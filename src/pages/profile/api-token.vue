@@ -1,25 +1,72 @@
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import { useClipboard } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
+import api from '@/models/api';
+import type { APIToken } from '@/types/api-token';
 
 const { t } = useI18n();
 
-// --- 主要資料與函式 ---
-const tokens = ref([
-  { id: 1, name: 'test 1', status: 'active', created: '2025-09-18', lastUsed: '2025-09-18', dueTime: '2025-12-18', scope: 'Read-only' },
-  { id: 2, name: 'test 2', status: 'deactivated', created: '2025-09-18', lastUsed: '2025-09-18', dueTime: '2025-12-18', scope: 'Read-only, Read/Write' },
-]);
+// 主要資料與函式
+const allTokens = ref<APIToken[]>([]); // 從後端取得的原始資料
+const isLoading = ref(true);
+const searchQuery = ref(''); // 搜尋框的文字
+
+// 篩選後的 Token 列表
+const filteredTokens = computed(() => {
+  if (!searchQuery.value) {
+    return allTokens.value;
+  }
+  return allTokens.value.filter(token =>
+    token.Name.toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
+});
+
+// TODO: 後端串接點 (1/5) 取得所有 API Token
+onMounted(async () => {
+  isLoading.value = true;
+  // 開發用假資料 (開始)
+  allTokens.value = [
+    { ID: '1', Name: 'My Test Key 1', Status: 'Active', Created: '2025-09-18', Last_Used: '2025-09-18', Due_Time: '2025-12-18', Scope: ['Read-only'], Owner: 'user' },
+    { ID: '2', Name: 'Another Key', Status: 'Deactivated', Created: '2025-09-15', Last_Used: '2025-09-16', Due_Time: '2025-12-15', Scope: ['Read-only', 'Read/Write'], Owner: 'user' },
+  ];
+  isLoading.value = false;
+  //開發用假資料 (結束)
+  
+  /* //真實 API 請求 (開始)
+  try {
+    const response = await api.APIToken.getAll();
+    allTokens.value = response.data.Tokens;
+  } catch (error) {
+    console.error("無法取得 API Token 列表:", error);
+  } finally {
+    isLoading.value = false;
+  }
+  */ //真實 API 請求 (結束)
+
+  await getScopeOptions();
+});
+
 
 const getStatusClass = (status: string) => {
-  if (status === 'active') return 'badge-success';
+  if (status === 'Active') return 'badge-success';
   return 'badge-ghost';
 };
 
-const scopeOptions = computed(() => ['Read-only', 'Read/Write', 'Admin', 'None']);
+const scopeOptions = ref<string[]>([]);
+// TODO: 後端串接點 (2/5) - 取得可用的 Scope 選項
+async function getScopeOptions() {
+  try {
+    const response = await api.APIToken.getScopes();
+    scopeOptions.value = response.data.Scope;
+  } catch (error) {
+    console.error("無法取得 Scope 選項:", error);
+    scopeOptions.value = ['Read-only', 'Read/Write', 'Admin', 'None'];
+  }
+}
 
 
-// --- 新增 Token 的邏輯 ---
+// 新增 Token 
 const isCreateModalOpen = ref(false);
 const newApiTokenForm = reactive({ name: '', scopes: ['Read-only'], date: '' });
 
@@ -31,39 +78,79 @@ function openCreateModal() {
 }
 
 
-// --- 新增成功後的邏輯 ---
+// 新增成功
 const isSuccessModalOpen = ref(false);
 const newSecretKey = ref('');
 const { copy, copied, isSupported } = useClipboard({ source: newSecretKey });
 
-function handleCreate() {
+// TODO: 後端串接點 (3/5) - 新增 API Token
+async function handleCreate() {
   console.log('正在建立新的 Token:', newApiTokenForm);
-  newSecretKey.value = 'sk-' + Math.random().toString(36).substring(2, 15);
-  isCreateModalOpen.value = false;
-  isSuccessModalOpen.value = true;
+
+  try {
+    const response = await api.APIToken.create({
+      Name: newApiTokenForm.name,
+      Due_Time: newApiTokenForm.date,
+      Scope: newApiTokenForm.scopes
+    });
+    
+    if (response.data.Type === 'OK') {
+      newSecretKey.value = response.data.Token;
+      isCreateModalOpen.value = false;
+      isSuccessModalOpen.value = true;
+      const tokenListResponse = await api.APIToken.getAll();
+      allTokens.value = tokenListResponse.data.Tokens;
+    } else {
+      alert(`建立失敗: ${response.data.Message}`);
+    }
+  } catch (error) {
+    console.error("建立 API Token 失敗:", error);
+    alert("建立失敗，請查看 console");
+  }
 }
 
 
-// --- 編輯 Token 的邏輯 ---
+// 編輯 Token 
 const isEditModalOpen = ref(false);
-const editingToken = ref<any>(null);
+const editingToken = ref<APIToken | null>(null);
 const editApiTokenForm = reactive({ name: '', scopes: [''], date: '' });
 
-function openEditModal(token: any) {
+function openEditModal(token: APIToken) {
   editingToken.value = token;
-  editApiTokenForm.name = token.name;
-  editApiTokenForm.scopes = token.scope.split(', ');
-  editApiTokenForm.date = token.dueTime;
+  editApiTokenForm.name = token.Name;
+  editApiTokenForm.scopes = token.Scope;
+  editApiTokenForm.date = token.Due_Time;
   isEditModalOpen.value = true;
 }
 
-function handleUpdate() {
-  console.log('正在更新 Token:', editingToken.value?.id, '新資料:', editApiTokenForm);
-  isEditModalOpen.value = false;
+// TODO: 後端串接點 (4/5) - 編輯 API Token
+async function handleUpdate() {
+  if (!editingToken.value) return;
+  console.log('正在更新 Token:', editingToken.value?.ID, '新資料:', editApiTokenForm);
+  
+  try {
+    const response = await api.APIToken.edit(editingToken.value.ID, {
+      data: {
+        Name: editApiTokenForm.name,
+        Due_Time: editApiTokenForm.date,
+        Scope: editApiTokenForm.scopes,
+      }
+    });
+    if (response.data.Type === 'OK') {
+      isEditModalOpen.value = false;
+      const tokenListResponse = await api.APIToken.getAll();
+      allTokens.value = tokenListResponse.data.Tokens;
+    } else {
+       alert(`更新失敗: ${response.data.Message}`);
+    }
+  } catch (error) {
+    console.error("更新 API Token 失敗:", error);
+    alert("更新失敗，請查看 console");
+  }
 }
 
 
-// --- 共用的 Scope 加減邏輯 ---
+// Scope 加減 
 function addScope(form: 'create' | 'edit') {
   const targetForm = form === 'create' ? newApiTokenForm : editApiTokenForm;
   targetForm.scopes.push('Read-only');
@@ -76,29 +163,41 @@ function removeScope(index: number, form: 'create' | 'edit') {
   }
 }
 
-// --- 查看 Scope 彈窗邏輯 ---
+// 查看 Scope 彈窗
 const isViewScopeModalOpen = ref(false);
 const viewingScopes = ref<string[]>([]);
 
-function openViewScopeModal(token: any) {
-  viewingScopes.value = token.scope.split(', ');
+function openViewScopeModal(token: APIToken) {
+  viewingScopes.value = token.Scope;
   isViewScopeModalOpen.value = true;
 }
 
-// --- 停用 Token 的邏輯 ---
+// 停用 Token 
 const isDeactivateModalOpen = ref(false);
 
-function openDeactivateModal(token: any) {
-  editingToken.value = token;
+function openDeactivateModal(token: APIToken) {
+  editingToken.value = token; 
   isDeactivateModalOpen.value = true;
 }
 
-function handleDeactivate() {
-  console.log('正在停用 Token:', editingToken.value?.id);
-  if (editingToken.value) {
-    tokens.value = tokens.value.filter(t => t.id !== editingToken.value.id);
+// TODO: 後端串接點 (5/5) - 停用 API Token
+async function handleDeactivate() {
+  if (!editingToken.value) return;
+  console.log('正在停用 Token:', editingToken.value?.ID);
+  
+  try {
+    const response = await api.APIToken.deactivate(editingToken.value.ID);
+    if (response.data.Type === 'OK') {
+      isDeactivateModalOpen.value = false;
+      const tokenListResponse = await api.APIToken.getAll();
+      allTokens.value = tokenListResponse.data.Tokens;
+    } else {
+      alert(`停用失敗: ${response.data.Message}`);
+    }
+  } catch (error) {
+    console.error("停用 API Token 失敗:", error);
+    alert("停用失敗，請查看 console");
   }
-  isDeactivateModalOpen.value = false;
 }
 </script>
 
@@ -118,49 +217,58 @@ function handleDeactivate() {
         </p>
         <div class="form-control mt-4">
           <div class="input-group">
-            <input type="text" :placeholder="t('profile.apiToken.search_placeholder')" class="input input-bordered w-full" />
+            <input type="text" v-model="searchQuery" :placeholder="t('profile.apiToken.search_placeholder')" class="input input-bordered w-full" />
             <button class="btn btn-square" aria-label="Search">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
             </button>
           </div>
         </div>
-        <div class="overflow-x-auto mt-4">
-          <table class="table w-full">
-            <thead>
-              <tr>
-                <th>{{ t('profile.apiToken.table.name') }}</th>
-                <th>{{ t('profile.apiToken.table.status') }}</th>
-                <th>{{ t('profile.apiToken.table.created') }}</th>
-                <th>{{ t('profile.apiToken.table.last_used') }}</th>
-                <th>{{ t('profile.apiToken.table.due_time') }}</th>
-                <th>{{ t('profile.apiToken.table.scope') }}</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="token in tokens" :key="token.id" class="hover">
-                <td class="font-mono">{{ token.name }}</td>
-                <td><div class="badge" :class="getStatusClass(token.status)">{{ token.status === 'active' ? t('profile.apiToken.status_active') : t('profile.apiToken.status_deactivated') }}</div></td>
-                <td>{{ token.created }}</td>
-                <td>{{ token.lastUsed }}</td>
-                <td>{{ token.dueTime }}</td>
-                <td>
-                  <button class="btn btn-ghost btn-xs" @click="openViewScopeModal(token)">
-                    {{ t('profile.apiToken.view_scopes') }}
-                  </button>
-                </td>
-                <td class="flex gap-1">
-                  <button class="btn btn-ghost btn-xs" aria-label="Edit" @click="openEditModal(token)"><i-uil-pen /></button>
-                  <button class="btn btn-ghost btn-xs" aria-label="Deactivate" @click="openDeactivateModal(token)"><i-uil-ban /></button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+
+        <data-status-wrapper :is-loading="isLoading">
+            <template #loading>
+              <skeleton-table :col="7" :row="3" />
+            </template>
+            <template #data>
+              <div class="overflow-x-auto mt-4">
+                <table class="table w-full">
+                  <thead>
+                    <tr>
+                      <th>{{ t('profile.apiToken.table.name') }}</th>
+                      <th>{{ t('profile.apiToken.table.status') }}</th>
+                      <th>{{ t('profile.apiToken.table.created') }}</th>
+                      <th>{{ t('profile.apiToken.table.last_used') }}</th>
+                      <th>{{ t('profile.apiToken.table.due_time') }}</th>
+                      <th>{{ t('profile.apiToken.table.scope') }}</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="token in filteredTokens" :key="token.ID" class="hover">
+                      <td class="font-mono">{{ token.Name }}</td>
+                      <td><div class="badge" :class="getStatusClass(token.Status)">{{ token.Status === 'Active' ? t('profile.apiToken.status_active') : t('profile.apiToken.status_deactivated') }}</div></td>
+                      <td>{{ token.Created }}</td>
+                      <td>{{ token.Last_Used }}</td>
+                      <td>{{ token.Due_Time }}</td>
+                      <td>
+                        <button class="btn btn-ghost btn-xs" @click="openViewScopeModal(token)">
+                          {{ t('profile.apiToken.view_scopes') }}
+                        </button>
+                      </td>
+                      <td class="flex gap-1">
+                        <button class="btn btn-ghost btn-xs" aria-label="Edit" @click="openEditModal(token)"><i-uil-pen /></button>
+                        <button class="btn btn-ghost btn-xs" aria-label="Deactivate" @click="openDeactivateModal(token)"><i-uil-ban /></button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </template>
+        </data-status-wrapper>
       </div>
     </div>
   </div>
 
+  <!-- 創建 Token 彈窗 -->
   <ui-dialog v-model="isCreateModalOpen">
     <template #title>
       <div class="bg-primary text-primary-content rounded-t-box -m-6 p-6">{{ t('profile.apiToken.create_modal.title') }}</div>
@@ -195,6 +303,7 @@ function handleDeactivate() {
     </template>
   </ui-dialog>
 
+  <!-- 編輯 Token 的彈窗 -->
   <ui-dialog v-model="isEditModalOpen">
     <template #title>
       <div class="bg-primary text-primary-content rounded-t-box -m-6 p-6">{{ t('profile.apiToken.edit_modal.title') }}</div>
@@ -205,7 +314,7 @@ function handleDeactivate() {
           <div class="form-control w-full">
             <label class="label"><span class="label-text text-primary-content/70">{{ t('profile.apiToken.edit_modal.original_info') }}</span></label>
             <div class="p-2 rounded bg-base-300/20 font-mono text-sm">
-              {Name: "{{ editingToken?.name }}"; Scope: {{ editingToken?.scope }}}
+              {Name: "{{ editingToken?.Name }}"; Scope: {{ editingToken?.Scope.join(', ') }}}
             </div>
           </div>
           <div class="form-control w-full">
@@ -235,6 +344,7 @@ function handleDeactivate() {
     </template>
   </ui-dialog>
 
+  <!-- 創建成功後顯示的彈窗 -->
   <ui-dialog v-model="isSuccessModalOpen">
     <template #content>
       <div class="flex flex-col items-center gap-4 text-center">
@@ -250,6 +360,7 @@ function handleDeactivate() {
     </template>
   </ui-dialog>
 
+  <!-- 查看 Scope 的彈出視窗 -->
   <ui-dialog v-model="isViewScopeModalOpen">
     <template #title>
       <div class="bg-primary text-primary-content rounded-t-box -m-6 p-6">{{ t('profile.apiToken.view_scope_modal.title') }}</div>
@@ -269,6 +380,7 @@ function handleDeactivate() {
     </template>
   </ui-dialog>
 
+  <!-- 停用 Token 的確認彈窗 -->
   <ui-dialog v-model="isDeactivateModalOpen">
     <template #title>
       <div class="bg-primary text-primary-content rounded-t-box -m-6 p-6">
@@ -280,7 +392,7 @@ function handleDeactivate() {
         <div class="form-control w-full">
           <label class="label"><span class="label-text text-primary-content/70">{{ t('profile.apiToken.deactivate_modal.token_info') }}</span></label>
           <div class="p-2 rounded bg-base-300/20 font-mono text-sm text-left">
-            {Name: "{{ editingToken?.name }}"; Scope: {{ editingToken?.scope }}}
+            {Name: "{{ editingToken?.Name }}"; Scope: {{ editingToken?.Scope.join(', ') }}}
           </div>
         </div>
         <div class="mt-8 flex justify-end gap-4">
@@ -291,3 +403,4 @@ function handleDeactivate() {
     </template>
   </ui-dialog>
 </template>
+

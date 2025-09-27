@@ -486,7 +486,8 @@
         "created": "CREATED",
         "last_used": "LAST USED",
         "due_time": "DUE TIME",
-        "scope": "SCOPE"
+        "scope": "SCOPE",
+        "owner": "OWNER"
       },
       "view_scopes": "View",
       "status_active": "active",

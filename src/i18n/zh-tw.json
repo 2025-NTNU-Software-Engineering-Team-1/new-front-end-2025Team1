@@ -485,7 +485,8 @@
         "created": "建立時間",
         "last_used": "上次使用",
         "due_time": "到期時間",
-        "scope": "權限範圍"
+        "scope": "權限範圍",
+        "owner": "擁有者"
       },
       "view_scopes": "查看",
       "status_active": "啟用中",

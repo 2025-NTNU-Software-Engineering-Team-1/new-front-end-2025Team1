@@ -4,8 +4,10 @@ import { useClipboard } from '@vueuse/core';
 import { useI18n } from 'vue-i18n';
 import api from '@/models/api';
 import type { APIToken } from '@/types/api-token';
+import { useSession } from '@/stores/session';
 
 const { t } = useI18n();
+const session = useSession();
 
 // 主要資料與函式
 const allTokens = ref<APIToken[]>([]); // 從後端取得的原始資料
@@ -226,7 +228,7 @@ async function handleDeactivate() {
 
         <data-status-wrapper :is-loading="isLoading">
             <template #loading>
-              <skeleton-table :col="7" :row="3" />
+              <skeleton-table :col="session.isAdmin ? 8 : 7" :row="3" />
             </template>
             <template #data>
               <div class="overflow-x-auto mt-4">
@@ -234,6 +236,7 @@ async function handleDeactivate() {
                   <thead>
                     <tr>
                       <th>{{ t('profile.apiToken.table.name') }}</th>
+                      <th v-if="session.isAdmin">{{ t('profile.apiToken.table.owner') }}</th>
                       <th>{{ t('profile.apiToken.table.status') }}</th>
                       <th>{{ t('profile.apiToken.table.created') }}</th>
                       <th>{{ t('profile.apiToken.table.last_used') }}</th>
@@ -245,6 +248,7 @@ async function handleDeactivate() {
                   <tbody>
                     <tr v-for="token in filteredTokens" :key="token.ID" class="hover">
                       <td class="font-mono">{{ token.Name }}</td>
+                      <td v-if="session.isAdmin">{{ token.Owner }}</td>
                       <td><div class="badge" :class="getStatusClass(token.Status)">{{ token.Status === 'Active' ? t('profile.apiToken.status_active') : t('profile.apiToken.status_deactivated') }}</div></td>
                       <td>{{ token.Created }}</td>
                       <td>{{ token.Last_Used }}</td>

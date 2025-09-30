@@ -101,7 +101,7 @@ function clearForm() {
           </tbody>
         </table>
         <div class="card-actions justify-start">
-            <button class="btn btn-outline btn-error mt-4" @click="logout">{{ t("profile.signOut") }}</button>
+          <button class="btn btn-outline btn-error mt-4" @click="logout">{{ t("profile.signOut") }}</button>
         </div>
       </div>
 

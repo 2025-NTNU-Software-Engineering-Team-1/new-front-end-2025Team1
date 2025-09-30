@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue';
-import { useClipboard } from '@vueuse/core';
-import { useI18n } from 'vue-i18n';
-import api from '@/models/api';
-import type { APIToken } from '@/types/api-token';
-import { useSession } from '@/stores/session';
+import { ref, reactive, computed, onMounted } from "vue";
+import { useClipboard } from "@vueuse/core";
+import { useI18n } from "vue-i18n";
+import api from "@/models/api";
+import type { APIToken } from "@/types/api-token";
+import { useSession } from "@/stores/session";
 
 const { t } = useI18n();
 const session = useSession();
@@ -12,15 +12,15 @@ const session = useSession();
 // 主要資料與函式
 const allTokens = ref<APIToken[]>([]); // 從後端取得的原始資料
 const isLoading = ref(true);
-const searchQuery = ref(''); // 搜尋框的文字
+const searchQuery = ref(""); // 搜尋框的文字
 
 // 篩選後的 Token 列表
 const filteredTokens = computed(() => {
   if (!searchQuery.value) {
     return allTokens.value;
   }
-  return allTokens.value.filter(token =>
-    token.Name.toLowerCase().includes(searchQuery.value.toLowerCase())
+  return allTokens.value.filter((token) =>
+    token.Name.toLowerCase().includes(searchQuery.value.toLowerCase()),
   );
 });
 
@@ -29,12 +29,30 @@ onMounted(async () => {
   isLoading.value = true;
   // 開發用假資料 (開始)
   allTokens.value = [
-    { ID: '1', Name: 'My Test Key 1', Status: 'Active', Created: '2025-09-18', Last_Used: '2025-09-18', Due_Time: '2025-12-18', Scope: ['Read-only'], Owner: 'user' },
-    { ID: '2', Name: 'Another Key', Status: 'Deactivated', Created: '2025-09-15', Last_Used: '2025-09-16', Due_Time: '2025-12-15', Scope: ['Read-only', 'Read/Write'], Owner: 'user' },
+    {
+      ID: "1",
+      Name: "My Test Key 1",
+      Status: "Active",
+      Created: "2025-09-18",
+      Last_Used: "2025-09-18",
+      Due_Time: "2025-12-18",
+      Scope: ["Read-only"],
+      Owner: "user",
+    },
+    {
+      ID: "2",
+      Name: "Another Key",
+      Status: "Deactivated",
+      Created: "2025-09-15",
+      Last_Used: "2025-09-16",
+      Due_Time: "2025-12-15",
+      Scope: ["Read-only", "Read/Write"],
+      Owner: "user",
+    },
   ];
   isLoading.value = false;
   //開發用假資料 (結束)
-  
+
   /* //真實 API 請求 (開始)
   try {
     const response = await api.APIToken.getAll();
@@ -49,10 +67,9 @@ onMounted(async () => {
   await getScopeOptions();
 });
 
-
 const getStatusClass = (status: string) => {
-  if (status === 'Active') return 'badge-success';
-  return 'badge-ghost';
+  if (status === "Active") return "badge-success";
+  return "badge-ghost";
 };
 
 const scopeOptions = ref<string[]>([]);
@@ -63,40 +80,38 @@ async function getScopeOptions() {
     scopeOptions.value = response.data.Scope;
   } catch (error) {
     console.error("無法取得 Scope 選項:", error);
-    scopeOptions.value = ['Read-only', 'Read/Write', 'Admin', 'None'];
+    scopeOptions.value = ["Read-only", "Read/Write", "Admin", "None"];
   }
 }
 
-
-// 新增 Token 
+// 新增 Token
 const isCreateModalOpen = ref(false);
-const newApiTokenForm = reactive({ name: '', scopes: ['Read-only'], date: '' });
+const newApiTokenForm = reactive({ name: "", scopes: ["Read-only"], date: "" });
 
 function openCreateModal() {
-  newApiTokenForm.name = '';
-  newApiTokenForm.scopes = ['Read-only'];
-  newApiTokenForm.date = '';
+  newApiTokenForm.name = "";
+  newApiTokenForm.scopes = ["Read-only"];
+  newApiTokenForm.date = "";
   isCreateModalOpen.value = true;
 }
 
-
 // 新增成功
 const isSuccessModalOpen = ref(false);
-const newSecretKey = ref('');
+const newSecretKey = ref("");
 const { copy, copied, isSupported } = useClipboard({ source: newSecretKey });
 
 // TODO: 後端串接點 (3/5) - 新增 API Token
 async function handleCreate() {
-  console.log('正在建立新的 Token:', newApiTokenForm);
+  console.log("正在建立新的 Token:", newApiTokenForm);
 
   try {
     const response = await api.APIToken.create({
       Name: newApiTokenForm.name,
       Due_Time: newApiTokenForm.date,
-      Scope: newApiTokenForm.scopes
+      Scope: newApiTokenForm.scopes,
     });
-    
-    if (response.data.Type === 'OK') {
+
+    if (response.data.Type === "OK") {
       newSecretKey.value = response.data.Token;
       isCreateModalOpen.value = false;
       isSuccessModalOpen.value = true;
@@ -111,11 +126,10 @@ async function handleCreate() {
   }
 }
 
-
-// 編輯 Token 
+// 編輯 Token
 const isEditModalOpen = ref(false);
 const editingToken = ref<APIToken | null>(null);
-const editApiTokenForm = reactive({ name: '', scopes: [''], date: '' });
+const editApiTokenForm = reactive({ name: "", scopes: [""], date: "" });
 
 function openEditModal(token: APIToken) {
   editingToken.value = token;
@@ -128,22 +142,22 @@ function openEditModal(token: APIToken) {
 // TODO: 後端串接點 (4/5) - 編輯 API Token
 async function handleUpdate() {
   if (!editingToken.value) return;
-  console.log('正在更新 Token:', editingToken.value?.ID, '新資料:', editApiTokenForm);
-  
+  console.log("正在更新 Token:", editingToken.value?.ID, "新資料:", editApiTokenForm);
+
   try {
     const response = await api.APIToken.edit(editingToken.value.ID, {
       data: {
         Name: editApiTokenForm.name,
         Due_Time: editApiTokenForm.date,
         Scope: editApiTokenForm.scopes,
-      }
+      },
     });
-    if (response.data.Type === 'OK') {
+    if (response.data.Type === "OK") {
       isEditModalOpen.value = false;
       const tokenListResponse = await api.APIToken.getAll();
       allTokens.value = tokenListResponse.data.Tokens;
     } else {
-       alert(`更新失敗: ${response.data.Message}`);
+      alert(`更新失敗: ${response.data.Message}`);
     }
   } catch (error) {
     console.error("更新 API Token 失敗:", error);
@@ -151,15 +165,14 @@ async function handleUpdate() {
   }
 }
 
-
-// Scope 加減 
-function addScope(form: 'create' | 'edit') {
-  const targetForm = form === 'create' ? newApiTokenForm : editApiTokenForm;
-  targetForm.scopes.push('Read-only');
+// Scope 加減
+function addScope(form: "create" | "edit") {
+  const targetForm = form === "create" ? newApiTokenForm : editApiTokenForm;
+  targetForm.scopes.push("Read-only");
 }
 
-function removeScope(index: number, form: 'create' | 'edit') {
-  const targetForm = form === 'create' ? newApiTokenForm : editApiTokenForm;
+function removeScope(index: number, form: "create" | "edit") {
+  const targetForm = form === "create" ? newApiTokenForm : editApiTokenForm;
   if (targetForm.scopes.length > 1) {
     targetForm.scopes.splice(index, 1);
   }
@@ -174,22 +187,22 @@ function openViewScopeModal(token: APIToken) {
   isViewScopeModalOpen.value = true;
 }
 
-// 停用 Token 
+// 停用 Token
 const isDeactivateModalOpen = ref(false);
 
 function openDeactivateModal(token: APIToken) {
-  editingToken.value = token; 
+  editingToken.value = token;
   isDeactivateModalOpen.value = true;
 }
 
 // TODO: 後端串接點 (5/5) - 停用 API Token
 async function handleDeactivate() {
   if (!editingToken.value) return;
-  console.log('正在停用 Token:', editingToken.value?.ID);
-  
+  console.log("正在停用 Token:", editingToken.value?.ID);
+
   try {
     const response = await api.APIToken.deactivate(editingToken.value.ID);
-    if (response.data.Type === 'OK') {
+    if (response.data.Type === "OK") {
       isDeactivateModalOpen.value = false;
       const tokenListResponse = await api.APIToken.getAll();
       allTokens.value = tokenListResponse.data.Tokens;
@@ -208,65 +221,99 @@ async function handleDeactivate() {
     <div class="card min-w-full">
       <div class="card-body">
         <div class="flex flex-wrap items-center justify-between gap-2">
-          <h2 class="card-title text-2xl">{{ t('profile.apiToken.title') }}</h2>
+          <h2 class="card-title text-2xl">{{ t("profile.apiToken.title") }}</h2>
           <button class="btn btn-primary" @click="openCreateModal">
             <i-uil-plus class="mr-2 h-5 w-5" />
-            {{ t('profile.apiToken.create_new_key') }}
+            {{ t("profile.apiToken.create_new_key") }}
           </button>
         </div>
         <p class="mt-4 text-sm text-base-content/70">
-          {{ t('profile.apiToken.description') }}
+          {{ t("profile.apiToken.description") }}
         </p>
         <div class="form-control mt-4">
           <div class="input-group">
-            <input type="text" v-model="searchQuery" :placeholder="t('profile.apiToken.search_placeholder')" class="input input-bordered w-full" />
+            <input
+              type="text"
+              v-model="searchQuery"
+              :placeholder="t('profile.apiToken.search_placeholder')"
+              class="input input-bordered w-full"
+            />
             <button class="btn btn-square" aria-label="Search">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
             </button>
           </div>
         </div>
 
         <data-status-wrapper :is-loading="isLoading">
-            <template #loading>
-              <skeleton-table :col="session.isAdmin ? 8 : 7" :row="3" />
-            </template>
-            <template #data>
-              <div class="overflow-x-auto mt-4">
-                <table class="table w-full">
-                  <thead>
-                    <tr>
-                      <th>{{ t('profile.apiToken.table.name') }}</th>
-                      <th v-if="session.isAdmin">{{ t('profile.apiToken.table.owner') }}</th>
-                      <th>{{ t('profile.apiToken.table.status') }}</th>
-                      <th>{{ t('profile.apiToken.table.created') }}</th>
-                      <th>{{ t('profile.apiToken.table.last_used') }}</th>
-                      <th>{{ t('profile.apiToken.table.due_time') }}</th>
-                      <th>{{ t('profile.apiToken.table.scope') }}</th>
-                      <th></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="token in filteredTokens" :key="token.ID" class="hover">
-                      <td class="font-mono">{{ token.Name }}</td>
-                      <td v-if="session.isAdmin">{{ token.Owner }}</td>
-                      <td><div class="badge" :class="getStatusClass(token.Status)">{{ token.Status === 'Active' ? t('profile.apiToken.status_active') : t('profile.apiToken.status_deactivated') }}</div></td>
-                      <td>{{ token.Created }}</td>
-                      <td>{{ token.Last_Used }}</td>
-                      <td>{{ token.Due_Time }}</td>
-                      <td>
-                        <button class="btn btn-ghost btn-xs" @click="openViewScopeModal(token)">
-                          {{ t('profile.apiToken.view_scopes') }}
-                        </button>
-                      </td>
-                      <td class="flex gap-1">
-                        <button class="btn btn-ghost btn-xs" aria-label="Edit" @click="openEditModal(token)"><i-uil-pen /></button>
-                        <button class="btn btn-ghost btn-xs" aria-label="Deactivate" @click="openDeactivateModal(token)"><i-uil-ban /></button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </template>
+          <template #loading>
+            <skeleton-table :col="session.isAdmin ? 8 : 7" :row="3" />
+          </template>
+          <template #data>
+            <div class="mt-4 overflow-x-auto">
+              <table class="table w-full">
+                <thead>
+                  <tr>
+                    <th>{{ t("profile.apiToken.table.name") }}</th>
+                    <th v-if="session.isAdmin">{{ t("profile.apiToken.table.owner") }}</th>
+                    <th>{{ t("profile.apiToken.table.status") }}</th>
+                    <th>{{ t("profile.apiToken.table.created") }}</th>
+                    <th>{{ t("profile.apiToken.table.last_used") }}</th>
+                    <th>{{ t("profile.apiToken.table.due_time") }}</th>
+                    <th>{{ t("profile.apiToken.table.scope") }}</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="token in filteredTokens" :key="token.ID" class="hover">
+                    <td class="font-mono">{{ token.Name }}</td>
+                    <td v-if="session.isAdmin">{{ token.Owner }}</td>
+                    <td>
+                      <div class="badge" :class="getStatusClass(token.Status)">
+                        {{
+                          token.Status === "Active"
+                            ? t("profile.apiToken.status_active")
+                            : t("profile.apiToken.status_deactivated")
+                        }}
+                      </div>
+                    </td>
+                    <td>{{ token.Created }}</td>
+                    <td>{{ token.Last_Used }}</td>
+                    <td>{{ token.Due_Time }}</td>
+                    <td>
+                      <button class="btn btn-ghost btn-xs" @click="openViewScopeModal(token)">
+                        {{ t("profile.apiToken.view_scopes") }}
+                      </button>
+                    </td>
+                    <td class="flex gap-1">
+                      <button class="btn btn-ghost btn-xs" aria-label="Edit" @click="openEditModal(token)">
+                        <i-uil-pen />
+                      </button>
+                      <button
+                        class="btn btn-ghost btn-xs"
+                        aria-label="Deactivate"
+                        @click="openDeactivateModal(token)"
+                      >
+                        <i-uil-ban />
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </template>
         </data-status-wrapper>
       </div>
     </div>
@@ -275,33 +322,68 @@ async function handleDeactivate() {
   <!-- 創建 Token 彈窗 -->
   <ui-dialog v-model="isCreateModalOpen">
     <template #title>
-      <div class="bg-primary text-primary-content rounded-t-box -m-6 p-6">{{ t('profile.apiToken.create_modal.title') }}</div>
+      <div class="rounded-t-box -m-6 bg-primary p-6 text-primary-content">
+        {{ t("profile.apiToken.create_modal.title") }}
+      </div>
     </template>
     <template #content>
-      <div class="bg-primary text-primary-content -m-6 p-6 pt-0">
+      <div class="-m-6 bg-primary p-6 pt-0 text-primary-content">
         <div class="space-y-4">
           <div class="form-control w-full">
-            <label class="label"><span class="label-text text-primary-content">{{ t('profile.apiToken.create_modal.name_label') }}</span></label>
-            <input type="text" v-model="newApiTokenForm.name" :placeholder="t('profile.apiToken.create_modal.name_placeholder')" class="input bg-base-200 text-base-content" />
+            <label class="label"
+              ><span class="label-text text-primary-content">{{
+                t("profile.apiToken.create_modal.name_label")
+              }}</span></label
+            >
+            <input
+              type="text"
+              v-model="newApiTokenForm.name"
+              :placeholder="t('profile.apiToken.create_modal.name_placeholder')"
+              class="input bg-base-200 text-base-content"
+            />
           </div>
           <div v-for="(scope, index) in newApiTokenForm.scopes" :key="index" class="form-control w-full">
-            <label class="label" v-if="index === 0"><span class="label-text text-primary-content">{{ t('profile.apiToken.create_modal.scope_label') }}</span></label>
+            <label class="label" v-if="index === 0"
+              ><span class="label-text text-primary-content">{{
+                t("profile.apiToken.create_modal.scope_label")
+              }}</span></label
+            >
             <div class="flex items-center gap-2">
-              <select class="select bg-base-200 text-base-content flex-grow" v-model="newApiTokenForm.scopes[index]">
+              <select
+                class="select flex-grow bg-base-200 text-base-content"
+                v-model="newApiTokenForm.scopes[index]"
+              >
                 <option v-for="option in scopeOptions" :key="option" :value="option">{{ option }}</option>
               </select>
-              <button class="btn btn-sm" @click="addScope('create')" aria-label="Add scope"><i-uil-plus /></button>
-              <button class="btn btn-sm" @click="removeScope(index, 'create')" :disabled="newApiTokenForm.scopes.length <= 1" aria-label="Remove scope"><i-uil-minus /></button>
+              <button class="btn btn-sm" @click="addScope('create')" aria-label="Add scope">
+                <i-uil-plus />
+              </button>
+              <button
+                class="btn btn-sm"
+                @click="removeScope(index, 'create')"
+                :disabled="newApiTokenForm.scopes.length <= 1"
+                aria-label="Remove scope"
+              >
+                <i-uil-minus />
+              </button>
             </div>
           </div>
           <div class="form-control w-full">
-            <label class="label"><span class="label-text text-primary-content">{{ t('profile.apiToken.create_modal.date_label') }}</span></label>
+            <label class="label"
+              ><span class="label-text text-primary-content">{{
+                t("profile.apiToken.create_modal.date_label")
+              }}</span></label
+            >
             <input type="date" v-model="newApiTokenForm.date" class="input bg-base-200 text-base-content" />
           </div>
         </div>
         <div class="mt-8 flex justify-end gap-4">
-          <button class="btn btn-link text-primary-content" @click="isCreateModalOpen = false">{{ t('profile.apiToken.create_modal.cancel') }}</button>
-          <button class="btn btn-link text-primary-content font-bold" @click="handleCreate">{{ t('profile.apiToken.create_modal.create') }}</button>
+          <button class="btn btn-link text-primary-content" @click="isCreateModalOpen = false">
+            {{ t("profile.apiToken.create_modal.cancel") }}
+          </button>
+          <button class="btn btn-link font-bold text-primary-content" @click="handleCreate">
+            {{ t("profile.apiToken.create_modal.create") }}
+          </button>
         </div>
       </div>
     </template>
@@ -310,39 +392,73 @@ async function handleDeactivate() {
   <!-- 編輯 Token 的彈窗 -->
   <ui-dialog v-model="isEditModalOpen">
     <template #title>
-      <div class="bg-primary text-primary-content rounded-t-box -m-6 p-6">{{ t('profile.apiToken.edit_modal.title') }}</div>
+      <div class="rounded-t-box -m-6 bg-primary p-6 text-primary-content">
+        {{ t("profile.apiToken.edit_modal.title") }}
+      </div>
     </template>
     <template #content>
-      <div class="bg-primary text-primary-content -m-6 p-6 pt-0">
+      <div class="-m-6 bg-primary p-6 pt-0 text-primary-content">
         <div class="space-y-4">
           <div class="form-control w-full">
-            <label class="label"><span class="label-text text-primary-content/70">{{ t('profile.apiToken.edit_modal.original_info') }}</span></label>
-            <div class="p-2 rounded bg-base-300/20 font-mono text-sm">
-              {Name: "{{ editingToken?.Name }}"; Scope: {{ editingToken?.Scope.join(', ') }}}
+            <label class="label"
+              ><span class="label-text text-primary-content/70">{{
+                t("profile.apiToken.edit_modal.original_info")
+              }}</span></label
+            >
+            <div class="rounded bg-base-300/20 p-2 font-mono text-sm">
+              {Name: "{{ editingToken?.Name }}"; Scope: {{ editingToken?.Scope.join(", ") }}}
             </div>
           </div>
           <div class="form-control w-full">
-            <label class="label"><span class="label-text text-primary-content">{{ t('profile.apiToken.edit_modal.new_name_label') }}</span></label>
+            <label class="label"
+              ><span class="label-text text-primary-content">{{
+                t("profile.apiToken.edit_modal.new_name_label")
+              }}</span></label
+            >
             <input type="text" v-model="editApiTokenForm.name" class="input bg-base-200 text-base-content" />
           </div>
           <div v-for="(scope, index) in editApiTokenForm.scopes" :key="index" class="form-control w-full">
-            <label class="label" v-if="index === 0"><span class="label-text text-primary-content">{{ t('profile.apiToken.create_modal.scope_label') }}</span></label>
+            <label class="label" v-if="index === 0"
+              ><span class="label-text text-primary-content">{{
+                t("profile.apiToken.create_modal.scope_label")
+              }}</span></label
+            >
             <div class="flex items-center gap-2">
-              <select class="select bg-base-200 text-base-content flex-grow" v-model="editApiTokenForm.scopes[index]">
+              <select
+                class="select flex-grow bg-base-200 text-base-content"
+                v-model="editApiTokenForm.scopes[index]"
+              >
                 <option v-for="option in scopeOptions" :key="option" :value="option">{{ option }}</option>
               </select>
-              <button class="btn btn-sm" @click="addScope('edit')" aria-label="Add scope"><i-uil-plus /></button>
-              <button class="btn btn-sm" @click="removeScope(index, 'edit')" :disabled="editApiTokenForm.scopes.length <= 1" aria-label="Remove scope"><i-uil-minus /></button>
+              <button class="btn btn-sm" @click="addScope('edit')" aria-label="Add scope">
+                <i-uil-plus />
+              </button>
+              <button
+                class="btn btn-sm"
+                @click="removeScope(index, 'edit')"
+                :disabled="editApiTokenForm.scopes.length <= 1"
+                aria-label="Remove scope"
+              >
+                <i-uil-minus />
+              </button>
             </div>
           </div>
           <div class="form-control w-full">
-            <label class="label"><span class="label-text text-primary-content">{{ t('profile.apiToken.create_modal.date_label') }}</span></label>
+            <label class="label"
+              ><span class="label-text text-primary-content">{{
+                t("profile.apiToken.create_modal.date_label")
+              }}</span></label
+            >
             <input type="date" v-model="editApiTokenForm.date" class="input bg-base-200 text-base-content" />
           </div>
         </div>
         <div class="mt-8 flex justify-end gap-4">
-          <button class="btn btn-link text-primary-content" @click="isEditModalOpen = false">{{ t('profile.apiToken.create_modal.cancel') }}</button>
-          <button class="btn btn-link text-primary-content font-bold" @click="handleUpdate">{{ t('profile.apiToken.edit_modal.update') }}</button>
+          <button class="btn btn-link text-primary-content" @click="isEditModalOpen = false">
+            {{ t("profile.apiToken.create_modal.cancel") }}
+          </button>
+          <button class="btn btn-link font-bold text-primary-content" @click="handleUpdate">
+            {{ t("profile.apiToken.edit_modal.update") }}
+          </button>
         </div>
       </div>
     </template>
@@ -352,14 +468,22 @@ async function handleDeactivate() {
   <ui-dialog v-model="isSuccessModalOpen">
     <template #content>
       <div class="flex flex-col items-center gap-4 text-center">
-        <h3 class="text-xl font-bold flex items-center gap-2">
-          <i-uil-exclamation-triangle class="text-warning"/> {{ t('profile.apiToken.success_modal.warning') }} <i-uil-exclamation-triangle class="text-warning"/>
+        <h3 class="flex items-center gap-2 text-xl font-bold">
+          <i-uil-exclamation-triangle class="text-warning" />
+          {{ t("profile.apiToken.success_modal.warning") }}
+          <i-uil-exclamation-triangle class="text-warning" />
         </h3>
         <div class="input-group w-full max-w-xs">
           <input type="text" :value="newSecretKey" readonly class="input input-bordered w-full" />
-          <button v-if="isSupported" class="btn" @click="copy()">{{ copied ? t('profile.apiToken.success_modal.copied') : t('profile.apiToken.success_modal.copy') }}</button>
+          <button v-if="isSupported" class="btn" @click="copy()">
+            {{
+              copied ? t("profile.apiToken.success_modal.copied") : t("profile.apiToken.success_modal.copy")
+            }}
+          </button>
         </div>
-        <button class="btn" @click="isSuccessModalOpen = false">{{ t('profile.apiToken.success_modal.ok') }}</button>
+        <button class="btn" @click="isSuccessModalOpen = false">
+          {{ t("profile.apiToken.success_modal.ok") }}
+        </button>
       </div>
     </template>
   </ui-dialog>
@@ -367,18 +491,26 @@ async function handleDeactivate() {
   <!-- 查看 Scope 的彈出視窗 -->
   <ui-dialog v-model="isViewScopeModalOpen">
     <template #title>
-      <div class="bg-primary text-primary-content rounded-t-box -m-6 p-6">{{ t('profile.apiToken.view_scope_modal.title') }}</div>
+      <div class="rounded-t-box -m-6 bg-primary p-6 text-primary-content">
+        {{ t("profile.apiToken.view_scope_modal.title") }}
+      </div>
     </template>
     <template #content>
-      <div class="bg-primary text-primary-content -m-6 p-6 pt-0">
+      <div class="-m-6 bg-primary p-6 pt-0 text-primary-content">
         <div class="space-y-2">
-          <label class="label"><span class="label-text text-primary-content">{{ t('profile.apiToken.create_modal.scope_label') }}</span></label>
-          <div v-for="scope in viewingScopes" :key="scope" class="p-3 rounded bg-base-200 text-base-content">
+          <label class="label"
+            ><span class="label-text text-primary-content">{{
+              t("profile.apiToken.create_modal.scope_label")
+            }}</span></label
+          >
+          <div v-for="scope in viewingScopes" :key="scope" class="rounded bg-base-200 p-3 text-base-content">
             {{ scope }}
           </div>
         </div>
         <div class="modal-action">
-          <button class="btn btn-link text-primary-content font-bold" @click="isViewScopeModalOpen = false">{{ t('profile.apiToken.success_modal.ok') }}</button>
+          <button class="btn btn-link font-bold text-primary-content" @click="isViewScopeModalOpen = false">
+            {{ t("profile.apiToken.success_modal.ok") }}
+          </button>
         </div>
       </div>
     </template>
@@ -387,24 +519,31 @@ async function handleDeactivate() {
   <!-- 停用 Token 的確認彈窗 -->
   <ui-dialog v-model="isDeactivateModalOpen">
     <template #title>
-      <div class="bg-primary text-primary-content rounded-t-box -m-6 p-6">
-        {{ t('profile.apiToken.deactivate_modal.title') }}
+      <div class="rounded-t-box -m-6 bg-primary p-6 text-primary-content">
+        {{ t("profile.apiToken.deactivate_modal.title") }}
       </div>
     </template>
     <template #content>
-      <div class="bg-primary text-primary-content -m-6 p-6 pt-0">
+      <div class="-m-6 bg-primary p-6 pt-0 text-primary-content">
         <div class="form-control w-full">
-          <label class="label"><span class="label-text text-primary-content/70">{{ t('profile.apiToken.deactivate_modal.token_info') }}</span></label>
-          <div class="p-2 rounded bg-base-300/20 font-mono text-sm text-left">
-            {Name: "{{ editingToken?.Name }}"; Scope: {{ editingToken?.Scope.join(', ') }}}
+          <label class="label"
+            ><span class="label-text text-primary-content/70">{{
+              t("profile.apiToken.deactivate_modal.token_info")
+            }}</span></label
+          >
+          <div class="rounded bg-base-300/20 p-2 text-left font-mono text-sm">
+            {Name: "{{ editingToken?.Name }}"; Scope: {{ editingToken?.Scope.join(", ") }}}
           </div>
         </div>
         <div class="mt-8 flex justify-end gap-4">
-          <button class="btn btn-link text-primary-content" @click="isDeactivateModalOpen = false">{{ t('profile.apiToken.create_modal.cancel') }}</button>
-          <button class="btn btn-link text-error font-bold" @click="handleDeactivate">{{ t('profile.apiToken.deactivate_modal.deactivate') }}</button>
+          <button class="btn btn-link text-primary-content" @click="isDeactivateModalOpen = false">
+            {{ t("profile.apiToken.create_modal.cancel") }}
+          </button>
+          <button class="btn btn-link font-bold text-error" @click="handleDeactivate">
+            {{ t("profile.apiToken.deactivate_modal.deactivate") }}
+          </button>
         </div>
       </div>
     </template>
   </ui-dialog>
 </template>
-

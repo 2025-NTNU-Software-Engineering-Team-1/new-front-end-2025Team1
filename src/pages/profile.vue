@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useTitle } from "@vueuse/core";
 import { useRoute } from "vue-router";
-import { useI18n } from 'vue-i18n';
+import { useI18n } from "vue-i18n";
 
 useTitle("Profile | Normal OJ");
 const route = useRoute();
@@ -13,7 +13,7 @@ const { t } = useI18n();
     <aside class="w-full shrink-0 lg:w-56">
       <ul class="menu bg-base-100 p-2 text-base-content lg:sticky lg:top-4">
         <li class="menu-title">
-          <span>{{ t('profile.menu.accountInfo') }}</span>
+          <span>{{ t("profile.menu.accountInfo") }}</span>
         </li>
         <li>
           <router-link
@@ -21,7 +21,7 @@ const { t } = useI18n();
             class="rounded-lg"
             :class="{ 'bg-base-300 font-semibold': route.path === '/profile' }"
           >
-            {{ t('profile.menu.user_information') }}
+            {{ t("profile.menu.user_information") }}
           </router-link>
         </li>
         <li>
@@ -30,7 +30,7 @@ const { t } = useI18n();
             class="rounded-lg"
             :class="{ 'bg-base-300 font-semibold': route.path === '/profile/api-token' }"
           >
-            {{ t('profile.menu.api_token') }}
+            {{ t("profile.menu.api_token") }}
           </router-link>
         </li>
       </ul>
@@ -40,9 +40,9 @@ const { t } = useI18n();
       <div class="breadcrumbs border-b border-base-300 p-4 text-sm">
         <ul>
           <li>
-            <router-link to="/profile">{{ t('profile.breadcrumb.profile') }}</router-link>
+            <router-link to="/profile">{{ t("profile.breadcrumb.profile") }}</router-link>
           </li>
-          <li v-if="route.path === '/profile/api-token'">{{ t('profile.menu.api_token') }}</li>
+          <li v-if="route.path === '/profile/api-token'">{{ t("profile.menu.api_token") }}</li>
         </ul>
       </div>
 

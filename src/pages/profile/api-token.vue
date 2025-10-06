@@ -24,37 +24,11 @@ const filteredTokens = computed(() => {
   );
 });
 
-// TODO: 後端串接點 (1/5) 取得所有 API Token
+// 後端串接點 (1/5) 取得所有 API Token
 onMounted(async () => {
-  isLoading.value = true;
-  // 開發用假資料 (開始)
-  allTokens.value = [
-    {
-      ID: "1",
-      Name: "My Test Key 1",
-      Status: "Active",
-      Created: "2025-09-18",
-      Last_Used: "2025-09-18",
-      Due_Time: "2025-12-18",
-      Scope: ["Read-only"],
-      Owner: "user",
-    },
-    {
-      ID: "2",
-      Name: "Another Key",
-      Status: "Deactivated",
-      Created: "2025-09-15",
-      Last_Used: "2025-09-16",
-      Due_Time: "2025-12-15",
-      Scope: ["Read-only", "Read/Write"],
-      Owner: "user",
-    },
-  ];
-  isLoading.value = false;
-  //開發用假資料 (結束)
-
-  /* //真實 API 請求 (開始)
+  // 真實 API 請求
   try {
+    isLoading.value = true;
     const response = await api.APIToken.getAll();
     allTokens.value = response.data.Tokens;
   } catch (error) {
@@ -62,7 +36,6 @@ onMounted(async () => {
   } finally {
     isLoading.value = false;
   }
-  */ //真實 API 請求 (結束)
 
   await getScopeOptions();
 });
@@ -73,7 +46,7 @@ const getStatusClass = (status: string) => {
 };
 
 const scopeOptions = ref<string[]>([]);
-// TODO: 後端串接點 (2/5) - 取得可用的 Scope 選項
+// 後端串接點 (2/5) - 取得可用的 Scope 選項
 async function getScopeOptions() {
   try {
     const response = await api.APIToken.getScopes();
@@ -100,7 +73,7 @@ const isSuccessModalOpen = ref(false);
 const newSecretKey = ref("");
 const { copy, copied, isSupported } = useClipboard({ source: newSecretKey });
 
-// TODO: 後端串接點 (3/5) - 新增 API Token
+// 後端串接點 (3/5) - 新增 API Token
 async function handleCreate() {
   console.log("正在建立新的 Token:", newApiTokenForm);
 
@@ -139,7 +112,7 @@ function openEditModal(token: APIToken) {
   isEditModalOpen.value = true;
 }
 
-// TODO: 後端串接點 (4/5) - 編輯 API Token
+// 後端串接點 (4/5) - 編輯 API Token
 async function handleUpdate() {
   if (!editingToken.value) return;
   console.log("正在更新 Token:", editingToken.value?.ID, "新資料:", editApiTokenForm);
@@ -195,7 +168,7 @@ function openDeactivateModal(token: APIToken) {
   isDeactivateModalOpen.value = true;
 }
 
-// TODO: 後端串接點 (5/5) - 停用 API Token
+// 後端串接點 (5/5) - 停用 API Token
 async function handleDeactivate() {
   if (!editingToken.value) return;
   console.log("正在停用 Token:", editingToken.value?.ID);

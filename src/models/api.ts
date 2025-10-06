@@ -98,13 +98,14 @@ const User = {
 };
 
 const APIToken = {
-  getAll: () => fetcher.get<{ Tokens: APIToken[] }>("/api-token"),
-  getScopes: () => fetcher.get<{ Scope: string[] }>("/api-token/scopes"),
+  getAll: () => fetcher.get<{ Tokens: APIToken[] }>("/profile/api_token"),
+  getScopes: () => fetcher.get<{ Scope: string[] }>("/profile/api_token/getscope"),
   create: (body: { Name: string; Due_Time: string; Scope: string[] }) =>
-    fetcher.post<{ Type: string; Token: string; Message: string }>("/api-token", body),
+    fetcher.post<{ Type: string; Token: string; Message: string }>("/profile/api_token/create", body),
   edit: (id: string, body: { data: { Name: string; Due_Time: string; Scope: string[] } }) =>
-    fetcher.put<{ Type: string; Message: string }>(`/api-token/${id}`, body),
-  deactivate: (id: string) => fetcher.delete<{ Type: string; Message: string }>(`/api-token/${id}`),
+    fetcher.patch<{ Type: string; Message: string }>(`/profile/api_token/edit/${id}`, body),
+  deactivate: (id: string) =>
+    fetcher.patch<{ Type: string; Message: string }>(`/profile/api_token/deactivate/${id}`),
 };
 
 export default {

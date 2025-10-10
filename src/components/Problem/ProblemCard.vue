@@ -21,7 +21,9 @@ function downloadTestCase(problemId: number) {
 
 <template>
   <div class="card min-w-full">
+
     <div class="card-body">
+
       <div class="flex flex-wrap items-start justify-between gap-y-4">
         <div class="flex flex-col gap-4">
           <div class="card-title md:text-2xl lg:text-3xl">
@@ -97,6 +99,17 @@ function downloadTestCase(problemId: number) {
       </div>
 
       <div class="divider" />
+      
+      <div v-if="preview">
+        <div v-if="problem.config">
+          <h3 class="font-bold mb-2 mt-3">Config 設定</h3>
+          <pre class="whitespace-pre-wrap bg-gray-100 p-2 rounded">{{ JSON.stringify(problem.config, null, 2) }}</pre>
+        </div>
+        <div v-if="problem.pipeline">
+          <h3 class="font-bold mb-2 mt-3">Pipeline 設定</h3>
+          <pre class="whitespace-pre-wrap bg-gray-100 p-2 rounded">{{ JSON.stringify(problem.pipeline, null, 2) }}</pre>
+        </div>
+      </div>
 
       <div class="card min-w-full rounded-none">
         <div class="card-body p-0">

@@ -99,3 +99,60 @@ interface MossReport {
 
 type LangOption = { value: number; text: string; mask: number };
 type ProblemUpdater = <K extends keyof ProblemForm>(key: K, value: ProblemForm[K]) => void;
+
+
+type AcceptedFormat = "code" | "zip";
+type ExecutionMode = "general" | "functionOnly" | "interactive";
+type ArtifactCollection = "compiledBinary" | "zip";
+
+interface ProblemStaticAnalys {
+  custom: boolean;
+  libraryRestrictions?: {
+    enabled: boolean;
+    whitelist: string[];
+    blacklist: string[];
+  };
+
+  networkAccessRestrictio?: {
+    enabled: boolean;
+    firewallExtranet?: {
+      enabled: boolean;
+      whitelist: string[];
+      blacklist: string[];
+    };
+    connectWithLocal?: {
+      enabled: boolean;
+      whitelist: string[];
+      blacklist: string[];
+      localServiceZip?: File | null;
+    };
+  };
+}
+
+interface ProblemConfigExtra {
+  compilation: boolean;
+  testMode: boolean;
+  aiVTuber: boolean;
+  acceptedFormat: AcceptedFormat;
+  staticAnalys: ProblemStaticAnalys;
+  artifactCollection: ArtifactCollection[];
+}
+
+interface ProblemPipeline {
+  fopen: boolean;
+  fwrite: boolean;
+  executionMode: ExecutionMode;
+  customChecker: boolean;
+  teacherFirst?: boolean;
+}
+
+interface ProblemAssets {
+  // All are optional and nullable; stored for upload.
+  checkerPy?: File | null;
+  makefileZip?: File | null;
+  teacherFile?: File | null;
+  scorePy?: File | null;
+  scoreJson?: File | null;
+  localServiceZip?: File | null;
+  testdataZip?: File | null;
+}

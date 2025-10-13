@@ -5,6 +5,7 @@ import { useI18n } from "vue-i18n";
 import api from "@/models/api";
 import type { APIToken } from "@/types/api-token";
 import { useSession } from "@/stores/session";
+import { formatTime } from "@/utils/formatTime";
 
 const { t } = useI18n();
 const session = useSession();
@@ -75,6 +76,11 @@ const { copy, copied, isSupported } = useClipboard({ source: newSecretKey });
 
 // 後端串接點 (3/5) - 新增 API Token
 async function handleCreate() {
+  // 檢查名稱是否為空
+  if (!newApiTokenForm.name.trim()) {
+    alert(t("profile.apiToken.create_modal.name_required_alert"));
+    return;
+  }
   console.log("正在建立新的 Token:", newApiTokenForm);
 
   try {
@@ -102,12 +108,12 @@ async function handleCreate() {
 // 編輯 Token
 const isEditModalOpen = ref(false);
 const editingToken = ref<APIToken | null>(null);
-const editApiTokenForm = reactive({ name: "", scopes: [""], date: "" });
+const editApiTokenForm = reactive({ name: "", scopes: [] as string[], date: "" });
 
 function openEditModal(token: APIToken) {
   editingToken.value = token;
   editApiTokenForm.name = token.Name;
-  editApiTokenForm.scopes = token.Scope;
+  editApiTokenForm.scopes = [...token.Scope]; // 使用展開運算符複製陣列
   editApiTokenForm.date = token.Due_Time;
   isEditModalOpen.value = true;
 }
@@ -262,9 +268,9 @@ async function handleDeactivate() {
                         }}
                       </div>
                     </td>
-                    <td>{{ token.Created }}</td>
-                    <td>{{ token.Last_Used }}</td>
-                    <td>{{ token.Due_Time }}</td>
+                    <td>{{ formatTime(token.Created) }}</td>
+                    <td>{{ formatTime(token.Last_Used) }}</td>
+                    <td>{{ formatTime(token.Due_Time) }}</td>
                     <td>
                       <button class="btn btn-ghost btn-xs" @click="openViewScopeModal(token)">
                         {{ t("profile.apiToken.view_scopes") }}

@@ -502,6 +502,7 @@
         "title": "Create new secret key",
         "name_label": "Name",
         "name_placeholder": "My new key",
+        "name_required_alert": "Please remember to name your token",
         "scope_label": "Scope",
         "date_label": "Date",
         "cancel": "Cancel",

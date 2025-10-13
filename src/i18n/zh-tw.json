@@ -501,6 +501,7 @@
         "title": "建立新的金鑰",
         "name_label": "名稱",
         "name_placeholder": "我的新金鑰",
+        "name_required_alert": "請輸入 Token 名稱",
         "scope_label": "權限範圍",
         "date_label": "日期",
         "cancel": "取消",

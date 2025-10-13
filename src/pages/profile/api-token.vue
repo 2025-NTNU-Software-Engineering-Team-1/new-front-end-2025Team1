@@ -76,7 +76,6 @@ const { copy, copied, isSupported } = useClipboard({ source: newSecretKey });
 
 // 後端串接點 (3/5) - 新增 API Token
 async function handleCreate() {
-  // 檢查名稱是否為空
   if (!newApiTokenForm.name.trim()) {
     alert(t("profile.apiToken.create_modal.name_required_alert"));
     return;
@@ -113,7 +112,7 @@ const editApiTokenForm = reactive({ name: "", scopes: [] as string[], date: "" }
 function openEditModal(token: APIToken) {
   editingToken.value = token;
   editApiTokenForm.name = token.Name;
-  editApiTokenForm.scopes = [...token.Scope]; // 使用展開運算符複製陣列
+  editApiTokenForm.scopes = [...token.Scope];
   editApiTokenForm.date = token.Due_Time;
   isEditModalOpen.value = true;
 }
@@ -353,7 +352,11 @@ async function handleDeactivate() {
                 t("profile.apiToken.create_modal.date_label")
               }}</span></label
             >
-            <input type="date" v-model="newApiTokenForm.date" class="input bg-base-200 text-base-content" />
+            <input
+              type="datetime-local"
+              v-model="newApiTokenForm.date"
+              class="input bg-base-200 text-base-content"
+            />
           </div>
         </div>
         <div class="mt-8 flex justify-end gap-4">
@@ -428,7 +431,11 @@ async function handleDeactivate() {
                 t("profile.apiToken.create_modal.date_label")
               }}</span></label
             >
-            <input type="date" v-model="editApiTokenForm.date" class="input bg-base-200 text-base-content" />
+            <input
+              type="datetime-local"
+              v-model="editApiTokenForm.date"
+              class="input bg-base-200 text-base-content"
+            />
           </div>
         </div>
         <div class="mt-8 flex justify-end gap-4">

@@ -39,6 +39,11 @@ interface ProblemForm {
   };
   canViewStdout: boolean;
   defaultCode: string;
+
+  // Extra (admin config/pipeline/assets)
+  config?: ProblemConfigExtra;
+  pipeline?: ProblemPipeline;
+  assets?: ProblemAssets;
 }
 
 interface Problem {
@@ -65,6 +70,9 @@ interface Problem {
   highScore: number;
   ACUser: number;
   submitter: number;
+
+  // 後端 /problem/view/:id 可能附帶 Extra 設定（供前端行為判斷）
+  config?: ProblemConfigExtra;
 }
 
 interface ProblemListItem {
@@ -138,12 +146,17 @@ interface ProblemConfigExtra {
   artifactCollection: ArtifactCollection[];
 }
 
+interface ProblemScoringScript {
+  custom: boolean;
+}
+
 interface ProblemPipeline {
   fopen: boolean;
   fwrite: boolean;
   executionMode: ExecutionMode;
   customChecker: boolean;
   teacherFirst?: boolean;
+  scoringScript?: ProblemScoringScript; // optional custom scoring script flag
 }
 
 interface ProblemAssets {

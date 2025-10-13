@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watchEffect } from "vue";
+import { ref, watchEffect, computed } from "vue";
 import { useClipboard, useIntervalFn } from "@vueuse/core";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import { useRoute, useRouter } from "vue-router";
@@ -30,6 +30,27 @@ const {
 } = useAxios<{ stderr: string; stdout: string }>(`/submission/${route.params.id}/output/0/0`, fetcher, {
   immediate: false,
 });
+
+// 題目資料，用來判斷 artifactCollection
+const {
+  data: problem,
+  error: problemError,
+  isLoading: isProblemLoading,
+  execute: fetchProblem,
+} = useAxios<Problem>(fetcher, { immediate: false });
+
+watchEffect(() => {
+  if (submission.value && !problem.value) {
+    fetchProblem(`/problem/view/${submission.value.problemId}`);
+  }
+});
+
+const enableCompiledBinary = computed(
+  () => !!(problem.value as any)?.config?.artifactCollection?.includes("compiledBinary"),
+);
+const enableZipArtifact = computed(
+  () => !!(problem.value as any)?.config?.artifactCollection?.includes("zip"),
+);
 
 const { copy, copied, isSupported } = useClipboard();
 
@@ -67,6 +88,16 @@ async function rejudge() {
     isRejudgeLoading.value = false;
   }
 }
+
+// 下載 artifact（由後端供應檔案）
+function downloadCompiledBinary() {
+  const url = api.Submission.getArtifactUrl(route.params.id as string, "compiledBinary");
+  window.open(url, "_blank");
+}
+function downloadTaskZip(taskIndex: number) {
+  const url = api.Submission.getArtifactUrl(route.params.id as string, "zip", taskIndex);
+  window.open(url, "_blank");
+}
 </script>
 
 <template>
@@ -80,12 +111,17 @@ async function rejudge() {
             </div>
           </div>
 
-          <div
-            v-if="session.isAdmin"
-            :class="['btn md:btn-md', isRejudgeLoading && 'loading']"
-            @click="rejudge"
-          >
-            <i-uil-repeat class="mr-1" /> Rejudge
+          <div class="flex flex-wrap items-center gap-2">
+            <div v-if="enableCompiledBinary" class="btn md:btn-md" @click="downloadCompiledBinary">
+              <i-uil-folder-download class="mr-1" /> Download binary
+            </div>
+            <div
+              v-if="session.isAdmin"
+              :class="['btn md:btn-md', isRejudgeLoading && 'loading']"
+              @click="rejudge"
+            >
+              <i-uil-repeat class="mr-1" /> Rejudge
+            </div>
           </div>
         </div>
 
@@ -96,7 +132,7 @@ async function rejudge() {
             <div class="card-title md:text-xl lg:text-2xl">{{ $t("course.submission.general.title") }}</div>
             <div class="my-1" />
 
-            <data-status-wrapper :error="error" :is-loading="isLoading">
+            <data-status-wrapper :error="error || problemError" :is-loading="isLoading || isProblemLoading">
               <template #loading>
                 <skeleton-table :col="8" :row="1" />
               </template>
@@ -162,7 +198,14 @@ async function rejudge() {
             <div v-else-if="isActive" class="flex items-center">
               <ui-spinner class="mr-3 h-6 w-6" /> {{ $t("course.submission.detail.desc") }}
             </div>
-            <table v-else class="table table-compact w-full" v-for="(task, taskIndex) in submission.tasks">
+
+            <!-- 詳細結果表格：若題目設定 zip artifact，新增 Artifact 欄位，於每個子任務提供 zip 下載 -->
+            <table
+              v-else
+              class="table table-compact w-full"
+              v-for="(task, taskIndex) in submission.tasks"
+              :key="`task-${taskIndex}`"
+            >
               <thead>
                 <tr>
                   <th>{{ $t("course.submission.detail.id") }} {{ taskIndex }}</th>
@@ -170,6 +213,7 @@ async function rejudge() {
                   <th>{{ $t("course.submission.detail.runtime") }}</th>
                   <th>{{ $t("course.submission.detail.memory") }}</th>
                   <th>{{ $t("course.submission.detail.score") }}</th>
+                  <th v-if="enableZipArtifact">Artifact</th>
                 </tr>
               </thead>
               <tbody>
@@ -179,9 +223,14 @@ async function rejudge() {
                   <td>{{ task.execTime }} ms</td>
                   <td>{{ task.memoryUsage }} KB</td>
                   <td>{{ task.score }}</td>
+                  <td v-if="enableZipArtifact">
+                    <button class="btn btn-ghost btn-xs" @click="downloadTaskZip(taskIndex)">
+                      <i-uil-import class="mr-1" /> zip
+                    </button>
+                  </td>
                 </tr>
                 <tr>
-                  <td colspan="5">
+                  <td :colspan="enableZipArtifact ? 6 : 5">
                     <div
                       class="btn btn-ghost btn-sm btn-block gap-x-3"
                       @click="expandTasks[taskIndex] = !expandTasks[taskIndex]"
@@ -196,12 +245,13 @@ async function rejudge() {
                     </div>
                   </td>
                 </tr>
-                <tr v-show="expandTasks[taskIndex]" v-for="(_case, caseIndex) in task.cases">
+                <tr v-show="expandTasks[taskIndex]" v-for="(_case, caseIndex) in task.cases" :key="`case-${taskIndex}-${caseIndex}`">
                   <td>{{ taskIndex }}-{{ caseIndex }}</td>
                   <td><judge-status :status="_case.status" /></td>
                   <td>{{ _case.execTime }} ms</td>
                   <td>{{ _case.memoryUsage }} KB</td>
                   <td>-</td>
+                  <td v-if="enableZipArtifact">-</td>
                 </tr>
               </tbody>
             </table>
@@ -215,7 +265,6 @@ async function rejudge() {
           <div class="card-body p-0">
             <div class="card-title md:text-xl lg:text-2xl">
               {{ $t("course.submission.source.text") }}
-              <!-- TODO submission?.code should without ? -->
               <button
                 v-if="isSupported && submission"
                 class="btn btn-info btn-xs ml-3"

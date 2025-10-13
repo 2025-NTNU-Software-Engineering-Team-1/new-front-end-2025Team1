@@ -18,17 +18,35 @@ useTitle(`Submit - ${route.params.id} - ${route.params.name} | Normal OJ`);
 const router = useRouter();
 const { data: problem, error, isLoading } = useAxios<Problem>(`/problem/view/${route.params.id}`, fetcher);
 
+// 依題目 meta 判斷允許的提交格式；預設為 "code"
+const acceptedFormat = computed<AcceptedFormat>(() => {
+  const fmt = (problem.value as any)?.config?.acceptedFormat;
+  return fmt === "zip" ? "zip" : "code";
+});
+
 const lang = useStorage(LOCAL_STORAGE_KEY.LAST_USED_LANG, -1);
 const form = reactive({
   code: "",
+  zip: null as File | null,
   lang,
   isLoading: false,
   isSubmitError: false,
 });
-const rules = {
-  code: { required: helpers.withMessage(t("course.problem.submit.err.code"), required) },
+
+// 驗證規則依 acceptedFormat 切換
+const rules = computed(() => ({
+  code:
+    acceptedFormat.value === "code"
+      ? { required: helpers.withMessage(t("course.problem.submit.err.code"), required) }
+      : {},
+  zip:
+    acceptedFormat.value === "zip"
+      ? {
+          requiredFile: helpers.withMessage(t("course.problem.submit.err.zip"), (v: any) => v instanceof File),
+        }
+      : {},
   lang: { betweenValue: helpers.withMessage(t("course.problem.submit.err.lang"), between(0, 3)) },
-};
+}));
 const v$ = useVuelidate(rules, form);
 
 const LANGUAGE_EXTENSION = [".c", ".cpp", ".py"];
@@ -47,9 +65,10 @@ const langOptions = computed<LangOption[]>(() => {
   return availables;
 });
 
+// 只在 code 模式下進行簡易語言偵測（python）
 watchEffect(() => {
+  if (acceptedFormat.value !== "code") return;
   const detectedLang = hljs.highlightAuto(form.code, ["c", "cpp", "python"]).language;
-  // Since c and cpp are difficult to distinguish, we only detect python.
   if (detectedLang === "python" && langOptions.value.some((option) => option.value === 2)) {
     form.lang = 2;
   }
@@ -61,13 +80,22 @@ async function submit() {
   form.isLoading = true;
   form.isSubmitError = false;
   try {
-    const blobWriter = new BlobWriter("application/zip");
-    const writer = new ZipWriter(blobWriter);
-    await writer.add(`main${LANGUAGE_EXTENSION[form.lang]}`, new TextReader(form.code));
-    await writer.close();
-    const blob = await blobWriter.getData();
     const formData = new FormData();
-    formData.append("code", blob);
+
+    if (acceptedFormat.value === "code") {
+      // 將貼上的程式碼包成 zip 後上傳（延用後端原接口）
+      const blobWriter = new BlobWriter("application/zip");
+      const writer = new ZipWriter(blobWriter);
+      await writer.add(`main${LANGUAGE_EXTENSION[form.lang]}`, new TextReader(form.code));
+      await writer.close();
+      const blob = await blobWriter.getData();
+      formData.append("code", blob);
+    } else {
+      // 直接上傳使用者選擇的 zip 檔
+      if (!form.zip) throw new Error("No zip file selected");
+      formData.append("code", form.zip);
+    }
+
     const { submissionId } = (
       await api.Submission.create({
         problemId: Number(route.params.id),
@@ -80,7 +108,7 @@ async function submit() {
     form.isSubmitError = true;
     throw error;
   } finally {
-    isLoading.value = false;
+    form.isLoading = false;
   }
 }
 </script>
@@ -93,11 +121,40 @@ async function submit() {
           {{ t("course.problem.submit.card.title") }}{{ $route.params.id }}
         </div>
 
-        <div class="card-title mt-10 md:text-lg lg:text-xl">
-          {{ t("course.problem.submit.card.placeholder") }}
-        </div>
-        <code-editor v-model="form.code" class="mt-4" />
-        <span v-show="v$.code.$error" class="text-error" v-text="v$.code.$errors[0]?.$message" />
+        <!-- code 模式 -->
+        <template v-if="acceptedFormat === 'code'">
+          <div class="card-title mt-10 md:text-lg lg:text-xl">
+            {{ t("course.problem.submit.card.placeholder") }}
+          </div>
+          <code-editor v-model="form.code" class="mt-4" />
+          <span
+            v-show="(v$ as any).code?.$error"
+            class="text-error"
+            v-text="(v$ as any).code?.$errors[0]?.$message"
+          />
+        </template>
+
+        <!-- zip 模式 -->
+        <template v-else>
+          <div class="card-title mt-10 md:text-lg lg:text-xl">Upload your solution (.zip)</div>
+          <div class="mt-4">
+            <input
+              type="file"
+              accept=".zip"
+              @change="form.zip = ($event.target as HTMLInputElement).files?.[0] || null"
+              class="file-input file-input-bordered"
+            />
+            <div class="mt-2" v-if="form.zip">
+              <span class="mr-2">{{ form.zip.name }}</span>
+              <button class="btn btn-sm" @click="form.zip = null">
+                <i-uil-times />
+              </button>
+            </div>
+            <label class="label" v-show="(v$ as any).zip?.$error">
+              <span class="label-text-alt text-error" v-text="(v$ as any).zip?.$errors[0]?.$message" />
+            </label>
+          </div>
+        </template>
 
         <div v-if="error" class="alert alert-error shadow-lg">
           <div>
@@ -113,14 +170,14 @@ async function submit() {
               <ui-spinner v-if="isLoading" class="h-6 w-6" />
             </label>
             <select
-              v-model="v$.lang.$model"
-              :class="['select select-bordered', v$.lang.$error && 'input-error']"
+              v-model="(v$ as any).lang.$model"
+              :class="['select select-bordered', (v$ as any).lang.$error && 'input-error']"
             >
               <option disabled :value="-1">{{ t("course.problem.submit.lang.select") }}</option>
               <option v-for="{ text, value } in langOptions" :key="value" :value="value">{{ text }}</option>
             </select>
-            <label class="label" v-show="v$.lang.$error">
-              <span class="label-text-alt text-error" v-text="v$.lang.$errors[0]?.$message" />
+            <label class="label" v-show="(v$ as any).lang.$error">
+              <span class="label-text-alt text-error" v-text="(v$ as any).lang.$errors[0]?.$message" />
             </label>
           </div>
 

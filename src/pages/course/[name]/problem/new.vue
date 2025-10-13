@@ -4,13 +4,13 @@ import { useTitle } from "@vueuse/core";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import api from "@/models/api";
-import ProblemForm from "@/components/Problem/ProblemForm.vue";
+import AdminProblemForm from "@/components/Problem/Admin/AdminProblemForm.vue";
 
 const route = useRoute();
 const router = useRouter();
 useTitle(`New Problem - ${route.params.name} | Normal OJ`);
 
-const formElement = ref<InstanceType<typeof ProblemForm>>();
+const formElement = ref<InstanceType<typeof AdminProblemForm>>();
 
 const newProblem = ref<ProblemForm>({
   problemName: "",
@@ -35,47 +35,75 @@ const newProblem = ref<ProblemForm>({
     tasks: [],
   },
   canViewStdout: false,
+
+  // NEW sections
+  config: {
+    compilation: false,
+    testMode: false,
+    aiVTuber: false,
+    acceptedFormat: "code",
+    staticAnalys: {
+      custom: false,
+      libraryRestrictions: { enabled: false, whitelist: [], blacklist: [] },
+      networkAccessRestrictio: {
+        enabled: false,
+        firewallExtranet: { enabled: false, whitelist: [], blacklist: [] },
+        connectWithLocal: { enabled: false, whitelist: [], blacklist: [], localServiceZip: null },
+      },
+    },
+    artifactCollection: [],
+  },
+  pipeline: {
+    fopen: false,
+    fwrite: false,
+    executionMode: "general",
+    customChecker: false,
+    teacherFirst: false,
+    // optional scoring flag structure
+    scoringScrip: { custom: false } as any,
+  },
+  assets: {
+    checkerPy: null,
+    makefileZip: null,
+    teacherFile: null,
+    scorePy: null,
+    scoreJson: null,
+    localServiceZip: null,
+    testdataZip: null,
+  },
 });
-function update<K extends keyof ProblemForm>(
-  key: K,
-  value: ProblemForm[K] | ((arg: ProblemForm[K]) => ProblemForm[K]),
-) {
-  if (typeof value === "function") {
-    newProblem.value[key] = value(newProblem.value[key]);
-  } else {
-    newProblem.value[key] = value;
-  }
+
+function update<K extends keyof ProblemForm>(key: K, value: ProblemForm[K]) {
+  newProblem.value[key] = value;
 }
 provide<Ref<ProblemForm>>("problem", newProblem);
-const testdata = ref<File | null>(null);
 
 async function submit() {
   if (!formElement.value) return;
-  if (!testdata.value) {
-    alert("Testdata not provided");
-    return;
-  }
   formElement.value.isLoading = true;
   try {
-    const { problemId } = (
-      await api.Problem.create({
-        ...newProblem.value,
-      })
-    ).data;
+    // 1) create (same body shape as before; backend ignores unknown optional fields)
+    const { problemId } = (await api.Problem.create({ ...newProblem.value })).data;
 
-    const testdataForm = new FormData();
-    testdataForm.append("case", testdata.value);
-    try {
-      await api.Problem.modifyTestdata(problemId, testdataForm);
-    } catch (error) {
-      const errorMsg =
-        axios.isAxiosError(error) && error.response?.data?.message
-          ? error.response.data.message
-          : "Unknown error occurred :(";
-      alert(`Problem created, but testdata upload failed: ${errorMsg}`);
-      router.push(`/course/${route.params.name}/problem/${problemId}/edit`);
-      throw error;
-    }
+    // 2) upload assets + meta
+    const fd = new FormData();
+    fd.append(
+      "meta",
+      JSON.stringify({
+        config: newProblem.value.config,
+        pipeline: newProblem.value.pipeline,
+      }),
+    );
+    if (newProblem.value.assets?.testdataZip) fd.append("case", newProblem.value.assets.testdataZip);
+    if (newProblem.value.assets?.checkerPy) fd.append("checker.py", newProblem.value.assets.checkerPy);
+    if (newProblem.value.assets?.makefileZip) fd.append("makefile.zip", newProblem.value.assets.makefileZip);
+    if (newProblem.value.assets?.teacherFile) fd.append("Teacher_file", newProblem.value.assets.teacherFile);
+    if (newProblem.value.assets?.scorePy) fd.append("score.py", newProblem.value.assets.scorePy);
+    if (newProblem.value.assets?.scoreJson) fd.append("score.json", newProblem.value.assets.scoreJson);
+    if (newProblem.value.assets?.localServiceZip) fd.append("local_service.zip", newProblem.value.assets.localServiceZip);
+
+    await api.Problem.uploadAssetsV2(problemId, fd);
+
     router.push(`/course/${route.params.name}/problem/${problemId}`);
   } catch (error) {
     formElement.value.errorMsg =
@@ -104,17 +132,18 @@ const openJSON = ref<boolean>(false);
   <div class="card-container">
     <div class="card min-w-full">
       <div class="card-body">
-        <div class="card-title mb-3 justify-between">{{ $t("course.problem.new.title") }}</div>
+        <div class="card-title mb-3 justify-between">New Problem</div>
 
-        <problem-form ref="formElement" v-model:testdata="testdata" @update="update" @submit="submit" />
+        <!-- Level 1: Admin form (name/hidden + collapses) -->
+        <admin-problem-form ref="formElement" @update="update" @submit="submit" />
 
         <div class="divider" />
 
+        <!-- Preview (Level 1) -->
         <div class="card-title mb-3">
-          {{ $t("course.problem.new.preview") }}
+          Preview
           <input v-model="openPreview" type="checkbox" class="toggle" />
         </div>
-
         <problem-card
           v-if="openPreview"
           :problem="{ ...mockProblemMeta, ...newProblem, testCase: newProblem.testCaseInfo.tasks }"
@@ -123,11 +152,11 @@ const openJSON = ref<boolean>(false);
 
         <div class="divider my-4" />
 
+        <!-- JSON (Level 1) -->
         <div class="card-title mb-3">
-          {{ $t("course.problem.new.json") }}
+          JSON
           <input v-model="openJSON" type="checkbox" class="toggle" />
         </div>
-
         <pre v-if="openJSON">{{ JSON.stringify(newProblem, null, 2) }}</pre>
 
         <div class="mb-[50%]" />

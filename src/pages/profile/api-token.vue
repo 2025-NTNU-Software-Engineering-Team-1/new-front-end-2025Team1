@@ -459,6 +459,9 @@ async function handleDeactivate() {
           {{ t("profile.apiToken.success_modal.warning") }}
           <i-uil-exclamation-triangle class="text-warning" />
         </h3>
+        <p class="text-sm text-warning font-semibold">
+          {{ t("profile.apiToken.success_modal.message") }}
+        </p>
         <div class="input-group w-full max-w-xs">
           <input type="text" :value="newSecretKey" readonly class="input input-bordered w-full" />
           <button v-if="isSupported" class="btn" @click="copy()">

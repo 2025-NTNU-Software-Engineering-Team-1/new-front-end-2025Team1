@@ -184,34 +184,6 @@
       "unknown-error-occurred": "Unknown error occurred :("
     }
   },
-  "profile": {
-    "title": "Profile",
-    "rules": {
-      "confirmPassword": {
-        "sameAsRef": "Password does not match."
-      }
-    },
-    "username": "Username",
-    "dispname": "Display Name",
-    "email": "Email",
-    "role": "Role",
-    "signOut": "Sign out",
-    "pw": {
-      "change": "Change Password",
-      "success": "Password has been successfully changed",
-      "new": "New Password",
-      "confirm": "Confirm New Password",
-      "current": "Current Password",
-      "placeholder": {
-        "new": "new password",
-        "again": "new password again",
-        "current": "current password"
-      },
-      "submit": "Submit"
-    },
-    "wrongPassword": "Wrong Password",
-    "operationFailed": "Operation failed, please try again later"
-  },
   "ann": {
     "id": {
       "back": "Back"
@@ -510,6 +482,7 @@
       },
       "success_modal": {
         "warning": "Warning",
+        "message": "Please save this key properly, otherwise you will not be able to see it again.",
         "copied": "Copied!",
         "copy": "Copy",
         "ok": "OK"

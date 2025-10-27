@@ -46,7 +46,7 @@ function toggleArray(arr: string[], value: string) {
 </script>
 
 <template>
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
     <!-- allowedLanguage -->
     <div class="form-control w-full max-w-xs">
       <label class="label"><span class="label-text">Allowed Languages</span></label>
@@ -63,7 +63,12 @@ function toggleArray(arr: string[], value: string) {
         type="text"
         class="input input-bordered w-full max-w-xs"
         :value="problem.tags.join(',')"
-        @input="problem.tags = ($event.target as HTMLInputElement).value.split(',').map((s) => s.trim()).filter(Boolean)"
+        @input="
+          problem.tags = ($event.target as HTMLInputElement).value
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean)
+        "
       />
       <label class="label"><span class="label-text-alt">Comma separated</span></label>
     </div>
@@ -109,11 +114,23 @@ function toggleArray(arr: string[], value: string) {
       <label class="label"><span class="label-text">Accepted format</span></label>
       <div class="flex gap-4">
         <label class="label cursor-pointer gap-2">
-          <input type="radio" name="acceptedFormat" class="radio" value="code" v-model="(problem.config!.acceptedFormat as any)" />
+          <input
+            type="radio"
+            name="acceptedFormat"
+            class="radio"
+            value="code"
+            v-model="(problem.config!.acceptedFormat as any)"
+          />
           <span class="label-text">code</span>
         </label>
         <label class="label cursor-pointer gap-2">
-          <input type="radio" name="acceptedFormat" class="radio" value="zip" v-model="(problem.config!.acceptedFormat as any)" />
+          <input
+            type="radio"
+            name="acceptedFormat"
+            class="radio"
+            value="zip"
+            v-model="(problem.config!.acceptedFormat as any)"
+          />
           <span class="label-text">zip</span>
         </label>
       </div>
@@ -126,14 +143,21 @@ function toggleArray(arr: string[], value: string) {
         <input type="checkbox" class="toggle" v-model="problem.config!.staticAnalysis.custom" />
       </label>
 
-      <div v-if="problem.config!.staticAnalysis.custom" class="mt-3 grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div v-if="problem.config!.staticAnalysis.custom" class="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-2">
         <!-- Library restrictions -->
         <div class="rounded-box bg-base-200 p-3">
           <label class="label cursor-pointer justify-start gap-x-4">
             <span class="label-text">Library restrictions</span>
-            <input type="checkbox" class="toggle" v-model="problem.config!.staticAnalysis.libraryRestrictions!.enabled" />
+            <input
+              type="checkbox"
+              class="toggle"
+              v-model="problem.config!.staticAnalysis.libraryRestrictions!.enabled"
+            />
           </label>
-          <div v-if="problem.config!.staticAnalysis.libraryRestrictions!.enabled" class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+          <div
+            v-if="problem.config!.staticAnalysis.libraryRestrictions!.enabled"
+            class="mt-2 grid grid-cols-1 gap-3 md:grid-cols-2"
+          >
             <div>
               <div class="label-text mb-1">Whitelist</div>
               <div class="flex flex-wrap gap-2">
@@ -143,7 +167,9 @@ function toggleArray(arr: string[], value: string) {
                   class="btn btn-xs"
                   :class="problem.config!.staticAnalysis.libraryRestrictions!.whitelist.includes(sym) && 'btn-accent'"
                   @click="toggleArray(problem.config!.staticAnalysis.libraryRestrictions!.whitelist, sym)"
-                >{{ sym }}</button>
+                >
+                  {{ sym }}
+                </button>
               </div>
             </div>
             <div>
@@ -155,7 +181,9 @@ function toggleArray(arr: string[], value: string) {
                   class="btn btn-xs"
                   :class="problem.config!.staticAnalysis.libraryRestrictions!.blacklist.includes(sym) && 'btn-error text-base-100'"
                   @click="toggleArray(problem.config!.staticAnalysis.libraryRestrictions!.blacklist, sym)"
-                >{{ sym }}</button>
+                >
+                  {{ sym }}
+                </button>
               </div>
             </div>
           </div>
@@ -165,33 +193,74 @@ function toggleArray(arr: string[], value: string) {
         <div class="rounded-box bg-base-200 p-3">
           <label class="label cursor-pointer justify-start gap-x-4">
             <span class="label-text">Network access restriction</span>
-            <input type="checkbox" class="toggle" v-model="problem.config!.staticAnalysis.networkAccessRestriction!.enabled" />
+            <input
+              type="checkbox"
+              class="toggle"
+              v-model="problem.config!.staticAnalysis.networkAccessRestriction!.enabled"
+            />
           </label>
 
-          <div v-if="problem.config!.staticAnalysis.networkAccessRestriction!.enabled" class="mt-2 grid grid-cols-1 gap-3">
+          <div
+            v-if="problem.config!.staticAnalysis.networkAccessRestriction!.enabled"
+            class="mt-2 grid grid-cols-1 gap-3"
+          >
             <div class="rounded bg-base-300 p-3">
               <label class="label cursor-pointer justify-start gap-x-4">
                 <span class="label-text">Firewall extranet</span>
-                <input type="checkbox" class="toggle" v-model="problem.config!.staticAnalysis.networkAccessRestriction!.firewallExtranet!.enabled" />
+                <input
+                  type="checkbox"
+                  class="toggle"
+                  v-model="problem.config!.staticAnalysis.networkAccessRestriction!.firewallExtranet!.enabled"
+                />
               </label>
-              <div v-if="problem.config!.staticAnalysis.networkAccessRestriction!.firewallExtranet!.enabled" class="grid md:grid-cols-2 gap-3 mt-2">
-                <MultiStringInput v-model="problem.config!.staticAnalysis.networkAccessRestriction!.firewallExtranet!.whitelist" placeholder="Add whitelist host/IP" />
-                <MultiStringInput v-model="problem.config!.staticAnalysis.networkAccessRestriction!.firewallExtranet!.blacklist" placeholder="Add blacklist host/IP" />
+              <div
+                v-if="problem.config!.staticAnalysis.networkAccessRestriction!.firewallExtranet!.enabled"
+                class="mt-2 grid gap-3 md:grid-cols-2"
+              >
+                <MultiStringInput
+                  v-model="problem.config!.staticAnalysis.networkAccessRestriction!.firewallExtranet!.whitelist"
+                  placeholder="Add whitelist host/IP"
+                />
+                <MultiStringInput
+                  v-model="problem.config!.staticAnalysis.networkAccessRestriction!.firewallExtranet!.blacklist"
+                  placeholder="Add blacklist host/IP"
+                />
               </div>
             </div>
 
             <div class="rounded bg-base-300 p-3">
               <label class="label cursor-pointer justify-start gap-x-4">
                 <span class="label-text">Connect with local</span>
-                <input type="checkbox" class="toggle" v-model="problem.config!.staticAnalysis.networkAccessRestriction!.connectWithLocal!.enabled" />
+                <input
+                  type="checkbox"
+                  class="toggle"
+                  v-model="problem.config!.staticAnalysis.networkAccessRestriction!.connectWithLocal!.enabled"
+                />
               </label>
-              <div v-if="problem.config!.staticAnalysis.networkAccessRestriction!.connectWithLocal!.enabled" class="grid md:grid-cols-2 gap-3 mt-2">
-                <MultiStringInput v-model="problem.config!.staticAnalysis.networkAccessRestriction!.connectWithLocal!.whitelist" placeholder="Add whitelist host/IP" />
-                <MultiStringInput v-model="problem.config!.staticAnalysis.networkAccessRestriction!.connectWithLocal!.blacklist" placeholder="Add blacklist host/IP" />
+              <div
+                v-if="problem.config!.staticAnalysis.networkAccessRestriction!.connectWithLocal!.enabled"
+                class="mt-2 grid gap-3 md:grid-cols-2"
+              >
+                <MultiStringInput
+                  v-model="problem.config!.staticAnalysis.networkAccessRestriction!.connectWithLocal!.whitelist"
+                  placeholder="Add whitelist host/IP"
+                />
+                <MultiStringInput
+                  v-model="problem.config!.staticAnalysis.networkAccessRestriction!.connectWithLocal!.blacklist"
+                  placeholder="Add blacklist host/IP"
+                />
               </div>
-              <div v-if="problem.config!.staticAnalysis.networkAccessRestriction!.connectWithLocal!.enabled" class="form-control mt-2">
+              <div
+                v-if="problem.config!.staticAnalysis.networkAccessRestriction!.connectWithLocal!.enabled"
+                class="form-control mt-2"
+              >
                 <label class="label"><span class="label-text">Upload local_service.zip</span></label>
-                <input type="file" accept=".zip" class="file-input file-input-bordered" @change="(e:any) => problem.assets!.localServiceZip = e.target.files?.[0] || null" />
+                <input
+                  type="file"
+                  accept=".zip"
+                  class="file-input file-input-bordered"
+                  @change="(e:any) => problem.assets!.localServiceZip = e.target.files?.[0] || null"
+                />
               </div>
             </div>
           </div>
@@ -208,9 +277,13 @@ function toggleArray(arr: string[], value: string) {
             type="checkbox"
             class="checkbox"
             :checked="problem.config!.artifactCollection.includes('compiledBinary')"
-            @change="($event.target as HTMLInputElement).checked
-              ? problem.config!.artifactCollection.push('compiledBinary')
-              : problem.config!.artifactCollection = problem.config!.artifactCollection.filter(v => v !== 'compiledBinary')"
+            @change="
+              ($event.target as HTMLInputElement).checked
+                ? problem.config!.artifactCollection.push('compiledBinary')
+                : (problem.config!.artifactCollection = problem.config!.artifactCollection.filter(
+                    (v) => v !== 'compiledBinary',
+                  ))
+            "
           />
           <span class="label-text">compiledBinary</span>
         </label>
@@ -219,9 +292,13 @@ function toggleArray(arr: string[], value: string) {
             type="checkbox"
             class="checkbox"
             :checked="problem.config!.artifactCollection.includes('zip')"
-            @change="($event.target as HTMLInputElement).checked
-              ? problem.config!.artifactCollection.push('zip')
-              : problem.config!.artifactCollection = problem.config!.artifactCollection.filter(v => v !== 'zip')"
+            @change="
+              ($event.target as HTMLInputElement).checked
+                ? problem.config!.artifactCollection.push('zip')
+                : (problem.config!.artifactCollection = problem.config!.artifactCollection.filter(
+                    (v) => v !== 'zip',
+                  ))
+            "
           />
           <span class="label-text">zip</span>
         </label>

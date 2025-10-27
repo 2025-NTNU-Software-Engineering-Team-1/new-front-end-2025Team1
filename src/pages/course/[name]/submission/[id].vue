@@ -245,7 +245,11 @@ function downloadTaskZip(taskIndex: number) {
                     </div>
                   </td>
                 </tr>
-                <tr v-show="expandTasks[taskIndex]" v-for="(_case, caseIndex) in task.cases" :key="`case-${taskIndex}-${caseIndex}`">
+                <tr
+                  v-show="expandTasks[taskIndex]"
+                  v-for="(_case, caseIndex) in task.cases"
+                  :key="`case-${taskIndex}-${caseIndex}`"
+                >
                   <td>{{ taskIndex }}-{{ caseIndex }}</td>
                   <td><judge-status :status="_case.status" /></td>
                   <td>{{ _case.execTime }} ms</td>

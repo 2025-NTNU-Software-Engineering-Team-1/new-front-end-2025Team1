@@ -100,7 +100,8 @@ async function submit() {
     if (newProblem.value.assets?.teacherFile) fd.append("Teacher_file", newProblem.value.assets.teacherFile);
     if (newProblem.value.assets?.scorePy) fd.append("score.py", newProblem.value.assets.scorePy);
     if (newProblem.value.assets?.scoreJson) fd.append("score.json", newProblem.value.assets.scoreJson);
-    if (newProblem.value.assets?.localServiceZip) fd.append("local_service.zip", newProblem.value.assets.localServiceZip);
+    if (newProblem.value.assets?.localServiceZip)
+      fd.append("local_service.zip", newProblem.value.assets.localServiceZip);
 
     await api.Problem.uploadAssetsV2(problemId, fd);
 

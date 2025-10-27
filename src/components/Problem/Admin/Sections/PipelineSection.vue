@@ -71,7 +71,7 @@ watch(
 </script>
 
 <template>
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
     <!-- fopen -->
     <div class="form-control">
       <label class="label cursor-pointer justify-start gap-x-4">
@@ -93,43 +93,78 @@ watch(
       <label class="label"><span class="label-text">Execution mode</span></label>
       <div class="flex gap-6">
         <label class="label cursor-pointer gap-2">
-          <input type="radio" class="radio" value="general" v-model="(problem.pipeline!.executionMode as any)" />
+          <input
+            type="radio"
+            class="radio"
+            value="general"
+            v-model="(problem.pipeline!.executionMode as any)"
+          />
           <span class="label-text">general</span>
         </label>
         <label class="label cursor-pointer gap-2">
-          <input type="radio" class="radio" value="functionOnly" v-model="(problem.pipeline!.executionMode as any)" />
+          <input
+            type="radio"
+            class="radio"
+            value="functionOnly"
+            v-model="(problem.pipeline!.executionMode as any)"
+          />
           <span class="label-text">functionOnly</span>
         </label>
         <label class="label cursor-pointer gap-2">
-          <input type="radio" class="radio" value="interactive" v-model="(problem.pipeline!.executionMode as any)" />
+          <input
+            type="radio"
+            class="radio"
+            value="interactive"
+            v-model="(problem.pipeline!.executionMode as any)"
+          />
           <span class="label-text">interactive</span>
         </label>
       </div>
     </div>
 
     <!-- general/functionOnly custom checker -->
-    <div v-if="problem.pipeline!.executionMode === 'general' || problem.pipeline!.executionMode === 'functionOnly'" class="form-control">
+    <div
+      v-if="problem.pipeline!.executionMode === 'general' || problem.pipeline!.executionMode === 'functionOnly'"
+      class="form-control"
+    >
       <label class="label cursor-pointer justify-start gap-x-4">
         <span class="label-text">Custom checker</span>
         <input type="checkbox" class="toggle" v-model="problem.pipeline!.customChecker" />
       </label>
       <div v-if="problem.pipeline!.customChecker" class="mt-2">
         <label class="label"><span class="label-text">Upload checker.py</span></label>
-        <input type="file" accept=".py" class="file-input file-input-bordered" @change="(e:any) => problem.assets!.checkerPy = e.target.files?.[0] || null" />
+        <input
+          type="file"
+          accept=".py"
+          class="file-input file-input-bordered"
+          @change="(e:any) => problem.assets!.checkerPy = e.target.files?.[0] || null"
+        />
       </div>
     </div>
 
     <!-- functionOnly makefile.zip -->
     <div v-if="problem.pipeline!.executionMode === 'functionOnly'" class="form-control">
       <label class="label"><span class="label-text">Upload makefile.zip</span></label>
-      <input type="file" accept=".zip" class="file-input file-input-bordered" @change="(e:any) => problem.assets!.makefileZip = e.target.files?.[0] || null" />
+      <input
+        type="file"
+        accept=".zip"
+        class="file-input file-input-bordered"
+        @change="(e:any) => problem.assets!.makefileZip = e.target.files?.[0] || null"
+      />
     </div>
 
     <!-- interactive -->
-    <div v-if="problem.pipeline!.executionMode === 'interactive'" class="form-control col-span-1 md:col-span-2">
+    <div
+      v-if="problem.pipeline!.executionMode === 'interactive'"
+      class="form-control col-span-1 md:col-span-2"
+    >
       <label class="label"><span class="label-text">Upload Teacher_file</span></label>
-      <input type="file" class="file-input file-input-bordered" @change="(e:any) => problem.assets!.teacherFile = e.target.files?.[0] || null" />
-      <label class="label cursor-pointer justify-start gap-x-4 mt-2">
+      <input
+        type="file"
+        class="file-input file-input-bordered"
+        @change="(e:any) => problem.assets!.teacherFile = e.target.files?.[0] || null"
+      />
+      <label class="label mt-2 cursor-pointer justify-start gap-x-4">
         <span class="label-text">Teacher first</span>
         <input type="checkbox" class="toggle" v-model="problem.pipeline!.teacherFirst" />
       </label>
@@ -146,7 +181,11 @@ watch(
       >
         <template v-if="!problem.assets!.testdataZip">
           <span class="mb-6 mr-6 text-sm">Drop a .zip file here</span>
-          <input type="file" accept=".zip" @change="problem.assets!.testdataZip = ($event.target as HTMLInputElement).files![0]" />
+          <input
+            type="file"
+            accept=".zip"
+            @change="problem.assets!.testdataZip = ($event.target as HTMLInputElement).files![0]"
+          />
         </template>
         <template v-else>
           <div class="flex">
@@ -166,24 +205,38 @@ watch(
         <!-- You can keep this flag under pipeline.scoringScript = { custom: boolean } -->
         <input type="checkbox" class="toggle" v-model="(problem as any).pipeline.scoringScript.custom" />
       </label>
-      <div v-if="(problem as any).pipeline.scoringScript?.custom" class="grid md:grid-cols-2 gap-3 mt-2">
+      <div v-if="(problem as any).pipeline.scoringScript?.custom" class="mt-2 grid gap-3 md:grid-cols-2">
         <div class="form-control">
           <label class="label"><span class="label-text">Upload score.py</span></label>
-          <input type="file" accept=".py" class="file-input file-input-bordered" @change="(e:any) => problem.assets!.scorePy = e.target.files?.[0] || null" />
+          <input
+            type="file"
+            accept=".py"
+            class="file-input file-input-bordered"
+            @change="(e:any) => problem.assets!.scorePy = e.target.files?.[0] || null"
+          />
         </div>
         <div class="form-control">
           <label class="label"><span class="label-text">Upload score.json</span></label>
-          <input type="file" accept=".json" class="file-input file-input-bordered" @change="(e:any) => problem.assets!.scoreJson = e.target.files?.[0] || null" />
+          <input
+            type="file"
+            accept=".json"
+            class="file-input file-input-bordered"
+            @change="(e:any) => problem.assets!.scoreJson = e.target.files?.[0] || null"
+          />
         </div>
       </div>
     </div>
 
     <!-- show and edit subtasks -->
-    <label class="label text-error" v-show="v$.testCaseInfo.tasks.$error" v-text="v$.testCaseInfo.tasks.$errors[0]?.$message" />
+    <label
+      class="label text-error"
+      v-show="v$.testCaseInfo.tasks.$error"
+      v-text="v$.testCaseInfo.tasks.$errors[0]?.$message"
+    />
     <template v-for="(t, i) in problem.testCaseInfo.tasks" :key="i">
       <div class="col-span-1 md:col-span-2">
         <div class="font-semibold">Subtask {{ i + 1 }}</div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div class="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
           <div class="form-control">
             <label class="label"><span class="label-text">#Cases</span></label>
             <input type="text" class="input input-bordered w-full max-w-xs" :value="t.caseCount" readonly />
@@ -194,7 +247,9 @@ watch(
               type="number"
               class="input input-bordered w-full max-w-xs"
               :value="t.taskScore"
-              @input="problem.testCaseInfo.tasks[i].taskScore = Number(($event.target as HTMLInputElement).value)"
+              @input="
+                problem.testCaseInfo.tasks[i].taskScore = Number(($event.target as HTMLInputElement).value)
+              "
             />
           </div>
           <div class="form-control">
@@ -203,7 +258,9 @@ watch(
               type="number"
               class="input input-bordered w-full max-w-xs"
               :value="t.memoryLimit"
-              @input="problem.testCaseInfo.tasks[i].memoryLimit = Number(($event.target as HTMLInputElement).value)"
+              @input="
+                problem.testCaseInfo.tasks[i].memoryLimit = Number(($event.target as HTMLInputElement).value)
+              "
             />
           </div>
           <div class="form-control">
@@ -212,7 +269,9 @@ watch(
               type="number"
               class="input input-bordered w-full max-w-xs"
               :value="t.timeLimit"
-              @input="problem.testCaseInfo.tasks[i].timeLimit = Number(($event.target as HTMLInputElement).value)"
+              @input="
+                problem.testCaseInfo.tasks[i].timeLimit = Number(($event.target as HTMLInputElement).value)
+              "
             />
           </div>
         </div>

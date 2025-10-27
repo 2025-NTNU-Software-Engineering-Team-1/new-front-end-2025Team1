@@ -108,7 +108,6 @@ interface MossReport {
 type LangOption = { value: number; text: string; mask: number };
 type ProblemUpdater = <K extends keyof ProblemForm>(key: K, value: ProblemForm[K]) => void;
 
-
 type AcceptedFormat = "code" | "zip";
 type ExecutionMode = "general" | "functionOnly" | "interactive";
 type ArtifactCollection = "compiledBinary" | "zip";

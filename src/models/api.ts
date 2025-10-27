@@ -63,10 +63,8 @@ const Problem = {
 
   // NEW: Save meta only (Set Configuration + Set Pipeline) without files
   // Body example: { config: ProblemConfigExtra | undefined, pipeline: ProblemPipeline | undefined }
-  saveMeta: (
-    problemId: number,
-    body: { config?: ProblemConfigExtra; pipeline?: ProblemPipeline },
-  ) => fetcher.put(`/problem/${problemId}/meta`, body),
+  saveMeta: (problemId: number, body: { config?: ProblemConfigExtra; pipeline?: ProblemPipeline }) =>
+    fetcher.put(`/problem/${problemId}/meta`, body),
 
   // NEW: Upload all assets (V2) with a single multipart request
   // FormData fields (append if present):
@@ -87,9 +85,7 @@ const Problem = {
   // Return: { librarySymbols: string[] }
   getStaticAnalysisOptions: () =>
     fetcher.get<{ librarySymbols: string[] }>(`/problem/static-analysis/options`),
-
 };
-
 
 const Submission = {
   create: (body: { problemId: number; languageType: number }) =>

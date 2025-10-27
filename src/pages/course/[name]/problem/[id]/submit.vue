@@ -42,7 +42,10 @@ const rules = computed(() => ({
   zip:
     acceptedFormat.value === "zip"
       ? {
-          requiredFile: helpers.withMessage(t("course.problem.submit.err.zip"), (v: any) => v instanceof File),
+          requiredFile: helpers.withMessage(
+            t("course.problem.submit.err.zip"),
+            (v: any) => v instanceof File,
+          ),
         }
       : {},
   lang: { betweenValue: helpers.withMessage(t("course.problem.submit.err.lang"), between(0, 3)) },

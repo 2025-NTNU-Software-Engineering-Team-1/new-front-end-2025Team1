@@ -49,27 +49,32 @@ const rules = {
   // new validations
   config: {
     acceptedFormat: {
-      required: helpers.withMessage("Accepted format is required", (v: any, p: any) => !!p?.config?.acceptedFormat),
+      required: helpers.withMessage(
+        "Accepted format is required",
+        (v: any, p: any) => !!p?.config?.acceptedFormat,
+      ),
     },
   },
   pipeline: {
     executionMode: {
-      required: helpers.withMessage(
-        "Execution mode is required",
-        (v: any, p: any) => ["general", "functionOnly", "interactive"].includes(p?.pipeline?.executionMode || ""),
+      required: helpers.withMessage("Execution mode is required", (v: any, p: any) =>
+        ["general", "functionOnly", "interactive"].includes(p?.pipeline?.executionMode || ""),
       ),
     },
   },
   assets: {
-    checkerPyRequired: helpers.withMessage("checker.py is required when Custom Checker is enabled", (_: any, p: any) => {
-      const mode = p?.pipeline?.executionMode;
-      const cc = !!p?.pipeline?.customChecker;
-      if (!cc) return true;
-      if (mode === "general" || mode === "functionOnly") {
-        return !!p?.assets?.checkerPy;
-      }
-      return true;
-    }),
+    checkerPyRequired: helpers.withMessage(
+      "checker.py is required when Custom Checker is enabled",
+      (_: any, p: any) => {
+        const mode = p?.pipeline?.executionMode;
+        const cc = !!p?.pipeline?.customChecker;
+        if (!cc) return true;
+        if (mode === "general" || mode === "functionOnly") {
+          return !!p?.assets?.checkerPy;
+        }
+        return true;
+      },
+    ),
     makefileZipRequired: helpers.withMessage(
       "makefile.zip is required when Execution Mode is functionOnly",
       (_: any, p: any) => (p?.pipeline?.executionMode === "functionOnly" ? !!p?.assets?.makefileZip : true),

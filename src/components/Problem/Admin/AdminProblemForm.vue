@@ -81,15 +81,15 @@ const rules = {
     localServiceZipRequired: helpers.withMessage(
       "local_service.zip is required when Connect With Local is enabled",
       (_: any, p: any) =>
-        p?.config?.staticAnalys?.custom &&
-        p?.config?.staticAnalys?.networkAccessRestrictio?.connectWithLocal?.enabled
+        p?.config?.staticAnalysis?.custom &&
+        p?.config?.staticAnalysis?.networkAccessRestriction?.connectWithLocal?.enabled
           ? !!p?.assets?.localServiceZip
           : true,
     ),
     scoringFilesRequired: helpers.withMessage(
       "score.py and score.json are required when Scoring Script Custom is enabled",
       (_: any, p: any) => {
-        const custom = (p as any)?.pipeline?.scoringScrip?.custom === true;
+        const custom = (p as any)?.pipeline?.scoringScript?.custom === true;
         return custom ? !!p?.assets?.scorePy && !!p?.assets?.scoreJson : true;
       },
     ),

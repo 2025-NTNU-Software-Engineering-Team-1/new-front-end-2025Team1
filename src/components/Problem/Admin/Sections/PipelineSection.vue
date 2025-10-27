@@ -163,10 +163,10 @@ watch(
     <div class="form-control col-span-1 md:col-span-2">
       <label class="label cursor-pointer justify-start gap-x-4">
         <span class="label-text">Scoring script - Custom</span>
-        <!-- You can keep this flag under pipeline.scoringScrip = { custom: boolean } -->
-        <input type="checkbox" class="toggle" v-model="(problem as any).pipeline.scoringScrip.custom" />
+        <!-- You can keep this flag under pipeline.scoringScript = { custom: boolean } -->
+        <input type="checkbox" class="toggle" v-model="(problem as any).pipeline.scoringScript.custom" />
       </label>
-      <div v-if="(problem as any).pipeline.scoringScrip?.custom" class="grid md:grid-cols-2 gap-3 mt-2">
+      <div v-if="(problem as any).pipeline.scoringScript?.custom" class="grid md:grid-cols-2 gap-3 mt-2">
         <div class="form-control">
           <label class="label"><span class="label-text">Upload score.py</span></label>
           <input type="file" accept=".py" class="file-input file-input-bordered" @change="(e:any) => problem.assets!.scorePy = e.target.files?.[0] || null" />

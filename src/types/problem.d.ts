@@ -113,7 +113,7 @@ type AcceptedFormat = "code" | "zip";
 type ExecutionMode = "general" | "functionOnly" | "interactive";
 type ArtifactCollection = "compiledBinary" | "zip";
 
-interface ProblemStaticAnalys {
+interface ProblemStaticAnalysis {
   custom: boolean;
   libraryRestrictions?: {
     enabled: boolean;
@@ -121,7 +121,7 @@ interface ProblemStaticAnalys {
     blacklist: string[];
   };
 
-  networkAccessRestrictio?: {
+  networkAccessRestriction?: {
     enabled: boolean;
     firewallExtranet?: {
       enabled: boolean;
@@ -142,7 +142,7 @@ interface ProblemConfigExtra {
   testMode: boolean;
   aiVTuber: boolean;
   acceptedFormat: AcceptedFormat;
-  staticAnalys: ProblemStaticAnalys;
+  staticAnalysis: ProblemStaticAnalysis;
   artifactCollection: ArtifactCollection[];
 }
 

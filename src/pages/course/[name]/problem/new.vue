@@ -42,10 +42,10 @@ const newProblem = ref<ProblemForm>({
     testMode: false,
     aiVTuber: false,
     acceptedFormat: "code",
-    staticAnalys: {
+    staticAnalysis: {
       custom: false,
       libraryRestrictions: { enabled: false, whitelist: [], blacklist: [] },
-      networkAccessRestrictio: {
+      networkAccessRestriction: {
         enabled: false,
         firewallExtranet: { enabled: false, whitelist: [], blacklist: [] },
         connectWithLocal: { enabled: false, whitelist: [], blacklist: [], localServiceZip: null },
@@ -60,7 +60,7 @@ const newProblem = ref<ProblemForm>({
     customChecker: false,
     teacherFirst: false,
     // optional scoring flag structure
-    scoringScrip: { custom: false } as any,
+    scoringScript: { custom: false } as any,
   },
   assets: {
     checkerPy: null,

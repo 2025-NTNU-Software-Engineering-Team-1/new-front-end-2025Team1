@@ -9,7 +9,7 @@ const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
 const libraryOptions = ref<string[]>([]);
 onMounted(async () => {
   try {
-    const { librarySymbols } = await api.Problem.getStaticAnalysisOptions();
+    const { librarySymbols } = await api.Problem.getstaticAnalysisOptions();
     libraryOptions.value = librarySymbols || [];
   } catch {
     libraryOptions.value = [];
@@ -23,10 +23,10 @@ function ensureConfig() {
       testMode: false,
       aiVTuber: false,
       acceptedFormat: "code",
-      staticAnalys: {
+      staticAnalysis: {
         custom: false,
         libraryRestrictions: { enabled: false, whitelist: [], blacklist: [] },
-        networkAccessRestrictio: {
+        networkAccessRestriction: {
           enabled: false,
           firewallExtranet: { enabled: false, whitelist: [], blacklist: [] },
           connectWithLocal: { enabled: false, whitelist: [], blacklist: [], localServiceZip: null },
@@ -123,17 +123,17 @@ function toggleArray(arr: string[], value: string) {
     <div class="form-control col-span-1 md:col-span-2">
       <label class="label cursor-pointer justify-start gap-x-4">
         <span class="label-text">Static analysis - Custom</span>
-        <input type="checkbox" class="toggle" v-model="problem.config!.staticAnalys.custom" />
+        <input type="checkbox" class="toggle" v-model="problem.config!.staticAnalysis.custom" />
       </label>
 
-      <div v-if="problem.config!.staticAnalys.custom" class="mt-3 grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div v-if="problem.config!.staticAnalysis.custom" class="mt-3 grid grid-cols-1 lg:grid-cols-2 gap-4">
         <!-- Library restrictions -->
         <div class="rounded-box bg-base-200 p-3">
           <label class="label cursor-pointer justify-start gap-x-4">
             <span class="label-text">Library restrictions</span>
-            <input type="checkbox" class="toggle" v-model="problem.config!.staticAnalys.libraryRestrictions!.enabled" />
+            <input type="checkbox" class="toggle" v-model="problem.config!.staticAnalysis.libraryRestrictions!.enabled" />
           </label>
-          <div v-if="problem.config!.staticAnalys.libraryRestrictions!.enabled" class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+          <div v-if="problem.config!.staticAnalysis.libraryRestrictions!.enabled" class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
             <div>
               <div class="label-text mb-1">Whitelist</div>
               <div class="flex flex-wrap gap-2">
@@ -141,8 +141,8 @@ function toggleArray(arr: string[], value: string) {
                   v-for="sym in libraryOptions"
                   :key="`w-${sym}`"
                   class="btn btn-xs"
-                  :class="problem.config!.staticAnalys.libraryRestrictions!.whitelist.includes(sym) && 'btn-accent'"
-                  @click="toggleArray(problem.config!.staticAnalys.libraryRestrictions!.whitelist, sym)"
+                  :class="problem.config!.staticAnalysis.libraryRestrictions!.whitelist.includes(sym) && 'btn-accent'"
+                  @click="toggleArray(problem.config!.staticAnalysis.libraryRestrictions!.whitelist, sym)"
                 >{{ sym }}</button>
               </div>
             </div>
@@ -153,8 +153,8 @@ function toggleArray(arr: string[], value: string) {
                   v-for="sym in libraryOptions"
                   :key="`b-${sym}`"
                   class="btn btn-xs"
-                  :class="problem.config!.staticAnalys.libraryRestrictions!.blacklist.includes(sym) && 'btn-error text-base-100'"
-                  @click="toggleArray(problem.config!.staticAnalys.libraryRestrictions!.blacklist, sym)"
+                  :class="problem.config!.staticAnalysis.libraryRestrictions!.blacklist.includes(sym) && 'btn-error text-base-100'"
+                  @click="toggleArray(problem.config!.staticAnalysis.libraryRestrictions!.blacklist, sym)"
                 >{{ sym }}</button>
               </div>
             </div>
@@ -165,31 +165,31 @@ function toggleArray(arr: string[], value: string) {
         <div class="rounded-box bg-base-200 p-3">
           <label class="label cursor-pointer justify-start gap-x-4">
             <span class="label-text">Network access restriction</span>
-            <input type="checkbox" class="toggle" v-model="problem.config!.staticAnalys.networkAccessRestrictio!.enabled" />
+            <input type="checkbox" class="toggle" v-model="problem.config!.staticAnalysis.networkAccessRestriction!.enabled" />
           </label>
 
-          <div v-if="problem.config!.staticAnalys.networkAccessRestrictio!.enabled" class="mt-2 grid grid-cols-1 gap-3">
+          <div v-if="problem.config!.staticAnalysis.networkAccessRestriction!.enabled" class="mt-2 grid grid-cols-1 gap-3">
             <div class="rounded bg-base-300 p-3">
               <label class="label cursor-pointer justify-start gap-x-4">
                 <span class="label-text">Firewall extranet</span>
-                <input type="checkbox" class="toggle" v-model="problem.config!.staticAnalys.networkAccessRestrictio!.firewallExtranet!.enabled" />
+                <input type="checkbox" class="toggle" v-model="problem.config!.staticAnalysis.networkAccessRestriction!.firewallExtranet!.enabled" />
               </label>
-              <div v-if="problem.config!.staticAnalys.networkAccessRestrictio!.firewallExtranet!.enabled" class="grid md:grid-cols-2 gap-3 mt-2">
-                <MultiStringInput v-model="problem.config!.staticAnalys.networkAccessRestrictio!.firewallExtranet!.whitelist" placeholder="Add whitelist host/IP" />
-                <MultiStringInput v-model="problem.config!.staticAnalys.networkAccessRestrictio!.firewallExtranet!.blacklist" placeholder="Add blacklist host/IP" />
+              <div v-if="problem.config!.staticAnalysis.networkAccessRestriction!.firewallExtranet!.enabled" class="grid md:grid-cols-2 gap-3 mt-2">
+                <MultiStringInput v-model="problem.config!.staticAnalysis.networkAccessRestriction!.firewallExtranet!.whitelist" placeholder="Add whitelist host/IP" />
+                <MultiStringInput v-model="problem.config!.staticAnalysis.networkAccessRestriction!.firewallExtranet!.blacklist" placeholder="Add blacklist host/IP" />
               </div>
             </div>
 
             <div class="rounded bg-base-300 p-3">
               <label class="label cursor-pointer justify-start gap-x-4">
                 <span class="label-text">Connect with local</span>
-                <input type="checkbox" class="toggle" v-model="problem.config!.staticAnalys.networkAccessRestrictio!.connectWithLocal!.enabled" />
+                <input type="checkbox" class="toggle" v-model="problem.config!.staticAnalysis.networkAccessRestriction!.connectWithLocal!.enabled" />
               </label>
-              <div v-if="problem.config!.staticAnalys.networkAccessRestrictio!.connectWithLocal!.enabled" class="grid md:grid-cols-2 gap-3 mt-2">
-                <MultiStringInput v-model="problem.config!.staticAnalys.networkAccessRestrictio!.connectWithLocal!.whitelist" placeholder="Add whitelist host/IP" />
-                <MultiStringInput v-model="problem.config!.staticAnalys.networkAccessRestrictio!.connectWithLocal!.blacklist" placeholder="Add blacklist host/IP" />
+              <div v-if="problem.config!.staticAnalysis.networkAccessRestriction!.connectWithLocal!.enabled" class="grid md:grid-cols-2 gap-3 mt-2">
+                <MultiStringInput v-model="problem.config!.staticAnalysis.networkAccessRestriction!.connectWithLocal!.whitelist" placeholder="Add whitelist host/IP" />
+                <MultiStringInput v-model="problem.config!.staticAnalysis.networkAccessRestriction!.connectWithLocal!.blacklist" placeholder="Add blacklist host/IP" />
               </div>
-              <div v-if="problem.config!.staticAnalys.networkAccessRestrictio!.connectWithLocal!.enabled" class="form-control mt-2">
+              <div v-if="problem.config!.staticAnalysis.networkAccessRestriction!.connectWithLocal!.enabled" class="form-control mt-2">
                 <label class="label"><span class="label-text">Upload local_service.zip</span></label>
                 <input type="file" accept=".zip" class="file-input file-input-bordered" @change="(e:any) => problem.assets!.localServiceZip = e.target.files?.[0] || null" />
               </div>

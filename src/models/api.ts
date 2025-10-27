@@ -94,11 +94,23 @@ const Problem = {
 const Submission = {
   create: (body: { problemId: number; languageType: number }) =>
     fetcher.post<{ submissionId: string }>("/submission", body),
+
   modify: (id: string, body: FormData) =>
     fetcher.put(`/submission/${id}`, body, {
       headers: { "Content-Type": "multipart/form-data" },
     }),
+
   rejudge: (id: string) => fetcher.get(`/submission/${id}/rejudge`),
+
+  // 產物下載 URL（compiledBinary 或 zip；zip 可帶 taskIndex）
+  getArtifactUrl: (id: string, kind: "compiledBinary" | "zip", taskIndex?: number) => {
+    const base = (fetcher.defaults.baseURL || "").toString().replace(/\/$/, "");
+    const path =
+      taskIndex != null
+        ? `/submission/${id}/artifact/${kind}/${taskIndex}`
+        : `/submission/${id}/artifact/${kind}`;
+    return `${base}${path}`;
+  },
 };
 
 const Copycat = {

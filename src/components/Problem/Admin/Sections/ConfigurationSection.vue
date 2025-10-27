@@ -9,7 +9,7 @@ const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
 const libraryOptions = ref<string[]>([]);
 onMounted(async () => {
   try {
-    const { librarySymbols } = await api.Problem.getstaticAnalysisOptions();
+    const { librarySymbols } = await api.Problem.getStaticAnalysisOptions();
     libraryOptions.value = librarySymbols || [];
   } catch {
     libraryOptions.value = [];

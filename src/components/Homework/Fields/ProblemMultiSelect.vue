@@ -36,7 +36,7 @@ defineEmits<{
             :value="Number(value)"
             as="template"
           >
-            <li :class="[active && 'bg-base-300', 'cursor-default relative select-none py-2 pl-10 pr-4']">
+            <li :class="[active && 'bg-base-300', 'relative cursor-default select-none py-2 pl-10 pr-4']">
               <span :class="[selected ? 'font-medium' : 'font-normal', 'block truncate']">
                 {{ text }}
               </span>

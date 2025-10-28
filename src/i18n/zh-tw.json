@@ -184,34 +184,6 @@
       "unknown-error-occurred": "發生未知錯誤 :("
     }
   },
-  "profile": {
-    "title": "個人資料",
-    "rules": {
-      "confirmPassword": {
-        "sameAsRef": "密碼不符合。"
-      }
-    },
-    "username": "帳號",
-    "dispname": "顯示名稱",
-    "email": "電子郵件",
-    "role": "角色",
-    "signOut": "登出",
-    "pw": {
-      "change": "變更密碼",
-      "success": "密碼已成功變更",
-      "new": "新密碼",
-      "confirm": "確認新密碼",
-      "current": "舊密碼",
-      "placeholder": {
-        "new": "新密碼",
-        "again": "再輸入一次新密碼",
-        "current": "舊密碼"
-      },
-      "submit": "送出"
-    },
-    "wrongPassword": "密碼錯誤",
-    "operationFailed": "操作失敗，請稍後再重試"
-  },
   "ann": {
     "id": {
       "back": "返回"
@@ -438,5 +410,96 @@
       "success": "發送成功，請檢查你的電子信箱。"
     },
     "return-home": "回到首頁"
+  },
+  "profile": {
+    "title": "個人資料",
+    "rules": {
+      "confirmPassword": {
+        "sameAsRef": "密碼不符合。"
+      }
+    },
+    "username": "帳號",
+    "dispname": "顯示名稱",
+    "email": "電子郵件",
+    "role": "角色",
+    "signOut": "登出",
+    "pw": {
+      "change": "變更密碼",
+      "success": "密碼已成功變更",
+      "new": "新密碼",
+      "confirm": "確認新密碼",
+      "current": "舊密碼",
+      "placeholder": {
+        "new": "新密碼",
+        "again": "再輸入一次新密碼",
+        "current": "舊密碼"
+      },
+      "submit": "送出"
+    },
+    "wrongPassword": "密碼錯誤",
+    "operationFailed": "操作失敗，請稍後再重試",
+    "menu": {
+      "accountInfo": "帳號資訊",
+      "user_information": "使用者資訊",
+      "api_token": "API 金鑰"
+    },
+    "breadcrumb": {
+      "profile": "個人資料"
+    },
+    "apiToken": {
+      "title": "API 金鑰",
+      "create_new_key": "建立新的金鑰",
+      "description": "請在新增後立即複製並儲存您的金鑰，並確保不要與任何人分享或在任何公開的網域上洩露。",
+      "search_placeholder": "搜尋…",
+      "table": {
+        "name": "名稱",
+        "status": "狀態",
+        "created": "建立時間",
+        "last_used": "上次使用",
+        "due_time": "到期時間",
+        "scope": "權限範圍",
+        "owner": "擁有者"
+      },
+      "view_scopes": "查看",
+      "status_active": "啟用中",
+      "status_deactivated": "已停用",
+      "scopes": {
+        "read_only": "唯讀",
+        "read_write": "讀寫",
+        "admin": "管理員",
+        "none": "無"
+      },
+      "create_modal": {
+        "title": "建立新的金鑰",
+        "name_label": "名稱",
+        "name_placeholder": "我的新金鑰",
+        "name_required_alert": "請輸入 Token 名稱",
+        "scope_label": "權限範圍",
+        "date_label": "日期",
+        "cancel": "取消",
+        "create": "建立"
+      },
+      "success_modal": {
+        "warning": "警告",
+        "message": "請妥善保存此金鑰，否則將無法再次查看。",
+        "copied": "已複製！",
+        "copy": "複製",
+        "ok": "確認"
+      },
+      "edit_modal": {
+        "title": "編輯 API 金鑰",
+        "original_info": "原始資訊",
+        "new_name_label": "新名稱",
+        "update": "更新"
+      },
+      "view_scope_modal": {
+        "title": "權限列表"
+      },
+      "deactivate_modal": {
+        "title": "停用 API 金鑰",
+        "token_info": "金鑰資訊",
+        "deactivate": "停用"
+      }
+    }
   }
 }

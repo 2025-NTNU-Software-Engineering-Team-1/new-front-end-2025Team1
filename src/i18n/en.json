@@ -184,34 +184,6 @@
       "unknown-error-occurred": "Unknown error occurred :("
     }
   },
-  "profile": {
-    "title": "Profile",
-    "rules": {
-      "confirmPassword": {
-        "sameAsRef": "Password does not match."
-      }
-    },
-    "username": "Username",
-    "dispname": "Display Name",
-    "email": "Email",
-    "role": "Role",
-    "signOut": "Sign out",
-    "pw": {
-      "change": "Change Password",
-      "success": "Password has been successfully changed",
-      "new": "New Password",
-      "confirm": "Confirm New Password",
-      "current": "Current Password",
-      "placeholder": {
-        "new": "new password",
-        "again": "new password again",
-        "current": "current password"
-      },
-      "submit": "Submit"
-    },
-    "wrongPassword": "Wrong Password",
-    "operationFailed": "Operation failed, please try again later"
-  },
   "ann": {
     "id": {
       "back": "Back"
@@ -439,5 +411,96 @@
       "success": "Email sent, please check your inbox."
     },
     "return-home": "Return Home"
+  },
+  "profile": {
+    "title": "Profile",
+    "rules": {
+      "confirmPassword": {
+        "sameAsRef": "Password does not match."
+      }
+    },
+    "username": "Username",
+    "dispname": "Display Name",
+    "email": "Email",
+    "role": "Role",
+    "signOut": "Sign out",
+    "pw": {
+      "change": "Change Password",
+      "success": "Password has been successfully changed",
+      "new": "New Password",
+      "confirm": "Confirm New Password",
+      "current": "Current Password",
+      "placeholder": {
+        "new": "new password",
+        "again": "new password again",
+        "current": "current password"
+      },
+      "submit": "Submit"
+    },
+    "wrongPassword": "Wrong Password",
+    "operationFailed": "Operation failed, please try again later",
+    "menu": {
+      "accountInfo": "Account Information",
+      "user_information": "User Information",
+      "api_token": "API Token"
+    },
+    "breadcrumb": {
+      "profile": "Profile"
+    },
+    "apiToken": {
+      "title": "API Token",
+      "create_new_key": "Create new secret key",
+      "description": "Please copy and save it immediately after adding it, and make sure not to share it with anyone or make it public on any domain.",
+      "search_placeholder": "Search…",
+      "table": {
+        "name": "NAME",
+        "status": "STATUS",
+        "created": "CREATED",
+        "last_used": "LAST USED",
+        "due_time": "DUE TIME",
+        "scope": "SCOPE",
+        "owner": "OWNER"
+      },
+      "view_scopes": "View",
+      "status_active": "active",
+      "status_deactivated": "deactivated",
+      "scopes": {
+        "read_only": "Read-only",
+        "read_write": "Read/Write",
+        "admin": "Admin",
+        "none": "None"
+      },
+      "create_modal": {
+        "title": "Create new secret key",
+        "name_label": "Name",
+        "name_placeholder": "My new key",
+        "name_required_alert": "Please remember to name your token",
+        "scope_label": "Scope",
+        "date_label": "Date",
+        "cancel": "Cancel",
+        "create": "Create"
+      },
+      "success_modal": {
+        "warning": "Warning",
+        "message": "Please save this key properly, otherwise you will not be able to see it again.",
+        "copied": "Copied!",
+        "copy": "Copy",
+        "ok": "OK"
+      },
+      "edit_modal": {
+        "title": "Edit API Token",
+        "original_info": "Original information",
+        "new_name_label": "New Name",
+        "update": "Update"
+      },
+      "view_scope_modal": {
+        "title": "Scope List"
+      },
+      "deactivate_modal": {
+        "title": "Deactivate API Token",
+        "token_info": "Token information",
+        "deactivate": "Deactivate"
+      }
+    }
   }
 }

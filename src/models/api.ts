@@ -72,6 +72,8 @@ const Submission = {
   rejudge: (id: string) => fetcher.get(`/submission/${id}/rejudge`),
 };
 
+//test api
+
 const Copycat = {
   detect: (body: { course: string; problemId: number; studentNicknames: { [k: string]: string } }) =>
     fetcher.post("/copycat", body),

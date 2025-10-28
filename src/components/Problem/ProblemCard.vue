@@ -64,6 +64,12 @@ function downloadTestCase(problemId: number) {
             </router-link>
             <router-link
               class="btn md:btn-md lg:btn-lg"
+              :to="`/course/${$route.params.name}/problem/${$route.params.id}/test`"
+            >
+              <i-uil-test-tube class="lg:h-5 lg:w-5" /> {{ $t("components.problem.card.test") }}
+            </router-link>
+            <router-link
+              class="btn md:btn-md lg:btn-lg"
               :to="`/course/${$route.params.name}/problem/${$route.params.id}/stats`"
             >
               <i-uil-chart-line class="lg:h-5 lg:w-5" /> {{ $t("components.problem.card.stats") }}

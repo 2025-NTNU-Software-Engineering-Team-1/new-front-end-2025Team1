@@ -37,7 +37,7 @@ const {
   error: problemError,
   isLoading: isProblemLoading,
   execute: fetchProblem,
-} = useAxios<Problem>(fetcher, { immediate: false });
+} = useAxios<Problem>("", fetcher, { immediate: false });
 
 watchEffect(() => {
   if (submission.value && !problem.value) {

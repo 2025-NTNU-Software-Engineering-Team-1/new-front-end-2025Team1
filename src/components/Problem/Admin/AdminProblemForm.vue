@@ -101,7 +101,7 @@ const rules = {
   },
 };
 
-const v$ = useVuelidate(rules, problem.value);
+const v$ = useVuelidate(rules, problem);
 
 function update<K extends keyof ProblemForm>(key: K, value: ProblemForm[K]) {
   emits("update", key, value);

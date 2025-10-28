@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, ref, Ref } from "vue";
+import { inject, ref, Ref, toRefs } from "vue";
 import useVuelidate from "@vuelidate/core";
 import { required, maxLength, minValue, between, helpers } from "@vuelidate/validators";
 import DescriptionSection from "./Sections/DescriptionSection.vue";
@@ -101,7 +101,7 @@ const rules = {
   },
 };
 
-const v$ = useVuelidate(rules, problem);
+const v$ = useVuelidate(rules, toRefs(problem.value));
 
 function update<K extends keyof ProblemForm>(key: K, value: ProblemForm[K]) {
   emits("update", key, value);

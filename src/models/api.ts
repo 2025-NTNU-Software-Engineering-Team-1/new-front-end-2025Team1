@@ -36,6 +36,7 @@ const Auth = {
 };
 
 const Problem = {
+  // existing
   create: (body: ProblemForm) => fetcher.post("/problem/manage", body),
   getTestCaseUrl: (problemId: number) => `${fetcher.defaults.baseURL}/problem/${problemId}/testcase`,
   modify: (id: string | number, body: ProblemForm) => fetcher.put(`/problem/manage/${id}`, body),
@@ -60,16 +61,53 @@ const Problem = {
     uploadId: string,
     parts: { ETag: string; PartNumber: number }[],
   ) => fetcher.post(`/problem/${problemId}/complete-test-case-upload`, { uploadId, parts }),
+
+  // NEW: Save meta only (Set Configuration + Set Pipeline) without files
+  // Body example: { config: ProblemConfigExtra | undefined, pipeline: ProblemPipeline | undefined }
+  saveMeta: (problemId: number, body: { config?: ProblemConfigExtra; pipeline?: ProblemPipeline }) =>
+    fetcher.put(`/problem/${problemId}/meta`, body),
+
+  // NEW: Upload all assets (V2) with a single multipart request
+  // FormData fields (append if present):
+  // - "meta": JSON.stringify({ config, pipeline })
+  // - "case": File (testdata zip)
+  // - "checker.py": File
+  // - "makefile.zip": File
+  // - "Teacher_file": File
+  // - "score.py": File
+  // - "score.json": File
+  // - "local_service.zip": File
+  uploadAssetsV2: (problemId: number, formData: FormData) =>
+    fetcher.put(`/problem/${problemId}/assets`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }),
+
+  // NEW: Fetch available symbols for static analysis white/black lists
+  // Return: { librarySymbols: string[] }
+  getStaticAnalysisOptions: () =>
+    fetcher.get<{ librarySymbols: string[] }>(`/problem/static-analysis/options`),
 };
 
 const Submission = {
   create: (body: { problemId: number; languageType: number }) =>
     fetcher.post<{ submissionId: string }>("/submission", body),
+
   modify: (id: string, body: FormData) =>
     fetcher.put(`/submission/${id}`, body, {
       headers: { "Content-Type": "multipart/form-data" },
     }),
+
   rejudge: (id: string) => fetcher.get(`/submission/${id}/rejudge`),
+
+  // 產物下載 URL（compiledBinary 或 zip；zip 可帶 taskIndex）
+  getArtifactUrl: (id: string, kind: "compiledBinary" | "zip", taskIndex?: number) => {
+    const base = (fetcher.defaults.baseURL || "").toString().replace(/\/$/, "");
+    const path =
+      taskIndex != null
+        ? `/submission/${id}/artifact/${kind}/${taskIndex}`
+        : `/submission/${id}/artifact/${kind}`;
+    return `${base}${path}`;
+  },
 };
 
 const Copycat = {

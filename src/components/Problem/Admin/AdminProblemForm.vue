@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, ref, Ref, toRefs } from "vue";
+import { inject, ref, Ref, computed } from "vue";
 import useVuelidate from "@vuelidate/core";
 import { required, maxLength, minValue, between, helpers } from "@vuelidate/validators";
 import DescriptionSection from "./Sections/DescriptionSection.vue";
@@ -12,6 +12,19 @@ const emits = defineEmits<{
   (e: "update", key: keyof ProblemForm, value: ProblemForm[typeof key]): void;
   (e: "submit"): void;
 }>();
+
+const modelForVuelidate = computed(() => ({
+  problemName: problem.value.problemName,
+  description: problem.value.description,
+  tags: problem.value.tags,
+  allowedLanguage: problem.value.allowedLanguage,
+  quota: problem.value.quota,
+  testCaseInfo: problem.value.testCaseInfo,
+  // 讓 key 一定存在
+  config: problem.value.config,
+  pipeline: problem.value.pipeline,
+  assets: problem.value.assets,
+}));
 
 const isLoading = ref(false);
 const errorMsg = ref("");
@@ -101,7 +114,7 @@ const rules = {
   },
 };
 
-const v$ = useVuelidate(rules, toRefs(problem.value));
+const v$ = useVuelidate(rules, modelForVuelidate);
 
 function update<K extends keyof ProblemForm>(key: K, value: ProblemForm[K]) {
   emits("update", key, value);

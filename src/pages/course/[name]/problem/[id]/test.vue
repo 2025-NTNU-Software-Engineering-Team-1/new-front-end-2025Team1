@@ -1,7 +1,7 @@
-<![CDATA[<script setup lang="ts">
+<script setup lang="ts">
 import { reactive, watchEffect, computed, ref } from "vue";
 import hljs from "highlight.js";
-import { BlobWriter, ZipWriter, TextReader } from "@zip.js/zip.js";
+import { BlobWriter, ZipWriter, TextReader, ZipReader, BlobReader, TextWriter } from "@zip.js/zip.js";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import { useRoute, useRouter } from "vue-router";
 import useVuelidate from "@vuelidate/core";
@@ -9,7 +9,7 @@ import { required, between, helpers } from "@vuelidate/validators";
 import api, { fetcher } from "@/models/api";
 import { useTitle, useStorage } from "@vueuse/core";
 import { LANGUAGE_OPTIONS, LOCAL_STORAGE_KEY } from "@/constants";
-import { useI18n } from "vue-i18n";]]>
+import { useI18n } from "vue-i18n";
 
 const route = useRoute();
 const { t } = useI18n();
@@ -20,6 +20,9 @@ const { data: problem, error, isLoading } = useAxios<Problem>(`/problem/view/${r
 
 const lang = useStorage(LOCAL_STORAGE_KEY.LAST_USED_LANG, -1);
 const showSubmitModal = ref(false);
+const showTestcaseModal = ref(false);
+const testcaseFiles = ref<Array<{name: string, content: string}>>([]);
+const selectedTestcases = ref<string[]>([]);
 
 const form = reactive({
   code: "",
@@ -78,15 +81,17 @@ async function test() {
     formData.append("code", blob);
     formData.append("test_input", form.testInput);
 
-    const { testSubmissionId } = (
+    //const { testSubmissionId } = (
+    const { submissionId } = (
       await api.Submission.create({
         problemId: Number(route.params.id),
-        languageType: Number(form.lang),
-        isTest: true,
+        //isTest: true,
+        languageType: Number(form.lang)
       })
     ).data;
 
-    await api.Submission.modify(testSubmissionId, formData);
+    //await api.Submission.modify(testSubmissionId, formData);
+    await api.Submission.modify(submissionId, formData);
     router.push(`/course/${route.params.name}/problem/${route.params.id}/test-history`);
   } catch (error) {
     form.isSubmitError = true;
@@ -134,7 +139,8 @@ async function handleTestcaseUpload(event: Event) {
   
   testcaseFiles.value = [];
   for (const entry of entries) {
-    if (!entry.directory) {
+    if (!entry.directory && entry.getData) {
+    //if (!entry.directory) {
       const textWriter = new TextWriter();
       const content = await entry.getData(textWriter);
       testcaseFiles.value.push({

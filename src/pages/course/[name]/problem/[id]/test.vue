@@ -182,31 +182,32 @@ function saveTestcaseSettings() {
         <div class="card min-w-full">
           <div class="card-body">
             <div class="flex justify-between items-center">
-              <div class="card-title">{{ t("course.problem.test.card.title") }}{{ route.params.id }}</div>
-              <button class="btn btn-primary" @click="showSubmitModal = true">
-                <i-uil-file-upload-alt class="mr-1 h-5 w-5" />
-                {{ t("course.problem.test.submit") }}
-              </button>
+              <div class="card-title md:text-2xl lg:text-3xl">{{ t("course.problem.test.card.title") }}{{ route.params.id }}</div>
             </div>
 
             <div class="divider" />
 
             <div class="flex justify-between items-center gap-4">
               <div class="form-control flex-1">
-                <select
-                  class="select select-bordered w-full"
-                  :class="[v$.lang.$error && 'select-error']"
-                  v-model="form.lang"
-                >
-                  <option :value="-1">{{ t("course.problem.test.lang.select") }}</option>
-                  <option v-for="lang in langOptions" :key="lang.value" :value="lang.value">
-                    {{ lang.text }}
-                  </option>
-                </select>
+                <label class="form-control w-60">
+                  <div class="label">
+                    <span class="label-text text-sm text-gray-500">{{ t("course.problem.test.lang.text") }}</span>
+                  </div>
+                  <select
+                    v-model="v$.lang.$model"
+                    :class="['select select-bordered w-60', v$.lang.$error && 'input-error']"
+                  >
+                    <option :value="-1">{{ t("course.problem.test.lang.select") }}</option>
+                    <option v-for="lang in langOptions" :key="lang.value" :value="lang.value">
+                      {{ lang.text }}
+                    </option>
+                  </select>
+                </label>
+                  
                 <label class="label" v-show="v$.lang.$error">
                   <span class="label-text-alt text-error">{{ v$.lang.$errors[0]?.$message }}</span>
                 </label>
-              </div>
+            </div>
 
               <div class="flex gap-2">
                 <router-link
@@ -244,15 +245,13 @@ function saveTestcaseSettings() {
               </label>
             </div>
 
-            <div class="form-control">
-              <label class="label">
-                <span class="label-text">{{ t("course.problem.test.card.testInput") }}</span>
-              </label>
-              <textarea
-                v-model="form.testInput"
-                class="textarea textarea-bordered h-32"
-                :placeholder="t('course.problem.test.card.testInputPlaceholder')"
-              />
+            <div class=" submit submit-place">
+              <div class="flex justify-end">
+                <button class="btn btn-primary" @click="showSubmitModal = true">
+                  <i-uil-file-upload-alt class="mr-1 h-5 w-5" />
+                  {{ t("course.problem.test.submit") }}
+                </button>
+              </div>
             </div>
 
             <div class="alert alert-error" v-if="form.isSubmitError">
@@ -262,8 +261,10 @@ function saveTestcaseSettings() {
           </div>
 
           <!-- Submit Confirmation Modal -->
-          <dialog class="modal" :class="{ 'modal-open': showSubmitModal }">
-            <div class="modal-box">
+          <dialog 
+            class="modal backdrop:bg-black/20 backdrop:backdrop-blur-[1px] bg-transparent border-0 p-0" 
+            :class="{ 'modal-open': showSubmitModal }">
+            <div class="modal-box rounded-3xl shadow-[0_4px_15px_rgba(0,0,0,0.2)]">
               <h3 class="font-bold text-lg">{{ t("course.problem.test.submitModal.title") }}</h3>
               <p class="py-4">{{ t("course.problem.test.submitModal.message") }}</p>
               <div class="modal-action">
@@ -275,9 +276,6 @@ function saveTestcaseSettings() {
                 </button>
               </div>
             </div>
-            <form method="dialog" class="modal-backdrop">
-              <button @click="showSubmitModal = false">close</button>
-            </form>
           </dialog>
 
 
@@ -285,4 +283,14 @@ function saveTestcaseSettings() {
       </template>
     </data-status-wrapper>
   </div>
+
+  <!--改動介面-->
+  <!--card title 的class更改: 沿用舊noj-->
+  <!--解決submit按鈕彈跳視窗背景陰影問題-->
+  <!--取消test input textarea-->
+  <!--submit按鈕移動到右下-->
+  <!--語言框調短-->
 </template>
+
+
+

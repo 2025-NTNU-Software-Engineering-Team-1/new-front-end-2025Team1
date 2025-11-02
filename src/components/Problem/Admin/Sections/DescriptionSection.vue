@@ -71,44 +71,48 @@ const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
   </div>
 
   <template v-for="(no, i) in problem.description.sampleInput.length" :key="i">
-    <div class="form-control mt-2 w-full">
-      <label class="label"
-        ><span class="label-text">Examples - Input {{ no }}</span></label
-      >
-      <textarea
-        class="textarea textarea-bordered h-24"
-        :value="problem.description.sampleInput[i]"
-        @input="
-          $emit('update', 'description', {
-            ...problem.description,
-            sampleInput: [
-              ...problem.description.sampleInput.slice(0, i),
-              ($event.target as HTMLInputElement).value,
-              ...problem.description.sampleInput.slice(i + 1),
-            ],
-          })
-        "
-      />
-    </div>
+    <div class="mt-2 grid w-full grid-cols-1 gap-3 md:grid-cols-2">
+      <!-- Input -->
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text">Examples - Input {{ no }}</span>
+        </label>
+        <textarea
+          class="textarea textarea-bordered h-24"
+          :value="problem.description.sampleInput[i]"
+          @input="
+            $emit('update', 'description', {
+              ...problem.description,
+              sampleInput: [
+                ...problem.description.sampleInput.slice(0, i),
+                ($event.target as HTMLInputElement).value,
+                ...problem.description.sampleInput.slice(i + 1),
+              ],
+            })
+          "
+        />
+      </div>
 
-    <div class="form-control w-full">
-      <label class="label"
-        ><span class="label-text">Examples - Output {{ no }}</span></label
-      >
-      <textarea
-        class="textarea textarea-bordered h-24"
-        :value="problem.description.sampleOutput[i]"
-        @input="
-          $emit('update', 'description', {
-            ...problem.description,
-            sampleOutput: [
-              ...problem.description.sampleOutput.slice(0, i),
-              ($event.target as HTMLInputElement).value,
-              ...problem.description.sampleOutput.slice(i + 1),
-            ],
-          })
-        "
-      />
+      <!-- Output -->
+      <div class="form-control">
+        <label class="label">
+          <span class="label-text">Examples - Output {{ no }}</span>
+        </label>
+        <textarea
+          class="textarea textarea-bordered h-24"
+          :value="problem.description.sampleOutput[i]"
+          @input="
+            $emit('update', 'description', {
+              ...problem.description,
+              sampleOutput: [
+                ...problem.description.sampleOutput.slice(0, i),
+                ($event.target as HTMLInputElement).value,
+                ...problem.description.sampleOutput.slice(i + 1),
+              ],
+            })
+          "
+        />
+      </div>
     </div>
   </template>
 

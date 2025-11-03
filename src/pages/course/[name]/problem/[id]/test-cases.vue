@@ -23,6 +23,10 @@ const saveError = ref(false);
 async function handleTestcaseUpload(event: Event) {
   const file = (event.target as HTMLInputElement).files?.[0];
   if (!file || !file.name.endsWith('.zip')) return;
+  if (testcaseFiles.value.length > 0) {
+  const confirmReplace = confirm(t("course.problem.test.testcaseModal.confirm"));
+  if (!confirmReplace) return;
+  }
 
   const zipReader = new ZipReader(new BlobReader(file));
   const entries = await zipReader.getEntries();
@@ -30,14 +34,37 @@ async function handleTestcaseUpload(event: Event) {
   testcaseFiles.value = [];
   for (const entry of entries) {
     if (!entry.directory && entry.getData) {
-      const textWriter = new TextWriter();
-      const content = await entry.getData(textWriter);
-      testcaseFiles.value.push({
-        name: entry.filename,
-        content,
-      });
+      const ext=entry.filename.split(".").pop()?.toLowerCase();
+      try{
+        if (["pdf"].includes(ext || "")) {
+          const blobWriter = new BlobWriter("application/pdf");
+          const blob = await entry.getData(blobWriter);
+          const url = URL.createObjectURL(blob);
+          
+          testcaseFiles.value.push({
+            name: entry.filename,
+             content: `${t("course.problem.test.testcaseModal.pdfNotice")}\n${url}`,
+          });
+        }else if(["txt", "md", "in", "out", "json", "csv", "xml"].includes(ext || "")){
+          const textWriter = new TextWriter();
+          const content = await entry.getData(textWriter);
+          testcaseFiles.value.push({name: entry.filename,content});
+        }
+        else{
+          const blobWriter = new BlobWriter();
+          const blob = await entry.getData(blobWriter);
+          const url = URL.createObjectURL(blob);
+          testcaseFiles.value.push({
+            name: entry.filename,
+            content: `[${t("course.problem.test.testcaseModal.unsupported", { ext })}]\n${url}`,
+            });
+        }
+      }catch(err){
+        console.error(`Error reading ${entry.filename}:`, err);
+      }
     }
   }
+  await zipReader.close();
 }
 
 function previewTestcase(file: {name: string, content: string}) {
@@ -56,6 +83,10 @@ function deleteTestcase(file: {name: string, content: string}) {
 }
 
 async function saveTestcaseSettings() {
+  if (!useDefaultTestcases.value && selectedTestcases.value.length === 0) {
+  alert(t("course.problem.test.testcaseModal.alert"));
+  return;
+  }
   isLoading.value = true;
   saveSuccess.value = false;
   saveError.value = false;
@@ -144,7 +175,27 @@ async function saveTestcaseSettings() {
 
             <div class="border rounded p-4">
               <h4 class="font-semibold mb-2">{{ t("course.problem.test.testcaseModal.preview") }}</h4>
-              <pre class="whitespace-pre-wrap"><code>{{ selectedTestcaseContent }}</code></pre>
+              <div class="whitespace-pre-wrap h-64 overflow-auto border rounded bg-base-200 p-2 max-w-full">
+                <template v-if="selectedTestcaseContent.includes('blob:')">
+                  <div v-for="(line, idx) in selectedTestcaseContent.split('\n')" :key="idx">
+                    <template v-if="line.startsWith('blob:')">
+                      <a
+                        :href="line"
+                        target="_blank"
+                        class="link text-blue-500 underline break-all"
+                      >
+                        {{ t("course.problem.test.testcaseModal.download") }}
+                      </a>
+                    </template>
+                    <template v-else>
+                      {{ line }}
+                    </template>
+                  </div>
+                </template>
+                <template v-else>
+                  <pre><code>{{ selectedTestcaseContent }}</code></pre>
+                </template>
+              </div>
             </div>
           </div>
         </div>

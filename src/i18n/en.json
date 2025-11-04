@@ -81,6 +81,7 @@
         "history": "History",
         "testcase": "Testcase",
         "run": "Run",
+        "back":"Back",
         "submitModal": {
           "title": "Submit Confirmation",
           "message": "Are you sure you want to submit this code for grading?",

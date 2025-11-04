@@ -1,0 +1,25 @@
+import { defineComponent, reactive } from 'vue-demi';
+import { useAsyncValidator } from '@vueuse/integrations';
+
+const UseAsyncValidator = defineComponent({
+  name: "UseAsyncValidator",
+  props: {
+    form: {
+      type: Object,
+      required: true
+    },
+    rules: {
+      type: Object,
+      required: true
+    }
+  },
+  setup(props, { slots }) {
+    const data = reactive(useAsyncValidator(props.form, props.rules));
+    return () => {
+      if (slots.default)
+        return slots.default(data);
+    };
+  }
+});
+
+export { UseAsyncValidator };

@@ -1,0 +1,29 @@
+'use strict';
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
+var vueDemi = require('vue-demi');
+var integrations = require('@vueuse/integrations');
+
+const UseAsyncValidator = vueDemi.defineComponent({
+  name: "UseAsyncValidator",
+  props: {
+    form: {
+      type: Object,
+      required: true
+    },
+    rules: {
+      type: Object,
+      required: true
+    }
+  },
+  setup(props, { slots }) {
+    const data = vueDemi.reactive(integrations.useAsyncValidator(props.form, props.rules));
+    return () => {
+      if (slots.default)
+        return slots.default(data);
+    };
+  }
+});
+
+exports.UseAsyncValidator = UseAsyncValidator;

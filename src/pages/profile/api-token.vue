@@ -2,6 +2,8 @@
 import { ref, reactive, computed, onMounted } from "vue";
 import { useClipboard } from "@vueuse/core";
 import { useI18n } from "vue-i18n";
+import { VueDatePicker } from "@vuepic/vue-datepicker";
+import "@vuepic/vue-datepicker/dist/main.css";
 import api from "@/models/api";
 import type { APIToken } from "@/types/api-token";
 import { useSession } from "@/stores/session";
@@ -60,12 +62,12 @@ async function getScopeOptions() {
 
 // 新增 Token
 const isCreateModalOpen = ref(false);
-const newApiTokenForm = reactive({ name: "", scopes: ["Read-only"], date: "" });
+const newApiTokenForm = reactive({ name: "", scopes: ["Read-only"], dueDateTime: null as Date | null });
 
 function openCreateModal() {
   newApiTokenForm.name = "";
   newApiTokenForm.scopes = ["Read-only"];
-  newApiTokenForm.date = "";
+  newApiTokenForm.dueDateTime = null;
   isCreateModalOpen.value = true;
 }
 
@@ -83,9 +85,16 @@ async function handleCreate() {
   console.log("正在建立新的 Token:", newApiTokenForm);
 
   try {
+    // Convert Date object to ISO string format for API
+    let createDueTime = "";
+    if (newApiTokenForm.dueDateTime) {
+      const date = new Date(newApiTokenForm.dueDateTime);
+      createDueTime = date.toISOString().slice(0, 16); // Format: YYYY-MM-DDTHH:MM
+    }
+
     const response = await api.APIToken.create({
       Name: newApiTokenForm.name,
-      Due_Time: newApiTokenForm.date,
+      Due_Time: createDueTime,
       Scope: newApiTokenForm.scopes,
     });
 
@@ -107,13 +116,20 @@ async function handleCreate() {
 // 編輯 Token
 const isEditModalOpen = ref(false);
 const editingToken = ref<APIToken | null>(null);
-const editApiTokenForm = reactive({ name: "", scopes: [] as string[], date: "" });
+const editApiTokenForm = reactive({ name: "", scopes: [] as string[], dueDateTime: null as Date | null });
 
 function openEditModal(token: APIToken) {
   editingToken.value = token;
   editApiTokenForm.name = token.Name;
   editApiTokenForm.scopes = [...token.Scope];
-  editApiTokenForm.date = token.Due_Time;
+  
+  // Convert ISO string to Date object for datepicker
+  if (token.Due_Time) {
+    editApiTokenForm.dueDateTime = new Date(token.Due_Time);
+  } else {
+    editApiTokenForm.dueDateTime = null;
+  }
+  
   isEditModalOpen.value = true;
 }
 
@@ -123,10 +139,17 @@ async function handleUpdate() {
   console.log("正在更新 Token:", editingToken.value?.ID, "新資料:", editApiTokenForm);
 
   try {
+    // Convert Date object to ISO string format for API
+    let updateDueTime = "";
+    if (editApiTokenForm.dueDateTime) {
+      const date = new Date(editApiTokenForm.dueDateTime);
+      updateDueTime = date.toISOString().slice(0, 16); // Format: YYYY-MM-DDTHH:MM
+    }
+
     const response = await api.APIToken.edit(editingToken.value.ID, {
       data: {
         Name: editApiTokenForm.name,
-        Due_Time: editApiTokenForm.date,
+        Due_Time: updateDueTime,
         Scope: editApiTokenForm.scopes,
       },
     });
@@ -352,10 +375,13 @@ async function handleDeactivate() {
                 t("profile.apiToken.create_modal.date_label")
               }}</span></label
             >
-            <input
-              type="datetime-local"
-              v-model="newApiTokenForm.date"
-              class="input bg-base-200 text-base-content"
+            <VueDatePicker
+              v-model="newApiTokenForm.dueDateTime"
+              :enable-time-picker="true"
+              :format="'yyyy-MM-dd HH:mm'"
+              auto-apply
+              :clearable="true"
+              placeholder="Select date and time"
             />
           </div>
         </div>
@@ -431,10 +457,13 @@ async function handleDeactivate() {
                 t("profile.apiToken.create_modal.date_label")
               }}</span></label
             >
-            <input
-              type="datetime-local"
-              v-model="editApiTokenForm.date"
-              class="input bg-base-200 text-base-content"
+            <VueDatePicker
+              v-model="editApiTokenForm.dueDateTime"
+              :enable-time-picker="true"
+              :format="'yyyy-MM-dd HH:mm'"
+              auto-apply
+              :clearable="true"
+              placeholder="Select date and time"
             />
           </div>
         </div>

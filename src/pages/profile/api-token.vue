@@ -6,6 +6,8 @@ import api from "@/models/api";
 import type { APIToken } from "@/types/api-token";
 import { useSession } from "@/stores/session";
 import { formatTime } from "@/utils/formatTime";
+import { VueDatePicker } from "@vuepic/vue-datepicker";
+import "@vuepic/vue-datepicker/dist/main.css";
 
 const { t } = useI18n();
 const session = useSession();
@@ -352,10 +354,12 @@ async function handleDeactivate() {
                 t("profile.apiToken.create_modal.date_label")
               }}</span></label
             >
-            <input
-              type="datetime-local"
+            <VueDatePicker
               v-model="newApiTokenForm.date"
-              class="input bg-base-200 text-base-content"
+              :placeholder="t('profile.apiToken.create_modal.date_label')"
+              format="yyyy-MM-dd HH:mm"
+              time-picker-inline
+              enable-time-picker
             />
           </div>
         </div>
@@ -431,10 +435,12 @@ async function handleDeactivate() {
                 t("profile.apiToken.create_modal.date_label")
               }}</span></label
             >
-            <input
-              type="datetime-local"
+            <VueDatePicker
               v-model="editApiTokenForm.date"
-              class="input bg-base-200 text-base-content"
+              :placeholder="t('profile.apiToken.create_modal.date_label')"
+              format="yyyy-MM-dd HH:mm"
+              time-picker-inline
+              enable-time-picker
             />
           </div>
         </div>

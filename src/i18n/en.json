@@ -106,7 +106,14 @@
           "files": "Files",
           "preview": "Preview",
           "cancel": "Cancel",
-          "save": "Save Changes"
+          "save": "Save Changes",
+          "saveError":"Failed to save test case",
+          "confirm":"This upload will overwrite the current list of test cases. Continue?",
+          "alert":"Please select at least one test case file.",
+          "pdfNotice":"click the link below to download",
+          "unsupported":"Unsupported file type: {ext}",
+          "download":"open and download file"
+          
         }
       },
       "stats": {

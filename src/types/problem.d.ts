@@ -138,7 +138,7 @@ interface ProblemStaticAnalysis {
 
 interface ProblemConfigExtra {
   compilation: boolean;
-  testMode: boolean;
+  trialMode: boolean;
   aiVTuber: boolean;
   acceptedFormat: AcceptedFormat;
   staticAnalysis: ProblemStaticAnalysis;

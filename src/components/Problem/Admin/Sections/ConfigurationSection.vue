@@ -4,7 +4,7 @@ import LanguageMultiSelect from "../../Forms/LanguageMultiSelect.vue";
 import MultiStringInput from "../Controls/MultiStringInput.vue";
 import api from "@/models/api";
 
-// ✅ 安全注入，避免 undefined crash
+// 避免 undefined crash
 const rawProblem = inject<Ref<ProblemForm> | undefined>("problem");
 if (!rawProblem || !rawProblem.value) {
   throw new Error("ConfigurationSection requires problem injection");
@@ -42,7 +42,7 @@ function ensureConfig() {
   if (!problem.value.config) {
     problem.value.config = {
       compilation: false,
-      testMode: false,
+      trialMode: false,
       aiVTuber: false,
       acceptedFormat: "code",
       staticAnalysis: {
@@ -154,8 +154,8 @@ function onQuotaInput(e: Event) {
     <!-- testMode -->
     <div class="form-control">
       <label class="label cursor-pointer justify-start gap-x-4">
-        <span class="label-text">Test mode</span>
-        <input type="checkbox" class="toggle" v-model="problem.config!.testMode" />
+        <span class="label-text">Trial mode</span>
+        <input type="checkbox" class="toggle" v-model="problem.config!.trialMode" />
       </label>
     </div>
 

@@ -39,7 +39,7 @@ const newProblem = ref<ProblemForm>({
   // NEW sections
   config: {
     compilation: false,
-    testMode: false,
+    trialMode: false,
     aiVTuber: false,
     acceptedFormat: "code",
     staticAnalysis: {

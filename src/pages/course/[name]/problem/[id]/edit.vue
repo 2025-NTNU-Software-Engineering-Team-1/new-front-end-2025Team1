@@ -31,7 +31,7 @@ watchEffect(() => {
       },
       config: problem.value.config || {
         compilation: false,
-        testMode: false,
+        trialMode: false,
         aiVTuber: false,
         acceptedFormat: "code",
         staticAnalysis: {

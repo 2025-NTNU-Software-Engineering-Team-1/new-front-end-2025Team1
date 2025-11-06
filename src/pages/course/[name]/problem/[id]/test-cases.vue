@@ -138,7 +138,7 @@ async function saveTestcaseSettings() {
         <div class="divider"></div>
 
         <div class="form-control">
-          <label class="label cursor-pointer">
+          <label class="label cursor-pointer justify-start gap-3">
             <span class="label-text">{{ t("course.problem.test.testcaseModal.useDefault") }}</span>
             <input type="checkbox" class="toggle" v-model="useDefaultTestcases" />
           </label>

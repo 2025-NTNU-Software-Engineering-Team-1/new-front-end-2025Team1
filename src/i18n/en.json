@@ -59,6 +59,56 @@
         },
         "text": "Submit"
       },
+      "test": {
+        "err": {
+          "code": "Please paste your source code to test.",
+          "lang": "Please select the programming language.",
+          "msg": "Oops! Something went wrong when testing the code. Try again later."
+        },
+        "card": {
+          "title": "Test problem #",
+          "code": "Source Code",
+          "testInput": "Test Input",
+          "placeholder": "Paste your code here",
+          "testInputPlaceholder": "Enter your test input here"
+        },
+        "lang": {
+          "text": "Language",
+          "select": "Select language"
+        },
+        "text": "Run Test",
+        "submit": "Submit",
+        "history": "History",
+        "testcase": "Testcase",
+        "run": "Run",
+        "back":"Back",
+        "submitModal": {
+          "title": "Submit Confirmation",
+          "message": "Are you sure you want to submit this code for grading?",
+          "cancel": "Cancel",
+          "confirm": "Yes, Submit"
+        },
+        "historyModal": {
+          "title": "Test History",
+          "table": {
+            "id": "ID",
+            "result": "Result",
+            "score": "Score",
+            "time": "Time"
+          },
+          "detail": "Details",
+          "close": "Close"
+        },
+        "testcaseModal": {
+          "title": "Testcase Settings",
+          "useDefault": "Use default testcases",
+          "customTestcases": "Custom Testcases",
+          "files": "Files",
+          "preview": "Preview",
+          "cancel": "Cancel",
+          "save": "Save Changes"
+        }
+      },
       "stats": {
         "pieTitle": "Submission Result",
         "title": "Stats for problem #",
@@ -285,6 +335,7 @@
         "quota": "Quota",
         "score": "Score",
         "submit": "Submit",
+        "test": "Test",
         "stats": "Stats",
         "desc": "Description",
         "input": "Input",

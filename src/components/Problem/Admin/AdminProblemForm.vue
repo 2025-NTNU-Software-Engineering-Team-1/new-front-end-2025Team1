@@ -50,7 +50,13 @@ const rules = {
   },
   tags: { itemMaxLength: (v: string[]) => v.every((d) => d.length <= 16) },
   allowedLanguage: { required, between: between(1, 7) },
-  quota: { required, minValue: minValue(-1) },
+  quota: {
+    required,
+    validRange: helpers.withMessage(
+      "Quota must be -1 (unlimited) or between 1 and 500",
+      (v: number) => v === -1 || (v >= 1 && v <= 500),
+    ),
+  },
   testCaseInfo: {
     tasks: {
       scoreSum: helpers.withMessage(

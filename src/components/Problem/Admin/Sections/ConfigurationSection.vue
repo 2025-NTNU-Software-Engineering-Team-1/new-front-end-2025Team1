@@ -1,11 +1,32 @@
 <script setup lang="ts">
-import { inject, onMounted, Ref, ref } from "vue";
+import { inject, Ref, ref, onMounted, watch } from "vue";
 import LanguageMultiSelect from "../../Forms/LanguageMultiSelect.vue";
 import MultiStringInput from "../Controls/MultiStringInput.vue";
 import api from "@/models/api";
 
-const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
+// ✅ 安全注入，避免 undefined crash
+const rawProblem = inject<Ref<ProblemForm> | undefined>("problem");
+if (!rawProblem || !rawProblem.value) {
+  throw new Error("ConfigurationSection requires problem injection");
+}
+const problem = rawProblem as Ref<ProblemForm>;
 
+// quota 錯誤訊息
+const quotaError = ref("");
+// quota 輸入框使用 localQuota 避免父層重繪覆蓋
+const localQuota = ref<number | "">(problem.value?.quota ?? "");
+watch(
+  () => problem.value,
+  (newVal, oldVal) => {
+    if (newVal !== oldVal) {
+      localQuota.value = newVal?.quota ?? "";
+      quotaError.value = "";
+    }
+  },
+  { deep: false },
+);
+
+// Library options setup
 const libraryOptions = ref<string[]>([]);
 onMounted(async () => {
   try {
@@ -16,6 +37,7 @@ onMounted(async () => {
   }
 });
 
+// 初始化配置
 function ensureConfig() {
   if (!problem.value.config) {
     problem.value.config = {
@@ -42,6 +64,33 @@ function toggleArray(arr: string[], value: string) {
   const idx = arr.indexOf(value);
   if (idx >= 0) arr.splice(idx, 1);
   else arr.push(value);
+}
+
+function onQuotaInput(e: Event) {
+  const inputEl = e.target as HTMLInputElement;
+  const valStr = inputEl.value;
+
+  // 允許清空
+  if (valStr === "") {
+    localQuota.value = "";
+    quotaError.value = "";
+    // 不去改 problem.value.quota，以避免重畫時跳回 10
+    return;
+  }
+
+  const val = Number(valStr);
+
+  // ✅ 合法範圍：-1 或 1~500
+  if (val === -1 || (val >= 1 && val <= 500)) {
+    localQuota.value = val;
+    quotaError.value = "";
+    problem.value.quota = val; // 僅合法時才同步父層
+  } else {
+    // ❌ 非法：清空並顯示提示，不覆寫父層
+    inputEl.value = "";
+    localQuota.value = "";
+    quotaError.value = "Quota must be -1 (unlimited) or between 1 and 500";
+  }
 }
 </script>
 
@@ -78,11 +127,20 @@ function toggleArray(arr: string[], value: string) {
       <label class="label"><span class="label-text">Quota</span></label>
       <input
         type="number"
-        class="input input-bordered w-full max-w-xs"
-        :value="problem.quota"
-        @input="problem.quota = Number(($event.target as HTMLInputElement).value)"
+        :min="-1"
+        :max="500"
+        step="1"
+        :class="['input input-bordered w-full max-w-xs', quotaError && 'input-error']"
+        :value="localQuota"
+        placeholder="-1 (unlimited) or 1–500"
+        @input="onQuotaInput"
       />
-      <label class="label"><span class="label-text-alt">-1 means unlimited</span></label>
+      <label v-if="quotaError" class="label">
+        <span class="label-text-alt text-error">{{ quotaError }}</span>
+      </label>
+      <label v-else class="label">
+        <span class="label-text-alt">-1 means unlimited</span>
+      </label>
     </div>
 
     <!-- compilation -->

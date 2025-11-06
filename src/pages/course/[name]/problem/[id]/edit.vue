@@ -29,9 +29,26 @@ watchEffect(() => {
         fillInTemplate: "",
         tasks: problem.value.testCase.slice(),
       },
+      pipeline: problem.value.pipeline || {
+        fopen: false,
+        fwrite: false,
+        executionMode: "general",
+        customChecker: false,
+        teacherFirst: false,
+      },
+      assets: problem.value.assets || {
+        checkerPy: null,
+        makefileZip: null,
+        teacherFile: null,
+        scorePy: null,
+        scoreJson: null,
+        localServiceZip: null,
+        testdataZip: null,
+      },
     };
   }
 });
+
 function update<K extends keyof ProblemForm>(key: K, value: ProblemForm[K]) {
   if (!edittingProblem.value) return;
   edittingProblem.value[key] = value;

@@ -29,14 +29,30 @@ watchEffect(() => {
         fillInTemplate: "",
         tasks: problem.value.testCase.slice(),
       },
-      pipeline: problem.value.pipeline || {
+      config: problem.value.config || {
+        compilation: false,
+        testMode: false,
+        aiVTuber: false,
+        acceptedFormat: "code",
+        staticAnalysis: {
+          custom: false,
+          libraryRestrictions: { enabled: false, whitelist: [], blacklist: [] },
+          networkAccessRestriction: {
+            enabled: false,
+            firewallExtranet: { enabled: false, whitelist: [], blacklist: [] },
+            connectWithLocal: { enabled: false, whitelist: [], blacklist: [], localServiceZip: null },
+          },
+        },
+        artifactCollection: [],
+      },
+      pipeline: (problem.value as any).pipeline || {
         fopen: false,
         fwrite: false,
         executionMode: "general",
         customChecker: false,
         teacherFirst: false,
       },
-      assets: problem.value.assets || {
+      assets: (problem.value as any).assets || {
         checkerPy: null,
         makefileZip: null,
         teacherFile: null,
@@ -45,7 +61,7 @@ watchEffect(() => {
         localServiceZip: null,
         testdataZip: null,
       },
-    };
+    } as ProblemForm;
   }
 });
 

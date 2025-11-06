@@ -13,19 +13,6 @@ const emits = defineEmits<{
   (e: "submit"): void;
 }>();
 
-const modelForVuelidate = computed(() => ({
-  problemName: problem.value.problemName,
-  description: problem.value.description,
-  tags: problem.value.tags,
-  allowedLanguage: problem.value.allowedLanguage,
-  quota: problem.value.quota,
-  testCaseInfo: problem.value.testCaseInfo,
-  // 讓 key 一定存在
-  config: problem.value.config,
-  pipeline: problem.value.pipeline,
-  assets: problem.value.assets,
-}));
-
 const isLoading = ref(false);
 const errorMsg = ref("");
 defineExpose({ isLoading, errorMsg });
@@ -70,14 +57,14 @@ const rules = {
     acceptedFormat: {
       required: helpers.withMessage(
         "Accepted format is required",
-        (v: any, p: any) => !!p?.config?.acceptedFormat,
+        () => !!problem.value.config.acceptedFormat,
       ),
     },
   },
   pipeline: {
     executionMode: {
       required: helpers.withMessage("Execution mode is required", (v: any, p: any) =>
-        ["general", "functionOnly", "interactive"].includes(p?.pipeline?.executionMode || ""),
+        ["general", "functionOnly", "interactive"].includes(problem.value.pipeline.executionMode),
       ),
     },
   },
@@ -120,7 +107,7 @@ const rules = {
   },
 };
 
-const v$ = useVuelidate(rules, modelForVuelidate);
+const v$ = useVuelidate(rules, problem);
 
 function update<K extends keyof ProblemForm>(key: K, value: ProblemForm[K]) {
   emits("update", key, value);
@@ -131,7 +118,10 @@ function update<K extends keyof ProblemForm>(key: K, value: ProblemForm[K]) {
 }
 
 async function submit() {
+  console.log("AdminProblemForm submit() 執行了，驗證中…");
   const ok = await v$.value.$validate();
+  console.log("驗證結果 ok =", ok);
+  console.log("$errors 明細 =", JSON.stringify(v$.value.$errors, null, 2));
   if (ok) emits("submit");
 }
 </script>

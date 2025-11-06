@@ -79,6 +79,7 @@ function update<K extends keyof ProblemForm>(key: K, value: ProblemForm[K]) {
 provide<Ref<ProblemForm>>("problem", newProblem);
 
 async function submit() {
+  console.log("submit 時的 testdataZip：", newProblem.value.assets?.testdataZip);
   if (!formElement.value) return;
   formElement.value.isLoading = true;
   try {

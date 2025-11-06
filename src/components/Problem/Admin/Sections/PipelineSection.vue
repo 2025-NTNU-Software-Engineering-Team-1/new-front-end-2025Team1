@@ -184,7 +184,10 @@ watch(
           <input
             type="file"
             accept=".zip"
-            @change="problem.assets!.testdataZip = ($event.target as HTMLInputElement).files![0]"
+            @change="(e:any) => {
+              problem.assets!.testdataZip = e.target.files?.[0] || null;
+              console.log('現在選擇的 testdataZip：', problem.assets!.testdataZip);
+            }"
           />
         </template>
         <template v-else>

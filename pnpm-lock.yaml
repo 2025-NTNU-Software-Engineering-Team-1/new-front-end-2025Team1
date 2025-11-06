@@ -17,6 +17,9 @@ importers:
       '@sentry/vue':
         specifier: ^9.17.0
         version: 9.17.0(pinia@2.3.1(typescript@5.8.2)(vue@3.5.13(typescript@5.8.2)))(vue@3.5.13(typescript@5.8.2))
+      '@syncfusion/ej2-vue-calendars':
+        specifier: ^31.2.5
+        version: 31.2.5
       '@tailwindcss/typography':
         specifier: ^0.5.2
         version: 0.5.16(tailwindcss@3.4.17)
@@ -26,6 +29,9 @@ importers:
       '@vuelidate/validators':
         specifier: ^2.0.0-alpha.26
         version: 2.0.4(vue@3.5.13(typescript@5.8.2))
+      '@vuepic/vue-datepicker':
+        specifier: ^12.0.1
+        version: 12.0.1(vue@3.5.13(typescript@5.8.2))
       '@vueuse/core':
         specifier: ^10.1.2
         version: 10.11.1(vue@3.5.13(typescript@5.8.2))
@@ -195,6 +201,9 @@ packages:
     resolution: {integrity: sha512-Y3IR1cRnOxOCDvMmNiym7XpXQ93iGDDPHx+Zj+NM+rg0fBaShfQLkg+hKPaZCEvg5N/LeCo4+Rj/i3FuJsIQaw==}
     engines: {node: '>=6.9.0'}
 
+  '@date-fns/tz@1.4.1':
+    resolution: {integrity: sha512-P5LUNhtbj6YfI3iJjw5EL9eUAG6OitD0W3fWQcpQjDRc/QIsL0tRNuO1PcDvPccWL1fSTXXdE1ds+l95DV/OFA==}
+
   '@esbuild/android-arm64@0.18.20':
     resolution: {integrity: sha512-Nz4rJcchGDtENV0eMKUNa6L12zz2zBDXuhj/Vjh18zGqB44Bi7MBMSXjgunJgjRhCmKOjnPuZp4Mb6OKqtMHLQ==}
     engines: {node: '>=12'}
@@ -345,6 +354,18 @@ packages:
     resolution: {integrity: sha512-d9zaMRSTIKDLhctzH12MtXvJKSSUhaHcjV+2Z+GK+EEY7XKpP5yR4x+N3TAcHTcu963nIr+TMcCb4DBCYX1z6Q==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
 
+  '@floating-ui/core@1.7.3':
+    resolution: {integrity: sha512-sGnvb5dmrJaKEZ+LDIpguvdX3bDlEllmv4/ClQ9awcmCZrlx5jQyyMWFM5kBI+EyNOCDDiKk8il0zeuX3Zlg/w==}
+
+  '@floating-ui/dom@1.7.4':
+    resolution: {integrity: sha512-OOchDgh4F2CchOX94cRVqhvy7b3AFb+/rQXyswmzmGakRfkMgoWVjfnLWkRirfLEfuD4ysVW16eXzwt3jHIzKA==}
+
+  '@floating-ui/utils@0.2.10':
+    resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
+
+  '@floating-ui/vue@1.1.9':
+    resolution: {integrity: sha512-BfNqNW6KA83Nexspgb9DZuz578R7HT8MZw1CfK9I6Ah4QReNWEJsXWHN+SdmOVLNGmTPDi+fDT535Df5PzMLbQ==}
+
   '@headlessui/vue@1.7.23':
     resolution: {integrity: sha512-JzdCNqurrtuu0YW6QaDtR2PIYCKPUWq28csDyMvN4zmGccmE7lz40Is6hc3LA4HFeCI7sekZ/PQMTNmn9I/4Wg==}
     engines: {node: '>=10'}
@@ -491,6 +512,40 @@ packages:
       pinia:
         optional: true
 
+  '@syncfusion/ej2-base@31.2.5':
+    resolution: {integrity: sha512-irE/xASivfvKxrXLPyC7QRXVSxnwqPHnImnpEAK+7we1SOXlF5nChbYjQwLFUPo9BGk9blHMvP8G1vBKzRL18Q==}
+    hasBin: true
+
+  '@syncfusion/ej2-buttons@31.2.3':
+    resolution: {integrity: sha512-h5NolAUlTd0LcZBtdNwJv9OotL2BOi0jJEtTAZgMaOuF8GdMfgR4T2CkyCsCX1u2FlH03fuNP+e0Px2LgQ9MGQ==}
+
+  '@syncfusion/ej2-calendars@31.2.5':
+    resolution: {integrity: sha512-GDP1UAkZZ8K22XwN8kVa8mfKmnfS8QiWoS9V0Qbdl/SHhKKLpq8fgpOp06Wl6JjmfdhYr9bt5sfmfAahX9R4Sw==}
+
+  '@syncfusion/ej2-data@31.2.5':
+    resolution: {integrity: sha512-CZv8LluaYOZ6/kX+PqGYXpf/vDX5NuExyfHXE1gAcHdr7DHo/fcT/1Yq0lGRdKNQyyTT8wrnyt+ygechGpqqQA==}
+
+  '@syncfusion/ej2-icons@31.2.2':
+    resolution: {integrity: sha512-XXiaK9VR+6h8iI6BesBydO8j4zT63dk9plUi7KlyjVJnFUveDDNYOpvixU5aY6mJd1Buj9KkVUYBunM4rcZLBg==}
+
+  '@syncfusion/ej2-inputs@31.2.5':
+    resolution: {integrity: sha512-wB76bMB3fx4DdZbRJEQBP1VLrw4nLpAOi4ZpGZrLCAAi6ZxQmIasC8eH9FadeCc3gGL1GLRXZh+xi/QIKaOcrw==}
+
+  '@syncfusion/ej2-lists@31.2.2':
+    resolution: {integrity: sha512-/ynwm6vQTIOZcERMl3Qlhpw/TsmGypQneqdnD4lot67RphzF08BiVHmAdz7DfVOYBlWySlEK2+oGNDdLZNdzIw==}
+
+  '@syncfusion/ej2-popups@31.2.5':
+    resolution: {integrity: sha512-CrwdkBskbyAHfRKILTrIva/aPgC0XLltNiyrvwi/8mZRqgU9Fo6QogAx9xHeHKKPq2tpXh95v5OX0XTOoOyH6w==}
+
+  '@syncfusion/ej2-splitbuttons@31.2.2':
+    resolution: {integrity: sha512-R31Z+/74kgMjwNuTyWxoy+4IuWtTgP1nLOiZMjsxUKdjliMnlqE5SoDe/eosthYHp+TlvojNlZX8k3gVzIEKZQ==}
+
+  '@syncfusion/ej2-vue-base@31.2.5':
+    resolution: {integrity: sha512-Qk9sRzhdk9Ty/LDNU0ftxLhPU6uSe9b3eJUrs472felOorzxRjkBMpGXWAdlVTHA+lHtJ1extB0lF4ofPK2RTA==}
+
+  '@syncfusion/ej2-vue-calendars@31.2.5':
+    resolution: {integrity: sha512-HklwEMDLaB7OjeynlF+lEAZpt07A5+JdoMBJGZZIdbeBssk+QNnC2t7mhSF6GloZ3gQojOO2bLfevIqr06zxvA==}
+
   '@tailwindcss/typography@0.5.16':
     resolution: {integrity: sha512-0wDLwCVF5V3x3b1SGXPCDcdsbDHMBe+lkFzBRaHeLvNi+nrrnZ1lA18u+OTWO8iSWU2GxUOCvlXtDuqftc1oiA==}
     peerDependencies:
@@ -542,6 +597,9 @@ packages:
 
   '@types/web-bluetooth@0.0.20':
     resolution: {integrity: sha512-g9gZnnXVq7gM7v3tJCWV/qw7w+KeOlSHAhgF9RytFyifW6AF61hdT2ucrYhPq9hLs5JIryeupHV3qGk95dH9ow==}
+
+  '@types/web-bluetooth@0.0.21':
+    resolution: {integrity: sha512-oIQLCGWtcFZy2JW77j9k8nHzAOpqMHLQejDA48XXMWH6tjCQHz5RCFz1bzsmROyL6PUm+LLnUiI4BCn221inxA==}
 
   '@typescript-eslint/eslint-plugin@7.18.0':
     resolution: {integrity: sha512-94EQTWZ40mzBc42ATNIBimBEDltSJ9RQHCC8vc/PDbxi4k8dVwUAv4o98dk50M1zB+JGFxp43FP7f8+FP8R6Sw==}
@@ -681,8 +739,19 @@ packages:
       '@vue/composition-api':
         optional: true
 
+  '@vuepic/vue-datepicker@12.0.1':
+    resolution: {integrity: sha512-I7yWgDfymtGmtvcVxOdK+THOLCbcq0aEfIsRh4IhWyJkk6q+Nf3rCNHEaGy16GNXRDOsZLT2FiTqP/1Upx2Lzg==}
+    engines: {node: '>=18.12.0'}
+    peerDependencies:
+      vue: '>=3.5.0'
+
   '@vueuse/core@10.11.1':
     resolution: {integrity: sha512-guoy26JQktXPcz+0n3GukWIy/JDNKti9v6VEMu6kV2sYBsWuGiTU8OWdg+ADfUbHg3/3DlqySDe7JmdHrktiww==}
+
+  '@vueuse/core@14.0.0':
+    resolution: {integrity: sha512-d6tKRWkZE8IQElX2aHBxXOMD478fHIYV+Dzm2y9Ag122ICBpNKtGICiXKOhWU3L1kKdttDD9dCMS4bGP3jhCTQ==}
+    peerDependencies:
+      vue: ^3.5.0
 
   '@vueuse/core@8.9.4':
     resolution: {integrity: sha512-B/Mdj9TK1peFyWaPof+Zf/mP9XuGAngaJZBwPaXBvU3aCTZlx3ltlrFFFyMV4iGBwsjSCeUCgZrtkEj9dS2Y3Q==}
@@ -733,11 +802,19 @@ packages:
   '@vueuse/metadata@10.11.1':
     resolution: {integrity: sha512-IGa5FXd003Ug1qAZmyE8wF3sJ81xGLSqTqtQ6jaVfkeZ4i5kS2mwQF61yhVqojRnenVew5PldLyRgvdl4YYuSw==}
 
+  '@vueuse/metadata@14.0.0':
+    resolution: {integrity: sha512-6yoGqbJcMldVCevkFiHDBTB1V5Hq+G/haPlGIuaFZHpXC0HADB0EN1ryQAAceiW+ryS3niUwvdFbGiqHqBrfVA==}
+
   '@vueuse/metadata@8.9.4':
     resolution: {integrity: sha512-IwSfzH80bnJMzqhaapqJl9JRIiyQU0zsRGEgnxN6jhq7992cPUJIRfV+JHRIZXjYqbwt07E1gTEp0R0zPJ1aqw==}
 
   '@vueuse/shared@10.11.1':
     resolution: {integrity: sha512-LHpC8711VFZlDaYUXEBbFBCQ7GS3dVU9mjOhhMhXP6txTV4EhYQg/KGnQuvt/sPAtoUKq7VVUnL6mVtFoL42sA==}
+
+  '@vueuse/shared@14.0.0':
+    resolution: {integrity: sha512-mTCA0uczBgurRlwVaQHfG0Ja7UdGe4g9mwffiJmvLiTtp1G4AQyIjej6si/k8c8pUwTfVpNufck+23gXptPAkw==}
+    peerDependencies:
+      vue: ^3.5.0
 
   '@vueuse/shared@8.9.4':
     resolution: {integrity: sha512-wt+T30c4K6dGRMVqPddexEVLa28YwxW5OFIPmzUHICjphfAuBFTTdDoyqREZNDOFJZ44ARH1WWQNCUK8koJ+Ag==}
@@ -930,6 +1007,9 @@ packages:
     peerDependencies:
       autoprefixer: ^10.0.2
       postcss: ^8.1.6
+
+  date-fns@4.1.0:
+    resolution: {integrity: sha512-Ukq0owbQXxa/U3EGtsdVBkR1w7KOQ5gIBqdH2hkvknzZPYvBxb/aa6E8L7tmjFtkwZBu3UXBbjIgPo/Ez4xaNg==}
 
   dayjs@1.11.13:
     resolution: {integrity: sha512-oaMBel6gjolK862uaPQOVTA7q3TZhuSvuMQAAglQDOWYO9A91IrAOUJEyKVlqJlHE0vq5p5UXxzdPfMH/x6xNg==}
@@ -2191,6 +2271,8 @@ snapshots:
       '@babel/helper-string-parser': 7.25.9
       '@babel/helper-validator-identifier': 7.25.9
 
+  '@date-fns/tz@1.4.1': {}
+
   '@esbuild/android-arm64@0.18.20':
     optional: true
 
@@ -2279,6 +2361,26 @@ snapshots:
       - supports-color
 
   '@eslint/js@8.57.1': {}
+
+  '@floating-ui/core@1.7.3':
+    dependencies:
+      '@floating-ui/utils': 0.2.10
+
+  '@floating-ui/dom@1.7.4':
+    dependencies:
+      '@floating-ui/core': 1.7.3
+      '@floating-ui/utils': 0.2.10
+
+  '@floating-ui/utils@0.2.10': {}
+
+  '@floating-ui/vue@1.1.9(vue@3.5.13(typescript@5.8.2))':
+    dependencies:
+      '@floating-ui/dom': 1.7.4
+      '@floating-ui/utils': 0.2.10
+      vue-demi: 0.14.10(vue@3.5.13(typescript@5.8.2))
+    transitivePeerDependencies:
+      - '@vue/composition-api'
+      - vue
 
   '@headlessui/vue@1.7.23(vue@3.5.13(typescript@5.8.2))':
     dependencies:
@@ -2438,6 +2540,62 @@ snapshots:
     optionalDependencies:
       pinia: 2.3.1(typescript@5.8.2)(vue@3.5.13(typescript@5.8.2))
 
+  '@syncfusion/ej2-base@31.2.5':
+    dependencies:
+      '@syncfusion/ej2-icons': 31.2.2
+
+  '@syncfusion/ej2-buttons@31.2.3':
+    dependencies:
+      '@syncfusion/ej2-base': 31.2.5
+
+  '@syncfusion/ej2-calendars@31.2.5':
+    dependencies:
+      '@syncfusion/ej2-base': 31.2.5
+      '@syncfusion/ej2-buttons': 31.2.3
+      '@syncfusion/ej2-inputs': 31.2.5
+      '@syncfusion/ej2-lists': 31.2.2
+      '@syncfusion/ej2-popups': 31.2.5
+
+  '@syncfusion/ej2-data@31.2.5':
+    dependencies:
+      '@syncfusion/ej2-base': 31.2.5
+
+  '@syncfusion/ej2-icons@31.2.2': {}
+
+  '@syncfusion/ej2-inputs@31.2.5':
+    dependencies:
+      '@syncfusion/ej2-base': 31.2.5
+      '@syncfusion/ej2-buttons': 31.2.3
+      '@syncfusion/ej2-popups': 31.2.5
+      '@syncfusion/ej2-splitbuttons': 31.2.2
+
+  '@syncfusion/ej2-lists@31.2.2':
+    dependencies:
+      '@syncfusion/ej2-base': 31.2.5
+      '@syncfusion/ej2-buttons': 31.2.3
+      '@syncfusion/ej2-data': 31.2.5
+      '@syncfusion/ej2-popups': 31.2.5
+
+  '@syncfusion/ej2-popups@31.2.5':
+    dependencies:
+      '@syncfusion/ej2-base': 31.2.5
+      '@syncfusion/ej2-buttons': 31.2.3
+
+  '@syncfusion/ej2-splitbuttons@31.2.2':
+    dependencies:
+      '@syncfusion/ej2-base': 31.2.5
+      '@syncfusion/ej2-popups': 31.2.5
+
+  '@syncfusion/ej2-vue-base@31.2.5':
+    dependencies:
+      '@syncfusion/ej2-base': 31.2.5
+
+  '@syncfusion/ej2-vue-calendars@31.2.5':
+    dependencies:
+      '@syncfusion/ej2-base': 31.2.5
+      '@syncfusion/ej2-calendars': 31.2.5
+      '@syncfusion/ej2-vue-base': 31.2.5
+
   '@tailwindcss/typography@0.5.16(tailwindcss@3.4.17)':
     dependencies:
       lodash.castarray: 4.4.0
@@ -2487,6 +2645,8 @@ snapshots:
   '@types/web-bluetooth@0.0.14': {}
 
   '@types/web-bluetooth@0.0.20': {}
+
+  '@types/web-bluetooth@0.0.21': {}
 
   '@typescript-eslint/eslint-plugin@7.18.0(@typescript-eslint/parser@7.18.0(eslint@8.57.1)(typescript@5.8.2))(eslint@8.57.1)(typescript@5.8.2)':
     dependencies:
@@ -2672,6 +2832,16 @@ snapshots:
       vue: 3.5.13(typescript@5.8.2)
       vue-demi: 0.13.11(vue@3.5.13(typescript@5.8.2))
 
+  '@vuepic/vue-datepicker@12.0.1(vue@3.5.13(typescript@5.8.2))':
+    dependencies:
+      '@date-fns/tz': 1.4.1
+      '@floating-ui/vue': 1.1.9(vue@3.5.13(typescript@5.8.2))
+      '@vueuse/core': 14.0.0(vue@3.5.13(typescript@5.8.2))
+      date-fns: 4.1.0
+      vue: 3.5.13(typescript@5.8.2)
+    transitivePeerDependencies:
+      - '@vue/composition-api'
+
   '@vueuse/core@10.11.1(vue@3.5.13(typescript@5.8.2))':
     dependencies:
       '@types/web-bluetooth': 0.0.20
@@ -2681,6 +2851,13 @@ snapshots:
     transitivePeerDependencies:
       - '@vue/composition-api'
       - vue
+
+  '@vueuse/core@14.0.0(vue@3.5.13(typescript@5.8.2))':
+    dependencies:
+      '@types/web-bluetooth': 0.0.21
+      '@vueuse/metadata': 14.0.0
+      '@vueuse/shared': 14.0.0(vue@3.5.13(typescript@5.8.2))
+      vue: 3.5.13(typescript@5.8.2)
 
   '@vueuse/core@8.9.4(vue@3.5.13(typescript@5.8.2))':
     dependencies:
@@ -2704,6 +2881,8 @@ snapshots:
 
   '@vueuse/metadata@10.11.1': {}
 
+  '@vueuse/metadata@14.0.0': {}
+
   '@vueuse/metadata@8.9.4': {}
 
   '@vueuse/shared@10.11.1(vue@3.5.13(typescript@5.8.2))':
@@ -2712,6 +2891,10 @@ snapshots:
     transitivePeerDependencies:
       - '@vue/composition-api'
       - vue
+
+  '@vueuse/shared@14.0.0(vue@3.5.13(typescript@5.8.2))':
+    dependencies:
+      vue: 3.5.13(typescript@5.8.2)
 
   '@vueuse/shared@8.9.4(vue@3.5.13(typescript@5.8.2))':
     dependencies:
@@ -2903,6 +3086,8 @@ snapshots:
       tailwindcss: 3.4.17
     transitivePeerDependencies:
       - ts-node
+
+  date-fns@4.1.0: {}
 
   dayjs@1.11.13: {}
 

@@ -41,9 +41,9 @@ interface ProblemForm {
   defaultCode: string;
 
   // Extra (admin config/pipeline/assets)
-  config?: ProblemConfigExtra;
-  pipeline?: ProblemPipeline;
-  assets?: ProblemAssets;
+  config: ProblemConfigExtra;
+  pipeline: ProblemPipeline;
+  assets: ProblemAssets;
 }
 
 interface Problem {

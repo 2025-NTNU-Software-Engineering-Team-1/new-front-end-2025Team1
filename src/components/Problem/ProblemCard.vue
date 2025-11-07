@@ -177,38 +177,103 @@ function downloadTestCase(problemId: number) {
                     </div>
                   </div>
                   <div class="collapse-content">
-                    <div>
-                      <strong>Whitelist</strong>
-                      <div class="mt-2 flex flex-wrap gap-2">
-                        <template
-                          v-if="problem.config?.staticAnalysis?.libraryRestrictions?.whitelist?.length"
-                        >
-                          <span
-                            v-for="sym in problem.config.staticAnalysis.libraryRestrictions.whitelist"
-                            :key="'lib-w-' + sym"
-                            class="badge badge-accent text-base-100"
+                    <div class="space-y-4">
+                      <!-- Whitelist -->
+                      <div class="rounded-lg border-l-4 border-accent bg-accent/10 p-4">
+                        <div class="mb-3 flex items-center gap-2">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-5 w-5 text-accent"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
                           >
-                            {{ sym }}
-                          </span>
-                        </template>
-                        <span v-else class="italic opacity-70">Null</span>
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                          <strong class="text-accent">Whitelist</strong>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                          <template
+                            v-if="problem.config?.staticAnalysis?.libraryRestrictions?.whitelist?.length"
+                          >
+                            <span
+                              v-for="sym in problem.config.staticAnalysis.libraryRestrictions.whitelist"
+                              :key="'lib-w-' + sym"
+                              class="badge badge-accent badge-lg gap-1"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-3 w-3"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  stroke-width="2"
+                                  d="M5 13l4 4L19 7"
+                                />
+                              </svg>
+                              {{ sym }}
+                            </span>
+                          </template>
+                          <span v-else class="text-sm italic opacity-60">No restrictions</span>
+                        </div>
                       </div>
-                    </div>
-                    <div class="mt-4">
-                      <strong>Blacklist</strong>
-                      <div class="mt-2 flex flex-wrap gap-2">
-                        <template
-                          v-if="problem.config?.staticAnalysis?.libraryRestrictions?.blacklist?.length"
-                        >
-                          <span
-                            v-for="sym in problem.config.staticAnalysis.libraryRestrictions.blacklist"
-                            :key="'lib-b-' + sym"
-                            class="badge badge-error text-base-100"
+
+                      <!-- Blacklist -->
+                      <div class="rounded-lg border-l-4 border-error bg-error/10 p-4">
+                        <div class="mb-3 flex items-center gap-2">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-5 w-5 text-error"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
                           >
-                            {{ sym }}
-                          </span>
-                        </template>
-                        <span v-else class="italic opacity-70">Null</span>
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                          <strong class="text-error">Blacklist</strong>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                          <template
+                            v-if="problem.config?.staticAnalysis?.libraryRestrictions?.blacklist?.length"
+                          >
+                            <span
+                              v-for="sym in problem.config.staticAnalysis.libraryRestrictions.blacklist"
+                              :key="'lib-b-' + sym"
+                              class="badge badge-error badge-lg gap-1"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-3 w-3"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  stroke-width="2"
+                                  d="M6 18L18 6M6 6l12 12"
+                                />
+                              </svg>
+                              {{ sym }}
+                            </span>
+                          </template>
+                          <span v-else class="text-sm italic opacity-60">No restrictions</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -239,92 +304,258 @@ function downloadTestCase(problemId: number) {
                     </div>
                   </div>
                   <div class="collapse-content">
-                    <!-- Firewall Extranet -->
-                    <div class="border-b border-base-300 pb-3">
-                      <div class="mb-2 font-semibold">Firewall Extranet</div>
-                      <div class="ml-2">
-                        <div><strong>Whitelist</strong></div>
-                        <div class="mt-2 flex flex-wrap gap-2">
-                          <template
-                            v-if="
-                              problem.config?.staticAnalysis?.networkAccessRestriction?.firewallExtranet
-                                ?.whitelist?.length
-                            "
+                    <div class="space-y-6">
+                      <!-- Firewall Extranet -->
+                      <div class="rounded-lg bg-base-300/30 p-4">
+                        <div class="mb-4 flex items-center gap-2 text-lg font-semibold">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-5 w-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
                           >
-                            <span
-                              v-for="sym in problem.config.staticAnalysis.networkAccessRestriction
-                                .firewallExtranet.whitelist"
-                              :key="'fw-w-' + sym"
-                              class="badge badge-accent text-base-100"
-                            >
-                              {{ sym }}
-                            </span>
-                          </template>
-                          <span v-else class="italic opacity-70">Null</span>
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"
+                            />
+                          </svg>
+                          Firewall Extranet
                         </div>
-                        <div class="mt-3"><strong>Blacklist</strong></div>
-                        <div class="mt-2 flex flex-wrap gap-2">
-                          <template
-                            v-if="
-                              problem.config?.staticAnalysis?.networkAccessRestriction?.firewallExtranet
-                                ?.blacklist?.length
-                            "
-                          >
-                            <span
-                              v-for="sym in problem.config.staticAnalysis.networkAccessRestriction
-                                .firewallExtranet.blacklist"
-                              :key="'fw-b-' + sym"
-                              class="badge badge-error text-base-100"
+
+                        <!-- Whitelist -->
+                        <div class="mb-3 rounded-lg border-l-4 border-accent bg-accent/10 p-3">
+                          <div class="mb-2 flex items-center gap-2">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              class="h-4 w-4 text-accent"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
                             >
-                              {{ sym }}
-                            </span>
-                          </template>
-                          <span v-else class="italic opacity-70">Null</span>
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                              />
+                            </svg>
+                            <strong class="text-sm text-accent">Whitelist</strong>
+                          </div>
+                          <div class="flex flex-wrap gap-2">
+                            <template
+                              v-if="
+                                problem.config?.staticAnalysis?.networkAccessRestriction?.firewallExtranet
+                                  ?.whitelist?.length
+                              "
+                            >
+                              <span
+                                v-for="sym in problem.config.staticAnalysis.networkAccessRestriction
+                                  .firewallExtranet.whitelist"
+                                :key="'fw-w-' + sym"
+                                class="badge badge-accent gap-1"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  class="h-3 w-3"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M5 13l4 4L19 7"
+                                  />
+                                </svg>
+                                {{ sym }}
+                              </span>
+                            </template>
+                            <span v-else class="text-sm italic opacity-60">No restrictions</span>
+                          </div>
+                        </div>
+
+                        <!-- Blacklist -->
+                        <div class="rounded-lg border-l-4 border-error bg-error/10 p-3">
+                          <div class="mb-2 flex items-center gap-2">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              class="h-4 w-4 text-error"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                              />
+                            </svg>
+                            <strong class="text-sm text-error">Blacklist</strong>
+                          </div>
+                          <div class="flex flex-wrap gap-2">
+                            <template
+                              v-if="
+                                problem.config?.staticAnalysis?.networkAccessRestriction?.firewallExtranet
+                                  ?.blacklist?.length
+                              "
+                            >
+                              <span
+                                v-for="sym in problem.config.staticAnalysis.networkAccessRestriction
+                                  .firewallExtranet.blacklist"
+                                :key="'fw-b-' + sym"
+                                class="badge badge-error gap-1"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  class="h-3 w-3"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"
+                                  />
+                                </svg>
+                                {{ sym }}
+                              </span>
+                            </template>
+                            <span v-else class="text-sm italic opacity-60">No restrictions</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <!-- Connect With Local -->
-                    <div class="mt-4">
-                      <div class="mb-2 font-semibold">Connect With Local</div>
-                      <div class="ml-2">
-                        <div><strong>Whitelist</strong></div>
-                        <div class="mt-2 flex flex-wrap gap-2">
-                          <template
-                            v-if="
-                              problem.config?.staticAnalysis?.networkAccessRestriction?.connectWithLocal
-                                ?.whitelist?.length
-                            "
+                      <!-- Connect With Local -->
+                      <div class="rounded-lg bg-base-300/30 p-4">
+                        <div class="mb-4 flex items-center gap-2 text-lg font-semibold">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-5 w-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
                           >
-                            <span
-                              v-for="sym in problem.config.staticAnalysis.networkAccessRestriction
-                                .connectWithLocal.whitelist"
-                              :key="'loc-w-' + sym"
-                              class="badge badge-accent text-base-100"
-                            >
-                              {{ sym }}
-                            </span>
-                          </template>
-                          <span v-else class="italic opacity-70">Null</span>
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"
+                            />
+                          </svg>
+                          Connect With Local
                         </div>
-                        <div class="mt-3"><strong>Blacklist</strong></div>
-                        <div class="mt-2 flex flex-wrap gap-2">
-                          <template
-                            v-if="
-                              problem.config?.staticAnalysis?.networkAccessRestriction?.connectWithLocal
-                                ?.blacklist?.length
-                            "
-                          >
-                            <span
-                              v-for="sym in problem.config.staticAnalysis.networkAccessRestriction
-                                .connectWithLocal.blacklist"
-                              :key="'loc-b-' + sym"
-                              class="badge badge-error text-base-100"
+
+                        <!-- Whitelist -->
+                        <div class="mb-3 rounded-lg border-l-4 border-accent bg-accent/10 p-3">
+                          <div class="mb-2 flex items-center gap-2">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              class="h-4 w-4 text-accent"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
                             >
-                              {{ sym }}
-                            </span>
-                          </template>
-                          <span v-else class="italic opacity-70">Null</span>
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                              />
+                            </svg>
+                            <strong class="text-sm text-accent">Whitelist</strong>
+                          </div>
+                          <div class="flex flex-wrap gap-2">
+                            <template
+                              v-if="
+                                problem.config?.staticAnalysis?.networkAccessRestriction?.connectWithLocal
+                                  ?.whitelist?.length
+                              "
+                            >
+                              <span
+                                v-for="sym in problem.config.staticAnalysis.networkAccessRestriction
+                                  .connectWithLocal.whitelist"
+                                :key="'loc-w-' + sym"
+                                class="badge badge-accent gap-1"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  class="h-3 w-3"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M5 13l4 4L19 7"
+                                  />
+                                </svg>
+                                {{ sym }}
+                              </span>
+                            </template>
+                            <span v-else class="text-sm italic opacity-60">No restrictions</span>
+                          </div>
+                        </div>
+
+                        <!-- Blacklist -->
+                        <div class="rounded-lg border-l-4 border-error bg-error/10 p-3">
+                          <div class="mb-2 flex items-center gap-2">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              class="h-4 w-4 text-error"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                              />
+                            </svg>
+                            <strong class="text-sm text-error">Blacklist</strong>
+                          </div>
+                          <div class="flex flex-wrap gap-2">
+                            <template
+                              v-if="
+                                problem.config?.staticAnalysis?.networkAccessRestriction?.connectWithLocal
+                                  ?.blacklist?.length
+                              "
+                            >
+                              <span
+                                v-for="sym in problem.config.staticAnalysis.networkAccessRestriction
+                                  .connectWithLocal.blacklist"
+                                :key="'loc-b-' + sym"
+                                class="badge badge-error gap-1"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  class="h-3 w-3"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"
+                                  />
+                                </svg>
+                                {{ sym }}
+                              </span>
+                            </template>
+                            <span v-else class="text-sm italic opacity-60">No restrictions</span>
+                          </div>
                         </div>
                       </div>
                     </div>

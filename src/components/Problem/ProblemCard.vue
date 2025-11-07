@@ -156,6 +156,184 @@ function downloadTestCase(problemId: number) {
           </div>
           <markdown-renderer class="mb-10" :md="problem.description.hint" />
 
+          <!-- Static Analysis Section -->
+          <div class="mb-10">
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <!-- Library Restrictions -->
+              <div class="rounded-box border border-base-300 bg-base-200">
+                <div class="collapse collapse-arrow">
+                  <input type="checkbox" class="peer" />
+                  <div class="collapse-title text-lg font-semibold">
+                    <div class="flex items-center justify-between pr-8">
+                      <span>Library Restrictions</span>
+                      <span class="text-sm italic opacity-80">
+                        {{
+                          problem.config?.staticAnalysis?.libraryRestrictions?.whitelist?.length ||
+                          problem.config?.staticAnalysis?.libraryRestrictions?.blacklist?.length
+                            ? "Configured"
+                            : "Empty"
+                        }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="collapse-content">
+                    <div>
+                      <strong>Whitelist</strong>
+                      <div class="mt-2 flex flex-wrap gap-2">
+                        <template
+                          v-if="problem.config?.staticAnalysis?.libraryRestrictions?.whitelist?.length"
+                        >
+                          <span
+                            v-for="sym in problem.config.staticAnalysis.libraryRestrictions.whitelist"
+                            :key="'lib-w-' + sym"
+                            class="badge badge-accent text-base-100"
+                          >
+                            {{ sym }}
+                          </span>
+                        </template>
+                        <span v-else class="italic opacity-70">Null</span>
+                      </div>
+                    </div>
+                    <div class="mt-4">
+                      <strong>Blacklist</strong>
+                      <div class="mt-2 flex flex-wrap gap-2">
+                        <template
+                          v-if="problem.config?.staticAnalysis?.libraryRestrictions?.blacklist?.length"
+                        >
+                          <span
+                            v-for="sym in problem.config.staticAnalysis.libraryRestrictions.blacklist"
+                            :key="'lib-b-' + sym"
+                            class="badge badge-error text-base-100"
+                          >
+                            {{ sym }}
+                          </span>
+                        </template>
+                        <span v-else class="italic opacity-70">Null</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Network Access Restrictions -->
+              <div class="rounded-box border border-base-300 bg-base-200">
+                <div class="collapse collapse-arrow">
+                  <input type="checkbox" class="peer" />
+                  <div class="collapse-title text-lg font-semibold">
+                    <div class="flex items-center justify-between pr-8">
+                      <span>Network Access Restrictions</span>
+                      <span class="text-sm italic opacity-80">
+                        {{
+                          problem.config?.staticAnalysis?.networkAccessRestriction?.firewallExtranet
+                            ?.whitelist?.length ||
+                          problem.config?.staticAnalysis?.networkAccessRestriction?.firewallExtranet
+                            ?.blacklist?.length ||
+                          problem.config?.staticAnalysis?.networkAccessRestriction?.connectWithLocal
+                            ?.whitelist?.length ||
+                          problem.config?.staticAnalysis?.networkAccessRestriction?.connectWithLocal
+                            ?.blacklist?.length
+                            ? "Configured"
+                            : "Empty"
+                        }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="collapse-content">
+                    <!-- Firewall Extranet -->
+                    <div class="border-b border-base-300 pb-3">
+                      <div class="mb-2 font-semibold">Firewall Extranet</div>
+                      <div class="ml-2">
+                        <div><strong>Whitelist</strong></div>
+                        <div class="mt-2 flex flex-wrap gap-2">
+                          <template
+                            v-if="
+                              problem.config?.staticAnalysis?.networkAccessRestriction?.firewallExtranet
+                                ?.whitelist?.length
+                            "
+                          >
+                            <span
+                              v-for="sym in problem.config.staticAnalysis.networkAccessRestriction
+                                .firewallExtranet.whitelist"
+                              :key="'fw-w-' + sym"
+                              class="badge badge-accent text-base-100"
+                            >
+                              {{ sym }}
+                            </span>
+                          </template>
+                          <span v-else class="italic opacity-70">Null</span>
+                        </div>
+                        <div class="mt-3"><strong>Blacklist</strong></div>
+                        <div class="mt-2 flex flex-wrap gap-2">
+                          <template
+                            v-if="
+                              problem.config?.staticAnalysis?.networkAccessRestriction?.firewallExtranet
+                                ?.blacklist?.length
+                            "
+                          >
+                            <span
+                              v-for="sym in problem.config.staticAnalysis.networkAccessRestriction
+                                .firewallExtranet.blacklist"
+                              :key="'fw-b-' + sym"
+                              class="badge badge-error text-base-100"
+                            >
+                              {{ sym }}
+                            </span>
+                          </template>
+                          <span v-else class="italic opacity-70">Null</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Connect With Local -->
+                    <div class="mt-4">
+                      <div class="mb-2 font-semibold">Connect With Local</div>
+                      <div class="ml-2">
+                        <div><strong>Whitelist</strong></div>
+                        <div class="mt-2 flex flex-wrap gap-2">
+                          <template
+                            v-if="
+                              problem.config?.staticAnalysis?.networkAccessRestriction?.connectWithLocal
+                                ?.whitelist?.length
+                            "
+                          >
+                            <span
+                              v-for="sym in problem.config.staticAnalysis.networkAccessRestriction
+                                .connectWithLocal.whitelist"
+                              :key="'loc-w-' + sym"
+                              class="badge badge-accent text-base-100"
+                            >
+                              {{ sym }}
+                            </span>
+                          </template>
+                          <span v-else class="italic opacity-70">Null</span>
+                        </div>
+                        <div class="mt-3"><strong>Blacklist</strong></div>
+                        <div class="mt-2 flex flex-wrap gap-2">
+                          <template
+                            v-if="
+                              problem.config?.staticAnalysis?.networkAccessRestriction?.connectWithLocal
+                                ?.blacklist?.length
+                            "
+                          >
+                            <span
+                              v-for="sym in problem.config.staticAnalysis.networkAccessRestriction
+                                .connectWithLocal.blacklist"
+                              :key="'loc-b-' + sym"
+                              class="badge badge-error text-base-100"
+                            >
+                              {{ sym }}
+                            </span>
+                          </template>
+                          <span v-else class="italic opacity-70">Null</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="card-title md:text-xl lg:text-2xl">
             {{ $t("components.problem.card.subtasks.title") }}
           </div>

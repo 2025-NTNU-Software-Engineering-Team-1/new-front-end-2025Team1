@@ -50,7 +50,7 @@ export const useSession = defineStore("session", {
         this.role = role;
         this.email = email;
         this.state = SessionState.IsLogin;
-      } catch (error) {
+      } catch {
         this.$reset();
         this.state = SessionState.IsNotLogin;
       }

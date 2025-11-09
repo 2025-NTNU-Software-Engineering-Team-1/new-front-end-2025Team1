@@ -72,6 +72,20 @@
           "placeholder": "Paste your code here",
           "testInputPlaceholder": "Enter your test input here"
         },
+        "topic":{
+          "dec":"description",
+          "input":"input",
+          "output":"output",
+          "hint":"hint",
+          "sample":{
+            "id":"#",
+            "input":"input",
+            "output":"output"
+          },
+          "noContent":"no content",
+          "expand":"open",
+          "collapse":"close"
+        },
         "lang": {
           "text": "Language",
           "select": "Select language"

@@ -18,6 +18,9 @@ useTitle(`Test - ${route.params.id} - ${route.params.name} | Normal OJ`);
 const router = useRouter();
 const { data: problem, error, isLoading } = useAxios<Problem>(`/problem/view/${route.params.id}`, fetcher);
 
+const isExpanded=ref(true);
+
+
 const lang = useStorage(LOCAL_STORAGE_KEY.LAST_USED_LANG, -1);
 const showSubmitModal = ref(false);
 const showTestcaseModal = ref(false);
@@ -186,6 +189,68 @@ function saveTestcaseSettings() {
             </div>
 
             <div class="divider" />
+            <div  class="mt-4 p-4 bg-base-200 rounded-lg relative transition-all duration-300"
+            >
+              <button
+                class="absolute bottom-3 right-4 z-10 text-gray-500 hover:text-gray-700"
+                @click="isExpanded = !isExpanded"
+              >
+                <img v-if="isExpanded" src="/expand.png" alt="t('course.problem.test.topic.collapse')" class="h-5 w-5"
+                />
+                <img v-else src="/expand.png" alt="t('course.problem.test.topic.expand')" class="h-5 w-5"
+                />
+              </button>
+              <div
+                class="transition-all duration-300"
+                :class="{ 'max-h-96 overflow-hidden': !isExpanded }"
+              >
+                <h2 class="text-xl font-bold mb-2">{{ problem?.problemName }}</h2>
+                <div class="prose max-w-none leading-relaxed">
+                  <h3 class="font-semibold text-lg mt-4">{{t("course.problem.test.topic.dec")}}</h3>
+                  <p v-html="problem?.description.description" class="whitespace-pre-line"></p>
+                  <h3 class="font-semibold text-lg mt-4">{{t("course.problem.test.topic.input")}}</h3>
+                  <p v-html="problem?.description.input" class="whitespace-pre-line"></p>
+                  <h3 class="font-semibold text-lg mt-4">{{t("course.problem.test.topic.output")}}</h3>
+                  <p v-html="problem?.description.output" class="whitespace-pre-line"></p>
+                  <div class="overflow-x-auto rounded-lg border border-base-300 bg-base-100 overflow-hidden p-0">
+                    <table class="table w-full border-collapse border-0 !m-0 !border-spacing-0">
+                      <thead class="bg-base-300 rounded-none">
+                        <tr>
+                          <th>{{ t("course.problem.test.topic.sample.id") }}</th>
+                          <th>{{ t("course.problem.test.topic.sample.input") }}</th>
+                          <th>{{ t("course.problem.test.topic.sample.output") }}</th>
+                        </tr>
+                      </thead>
+                      <tbody class="rounded-none">
+                        <tr v-for="(input, i) in problem?.description?.sampleInput || []" :key="i">
+                          <td class="align-top">{{ i+1 }}</td>
+                          <td class="align-top">
+                            <sample-code-block
+                              v-if="problem?.description?.sampleInput?.[i]"
+                              :code="problem?.description?.sampleInput?.[i]"
+                            ></sample-code-block>
+                            <span v-else class="italic opacity-70">{{
+                              t("course.problem.test.topic.noContent")
+                            }}</span>
+                          </td>
+                          <td class="align-top">
+                            <sample-code-block
+                              v-if="problem?.description?.sampleOutput?.[i]"
+                              :code="problem?.description?.sampleOutput?.[i]"
+                            ></sample-code-block>
+                            <span v-else class="italic opacity-70">{{
+                              t("course.problem.test.topic.noContent")
+                            }}</span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                    <h3 class="font-semibold text-lg mt-4">{{t("course.problem.test.topic.hint")}}</h3>
+                    <p v-html="problem?.description.hint" class="whitespace-pre-line"></p>
+                </div>
+              </div>
+            </div>
 
             <div class="flex justify-between items-center gap-4">
               <div class="form-control flex-1">
@@ -207,7 +272,7 @@ function saveTestcaseSettings() {
                 <label class="label" v-show="v$.lang.$error">
                   <span class="label-text-alt text-error">{{ v$.lang.$errors[0]?.$message }}</span>
                 </label>
-            </div>
+              </div>
 
               <div class="flex gap-2">
                 <router-link

@@ -5,6 +5,9 @@
     "module": "esnext",
     "moduleResolution": "node",
     "strict": true,
+    "strictNullChecks": false,
+    "strictPropertyInitialization": false,
+    "noImplicitAny": false,
     "jsx": "preserve",
     "sourceMap": true,
     "resolveJsonModule": true,
@@ -20,8 +23,12 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@framework/*": ["src/live2d/Framework/src/*"]
+      "@/*": [
+        "src/*"
+      ],
+      "@framework/*": [
+        "src/live2d/Framework/src/*"
+      ]
     }
   },
   "include": [
@@ -29,6 +36,10 @@
     "src/**/*.d.ts",
     "src/**/*.tsx",
     "src/**/*.vue"
+  ],
+  "exclude": [
+    "src/live2d/Framework/**/*",
+    "src/live2d/Samples/**/*"
   ],
   "references": [
     {

@@ -5,8 +5,8 @@
  * that can be found at https://www.live2d.com/eula/live2d-open-software-license-agreement_en.html.
  */
 
-import { CubismIdHandle } from './id/cubismid';
-import { csmMap } from './type/csmmap';
+import { CubismIdHandle } from "./id/cubismid";
+import { csmMap } from "./type/csmmap";
 
 /**
  * モデル設定情報を取り扱う関数を宣言した純粋仮想クラス。
@@ -126,10 +126,7 @@ export abstract class ICubismModelSetting {
    * @param index 配列のインデックス値
    * @return サウンドファイルの名前
    */
-  public abstract getMotionSoundFileName(
-    groupName: string,
-    index: number
-  ): string;
+  public abstract getMotionSoundFileName(groupName: string, index: number): string;
 
   /**
    * モーション開始時のフェードイン処理時間を取得する
@@ -137,10 +134,7 @@ export abstract class ICubismModelSetting {
    * @param index 配列のインデックス値
    * @return フェードイン処理時間[秒]
    */
-  public abstract getMotionFadeInTimeValue(
-    groupName: string,
-    index: number
-  ): number;
+  public abstract getMotionFadeInTimeValue(groupName: string, index: number): number;
 
   /**
    * モーション終了時のフェードアウト処理時間を取得する
@@ -148,10 +142,7 @@ export abstract class ICubismModelSetting {
    * @param index 配列のインデックス値
    * @return フェードアウト処理時間[秒]
    */
-  public abstract getMotionFadeOutTimeValue(
-    groupName: string,
-    index: number
-  ): number;
+  public abstract getMotionFadeOutTimeValue(groupName: string, index: number): number;
 
   /**
    * ユーザーデータのファイル名を取得する
@@ -195,7 +186,7 @@ export abstract class ICubismModelSetting {
 }
 
 // Namespace definition for compatibility.
-import * as $ from './icubismmodelsetting';
+import * as $ from "./icubismmodelsetting";
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace Live2DCubismFramework {
   export const ICubismModelSetting = $.ICubismModelSetting;

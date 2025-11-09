@@ -5,7 +5,7 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc --noEmit && vite build",
+    "build": "vue-tsc --noEmit -p tsconfig.vue-tsc.json && vite build",
     "preview": "vite preview",
     "cf-build": "npm install -g pnpm && pnpm run build",
     "lint": "eslint -c .eslintrc.js --ext .ts . && prettier -c .prettierrc --check ./src",

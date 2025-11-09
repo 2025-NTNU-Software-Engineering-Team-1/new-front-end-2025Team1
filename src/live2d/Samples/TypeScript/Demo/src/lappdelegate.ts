@@ -5,12 +5,12 @@
  * that can be found at https://www.live2d.com/eula/live2d-open-software-license-agreement_en.html.
  */
 
-import { csmVector } from '@framework/type/csmvector';
-import { CubismFramework, Option } from '@framework/live2dcubismframework';
-import * as LAppDefine from './lappdefine';
-import { LAppPal } from './lapppal';
-import { LAppSubdelegate } from './lappsubdelegate';
-import { CubismLogError } from '@framework/utils/cubismdebug';
+import { csmVector } from "@framework/type/csmvector";
+import { CubismFramework, Option } from "@framework/live2dcubismframework";
+import * as LAppDefine from "./lappdefine";
+import { LAppPal } from "./lapppal";
+import { LAppSubdelegate } from "./lappsubdelegate";
+import { CubismLogError } from "@framework/utils/cubismdebug";
 
 export let s_instance: LAppDelegate = null;
 
@@ -48,11 +48,7 @@ export class LAppDelegate {
    * ポインタがアクティブになるときに呼ばれる。
    */
   private onPointerBegan(e: PointerEvent): void {
-    for (
-      let ite = this._subdelegates.begin();
-      ite.notEqual(this._subdelegates.end());
-      ite.preIncrement()
-    ) {
+    for (let ite = this._subdelegates.begin(); ite.notEqual(this._subdelegates.end()); ite.preIncrement()) {
       ite.ptr().onPointBegan(e.pageX, e.pageY);
     }
   }
@@ -61,11 +57,7 @@ export class LAppDelegate {
    * ポインタが動いたら呼ばれる。
    */
   private onPointerMoved(e: PointerEvent): void {
-    for (
-      let ite = this._subdelegates.begin();
-      ite.notEqual(this._subdelegates.end());
-      ite.preIncrement()
-    ) {
+    for (let ite = this._subdelegates.begin(); ite.notEqual(this._subdelegates.end()); ite.preIncrement()) {
       ite.ptr().onPointMoved(e.pageX, e.pageY);
     }
   }
@@ -74,11 +66,7 @@ export class LAppDelegate {
    * ポインタがアクティブでなくなったときに呼ばれる。
    */
   private onPointerEnded(e: PointerEvent): void {
-    for (
-      let ite = this._subdelegates.begin();
-      ite.notEqual(this._subdelegates.end());
-      ite.preIncrement()
-    ) {
+    for (let ite = this._subdelegates.begin(); ite.notEqual(this._subdelegates.end()); ite.preIncrement()) {
       ite.ptr().onPointEnded(e.pageX, e.pageY);
     }
   }
@@ -87,11 +75,7 @@ export class LAppDelegate {
    * ポインタがキャンセルされると呼ばれる。
    */
   private onPointerCancel(e: PointerEvent): void {
-    for (
-      let ite = this._subdelegates.begin();
-      ite.notEqual(this._subdelegates.end());
-      ite.preIncrement()
-    ) {
+    for (let ite = this._subdelegates.begin(); ite.notEqual(this._subdelegates.end()); ite.preIncrement()) {
       ite.ptr().onTouchCancel(e.pageX, e.pageY);
     }
   }
@@ -146,13 +130,13 @@ export class LAppDelegate {
    * イベントリスナーを解除する。
    */
   private releaseEventListener(): void {
-    document.removeEventListener('pointerup', this.pointBeganEventListener);
+    document.removeEventListener("pointerup", this.pointBeganEventListener);
     this.pointBeganEventListener = null;
-    document.removeEventListener('pointermove', this.pointMovedEventListener);
+    document.removeEventListener("pointermove", this.pointMovedEventListener);
     this.pointMovedEventListener = null;
-    document.removeEventListener('pointerdown', this.pointEndedEventListener);
+    document.removeEventListener("pointerdown", this.pointEndedEventListener);
     this.pointEndedEventListener = null;
-    document.removeEventListener('pointerdown', this.pointCancelEventListener);
+    document.removeEventListener("pointerdown", this.pointCancelEventListener);
     this.pointCancelEventListener = null;
   }
 
@@ -160,11 +144,7 @@ export class LAppDelegate {
    * Subdelegate を解放する
    */
   private releaseSubdelegates(): void {
-    for (
-      let ite = this._subdelegates.begin();
-      ite.notEqual(this._subdelegates.end());
-      ite.preIncrement()
-    ) {
+    for (let ite = this._subdelegates.begin(); ite.notEqual(this._subdelegates.end()); ite.preIncrement()) {
       ite.ptr().release();
     }
 
@@ -195,17 +175,17 @@ export class LAppDelegate {
     this.pointCancelEventListener = this.onPointerCancel.bind(this);
 
     // ポインタ関連コールバック関数登録
-    document.addEventListener('pointerdown', this.pointBeganEventListener, {
-      passive: true
+    document.addEventListener("pointerdown", this.pointBeganEventListener, {
+      passive: true,
     });
-    document.addEventListener('pointermove', this.pointMovedEventListener, {
-      passive: true
+    document.addEventListener("pointermove", this.pointMovedEventListener, {
+      passive: true,
     });
-    document.addEventListener('pointerup', this.pointEndedEventListener, {
-      passive: true
+    document.addEventListener("pointerup", this.pointEndedEventListener, {
+      passive: true,
     });
-    document.addEventListener('pointercancel', this.pointCancelEventListener, {
-      passive: true
+    document.addEventListener("pointercancel", this.pointCancelEventListener, {
+      passive: true,
     });
   }
 
@@ -242,7 +222,7 @@ export class LAppDelegate {
     this._canvases.prepareCapacity(LAppDefine.CanvasNum);
     this._subdelegates.prepareCapacity(LAppDefine.CanvasNum);
     for (let i = 0; i < LAppDefine.CanvasNum; i++) {
-      const canvas = document.createElement('canvas');
+      const canvas = document.createElement("canvas");
       this._canvases.pushBack(canvas);
       canvas.style.width = `${width}vw`;
       canvas.style.height = `${height}vh`;
@@ -260,7 +240,7 @@ export class LAppDelegate {
     for (let i = 0; i < LAppDefine.CanvasNum; i++) {
       if (this._subdelegates.at(i).isContextLost()) {
         CubismLogError(
-          `The context for Canvas at index ${i} was lost, possibly because the acquisition limit for WebGLRenderingContext was reached.`
+          `The context for Canvas at index ${i} was lost, possibly because the acquisition limit for WebGLRenderingContext was reached.`,
         );
       }
     }

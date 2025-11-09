@@ -5,12 +5,12 @@
  * that can be found at https://www.live2d.com/eula/live2d-open-software-license-agreement_en.html.
  */
 
-import * as LAppDefine from './lappdefine';
-import { LAppGlManager } from './lappglmanager';
-import { LAppLive2DManager } from './lapplive2dmanager';
-import { LAppPal } from './lapppal';
-import { LAppTextureManager } from './lapptexturemanager';
-import { LAppView } from './lappview';
+import * as LAppDefine from "./lappdefine";
+import { LAppGlManager } from "./lappglmanager";
+import { LAppLive2DManager } from "./lapplive2dmanager";
+import { LAppPal } from "./lapppal";
+import { LAppTextureManager } from "./lapptexturemanager";
+import { LAppView } from "./lappview";
 
 /**
  * Canvasに関連する操作を取りまとめるクラス
@@ -60,7 +60,7 @@ export class LAppSubdelegate {
 
     this._canvas = canvas;
 
-    if (LAppDefine.CanvasSize === 'auto') {
+    if (LAppDefine.CanvasSize === "auto") {
       this.resizeCanvas();
     } else {
       canvas.width = LAppDefine.CanvasSize.width;
@@ -85,9 +85,8 @@ export class LAppSubdelegate {
 
     this._live2dManager.initialize(this);
 
-    this._resizeObserver = new ResizeObserver(
-      (entries: ResizeObserverEntry[], observer: ResizeObserver) =>
-        this.resizeObserverCallback.call(this, entries, observer)
+    this._resizeObserver = new ResizeObserver((entries: ResizeObserverEntry[], observer: ResizeObserver) =>
+      this.resizeObserverCallback.call(this, entries, observer),
     );
     this._resizeObserver.observe(this._canvas);
 
@@ -103,11 +102,8 @@ export class LAppSubdelegate {
     this._view.initializeSprite();
   }
 
-  private resizeObserverCallback(
-    entries: ResizeObserverEntry[],
-    observer: ResizeObserver
-  ): void {
-    if (LAppDefine.CanvasSize === 'auto') {
+  private resizeObserverCallback(entries: ResizeObserverEntry[], observer: ResizeObserver): void {
+    if (LAppDefine.CanvasSize === "auto") {
       this._needResize = true;
     }
   }
@@ -159,20 +155,20 @@ export class LAppSubdelegate {
     const vertexShaderId = gl.createShader(gl.VERTEX_SHADER);
 
     if (vertexShaderId == null) {
-      LAppPal.printMessage('failed to create vertexShader');
+      LAppPal.printMessage("failed to create vertexShader");
       return null;
     }
 
     const vertexShader: string =
-      'precision mediump float;' +
-      'attribute vec3 position;' +
-      'attribute vec2 uv;' +
-      'varying vec2 vuv;' +
-      'void main(void)' +
-      '{' +
-      '   gl_Position = vec4(position, 1.0);' +
-      '   vuv = uv;' +
-      '}';
+      "precision mediump float;" +
+      "attribute vec3 position;" +
+      "attribute vec2 uv;" +
+      "varying vec2 vuv;" +
+      "void main(void)" +
+      "{" +
+      "   gl_Position = vec4(position, 1.0);" +
+      "   vuv = uv;" +
+      "}";
 
     gl.shaderSource(vertexShaderId, vertexShader);
     gl.compileShader(vertexShaderId);
@@ -181,18 +177,18 @@ export class LAppSubdelegate {
     const fragmentShaderId = gl.createShader(gl.FRAGMENT_SHADER);
 
     if (fragmentShaderId == null) {
-      LAppPal.printMessage('failed to create fragmentShader');
+      LAppPal.printMessage("failed to create fragmentShader");
       return null;
     }
 
     const fragmentShader: string =
-      'precision mediump float;' +
-      'varying vec2 vuv;' +
-      'uniform sampler2D texture;' +
-      'void main(void)' +
-      '{' +
-      '   gl_FragColor = texture2D(texture, vuv);' +
-      '}';
+      "precision mediump float;" +
+      "varying vec2 vuv;" +
+      "uniform sampler2D texture;" +
+      "void main(void)" +
+      "{" +
+      "   gl_FragColor = texture2D(texture, vuv);" +
+      "}";
 
     gl.shaderSource(fragmentShaderId, fragmentShader);
     gl.compileShader(fragmentShaderId);
@@ -249,7 +245,7 @@ export class LAppSubdelegate {
    */
   public onPointBegan(pageX: number, pageY: number): void {
     if (!this._view) {
-      LAppPal.printMessage('view notfound');
+      LAppPal.printMessage("view notfound");
       return;
     }
     this._captured = true;
@@ -281,7 +277,7 @@ export class LAppSubdelegate {
     this._captured = false;
 
     if (!this._view) {
-      LAppPal.printMessage('view notfound');
+      LAppPal.printMessage("view notfound");
       return;
     }
 
@@ -298,7 +294,7 @@ export class LAppSubdelegate {
     this._captured = false;
 
     if (!this._view) {
-      LAppPal.printMessage('view notfound');
+      LAppPal.printMessage("view notfound");
       return;
     }
 

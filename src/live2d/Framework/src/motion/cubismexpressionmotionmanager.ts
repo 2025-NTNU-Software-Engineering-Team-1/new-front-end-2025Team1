@@ -1,15 +1,12 @@
-import { CubismId, CubismIdHandle } from '../id/cubismid';
-import { LogLevel, csmDelete } from '../live2dcubismframework';
-import { CubismModel } from '../model/cubismmodel';
-import { csmVector, iterator } from '../type/csmvector';
-import { ACubismMotion } from './acubismmotion';
-import { CubismExpressionMotion } from './cubismexpressionmotion';
-import { CubismMotionQueueEntry } from './cubismmotionqueueentry';
-import {
-  CubismMotionQueueEntryHandle,
-  CubismMotionQueueManager
-} from './cubismmotionqueuemanager';
-import { CubismLogInfo } from '../utils/cubismdebug';
+import { CubismId, CubismIdHandle } from "../id/cubismid";
+import { LogLevel, csmDelete } from "../live2dcubismframework";
+import { CubismModel } from "../model/cubismmodel";
+import { csmVector, iterator } from "../type/csmvector";
+import { ACubismMotion } from "./acubismmotion";
+import { CubismExpressionMotion } from "./cubismexpressionmotion";
+import { CubismMotionQueueEntry } from "./cubismmotionqueueentry";
+import { CubismMotionQueueEntryHandle, CubismMotionQueueManager } from "./cubismmotionqueuemanager";
+import { CubismLogInfo } from "../utils/cubismdebug";
 
 /**
  * @brief パラメータに適用する表情の値を持たせる構造体
@@ -65,7 +62,7 @@ export class CubismExpressionMotionManager extends CubismMotionQueueManager {
    */
   public getCurrentPriority(): number {
     CubismLogInfo(
-      'CubismExpressionMotionManager.getCurrentPriority() is deprecated because a priority value is not actually used during expression motion playback.'
+      "CubismExpressionMotionManager.getCurrentPriority() is deprecated because a priority value is not actually used during expression motion playback.",
     );
     return this._currentPriority;
   }
@@ -82,7 +79,7 @@ export class CubismExpressionMotionManager extends CubismMotionQueueManager {
    */
   public getReservePriority(): number {
     CubismLogInfo(
-      'CubismExpressionMotionManager.getReservePriority() is deprecated because a priority value is not actually used during expression motion playback.'
+      "CubismExpressionMotionManager.getReservePriority() is deprecated because a priority value is not actually used during expression motion playback.",
     );
     return this._reservePriority;
   }
@@ -94,14 +91,8 @@ export class CubismExpressionMotionManager extends CubismMotionQueueManager {
    * @returns               表情モーションのウェイト
    */
   public getFadeWeight(index: number): number {
-    if (
-      index < 0 ||
-      this._fadeWeights.getSize() < 1 ||
-      index >= this._fadeWeights.getSize()
-    ) {
-      console.warn(
-        'Failed to get the fade weight value. The element at that index does not exist.'
-      );
+    if (index < 0 || this._fadeWeights.getSize() < 1 || index >= this._fadeWeights.getSize()) {
+      console.warn("Failed to get the fade weight value. The element at that index does not exist.");
       return -1;
     }
 
@@ -115,14 +106,8 @@ export class CubismExpressionMotionManager extends CubismMotionQueueManager {
    * @param[in]    index    表情モーションのウェイト
    */
   public setFadeWeight(index: number, expressionFadeWeight: number): void {
-    if (
-      index < 0 ||
-      this._fadeWeights.getSize() < 1 ||
-      this._fadeWeights.getSize() <= index
-    ) {
-      console.warn(
-        'Failed to set the fade weight value. The element at that index does not exist.'
-      );
+    if (index < 0 || this._fadeWeights.getSize() < 1 || this._fadeWeights.getSize() <= index) {
+      console.warn("Failed to set the fade weight value. The element at that index does not exist.");
       return;
     }
 
@@ -141,7 +126,7 @@ export class CubismExpressionMotionManager extends CubismMotionQueueManager {
    */
   public setReservePriority(priority: number) {
     CubismLogInfo(
-      'CubismExpressionMotionManager.setReservePriority() is deprecated because a priority value is not actually used during expression motion playback.'
+      "CubismExpressionMotionManager.setReservePriority() is deprecated because a priority value is not actually used during expression motion playback.",
     );
     this._reservePriority = priority;
   }
@@ -163,10 +148,10 @@ export class CubismExpressionMotionManager extends CubismMotionQueueManager {
   public startMotionPriority(
     motion: ACubismMotion,
     autoDelete: boolean,
-    priority: number
+    priority: number,
   ): CubismMotionQueueEntryHandle {
     CubismLogInfo(
-      'CubismExpressionMotionManager.startMotionPriority() is deprecated because a priority value is not actually used during expression motion playback.'
+      "CubismExpressionMotionManager.startMotionPriority() is deprecated because a priority value is not actually used during expression motion playback.",
     );
     if (priority == this.getReservePriority()) {
       this.setReservePriority(0);
@@ -215,9 +200,7 @@ export class CubismExpressionMotionManager extends CubismMotionQueueManager {
         continue;
       }
 
-      const expressionMotion = <CubismExpressionMotion>(
-        motionQueueEntry.getCubismMotion()
-      );
+      const expressionMotion = <CubismExpressionMotion>motionQueueEntry.getCubismMotion();
 
       if (expressionMotion == null) {
         csmDelete(motionQueueEntry);
@@ -237,10 +220,7 @@ export class CubismExpressionMotionManager extends CubismMotionQueueManager {
           let index = -1;
           // リストにパラメータIDが存在するか検索
           for (let j = 0; j < this._expressionParameterValues.getSize(); ++j) {
-            if (
-              this._expressionParameterValues.at(j).parameterId !=
-              expressionParameters.at(i).parameterId
-            ) {
+            if (this._expressionParameterValues.at(j).parameterId != expressionParameters.at(i).parameterId) {
               continue;
             }
 
@@ -263,16 +243,10 @@ export class CubismExpressionMotionManager extends CubismMotionQueueManager {
       }
 
       // ------ 値を計算する ------
-      expressionMotion.setupMotionQueueEntry(
-        motionQueueEntry,
-        this._userTimeSeconds
-      );
+      expressionMotion.setupMotionQueueEntry(motionQueueEntry, this._userTimeSeconds);
       this.setFadeWeight(
         expressionIndex,
-        expressionMotion.updateFadeWeight(
-          motionQueueEntry,
-          this._userTimeSeconds
-        )
+        expressionMotion.updateFadeWeight(motionQueueEntry, this._userTimeSeconds),
       );
       expressionMotion.calculateExpressionParameters(
         model,
@@ -280,7 +254,7 @@ export class CubismExpressionMotionManager extends CubismMotionQueueManager {
         motionQueueEntry,
         this._expressionParameterValues,
         expressionIndex,
-        this.getFadeWeight(expressionIndex)
+        this.getFadeWeight(expressionIndex),
       );
 
       expressionWeight +=
@@ -288,17 +262,14 @@ export class CubismExpressionMotionManager extends CubismMotionQueueManager {
           ? 1.0
           : CubismMath.getEasingSine(
               (this._userTimeSeconds - motionQueueEntry.getFadeInStartTime()) /
-                expressionMotion.getFadeInTime()
+                expressionMotion.getFadeInTime(),
             );
 
       updated = true;
 
       if (motionQueueEntry.isTriggeredFadeOut()) {
         // フェードアウト開始
-        motionQueueEntry.startFadeOut(
-          motionQueueEntry.getFadeOutSeconds(),
-          this._userTimeSeconds
-        );
+        motionQueueEntry.startFadeOut(motionQueueEntry.getFadeOutSeconds(), this._userTimeSeconds);
       }
 
       ite.preIncrement();
@@ -307,9 +278,7 @@ export class CubismExpressionMotionManager extends CubismMotionQueueManager {
 
     // ----- 最新のExpressionのフェードが完了していればそれ以前を削除する ------
     if (motions.getSize() > 1) {
-      const latestFadeWeight: number = this.getFadeWeight(
-        this._fadeWeights.getSize() - 1
-      );
+      const latestFadeWeight: number = this.getFadeWeight(this._fadeWeights.getSize() - 1);
       if (latestFadeWeight >= 1.0) {
         // 配列の最後の要素は削除しない
         for (let i = motions.getSize() - 2; i >= 0; --i) {
@@ -330,16 +299,13 @@ export class CubismExpressionMotionManager extends CubismMotionQueueManager {
       const expressionParameterValue = this._expressionParameterValues.at(i);
       model.setParameterValueById(
         expressionParameterValue.parameterId,
-        (expressionParameterValue.overwriteValue +
-          expressionParameterValue.additiveValue) *
+        (expressionParameterValue.overwriteValue + expressionParameterValue.additiveValue) *
           expressionParameterValue.multiplyValue,
-        expressionWeight
+        expressionWeight,
       );
 
-      expressionParameterValue.additiveValue =
-        CubismExpressionMotion.DefaultAdditiveValue;
-      expressionParameterValue.multiplyValue =
-        CubismExpressionMotion.DefaultMultiplyValue;
+      expressionParameterValue.additiveValue = CubismExpressionMotion.DefaultAdditiveValue;
+      expressionParameterValue.multiplyValue = CubismExpressionMotion.DefaultMultiplyValue;
     }
 
     return updated;
@@ -353,9 +319,9 @@ export class CubismExpressionMotionManager extends CubismMotionQueueManager {
 }
 
 // Namespace definition for compatibility.
-import * as $ from './cubismexpressionmotionmanager';
-import { CubismMath } from '../math/cubismmath';
-import { CubismDebug, CubismLogError } from '../utils/cubismdebug';
+import * as $ from "./cubismexpressionmotionmanager";
+import { CubismMath } from "../math/cubismmath";
+import { CubismDebug, CubismLogError } from "../utils/cubismdebug";
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace Live2DCubismFramework {
   export const CubismExpressionMotionManager = $.CubismExpressionMotionManager;

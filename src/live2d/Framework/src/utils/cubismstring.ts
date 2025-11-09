@@ -18,10 +18,10 @@ export class CubismString {
       /\{(\d+)\}/g,
       (
         m,
-        k // m="{0}", k="0"
+        k, // m="{0}", k="0"
       ) => {
         return args[k];
-      }
+      },
     );
   }
 
@@ -35,11 +35,8 @@ export class CubismString {
   public static isStartWith(text: string, startWord: string): boolean {
     let textIndex = 0;
     let startWordIndex = 0;
-    while (startWord[startWordIndex] != '\0') {
-      if (
-        text[textIndex] == '\0' ||
-        text[textIndex++] != startWord[startWordIndex++]
-      ) {
+    while (startWord[startWordIndex] != "\0") {
+      if (text[textIndex] == "\0" || text[textIndex++] != startWord[startWordIndex++]) {
         return false;
       }
     }
@@ -55,12 +52,7 @@ export class CubismString {
    * @param outEndPos 一文字も読み込まなかった場合はエラー値(-1)が入る
    * @return 解析結果の数値
    */
-  public static stringToFloat(
-    string: string,
-    length: number,
-    position: number,
-    outEndPos: number[]
-  ): number {
+  public static stringToFloat(string: string, length: number, position: number, outEndPos: number[]): number {
     let i: number = position;
     let minus = false; // マイナスフラグ
     let period = false;
@@ -78,7 +70,7 @@ export class CubismString {
       const c = string[i];
       if (0 <= parseInt(c) && parseInt(c) <= 9) {
         v1 = v1 * 10 + (parseInt(c) - 0);
-      } else if (c == '.') {
+      } else if (c == ".") {
         period = true;
         i++;
         break;
@@ -121,7 +113,7 @@ export class CubismString {
 }
 
 // Namespace definition for compatibility.
-import * as $ from './cubismstring';
+import * as $ from "./cubismstring";
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace Live2DCubismFramework {
   export const CubismString = $.CubismString;

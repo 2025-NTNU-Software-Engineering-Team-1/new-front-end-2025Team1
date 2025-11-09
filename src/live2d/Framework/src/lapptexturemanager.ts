@@ -5,8 +5,8 @@
  * that can be found at https://www.live2d.com/eula/live2d-open-software-license-agreement_en.html.
  */
 
-import { csmVector, iterator } from '@framework/type/csmvector';
-import { LAppGlManager } from './lappglmanager';
+import { csmVector, iterator } from "@framework/type/csmvector";
+import { LAppGlManager } from "./lappglmanager";
 
 /**
  * テクスチャ管理クラス
@@ -45,76 +45,56 @@ export class LAppTextureManager {
 	 * @param usePremultiply Premult 処理を有効にするか
 	 * @param callback 読み込み完了時に呼ばれるコールバック
 	 */
-	public createTextureFromPngFile(
-		fileName: string,
-		gl: WebGLRenderingContext | WebGL2RenderingContext,
-		usePremultiply: boolean,
-		callback: (textureInfo: TextureInfo | null) => void
-	): void {
-		const img = new Image();
+  public createTextureFromPngFile(
+    fileName: string,
+    gl: WebGLRenderingContext | WebGL2RenderingContext,
+    usePremultiply: boolean,
+    callback: (textureInfo: TextureInfo | null) => void,
+  ): void {
+    const img = new Image();
 
-		img.addEventListener(
-			'load',
-			() => {
-				const texture = gl.createTexture();
-				if (!texture) {
-					console.error('[APP] createTextureFromPngFile: createTexture 失敗', fileName);
-					callback(null);
-					return;
-				}
+    img.addEventListener(
+      "load",
+      () => {
+        const texture = gl.createTexture();
+        if (!texture) {
+          console.error("[APP] createTextureFromPngFile: createTexture 失敗", fileName);
+          callback(null);
+          return;
+        }
 
-				gl.bindTexture(gl.TEXTURE_2D, texture);
-				gl.pixelStorei(
-					gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,
-					usePremultiply ? 1 : 0
-				);
-				gl.texImage2D(
-					gl.TEXTURE_2D,
-					0,
-					gl.RGBA,
-					gl.RGBA,
-					gl.UNSIGNED_BYTE,
-					img
-				);
-				gl.texParameteri(
-					gl.TEXTURE_2D,
-					gl.TEXTURE_MIN_FILTER,
-					gl.LINEAR_MIPMAP_LINEAR
-				);
-				gl.texParameteri(
-					gl.TEXTURE_2D,
-					gl.TEXTURE_MAG_FILTER,
-					gl.LINEAR
-				);
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, usePremultiply ? 1 : 0);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
-				gl.generateMipmap(gl.TEXTURE_2D);
-				gl.bindTexture(gl.TEXTURE_2D, null);
+        gl.generateMipmap(gl.TEXTURE_2D);
+        gl.bindTexture(gl.TEXTURE_2D, null);
 
-				// TextureInfo を作って管理ベクタに入れる
-				const textureInfo = new TextureInfo();
-				textureInfo.id = texture;
-				textureInfo.img = img;
-				textureInfo.width = img.width;
-				textureInfo.height = img.height;
-				textureInfo.usePremultply = usePremultiply;
-				textureInfo.fileName = fileName;
+        // TextureInfo を作って管理ベクタに入れる
+        const textureInfo = new TextureInfo();
+        textureInfo.id = texture;
+        textureInfo.img = img;
+        textureInfo.width = img.width;
+        textureInfo.height = img.height;
+        textureInfo.usePremultply = usePremultiply;
+        textureInfo.fileName = fileName;
 
-				this._textures.pushBack(textureInfo);
+        this._textures.pushBack(textureInfo);
 
-				callback(textureInfo);
-			},
-			{ passive: true }
-		);
+        callback(textureInfo);
+      },
+      { passive: true },
+    );
 
-		img.addEventListener('error', () => {
-			console.error('[APP] createTextureFromPngFile: 画像読み込み失敗', fileName);
-			callback(null);
-		});
+    img.addEventListener("error", () => {
+      console.error("[APP] createTextureFromPngFile: 画像読み込み失敗", fileName);
+      callback(null);
+    });
 
-		img.src = fileName;
-	}
-
-
+    img.src = fileName;
+  }
 
   /**
    * 画像の解放

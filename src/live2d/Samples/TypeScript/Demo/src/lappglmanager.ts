@@ -15,11 +15,11 @@ export class LAppGlManager {
 
   public initialize(canvas: HTMLCanvasElement): boolean {
     // glコンテキストを初期化
-    this._gl = canvas.getContext('webgl2');
+    this._gl = canvas.getContext("webgl2");
 
     if (!this._gl) {
       // gl初期化失敗
-      alert('Cannot initialize WebGL. This browser does not support.');
+      alert("Cannot initialize WebGL. This browser does not support.");
       this._gl = null;
       // document.body.innerHTML =
       //   'This browser does not support the <code>&lt;canvas&gt;</code> element.';

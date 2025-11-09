@@ -26,14 +26,9 @@ export class CubismMatrix44 {
    * @param b 行列b
    * @return 乗算結果の行列
    */
-  public static multiply(
-    a: Float32Array,
-    b: Float32Array,
-    dst: Float32Array
-  ): void {
+  public static multiply(a: Float32Array, b: Float32Array, dst: Float32Array): void {
     const c: Float32Array = new Float32Array([
-      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-      0.0
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
     ]);
 
     const n = 4;
@@ -56,8 +51,7 @@ export class CubismMatrix44 {
    */
   public loadIdentity(): void {
     const c: Float32Array = new Float32Array([
-      1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
-      1.0
+      1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0,
     ]);
 
     this.setMatrix(c);
@@ -175,7 +169,7 @@ export class CubismMatrix44 {
       x,
       y,
       0.0,
-      1.0
+      1.0,
     ]);
 
     CubismMatrix44.multiply(tr1, this._tr, this._tr);
@@ -235,7 +229,7 @@ export class CubismMatrix44 {
       0.0,
       0.0,
       0.0,
-      1.0
+      1.0,
     ]);
 
     CubismMatrix44.multiply(tr1, this._tr, this._tr);
@@ -280,7 +274,7 @@ export class CubismMatrix44 {
 }
 
 // Namespace definition for compatibility.
-import * as $ from './cubismmatrix44';
+import * as $ from "./cubismmatrix44";
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace Live2DCubismFramework {
   export const CubismMatrix44 = $.CubismMatrix44;

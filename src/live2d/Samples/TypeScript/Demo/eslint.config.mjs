@@ -1,8 +1,8 @@
-import eslint from '@eslint/js';
-import tseslint from 'typescript-eslint';
-import globals from 'globals';
-import eslintConfigPrettier from 'eslint-config-prettier';
-import eslintPluginPrettier from 'eslint-plugin-prettier';
+import eslint from "@eslint/js";
+import tseslint from "typescript-eslint";
+import globals from "globals";
+import eslintConfigPrettier from "eslint-config-prettier";
+import eslintPluginPrettier from "eslint-plugin-prettier";
 
 export default tseslint.config(
   eslint.configs.recommended,
@@ -11,158 +11,149 @@ export default tseslint.config(
   ...tseslint.configs.recommendedTypeChecked,
   eslintConfigPrettier,
   {
-    languageOptions:
-    {
-      parserOptions:
-      {
-        sourceType: 'module',
+    languageOptions: {
+      parserOptions: {
+        sourceType: "module",
         ecmaVersion: 2020,
-        project: './tsconfig.json',
+        project: "./tsconfig.json",
       },
-      globals:
-      {
+      globals: {
         ...globals.browser,
       },
     },
-    plugins:
-    {
-      'prettier': eslintPluginPrettier,
+    plugins: {
+      prettier: eslintPluginPrettier,
     },
-    rules:
-    {
-      'prettier/prettier': [
-        'error',
+    rules: {
+      "prettier/prettier": [
+        "error",
         {
           singleQuote: true,
-          trailingComma: 'none',
-          arrowParens: 'avoid',
-        }
+          trailingComma: "none",
+          arrowParens: "avoid",
+        },
       ],
-      camelcase: 'off',
-      '@typescript-eslint/naming-convention': [
-        'warn',
+      camelcase: "off",
+      "@typescript-eslint/naming-convention": [
+        "warn",
         {
-          selector: 'default',
-          format: ['camelCase'],
+          selector: "default",
+          format: ["camelCase"],
         },
         {
-          selector: 'import',
-          format: ['PascalCase'],
+          selector: "import",
+          format: ["PascalCase"],
         },
         {
-          selector: 'variable',
+          selector: "variable",
           format: [],
           custom: {
             // 指定の文字列で始まるものと特定の文字を含むものは許容
-            regex: '^[A-Z]|^csm|^iterator|Shader',
+            regex: "^[A-Z]|^csm|^iterator|Shader",
             match: true,
           },
-          modifiers: ['exported', 'const'],
+          modifiers: ["exported", "const"],
         },
         {
-          selector: 'variable',
-          format: ['camelCase'],
+          selector: "variable",
+          format: ["camelCase"],
         },
         {
-          selector: 'variable',
+          selector: "variable",
           format: [],
           custom: {
             // 指定の文字列で始まるものは許容
-            regex: '^[A-Z]|^s_',
+            regex: "^[A-Z]|^s_",
             match: true,
           },
-          modifiers: ['global']
+          modifiers: ["global"],
         },
         {
-          selector: 'enum',
-          format: ['PascalCase'],
+          selector: "enum",
+          format: ["PascalCase"],
         },
         {
-          selector: 'enumMember',
+          selector: "enumMember",
           format: [],
           custom: {
             // 大文字から始まること
-            regex: '^[A-Z]',
+            regex: "^[A-Z]",
             match: true,
-          }
+          },
         },
         {
-          selector: 'classProperty',
-          format: ['PascalCase'],
-          modifiers: ['static', 'readonly']
+          selector: "classProperty",
+          format: ["PascalCase"],
+          modifiers: ["static", "readonly"],
         },
         {
-          selector: 'classProperty',
-          format: ['camelCase'],
-          leadingUnderscore: 'allow',
+          selector: "classProperty",
+          format: ["camelCase"],
+          leadingUnderscore: "allow",
         },
         {
-          selector: 'class',
+          selector: "class",
           format: [],
           custom: {
             // 指定の文字列で始まるか、指定の文字列で終わること
-            regex: '^[A-Z]|^csm|^iterator|_WebGL$',
+            regex: "^[A-Z]|^csm|^iterator|_WebGL$",
             match: true,
-          }
+          },
         },
         {
-          selector: 'interface',
-          format: ['camelCase', 'PascalCase'],
+          selector: "interface",
+          format: ["camelCase", "PascalCase"],
         },
         {
-          selector: 'parameter',
-          format: ['camelCase'],
+          selector: "parameter",
+          format: ["camelCase"],
         },
         {
-          selector: 'classMethod',
-          format: ['camelCase'],
+          selector: "classMethod",
+          format: ["camelCase"],
         },
         {
-          selector: 'objectLiteralProperty',
-          format: ['camelCase', 'PascalCase'],
+          selector: "objectLiteralProperty",
+          format: ["camelCase", "PascalCase"],
         },
         {
-          selector: 'typeAlias',
+          selector: "typeAlias",
           format: [],
           custom: {
             // 指定の文字列で始まるものは許容
-            regex: '^[A-Z]|^[a-z]|^CSM_|^csm|^iterator',
+            regex: "^[A-Z]|^[a-z]|^CSM_|^csm|^iterator",
             match: true,
           },
-          modifiers: ['exported']
+          modifiers: ["exported"],
         },
         {
-          selector: 'typeAlias',
-          format: ['camelCase'],
+          selector: "typeAlias",
+          format: ["camelCase"],
         },
         {
-          selector: 'typeParameter',
+          selector: "typeParameter",
           format: [],
-          custom:
-          {
+          custom: {
             // 「大文字+アンダースコア以外の文字」、あるいは「大文字1文字」
             // あるいは、「`T`+アンダースコア」で始まる場合
-            regex: '^[A-Z][^_]|^[A-Z]|^T_$',
+            regex: "^[A-Z][^_]|^[A-Z]|^T_$",
             match: true,
           },
-          leadingUnderscore: 'allow',
+          leadingUnderscore: "allow",
         },
       ], // @typescript-eslint/naming-convention
-      '@typescript-eslint/no-use-before-define': 'off',
-      '@typescript-eslint/ban-ts-comment': 'off',
-      '@typescript-eslint/unbound-method': 'off',
-      '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-return': 'off',
-      '@typescript-eslint/no-floating-promises': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
+      "@typescript-eslint/no-use-before-define": "off",
+      "@typescript-eslint/ban-ts-comment": "off",
+      "@typescript-eslint/unbound-method": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-return": "off",
+      "@typescript-eslint/no-floating-promises": "off",
+      "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-explicit-any": "off",
     },
   },
   {
     // ignores property はなぜか単独で指定していないと効果がない。
-    ignores: [
-      '**/*.*',
-      '!src/**/*.ts',
-    ],
+    ignores: ["**/*.*", "!src/**/*.ts"],
   },
 );

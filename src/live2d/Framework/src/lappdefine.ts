@@ -5,21 +5,19 @@
  * that can be found at https://www.live2d.com/eula/live2d-open-software-license-agreement_en.html.
  */
 
-import { LogLevel } from '@framework/live2dcubismframework';
+import { LogLevel } from "@framework/live2dcubismframework";
 
 /**
  * Sample Appで使用する定数
  */
 
 // Canvas width and height pixel values, or dynamic screen size ('auto').
-export const CanvasId = 'live2d-canvas';
-export const CanvasWidth = 400;  // 可以之後微調
+export const CanvasId: string = "live2d-canvas";
+export const CanvasWidth = 400; // 可以之後微調
 export const CanvasHeight = 520; // 先跟聊天框差不多高
-
 
 // キャンバスの数
 export const CanvasNum = 1;
-
 
 // 画面
 export const ViewScale = 1.0;
@@ -37,32 +35,32 @@ export const ViewLogicalMaxBottom = -2.0;
 export const ViewLogicalMaxTop = 2.0;
 
 // 相対パス
-export const ResourcesPath = '/live2d/hiyori_pro_zh/runtime/';
+export const ResourcesPath = "/live2d/hiyori_pro_zh/runtime/";
 
 // モデルの後ろにある背景の画像ファイル
-export const BackImageName = '';
+export const BackImageName = "";
 
 // 歯車
-export const GearImageName = '';
+export const GearImageName = "";
 
 // 終了ボタン
-export const PowerImageName = '';
+export const PowerImageName = "";
 
 // モデル定義---------------------------------------------
 // モデルを配置したディレクトリ名の配列
 // ディレクトリ名とmodel3.jsonの名前を一致させておくこと
 
-export const ModelJsonName: string = 'hiyori_pro_t11.model3.json';
-export const ModelDir: string[] = ['.']; // 其實沒用，但防止程式報錯
+export const ModelJsonName: string = "hiyori_pro_t11.model3.json";
+export const ModelDir: string[] = ["."]; // 其實沒用，但防止程式報錯
 export const ModelDirSize: number = ModelDir.length;
 
 // 外部定義ファイル（json）と合わせる
-export const MotionGroupIdle = 'Idle'; // アイドリング
-export const MotionGroupTapBody = 'TapBody'; // 体をタップしたとき
+export const MotionGroupIdle = "Idle"; // アイドリング
+export const MotionGroupTapBody = "TapBody"; // 体をタップしたとき
 
 // 外部定義ファイル（json）と合わせる
-export const HitAreaNameHead = 'Head';
-export const HitAreaNameBody = 'Body';
+export const HitAreaNameHead = "Head";
+export const HitAreaNameBody = "Body";
 
 // モーションの優先度定数
 export const PriorityNone = 0;

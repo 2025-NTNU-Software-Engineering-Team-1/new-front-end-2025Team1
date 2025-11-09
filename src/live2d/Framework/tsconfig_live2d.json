@@ -6,21 +6,13 @@
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
-    "removeComments": true,
+    "declaration": true,
+    "declarationMap": true,
     "sourceMap": true,
-    "baseUrl": "./",
-    "paths": {
-      "@framework/*": ["../../../Framework/src/*"]
-    },
+    "emitDecoratorMetadata": true,
     "noImplicitAny": true,
     "useUnknownInCatchVariables": true
   },
-  "include": [
-    "src/**/*.ts",
-    "../../../Core/*.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+  "include": ["src/**/*.ts", "../Core/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }

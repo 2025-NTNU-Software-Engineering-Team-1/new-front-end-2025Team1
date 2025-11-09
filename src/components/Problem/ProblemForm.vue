@@ -243,12 +243,15 @@ watch(
           </template>
         </div>
       </div>
-
-      <label
-        class="label text-error"
-        v-show="v$.testCaseInfo.tasks.$error"
-        v-text="v$.testCaseInfo.tasks.$errors[0]?.$message"
-      />
+      <!-- @vue-ignore -->
+      <template v-if="v$ && v$.testCaseInfo && v$.testCaseInfo.tasks">
+        
+        <label
+          class="label text-error"
+          v-show="v$.testCaseInfo.tasks.$error"
+          v-text="v$.testCaseInfo.tasks.$errors[0]?.$message ?? ''"
+        />
+      </template>
       <template v-for="(no, i) in problem.testCaseInfo.tasks.length">
         <div class="col-span-2">
           <div class="font-semibold">{{ $t("components.problem.forms.subtask", { no }) }}</div>

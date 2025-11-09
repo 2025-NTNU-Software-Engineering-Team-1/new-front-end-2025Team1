@@ -5,8 +5,8 @@
  * that can be found at https://www.live2d.com/eula/live2d-open-software-license-agreement_en.html.
  */
 
-import { csmVector, iterator } from '@framework/type/csmvector';
-import { LAppGlManager } from './lappglmanager';
+import { csmVector, iterator } from "@framework/type/csmvector";
+import { LAppGlManager } from "./lappglmanager";
 
 /**
  * テクスチャ管理クラス
@@ -44,7 +44,7 @@ export class LAppTextureManager {
   public createTextureFromPngFile(
     fileName: string,
     usePremultiply: boolean,
-    callback: (textureInfo: TextureInfo) => void
+    callback: (textureInfo: TextureInfo) => void,
   ): void {
     // search loaded texture already
     for (
@@ -52,19 +52,14 @@ export class LAppTextureManager {
       ite.notEqual(this._textures.end());
       ite.preIncrement()
     ) {
-      if (
-        ite.ptr().fileName == fileName &&
-        ite.ptr().usePremultply == usePremultiply
-      ) {
+      if (ite.ptr().fileName == fileName && ite.ptr().usePremultply == usePremultiply) {
         // 2回目以降はキャッシュが使用される(待ち時間なし)
         // WebKitでは同じImageのonloadを再度呼ぶには再インスタンスが必要
         // 詳細：https://stackoverflow.com/a/5024181
         ite.ptr().img = new Image();
-        ite
-          .ptr()
-          .img.addEventListener('load', (): void => callback(ite.ptr()), {
-            passive: true
-          });
+        ite.ptr().img.addEventListener("load", (): void => callback(ite.ptr()), {
+          passive: true,
+        });
         ite.ptr().img.src = fileName;
         return;
       }
@@ -73,15 +68,13 @@ export class LAppTextureManager {
     // データのオンロードをトリガーにする
     const img = new Image();
     img.addEventListener(
-      'load',
+      "load",
       (): void => {
         // テクスチャオブジェクトの作成
         const tex: WebGLTexture = this._glManager.getGl().createTexture();
 
         // テクスチャを選択
-        this._glManager
-          .getGl()
-          .bindTexture(this._glManager.getGl().TEXTURE_2D, tex);
+        this._glManager.getGl().bindTexture(this._glManager.getGl().TEXTURE_2D, tex);
 
         // テクスチャにピクセルを書き込む
         this._glManager
@@ -89,24 +82,19 @@ export class LAppTextureManager {
           .texParameteri(
             this._glManager.getGl().TEXTURE_2D,
             this._glManager.getGl().TEXTURE_MIN_FILTER,
-            this._glManager.getGl().LINEAR_MIPMAP_LINEAR
+            this._glManager.getGl().LINEAR_MIPMAP_LINEAR,
           );
         this._glManager
           .getGl()
           .texParameteri(
             this._glManager.getGl().TEXTURE_2D,
             this._glManager.getGl().TEXTURE_MAG_FILTER,
-            this._glManager.getGl().LINEAR
+            this._glManager.getGl().LINEAR,
           );
 
         // Premult処理を行わせる
         if (usePremultiply) {
-          this._glManager
-            .getGl()
-            .pixelStorei(
-              this._glManager.getGl().UNPACK_PREMULTIPLY_ALPHA_WEBGL,
-              1
-            );
+          this._glManager.getGl().pixelStorei(this._glManager.getGl().UNPACK_PREMULTIPLY_ALPHA_WEBGL, 1);
         }
 
         // テクスチャにピクセルを書き込む
@@ -118,18 +106,14 @@ export class LAppTextureManager {
             this._glManager.getGl().RGBA,
             this._glManager.getGl().RGBA,
             this._glManager.getGl().UNSIGNED_BYTE,
-            img
+            img,
           );
 
         // ミップマップを生成
-        this._glManager
-          .getGl()
-          .generateMipmap(this._glManager.getGl().TEXTURE_2D);
+        this._glManager.getGl().generateMipmap(this._glManager.getGl().TEXTURE_2D);
 
         // テクスチャをバインド
-        this._glManager
-          .getGl()
-          .bindTexture(this._glManager.getGl().TEXTURE_2D, null);
+        this._glManager.getGl().bindTexture(this._glManager.getGl().TEXTURE_2D, null);
 
         const textureInfo: TextureInfo = new TextureInfo();
         if (textureInfo != null) {
@@ -146,7 +130,7 @@ export class LAppTextureManager {
 
         callback(textureInfo);
       },
-      { passive: true }
+      { passive: true },
     );
     img.src = fileName;
   }

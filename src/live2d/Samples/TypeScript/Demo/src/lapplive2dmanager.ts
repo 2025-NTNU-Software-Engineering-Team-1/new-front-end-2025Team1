@@ -5,14 +5,14 @@
  * that can be found at https://www.live2d.com/eula/live2d-open-software-license-agreement_en.html.
  */
 
-import { CubismMatrix44 } from '@framework/math/cubismmatrix44';
-import { ACubismMotion } from '@framework/motion/acubismmotion';
-import { csmVector } from '@framework/type/csmvector';
+import { CubismMatrix44 } from "@framework/math/cubismmatrix44";
+import { ACubismMotion } from "@framework/motion/acubismmotion";
+import { csmVector } from "@framework/type/csmvector";
 
-import * as LAppDefine from './lappdefine';
-import { LAppModel } from './lappmodel';
-import { LAppPal } from './lapppal';
-import { LAppSubdelegate } from './lappsubdelegate';
+import * as LAppDefine from "./lappdefine";
+import { LAppModel } from "./lappmodel";
+import { LAppPal } from "./lapppal";
+import { LAppSubdelegate } from "./lappsubdelegate";
 
 /**
  * サンプルアプリケーションにおいてCubismModelを管理するクラス
@@ -47,9 +47,7 @@ export class LAppLive2DManager {
    */
   public onTap(x: number, y: number): void {
     if (LAppDefine.DebugLogEnable) {
-      LAppPal.printMessage(
-        `[APP]tap point: {x: ${x.toFixed(2)} y: ${y.toFixed(2)}}`
-      );
+      LAppPal.printMessage(`[APP]tap point: {x: ${x.toFixed(2)} y: ${y.toFixed(2)}}`);
     }
 
     const model: LAppModel = this._models.at(0);
@@ -67,7 +65,7 @@ export class LAppLive2DManager {
         LAppDefine.MotionGroupTapBody,
         LAppDefine.PriorityNormal,
         this.finishedMotion,
-        this.beganMotion
+        this.beganMotion,
       );
     }
   }
@@ -126,9 +124,9 @@ export class LAppLive2DManager {
     // model3.jsonのパスを決定する。
     // ディレクトリ名とmodel3.jsonの名前を一致させておくこと。
     const model: string = LAppDefine.ModelDir[index];
-    const modelPath: string = LAppDefine.ResourcesPath + model + '/';
+    const modelPath: string = LAppDefine.ResourcesPath + model + "/";
     let modelJsonName: string = LAppDefine.ModelDir[index];
-    modelJsonName += '.model3.json';
+    modelJsonName += ".model3.json";
 
     this.releaseAllModel();
     const instance = new LAppModel();
@@ -186,12 +184,12 @@ export class LAppLive2DManager {
 
   // モーション再生開始のコールバック関数
   beganMotion = (self: ACubismMotion): void => {
-    LAppPal.printMessage('Motion Began:');
+    LAppPal.printMessage("Motion Began:");
     console.log(self);
   };
   // モーション再生終了のコールバック関数
   finishedMotion = (self: ACubismMotion): void => {
-    LAppPal.printMessage('Motion Finished:');
+    LAppPal.printMessage("Motion Finished:");
     console.log(self);
   };
 }

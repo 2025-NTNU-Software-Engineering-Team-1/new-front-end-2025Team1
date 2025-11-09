@@ -5,7 +5,7 @@
  * that can be found at https://www.live2d.com/eula/live2d-open-software-license-agreement_en.html.
  */
 
-import { CubismMath } from './cubismmath';
+import { CubismMath } from "./cubismmath";
 
 const FrameRate = 30;
 const Epsilon = 0.01;
@@ -47,8 +47,7 @@ export class CubismTargetPoint {
       return;
     }
 
-    const deltaTimeWeight: number =
-      (this._userTimeSeconds - this._lastTimeSeconds) * FrameRate;
+    const deltaTimeWeight: number = (this._userTimeSeconds - this._lastTimeSeconds) * FrameRate;
     this._lastTimeSeconds = this._userTimeSeconds;
 
     // 最高速度になるまでの時間を
@@ -102,13 +101,8 @@ export class CubismTargetPoint {
       // 	時刻tは、あらかじめ加速度、速度を1/60(フレームレート、単位なし)で
       // 	考えているので、t＝１として消してよい（※未検証）
 
-      const maxV: number =
-        0.5 *
-        (CubismMath.sqrt(maxA * maxA + 16.0 * maxA * d - 8.0 * maxA * d) -
-          maxA);
-      const curV: number = CubismMath.sqrt(
-        this._faceVX * this._faceVX + this._faceVY * this._faceVY
-      );
+      const maxV: number = 0.5 * (CubismMath.sqrt(maxA * maxA + 16.0 * maxA * d - 8.0 * maxA * d) - maxA);
+      const curV: number = CubismMath.sqrt(this._faceVX * this._faceVX + this._faceVY * this._faceVY);
 
       if (curV > maxV) {
         // 現在の速度 > 最高速度のとき、最高速度まで減速
@@ -161,7 +155,7 @@ export class CubismTargetPoint {
 }
 
 // Namespace definition for compatibility.
-import * as $ from './cubismtargetpoint';
+import * as $ from "./cubismtargetpoint";
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace Live2DCubismFramework {
   export const CubismTargetPoint = $.CubismTargetPoint;

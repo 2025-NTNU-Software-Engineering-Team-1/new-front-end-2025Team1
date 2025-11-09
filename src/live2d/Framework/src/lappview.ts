@@ -5,22 +5,21 @@
  * that can be found at https://www.live2d.com/eula/live2d-open-software-license-agreement_en.html.
  */
 
-import { CubismMatrix44 } from '@framework/math/cubismmatrix44';
-import { CubismViewMatrix } from '@framework/math/cubismviewmatrix';
+import { CubismMatrix44 } from "@framework/math/cubismmatrix44";
+import { CubismViewMatrix } from "@framework/math/cubismviewmatrix";
 
-import * as LAppDefine from './lappdefine';
-import { LAppDelegate } from './lappdelegate';
-import { LAppPal } from './lapppal';
-import { LAppSprite } from './lappsprite';
-import { TextureInfo } from './lapptexturemanager';
-import { TouchManager } from './touchmanager';
-import { LAppSubdelegate } from './lappsubdelegate';
+import * as LAppDefine from "./lappdefine";
+import { LAppDelegate } from "./lappdelegate";
+import { LAppPal } from "./lapppal";
+import { LAppSprite } from "./lappsprite";
+import { TextureInfo } from "./lapptexturemanager";
+import { TouchManager } from "./touchmanager";
+import { LAppSubdelegate } from "./lappsubdelegate";
 
 /**
  * 描画クラス。
  */
 export class LAppView {
-
   /**
    * コンストラクタ
    */
@@ -75,7 +74,7 @@ export class LAppView {
       LAppDefine.ViewLogicalMaxLeft,
       LAppDefine.ViewLogicalMaxRight,
       LAppDefine.ViewLogicalMaxBottom,
-      LAppDefine.ViewLogicalMaxTop
+      LAppDefine.ViewLogicalMaxTop,
     );
   }
 
@@ -92,7 +91,7 @@ export class LAppView {
       try {
         this._gear.release();
       } catch (e) {
-        console.warn('[Live2D] _gear.release() failed:', e);
+        console.warn("[Live2D] _gear.release() failed:", e);
       }
       this._gear = null;
     }
@@ -102,7 +101,7 @@ export class LAppView {
       try {
         this._back.release();
       } catch (e) {
-        console.warn('[Live2D] _back.release() failed:', e);
+        console.warn("[Live2D] _back.release() failed:", e);
       }
       this._back = null;
     }
@@ -110,13 +109,13 @@ export class LAppView {
     // 安全釋放 OpenGL program
     if (this._subdelegate && this._subdelegate.getGlManager) {
       const glManager = this._subdelegate.getGlManager();
-      if (glManager && glManager.getGl && typeof glManager.getGl === 'function') {
+      if (glManager && glManager.getGl && typeof glManager.getGl === "function") {
         const gl = glManager.getGl();
         if (gl && gl.deleteProgram && this._programId) {
           try {
             gl.deleteProgram(this._programId);
           } catch (e) {
-            console.warn('[Live2D] deleteProgram failed:', e);
+            console.warn("[Live2D] deleteProgram failed:", e);
           }
         }
       }
@@ -125,48 +124,46 @@ export class LAppView {
     this._programId = null;
   }
 
-
   /**
    * 描画する。
    */
-	public render(): void {
-		if (!this._subdelegate) {
-			return;
-		}
+  public render(): void {
+    if (!this._subdelegate) {
+      return;
+    }
 
-		const glManager = this._subdelegate.getGlManager();
-		const gl = glManager.getGl();
-		if (!gl) {
-			return;
-		}
+    const glManager = this._subdelegate.getGlManager();
+    const gl = glManager.getGl();
+    if (!gl) {
+      return;
+    }
 
-		gl.useProgram(this._programId);
+    gl.useProgram(this._programId);
 
-		if (this._back) {
-			this._back.render(this._programId);
-		}
-		if (this._gear) {
-			this._gear.render(this._programId);
-		}
+    if (this._back) {
+      this._back.render(this._programId);
+    }
+    if (this._gear) {
+      this._gear.render(this._programId);
+    }
 
-		gl.flush();
+    gl.flush();
 
-		const live2dManager = this._subdelegate.getLive2DManager();
-		if (live2dManager != null) {
-			live2dManager.setViewMatrix(this._viewMatrix);
+    const live2dManager = this._subdelegate.getLive2DManager();
+    if (live2dManager != null) {
+      live2dManager.setViewMatrix(this._viewMatrix);
 
-			// 🔑 把 subdelegate 傳給 onUpdate，讓它不用再碰「自己沒設好的 this._subdelegate」
-			live2dManager.onUpdate(this._subdelegate);
-		}
-	}
-
+      // 🔑 把 subdelegate 傳給 onUpdate，讓它不用再碰「自己沒設好的 this._subdelegate」
+      live2dManager.onUpdate(this._subdelegate);
+    }
+  }
 
   /**
    * 画像の初期化を行う。
    */
-  
+
   public initializeSprite(): void {
-  /**
+    /**
     const width: number = this._subdelegate.getCanvas().width;
     const height: number = this._subdelegate.getCanvas().height;
     const textureManager = this._subdelegate.getTextureManager();
@@ -218,7 +215,7 @@ export class LAppView {
   */
     return;
   }
-  
+
   /**
    * タッチされた時に呼ばれる。
    *
@@ -226,15 +223,11 @@ export class LAppView {
    * @param pointY スクリーンY座標
    */
   public onTouchesBegan(pointX: number, pointY: number): void {
-
     if (!this._touchManager) {
       return;
     }
 
-    this._touchManager.touchesBegan(
-      pointX * window.devicePixelRatio,
-      pointY * window.devicePixelRatio
-    );
+    this._touchManager.touchesBegan(pointX * window.devicePixelRatio, pointY * window.devicePixelRatio);
   }
 
   /**
@@ -268,7 +261,6 @@ export class LAppView {
    * @param pointY スクリーンY座標
    */
   public onTouchesEnded(pointX: number, pointY: number): void {
-
     if (!this._touchManager) {
       return;
     }

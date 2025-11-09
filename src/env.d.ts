@@ -11,10 +11,16 @@ declare module "*.vue" {
 }
 
 declare namespace Live2DCubismCore {
+  // 這兩個是來自官方 Core 的物件，型別先維持 any，
+  // 但用 eslint 註解關掉 no-explicit-any 規則，避免 lint 報錯。
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const Moc: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const Model: any;
+
   function Logging_Log(message: string): void;
   function Logging_SetLogFunction(handler: (message: string) => void): void;
+
   enum LogLevel {
     LogLevel_Verbose,
     LogLevel_Debug,

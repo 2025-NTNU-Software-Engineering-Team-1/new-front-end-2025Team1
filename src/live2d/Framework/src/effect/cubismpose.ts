@@ -5,20 +5,20 @@
  * that can be found at https://www.live2d.com/eula/live2d-open-software-license-agreement_en.html.
  */
 
-import { CubismIdHandle } from '../id/cubismid';
-import { CubismFramework } from '../live2dcubismframework';
-import { CubismModel } from '../model/cubismmodel';
-import { csmVector, iterator } from '../type/csmvector';
-import { CubismJson, Value } from '../utils/cubismjson';
+import { CubismIdHandle } from "../id/cubismid";
+import { CubismFramework } from "../live2dcubismframework";
+import { CubismModel } from "../model/cubismmodel";
+import { csmVector, iterator } from "../type/csmvector";
+import { CubismJson, Value } from "../utils/cubismjson";
 
 const Epsilon = 0.001;
 const DefaultFadeInSeconds = 0.5;
 
 // Pose.jsonのタグ
-const FadeIn = 'FadeInTime';
-const Link = 'Link';
-const Groups = 'Groups';
-const Id = 'Id';
+const FadeIn = "FadeInTime";
+const Link = "Link";
+const Groups = "Groups";
+const Id = "Id";
 
 /**
  * パーツの不透明度の設定
@@ -43,9 +43,7 @@ export class CubismPose {
 
     // フェード時間の指定
     if (!root.getValueByString(FadeIn).isNull()) {
-      ret._fadeTimeSeconds = root
-        .getValueByString(FadeIn)
-        .toFloat(DefaultFadeInSeconds);
+      ret._fadeTimeSeconds = root.getValueByString(FadeIn).toFloat(DefaultFadeInSeconds);
 
       if (ret._fadeTimeSeconds < 0.0) {
         ret._fadeTimeSeconds = DefaultFadeInSeconds;
@@ -64,10 +62,9 @@ export class CubismPose {
       for (let groupIndex = 0; groupIndex < idCount; ++groupIndex) {
         const partInfo: Value = idListInfo.getValueByIndex(groupIndex);
         const partData: PartData = new PartData();
-        const parameterId: CubismIdHandle =
-          CubismFramework.getIdManager().getId(
-            partInfo.getValueByString(Id).getRawString()
-          );
+        const parameterId: CubismIdHandle = CubismFramework.getIdManager().getId(
+          partInfo.getValueByString(Id).getRawString(),
+        );
 
         partData.partId = parameterId;
 
@@ -79,7 +76,7 @@ export class CubismPose {
           for (let linkIndex = 0; linkIndex < linkCount; ++linkIndex) {
             const linkPart: PartData = new PartData();
             const linkId: CubismIdHandle = CubismFramework.getIdManager().getId(
-              linkListInfo.getValueByIndex(linkIndex).getString()
+              linkListInfo.getValueByIndex(linkIndex).getString(),
             );
 
             linkPart.partId = linkId;
@@ -182,11 +179,7 @@ export class CubismPose {
    * @param model 対象のモデル
    */
   public copyPartOpacities(model: CubismModel): void {
-    for (
-      let groupIndex = 0;
-      groupIndex < this._partGroups.getSize();
-      ++groupIndex
-    ) {
+    for (let groupIndex = 0; groupIndex < this._partGroups.getSize(); ++groupIndex) {
       const partData: PartData = this._partGroups.at(groupIndex);
 
       if (partData.link.getSize() == 0) {
@@ -196,11 +189,7 @@ export class CubismPose {
       const partIndex: number = this._partGroups.at(groupIndex).partIndex;
       const opacity: number = model.getPartOpacityByIndex(partIndex);
 
-      for (
-        let linkIndex = 0;
-        linkIndex < partData.link.getSize();
-        ++linkIndex
-      ) {
+      for (let linkIndex = 0; linkIndex < partData.link.getSize(); ++linkIndex) {
         const linkPart: PartData = partData.link.at(linkIndex);
         const linkPartIndex: number = linkPart.partIndex;
 
@@ -224,7 +213,7 @@ export class CubismPose {
     model: CubismModel,
     deltaTimeSeconds: number,
     beginIndex: number,
-    partGroupCount: number
+    partGroupCount: number,
   ): void {
     let visiblePartIndex = -1;
     let newOpacity = 1.0;
@@ -331,11 +320,7 @@ export class PartData {
     if (v != undefined) {
       this.partId = v.partId;
 
-      for (
-        const ite: iterator<PartData> = v.link.begin();
-        ite.notEqual(v.link.end());
-        ite.preIncrement()
-      ) {
+      for (const ite: iterator<PartData> = v.link.begin(); ite.notEqual(v.link.end()); ite.preIncrement()) {
         this.link.pushBack(ite.ptr().clone());
       }
     }
@@ -347,11 +332,7 @@ export class PartData {
   public assignment(v: PartData): PartData {
     this.partId = v.partId;
 
-    for (
-      const ite: iterator<PartData> = v.link.begin();
-      ite.notEqual(v.link.end());
-      ite.preIncrement()
-    ) {
+    for (const ite: iterator<PartData> = v.link.begin(); ite.notEqual(v.link.end()); ite.preIncrement()) {
       this.link.pushBack(ite.ptr().clone());
     }
 
@@ -380,11 +361,7 @@ export class PartData {
     clonePartData.partIndex = this.partIndex;
     clonePartData.link = new csmVector<PartData>();
 
-    for (
-      let ite: iterator<PartData> = this.link.begin();
-      ite.notEqual(this.link.end());
-      ite.increment()
-    ) {
+    for (let ite: iterator<PartData> = this.link.begin(); ite.notEqual(this.link.end()); ite.increment()) {
       clonePartData.link.pushBack(ite.ptr().clone());
     }
 
@@ -398,7 +375,7 @@ export class PartData {
 }
 
 // Namespace definition for compatibility.
-import * as $ from './cubismpose';
+import * as $ from "./cubismpose";
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace Live2DCubismFramework {
   export const CubismPose = $.CubismPose;

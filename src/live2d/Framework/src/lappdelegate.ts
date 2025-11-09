@@ -5,12 +5,12 @@
  * that can be found at https://www.live2d.com/eula/live2d-open-software-license-agreement_en.html.
  */
 
-import { csmVector } from '@framework/type/csmvector';
-import { CubismFramework, Option } from '@framework/live2dcubismframework';
-import * as LAppDefine from './lappdefine';
-import { LAppPal } from './lapppal';
-import { LAppSubdelegate } from './lappsubdelegate';
-import { CubismLogError } from '@framework/utils/cubismdebug';
+import { csmVector } from "@framework/type/csmvector";
+import { CubismFramework, Option } from "@framework/live2dcubismframework";
+import * as LAppDefine from "./lappdefine";
+import { LAppPal } from "./lapppal";
+import { LAppSubdelegate } from "./lappsubdelegate";
+import { CubismLogError } from "@framework/utils/cubismdebug";
 
 export let s_instance: LAppDelegate = null;
 
@@ -49,94 +49,78 @@ export class LAppDelegate {
   /**
    * ポインタがアクティブになるときに呼ばれる。
    */
-	private onPointerBegan(e: PointerEvent): void {
-		if (!this._subdelegates) {
-			return;
-		}
+  private onPointerBegan(e: PointerEvent): void {
+    if (!this._subdelegates) {
+      return;
+    }
 
-		for (
-			let ite = this._subdelegates.begin();
-			ite.notEqual(this._subdelegates.end());
-			ite.preIncrement()
-		) {
-			const sub = ite.ptr();
+    for (let ite = this._subdelegates.begin(); ite.notEqual(this._subdelegates.end()); ite.preIncrement()) {
+      const sub = ite.ptr();
 
-			if (!sub || typeof (sub as any).onPointBegan !== 'function') {
-				continue;
-			}
+      if (!sub || typeof (sub as any).onPointBegan !== "function") {
+        continue;
+      }
 
-			(sub as any).onPointBegan(e.pageX, e.pageY);
-		}
-	}
+      (sub as any).onPointBegan(e.pageX, e.pageY);
+    }
+  }
 
-	/**
-	 * ポインタが動いたら呼ばれる。
-	 */
-	private onPointerMoved(e: PointerEvent): void {
-		if (!this._subdelegates) {
-			return;
-		}
+  /**
+   * ポインタが動いたら呼ばれる。
+   */
+  private onPointerMoved(e: PointerEvent): void {
+    if (!this._subdelegates) {
+      return;
+    }
 
-		for (
-			let ite = this._subdelegates.begin();
-			ite.notEqual(this._subdelegates.end());
-			ite.preIncrement()
-		) {
-			const sub = ite.ptr();
+    for (let ite = this._subdelegates.begin(); ite.notEqual(this._subdelegates.end()); ite.preIncrement()) {
+      const sub = ite.ptr();
 
-			if (!sub || typeof (sub as any).onPointMoved !== 'function') {
-				continue;
-			}
+      if (!sub || typeof (sub as any).onPointMoved !== "function") {
+        continue;
+      }
 
-			(sub as any).onPointMoved(e.pageX, e.pageY);
-		}
-	}
+      (sub as any).onPointMoved(e.pageX, e.pageY);
+    }
+  }
 
-	/**
-	 * ポインタがアクティブでなくなったときに呼ばれる。
-	 */
-	private onPointerEnded(e: PointerEvent): void {
-		if (!this._subdelegates) {
-			return;
-		}
+  /**
+   * ポインタがアクティブでなくなったときに呼ばれる。
+   */
+  private onPointerEnded(e: PointerEvent): void {
+    if (!this._subdelegates) {
+      return;
+    }
 
-		for (
-			let ite = this._subdelegates.begin();
-			ite.notEqual(this._subdelegates.end());
-			ite.preIncrement()
-		) {
-			const sub = ite.ptr();
+    for (let ite = this._subdelegates.begin(); ite.notEqual(this._subdelegates.end()); ite.preIncrement()) {
+      const sub = ite.ptr();
 
-			if (!sub || typeof (sub as any).onPointEnded !== 'function') {
-				continue;
-			}
+      if (!sub || typeof (sub as any).onPointEnded !== "function") {
+        continue;
+      }
 
-			(sub as any).onPointEnded(e.pageX, e.pageY);
-		}
-	}
+      (sub as any).onPointEnded(e.pageX, e.pageY);
+    }
+  }
 
-	/**
-	 * ポインタがキャンセルされると呼ばれる。
-	 */
-	private onPointerCancel(e: PointerEvent): void {
-		if (!this._subdelegates) {
-			return;
-		}
+  /**
+   * ポインタがキャンセルされると呼ばれる。
+   */
+  private onPointerCancel(e: PointerEvent): void {
+    if (!this._subdelegates) {
+      return;
+    }
 
-		for (
-			let ite = this._subdelegates.begin();
-			ite.notEqual(this._subdelegates.end());
-			ite.preIncrement()
-		) {
-			const sub = ite.ptr();
+    for (let ite = this._subdelegates.begin(); ite.notEqual(this._subdelegates.end()); ite.preIncrement()) {
+      const sub = ite.ptr();
 
-			if (!sub || typeof (sub as any).onTouchCancel !== 'function') {
-				continue;
-			}
+      if (!sub || typeof (sub as any).onTouchCancel !== "function") {
+        continue;
+      }
 
-			(sub as any).onTouchCancel(e.pageX, e.pageY);
-		}
-	}
+      (sub as any).onTouchCancel(e.pageX, e.pageY);
+    }
+  }
 
   /**
    * Resize canvas and re-initialize view.
@@ -147,38 +131,36 @@ export class LAppDelegate {
     }
   }
 
-	public run(): void {
-		this._isEnd = false;
+  public run(): void {
+    this._isEnd = false;
 
-		const loopWrapper = (): void => {
-			if (this._isEnd) {
-				return;
-			}
+    const loopWrapper = (): void => {
+      if (this._isEnd) {
+        return;
+      }
 
-			LAppPal.updateTime();
+      LAppPal.updateTime();
 
-			this.loop();
+      this.loop();
 
-			requestAnimationFrame(loopWrapper);
-		};
+      requestAnimationFrame(loopWrapper);
+    };
 
-		requestAnimationFrame(loopWrapper);
-	}
+    requestAnimationFrame(loopWrapper);
+  }
 
-	private loop(): void {
-		if (!this._subdelegates || this._subdelegates.getSize() === 0) {
-			return;
-		}
+  private loop(): void {
+    if (!this._subdelegates || this._subdelegates.getSize() === 0) {
+      return;
+    }
 
-		for (let i = 0; i < this._subdelegates.getSize(); i++) {
-			const sub = this._subdelegates.at(i);
-			if (!sub) continue;
+    for (let i = 0; i < this._subdelegates.getSize(); i++) {
+      const sub = this._subdelegates.at(i);
+      if (!sub) continue;
 
-			sub.update();
-		}
-	}
-
-
+      sub.update();
+    }
+  }
 
   /**
    * 解放する。
@@ -198,56 +180,50 @@ export class LAppDelegate {
    * イベントリスナーを解除する。
    */
   private releaseEventListener(): void {
-    document.removeEventListener('pointerup', this.pointBeganEventListener);
+    document.removeEventListener("pointerup", this.pointBeganEventListener);
     this.pointBeganEventListener = null;
-    document.removeEventListener('pointermove', this.pointMovedEventListener);
+    document.removeEventListener("pointermove", this.pointMovedEventListener);
     this.pointMovedEventListener = null;
-    document.removeEventListener('pointerdown', this.pointEndedEventListener);
+    document.removeEventListener("pointerdown", this.pointEndedEventListener);
     this.pointEndedEventListener = null;
-    document.removeEventListener('pointerdown', this.pointCancelEventListener);
+    document.removeEventListener("pointerdown", this.pointCancelEventListener);
     this.pointCancelEventListener = null;
   }
 
   /**
    * Subdelegate を解放する
    */
-	private releaseSubdelegates(): void {
-		if (!this._subdelegates) {
-			return;
-		}
+  private releaseSubdelegates(): void {
+    if (!this._subdelegates) {
+      return;
+    }
 
-		const size = this._subdelegates.getSize
-			? this._subdelegates.getSize()
-			: 0;
+    const size = this._subdelegates.getSize ? this._subdelegates.getSize() : 0;
 
-		for (let i = 0; i < size; i++) {
-			const subdelegate = this._subdelegates.at(i);
-			if (subdelegate) {
-				subdelegate.release();
-			}
-		}
+    for (let i = 0; i < size; i++) {
+      const subdelegate = this._subdelegates.at(i);
+      if (subdelegate) {
+        subdelegate.release();
+      }
+    }
 
-		this._subdelegates = null as any;
-		this._canvases = null as any;
-	}
-
+    this._subdelegates = null as any;
+    this._canvases = null as any;
+  }
 
   /**
    * APPに必要な物を初期化する。
    */
-	public initialize(): boolean {
-		// Cubism SDK の初期化
-		this.initializeCubism();
+  public initialize(): boolean {
+    // Cubism SDK の初期化
+    this.initializeCubism();
 
-		this.initializeSubdelegates();
+    this.initializeSubdelegates();
 
-		this.initializeEventListener();
+    this.initializeEventListener();
 
-		return true;
-	}
-
-
-
+    return true;
+  }
 
   /**
    * イベントリスナーを設定する。
@@ -259,17 +235,17 @@ export class LAppDelegate {
     this.pointCancelEventListener = this.onPointerCancel.bind(this);
 
     // ポインタ関連コールバック関数登録
-    document.addEventListener('pointerdown', this.pointBeganEventListener, {
-      passive: true
+    document.addEventListener("pointerdown", this.pointBeganEventListener, {
+      passive: true,
     });
-    document.addEventListener('pointermove', this.pointMovedEventListener, {
-      passive: true
+    document.addEventListener("pointermove", this.pointMovedEventListener, {
+      passive: true,
     });
-    document.addEventListener('pointerup', this.pointEndedEventListener, {
-      passive: true
+    document.addEventListener("pointerup", this.pointEndedEventListener, {
+      passive: true,
     });
-    document.addEventListener('pointercancel', this.pointCancelEventListener, {
-      passive: true
+    document.addEventListener("pointercancel", this.pointCancelEventListener, {
+      passive: true,
     });
   }
 
@@ -291,34 +267,31 @@ export class LAppDelegate {
   /**
    * Canvasを生成配置、Subdelegateを初期化する
    */
-	private initializeSubdelegates(): void {
-		LAppPal.printMessage('[APP] LAppDelegate.initializeSubdelegates 被呼叫');
+  private initializeSubdelegates(): void {
+    LAppPal.printMessage("[APP] LAppDelegate.initializeSubdelegates 被呼叫");
 
-		const canvas = document.getElementById('live2d-canvas') as HTMLCanvasElement | null;
+    const canvas = document.getElementById("live2d-canvas") as HTMLCanvasElement | null;
 
-		if (!canvas) {
-			CubismLogError('[APP] initializeSubdelegates: 找不到 live2d-canvas');
-			return;
-		}
+    if (!canvas) {
+      CubismLogError("[APP] initializeSubdelegates: 找不到 live2d-canvas");
+      return;
+    }
 
-		this._canvases.clear();
-		this._subdelegates.clear();
+    this._canvases.clear();
+    this._subdelegates.clear();
 
-		this._canvases.pushBack(canvas);
+    this._canvases.pushBack(canvas);
 
-		const subdelegate = new LAppSubdelegate();
+    const subdelegate = new LAppSubdelegate();
 
-		const ok = subdelegate.initialize(canvas);
-		if (!ok) {
-			CubismLogError('[APP] LAppSubdelegate.initialize 失敗，可能是 WebGL context 拿不到');
-			return;
-		}
+    const ok = subdelegate.initialize(canvas);
+    if (!ok) {
+      CubismLogError("[APP] LAppSubdelegate.initialize 失敗，可能是 WebGL context 拿不到");
+      return;
+    }
 
-		this._subdelegates.pushBack(subdelegate);
-
-	}
-
-
+    this._subdelegates.pushBack(subdelegate);
+  }
 
   /**
    * Privateなコンストラクタ

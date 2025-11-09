@@ -5,7 +5,7 @@
  * that can be found at https://www.live2d.com/eula/live2d-open-software-license-agreement_en.html.
  */
 
-import { CubismMatrix44 } from './cubismmatrix44';
+import { CubismMatrix44 } from "./cubismmatrix44";
 
 /**
  * カメラの位置変更に使うと便利な4x4行列
@@ -49,10 +49,7 @@ export class CubismViewMatrix extends CubismMatrix44 {
       y = this._screenTop - this._tr[5] * this._maxTop - this._tr[13];
     }
 
-    if (
-      this._tr[5] * this._maxBottom + (this._tr[13] + y) >
-      this._screenBottom
-    ) {
+    if (this._tr[5] * this._maxBottom + (this._tr[13] + y) > this._screenBottom) {
       y = this._screenBottom - this._tr[5] * this._maxBottom - this._tr[13];
     }
 
@@ -72,7 +69,7 @@ export class CubismViewMatrix extends CubismMatrix44 {
       x,
       y,
       0.0,
-      1.0
+      1.0,
     ]);
 
     CubismMatrix44.multiply(tr1, this._tr, this._tr);
@@ -117,7 +114,7 @@ export class CubismViewMatrix extends CubismMatrix44 {
       cx,
       cy,
       0.0,
-      1.0
+      1.0,
     ]);
 
     const tr2: Float32Array = new Float32Array([
@@ -136,7 +133,7 @@ export class CubismViewMatrix extends CubismMatrix44 {
       0.0,
       0.0,
       0.0,
-      1.0
+      1.0,
     ]);
 
     const tr3: Float32Array = new Float32Array([
@@ -155,7 +152,7 @@ export class CubismViewMatrix extends CubismMatrix44 {
       -cx,
       -cy,
       0.0,
-      1.0
+      1.0,
     ]);
 
     CubismMatrix44.multiply(tr3, this._tr, this._tr);
@@ -171,12 +168,7 @@ export class CubismViewMatrix extends CubismMatrix44 {
    * @param bottom    下辺のY軸の位置
    * @param top       上辺のY軸の位置
    */
-  public setScreenRect(
-    left: number,
-    right: number,
-    bottom: number,
-    top: number
-  ): void {
+  public setScreenRect(left: number, right: number, bottom: number, top: number): void {
     this._screenLeft = left;
     this._screenRight = right;
     this._screenBottom = bottom;
@@ -190,12 +182,7 @@ export class CubismViewMatrix extends CubismMatrix44 {
    * @param bottom    下辺のY軸の位置
    * @param top       上辺のY軸の位置
    */
-  public setMaxScreenRect(
-    left: number,
-    right: number,
-    bottom: number,
-    top: number
-  ): void {
+  public setMaxScreenRect(left: number, right: number, bottom: number, top: number): void {
     this._maxLeft = left;
     this._maxRight = right;
     this._maxTop = top;
@@ -331,7 +318,7 @@ export class CubismViewMatrix extends CubismMatrix44 {
 }
 
 // Namespace definition for compatibility.
-import * as $ from './cubismviewmatrix';
+import * as $ from "./cubismviewmatrix";
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace Live2DCubismFramework {
   export const CubismViewMatrix = $.CubismViewMatrix;

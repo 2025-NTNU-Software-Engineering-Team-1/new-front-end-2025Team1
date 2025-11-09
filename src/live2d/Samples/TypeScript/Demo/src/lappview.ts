@@ -5,16 +5,16 @@
  * that can be found at https://www.live2d.com/eula/live2d-open-software-license-agreement_en.html.
  */
 
-import { CubismMatrix44 } from '@framework/math/cubismmatrix44';
-import { CubismViewMatrix } from '@framework/math/cubismviewmatrix';
+import { CubismMatrix44 } from "@framework/math/cubismmatrix44";
+import { CubismViewMatrix } from "@framework/math/cubismviewmatrix";
 
-import * as LAppDefine from './lappdefine';
-import { LAppDelegate } from './lappdelegate';
-import { LAppPal } from './lapppal';
-import { LAppSprite } from './lappsprite';
-import { TextureInfo } from './lapptexturemanager';
-import { TouchManager } from './touchmanager';
-import { LAppSubdelegate } from './lappsubdelegate';
+import * as LAppDefine from "./lappdefine";
+import { LAppDelegate } from "./lappdelegate";
+import { LAppPal } from "./lapppal";
+import { LAppSprite } from "./lappsprite";
+import { TextureInfo } from "./lapptexturemanager";
+import { TouchManager } from "./touchmanager";
+import { LAppSubdelegate } from "./lappsubdelegate";
 
 /**
  * 描画クラス。
@@ -73,7 +73,7 @@ export class LAppView {
       LAppDefine.ViewLogicalMaxLeft,
       LAppDefine.ViewLogicalMaxRight,
       LAppDefine.ViewLogicalMaxBottom,
-      LAppDefine.ViewLogicalMaxTop
+      LAppDefine.ViewLogicalMaxTop,
     );
   }
 
@@ -127,7 +127,7 @@ export class LAppView {
     const textureManager = this._subdelegate.getTextureManager();
     const resourcesPath = LAppDefine.ResourcesPath;
 
-    let imageName = '';
+    let imageName = "";
 
     // 背景画像初期化
     imageName = LAppDefine.BackImageName;
@@ -143,11 +143,7 @@ export class LAppView {
       this._back.setSubdelegate(this._subdelegate);
     };
 
-    textureManager.createTextureFromPngFile(
-      resourcesPath + imageName,
-      false,
-      initBackGroundTexture
-    );
+    textureManager.createTextureFromPngFile(resourcesPath + imageName, false, initBackGroundTexture);
 
     // 歯車画像初期化
     imageName = LAppDefine.GearImageName;
@@ -160,11 +156,7 @@ export class LAppView {
       this._gear.setSubdelegate(this._subdelegate);
     };
 
-    textureManager.createTextureFromPngFile(
-      resourcesPath + imageName,
-      false,
-      initGearTexture
-    );
+    textureManager.createTextureFromPngFile(resourcesPath + imageName, false, initGearTexture);
 
     // シェーダーを作成
     if (this._programId == null) {
@@ -179,10 +171,7 @@ export class LAppView {
    * @param pointY スクリーンY座標
    */
   public onTouchesBegan(pointX: number, pointY: number): void {
-    this._touchManager.touchesBegan(
-      pointX * window.devicePixelRatio,
-      pointY * window.devicePixelRatio
-    );
+    this._touchManager.touchesBegan(pointX * window.devicePixelRatio, pointY * window.devicePixelRatio);
   }
 
   /**

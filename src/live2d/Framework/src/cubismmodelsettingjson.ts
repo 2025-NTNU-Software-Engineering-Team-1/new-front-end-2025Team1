@@ -5,12 +5,12 @@
  * that can be found at https://www.live2d.com/eula/live2d-open-software-license-agreement_en.html.
  */
 
-import { ICubismModelSetting } from './icubismmodelsetting';
-import { CubismIdHandle } from './id/cubismid';
-import { CubismFramework } from './live2dcubismframework';
-import { csmMap, iterator } from './type/csmmap';
-import { csmVector } from './type/csmvector';
-import { CubismJson, Value } from './utils/cubismjson';
+import { ICubismModelSetting } from "./icubismmodelsetting";
+import { CubismIdHandle } from "./id/cubismid";
+import { CubismFramework } from "./live2dcubismframework";
+import { csmMap, iterator } from "./type/csmmap";
+import { csmVector } from "./type/csmvector";
+import { CubismJson, Value } from "./utils/cubismjson";
 
 export enum FrequestNode {
   FrequestNode_Groups, // getRoot().getValueByString(Groups)
@@ -20,7 +20,7 @@ export enum FrequestNode {
   FrequestNode_Textures, // getRoot().getValueByString(FileReferences).getValueByString(Textures)
   FrequestNode_Physics, // getRoot().getValueByString(FileReferences).getValueByString(Physics)
   FrequestNode_Pose, // getRoot().getValueByString(FileReferences).getValueByString(Pose)
-  FrequestNode_HitAreas // getRoot().getValueByString(HitAreas)
+  FrequestNode_HitAreas, // getRoot().getValueByString(HitAreas)
 }
 
 /**
@@ -43,48 +43,26 @@ export class CubismModelSettingJson extends ICubismModelSetting {
       this._jsonValue = new csmVector<Value>();
 
       // 順番はenum FrequestNodeと一致させる
+      this._jsonValue.pushBack(this.getJson().getRoot().getValueByString(this.groups));
       this._jsonValue.pushBack(
-        this.getJson().getRoot().getValueByString(this.groups)
+        this.getJson().getRoot().getValueByString(this.fileReferences).getValueByString(this.moc),
       );
       this._jsonValue.pushBack(
-        this.getJson()
-          .getRoot()
-          .getValueByString(this.fileReferences)
-          .getValueByString(this.moc)
+        this.getJson().getRoot().getValueByString(this.fileReferences).getValueByString(this.motions),
       );
       this._jsonValue.pushBack(
-        this.getJson()
-          .getRoot()
-          .getValueByString(this.fileReferences)
-          .getValueByString(this.motions)
+        this.getJson().getRoot().getValueByString(this.fileReferences).getValueByString(this.expressions),
       );
       this._jsonValue.pushBack(
-        this.getJson()
-          .getRoot()
-          .getValueByString(this.fileReferences)
-          .getValueByString(this.expressions)
+        this.getJson().getRoot().getValueByString(this.fileReferences).getValueByString(this.textures),
       );
       this._jsonValue.pushBack(
-        this.getJson()
-          .getRoot()
-          .getValueByString(this.fileReferences)
-          .getValueByString(this.textures)
+        this.getJson().getRoot().getValueByString(this.fileReferences).getValueByString(this.physics),
       );
       this._jsonValue.pushBack(
-        this.getJson()
-          .getRoot()
-          .getValueByString(this.fileReferences)
-          .getValueByString(this.physics)
+        this.getJson().getRoot().getValueByString(this.fileReferences).getValueByString(this.pose),
       );
-      this._jsonValue.pushBack(
-        this.getJson()
-          .getRoot()
-          .getValueByString(this.fileReferences)
-          .getValueByString(this.pose)
-      );
-      this._jsonValue.pushBack(
-        this.getJson().getRoot().getValueByString(this.hitAreas)
-      );
+      this._jsonValue.pushBack(this.getJson().getRoot().getValueByString(this.hitAreas));
     }
   }
 
@@ -112,7 +90,7 @@ export class CubismModelSettingJson extends ICubismModelSetting {
    */
   public getModelFileName(): string {
     if (!this.isExistModelFile()) {
-      return '';
+      return "";
     }
     return this._jsonValue.at(FrequestNode.FrequestNode_Moc).getRawString();
   }
@@ -139,16 +117,16 @@ export class CubismModelSettingJson extends ICubismModelSetting {
       .getValueByIndex(0)
       .getRawString();
 
-    const pathArray = texturePath.split('/');
+    const pathArray = texturePath.split("/");
     // 最後の要素はテクスチャ名なので不要
     const arrayLength = pathArray.length - 1;
-    let textureDirectoryStr = '';
+    let textureDirectoryStr = "";
 
     // 分割したパスを結合
     for (let i = 0; i < arrayLength; i++) {
       textureDirectoryStr += pathArray[i];
       if (i < arrayLength - 1) {
-        textureDirectoryStr += '/';
+        textureDirectoryStr += "/";
       }
     }
 
@@ -161,10 +139,7 @@ export class CubismModelSettingJson extends ICubismModelSetting {
    * @return テクスチャの名前
    */
   public getTextureFileName(index: number): string {
-    return this._jsonValue
-      .at(FrequestNode.FrequestNode_Textures)
-      .getValueByIndex(index)
-      .getRawString();
+    return this._jsonValue.at(FrequestNode.FrequestNode_Textures).getValueByIndex(index).getRawString();
   }
 
   /**
@@ -191,7 +166,7 @@ export class CubismModelSettingJson extends ICubismModelSetting {
         .at(FrequestNode.FrequestNode_HitAreas)
         .getValueByIndex(index)
         .getValueByString(this.id)
-        .getRawString()
+        .getRawString(),
     );
   }
 
@@ -214,7 +189,7 @@ export class CubismModelSettingJson extends ICubismModelSetting {
    */
   public getPhysicsFileName(): string {
     if (!this.isExistPhysicsFile()) {
-      return '';
+      return "";
     }
 
     return this._jsonValue.at(FrequestNode.FrequestNode_Physics).getRawString();
@@ -226,7 +201,7 @@ export class CubismModelSettingJson extends ICubismModelSetting {
    */
   public getPoseFileName(): string {
     if (!this.isExistPoseFile()) {
-      return '';
+      return "";
     }
 
     return this._jsonValue.at(FrequestNode.FrequestNode_Pose).getRawString();
@@ -279,10 +254,7 @@ export class CubismModelSettingJson extends ICubismModelSetting {
       return 0;
     }
 
-    return this._jsonValue
-      .at(FrequestNode.FrequestNode_Motions)
-      .getKeys()
-      .getSize();
+    return this._jsonValue.at(FrequestNode.FrequestNode_Motions).getKeys().getSize();
   }
 
   /**
@@ -295,10 +267,7 @@ export class CubismModelSettingJson extends ICubismModelSetting {
       return null;
     }
 
-    return this._jsonValue
-      .at(FrequestNode.FrequestNode_Motions)
-      .getKeys()
-      .at(index);
+    return this._jsonValue.at(FrequestNode.FrequestNode_Motions).getKeys().at(index);
   }
 
   /**
@@ -311,10 +280,7 @@ export class CubismModelSettingJson extends ICubismModelSetting {
       return 0;
     }
 
-    return this._jsonValue
-      .at(FrequestNode.FrequestNode_Motions)
-      .getValueByString(groupName)
-      .getSize();
+    return this._jsonValue.at(FrequestNode.FrequestNode_Motions).getValueByString(groupName).getSize();
   }
 
   /**
@@ -325,7 +291,7 @@ export class CubismModelSettingJson extends ICubismModelSetting {
    */
   public getMotionFileName(groupName: string, index: number): string {
     if (!this.isExistMotionGroupName(groupName)) {
-      return '';
+      return "";
     }
 
     return this._jsonValue
@@ -344,7 +310,7 @@ export class CubismModelSettingJson extends ICubismModelSetting {
    */
   public getMotionSoundFileName(groupName: string, index: number): string {
     if (!this.isExistMotionSoundFile(groupName, index)) {
-      return '';
+      return "";
     }
 
     return this._jsonValue
@@ -399,7 +365,7 @@ export class CubismModelSettingJson extends ICubismModelSetting {
    */
   public getUserDataFile(): string {
     if (!this.isExistUserDataFile()) {
-      return '';
+      return "";
     }
 
     return this.getJson()
@@ -417,10 +383,7 @@ export class CubismModelSettingJson extends ICubismModelSetting {
    */
   public getLayoutMap(outLayoutMap: csmMap<string, number>): boolean {
     // 存在しない要素にアクセスするとエラーになるためValueがnullの場合はnullを代入する
-    const map: csmMap<string, Value> = this.getJson()
-      .getRoot()
-      .getValueByString(this.layout)
-      .getMap();
+    const map: csmMap<string, Value> = this.getJson().getRoot().getValueByString(this.layout).getMap();
 
     if (map == null) {
       return false;
@@ -428,11 +391,7 @@ export class CubismModelSettingJson extends ICubismModelSetting {
 
     let ret = false;
 
-    for (
-      const ite: iterator<string, Value> = map.begin();
-      ite.notEqual(map.end());
-      ite.preIncrement()
-    ) {
+    for (const ite: iterator<string, Value> = map.begin(); ite.notEqual(map.end()); ite.preIncrement()) {
       outLayoutMap.setValue(ite.ptr().first, ite.ptr().second.toFloat());
       ret = true;
     }
@@ -450,14 +409,8 @@ export class CubismModelSettingJson extends ICubismModelSetting {
     }
 
     let num = 0;
-    for (
-      let i = 0;
-      i < this._jsonValue.at(FrequestNode.FrequestNode_Groups).getSize();
-      i++
-    ) {
-      const refI: Value = this._jsonValue
-        .at(FrequestNode.FrequestNode_Groups)
-        .getValueByIndex(i);
+    for (let i = 0; i < this._jsonValue.at(FrequestNode.FrequestNode_Groups).getSize(); i++) {
+      const refI: Value = this._jsonValue.at(FrequestNode.FrequestNode_Groups).getValueByIndex(i);
       if (refI.isNull() || refI.isError()) {
         continue;
       }
@@ -481,21 +434,15 @@ export class CubismModelSettingJson extends ICubismModelSetting {
       return null;
     }
 
-    for (
-      let i = 0;
-      i < this._jsonValue.at(FrequestNode.FrequestNode_Groups).getSize();
-      i++
-    ) {
-      const refI: Value = this._jsonValue
-        .at(FrequestNode.FrequestNode_Groups)
-        .getValueByIndex(i);
+    for (let i = 0; i < this._jsonValue.at(FrequestNode.FrequestNode_Groups).getSize(); i++) {
+      const refI: Value = this._jsonValue.at(FrequestNode.FrequestNode_Groups).getValueByIndex(i);
       if (refI.isNull() || refI.isError()) {
         continue;
       }
 
       if (refI.getValueByString(this.name).getRawString() == this.eyeBlink) {
         return CubismFramework.getIdManager().getId(
-          refI.getValueByString(this.ids).getValueByIndex(index).getRawString()
+          refI.getValueByString(this.ids).getValueByIndex(index).getRawString(),
         );
       }
     }
@@ -512,14 +459,8 @@ export class CubismModelSettingJson extends ICubismModelSetting {
     }
 
     let num = 0;
-    for (
-      let i = 0;
-      i < this._jsonValue.at(FrequestNode.FrequestNode_Groups).getSize();
-      i++
-    ) {
-      const refI: Value = this._jsonValue
-        .at(FrequestNode.FrequestNode_Groups)
-        .getValueByIndex(i);
+    for (let i = 0; i < this._jsonValue.at(FrequestNode.FrequestNode_Groups).getSize(); i++) {
+      const refI: Value = this._jsonValue.at(FrequestNode.FrequestNode_Groups).getValueByIndex(i);
       if (refI.isNull() || refI.isError()) {
         continue;
       }
@@ -543,21 +484,15 @@ export class CubismModelSettingJson extends ICubismModelSetting {
       return null;
     }
 
-    for (
-      let i = 0;
-      i < this._jsonValue.at(FrequestNode.FrequestNode_Groups).getSize();
-      i++
-    ) {
-      const refI: Value = this._jsonValue
-        .at(FrequestNode.FrequestNode_Groups)
-        .getValueByIndex(i);
+    for (let i = 0; i < this._jsonValue.at(FrequestNode.FrequestNode_Groups).getSize(); i++) {
+      const refI: Value = this._jsonValue.at(FrequestNode.FrequestNode_Groups).getValueByIndex(i);
       if (refI.isNull() || refI.isError()) {
         continue;
       }
 
       if (refI.getValueByString(this.name).getRawString() == this.lipSync) {
         return CubismFramework.getIdManager().getId(
-          refI.getValueByString(this.ids).getValueByIndex(index).getRawString()
+          refI.getValueByString(this.ids).getValueByIndex(index).getRawString(),
         );
       }
     }
@@ -620,9 +555,7 @@ export class CubismModelSettingJson extends ICubismModelSetting {
    * @return false キーが存在しない
    */
   protected isExistExpressionFile(): boolean {
-    const node: Value = this._jsonValue.at(
-      FrequestNode.FrequestNode_Expressions
-    );
+    const node: Value = this._jsonValue.at(FrequestNode.FrequestNode_Expressions);
     return !node.isNull() && !node.isError();
   }
 
@@ -643,9 +576,7 @@ export class CubismModelSettingJson extends ICubismModelSetting {
    * @return false キーが存在しない
    */
   protected isExistMotionGroupName(groupName: string): boolean {
-    const node: Value = this._jsonValue
-      .at(FrequestNode.FrequestNode_Motions)
-      .getValueByString(groupName);
+    const node: Value = this._jsonValue.at(FrequestNode.FrequestNode_Motions).getValueByString(groupName);
     return !node.isNull() && !node.isError();
   }
 
@@ -723,11 +654,7 @@ export class CubismModelSettingJson extends ICubismModelSetting {
       return false;
     }
 
-    for (
-      let i = 0;
-      i < this._jsonValue.at(FrequestNode.FrequestNode_Groups).getSize();
-      ++i
-    ) {
+    for (let i = 0; i < this._jsonValue.at(FrequestNode.FrequestNode_Groups).getSize(); ++i) {
       if (
         this._jsonValue
           .at(FrequestNode.FrequestNode_Groups)
@@ -754,11 +681,7 @@ export class CubismModelSettingJson extends ICubismModelSetting {
     ) {
       return false;
     }
-    for (
-      let i = 0;
-      i < this._jsonValue.at(FrequestNode.FrequestNode_Groups).getSize();
-      ++i
-    ) {
+    for (let i = 0; i < this._jsonValue.at(FrequestNode.FrequestNode_Groups).getSize(); ++i) {
       if (
         this._jsonValue
           .at(FrequestNode.FrequestNode_Groups)
@@ -778,58 +701,58 @@ export class CubismModelSettingJson extends ICubismModelSetting {
   /**
    * Model3Jsonのキー文字列
    */
-  protected readonly version = 'Version';
-  protected readonly fileReferences = 'FileReferences';
+  protected readonly version = "Version";
+  protected readonly fileReferences = "FileReferences";
 
-  protected readonly groups = 'Groups';
-  protected readonly layout = 'Layout';
-  protected readonly hitAreas = 'HitAreas';
+  protected readonly groups = "Groups";
+  protected readonly layout = "Layout";
+  protected readonly hitAreas = "HitAreas";
 
-  protected readonly moc = 'Moc';
-  protected readonly textures = 'Textures';
-  protected readonly physics = 'Physics';
-  protected readonly pose = 'Pose';
-  protected readonly expressions = 'Expressions';
-  protected readonly motions = 'Motions';
+  protected readonly moc = "Moc";
+  protected readonly textures = "Textures";
+  protected readonly physics = "Physics";
+  protected readonly pose = "Pose";
+  protected readonly expressions = "Expressions";
+  protected readonly motions = "Motions";
 
-  protected readonly userData = 'UserData';
-  protected readonly name = 'Name';
-  protected readonly filePath = 'File';
-  protected readonly id = 'Id';
-  protected readonly ids = 'Ids';
-  protected readonly target = 'Target';
+  protected readonly userData = "UserData";
+  protected readonly name = "Name";
+  protected readonly filePath = "File";
+  protected readonly id = "Id";
+  protected readonly ids = "Ids";
+  protected readonly target = "Target";
 
   // Motions
-  protected readonly idle = 'Idle';
-  protected readonly tapBody = 'TapBody';
-  protected readonly pinchIn = 'PinchIn';
-  protected readonly pinchOut = 'PinchOut';
-  protected readonly shake = 'Shake';
-  protected readonly flickHead = 'FlickHead';
-  protected readonly parameter = 'Parameter';
+  protected readonly idle = "Idle";
+  protected readonly tapBody = "TapBody";
+  protected readonly pinchIn = "PinchIn";
+  protected readonly pinchOut = "PinchOut";
+  protected readonly shake = "Shake";
+  protected readonly flickHead = "FlickHead";
+  protected readonly parameter = "Parameter";
 
-  protected readonly soundPath = 'Sound';
-  protected readonly fadeInTime = 'FadeInTime';
-  protected readonly fadeOutTime = 'FadeOutTime';
+  protected readonly soundPath = "Sound";
+  protected readonly fadeInTime = "FadeInTime";
+  protected readonly fadeOutTime = "FadeOutTime";
 
   // Layout
-  protected readonly centerX = 'CenterX';
-  protected readonly centerY = 'CenterY';
-  protected readonly x = 'X';
-  protected readonly y = 'Y';
-  protected readonly width = 'Width';
-  protected readonly height = 'Height';
+  protected readonly centerX = "CenterX";
+  protected readonly centerY = "CenterY";
+  protected readonly x = "X";
+  protected readonly y = "Y";
+  protected readonly width = "Width";
+  protected readonly height = "Height";
 
-  protected readonly lipSync = 'LipSync';
-  protected readonly eyeBlink = 'EyeBlink';
+  protected readonly lipSync = "LipSync";
+  protected readonly eyeBlink = "EyeBlink";
 
-  protected readonly initParameter = 'init_param';
-  protected readonly initPartsVisible = 'init_parts_visible';
-  protected readonly val = 'val';
+  protected readonly initParameter = "init_param";
+  protected readonly initPartsVisible = "init_parts_visible";
+  protected readonly val = "val";
 }
 
 // Namespace definition for compatibility.
-import * as $ from './cubismmodelsettingjson';
+import * as $ from "./cubismmodelsettingjson";
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace Live2DCubismFramework {
   export const CubismModelSettingJson = $.CubismModelSettingJson;

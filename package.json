@@ -37,7 +37,7 @@
     "pinia": "^2.0.11",
     "query-string": "^7.1.1",
     "scrollmagic": "^2.0.8",
-    "vue": "^3.2.45",
+    "vue": "^3.5.13",
     "vue-echarts": "^6.0.2",
     "vue-i18n": "^9.2.2",
     "vue-prism-editor": "^2.0.0-alpha.2",

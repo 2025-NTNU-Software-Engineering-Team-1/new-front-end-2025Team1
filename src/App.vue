@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { watchEffect } from "vue";
+import { watchEffect, computed } from "vue"; // 1. 匯入 computed
+import { useRoute } from "vue-router"; // 2. 匯入 useRoute
 import { useGlobal } from "@/stores/global";
 import { TransitionRoot } from "@headlessui/vue";
 import { useI18n } from "vue-i18n";
 import dayjs from "dayjs";
+import AIChatbot from "@/components/AIChatbot.vue"; // 3. 匯入我們的新元件
 
 const global = useGlobal();
+const route = useRoute(); // 4. 取得當前路由
 
 const { locale } = useI18n();
 watchEffect(() => {
@@ -20,6 +23,14 @@ watchEffect(() => {
       dayjs.locale("zh-tw");
       break;
   }
+});
+
+// 5. 加入這個 computed 屬性
+const showChatbot = computed(() => {
+  const path = route.path;
+  // 檢查路徑是否包含 /problem/ 或 /submission
+  // 這樣 /course/[name]/problem/[id] 和 /course/[name]/submission/[id] 都會觸發
+  return path.includes("/problem/") || path.includes("/submission");
 });
 </script>
 
@@ -48,10 +59,12 @@ watchEffect(() => {
         <div class="alert alert-error shadow-lg">
           <div>
             <i-uil-times-circle />
-            <span>Oops! Our server failed to respond. 😢</span>
+            <span>Oops! Our server failed to respond.</span>
           </div>
         </div>
       </div>
     </TransitionRoot>
+
+    <AIChatbot v-if="showChatbot" />
   </div>
 </template>

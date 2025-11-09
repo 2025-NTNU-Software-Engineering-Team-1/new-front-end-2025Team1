@@ -20,9 +20,8 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./src/*",
-      ]
+      "@/*": ["src/*"],
+      "@framework/*": ["src/live2d/Framework/src/*"]
     }
   },
   "include": [

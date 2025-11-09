@@ -9,3 +9,21 @@ declare module "*.vue" {
   const component: DefineComponent<{}, {}, any>;
   export default component;
 }
+
+declare namespace Live2DCubismCore {
+  const Moc: any;
+  const Model: any;
+  function Logging_Log(message: string): void;
+  function Logging_SetLogFunction(handler: (message: string) => void): void;
+  enum LogLevel {
+    LogLevel_Verbose,
+    LogLevel_Debug,
+    LogLevel_Info,
+    LogLevel_Warning,
+    LogLevel_Error,
+  }
+}
+
+interface Window {
+  Live2DCubismCore: typeof Live2DCubismCore;
+}

@@ -72,6 +72,20 @@
           "placeholder": "Paste your code here",
           "testInputPlaceholder": "Enter your test input here"
         },
+        "topic":{
+          "dec":"description",
+          "input":"input",
+          "output":"output",
+          "hint":"hint",
+          "sample":{
+            "id":"#",
+            "input":"input",
+            "output":"output"
+          },
+          "noContent":"no content",
+          "expand":"open",
+          "collapse":"close"
+        },
         "lang": {
           "text": "Language",
           "select": "Select language"
@@ -106,7 +120,14 @@
           "files": "Files",
           "preview": "Preview",
           "cancel": "Cancel",
-          "save": "Save Changes"
+          "save": "Save Changes",
+          "saveError":"Failed to save test case",
+          "confirm":"This upload will overwrite the current list of test cases. Continue?",
+          "alert":"Please select at least one test case file.",
+          "pdfNotice":"click the link below to download",
+          "unsupported":"Unsupported file type: {ext}",
+          "download":"open and download file"
+          
         }
       },
       "stats": {

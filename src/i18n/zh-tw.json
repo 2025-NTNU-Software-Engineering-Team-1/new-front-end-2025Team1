@@ -72,6 +72,20 @@
           "placeholder": "在此貼上程式碼",
           "testInputPlaceholder": "在此輸入測試資料"
         },
+        "topic":{
+          "dec":"說明",
+          "input":"輸入",
+          "output":"輸出",
+          "hint":"提示",
+          "sample":{
+            "id":"#",
+            "input":"輸入",
+            "output":"輸出"
+          },
+          "noContent":"無內容",
+          "expand":"展開",
+          "collapse":"收起"
+        },
         "lang": {
           "text": "語言",
           "select": "選擇語言"
@@ -105,7 +119,13 @@
           "files": "檔案",
           "preview": "預覽",
           "cancel": "取消",
-          "save": "儲存變更"
+          "save": "儲存變更",
+          "saveError":"儲存測資失敗",
+          "confirm":"此上傳將覆蓋當前的測資列表。是否繼續？",
+          "alert":"請至少選擇一個測資檔案。",
+          "pdfNotice":"點擊以下連結下載",
+          "unsupported":"不支援的檔案類型: {ext}",
+          "download":"開啟並下載檔案"
         }
       },
       "stats": {

@@ -245,7 +245,6 @@ watch(
       </div>
       <!-- @vue-ignore -->
       <template v-if="v$ && v$.testCaseInfo && v$.testCaseInfo.tasks">
-        
         <label
           class="label text-error"
           v-show="v$.testCaseInfo.tasks.$error"

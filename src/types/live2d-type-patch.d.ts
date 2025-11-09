@@ -1,4 +1,4 @@
-// 寫在 src/types/live2d-type-patch.d.ts
+/* eslint-disable @typescript-eslint/ban-ts-comment, @typescript-eslint/no-explicit-any */
 
 // 這個補丁會修補 Live2D Framework TS 原始碼
 // 和官方 'live2dcubismcore.d.ts' 型別定義檔之間的不一致。

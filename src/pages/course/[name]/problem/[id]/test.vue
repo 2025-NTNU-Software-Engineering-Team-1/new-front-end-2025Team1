@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, watchEffect, computed, ref } from "vue";
+import { reactive, watchEffect, computed, ref, onMounted } from "vue";
 import hljs from "highlight.js";
 import { BlobWriter, ZipWriter, TextReader, ZipReader, BlobReader, TextWriter } from "@zip.js/zip.js";
 import { useAxios } from "@vueuse/integrations/useAxios";
@@ -18,14 +18,17 @@ useTitle(`Test - ${route.params.id} - ${route.params.name} | Normal OJ`);
 const router = useRouter();
 const { data: problem, error, isLoading } = useAxios<Problem>(`/problem/view/${route.params.id}`, fetcher);
 
-const isExpanded=ref(true);
-
+const isExpanded = ref(true);
 
 const lang = useStorage(LOCAL_STORAGE_KEY.LAST_USED_LANG, -1);
 const showSubmitModal = ref(false);
 const showTestcaseModal = ref(false);
-const testcaseFiles = ref<Array<{name: string, content: string}>>([]);
+const testcaseFiles = ref<Array<{ name: string; content: string }>>([]);
 const selectedTestcases = ref<string[]>([]);
+
+// Test settings from test-cases page
+const useDefaultTestcases = ref(true);
+const customTestcasesBlob = ref<Blob | null>(null);
 
 const form = reactive({
   code: "",
@@ -68,33 +71,74 @@ watchEffect(() => {
 
 const selectedTestcaseContent = ref("");
 
+// Load test settings when component mounts
+onMounted(async () => {
+  try {
+    // Load test settings from backend
+    const response = await fetcher.get(`/problem/${route.params.id}/test-settings`);
+    if (response.data) {
+      useDefaultTestcases.value = response.data.use_default_testcases ?? true;
+
+      // If custom testcases exist, load them
+      if (!useDefaultTestcases.value && response.data.custom_testcases_url) {
+        const testcasesResponse = await fetcher.get(response.data.custom_testcases_url, {
+          responseType: "blob",
+        });
+        customTestcasesBlob.value = testcasesResponse.data;
+      }
+    }
+  } catch (error) {
+    console.error("Error loading test settings:", error);
+    // Default to using default testcases if loading fails
+    useDefaultTestcases.value = true;
+    customTestcasesBlob.value = null;
+  }
+});
+
 async function test() {
   const isFormCorrect = await v$.value.$validate();
   if (!isFormCorrect) return;
   form.isLoading = true;
   form.isSubmitError = false;
-  
+
   try {
-    const blobWriter = new BlobWriter("application/zip");
-    const writer = new ZipWriter(blobWriter);
-    await writer.add(`main${LANGUAGE_EXTENSION[form.lang]}`, new TextReader(form.code));
-    await writer.close();
-    const blob = await blobWriter.getData();
+    // NEW IMPLEMENTATION - Trial Submission APIs
+
+    // API 2: Create trial submission request
+    const requestResponse = await api.TrialSubmission.createTrialRequest({
+      Problem_Id: Number(route.params.id),
+      Language_Type: Number(form.lang), // 0: Python, 1: C++, 2: C
+      Use_Default_Test_Cases: useDefaultTestcases.value,
+    });
+
+    if (requestResponse.data.Status === "ERR" || !requestResponse.data.Trial_Submission_Id) {
+      throw new Error(requestResponse.data.Message || "Failed to create trial submission");
+    }
+
+    const trialSubmissionId = requestResponse.data.Trial_Submission_Id;
+
+    // Prepare code zip file
+    const codeWriter = new ZipWriter(new BlobWriter("application/zip"));
+    await codeWriter.add(`main${LANGUAGE_EXTENSION[form.lang]}`, new TextReader(form.code));
+    const codeBlob = await codeWriter.close();
+
+    // API 3: Upload code and optional custom testcases
     const formData = new FormData();
-    formData.append("code", blob);
-    formData.append("test_input", form.testInput);
+    formData.append("code", codeBlob);
 
-    //const { testSubmissionId } = (
-    const { submissionId } = (
-      await api.Submission.create({
-        problemId: Number(route.params.id),
-        //isTest: true,
-        languageType: Number(form.lang)
-      })
-    ).data;
+    // Add custom testcases if they were configured in test-cases page
+    if (!useDefaultTestcases.value && customTestcasesBlob.value) {
+      formData.append("custom_testcases", customTestcasesBlob.value);
+      console.log("Uploading custom testcases");
+    }
 
-    //await api.Submission.modify(testSubmissionId, formData);
-    await api.Submission.modify(submissionId, formData);
+    const uploadResponse = await api.TrialSubmission.uploadTrialFiles(trialSubmissionId, formData);
+
+    if (uploadResponse.data.Status === "ERR") {
+      throw new Error(uploadResponse.data.Message || "Failed to upload trial submission files");
+    }
+
+    // Navigate to test history
     router.push(`/course/${route.params.name}/problem/${route.params.id}/test-history`);
   } catch (error) {
     form.isSubmitError = true;
@@ -108,7 +152,7 @@ async function test() {
 async function submitCode() {
   const isFormCorrect = await v$.value.$validate();
   if (!isFormCorrect) return;
-  
+
   try {
     const blobWriter = new BlobWriter("application/zip");
     const writer = new ZipWriter(blobWriter);
@@ -132,47 +176,6 @@ async function submitCode() {
     throw error;
   }
 }
-
-async function handleTestcaseUpload(event: Event) {
-  const file = (event.target as HTMLInputElement).files?.[0];
-  if (!file || !file.name.endsWith('.zip')) return;
-
-  const zipReader = new ZipReader(new BlobReader(file));
-  const entries = await zipReader.getEntries();
-  
-  testcaseFiles.value = [];
-  for (const entry of entries) {
-    if (!entry.directory && entry.getData) {
-    //if (!entry.directory) {
-      const textWriter = new TextWriter();
-      const content = await entry.getData(textWriter);
-      testcaseFiles.value.push({
-        name: entry.filename,
-        content,
-      });
-    }
-  }
-}
-
-function previewTestcase(file: {name: string, content: string}) {
-  selectedTestcaseContent.value = file.content;
-}
-
-function deleteTestcase(file: {name: string, content: string}) {
-  const index = testcaseFiles.value.findIndex(f => f.name === file.name);
-  if (index !== -1) {
-    testcaseFiles.value.splice(index, 1);
-    selectedTestcases.value = selectedTestcases.value.filter(name => name !== file.name);
-    if (selectedTestcaseContent.value === file.content) {
-      selectedTestcaseContent.value = "";
-    }
-  }
-}
-
-function saveTestcaseSettings() {
-  showTestcaseModal.value = false;
-}
-
 </script>
 
 <template>
@@ -184,37 +187,40 @@ function saveTestcaseSettings() {
       <template #data>
         <div class="card min-w-full">
           <div class="card-body">
-            <div class="flex justify-between items-center">
-              <div class="card-title md:text-2xl lg:text-3xl">{{ t("course.problem.test.card.title") }}{{ route.params.id }}</div>
+            <div class="flex items-center justify-between">
+              <div class="card-title md:text-2xl lg:text-3xl">
+                {{ t("course.problem.test.card.title") }}{{ route.params.id }}
+              </div>
             </div>
 
             <div class="divider" />
-            <div  class="mt-4 p-4 bg-base-200 rounded-lg relative transition-all duration-300"
-            >
+            <div class="relative mt-4 rounded-lg bg-base-200 p-4 transition-all duration-300">
               <button
                 class="absolute bottom-3 right-4 z-10 text-gray-500 hover:text-gray-700"
                 @click="isExpanded = !isExpanded"
               >
-                <img v-if="isExpanded" src="/expand.png" alt="t('course.problem.test.topic.collapse')" class="h-5 w-5"
+                <img
+                  v-if="isExpanded"
+                  src="/expand.png"
+                  alt="t('course.problem.test.topic.collapse')"
+                  class="h-5 w-5"
                 />
-                <img v-else src="/expand.png" alt="t('course.problem.test.topic.expand')" class="h-5 w-5"
-                />
+                <img v-else src="/expand.png" alt="t('course.problem.test.topic.expand')" class="h-5 w-5" />
               </button>
-              <div
-                class="transition-all duration-300"
-                :class="{ 'max-h-96 overflow-hidden': !isExpanded }"
-              >
-                <h2 class="text-xl font-bold mb-2">{{ problem?.problemName }}</h2>
+              <div class="transition-all duration-300" :class="{ 'max-h-96 overflow-hidden': !isExpanded }">
+                <h2 class="mb-2 text-xl font-bold">{{ problem?.problemName }}</h2>
                 <div class="prose max-w-none leading-relaxed">
-                  <h3 class="font-semibold text-lg mt-4">{{t("course.problem.test.topic.dec")}}</h3>
+                  <h3 class="mt-4 text-lg font-semibold">{{ t("course.problem.test.topic.dec") }}</h3>
                   <p v-html="problem?.description.description" class="whitespace-pre-line"></p>
-                  <h3 class="font-semibold text-lg mt-4">{{t("course.problem.test.topic.input")}}</h3>
+                  <h3 class="mt-4 text-lg font-semibold">{{ t("course.problem.test.topic.input") }}</h3>
                   <p v-html="problem?.description.input" class="whitespace-pre-line"></p>
-                  <h3 class="font-semibold text-lg mt-4">{{t("course.problem.test.topic.output")}}</h3>
+                  <h3 class="mt-4 text-lg font-semibold">{{ t("course.problem.test.topic.output") }}</h3>
                   <p v-html="problem?.description.output" class="whitespace-pre-line"></p>
-                  <div class="overflow-x-auto rounded-lg border border-base-300 bg-base-100 overflow-hidden p-0">
-                    <table class="table w-full border-collapse border-0 !m-0 !border-spacing-0">
-                      <thead class="bg-base-300 rounded-none">
+                  <div
+                    class="overflow-hidden overflow-x-auto rounded-lg border border-base-300 bg-base-100 p-0"
+                  >
+                    <table class="table !m-0 w-full border-collapse !border-spacing-0 border-0">
+                      <thead class="rounded-none bg-base-300">
                         <tr>
                           <th>{{ t("course.problem.test.topic.sample.id") }}</th>
                           <th>{{ t("course.problem.test.topic.sample.input") }}</th>
@@ -223,7 +229,7 @@ function saveTestcaseSettings() {
                       </thead>
                       <tbody class="rounded-none">
                         <tr v-for="(input, i) in problem?.description?.sampleInput || []" :key="i">
-                          <td class="align-top">{{ i+1 }}</td>
+                          <td class="align-top">{{ i + 1 }}</td>
                           <td class="align-top">
                             <sample-code-block
                               v-if="problem?.description?.sampleInput?.[i]"
@@ -246,17 +252,19 @@ function saveTestcaseSettings() {
                       </tbody>
                     </table>
                   </div>
-                    <h3 class="font-semibold text-lg mt-4">{{t("course.problem.test.topic.hint")}}</h3>
-                    <p v-html="problem?.description.hint" class="whitespace-pre-line"></p>
+                  <h3 class="mt-4 text-lg font-semibold">{{ t("course.problem.test.topic.hint") }}</h3>
+                  <p v-html="problem?.description.hint" class="whitespace-pre-line"></p>
                 </div>
               </div>
             </div>
 
-            <div class="flex justify-between items-center gap-4">
+            <div class="flex items-center justify-between gap-4">
               <div class="form-control flex-1">
                 <label class="form-control w-60">
                   <div class="label">
-                    <span class="label-text text-sm text-gray-500">{{ t("course.problem.test.lang.text") }}</span>
+                    <span class="label-text text-sm text-gray-500">{{
+                      t("course.problem.test.lang.text")
+                    }}</span>
                   </div>
                   <select
                     v-model="v$.lang.$model"
@@ -268,7 +276,7 @@ function saveTestcaseSettings() {
                     </option>
                   </select>
                 </label>
-                  
+
                 <label class="label" v-show="v$.lang.$error">
                   <span class="label-text-alt text-error">{{ v$.lang.$errors[0]?.$message }}</span>
                 </label>
@@ -310,7 +318,7 @@ function saveTestcaseSettings() {
               </label>
             </div>
 
-            <div class=" submit submit-place">
+            <div class="submit submit-place">
               <div class="flex justify-end">
                 <button class="btn btn-primary" @click="showSubmitModal = true">
                   <i-uil-file-upload-alt class="mr-1 h-5 w-5" />
@@ -326,11 +334,12 @@ function saveTestcaseSettings() {
           </div>
 
           <!-- Submit Confirmation Modal -->
-          <dialog 
-            class="modal backdrop:bg-black/20 backdrop:backdrop-blur-[1px] bg-transparent border-0 p-0" 
-            :class="{ 'modal-open': showSubmitModal }">
+          <dialog
+            class="modal border-0 bg-transparent p-0 backdrop:bg-black/20 backdrop:backdrop-blur-[1px]"
+            :class="{ 'modal-open': showSubmitModal }"
+          >
             <div class="modal-box rounded-3xl shadow-[0_4px_15px_rgba(0,0,0,0.2)]">
-              <h3 class="font-bold text-lg">{{ t("course.problem.test.submitModal.title") }}</h3>
+              <h3 class="text-lg font-bold">{{ t("course.problem.test.submitModal.title") }}</h3>
               <p class="py-4">{{ t("course.problem.test.submitModal.message") }}</p>
               <div class="modal-action">
                 <button class="btn" @click="showSubmitModal = false">
@@ -342,8 +351,6 @@ function saveTestcaseSettings() {
               </div>
             </div>
           </dialog>
-
-
         </div>
       </template>
     </data-status-wrapper>
@@ -356,6 +363,3 @@ function saveTestcaseSettings() {
   <!--submit按鈕移動到右下-->
   <!--語言框調短-->
 </template>
-
-
-

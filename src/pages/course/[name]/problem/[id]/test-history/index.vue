@@ -1,22 +1,19 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import { useRoute, useRouter } from "vue-router";
 import { useTitle } from "@vueuse/core";
-import { fetcher } from "@/models/api";
+import api, { fetcher } from "@/models/api";
 import { useI18n } from "vue-i18n";
 import dayjs from "dayjs";
 import type { AxiosError } from "axios";
-import { SUBMISSION_STATUS_CODE } from "@/constants";
+import { SUBMISSION_STATUS_CODE, LANG } from "@/constants";
 
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
 
 useTitle(`Test History - ${route.params.id} - ${route.params.name} | Normal OJ`);
-
-// ToDo: Replace fake data with real API call
-// const { data: testHistory, error, isLoading } = useAxios(`/test-history/${route.params.id}`, fetcher);
 
 // Define a typed shape for the history items so TypeScript knows what properties exist
 type TestHistoryItem = {
@@ -28,80 +25,58 @@ type TestHistoryItem = {
   timestamp: string;
 };
 
-// 假資料用於預覽
-const testHistory = ref<TestHistoryItem[]>([
-  {
-    id: "T001",
-    pid: String(route.params.id),
-    result: SUBMISSION_STATUS_CODE.ACCEPTED,
-    score: 100,
-    lang: "C++",
-    timestamp: "2025-11-04T10:30:00",
-  },
-  {
-    id: "T002",
-    pid: String(route.params.id),
-    result: SUBMISSION_STATUS_CODE.WRONG_ANSWER,
-    score: 60,
-    lang: "Python",
-    timestamp: "2025-11-04T09:15:00",
-  },
-  {
-    id: "T003",
-    pid: String(route.params.id),
-    result: SUBMISSION_STATUS_CODE.TIME_LIMIT_EXCEED,
-    score: 40,
-    lang: "C++",
-    timestamp: "2025-11-04T08:45:00",
-  },
-  {
-    id: "T004",
-    pid: String(route.params.id),
-    result: SUBMISSION_STATUS_CODE.RUNTIME_ERROR,
-    score: 20,
-    lang: "Python",
-    timestamp: "2025-11-03T16:20:00",
-  },
-  {
-    id: "T005",
-    pid: String(route.params.id),
-    result: SUBMISSION_STATUS_CODE.COMPILE_ERROR,
-    score: 0,
-    lang: "C",
-    timestamp: "2025-11-03T14:10:00",
-  },
-  {
-    id: "T006",
-    pid: String(route.params.id),
-    result: SUBMISSION_STATUS_CODE.ACCEPTED,
-    score: 100,
-    lang: "C",
-    timestamp: "2025-11-03T12:30:00",
-  },
-  {
-    id: "T007",
-    pid: String(route.params.id),
-    result: SUBMISSION_STATUS_CODE.MEMORY_LIMIT_EXCEED,
-    score: 30,
-    lang: "C++",
-    timestamp: "2025-11-03T10:15:00",
-  },
-  {
-    id: "T008",
-    pid: String(route.params.id),
-    result: SUBMISSION_STATUS_CODE.PENDING,
-    score: 0,
-    lang: "Python",
-    timestamp: "2025-11-03T09:00:00",
-  },
-]);
-
+const testHistory = ref<TestHistoryItem[]>([]);
 const error = ref<AxiosError | undefined>(undefined);
 const isLoading = ref(false);
 
+// API 4: Load trial submission history when component mounts
+onMounted(async () => {
+  try {
+    isLoading.value = true;
+    const response = await api.TrialSubmission.getTrialHistory(Number(route.params.id));
+
+    if (response.data.Type === "OK") {
+      // Convert backend response to frontend format
+      testHistory.value = response.data.Data.History.map((item) => ({
+        id: item.Trial_Submission_Id,
+        pid: item.Problem_Id,
+        result: mapStatusToCode(item.Status),
+        score: item.Score,
+        lang: LANG[item.Language_Type] || "Unknown",
+        timestamp: String(item.Timestamp),
+      }));
+      console.log("Loaded trial history:", testHistory.value);
+    } else {
+      console.error("Failed to load trial history:", response.data.Message);
+      error.value = new Error(response.data.Message) as AxiosError;
+    }
+  } catch (err) {
+    console.error("Error loading trial history:", err);
+    error.value = err as AxiosError;
+  } finally {
+    isLoading.value = false;
+  }
+});
+
+// Helper function to map backend status string to status code
+function mapStatusToCode(status: string): SubmissionStatusCodes {
+  const statusMap: { [key: string]: SubmissionStatusCodes } = {
+    AC: SUBMISSION_STATUS_CODE.ACCEPTED,
+    WA: SUBMISSION_STATUS_CODE.WRONG_ANSWER,
+    CE: SUBMISSION_STATUS_CODE.COMPILE_ERROR,
+    TLE: SUBMISSION_STATUS_CODE.TIME_LIMIT_EXCEED,
+    MLE: SUBMISSION_STATUS_CODE.MEMORY_LIMIT_EXCEED,
+    RE: SUBMISSION_STATUS_CODE.RUNTIME_ERROR,
+    JE: SUBMISSION_STATUS_CODE.JUDGE_ERROR,
+    OLE: SUBMISSION_STATUS_CODE.OUTPUT_LIMIT_EXCEED,
+    Pending: SUBMISSION_STATUS_CODE.PENDING,
+  };
+  return statusMap[status] ?? SUBMISSION_STATUS_CODE.PENDING;
+}
+
 function viewTestDetail(testId: string | number) {
   const targetPath = `/course/${route.params.name}/problem/${route.params.id}/test-history/${testId}`;
-  console.log('Navigating to:', targetPath);
+  console.log("Navigating to:", targetPath);
   router.push(targetPath);
 }
 </script>
@@ -143,11 +118,17 @@ function viewTestDetail(testId: string | number) {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="item in testHistory" :key="item.id" 
-                      class="hover:bg-base-200 cursor-pointer"
-                      @click="viewTestDetail(item.id)">
+                  <tr
+                    v-for="item in testHistory"
+                    :key="item.id"
+                    class="cursor-pointer hover:bg-base-200"
+                    @click="viewTestDetail(item.id)"
+                  >
                     <td>
-                      <router-link :to="`/course/${route.params.name}/problem/${route.params.id}/test-history/${item.id}`" class="link">
+                      <router-link
+                        :to="`/course/${route.params.name}/problem/${route.params.id}/test-history/${item.id}`"
+                        class="link"
+                      >
                         {{ item.id }}
                       </router-link>
                     </td>
@@ -155,7 +136,7 @@ function viewTestDetail(testId: string | number) {
                     <td><judge-status :status="item.result" /></td>
                     <td>{{ item.score }}</td>
                     <td>{{ item.lang }}</td>
-                    <td>{{ dayjs(item.timestamp).format('YYYY-MM-DD HH:mm:ss') }}</td>
+                    <td>{{ dayjs(item.timestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
                   </tr>
                 </tbody>
               </table>

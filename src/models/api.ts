@@ -72,6 +72,92 @@ const Submission = {
   rejudge: (id: string) => fetcher.get(`/submission/${id}/rejudge`),
 };
 
+// Trial Submission APIs
+const TrialSubmission = {
+  // API 1: 取得Public-TrialCase 的 .in 以及 .out 內容
+  // GET /problem/<problem_id>/public-testcases
+  getPublicTestCases: (problemId: number) =>
+    fetcher.get<{
+      Status: "OK" | "ERR";
+      Trial_Cases: Array<{
+        File_Name: string;
+        Memory_Limit: number; // KB
+        Time_Limit: number; // ms
+        Input_Content: string;
+        Output_Content: string;
+      }>;
+    }>(`/problem/${problemId}/public-testcases`),
+
+  // API 2: 提交 Trial Submission 請求
+  // POST /problem/<problem_id>/trial/request
+  createTrialRequest: (body: {
+    Problem_Id: number;
+    Language_Type: number; // 0: Python, 1: C++, 2: C
+    Use_Default_Test_Cases: boolean;
+  }) =>
+    fetcher.post<{
+      Status: "OK" | "ERR";
+      Message: string;
+      Trial_Submission_Id?: string;
+    }>(`/problem/${body.Problem_Id}/trial/request`, body),
+
+  // API 3: 送出 Trial Submission 的程式以及測試測資
+  // PUT /trial-submission/<Trial_Submission_Id>/files
+  uploadTrialFiles: (trialSubmissionId: string, body: FormData) =>
+    fetcher.put<{
+      Status: "OK" | "ERR";
+      Message: string;
+    }>(`/trial-submission/${trialSubmissionId}/files`, body, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }),
+
+  // API 4: 取得所有Trial Submission紀錄
+  // GET /problem/<problem_id>/trial/history
+  getTrialHistory: (problemId: number) =>
+    fetcher.get<{
+      Type: "OK" | "ERR";
+      Message: string;
+      Data: {
+        Total_Count: number;
+        History: Array<{
+          Trial_Submission_Id: string;
+          Problem_Id: string;
+          Status: string;
+          Score: number;
+          Language_Type: number; // 0: C, 1: C++, 2: Python, 3: PDF
+          Timestamp: Date;
+        }>;
+      };
+    }>(`/problem/${problemId}/trial/history`),
+
+  // API 5: 取得某筆Trial Submission紀錄資料
+  // GET /trial-submission/<Trial_Submission_Id>
+  getTrialSubmission: (trialSubmissionId: string) =>
+    fetcher.get<{
+      Trial_Submission_Id: string;
+      Timestamp: Date;
+      Status: string;
+      Score: number;
+      Tasks: Array<{
+        Status: string; // (AC, WA, TLE)
+        Exec_Time: number;
+        Memory_Usage: number;
+        Score: number;
+        Stdout: string;
+        Stderr: string;
+      }>;
+    }>(`/trial-submission/${trialSubmissionId}`),
+
+  // API 6: 下載各別測資的結果
+  // GET /trial-submission/<Trial_Submission_Id>/download/case?task_index=<t_idx>
+  downloadCaseResult: (trialSubmissionId: string, taskIndex: number) =>
+    `/trial-submission/${trialSubmissionId}/download/case?task_index=${taskIndex}`,
+
+  // API 7: 下載一整題該Test Submission的所有測資結果
+  // GET /trial-submission/<Trial_Submission_Id>/download
+  downloadAllResults: (trialSubmissionId: string) => `/trial-submission/${trialSubmissionId}/download`,
+};
+
 //test api
 
 const Copycat = {
@@ -114,6 +200,7 @@ export default {
   Auth,
   Problem,
   Submission,
+  TrialSubmission,
   Copycat,
   Announcement,
   Homework,

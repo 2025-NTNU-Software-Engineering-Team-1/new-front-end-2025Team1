@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watchEffect } from "vue";
+import { ref, watchEffect, onMounted } from "vue";
 import { useClipboard, useIntervalFn } from "@vueuse/core";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import { useRoute, useRouter } from "vue-router";
@@ -14,14 +14,6 @@ const session = useSession();
 const route = useRoute();
 useTitle(`Test History - ${route.params.testId} - ${route.params.name} | Normal OJ`);
 const router = useRouter();
-
-// ToDo: Replace with real API call
-// const {
-//   data: testResult,
-//   error,
-//   isLoading,
-//   execute,
-// } = useAxios<TestResult>(`/test-history/${route.params.id}/${route.params.testId}`, fetcher);
 
 // Define test result type
 type TestCase = {
@@ -61,92 +53,8 @@ type TestResult = {
   ipAddr?: string;
 };
 
-// 假資料用於預覽
-const testResult = ref<TestResult>({
-  id: String(route.params.testId),
-  problemId: String(route.params.id),
-  user: {
-    username: "student01",
-    displayedName: "John Doe",
-  },
-  status: SUBMISSION_STATUS_CODE.WRONG_ANSWER,
-  runTime: 125,
-  memoryUsage: 2048,
-  score: 60,
-  languageType: 1, // C++
-  timestamp: Date.now(),
-  ipAddr: "192.168.1.100",
-  code: `#include <iostream>
-#include <vector>
-using namespace std;
-
-int main() {
-    int n;
-    cin >> n;
-    
-    vector<int> arr(n);
-    for (int i = 0; i < n; i++) {
-        cin >> arr[i];
-    }
-    
-    // Find the maximum element
-    int maxVal = arr[0];
-    for (int i = 1; i < n; i++) {
-        if (arr[i] > maxVal) {
-            maxVal = arr[i];
-        }
-    }
-    
-    cout << maxVal << endl;
-    return 0;
-}`,
-  tasks: [
-    {
-      taskId: 0,
-      execTime: 45,
-      memoryUsage: 1024,
-      score: 100,
-      status: SUBMISSION_STATUS_CODE.ACCEPTED,
-      cases: [
-        {
-          id: 0,
-          status: SUBMISSION_STATUS_CODE.ACCEPTED,
-          execTime: 15,
-          memoryUsage: 512,
-        },
-        {
-          id: 1,
-          status: SUBMISSION_STATUS_CODE.ACCEPTED,
-          execTime: 30,
-          memoryUsage: 512,
-        },
-      ],
-    },
-    {
-      taskId: 1,
-      execTime: 80,
-      memoryUsage: 1024,
-      score: 20,
-      status: SUBMISSION_STATUS_CODE.WRONG_ANSWER,
-      cases: [
-        {
-          id: 0,
-          status: SUBMISSION_STATUS_CODE.ACCEPTED,
-          execTime: 25,
-          memoryUsage: 512,
-        },
-        {
-          id: 1,
-          status: SUBMISSION_STATUS_CODE.WRONG_ANSWER,
-          execTime: 55,
-          memoryUsage: 512,
-        },
-      ],
-    },
-  ],
-});
-
-const error = ref(undefined);
+const testResult = ref<TestResult | null>(null);
+const error = ref<any>(undefined);
 const isLoading = ref(false);
 
 const {
@@ -159,8 +67,74 @@ const {
   fetcher,
   {
     immediate: false,
-  }
+  },
 );
+
+// API 5: Load trial submission details when component mounts
+onMounted(async () => {
+  try {
+    isLoading.value = true;
+    const response = await api.TrialSubmission.getTrialSubmission(String(route.params.testId));
+
+    // Convert backend response to frontend format
+    testResult.value = {
+      id: response.data.Trial_Submission_Id,
+      problemId: route.params.id as string,
+      user: {
+        username: session.username || "Unknown",
+        displayedName: session.displayedName || "Unknown",
+      },
+      status: mapStatusToCode(response.data.Status),
+      runTime: Math.max(...response.data.Tasks.map((t) => t.Exec_Time)),
+      memoryUsage: Math.max(...response.data.Tasks.map((t) => t.Memory_Usage)),
+      score: response.data.Score,
+      languageType: 1, // TODO: Get from backend
+      timestamp: new Date(response.data.Timestamp).getTime(),
+      code: "", // TODO: Get code from backend
+      tasks: response.data.Tasks.map((task, idx) => ({
+        taskId: idx,
+        execTime: task.Exec_Time,
+        memoryUsage: task.Memory_Usage,
+        score: task.Score,
+        status: mapStatusToCode(task.Status),
+        cases: [
+          {
+            id: 0,
+            status: mapStatusToCode(task.Status),
+            execTime: task.Exec_Time,
+            memoryUsage: task.Memory_Usage,
+            input: "",
+            expectedOutput: "",
+            actualOutput: task.Stdout,
+          },
+        ],
+      })),
+    };
+
+    console.log("Loaded trial submission details:", testResult.value);
+  } catch (err) {
+    console.error("Error loading trial submission details:", err);
+    error.value = err;
+  } finally {
+    isLoading.value = false;
+  }
+});
+
+// Helper function to map backend status string to status code
+function mapStatusToCode(status: string): SubmissionStatusCodes {
+  const statusMap: { [key: string]: SubmissionStatusCodes } = {
+    AC: SUBMISSION_STATUS_CODE.ACCEPTED,
+    WA: SUBMISSION_STATUS_CODE.WRONG_ANSWER,
+    CE: SUBMISSION_STATUS_CODE.COMPILE_ERROR,
+    TLE: SUBMISSION_STATUS_CODE.TIME_LIMIT_EXCEED,
+    MLE: SUBMISSION_STATUS_CODE.MEMORY_LIMIT_EXCEED,
+    RE: SUBMISSION_STATUS_CODE.RUNTIME_ERROR,
+    JE: SUBMISSION_STATUS_CODE.JUDGE_ERROR,
+    OLE: SUBMISSION_STATUS_CODE.OUTPUT_LIMIT_EXCEED,
+    Pending: SUBMISSION_STATUS_CODE.PENDING,
+  };
+  return statusMap[status] ?? SUBMISSION_STATUS_CODE.PENDING;
+}
 
 const { copy, copied, isSupported } = useClipboard();
 
@@ -196,7 +170,7 @@ const currentDetailData = ref<{
 function openTaskDetailModal(taskIndex: number) {
   const task = testResult.value?.tasks[taskIndex];
   if (!task) return;
-  
+
   const data = {
     stage: taskIndex,
     status: task.status,
@@ -211,9 +185,9 @@ function openTaskDetailModal(taskIndex: number) {
       input: c.input || `Input data for case ${idx}`,
       answer: c.expectedOutput || `Expected output for case ${idx}`,
       output: c.actualOutput || `Actual output for case ${idx}`,
-    }))
+    })),
   };
-  
+
   currentDetailData.value = {
     title: `Task ${taskIndex} Details`,
     jsonData: JSON.stringify(data, null, 2),
@@ -226,7 +200,7 @@ function openCaseDetailModal(taskIndex: number, caseIndex: number) {
   const task = testResult.value?.tasks[taskIndex];
   const testCase = task?.cases[caseIndex];
   if (!testCase) return;
-  
+
   const data = {
     stage: taskIndex,
     case: caseIndex,
@@ -237,7 +211,7 @@ function openCaseDetailModal(taskIndex: number, caseIndex: number) {
     answer: testCase.expectedOutput || `Expected output for case ${taskIndex}-${caseIndex}`,
     output: testCase.actualOutput || `Actual output for case ${taskIndex}-${caseIndex}`,
   };
-  
+
   currentDetailData.value = {
     title: `Task ${taskIndex} - Case ${caseIndex} Details`,
     jsonData: JSON.stringify(data, null, 2),
@@ -247,28 +221,20 @@ function openCaseDetailModal(taskIndex: number, caseIndex: number) {
 
 // 下載 Task 結果
 function downloadTaskResult(taskIndex: number) {
-  const task = testResult.value?.tasks[taskIndex];
-  if (!task) return;
-  
-  const data = {
-    stage: taskIndex,
-    status: task.status,
-    execTime: `${task.execTime} ms`,
-    memoryUsage: `${task.memoryUsage} KB`,
-    score: task.score,
-    cases: task.cases.map((c, idx) => ({
-      case: idx,
-      status: c.status,
-      execTime: `${c.execTime} ms`,
-      memoryUsage: `${c.memoryUsage} KB`,
-      input: c.input || `Input data for case ${idx}`,
-      answer: c.expectedOutput || `Expected output for case ${idx}`,
-      output: c.actualOutput || `Actual output for case ${idx}`,
-    }))
-  };
-  
-  const content = JSON.stringify(data, null, 2);
-  downloadFile(`task_${taskIndex}_result.json`, content, 'application/json');
+  // API 6: Download case result
+  const trialSubmissionId = String(route.params.testId);
+  const downloadUrl = `${fetcher.defaults.baseURL}${api.TrialSubmission.downloadCaseResult(
+    trialSubmissionId,
+    taskIndex,
+  )}`;
+
+  // Trigger download by creating a temporary link
+  const link = document.createElement("a");
+  link.href = downloadUrl;
+  link.download = `trial-${trialSubmissionId}-task-${taskIndex}.zip`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
 
 // 下載 Case 結果
@@ -276,7 +242,7 @@ function downloadCaseResult(taskIndex: number, caseIndex: number) {
   const task = testResult.value?.tasks[taskIndex];
   const testCase = task?.cases[caseIndex];
   if (!testCase) return;
-  
+
   const data = {
     stage: taskIndex,
     case: caseIndex,
@@ -287,56 +253,35 @@ function downloadCaseResult(taskIndex: number, caseIndex: number) {
     answer: testCase.expectedOutput || `Expected output for case ${taskIndex}-${caseIndex}`,
     output: testCase.actualOutput || `Actual output for case ${taskIndex}-${caseIndex}`,
   };
-  
+
   const content = JSON.stringify(data, null, 2);
-  downloadFile(`case_${taskIndex}_${caseIndex}_result.json`, content, 'application/json');
+  downloadFile(`case_${taskIndex}_${caseIndex}_result.json`, content, "application/json");
 }
 
 // 下載所有結果
 function downloadAllResults() {
   if (!testResult.value) return;
-  
-  const data = {
-    testId: testResult.value.id,
-    problemId: testResult.value.problemId,
-    user: {
-      username: testResult.value.user.username,
-      displayedName: testResult.value.user.displayedName,
-    },
-    status: testResult.value.status,
-    score: testResult.value.score,
-    runTime: `${testResult.value.runTime} ms`,
-    memoryUsage: `${testResult.value.memoryUsage} KB`,
-    language: LANG[testResult.value.languageType],
-    timestamp: dayjs(testResult.value.timestamp).format('YYYY-MM-DD HH:mm:ss'),
-    sourceCode: testResult.value.code,
-    tasks: testResult.value.tasks.map((task, taskIdx) => ({
-      stage: taskIdx,
-      status: task.status,
-      execTime: `${task.execTime} ms`,
-      memoryUsage: `${task.memoryUsage} KB`,
-      score: task.score,
-      cases: task.cases.map((c, caseIdx) => ({
-        case: caseIdx,
-        status: c.status,
-        execTime: `${c.execTime} ms`,
-        memoryUsage: `${c.memoryUsage} KB`,
-        input: c.input || `Input data for case ${caseIdx}`,
-        answer: c.expectedOutput || `Expected output for case ${caseIdx}`,
-        output: c.actualOutput || `Actual output for case ${caseIdx}`,
-      }))
-    }))
-  };
-  
-  const content = JSON.stringify(data, null, 2);
-  downloadFile(`test_history_${testResult.value.id}_complete.json`, content, 'application/json');
+
+  // API 7: Download all results
+  const trialSubmissionId = String(route.params.testId);
+  const downloadUrl = `${fetcher.defaults.baseURL}${api.TrialSubmission.downloadAllResults(
+    trialSubmissionId,
+  )}`;
+
+  // Trigger download by creating a temporary link
+  const link = document.createElement("a");
+  link.href = downloadUrl;
+  link.download = `trial-${trialSubmissionId}.zip`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
 
 // 輔助函數：下載文件
-function downloadFile(filename: string, content: string, mimeType: string = 'text/plain') {
+function downloadFile(filename: string, content: string, mimeType: string = "text/plain") {
   const blob = new Blob([content], { type: mimeType });
   const url = window.URL.createObjectURL(blob);
-  const link = document.createElement('a');
+  const link = document.createElement("a");
   link.href = url;
   link.download = filename;
   document.body.appendChild(link);
@@ -348,11 +293,12 @@ function downloadFile(filename: string, content: string, mimeType: string = 'tex
 // 從模態框下載 JSON
 function downloadModalJson() {
   if (currentDetailData.value?.jsonData && currentDetailData.value?.title) {
-    const filename = currentDetailData.value.title
-      .toLowerCase()
-      .replace(/\s+/g, '_')
-      .replace(/[^a-z0-9_-]/g, '') + '.json';
-    downloadFile(filename, currentDetailData.value.jsonData, 'application/json');
+    const filename =
+      currentDetailData.value.title
+        .toLowerCase()
+        .replace(/\s+/g, "_")
+        .replace(/[^a-z0-9_-]/g, "") + ".json";
+    downloadFile(filename, currentDetailData.value.jsonData, "application/json");
   }
 }
 </script>
@@ -362,9 +308,7 @@ function downloadModalJson() {
     <div class="card min-w-full">
       <div class="card-body">
         <div class="flex flex-wrap items-center justify-between gap-4">
-          <div class="card-title md:text-2xl lg:text-3xl">
-            Test History #{{ $route.params.testId }}
-          </div>
+          <div class="card-title md:text-2xl lg:text-3xl">Test History #{{ $route.params.testId }}</div>
           <div class="flex flex-wrap gap-2">
             <router-link
               :to="`/course/${route.params.name}/problem/${route.params.id}/test-history`"
@@ -374,7 +318,7 @@ function downloadModalJson() {
             </router-link>
             <router-link
               :to="`/course/${route.params.name}/problem/${route.params.id}`"
-              class="btn btn-sm btn-primary"
+              class="btn btn-primary btn-sm"
             >
               <i-uil-file-alt class="mr-1" /> Back to Problem
             </router-link>
@@ -423,7 +367,7 @@ function downloadModalJson() {
                       <td>{{ testResult.memoryUsage }} KB</td>
                       <td>{{ testResult.score }}</td>
                       <td>{{ LANG[testResult.languageType] }}</td>
-                      <td>{{ dayjs(testResult.timestamp).format('YYYY-MM-DD HH:mm:ss') }}</td>
+                      <td>{{ dayjs(testResult.timestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
                       <td v-if="session.isAdmin">{{ testResult.ipAddr }}</td>
                     </tr>
                   </tbody>
@@ -450,9 +394,9 @@ function downloadModalJson() {
 
             <div class="flex items-center justify-between">
               <div class="card-title md:text-xl lg:text-2xl">Test Details</div>
-              <button 
+              <button
                 v-if="testResult"
-                class="btn btn-sm btn-success"
+                class="btn btn-success btn-sm"
                 @click="downloadAllResults"
                 title="Download All Results"
               >
@@ -464,7 +408,12 @@ function downloadModalJson() {
             <div v-else-if="isActive" class="flex items-center">
               <ui-spinner class="mr-3 h-6 w-6" /> Loading test results...
             </div>
-            <table v-else class="table table-compact w-full" v-for="(task, taskIndex) in testResult.tasks" :key="taskIndex">
+            <table
+              v-else
+              class="table table-compact w-full"
+              v-for="(task, taskIndex) in testResult.tasks"
+              :key="taskIndex"
+            >
               <thead>
                 <tr>
                   <th>Task {{ taskIndex }}</th>
@@ -484,14 +433,14 @@ function downloadModalJson() {
                   <td>{{ task.score }}</td>
                   <td>
                     <div class="flex gap-1">
-                      <button 
+                      <button
                         class="btn btn-ghost btn-xs"
                         @click="openTaskDetailModal(taskIndex)"
                         title="View Details"
                       >
                         <i-uil-eye />
                       </button>
-                      <button 
+                      <button
                         class="btn btn-ghost btn-xs"
                         @click="downloadTaskResult(taskIndex)"
                         title="Download Result"
@@ -509,11 +458,7 @@ function downloadModalJson() {
                     >
                       <i-uil-angle-down v-if="!expandTasks[taskIndex]" />
                       <i-uil-angle-up v-else />
-                      {{
-                        expandTasks[taskIndex]
-                          ? "Hide Test Cases"
-                          : "Show Test Cases"
-                      }}
+                      {{ expandTasks[taskIndex] ? "Hide Test Cases" : "Show Test Cases" }}
                     </div>
                   </td>
                 </tr>
@@ -525,14 +470,14 @@ function downloadModalJson() {
                   <td>-</td>
                   <td>
                     <div class="flex gap-1">
-                      <button 
+                      <button
                         class="btn btn-ghost btn-xs"
                         @click="openCaseDetailModal(taskIndex, caseIndex)"
                         title="View Details"
                       >
                         <i-uil-eye />
                       </button>
-                      <button 
+                      <button
                         class="btn btn-ghost btn-xs"
                         @click="downloadCaseResult(taskIndex, caseIndex)"
                         title="Download Result"
@@ -583,24 +528,19 @@ function downloadModalJson() {
           <!-- JSON Display -->
           <div class="form-control w-full">
             <label class="label">
-              <span class="label-text text-primary-content font-semibold">JSON Data</span>
+              <span class="label-text font-semibold text-primary-content">JSON Data</span>
             </label>
             <div class="rounded bg-base-200 p-4 text-base-content">
-              <pre class="whitespace-pre-wrap text-sm font-mono">{{ currentDetailData.jsonData }}</pre>
+              <pre class="whitespace-pre-wrap font-mono text-sm">{{ currentDetailData.jsonData }}</pre>
             </div>
           </div>
         </div>
 
         <div class="mt-8 flex justify-end gap-2">
-          <button 
-            class="btn btn-sm btn-success"
-            @click="downloadModalJson"
-          >
+          <button class="btn btn-success btn-sm" @click="downloadModalJson">
             <i-uil-download-alt class="mr-1" /> Download JSON
           </button>
-          <button class="btn btn-link text-primary-content" @click="isDetailModalOpen = false">
-            Close
-          </button>
+          <button class="btn btn-link text-primary-content" @click="isDetailModalOpen = false">Close</button>
         </div>
       </div>
     </template>

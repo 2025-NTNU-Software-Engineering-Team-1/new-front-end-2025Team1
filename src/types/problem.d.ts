@@ -147,14 +147,6 @@ interface ProblemConfigExtra {
     };
   };
 
-  staticAnalysis?: {
-    libraryRestrictions?: {
-      enabled: boolean;
-      whitelist: string[];
-      blacklist: string[];
-    };
-  };
-
   artifactCollection: ArtifactCollection[];
 }
 

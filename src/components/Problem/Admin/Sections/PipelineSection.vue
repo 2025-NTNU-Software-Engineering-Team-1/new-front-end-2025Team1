@@ -233,14 +233,18 @@ function getAllowedFileExtensions(): string[] {
                 <span class="text-sm opacity-80">Upload Teacher_file</span>
                 <input
                   type="file"
-                  multiple
                   :accept="getAllowedFileExtensions().join(',')"
                   class="file-input file-input-bordered file-input-sm w-56"
                   @change="
-                    (e: any) =>
-                      problem.assets!.teacherFile = (Array.from(e.target.files ?? []) as File[]).filter((f) =>
-                        getAllowedFileExtensions().some((ext) => f.name.endsWith(ext))
-                      )
+                    (e: any) => {
+                      const file = (e.target.files as FileList)?.[0] || null;
+                      // 僅當符合副檔名才塞入
+                      if (file && getAllowedFileExtensions().some((ext) => file.name.endsWith(ext))) {
+                        problem.assets!.teacherFile = file;
+                      } else {
+                        problem.assets!.teacherFile = null;
+                      }
+                    }
                   "
                 />
               </div>

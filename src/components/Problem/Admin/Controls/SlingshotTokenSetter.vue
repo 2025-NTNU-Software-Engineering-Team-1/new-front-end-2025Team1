@@ -314,7 +314,7 @@ function handleMouseMove(e: MouseEvent) {
   pullPosition.value = adj;
   projectilePosition.value = adj;
   calculateTrajectory();
-  const ctx = canvas.value.getContext("2d");
+  const ctx = canvas.value!.getContext("2d")!;
   ctx && render(ctx);
 }
 
@@ -334,7 +334,7 @@ function handleMouseUp() {
 // ===== Flight Animation =====
 function startFlightAnimation() {
   if (!canvas.value) return;
-  const ctx = canvas.value.getContext("2d");
+  const ctx = canvas.value!.getContext("2d")!;
   if (!ctx) return;
   isFlying.value = true;
   cancelAnimationFrame(animationFrameId);
@@ -525,7 +525,7 @@ function resetToInitialState() {
 // ===== Hooks =====
 onMounted(() => {
   if (!canvas.value) return;
-  const ctx = canvas.value.getContext("2d");
+  const ctx = canvas.value!.getContext("2d")!;
   ctx && render(ctx);
 });
 onBeforeUnmount(() => {

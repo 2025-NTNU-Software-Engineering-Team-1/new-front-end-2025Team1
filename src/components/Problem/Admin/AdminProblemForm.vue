@@ -5,6 +5,7 @@ import { required, maxLength, minValue, between, helpers } from "@vuelidate/vali
 import DescriptionSection from "./Sections/DescriptionSection.vue";
 import ConfigurationSection from "./Sections/ConfigurationSection.vue";
 import PipelineSection from "./Sections/PipelineSection.vue";
+import TestDataSection from "./Sections/TestDataSection.vue";
 
 const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
 
@@ -168,7 +169,7 @@ async function submit() {
   <div class="mt-4 flex flex-col gap-3">
     <div class="collapse collapse-arrow rounded-box bg-base-200">
       <input type="checkbox" class="peer" />
-      <div class="collapse-title">Set Description</div>
+      <div class="collapse-title font-semibold">Set Description</div>
       <div class="collapse-content">
         <DescriptionSection :v$="v$" @update="update" />
       </div>
@@ -176,7 +177,7 @@ async function submit() {
 
     <div class="collapse collapse-arrow rounded-box bg-base-200">
       <input type="checkbox" class="peer" />
-      <div class="collapse-title">Set Configuration</div>
+      <div class="collapse-title font-semibold">Set Configuration</div>
       <div class="collapse-content">
         <ConfigurationSection />
       </div>
@@ -184,9 +185,17 @@ async function submit() {
 
     <div class="collapse collapse-arrow rounded-box bg-base-200">
       <input type="checkbox" class="peer" />
-      <div class="collapse-title">Set Pipeline</div>
+      <div class="collapse-title font-semibold">Set Pipeline</div>
       <div class="collapse-content">
         <PipelineSection :v$="v$" />
+      </div>
+    </div>
+
+    <div class="collapse collapse-arrow rounded-box bg-base-200">
+      <input type="checkbox" class="peer" />
+      <div class="collapse-title font-semibold">Set Test Data</div>
+      <div class="collapse-content">
+        <TestDataSection :v$="v$" />
       </div>
     </div>
   </div>

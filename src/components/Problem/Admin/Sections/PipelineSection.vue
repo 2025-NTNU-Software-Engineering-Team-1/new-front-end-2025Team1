@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { inject, Ref, ref, watch } from "vue";
 import { ZipReader, BlobReader } from "@zip.js/zip.js";
+import MultiStringInput from "../Controls/MultiStringInput.vue";
+import { inject, Ref, ref, onMounted } from "vue";
+import api from "@/models/api";
 
 defineProps<{ v$: any }>();
 const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
@@ -13,6 +15,14 @@ function ensurePipeline() {
       executionMode: "general",
       customChecker: false,
       teacherFirst: false,
+      staticAnalysis: {
+        libraryRestrictions: {
+          enabled: false,
+          whitelist: [],
+          blacklist: [],
+        },
+      },
+      scoringScript: { custom: false },
     };
   }
   if (!problem.value.assets) {
@@ -21,7 +31,6 @@ function ensurePipeline() {
       makefileZip: null,
       teacherFile: null,
       scorePy: null,
-      scoreJson: null,
       localServiceZip: null,
       testdataZip: null,
     };
@@ -29,256 +38,238 @@ function ensurePipeline() {
 }
 ensurePipeline();
 
-// drag state for testdata area
 const isDrag = ref(false);
+const libraryOptions = ref<string[]>([]);
+onMounted(async () => {
+  try {
+    const resp = await api.Problem.getStaticAnalysisOptions();
+    libraryOptions.value = resp.data?.librarySymbols || [];
+  } catch {
+    libraryOptions.value = [];
+  }
+});
 
-// parse testdata zip like original logic
-watch(
-  () => problem.value.assets?.testdataZip,
-  async () => {
-    isDrag.value = false;
-    const file = problem.value.assets?.testdataZip;
-    if (!file) {
-      problem.value.testCaseInfo = { ...problem.value.testCaseInfo, tasks: [] };
-      return;
-    }
-    const reader = new ZipReader(new BlobReader(file));
-    const entries = await reader.getEntries();
-    const filenames = entries.map(({ filename }) => filename);
-    const inputs = filenames.filter((f) => f.endsWith(".in"));
-    const outputs = filenames.filter((f) => f.endsWith(".out"));
-    if (inputs.length !== outputs.length) {
-      alert(`Input and output files are not matched. (got ${inputs.length} .in, ${outputs.length} .out)`);
-      problem.value.assets!.testdataZip = null;
-      return;
-    }
-    let i = 0;
-    const tasks = [];
-    while (true) {
-      const count = inputs.filter((fn) => fn.startsWith(`0${i}`.slice(-2))).length;
-      if (count > 0) {
-        tasks.push({ caseCount: count, memoryLimit: 134218, taskScore: 0, timeLimit: 1000 });
-        i++;
-      } else break;
-    }
-    if (tasks.length > 0) {
-      problem.value.testCaseInfo = { ...problem.value.testCaseInfo, tasks };
-    } else {
-      alert("No Test Data found in the zip file! (Only files required, no folders)");
-    }
-  },
-);
+function toggleArray(arr: string[], value: string) {
+  const idx = arr.indexOf(value);
+  if (idx >= 0) arr.splice(idx, 1);
+  else arr.push(value);
+}
+
+function getAllowedFileExtensions(): string[] {
+  const lang = problem.value.allowedLanguage;
+  const list: string[] = [];
+  if (lang & 1) list.push(".c");
+  if (lang & 2) list.push(".cpp");
+  if (lang & 4) list.push(".py");
+  return list;
+}
 </script>
 
 <template>
   <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-    <!-- fopen -->
-    <div class="form-control">
-      <label class="label cursor-pointer justify-start gap-x-4">
-        <span class="label-text">fopen</span>
-        <input type="checkbox" class="toggle" v-model="problem.pipeline!.fopen" />
-      </label>
-    </div>
-
-    <!-- fwrite -->
-    <div class="form-control">
-      <label class="label cursor-pointer justify-start gap-x-4">
-        <span class="label-text">fwrite</span>
-        <input type="checkbox" class="toggle" v-model="problem.pipeline!.fwrite" />
-      </label>
-    </div>
-
-    <!-- execution mode -->
-    <div class="form-control col-span-1 md:col-span-2">
-      <label class="label"><span class="label-text">Execution mode</span></label>
-      <div class="flex gap-6">
-        <label class="label cursor-pointer gap-2">
-          <input
-            type="radio"
-            class="radio"
-            value="general"
-            v-model="(problem.pipeline!.executionMode as any)"
-          />
-          <span class="label-text">general</span>
-        </label>
-        <label class="label cursor-pointer gap-2">
-          <input
-            type="radio"
-            class="radio"
-            value="functionOnly"
-            v-model="(problem.pipeline!.executionMode as any)"
-          />
-          <span class="label-text">functionOnly</span>
-        </label>
-        <label class="label cursor-pointer gap-2">
-          <input
-            type="radio"
-            class="radio"
-            value="interactive"
-            v-model="(problem.pipeline!.executionMode as any)"
-          />
-          <span class="label-text">interactive</span>
-        </label>
+    <!-- File Process -->
+    <div class="col-span-2 rounded-lg border border-base-300 p-3">
+      <div class="mb-2 text-sm">File Process</div>
+      <div class="flex gap-x-8">
+        <div class="form-control">
+          <label class="label cursor-pointer justify-start gap-x-2">
+            <span class="label-text">fopen</span>
+            <input type="checkbox" class="toggle" v-model="problem.pipeline!.fopen" />
+          </label>
+        </div>
+        <div class="form-control">
+          <label class="label cursor-pointer justify-start gap-x-2">
+            <span class="label-text">fwrite</span>
+            <input type="checkbox" class="toggle" v-model="problem.pipeline!.fwrite" />
+          </label>
+        </div>
       </div>
     </div>
 
-    <!-- general/functionOnly custom checker -->
-    <div
-      v-if="problem.pipeline!.executionMode === 'general' || problem.pipeline!.executionMode === 'functionOnly'"
-      class="form-control"
-    >
+    <!-- Library restrictions -->
+    <div class="form-control col-span-1 md:col-span-2">
       <label class="label cursor-pointer justify-start gap-x-4">
-        <span class="label-text">Custom checker</span>
-        <input type="checkbox" class="toggle" v-model="problem.pipeline!.customChecker" />
-      </label>
-      <div v-if="problem.pipeline!.customChecker" class="mt-2">
-        <label class="label"><span class="label-text">Upload checker.py</span></label>
+        <span class="label-text">Library restrictions</span>
         <input
-          type="file"
-          accept=".py"
-          class="file-input file-input-bordered"
-          @change="(e:any) => problem.assets!.checkerPy = e.target.files?.[0] || null"
+          type="checkbox"
+          class="toggle"
+          v-model="problem.pipeline!.staticAnalysis!.libraryRestrictions!.enabled"
         />
+      </label>
+      <div
+        v-if="problem.pipeline!.staticAnalysis!.libraryRestrictions!.enabled"
+        class="mt-2 grid grid-cols-1 gap-3 md:grid-cols-2"
+      >
+        <div>
+          <div class="label-text mb-1">Whitelist</div>
+          <div class="flex flex-wrap gap-2">
+            <button
+              v-for="sym in libraryOptions"
+              :key="`w-${sym}`"
+              class="btn btn-xs"
+              :class="problem.pipeline!.staticAnalysis!.libraryRestrictions!.whitelist.includes(sym) && 'btn-accent'"
+              @click="toggleArray(problem.pipeline!.staticAnalysis!.libraryRestrictions!.whitelist, sym)"
+            >
+              {{ sym }}
+            </button>
+          </div>
+        </div>
+        <div>
+          <div class="label-text mb-1">Blacklist</div>
+          <div class="flex flex-wrap gap-2">
+            <button
+              v-for="sym in libraryOptions"
+              :key="`b-${sym}`"
+              class="btn btn-xs"
+              :class="problem.pipeline!.staticAnalysis!.libraryRestrictions!.blacklist.includes(sym) && 'btn-error text-base-100'"
+              @click="toggleArray(problem.pipeline!.staticAnalysis!.libraryRestrictions!.blacklist, sym)"
+            >
+              {{ sym }}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- functionOnly makefile.zip -->
-    <div v-if="problem.pipeline!.executionMode === 'functionOnly'" class="form-control">
-      <label class="label"><span class="label-text">Upload makefile.zip</span></label>
-      <input
-        type="file"
-        accept=".zip"
-        class="file-input file-input-bordered"
-        @change="(e:any) => problem.assets!.makefileZip = e.target.files?.[0] || null"
-      />
-    </div>
-
-    <!-- interactive -->
-    <div
-      v-if="problem.pipeline!.executionMode === 'interactive'"
-      class="form-control col-span-1 md:col-span-2"
-    >
-      <label class="label"><span class="label-text">Upload Teacher_file</span></label>
-      <input
-        type="file"
-        class="file-input file-input-bordered"
-        @change="(e:any) => problem.assets!.teacherFile = e.target.files?.[0] || null"
-      />
-      <label class="label mt-2 cursor-pointer justify-start gap-x-4">
-        <span class="label-text">Teacher first</span>
-        <input type="checkbox" class="toggle" v-model="problem.pipeline!.teacherFirst" />
-      </label>
-    </div>
-
-    <!-- testdata upload -->
+    <!-- === Execution mode (with all mode-linked fields) === -->
     <div class="form-control col-span-1 md:col-span-2">
-      <label class="label"><span class="label-text">Test data</span></label>
-      <div
-        :class="['textarea textarea-bordered w-full p-4', isDrag ? 'border-accent' : '']"
-        @drop.prevent="problem.assets!.testdataZip = $event.dataTransfer!.files![0]"
-        @dragover.prevent="isDrag = true"
-        @dragleave="isDrag = false"
-      >
-        <template v-if="!problem.assets!.testdataZip">
-          <span class="mb-6 mr-6 text-sm">Drop a .zip file here</span>
+      <div class="rounded-lg border border-base-300 p-4">
+        <label class="label mb-2">
+          <span class="label-text font-semibold">Execution mode</span>
+        </label>
+
+        <!-- radio options -->
+        <div class="mb-4 flex flex-wrap gap-6">
+          <label class="label cursor-pointer gap-2">
+            <input
+              type="radio"
+              class="radio"
+              value="general"
+              v-model="(problem.pipeline!.executionMode as any)"
+            />
+            <span class="label-text">general</span>
+          </label>
+          <label class="label cursor-pointer gap-2">
+            <input
+              type="radio"
+              class="radio"
+              value="functionOnly"
+              v-model="(problem.pipeline!.executionMode as any)"
+            />
+            <span class="label-text">functionOnly</span>
+          </label>
+          <label class="label cursor-pointer gap-2">
+            <input
+              type="radio"
+              class="radio"
+              value="interactive"
+              v-model="(problem.pipeline!.executionMode as any)"
+            />
+            <span class="label-text">interactive</span>
+          </label>
+        </div>
+
+        <!-- Custom checker -->
+        <div class="form-control mb-3">
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <label class="label mb-0 cursor-pointer justify-start gap-x-2">
+              <span class="label-text flex items-center gap-1">
+                <span>Custom Checker</span>
+                <i-uil-lock-alt
+                  v-if="problem.pipeline!.executionMode === 'interactive'"
+                  class="text-error"
+                  title="Disabled in interactive mode"
+                />
+              </span>
+              <input
+                type="checkbox"
+                class="toggle toggle-sm"
+                v-model="problem.pipeline!.customChecker"
+                :disabled="problem.pipeline!.executionMode === 'interactive'"
+              />
+            </label>
+
+            <div
+              v-if="problem.pipeline!.customChecker && problem.pipeline!.executionMode !== 'interactive'"
+              class="flex items-center gap-x-2"
+            >
+              <span class="text-sm opacity-80">Upload checker.py</span>
+              <input
+                type="file"
+                accept=".py"
+                class="file-input file-input-bordered file-input-sm w-56"
+                @change="(e: any) => (problem.assets!.checkerPy = e.target.files?.[0] || null)"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- functionOnly makefile.zip -->
+        <div v-if="problem.pipeline!.executionMode === 'functionOnly'" class="form-control mb-3">
+          <label class="label"><span class="label-text">Upload makefile.zip</span></label>
           <input
             type="file"
             accept=".zip"
-            @change="(e:any) => {
-              problem.assets!.testdataZip = e.target.files?.[0] || null;
-              console.log('現在選擇的 testdataZip：', problem.assets!.testdataZip);
-            }"
+            class="file-input file-input-bordered file-input-sm w-56"
+            @change="(e: any) => (problem.assets!.makefileZip = e.target.files?.[0] || null)"
           />
-        </template>
-        <template v-else>
-          <div class="flex">
-            <span class="mr-3">{{ problem.assets!.testdataZip?.name }}</span>
-            <button class="btn btn-sm" @click="problem.assets!.testdataZip = null">
-              <i-uil-times />
-            </button>
+        </div>
+
+        <!-- interactive 模式 -->
+        <div
+          v-if="problem.pipeline!.executionMode === 'interactive'"
+          class="form-control col-span-1 md:col-span-2"
+        >
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <!-- 左：Teacher first -->
+            <label class="label mb-0 cursor-pointer justify-start gap-x-2">
+              <span class="label-text flex items-center gap-1">Teacher first</span>
+              <input type="checkbox" class="toggle toggle-sm" v-model="problem.pipeline!.teacherFirst" />
+            </label>
+
+            <!-- 右：Teacher_file -->
+            <div class="flex flex-col">
+              <div class="flex items-center gap-x-2">
+                <span class="text-sm opacity-80">Upload Teacher_file</span>
+                <input
+                  type="file"
+                  multiple
+                  :accept="getAllowedFileExtensions().join(',')"
+                  class="file-input file-input-bordered file-input-sm w-56"
+                  @change="
+                    (e: any) =>
+                      problem.assets!.teacherFile = (Array.from(e.target.files ?? []) as File[]).filter((f) =>
+                        getAllowedFileExtensions().some((ext) => f.name.endsWith(ext))
+                      )
+                  "
+                />
+              </div>
+              <span class="label-text-alt mt-1 text-sm opacity-70">
+                Allowed: {{ getAllowedFileExtensions().join(", ") }}
+              </span>
+            </div>
           </div>
-        </template>
+        </div>
       </div>
     </div>
 
-    <!-- scoring script -->
+    <!-- Custom Scoring Script -->
     <div class="form-control col-span-1 md:col-span-2">
       <label class="label cursor-pointer justify-start gap-x-4">
-        <span class="label-text">Scoring script - Custom</span>
-        <!-- You can keep this flag under pipeline.scoringScript = { custom: boolean } -->
+        <span class="label-text">Custom Scoring Script</span>
         <input type="checkbox" class="toggle" v-model="(problem as any).pipeline.scoringScript.custom" />
       </label>
-      <div v-if="(problem as any).pipeline.scoringScript?.custom" class="mt-2 grid gap-3 md:grid-cols-2">
+      <div v-if="(problem as any).pipeline.scoringScript?.custom" class="mt-2">
         <div class="form-control">
-          <label class="label"><span class="label-text">Upload score.py</span></label>
+          <label class="label"><span class="label-text">Upload score.py</span></label>
           <input
             type="file"
             accept=".py"
             class="file-input file-input-bordered"
-            @change="(e:any) => problem.assets!.scorePy = e.target.files?.[0] || null"
-          />
-        </div>
-        <div class="form-control">
-          <label class="label"><span class="label-text">Upload score.json</span></label>
-          <input
-            type="file"
-            accept=".json"
-            class="file-input file-input-bordered"
-            @change="(e:any) => problem.assets!.scoreJson = e.target.files?.[0] || null"
+            @change="(e: any) => (problem.assets!.scorePy = e.target.files?.[0] || null)"
           />
         </div>
       </div>
     </div>
-
-    <!-- show and edit subtasks -->
-    <label
-      class="label text-error"
-      v-show="v$.testCaseInfo.tasks.$error"
-      v-text="v$.testCaseInfo.tasks.$errors[0]?.$message"
-    />
-    <template v-for="(t, i) in problem.testCaseInfo.tasks" :key="i">
-      <div class="col-span-1 md:col-span-2">
-        <div class="font-semibold">Subtask {{ i + 1 }}</div>
-        <div class="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
-          <div class="form-control">
-            <label class="label"><span class="label-text">#Cases</span></label>
-            <input type="text" class="input input-bordered w-full max-w-xs" :value="t.caseCount" readonly />
-          </div>
-          <div class="form-control">
-            <label class="label"><span class="label-text">Score</span></label>
-            <input
-              type="number"
-              class="input input-bordered w-full max-w-xs"
-              :value="t.taskScore"
-              @input="
-                problem.testCaseInfo.tasks[i].taskScore = Number(($event.target as HTMLInputElement).value)
-              "
-            />
-          </div>
-          <div class="form-control">
-            <label class="label"><span class="label-text">Memory limit (KB)</span></label>
-            <input
-              type="number"
-              class="input input-bordered w-full max-w-xs"
-              :value="t.memoryLimit"
-              @input="
-                problem.testCaseInfo.tasks[i].memoryLimit = Number(($event.target as HTMLInputElement).value)
-              "
-            />
-          </div>
-          <div class="form-control">
-            <label class="label"><span class="label-text">Time limit (ms)</span></label>
-            <input
-              type="number"
-              class="input input-bordered w-full max-w-xs"
-              :value="t.timeLimit"
-              @input="
-                problem.testCaseInfo.tasks[i].timeLimit = Number(($event.target as HTMLInputElement).value)
-              "
-            />
-          </div>
-        </div>
-      </div>
-    </template>
   </div>
 </template>

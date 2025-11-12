@@ -32,36 +32,45 @@ watchEffect(() => {
       tasks: problem.value.testCase.slice(),
     },
     config: problem.value.config || {
-      compilation: false,
       trialMode: false,
       aiVTuber: false,
+      aiVTuberMaxToken: 0,
+      aiVTuberMode: "guided",
       acceptedFormat: "code",
-      staticAnalysis: {
-        custom: false,
-        libraryRestrictions: { enabled: false, whitelist: [], blacklist: [] },
-        networkAccessRestriction: {
+      maxStudentZipSizeMB: 50,
+      networkAccessRestriction: {
+        enabled: false,
+        firewallExtranet: { enabled: false, whitelist: [], blacklist: [] },
+        connectWithLocal: {
           enabled: false,
-          firewallExtranet: { enabled: false, whitelist: [], blacklist: [] },
-          connectWithLocal: { enabled: false, whitelist: [], blacklist: [], localServiceZip: null },
+          whitelist: [],
+          blacklist: [],
+          localServiceZip: null,
         },
       },
       artifactCollection: [],
     },
     pipeline: {
-      ...((problem.value as unknown as { pipeline?: ProblemPipeline }).pipeline || {}),
       fopen: (problem.value as any)?.pipeline?.fopen ?? false,
       fwrite: (problem.value as any)?.pipeline?.fwrite ?? false,
       executionMode: (problem.value as any)?.pipeline?.executionMode || "general",
       customChecker: (problem.value as any)?.pipeline?.customChecker ?? false,
       teacherFirst: (problem.value as any)?.pipeline?.teacherFirst ?? false,
+      staticAnalysis: {
+        libraryRestrictions: {
+          enabled: (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.enabled ?? false,
+          whitelist: (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.whitelist || [],
+          blacklist: (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.blacklist || [],
+        },
+      },
       scoringScript: (problem.value as any)?.pipeline?.scoringScript || { custom: false },
     },
     assets: (problem.value as any).assets || {
+      aiVTuberFiles: null,
       checkerPy: null,
       makefileZip: null,
       teacherFile: null,
       scorePy: null,
-      scoreJson: null,
       localServiceZip: null,
       testdataZip: null,
     },
@@ -88,30 +97,39 @@ const mockProblemMeta = {
 
 async function submit() {
   if (!edittingProblem.value || !formElement.value) return;
-
   formElement.value.isLoading = true;
   try {
     const pid = Number(route.params.id);
+
+    const cfg = {
+      ...edittingProblem.value.config,
+      aiVTuber: edittingProblem.value.config.aiVTuber,
+      aiVTuberMaxToken: edittingProblem.value.config.aiVTuberMaxToken,
+      aiVTuberMode: edittingProblem.value.config.aiVTuberMode,
+    };
+    const pipe = { ...edittingProblem.value.pipeline };
+
     const fd = new FormData();
     fd.append(
       "meta",
       JSON.stringify({
-        config: edittingProblem.value.config,
-        pipeline: edittingProblem.value.pipeline,
+        config: cfg,
+        pipeline: pipe,
       }),
     );
 
     const assets = edittingProblem.value.assets;
+    if (assets?.aiVTuberACFiles) assets.aiVTuberACFiles.forEach((f) => fd.append("aiVTuberFiles", f));
     if (assets?.testdataZip) fd.append("case", assets.testdataZip);
     if (assets?.checkerPy) fd.append("checker.py", assets.checkerPy);
     if (assets?.makefileZip) fd.append("makefile.zip", assets.makefileZip);
     if (assets?.teacherFile) fd.append("Teacher_file", assets.teacherFile);
     if (assets?.scorePy) fd.append("score.py", assets.scorePy);
-    if (assets?.scoreJson) fd.append("score.json", assets.scoreJson);
     if (assets?.localServiceZip) fd.append("local_service.zip", assets.localServiceZip);
 
     await api.Problem.modify(pid, edittingProblem.value);
     await api.Problem.uploadAssetsV2(pid, fd);
+
     router.push(`/course/${route.params.name}/problem/${route.params.id}`);
   } catch (error) {
     formElement.value.errorMsg =
@@ -200,8 +218,8 @@ async function delete_() {
                 <input v-model="openJSON" type="checkbox" class="toggle" />
               </div>
 
-              <pre v-if="openJSON" class="whitespace-pre-wrap rounded bg-base-200 p-2">
-                {{ JSON.stringify(edittingProblem, null, 2) }}
+              <pre v-if="openJSON" class="whitespace-pre-wrap rounded bg-base-200 p-2"
+                >{{ JSON.stringify(edittingProblem, null, 2) }}
               </pre>
 
               <div class="mb-[50%]" />

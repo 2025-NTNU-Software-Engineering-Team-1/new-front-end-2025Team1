@@ -12,6 +12,7 @@ useTitle(`New Problem - ${route.params.name} | Normal OJ`);
 
 const formElement = ref<InstanceType<typeof AdminProblemForm>>();
 
+// 初始化 newProblem
 const newProblem = ref<ProblemForm>({
   problemName: "",
   description: {
@@ -23,7 +24,6 @@ const newProblem = ref<ProblemForm>({
     sampleOutput: [""],
   },
   courses: [route.params.name as string],
-  defaultCode: "",
   tags: [],
   allowedLanguage: 3,
   quota: 10,
@@ -35,39 +35,45 @@ const newProblem = ref<ProblemForm>({
     tasks: [],
   },
   canViewStdout: false,
-
-  // NEW sections
+  defaultCode: "",
+  // === CONFIG ===
   config: {
-    compilation: false,
     trialMode: false,
     aiVTuber: false,
+    aiVTuberMaxToken: 0,
+    aiVTuberMode: "guided",
     acceptedFormat: "code",
-    staticAnalysis: {
-      custom: false,
-      libraryRestrictions: { enabled: false, whitelist: [], blacklist: [] },
-      networkAccessRestriction: {
-        enabled: false,
-        firewallExtranet: { enabled: false, whitelist: [], blacklist: [] },
-        connectWithLocal: { enabled: false, whitelist: [], blacklist: [], localServiceZip: null },
-      },
+    maxStudentZipSizeMB: 50,
+    networkAccessRestriction: {
+      enabled: false,
+      firewallExtranet: { enabled: false, whitelist: [], blacklist: [] },
+      connectWithLocal: { enabled: false, whitelist: [], blacklist: [], localServiceZip: null },
     },
     artifactCollection: [],
   },
+  // === PIPELINE ===
   pipeline: {
     fopen: false,
     fwrite: false,
     executionMode: "general",
     customChecker: false,
     teacherFirst: false,
-    // optional scoring flag structure
-    scoringScript: { custom: false } as any,
+    staticAnalysis: {
+      libraryRestrictions: {
+        enabled: false,
+        whitelist: [],
+        blacklist: [],
+      },
+    },
+    scoringScript: { custom: false },
   },
+  // === ASSETS ===
   assets: {
+    aiVTuberACFiles: null,
     checkerPy: null,
     makefileZip: null,
     teacherFile: null,
     scorePy: null,
-    scoreJson: null,
     localServiceZip: null,
     testdataZip: null,
   },
@@ -79,33 +85,42 @@ function update<K extends keyof ProblemForm>(key: K, value: ProblemForm[K]) {
 provide<Ref<ProblemForm>>("problem", newProblem);
 
 async function submit() {
-  console.log("submit 時的 testdataZip：", newProblem.value.assets?.testdataZip);
   if (!formElement.value) return;
   formElement.value.isLoading = true;
   try {
-    // 1) create (same body shape as before; backend ignores unknown optional fields)
+    // Step 1: 建立 Problem metadata
     const { problemId } = (await api.Problem.create({ ...newProblem.value })).data;
 
-    // 2) upload assets + meta
+    // Step 2: 準備 config/pipeline 給上傳
+    const cfg = {
+      ...newProblem.value.config,
+      aiVTuber: newProblem.value.config.aiVTuber,
+      aiVTuberMaxToken: newProblem.value.config.aiVTuberMaxToken,
+      aiVTuberMode: newProblem.value.config.aiVTuberMode,
+    };
+    const pipe = { ...newProblem.value.pipeline };
+
     const fd = new FormData();
     fd.append(
       "meta",
       JSON.stringify({
-        config: newProblem.value.config,
-        pipeline: newProblem.value.pipeline,
+        config: cfg,
+        pipeline: pipe,
       }),
     );
-    if (newProblem.value.assets?.testdataZip) fd.append("case", newProblem.value.assets.testdataZip);
-    if (newProblem.value.assets?.checkerPy) fd.append("checker.py", newProblem.value.assets.checkerPy);
-    if (newProblem.value.assets?.makefileZip) fd.append("makefile.zip", newProblem.value.assets.makefileZip);
-    if (newProblem.value.assets?.teacherFile) fd.append("Teacher_file", newProblem.value.assets.teacherFile);
-    if (newProblem.value.assets?.scorePy) fd.append("score.py", newProblem.value.assets.scorePy);
-    if (newProblem.value.assets?.scoreJson) fd.append("score.json", newProblem.value.assets.scoreJson);
-    if (newProblem.value.assets?.localServiceZip)
-      fd.append("local_service.zip", newProblem.value.assets.localServiceZip);
 
+    // Step 3: 加入檔案資產
+    const assets = newProblem.value.assets;
+    if (assets?.aiVTuberACFiles) assets.aiVTuberACFiles.forEach((f) => fd.append("aiVTuberACFiles", f));
+    if (assets?.testdataZip) fd.append("case", assets.testdataZip);
+    if (assets?.checkerPy) fd.append("checker.py", assets.checkerPy);
+    if (assets?.makefileZip) fd.append("makefile.zip", assets.makefileZip);
+    if (assets?.teacherFile) fd.append("Teacher_file", assets.teacherFile);
+    if (assets?.scorePy) fd.append("score.py", assets.scorePy);
+    if (assets?.localServiceZip) fd.append("local_service.zip", assets.localServiceZip);
+
+    // Step 4: 上傳所有資產
     await api.Problem.uploadAssetsV2(problemId, fd);
-
     router.push(`/course/${route.params.name}/problem/${problemId}`);
   } catch (error) {
     formElement.value.errorMsg =
@@ -118,7 +133,7 @@ async function submit() {
   }
 }
 
-const openPreview = ref<boolean>(false);
+const openPreview = ref(false);
 const mockProblemMeta = {
   owner: "",
   highScore: 0,
@@ -126,8 +141,7 @@ const mockProblemMeta = {
   ACUser: 0,
   submitter: 0,
 };
-
-const openJSON = ref<boolean>(false);
+const openJSON = ref(false);
 </script>
 
 <template>
@@ -136,12 +150,10 @@ const openJSON = ref<boolean>(false);
       <div class="card-body">
         <div class="card-title mb-3 justify-between">New Problem</div>
 
-        <!-- Level 1: Admin form (name/hidden + collapses) -->
         <admin-problem-form ref="formElement" @update="update" @submit="submit" />
 
         <div class="divider" />
 
-        <!-- Preview (Level 1) -->
         <div class="card-title mb-3">
           Preview
           <input v-model="openPreview" type="checkbox" class="toggle" />
@@ -154,13 +166,11 @@ const openJSON = ref<boolean>(false);
 
         <div class="divider my-4" />
 
-        <!-- JSON (Level 1) -->
         <div class="card-title mb-3">
           JSON
           <input v-model="openJSON" type="checkbox" class="toggle" />
         </div>
         <pre v-if="openJSON">{{ JSON.stringify(newProblem, null, 2) }}</pre>
-
         <div class="mb-[50%]" />
       </div>
     </div>

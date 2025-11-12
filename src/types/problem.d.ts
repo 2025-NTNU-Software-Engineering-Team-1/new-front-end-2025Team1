@@ -16,6 +16,9 @@ interface ProblemTestCase {
   timeLimit: number;
 }
 
+/* ------------------------------
+ * 基本 ProblemForm 定義
+ * ------------------------------ */
 interface ProblemForm {
   problemName: string;
   description: {
@@ -40,12 +43,14 @@ interface ProblemForm {
   canViewStdout: boolean;
   defaultCode: string;
 
-  // Extra (admin config/pipeline/assets)
   config: ProblemConfigExtra;
   pipeline: ProblemPipeline;
   assets: ProblemAssets;
 }
 
+/* ------------------------------
+ * API 回傳 Problem
+ * ------------------------------ */
 interface Problem {
   problemName: string;
   description: {
@@ -71,10 +76,12 @@ interface Problem {
   ACUser: number;
   submitter: number;
 
-  // 後端 /problem/view/:id 可能附帶 Extra 設定（供前端行為判斷）
   config?: ProblemConfigExtra;
 }
 
+/* ------------------------------
+ * 題目列表 & 統計
+ * ------------------------------ */
 interface ProblemListItem {
   problemId: number;
   problemName: string;
@@ -86,7 +93,6 @@ interface ProblemListItem {
   quota: number;
   submitCount: number;
 }
-
 type ProblemList = ProblemListItem[];
 
 interface ProblemStats {
@@ -112,14 +118,20 @@ type AcceptedFormat = "code" | "zip";
 type ExecutionMode = "general" | "functionOnly" | "interactive";
 type ArtifactCollection = "compiledBinary" | "zip";
 
-interface ProblemStaticAnalysis {
-  custom: boolean;
-  libraryRestrictions?: {
-    enabled: boolean;
-    whitelist: string[];
-    blacklist: string[];
-  };
+/* ===========================================================
+ * CONFIG (設定)
+ * =========================================================== */
+interface ProblemConfigExtra {
+  trialMode: boolean;
+  aiVTuber: boolean;
+  acceptedFormat: AcceptedFormat;
+  maxStudentZipSizeMB?: number;
 
+  // AI VTuber
+  aiVTuberMaxToken?: number;
+  aiVTuberMode?: "guided" | "unlimited";
+
+  // Network Access Restriction
   networkAccessRestriction?: {
     enabled: boolean;
     firewallExtranet?: {
@@ -134,37 +146,39 @@ interface ProblemStaticAnalysis {
       localServiceZip?: File | null;
     };
   };
-}
 
-interface ProblemConfigExtra {
-  compilation: boolean;
-  trialMode: boolean;
-  aiVTuber: boolean;
-  acceptedFormat: AcceptedFormat;
-  staticAnalysis: ProblemStaticAnalysis;
   artifactCollection: ArtifactCollection[];
 }
 
-interface ProblemScoringScript {
-  custom: boolean;
-}
-
+/* ===========================================================
+ * PIPELINE
+ * =========================================================== */
 interface ProblemPipeline {
   fopen: boolean;
   fwrite: boolean;
   executionMode: ExecutionMode;
   customChecker: boolean;
   teacherFirst?: boolean;
-  scoringScript?: ProblemScoringScript; // optional custom scoring script flag
+
+  scoringScript?: { custom: boolean }; // Custom py-only scorer
+  staticAnalysis?: {
+    libraryRestrictions?: {
+      enabled: boolean;
+      whitelist: string[];
+      blacklist: string[];
+    };
+  };
 }
 
+/* ===========================================================
+ * ASSETS
+ * =========================================================== */
 interface ProblemAssets {
-  // All are optional and nullable; stored for upload.
+  aiVTuberACFiles?: File[] | null;
   checkerPy?: File | null;
   makefileZip?: File | null;
   teacherFile?: File | null;
   scorePy?: File | null;
-  scoreJson?: File | null;
   localServiceZip?: File | null;
   testdataZip?: File | null;
 }

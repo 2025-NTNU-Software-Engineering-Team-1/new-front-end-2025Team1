@@ -283,42 +283,31 @@ function calculateTokenValue(x: number) {
   return Math.floor(ratio * MAX_TOKEN);
 }
 
-// ===== Mouse Handlers =====
-function handleMouseDown(e: MouseEvent) {
-  // 若非飛行中、非拖曳中且石頭在地上，左鍵可重置
-  if (!isFlying.value && !isDragging.value) {
-    const d = Math.hypot(
-      projectilePosition.value.x - SLING_ORIGIN.x,
-      projectilePosition.value.y - SLING_ORIGIN.y,
-    );
-    if (d > 5) {
-      resetToInitialState();
-      if (canvas.value) {
-        const c = canvas.value.getContext("2d");
-        c && render(c);
-      }
-      return;
-    }
-  }
+// ===== Mouse / Touch Handlers =====
+function handlePointerDown(e: MouseEvent) {
   if (isFlying.value) return;
-  const p = getCanvasPoint(e);
-  if (isPointNearProjectile(p)) isDragging.value = true;
+  const rect = (e.target as HTMLCanvasElement).getBoundingClientRect();
+  const p = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+  if (isPointNearProjectile(p)) {
+    isDragging.value = true;
+  }
 }
 
-function handleMouseMove(e: MouseEvent) {
+function handlePointerMove(e: MouseEvent) {
   if (!isDragging.value || !canvas.value) return;
-  const p = getCanvasPoint(e);
+  const rect = (e.target as HTMLCanvasElement).getBoundingClientRect();
+  const p = { x: e.clientX - rect.left, y: e.clientY - rect.top };
   const dx = (p.x - SLING_ORIGIN.x) * DRAG_SENSITIVITY;
   const dy = (p.y - SLING_ORIGIN.y) * DRAG_SENSITIVITY;
   const adj = constrainPullDistance({ x: SLING_ORIGIN.x + dx, y: SLING_ORIGIN.y + dy });
   pullPosition.value = adj;
   projectilePosition.value = adj;
   calculateTrajectory();
-  const ctx = canvas.value!.getContext("2d")!;
+  const ctx = canvas.value.getContext("2d")!;
   ctx && render(ctx);
 }
 
-function handleMouseUp() {
+function handlePointerUp() {
   if (!isDragging.value) return;
   isDragging.value = false;
 
@@ -539,11 +528,20 @@ onBeforeUnmount(() => {
     ref="canvas"
     :width="CANVAS_WIDTH"
     :height="CANVAS_HEIGHT"
-    class="cursor-crosshair rounded-lg"
-    style="display: block; background: transparent"
-    @mousedown="handleMouseDown"
-    @mousemove="handleMouseMove"
-    @mouseup="handleMouseUp"
-    @mouseleave="handleMouseUp"
+    class="cursor-crosshair select-none"
+    style="
+      display: block;
+      background: transparent;
+      touch-action: none;
+      user-select: none;
+      width: 300px;
+      height: 250px;
+      position: relative;
+      z-index: 10;
+    "
+    @mousedown.stop.prevent="handlePointerDown"
+    @mousemove.stop.prevent="handlePointerMove"
+    @mouseup.stop.prevent="handlePointerUp"
+    @mouseleave="handlePointerUp"
   />
 </template>

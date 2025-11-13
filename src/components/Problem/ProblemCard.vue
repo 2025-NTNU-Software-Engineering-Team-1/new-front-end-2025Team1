@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import { useSession } from "@/stores/session";
 import api from "@/models/api";
 import { isQuotaUnlimited } from "@/constants";
@@ -13,6 +14,16 @@ withDefaults(defineProps<Props>(), {
 });
 
 const session = useSession();
+
+/** ✅ 包裝成 computed，讓 TS 不報錯 **/
+const submitCount = computed(() => (problem as any).submitCount ?? 0);
+const highScore = computed(() => (problem as any).highScore ?? 0);
+
+/** ✅ 安全取得 subtasks */
+const subtasks = computed(() => {
+  const p: any = problem;
+  return p.testCase ?? p.testCaseInfo?.tasks ?? [];
+});
 
 function downloadTestCase(problemId: number) {
   window.location.assign(api.Problem.getTestCaseUrl(problemId));
@@ -48,7 +59,7 @@ function listOrEmpty(list?: string[]) {
                   <span class="text-sm">{{ $t("components.problem.card.unlimited") }}</span>
                 </template>
                 <template v-else>
-                  <span>{{ problem.quota - problem.submitCount }}</span>
+                  <span>{{ problem.quota - submitCount }}</span>
                   <span class="text-sm font-normal">{{ ` / ${problem.quota}` }}</span>
                 </template>
               </div>
@@ -56,7 +67,7 @@ function listOrEmpty(list?: string[]) {
             <div class="stat place-items-center py-0">
               <div class="stat-title">{{ $t("components.problem.card.score") }}</div>
               <div class="stat-value">
-                <span>{{ (problem as any).highScore ?? 0 }}</span>
+                <span>{{ highScore }}</span>
                 <span class="text-sm font-normal">/ 100</span>
               </div>
             </div>
@@ -139,7 +150,7 @@ function listOrEmpty(list?: string[]) {
           </div>
           <markdown-renderer class="mb-10" :md="problem.description.hint" />
 
-          <!-- ===== 新增設定與限制區 ===== -->
+          <!-- ===== Settings & Restrictions ===== -->
           <div v-if="(problem as any).config || (problem as any).pipeline" class="mb-10">
             <div class="card-title mb-2 md:text-xl lg:text-2xl">Settings & Restrictions</div>
 
@@ -194,7 +205,7 @@ function listOrEmpty(list?: string[]) {
               </div>
             </div>
 
-            <!-- Library Restrictions (來自 pipeline) -->
+            <!-- Library Restrictions -->
             <div v-if="(problem as any).pipeline" class="mt-5">
               <h3 class="mb-1 text-lg font-semibold">Library Restrictions</h3>
               <p>
@@ -223,10 +234,7 @@ function listOrEmpty(list?: string[]) {
               </tr>
             </thead>
             <tbody>
-              <tr
-                v-for="({ memoryLimit, timeLimit, taskScore }, index) in ((problem as any).testCase ?? ((problem as any).testCaseInfo?.tasks || []))"
-                :key="index"
-              >
+              <tr v-for="({ memoryLimit, timeLimit, taskScore }, index) in subtasks" :key="index">
                 <td>{{ index + 1 }}</td>
                 <td>{{ timeLimit }} ms</td>
                 <td>{{ memoryLimit }} KB</td>

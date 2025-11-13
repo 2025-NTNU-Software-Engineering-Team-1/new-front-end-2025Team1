@@ -5,21 +5,21 @@ import api from "@/models/api";
 import { isQuotaUnlimited } from "@/constants";
 
 interface Props {
-  /** 允許來自 Problem 或 ProblemForm **/
   problem: Problem | ProblemForm;
   preview?: boolean;
 }
+
 const props = withDefaults(defineProps<Props>(), {
   preview: false,
 });
 
 const session = useSession();
 
-/** ✅ 包裝成 computed，讓 TS 不報錯 **/
+/** 裝成 computed，取代直接訪問 problem.submitCount / highScore */
 const submitCount = computed(() => (props.problem as any).submitCount ?? 0);
 const highScore = computed(() => (props.problem as any).highScore ?? 0);
 
-/** ✅ 安全取得 subtasks */
+/** 安全取得 subtasks */
 const subtasks = computed(() => {
   const p: any = props.problem;
   return p.testCase ?? p.testCaseInfo?.tasks ?? [];
@@ -27,12 +27,6 @@ const subtasks = computed(() => {
 
 function downloadTestCase(problemId: number) {
   window.location.assign(api.Problem.getTestCaseUrl(problemId));
-}
-
-// 把清單轉為可讀字串
-function listOrEmpty(list?: string[]) {
-  if (!list || list.length === 0) return "None";
-  return list.join(", ");
 }
 </script>
 
@@ -46,7 +40,7 @@ function listOrEmpty(list?: string[]) {
             {{ $t("components.problem.card.title") }}
             {{ $route.params.id }} - {{ props.problem.problemName }}
           </div>
-          <div class="flex flex-wrap">
+          <div class="flex">
             <span class="badge badge-info mr-1" v-for="tag in props.problem.tags" :key="tag">{{ tag }}</span>
           </div>
         </div>
@@ -79,15 +73,13 @@ function listOrEmpty(list?: string[]) {
               class="btn md:btn-md lg:btn-lg"
               :to="`/course/${$route.params.name}/problem/${$route.params.id}/submit`"
             >
-              <i-uil-file-upload-alt class="lg:h-5 lg:w-5" />
-              {{ $t("components.problem.card.submit") }}
+              <i-uil-file-upload-alt class="lg:h-5 lg:w-5" /> {{ $t("components.problem.card.submit") }}
             </router-link>
             <router-link
               class="btn md:btn-md lg:btn-lg"
               :to="`/course/${$route.params.name}/problem/${$route.params.id}/stats`"
             >
-              <i-uil-chart-line class="lg:h-5 lg:w-5" />
-              {{ $t("components.problem.card.stats") }}
+              <i-uil-chart-line class="lg:h-5 lg:w-5" /> {{ $t("components.problem.card.stats") }}
             </router-link>
             <router-link
               v-if="session.isAdmin"
@@ -110,7 +102,7 @@ function listOrEmpty(list?: string[]) {
 
       <div class="divider" />
 
-      <!-- ===== Main body ===== -->
+      <!-- ===== Description ===== -->
       <div class="card min-w-full rounded-none">
         <div class="card-body p-0">
           <div class="card-title md:text-xl lg:text-2xl">
@@ -128,105 +120,197 @@ function listOrEmpty(list?: string[]) {
           </div>
           <markdown-renderer class="mb-10" :md="props.problem.description.output" />
 
-          <div class="card-title md:text-xl lg:text-2xl">
-            {{ $t("components.problem.card.ex") }}
+          <div class="card-title md:text-xl lg:text-2xl">{{ $t("components.problem.card.ex") }}</div>
+          <div class="mb-10">
+            <table class="table w-full">
+              <thead>
+                <tr>
+                  <th>{{ $t("components.problem.card.sample.id") }}</th>
+                  <th>{{ $t("components.problem.card.sample.input") }}</th>
+                  <th>{{ $t("components.problem.card.sample.output") }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="i in props.problem.description.sampleInput.length" :key="i">
+                  <td>{{ i }}</td>
+                  <td>
+                    <sample-code-block :code="props.problem.description.sampleInput[i - 1]" />
+                  </td>
+                  <td>
+                    <sample-code-block :code="props.problem.description.sampleOutput[i - 1]" />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-          <table class="table mb-10 w-full">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>{{ $t("components.problem.card.sample.input") }}</th>
-                <th>{{ $t("components.problem.card.sample.output") }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="i in props.problem.description.sampleInput.length" :key="i">
-                <td>{{ i }}</td>
-                <td>
-                  <sample-code-block :code="props.problem.description.sampleInput[i - 1]" />
-                </td>
-                <td>
-                  <sample-code-block :code="props.problem.description.sampleOutput[i - 1]" />
-                </td>
-              </tr>
-            </tbody>
-          </table>
 
-          <div class="card-title md:text-xl lg:text-2xl">
-            {{ $t("components.problem.card.hint") }}
-          </div>
+          <div class="card-title md:text-xl lg:text-2xl">{{ $t("components.problem.card.hint") }}</div>
           <markdown-renderer class="mb-10" :md="props.problem.description.hint" />
 
-          <!-- ===== Settings & Restrictions ===== -->
-          <div v-if="(props.problem as any).config || (props.problem as any).pipeline" class="mb-10">
-            <div class="card-title mb-2 md:text-xl lg:text-2xl">Settings & Restrictions</div>
+          <!-- ===== Restrictions ===== -->
+          <div class="mb-10">
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <!-- Library Restrictions -->
+              <div class="rounded-box border border-base-300 bg-base-200">
+                <div class="collapse collapse-arrow">
+                  <input type="checkbox" class="peer" />
+                  <div class="collapse-title flex justify-between pr-8 text-lg font-semibold">
+                    <span>Library Restrictions</span>
+                    <span class="text-sm italic opacity-80">
+                      {{
+                        (props.problem as any).pipeline?.staticAnalysis?.libraryRestrictions?.whitelist
+                          ?.length ||
+                        (props.problem as any).pipeline?.staticAnalysis?.libraryRestrictions?.blacklist
+                          ?.length
+                          ? "Configured"
+                          : "Empty"
+                      }}
+                    </span>
+                  </div>
+                  <div class="collapse-content">
+                    <div class="space-y-4">
+                      <div class="rounded-lg border-l-4 border-accent bg-accent/10 p-4">
+                        <strong class="text-accent">Whitelist</strong>
+                        <div class="mt-2 flex flex-wrap gap-2">
+                          <template
+                            v-if="(props.problem as any).pipeline?.staticAnalysis?.libraryRestrictions?.whitelist?.length"
+                          >
+                            <span
+                              v-for="sym in (props.problem as any).pipeline.staticAnalysis.libraryRestrictions.whitelist"
+                              :key="sym"
+                              class="badge badge-accent badge-lg gap-1"
+                              >{{ sym }}</span
+                            >
+                          </template>
+                          <span v-else class="text-sm italic opacity-60">No restrictions</span>
+                        </div>
+                      </div>
 
-            <!-- Accepted Format & Artifact -->
-            <div v-if="(props.problem as any).config">
-              <p><strong>Accepted Format:</strong> {{ (props.problem as any).config.acceptedFormat }}</p>
-              <p>
-                <strong>Artifact Collection:</strong>
-                <span v-if="(props.problem as any).config.artifactCollection?.length">
-                  {{ (props.problem as any).config.artifactCollection.join(", ") }}
-                </span>
-                <span v-else>None</span>
-              </p>
-
-              <div class="mt-3">
-                <h3 class="mb-1 text-lg font-semibold">Network Access Restriction</h3>
-                <template v-if="(props.problem as any).config.networkAccessRestriction?.enabled">
-                  <p>
-                    <strong>Firewall Extranet Whitelist:</strong>
-                    {{
-                      listOrEmpty(
-                        (props.problem as any).config.networkAccessRestriction?.firewallExtranet?.whitelist,
-                      )
-                    }}
-                  </p>
-                  <p>
-                    <strong>Firewall Extranet Blacklist:</strong>
-                    {{
-                      listOrEmpty(
-                        (props.problem as any).config.networkAccessRestriction?.firewallExtranet?.blacklist,
-                      )
-                    }}
-                  </p>
-                  <p>
-                    <strong>Connect With Local Whitelist:</strong>
-                    {{
-                      listOrEmpty(
-                        (props.problem as any).config.networkAccessRestriction?.connectWithLocal?.whitelist,
-                      )
-                    }}
-                  </p>
-                  <p>
-                    <strong>Connect With Local Blacklist:</strong>
-                    {{
-                      listOrEmpty(
-                        (props.problem as any).config.networkAccessRestriction?.connectWithLocal?.blacklist,
-                      )
-                    }}
-                  </p>
-                </template>
-                <span v-else>No network restriction</span>
+                      <div class="rounded-lg border-l-4 border-error bg-error/10 p-4">
+                        <strong class="text-error">Blacklist</strong>
+                        <div class="mt-2 flex flex-wrap gap-2">
+                          <template
+                            v-if="(props.problem as any).pipeline?.staticAnalysis?.libraryRestrictions?.blacklist?.length"
+                          >
+                            <span
+                              v-for="sym in (props.problem as any).pipeline.staticAnalysis.libraryRestrictions.blacklist"
+                              :key="sym"
+                              class="badge badge-error badge-lg gap-1"
+                              >{{ sym }}</span
+                            >
+                          </template>
+                          <span v-else class="text-sm italic opacity-60">No restrictions</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <!-- Library Restrictions -->
-            <div v-if="(props.problem as any).pipeline" class="mt-5">
-              <h3 class="mb-1 text-lg font-semibold">Library Restrictions</h3>
-              <p>
-                <strong>Whitelist:</strong>
-                {{
-                  listOrEmpty((props.problem as any).pipeline.staticAnalysis?.libraryRestrictions?.whitelist)
-                }}
-              </p>
-              <p>
-                <strong>Blacklist:</strong>
-                {{
-                  listOrEmpty((props.problem as any).pipeline.staticAnalysis?.libraryRestrictions?.blacklist)
-                }}
-              </p>
+              <!-- Network Access Restrictions -->
+              <div class="rounded-box border border-base-300 bg-base-200">
+                <div class="collapse collapse-arrow">
+                  <input type="checkbox" class="peer" />
+                  <div class="collapse-title flex justify-between pr-8 text-lg font-semibold">
+                    <span>Network Access Restrictions</span>
+                    <span class="text-sm italic opacity-80">
+                      {{
+                        (props.problem as any).config?.networkAccessRestriction?.firewallExtranet?.whitelist
+                          ?.length ||
+                        (props.problem as any).config?.networkAccessRestriction?.firewallExtranet?.blacklist
+                          ?.length ||
+                        (props.problem as any).config?.networkAccessRestriction?.connectWithLocal?.whitelist
+                          ?.length ||
+                        (props.problem as any).config?.networkAccessRestriction?.connectWithLocal?.blacklist
+                          ?.length
+                          ? "Configured"
+                          : "Empty"
+                      }}
+                    </span>
+                  </div>
+                  <div class="collapse-content">
+                    <div class="space-y-6">
+                      <!-- Firewall Extranet -->
+                      <div class="rounded-lg bg-base-300/30 p-4">
+                        <strong class="mb-2 block text-lg">Firewall Extranet</strong>
+
+                        <div class="mb-3 rounded-lg border-l-4 border-accent bg-accent/10 p-3">
+                          <strong class="text-sm text-accent">Whitelist</strong>
+                          <div class="mt-2 flex flex-wrap gap-2">
+                            <template
+                              v-if="(props.problem as any).config?.networkAccessRestriction?.firewallExtranet?.whitelist?.length"
+                            >
+                              <span
+                                v-for="sym in (props.problem as any).config.networkAccessRestriction.firewallExtranet.whitelist"
+                                :key="sym"
+                                class="badge badge-accent gap-1"
+                                >{{ sym }}</span
+                              >
+                            </template>
+                            <span v-else class="text-sm italic opacity-60">No restrictions</span>
+                          </div>
+                        </div>
+
+                        <div class="rounded-lg border-l-4 border-error bg-error/10 p-3">
+                          <strong class="text-sm text-error">Blacklist</strong>
+                          <div class="mt-2 flex flex-wrap gap-2">
+                            <template
+                              v-if="(props.problem as any).config?.networkAccessRestriction?.firewallExtranet?.blacklist?.length"
+                            >
+                              <span
+                                v-for="sym in (props.problem as any).config.networkAccessRestriction.firewallExtranet.blacklist"
+                                :key="sym"
+                                class="badge badge-error gap-1"
+                                >{{ sym }}</span
+                              >
+                            </template>
+                            <span v-else class="text-sm italic opacity-60">No restrictions</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Connect With Local -->
+                      <div class="rounded-lg bg-base-300/30 p-4">
+                        <strong class="mb-2 block text-lg">Connect With Local</strong>
+
+                        <div class="mb-3 rounded-lg border-l-4 border-accent bg-accent/10 p-3">
+                          <strong class="text-sm text-accent">Whitelist</strong>
+                          <div class="mt-2 flex flex-wrap gap-2">
+                            <template
+                              v-if="(props.problem as any).config?.networkAccessRestriction?.connectWithLocal?.whitelist?.length"
+                            >
+                              <span
+                                v-for="sym in (props.problem as any).config.networkAccessRestriction.connectWithLocal.whitelist"
+                                :key="sym"
+                                class="badge badge-accent gap-1"
+                                >{{ sym }}</span
+                              >
+                            </template>
+                            <span v-else class="text-sm italic opacity-60">No restrictions</span>
+                          </div>
+                        </div>
+
+                        <div class="rounded-lg border-l-4 border-error bg-error/10 p-3">
+                          <strong class="text-sm text-error">Blacklist</strong>
+                          <div class="mt-2 flex flex-wrap gap-2">
+                            <template
+                              v-if="(props.problem as any).config?.networkAccessRestriction?.connectWithLocal?.blacklist?.length"
+                            >
+                              <span
+                                v-for="sym in (props.problem as any).config.networkAccessRestriction.connectWithLocal.blacklist"
+                                :key="sym"
+                                class="badge badge-error gap-1"
+                                >{{ sym }}</span
+                              >
+                            </template>
+                            <span v-else class="text-sm italic opacity-60">No restrictions</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -234,7 +318,6 @@ function listOrEmpty(list?: string[]) {
           <div class="card-title md:text-xl lg:text-2xl">
             {{ $t("components.problem.card.subtasks.title") }}
           </div>
-
           <table class="table w-full">
             <thead>
               <tr>
@@ -245,8 +328,8 @@ function listOrEmpty(list?: string[]) {
               </tr>
             </thead>
             <tbody>
-              <tr v-for="({ memoryLimit, timeLimit, taskScore }, index) in subtasks" :key="index">
-                <td>{{ index + 1 }}</td>
+              <tr v-for="({ memoryLimit, timeLimit, taskScore }, i) in subtasks" :key="i">
+                <td>{{ i + 1 }}</td>
                 <td>{{ timeLimit }} ms</td>
                 <td>{{ memoryLimit }} KB</td>
                 <td>{{ taskScore }}</td>

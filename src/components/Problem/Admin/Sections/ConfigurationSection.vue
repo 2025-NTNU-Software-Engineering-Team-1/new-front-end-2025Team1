@@ -204,7 +204,7 @@ function getAIFileExtensions(): string[] {
                 type="file"
                 multiple
                 :accept="getAIFileExtensions().join(',')"
-                class="file-input file-input-bordered file-input-sm w-full"
+                class="file-input file-input-bordered"
                 @change="
                   (e: any) =>
                     problem.assets!.aiVTuberACFiles = (Array.from(e.target.files ?? []) as File[])
@@ -389,6 +389,43 @@ function getAIFileExtensions(): string[] {
             />
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Artifact Collection -->
+    <div class="form-control col-span-1 md:col-span-2">
+      <label class="label"><span class="label-text">Artifact Collection (optional)</span></label>
+      <div class="flex gap-4">
+        <label class="label cursor-pointer gap-2">
+          <input
+            type="checkbox"
+            class="checkbox"
+            :checked="problem.config!.artifactCollection.includes('compiledBinary')"
+            @change="
+              ($event.target as HTMLInputElement).checked
+                ? problem.config!.artifactCollection.push('compiledBinary')
+                : (problem.config!.artifactCollection = problem.config!.artifactCollection.filter(
+                    (v) => v !== 'compiledBinary',
+                  ))
+            "
+          />
+          <span class="label-text">Compiled Binary</span>
+        </label>
+        <label class="label cursor-pointer gap-2">
+          <input
+            type="checkbox"
+            class="checkbox"
+            :checked="problem.config!.artifactCollection.includes('zip')"
+            @change="
+              ($event.target as HTMLInputElement).checked
+                ? problem.config!.artifactCollection.push('zip')
+                : (problem.config!.artifactCollection = problem.config!.artifactCollection.filter(
+                    (v) => v !== 'zip',
+                  ))
+            "
+          />
+          <span class="label-text">zip</span>
+        </label>
       </div>
     </div>
   </div>

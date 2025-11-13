@@ -25,6 +25,7 @@ declare module '@vue/runtime-core' {
     IUilAngleDoubleRight: typeof import('~icons/uil/angle-double-right')['default']
     IUilAngleDown: typeof import('~icons/uil/angle-down')['default']
     IUilBars: typeof import('~icons/uil/bars')['default']
+    IUilBitcoin: typeof import('~icons/uil/bitcoin')['default']
     IUilBolt: typeof import('~icons/uil/bolt')['default']
     IUilBookAlt: typeof import('~icons/uil/book-alt')['default']
     IUilChartLine: typeof import('~icons/uil/chart-line')['default']

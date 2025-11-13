@@ -9,19 +9,19 @@ interface Props {
   problem: Problem | ProblemForm;
   preview?: boolean;
 }
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   preview: false,
 });
 
 const session = useSession();
 
 /** ✅ 包裝成 computed，讓 TS 不報錯 **/
-const submitCount = computed(() => (problem as any).submitCount ?? 0);
-const highScore = computed(() => (problem as any).highScore ?? 0);
+const submitCount = computed(() => (props.problem as any).submitCount ?? 0);
+const highScore = computed(() => (props.problem as any).highScore ?? 0);
 
 /** ✅ 安全取得 subtasks */
 const subtasks = computed(() => {
-  const p: any = problem;
+  const p: any = props.problem;
   return p.testCase ?? p.testCaseInfo?.tasks ?? [];
 });
 
@@ -43,10 +43,11 @@ function listOrEmpty(list?: string[]) {
       <div class="flex flex-wrap items-start justify-between gap-y-4">
         <div class="flex flex-col gap-4">
           <div class="card-title md:text-2xl lg:text-3xl">
-            {{ $t("components.problem.card.title") }}{{ $route.params.id }} - {{ problem.problemName }}
+            {{ $t("components.problem.card.title") }}
+            {{ $route.params.id }} - {{ props.problem.problemName }}
           </div>
           <div class="flex flex-wrap">
-            <span class="badge badge-info mr-1" v-for="tag in problem.tags" :key="tag">{{ tag }}</span>
+            <span class="badge badge-info mr-1" v-for="tag in props.problem.tags" :key="tag">{{ tag }}</span>
           </div>
         </div>
 
@@ -55,12 +56,12 @@ function listOrEmpty(list?: string[]) {
             <div class="stat place-items-center py-0">
               <div class="stat-title">{{ $t("components.problem.card.quota") }}</div>
               <div class="stat-value">
-                <template v-if="isQuotaUnlimited(problem.quota)">
+                <template v-if="isQuotaUnlimited(props.problem.quota)">
                   <span class="text-sm">{{ $t("components.problem.card.unlimited") }}</span>
                 </template>
                 <template v-else>
-                  <span>{{ problem.quota - submitCount }}</span>
-                  <span class="text-sm font-normal">{{ ` / ${problem.quota}` }}</span>
+                  <span>{{ props.problem.quota - submitCount }}</span>
+                  <span class="text-sm font-normal">{{ ` / ${props.problem.quota}` }}</span>
                 </template>
               </div>
             </div>
@@ -73,18 +74,20 @@ function listOrEmpty(list?: string[]) {
             </div>
           </div>
 
-          <div v-if="!preview" class="ml-3 flex flex-wrap place-items-center gap-x-3">
+          <div v-if="!props.preview" class="ml-3 flex flex-wrap place-items-center gap-x-3">
             <router-link
               class="btn md:btn-md lg:btn-lg"
               :to="`/course/${$route.params.name}/problem/${$route.params.id}/submit`"
             >
-              <i-uil-file-upload-alt class="lg:h-5 lg:w-5" />{{ $t("components.problem.card.submit") }}
+              <i-uil-file-upload-alt class="lg:h-5 lg:w-5" />
+              {{ $t("components.problem.card.submit") }}
             </router-link>
             <router-link
               class="btn md:btn-md lg:btn-lg"
               :to="`/course/${$route.params.name}/problem/${$route.params.id}/stats`"
             >
-              <i-uil-chart-line class="lg:h-5 lg:w-5" />{{ $t("components.problem.card.stats") }}
+              <i-uil-chart-line class="lg:h-5 lg:w-5" />
+              {{ $t("components.problem.card.stats") }}
             </router-link>
             <router-link
               v-if="session.isAdmin"
@@ -113,17 +116,17 @@ function listOrEmpty(list?: string[]) {
           <div class="card-title md:text-xl lg:text-2xl">
             {{ $t("components.problem.card.desc") }}
           </div>
-          <markdown-renderer class="mb-10" :md="problem.description.description" />
+          <markdown-renderer class="mb-10" :md="props.problem.description.description" />
 
           <div class="card-title md:text-xl lg:text-2xl">
             {{ $t("components.problem.card.input") }}
           </div>
-          <markdown-renderer class="mb-10" :md="problem.description.input" />
+          <markdown-renderer class="mb-10" :md="props.problem.description.input" />
 
           <div class="card-title md:text-xl lg:text-2xl">
             {{ $t("components.problem.card.output") }}
           </div>
-          <markdown-renderer class="mb-10" :md="problem.description.output" />
+          <markdown-renderer class="mb-10" :md="props.problem.description.output" />
 
           <div class="card-title md:text-xl lg:text-2xl">
             {{ $t("components.problem.card.ex") }}
@@ -137,10 +140,14 @@ function listOrEmpty(list?: string[]) {
               </tr>
             </thead>
             <tbody>
-              <tr v-for="i in problem.description.sampleInput.length" :key="i">
+              <tr v-for="i in props.problem.description.sampleInput.length" :key="i">
                 <td>{{ i }}</td>
-                <td><sample-code-block :code="problem.description.sampleInput[i - 1]" /></td>
-                <td><sample-code-block :code="problem.description.sampleOutput[i - 1]" /></td>
+                <td>
+                  <sample-code-block :code="props.problem.description.sampleInput[i - 1]" />
+                </td>
+                <td>
+                  <sample-code-block :code="props.problem.description.sampleOutput[i - 1]" />
+                </td>
               </tr>
             </tbody>
           </table>
@@ -148,31 +155,31 @@ function listOrEmpty(list?: string[]) {
           <div class="card-title md:text-xl lg:text-2xl">
             {{ $t("components.problem.card.hint") }}
           </div>
-          <markdown-renderer class="mb-10" :md="problem.description.hint" />
+          <markdown-renderer class="mb-10" :md="props.problem.description.hint" />
 
           <!-- ===== Settings & Restrictions ===== -->
-          <div v-if="(problem as any).config || (problem as any).pipeline" class="mb-10">
+          <div v-if="(props.problem as any).config || (props.problem as any).pipeline" class="mb-10">
             <div class="card-title mb-2 md:text-xl lg:text-2xl">Settings & Restrictions</div>
 
             <!-- Accepted Format & Artifact -->
-            <div v-if="(problem as any).config">
-              <p><strong>Accepted Format:</strong> {{ (problem as any).config.acceptedFormat }}</p>
+            <div v-if="(props.problem as any).config">
+              <p><strong>Accepted Format:</strong> {{ (props.problem as any).config.acceptedFormat }}</p>
               <p>
                 <strong>Artifact Collection:</strong>
-                <span v-if="(problem as any).config.artifactCollection?.length">
-                  {{ (problem as any).config.artifactCollection.join(", ") }}
+                <span v-if="(props.problem as any).config.artifactCollection?.length">
+                  {{ (props.problem as any).config.artifactCollection.join(", ") }}
                 </span>
                 <span v-else>None</span>
               </p>
 
               <div class="mt-3">
                 <h3 class="mb-1 text-lg font-semibold">Network Access Restriction</h3>
-                <template v-if="(problem as any).config.networkAccessRestriction?.enabled">
+                <template v-if="(props.problem as any).config.networkAccessRestriction?.enabled">
                   <p>
                     <strong>Firewall Extranet Whitelist:</strong>
                     {{
                       listOrEmpty(
-                        (problem as any).config.networkAccessRestriction?.firewallExtranet?.whitelist,
+                        (props.problem as any).config.networkAccessRestriction?.firewallExtranet?.whitelist,
                       )
                     }}
                   </p>
@@ -180,7 +187,7 @@ function listOrEmpty(list?: string[]) {
                     <strong>Firewall Extranet Blacklist:</strong>
                     {{
                       listOrEmpty(
-                        (problem as any).config.networkAccessRestriction?.firewallExtranet?.blacklist,
+                        (props.problem as any).config.networkAccessRestriction?.firewallExtranet?.blacklist,
                       )
                     }}
                   </p>
@@ -188,7 +195,7 @@ function listOrEmpty(list?: string[]) {
                     <strong>Connect With Local Whitelist:</strong>
                     {{
                       listOrEmpty(
-                        (problem as any).config.networkAccessRestriction?.connectWithLocal?.whitelist,
+                        (props.problem as any).config.networkAccessRestriction?.connectWithLocal?.whitelist,
                       )
                     }}
                   </p>
@@ -196,7 +203,7 @@ function listOrEmpty(list?: string[]) {
                     <strong>Connect With Local Blacklist:</strong>
                     {{
                       listOrEmpty(
-                        (problem as any).config.networkAccessRestriction?.connectWithLocal?.blacklist,
+                        (props.problem as any).config.networkAccessRestriction?.connectWithLocal?.blacklist,
                       )
                     }}
                   </p>
@@ -206,15 +213,19 @@ function listOrEmpty(list?: string[]) {
             </div>
 
             <!-- Library Restrictions -->
-            <div v-if="(problem as any).pipeline" class="mt-5">
+            <div v-if="(props.problem as any).pipeline" class="mt-5">
               <h3 class="mb-1 text-lg font-semibold">Library Restrictions</h3>
               <p>
                 <strong>Whitelist:</strong>
-                {{ listOrEmpty((problem as any).pipeline.staticAnalysis?.libraryRestrictions?.whitelist) }}
+                {{
+                  listOrEmpty((props.problem as any).pipeline.staticAnalysis?.libraryRestrictions?.whitelist)
+                }}
               </p>
               <p>
                 <strong>Blacklist:</strong>
-                {{ listOrEmpty((problem as any).pipeline.staticAnalysis?.libraryRestrictions?.blacklist) }}
+                {{
+                  listOrEmpty((props.problem as any).pipeline.staticAnalysis?.libraryRestrictions?.blacklist)
+                }}
               </p>
             </div>
           </div>

@@ -59,8 +59,28 @@ watchEffect(() => {
       staticAnalysis: {
         libraryRestrictions: {
           enabled: (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.enabled ?? false,
-          whitelist: (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.whitelist || [],
-          blacklist: (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.blacklist || [],
+          whitelist: {
+            syntax:
+              (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.whitelist?.syntax || [],
+            imports:
+              (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.whitelist?.imports || [],
+            headers:
+              (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.whitelist?.headers || [],
+            functions:
+              (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.whitelist?.functions ||
+              [],
+          },
+          blacklist: {
+            syntax:
+              (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.blacklist?.syntax || [],
+            imports:
+              (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.blacklist?.imports || [],
+            headers:
+              (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.blacklist?.headers || [],
+            functions:
+              (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.blacklist?.functions ||
+              [],
+          },
         },
       },
       scoringScript: (problem.value as any)?.pipeline?.scoringScript || { custom: false },

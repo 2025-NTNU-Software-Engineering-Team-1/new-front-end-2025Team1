@@ -78,14 +78,16 @@ function normalizeLibraryRestrictions(raw: any) {
 /* ========================================================
    在表單初始化自動修正結構
    ======================================================== */
+
 watchEffect(() => {
   if (!problem.value) return;
-  const libs = (problem.value.pipeline?.staticAnalysis as any)?.libraryRestrictions;
 
+  // 防止 pipeline 或 staticAnalysis 未初始化
+  if (!problem.value.pipeline) problem.value.pipeline = {} as any;
+  if (!problem.value.pipeline.staticAnalysis) problem.value.pipeline.staticAnalysis = {} as any;
+
+  const libs = (problem.value.pipeline.staticAnalysis as any)?.libraryRestrictions;
   if (!libs || typeof libs !== "object") {
-    if (!problem.value.pipeline) problem.value.pipeline = {} as any;
-    if (!problem.value.pipeline.staticAnalysis) problem.value.pipeline.staticAnalysis = {} as any;
-
     problem.value.pipeline.staticAnalysis.libraryRestrictions = normalizeLibraryRestrictions(null);
   } else {
     problem.value.pipeline.staticAnalysis.libraryRestrictions = normalizeLibraryRestrictions(libs);

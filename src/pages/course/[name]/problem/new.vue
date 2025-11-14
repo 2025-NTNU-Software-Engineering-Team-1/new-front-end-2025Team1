@@ -61,8 +61,8 @@ const newProblem = ref<ProblemForm>({
     staticAnalysis: {
       libraryRestrictions: {
         enabled: false,
-        whitelist: [],
-        blacklist: [],
+        whitelist: { syntax: [], imports: [], headers: [], functions: [] },
+        blacklist: { syntax: [], imports: [], headers: [], functions: [] },
       },
     },
     scoringScript: { custom: false },

@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { inject, ref, Ref, computed } from "vue";
+import { inject, ref, Ref, watchEffect } from "vue";
 import useVuelidate from "@vuelidate/core";
-import { required, maxLength, minValue, between, helpers } from "@vuelidate/validators";
+import { required, maxLength, between, helpers } from "@vuelidate/validators";
+
 import DescriptionSection from "./Sections/DescriptionSection.vue";
 import ConfigurationSection from "./Sections/ConfigurationSection.vue";
 import PipelineSection from "./Sections/PipelineSection.vue";
@@ -17,6 +18,79 @@ const emits = defineEmits<{
 const isLoading = ref(false);
 const errorMsg = ref("");
 defineExpose({ isLoading, errorMsg });
+
+/* ========================================================
+   雙版本相容的 normalize 函式
+   ======================================================== */
+function normalizeLibraryRestrictions(raw: any) {
+  const base = {
+    enabled: false,
+    whitelist: { syntax: [], imports: [], headers: [], functions: [] },
+    blacklist: { syntax: [], imports: [], headers: [], functions: [] },
+  };
+  if (!raw) return base;
+
+  // 若是新版 (含物件內部 keys)，直接回傳
+  const isNewStructure =
+    typeof raw.whitelist === "object" &&
+    raw.whitelist !== null &&
+    Array.isArray(raw.whitelist.syntax) &&
+    Array.isArray(raw.blacklist.syntax);
+
+  if (isNewStructure) {
+    // 保留全部，但確保 keys 存在
+    return {
+      enabled: !!raw.enabled,
+      whitelist: {
+        syntax: raw.whitelist.syntax ?? [],
+        imports: raw.whitelist.imports ?? [],
+        headers: raw.whitelist.headers ?? [],
+        functions: raw.whitelist.functions ?? [],
+      },
+      blacklist: {
+        syntax: raw.blacklist.syntax ?? [],
+        imports: raw.blacklist.imports ?? [],
+        headers: raw.blacklist.headers ?? [],
+        functions: raw.blacklist.functions ?? [],
+      },
+    };
+  }
+
+  // 舊版: whitelist / blacklist 直接是陣列
+  const asArr = (v: any) => (Array.isArray(v) ? v : []);
+  return {
+    enabled: !!raw.enabled,
+    whitelist: {
+      syntax: asArr(raw.whitelist),
+      imports: [],
+      headers: [],
+      functions: [],
+    },
+    blacklist: {
+      syntax: asArr(raw.blacklist),
+      imports: [],
+      headers: [],
+      functions: [],
+    },
+  };
+}
+
+/* ========================================================
+   在表單初始化自動修正結構
+   ======================================================== */
+watchEffect(() => {
+  if (!problem.value) return;
+  const libs = (problem.value.pipeline?.staticAnalysis as any)?.libraryRestrictions;
+
+  if (!libs || typeof libs !== "object") {
+    if (!problem.value.pipeline) problem.value.pipeline = {} as any;
+    if (!problem.value.pipeline.staticAnalysis) problem.value.pipeline.staticAnalysis = {} as any;
+
+    problem.value.pipeline.staticAnalysis.libraryRestrictions = normalizeLibraryRestrictions(null);
+  } else {
+    problem.value.pipeline.staticAnalysis.libraryRestrictions = normalizeLibraryRestrictions(libs);
+  }
+});
 
 const rules = {
   problemName: { required, maxLength: maxLength(64) },
@@ -53,7 +127,6 @@ const rules = {
       ),
     },
   },
-  // new validations
   config: {
     acceptedFormat: {
       required: helpers.withMessage(
@@ -64,47 +137,10 @@ const rules = {
   },
   pipeline: {
     executionMode: {
-      required: helpers.withMessage("Execution mode is required", (v: any, p: any) =>
+      required: helpers.withMessage("Execution mode is required", () =>
         ["general", "functionOnly", "interactive"].includes(problem.value.pipeline.executionMode),
       ),
     },
-  },
-  assets: {
-    checkerPyRequired: helpers.withMessage(
-      "checker.py is required when Custom Checker is enabled",
-      (_: any, p: any) => {
-        const mode = p?.pipeline?.executionMode;
-        const cc = !!p?.pipeline?.customChecker;
-        if (!cc) return true;
-        if (mode === "general" || mode === "functionOnly") {
-          return !!p?.assets?.checkerPy;
-        }
-        return true;
-      },
-    ),
-    makefileZipRequired: helpers.withMessage(
-      "makefile.zip is required when Execution Mode is functionOnly",
-      (_: any, p: any) => (p?.pipeline?.executionMode === "functionOnly" ? !!p?.assets?.makefileZip : true),
-    ),
-    teacherFileRequired: helpers.withMessage(
-      "Teacher_file is required when Execution Mode is interactive",
-      (_: any, p: any) => (p?.pipeline?.executionMode === "interactive" ? !!p?.assets?.teacherFile : true),
-    ),
-    localServiceZipRequired: helpers.withMessage(
-      "local_service.zip is required when Connect With Local is enabled",
-      (_: any, p: any) =>
-        p?.config?.staticAnalysis?.custom &&
-        p?.config?.staticAnalysis?.networkAccessRestriction?.connectWithLocal?.enabled
-          ? !!p?.assets?.localServiceZip
-          : true,
-    ),
-    scoringFilesRequired: helpers.withMessage(
-      "score.py and score.json are required when Scoring Script Custom is enabled",
-      (_: any, p: any) => {
-        const custom = (p as any)?.pipeline?.scoringScript?.custom === true;
-        return custom ? !!p?.assets?.scorePy && !!p?.assets?.scoreJson : true;
-      },
-    ),
   },
 };
 
@@ -112,17 +148,11 @@ const v$ = useVuelidate(rules, problem);
 
 function update<K extends keyof ProblemForm>(key: K, value: ProblemForm[K]) {
   emits("update", key, value);
-  // touch top-level fields when updated
-  if ((v$.value as any)[key]) {
-    (v$.value as any)[key].$touch?.();
-  }
+  if ((v$.value as any)[key]) (v$.value as any)[key].$touch?.();
 }
 
 async function submit() {
-  console.log("AdminProblemForm submit() 執行了，驗證中…");
   const ok = await v$.value.$validate();
-  console.log("驗證結果 ok =", ok);
-  console.log("$errors 明細 =", JSON.stringify(v$.value.$errors, null, 2));
   if (ok) emits("submit");
 }
 </script>
@@ -135,12 +165,10 @@ async function submit() {
     </div>
   </div>
 
-  <!-- Level 1: name + hidden -->
+  <!-- 第一層：題名與隱藏開關 -->
   <div class="grid grid-cols-2 gap-y-4">
     <div class="form-control w-full max-w-xs">
-      <label class="label">
-        <span class="label-text">Problem name</span>
-      </label>
+      <label class="label"><span class="label-text">Problem name</span></label>
       <input
         type="text"
         :class="['input input-bordered w-full max-w-xs', v$.problemName.$error && 'input-error']"
@@ -165,11 +193,11 @@ async function submit() {
     </div>
   </div>
 
-  <!-- Level 1: collapsible sections -->
+  <!-- Section fold panels -->
   <div class="mt-4 flex flex-col gap-3">
     <div class="collapse collapse-arrow rounded-box bg-base-200">
       <input type="checkbox" class="peer" />
-      <div class="collapse-title font-semibold">Set Description</div>
+      <div class="collapse-title font-semibold">Set Description</div>
       <div class="collapse-content">
         <DescriptionSection :v$="v$" @update="update" />
       </div>
@@ -177,7 +205,7 @@ async function submit() {
 
     <div class="collapse collapse-arrow rounded-box bg-base-200">
       <input type="checkbox" class="peer" />
-      <div class="collapse-title font-semibold">Set Configuration</div>
+      <div class="collapse-title font-semibold">Set Configuration</div>
       <div class="collapse-content">
         <ConfigurationSection />
       </div>
@@ -185,9 +213,9 @@ async function submit() {
 
     <div class="collapse collapse-arrow rounded-box bg-base-200">
       <input type="checkbox" class="peer" />
-      <div class="collapse-title font-semibold">Set Pipeline</div>
+      <div class="collapse-title font-semibold">Set Pipeline</div>
       <div class="collapse-content">
-        <PipelineSection :v$="v$" />
+        <PipelineSection />
       </div>
     </div>
 

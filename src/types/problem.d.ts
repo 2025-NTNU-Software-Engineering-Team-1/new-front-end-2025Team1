@@ -164,8 +164,18 @@ interface ProblemPipeline {
   staticAnalysis?: {
     libraryRestrictions?: {
       enabled: boolean;
-      whitelist: string[];
-      blacklist: string[];
+      whitelist: {
+        syntax: string[];
+        imports: string[];
+        headers: string[];
+        functions: string[];
+      };
+      blacklist: {
+        syntax: string[];
+        imports: string[];
+        headers: string[];
+        functions: string[];
+      };
     };
   };
 }

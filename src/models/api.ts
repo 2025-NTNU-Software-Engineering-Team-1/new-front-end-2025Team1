@@ -8,12 +8,10 @@ export const fetcher = axios.create({
 });
 
 fetcher.interceptors.response.use(
-  (response) => {
-    return {
-      ...response,
-      ...response.data,
-    };
-  },
+  (response) => ({
+    ...response,
+    ...response.data,
+  }),
   (error) => {
     const global = useGlobal();
     if (error?.response?.status >= 500) {
@@ -36,22 +34,18 @@ const Auth = {
 };
 
 const Problem = {
-  // existing
+  // basic CRUD
   create: (body: ProblemForm) => fetcher.post("/problem/manage", body),
-  getTestCaseUrl: (problemId: number) => `${fetcher.defaults.baseURL}/problem/${problemId}/testcase`,
   modify: (id: string | number, body: ProblemForm) => fetcher.put(`/problem/manage/${id}`, body),
+  delete: (id: string | number) => fetcher.delete(`/problem/manage/${id}`),
+
+  // testcase uploads
   modifyTestdata: (id: string | number, body: FormData) =>
     fetcher.put(`/problem/manage/${id}`, body, {
       headers: { "Content-Type": "multipart/form-data" },
     }),
-  delete: (id: string | number) => fetcher.delete(`/problem/manage/${id}`),
-  initiateTestCaseUpload: (
-    problemId: number,
-    body: {
-      length: number;
-      partSize: number;
-    },
-  ) =>
+  getTestCaseUrl: (problemId: number) => `${fetcher.defaults.baseURL}/problem/${problemId}/testcase`,
+  initiateTestCaseUpload: (problemId: number, body: { length: number; partSize: number }) =>
     fetcher.post<{ upload_id: string; urls: string[] }>(
       `/problem/${problemId}/initiate-test-case-upload`,
       body,
@@ -62,30 +56,21 @@ const Problem = {
     parts: { ETag: string; PartNumber: number }[],
   ) => fetcher.post(`/problem/${problemId}/complete-test-case-upload`, { uploadId, parts }),
 
-  // NEW: Save meta only (Set Configuration + Set Pipeline) without files
-  // Body example: { config: ProblemConfigExtra | undefined, pipeline: ProblemPipeline | undefined }
+  // save configuration + pipeline meta only (no files)
   saveMeta: (problemId: number, body: { config?: ProblemConfigExtra; pipeline?: ProblemPipeline }) =>
     fetcher.put(`/problem/${problemId}/meta`, body),
 
-  // NEW: Upload all assets (V2) with a single multipart request
-  // FormData fields (append if present):
-  // - "meta": JSON.stringify({ config, pipeline })
-  // - "case": File (testdata zip)
-  // - "checker.py": File
-  // - "makefile.zip": File
-  // - "Teacher_file": File
-  // - "score.py": File
-  // - "score.json": File
-  // - "local_service.zip": File
+  // unified asset upload (v2)
   uploadAssetsV2: (problemId: number, formData: FormData) =>
     fetcher.put(`/problem/${problemId}/assets`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     }),
 
-  // NEW: Fetch available symbols for static analysis white/black lists
-  // Return: { librarySymbols: string[] }
+  // static analysis options
   getStaticAnalysisOptions: () =>
-    fetcher.get<{ librarySymbols: string[] }>(`/problem/static-analysis/options`),
+    fetcher.get<{ librarySymbols: { imports: string[]; headers: string[]; functions: string[] } }>(
+      `/problem/static-analysis/options`,
+    ),
 };
 
 const Submission = {
@@ -99,7 +84,6 @@ const Submission = {
 
   rejudge: (id: string) => fetcher.get(`/submission/${id}/rejudge`),
 
-  // 產物下載 URL（compiledBinary 或 zip；zip 可帶 taskIndex）
   getArtifactUrl: (id: string, kind: "compiledBinary" | "zip", taskIndex?: number) => {
     const base = (fetcher.defaults.baseURL || "").toString().replace(/\/$/, "");
     const path =
@@ -111,7 +95,7 @@ const Submission = {
 };
 
 const Copycat = {
-  detect: (body: { course: string; problemId: number; studentNicknames: { [k: string]: string } }) =>
+  detect: (body: { course: string; problemId: number; studentNicknames: Record<string, string> }) =>
     fetcher.post("/copycat", body),
 };
 

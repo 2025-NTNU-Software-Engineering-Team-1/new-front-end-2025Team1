@@ -93,6 +93,16 @@ function getAIFileExtensions() {
 
 const firewallMode = ref<"whitelist" | "blacklist">("whitelist");
 const localMode = ref<"whitelist" | "blacklist">("whitelist");
+
+// 監聽切換時清空對方清單
+watch(firewallMode, (newMode) => {
+  const oppositeMode = newMode === "whitelist" ? "blacklist" : "whitelist";
+  problem.value.config!.networkAccessRestriction!.firewallExtranet![oppositeMode] = [];
+});
+watch(localMode, (newMode) => {
+  const oppositeMode = newMode === "whitelist" ? "blacklist" : "whitelist";
+  problem.value.config!.networkAccessRestriction!.connectWithLocal![oppositeMode] = [];
+});
 </script>
 
 <template>
@@ -162,7 +172,7 @@ const localMode = ref<"whitelist" | "blacklist">("whitelist");
         v-if="problem.config!.acceptedFormat === 'zip'"
         class="mt-3 flex items-center gap-2 rounded bg-base-300 p-3"
       >
-        <span class="label-text">Max ZIP Size (MB)</span>
+        <span class="label-text">Max ZIP Size (MB)</span>
         <input
           type="number"
           class="input input-bordered input-sm w-28 text-center"
@@ -177,7 +187,7 @@ const localMode = ref<"whitelist" | "blacklist">("whitelist");
             )
           "
         />
-        <span class="whitespace-nowrap text-xs opacity-70">(default 50 MB)</span>
+        <span class="whitespace-nowrap text-xs opacity-70">(default 50 MB)</span>
       </div>
     </div>
 
@@ -185,7 +195,7 @@ const localMode = ref<"whitelist" | "blacklist">("whitelist");
     <div class="col-span-2 mt-4 rounded-lg border border-base-300 p-4">
       <div class="flex items-center gap-4">
         <label class="label cursor-pointer justify-start gap-x-4">
-          <span class="label-text">AI VTuber</span>
+          <span class="label-text">AI VTuber</span>
           <input type="checkbox" class="toggle toggle-primary" v-model="problem.config!.aiVTuber" />
         </label>
       </div>
@@ -197,7 +207,7 @@ const localMode = ref<"whitelist" | "blacklist">("whitelist");
         <div v-if="problem.config!.aiVTuber" class="mt-3 space-y-3 rounded bg-base-300 p-3">
           <div class="flex flex-col md:flex-row md:items-start md:gap-6">
             <div class="form-control w-full max-w-xs">
-              <label class="label mb-1"><span class="label-text">Upload AC files</span></label>
+              <label class="label mb-1"><span class="label-text">Upload AC files</span></label>
               <input
                 type="file"
                 multiple
@@ -218,17 +228,17 @@ const localMode = ref<"whitelist" | "blacklist">("whitelist");
             </div>
 
             <div class="form-control w-full max-w-xs">
-              <label class="label mb-1"><span class="label-text">AI Conversation Mode</span></label>
+              <label class="label mb-1"><span class="label-text">AI Conversation Mode</span></label>
               <select class="select select-bordered w-full max-w-xs" v-model="problem.config!.aiVTuberMode">
-                <option value="guided">Guided Mode</option>
-                <option value="unlimited">Unlimited Mode</option>
+                <option value="guided">Guided Mode</option>
+                <option value="unlimited">Unlimited Mode</option>
               </select>
             </div>
           </div>
 
           <div class="inline-block w-fit rounded-md border border-gray-400/60 p-3">
             <div class="relative flex items-center gap-2">
-              <span class="label-text">Max Token</span>
+              <span class="label-text">Max Token</span>
               <input
                 type="number"
                 min="0"
@@ -280,7 +290,7 @@ const localMode = ref<"whitelist" | "blacklist">("whitelist");
     <!-- Trial Mode -->
     <div class="form-control col-span-2 rounded-lg border border-base-300 p-4">
       <label class="label ml-1 cursor-pointer justify-start gap-x-4">
-        <span class="label-text">Trial Mode</span>
+        <span class="label-text">Trial Mode</span>
         <input type="checkbox" class="toggle toggle-primary" v-model="problem.config!.trialMode" />
       </label>
     </div>
@@ -288,7 +298,7 @@ const localMode = ref<"whitelist" | "blacklist">("whitelist");
     <!-- Network Access Restriction -->
     <div class="form-control col-span-2 rounded-lg border border-base-300 p-4">
       <label class="label cursor-pointer justify-start gap-x-4">
-        <span class="label-text">Network Access Restriction</span>
+        <span class="label-text">Network Access Restriction</span>
         <input type="checkbox" class="toggle" v-model="problem.config!.networkAccessRestriction!.enabled" />
       </label>
 
@@ -299,7 +309,7 @@ const localMode = ref<"whitelist" | "blacklist">("whitelist");
         <!-- Firewall Extranet -->
         <div class="rounded bg-base-100 p-3">
           <label class="label cursor-pointer justify-start gap-x-4">
-            <span class="label-text">Firewall Extranet</span>
+            <span class="label-text">Firewall Extranet</span>
             <input
               type="checkbox"
               class="toggle"
@@ -311,26 +321,43 @@ const localMode = ref<"whitelist" | "blacklist">("whitelist");
             v-if="problem.config!.networkAccessRestriction!.firewallExtranet!.enabled"
             class="mt-2 space-y-3 rounded bg-base-300 p-3"
           >
-            <div class="flex items-center gap-6">
-              <label class="label cursor-pointer gap-2">
-                <input type="radio" class="radio" value="whitelist" v-model="firewallMode" />
-                <span class="label-text">Edit Whitelist</span>
-              </label>
-              <label class="label cursor-pointer gap-2">
-                <input type="radio" class="radio" value="blacklist" v-model="firewallMode" />
-                <span class="label-text">Edit Blacklist</span>
-              </label>
+            <!-- 滑動開關 -->
+            <div class="flex justify-center">
+              <div class="mode-switcher">
+                <div class="mode-switcher-container">
+                  <div
+                    class="mode-switcher-slider"
+                    :class="{ 'slider-blacklist': firewallMode === 'blacklist' }"
+                  ></div>
+                  <button
+                    class="mode-switcher-option"
+                    :class="{ active: firewallMode === 'whitelist' }"
+                    @click="firewallMode = 'whitelist'"
+                  >
+                    <span>Whitelist</span>
+                  </button>
+                  <button
+                    class="mode-switcher-option"
+                    :class="{ active: firewallMode === 'blacklist' }"
+                    @click="firewallMode = 'blacklist'"
+                  >
+                    <span>Blacklist</span>
+                  </button>
+                </div>
+              </div>
             </div>
 
             <MultiStringInput
               v-if="firewallMode === 'whitelist'"
               v-model="problem.config!.networkAccessRestriction!.firewallExtranet!.whitelist"
               placeholder="Add whitelist host/IP"
+              badge-class="badge-info"
             />
             <MultiStringInput
               v-else
               v-model="problem.config!.networkAccessRestriction!.firewallExtranet!.blacklist"
               placeholder="Add blacklist host/IP"
+              badge-class="badge-error"
             />
           </div>
         </div>
@@ -338,7 +365,7 @@ const localMode = ref<"whitelist" | "blacklist">("whitelist");
         <!-- Connect With Local -->
         <div class="rounded bg-base-100 p-3">
           <label class="label cursor-pointer justify-start gap-x-4">
-            <span class="label-text">Connect With Local</span>
+            <span class="label-text">Connect With Local</span>
             <input
               type="checkbox"
               class="toggle"
@@ -350,30 +377,47 @@ const localMode = ref<"whitelist" | "blacklist">("whitelist");
             v-if="problem.config!.networkAccessRestriction!.connectWithLocal!.enabled"
             class="mt-2 space-y-3 rounded bg-base-300 p-3"
           >
-            <div class="flex items-center gap-6">
-              <label class="label cursor-pointer gap-2">
-                <input type="radio" class="radio" value="whitelist" v-model="localMode" />
-                <span class="label-text">Edit Whitelist</span>
-              </label>
-              <label class="label cursor-pointer gap-2">
-                <input type="radio" class="radio" value="blacklist" v-model="localMode" />
-                <span class="label-text">Edit Blacklist</span>
-              </label>
+            <!-- 滑動開關 -->
+            <div class="flex justify-center">
+              <div class="mode-switcher">
+                <div class="mode-switcher-container">
+                  <div
+                    class="mode-switcher-slider"
+                    :class="{ 'slider-blacklist': localMode === 'blacklist' }"
+                  ></div>
+                  <button
+                    class="mode-switcher-option"
+                    :class="{ active: localMode === 'whitelist' }"
+                    @click="localMode = 'whitelist'"
+                  >
+                    <span>Whitelist</span>
+                  </button>
+                  <button
+                    class="mode-switcher-option"
+                    :class="{ active: localMode === 'blacklist' }"
+                    @click="localMode = 'blacklist'"
+                  >
+                    <span>Blacklist</span>
+                  </button>
+                </div>
+              </div>
             </div>
 
             <MultiStringInput
               v-if="localMode === 'whitelist'"
               v-model="problem.config!.networkAccessRestriction!.connectWithLocal!.whitelist"
               placeholder="Add whitelist host/IP/URL"
+              badge-class="badge-info"
             />
             <MultiStringInput
               v-else
               v-model="problem.config!.networkAccessRestriction!.connectWithLocal!.blacklist"
               placeholder="Add blacklist host/IP/URL"
+              badge-class="badge-error"
             />
 
             <div class="form-control">
-              <label class="label"><span class="label-text">Upload local_service.zip</span></label>
+              <label class="label"><span class="label-text">Upload local_service.zip</span></label>
               <input
                 type="file"
                 accept=".zip"
@@ -403,7 +447,7 @@ const localMode = ref<"whitelist" | "blacklist">("whitelist");
                   ))
             "
           />
-          <span class="label-text">Compiled Binary</span>
+          <span class="label-text">Compiled Binary</span>
         </label>
 
         <label class="label cursor-pointer gap-2">
@@ -534,6 +578,78 @@ const localMode = ref<"whitelist" | "blacklist">("whitelist");
   100% {
     opacity: 0;
     transform: translate(-50%, -50%) scale(0.5) rotate(var(--angle, 0deg)) translateY(var(--distance, 40px));
+  }
+}
+
+/* 黑白名單切換器 */
+.mode-switcher {
+  display: flex;
+  align-items: center;
+}
+
+.mode-switcher-container {
+  position: relative;
+  display: inline-flex;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 12px;
+  padding: 3px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mode-switcher-slider {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: calc(50% - 3px);
+  height: calc(100% - 6px);
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  border-radius: 9px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4), 0 0 20px rgba(59, 130, 246, 0.2);
+  z-index: 1;
+}
+
+.mode-switcher-slider.slider-blacklist {
+  transform: translateX(calc(100% + 3px));
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4), 0 0 20px rgba(239, 68, 68, 0.2);
+}
+
+.mode-switcher-option {
+  position: relative;
+  z-index: 2;
+  padding: 6px 16px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  border-radius: 9px;
+}
+
+.mode-switcher-option:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.mode-switcher-option.active {
+  color: white;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.mode-switcher-option:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+/* 響應式設計 */
+@media (max-width: 640px) {
+  .mode-switcher-option {
+    padding: 5px 12px;
+    font-size: 0.7rem;
   }
 }
 </style>

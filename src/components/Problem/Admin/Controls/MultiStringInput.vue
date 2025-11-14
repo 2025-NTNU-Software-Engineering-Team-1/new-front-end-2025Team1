@@ -2,6 +2,7 @@
 const props = defineProps<{
   modelValue: string[];
   placeholder?: string;
+  badgeClass?: string;
 }>();
 const emits = defineEmits<{ (e: "update:modelValue", v: string[]): void }>();
 
@@ -32,7 +33,12 @@ function remove(i: number) {
       <button class="btn btn-sm" @click="add">Add</button>
     </div>
     <div class="mt-2 flex flex-wrap gap-2">
-      <div v-for="(s, i) in modelValue" :key="`${s}-${i}`" class="badge badge-info gap-2">
+      <div
+        v-for="(s, i) in modelValue"
+        :key="`${s}-${i}`"
+        class="badge gap-2"
+        :class="badgeClass || 'badge-info'"
+      >
         {{ s }}
         <button class="btn btn-ghost btn-xs" @click="remove(i)">
           <i-uil-times />

@@ -86,11 +86,13 @@ watchEffect(() => {
   if (!problem.value.pipeline) problem.value.pipeline = {} as any;
   if (!problem.value.pipeline.staticAnalysis) problem.value.pipeline.staticAnalysis = {} as any;
 
-  const libs = (problem.value.pipeline.staticAnalysis as any)?.libraryRestrictions;
+  const staticAnalysis = (problem.value.pipeline.staticAnalysis ??= {} as any);
+  const libs = staticAnalysis.libraryRestrictions;
+
   if (!libs || typeof libs !== "object") {
-    problem.value.pipeline.staticAnalysis.libraryRestrictions = normalizeLibraryRestrictions(null);
+    staticAnalysis.libraryRestrictions = normalizeLibraryRestrictions(null);
   } else {
-    problem.value.pipeline.staticAnalysis.libraryRestrictions = normalizeLibraryRestrictions(libs);
+    staticAnalysis.libraryRestrictions = normalizeLibraryRestrictions(libs);
   }
 });
 

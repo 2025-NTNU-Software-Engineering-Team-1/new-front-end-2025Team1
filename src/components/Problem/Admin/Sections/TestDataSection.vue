@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { inject, Ref, ref, watch } from "vue";
 import { ZipReader, BlobReader } from "@zip.js/zip.js";
+import { assertFileSizeOK } from "@/utils/checkFileSize";
 
 defineProps<{ v$: any }>();
 
@@ -72,9 +73,14 @@ watch(
               accept=".zip"
               class="file-input file-input-bordered file-input-sm w-full"
               @change="
-                (e: any) =>
-                  (problem.assets!.testdataZip =
-                    e.target.files?.[0] || null)
+                (e: any) => {
+                  const file = e.target.files?.[0];
+                  if (file && !assertFileSizeOK(file, 'testdataZip')) {
+                    e.target.value = '';
+                    return;
+                  }
+                  problem.assets!.testdataZip = file || null;
+                }
               "
             />
           </template>

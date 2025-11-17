@@ -2,6 +2,7 @@
 import { inject, Ref, ref, watch, nextTick } from "vue";
 import LanguageMultiSelect from "../../Forms/LanguageMultiSelect.vue";
 import MultiStringInput from "../Controls/MultiStringInput.vue";
+import { assertFileSizeOK } from "@/utils/checkFileSize";
 
 const rawProblem = inject<Ref<ProblemForm> | undefined>("problem");
 if (!rawProblem || !rawProblem.value) throw new Error("ConfigurationSection requires problem injection");
@@ -167,7 +168,7 @@ watch(localMode, (newMode) => {
         </label>
       </div>
 
-      <!-- ZIP setting with gray bg -->
+      <!-- ZIP setting -->
       <div
         v-if="problem.config!.acceptedFormat === 'zip'"
         class="mt-3 flex items-center gap-2 rounded bg-base-300 p-3"
@@ -214,10 +215,29 @@ watch(localMode, (newMode) => {
                 :accept="getAIFileExtensions().join(',')"
                 class="file-input file-input-bordered file-input-sm w-56"
                 @change="
-                  (e: any) =>
-                    problem.assets!.aiVTuberACFiles = (Array.from(e.target.files ?? []) as File[]).filter((f) =>
-                      getAIFileExtensions().some((ext) => f.name.endsWith(ext)),
-                    )
+                  (e: any) => {
+                    const files = Array.from(e.target.files || []) as File[];
+                    const valid = files.filter((f) => {
+                      if (!assertFileSizeOK(f, 'AI VTuber AC file')) {
+                        (e.target as HTMLInputElement).value = ''; // 清空 input
+                        return false;
+                      }
+                      const allowed = getAIFileExtensions().some((ext) => f.name.endsWith(ext));
+                      if (!allowed) {
+                        alert(
+                          `Invalid file type '${f.name}'. Allowed extensions: ${getAIFileExtensions().join(', ')}`
+                        );
+                      }
+                      return allowed;
+                    });
+
+                    problem.assets!.aiVTuberACFiles = valid;
+
+                    if (valid.length === 0 && files.length > 0) {
+                      alert('No valid files uploaded.');
+                      (e.target as HTMLInputElement).value = '';
+                    }
+                  }
                 "
               />
               <label class="label">
@@ -422,7 +442,16 @@ watch(localMode, (newMode) => {
                 type="file"
                 accept=".zip"
                 class="file-input file-input-bordered"
-                @change="(e: any) => (problem.assets!.localServiceZip = e.target.files?.[0] || null)"
+                @change="
+                  (e: any) => {
+                    const file = e.target.files?.[0];
+                    if (file && !assertFileSizeOK(file, 'checker.py')) {
+                      e.target.value = '';
+                      return;
+                    }
+                    problem.assets!.localServiceZip = file || null;
+                  }
+                "
               />
             </div>
           </div>

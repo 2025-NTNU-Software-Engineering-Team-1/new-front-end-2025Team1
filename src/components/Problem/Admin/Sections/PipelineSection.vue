@@ -2,6 +2,7 @@
 import { onMounted, inject, Ref, ref, watch } from "vue";
 import MultiStringInput from "../Controls/MultiStringInput.vue";
 import api from "@/models/api";
+import { assertFileSizeOK } from "@/utils/checkFileSize";
 
 const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
 
@@ -502,7 +503,16 @@ function getAllowedFileExtensions(): string[] {
                   type="file"
                   accept=".py"
                   class="file-input file-input-bordered file-input-sm w-56"
-                  @change="(e: any) => (problem.assets!.checkerPy = e.target.files?.[0] || null)"
+                  @change="
+                    (e: any) => {
+                      const file = e.target.files?.[0];
+                      if (file && !assertFileSizeOK(file, 'Custom Checker')) {
+                        e.target.value = '';
+                        return;
+                      }
+                      problem.assets!.checkerPy = file || null;
+                    }
+                  "
                 />
               </div>
             </div>
@@ -530,7 +540,16 @@ function getAllowedFileExtensions(): string[] {
                   type="file"
                   accept=".py"
                   class="file-input file-input-bordered file-input-sm w-56"
-                  @change="(e: any) => (problem.assets!.checkerPy = e.target.files?.[0] || null)"
+                  @change="
+                    (e: any) => {
+                      const file = e.target.files?.[0];
+                      if (file && !assertFileSizeOK(file, 'Custom checker')) {
+                        e.target.value = '';
+                        return;
+                      }
+                      problem.assets!.checkerPy = file || null;
+                    }
+                  "
                 />
               </div>
             </div>
@@ -543,7 +562,16 @@ function getAllowedFileExtensions(): string[] {
               type="file"
               accept=".zip"
               class="file-input file-input-bordered file-input-sm w-56"
-              @change="(e: any) => (problem.assets!.makefileZip = e.target.files?.[0] || null)"
+              @change="
+                (e: any) => {
+                  const file = e.target.files?.[0];
+                  if (file && !assertFileSizeOK(file, 'makefileZip')) {
+                    e.target.value = '';
+                    return;
+                  }
+                  problem.assets!.makefileZip = file || null;
+                }
+              "
             />
           </div>
         </div>
@@ -575,7 +603,16 @@ function getAllowedFileExtensions(): string[] {
                   type="file"
                   accept=".py"
                   class="file-input file-input-bordered file-input-sm w-56"
-                  @change="(e: any) => (problem.assets!.checkerPy = e.target.files?.[0] || null)"
+                  @change="
+                    (e: any) => {
+                      const file = e.target.files?.[0];
+                      if (file && !assertFileSizeOK(file, 'checkerPy')) {
+                        e.target.value = '';
+                        return;
+                      }
+                      problem.assets!.checkerPy = file || null;
+                    }
+                  "
                 />
               </div>
             </div>
@@ -601,11 +638,17 @@ function getAllowedFileExtensions(): string[] {
                     @change="
                       (e: any) => {
                         const file = (e.target.files as FileList)?.[0] || null;
-                        // 僅當符合副檔名才塞入
                         if (file && getAllowedFileExtensions().some((ext) => file.name.endsWith(ext))) {
+                          if (!assertFileSizeOK(file, 'teacherFile')) {
+                            (e.target as HTMLInputElement).value = '';
+                            problem.assets!.teacherFile = null;
+                            return;
+                          }
+
                           problem.assets!.teacherFile = file;
                         } else {
                           problem.assets!.teacherFile = null;
+                          (e.target as HTMLInputElement).value = '';
                         }
                       }
                     "
@@ -638,7 +681,16 @@ function getAllowedFileExtensions(): string[] {
               type="file"
               accept=".py"
               class="file-input file-input-bordered file-input-sm w-56"
-              @change="(e: any) => (problem.assets!.scorePy = e.target.files?.[0] || null)"
+              @change="
+                (e: any) => {
+                  const file = e.target.files?.[0];
+                  if (file && !assertFileSizeOK(file, 'scorePy')) {
+                    e.target.value = '';
+                    return;
+                  }
+                  problem.assets!.scorePy = file || null;
+                }
+              "
             />
           </div>
         </div>

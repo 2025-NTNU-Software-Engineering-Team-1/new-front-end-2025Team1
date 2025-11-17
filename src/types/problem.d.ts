@@ -16,6 +16,9 @@ interface ProblemTestCase {
   timeLimit: number;
 }
 
+/* ------------------------------
+ * 基本 ProblemForm 定義
+ * ------------------------------ */
 interface ProblemForm {
   problemName: string;
   description: {
@@ -39,8 +42,15 @@ interface ProblemForm {
   };
   canViewStdout: boolean;
   defaultCode: string;
+
+  config: ProblemConfigExtra;
+  pipeline: ProblemPipeline;
+  assets: ProblemAssets;
 }
 
+/* ------------------------------
+ * API 回傳 Problem
+ * ------------------------------ */
 interface Problem {
   problemName: string;
   description: {
@@ -65,8 +75,13 @@ interface Problem {
   highScore: number;
   ACUser: number;
   submitter: number;
+
+  config?: ProblemConfigExtra;
 }
 
+/* ------------------------------
+ * 題目列表 & 統計
+ * ------------------------------ */
 interface ProblemListItem {
   problemId: number;
   problemName: string;
@@ -78,7 +93,6 @@ interface ProblemListItem {
   quota: number;
   submitCount: number;
 }
-
 type ProblemList = ProblemListItem[];
 
 interface ProblemStats {
@@ -99,3 +113,82 @@ interface MossReport {
 
 type LangOption = { value: number; text: string; mask: number };
 type ProblemUpdater = <K extends keyof ProblemForm>(key: K, value: ProblemForm[K]) => void;
+
+type AcceptedFormat = "code" | "zip";
+type ExecutionMode = "general" | "functionOnly" | "interactive";
+type ArtifactCollection = "compiledBinary" | "zip";
+
+/* ===========================================================
+ * CONFIG (設定)
+ * =========================================================== */
+interface ProblemConfigExtra {
+  trialMode: boolean;
+  aiVTuber: boolean;
+  acceptedFormat: AcceptedFormat;
+  maxStudentZipSizeMB?: number;
+
+  // AI VTuber
+  aiVTuberMaxToken?: number;
+  aiVTuberMode?: "guided" | "unlimited";
+
+  // Network Access Restriction
+  networkAccessRestriction?: {
+    enabled: boolean;
+    firewallExtranet?: {
+      enabled: boolean;
+      whitelist: string[];
+      blacklist: string[];
+    };
+    connectWithLocal?: {
+      enabled: boolean;
+      whitelist: string[];
+      blacklist: string[];
+      localServiceZip?: File | null;
+    };
+  };
+
+  artifactCollection: ArtifactCollection[];
+}
+
+/* ===========================================================
+ * PIPELINE
+ * =========================================================== */
+interface ProblemPipeline {
+  fopen: boolean;
+  fwrite: boolean;
+  executionMode: ExecutionMode;
+  customChecker: boolean;
+  teacherFirst?: boolean;
+
+  scoringScript?: { custom: boolean }; // Custom py-only scorer
+  staticAnalysis?: {
+    libraryRestrictions?: {
+      enabled: boolean;
+      whitelist: {
+        syntax: string[];
+        imports: string[];
+        headers: string[];
+        functions: string[];
+      };
+      blacklist: {
+        syntax: string[];
+        imports: string[];
+        headers: string[];
+        functions: string[];
+      };
+    };
+  };
+}
+
+/* ===========================================================
+ * ASSETS
+ * =========================================================== */
+interface ProblemAssets {
+  aiVTuberACFiles?: File[] | null;
+  checkerPy?: File | null;
+  makefileZip?: File | null;
+  teacherFile?: File | null;
+  scorePy?: File | null;
+  localServiceZip?: File | null;
+  testdataZip?: File | null;
+}

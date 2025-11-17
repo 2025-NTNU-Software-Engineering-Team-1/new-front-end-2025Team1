@@ -8,12 +8,10 @@ export const fetcher = axios.create({
 });
 
 fetcher.interceptors.response.use(
-  (response) => {
-    return {
-      ...response,
-      ...response.data,
-    };
-  },
+  (response) => ({
+    ...response,
+    ...response.data,
+  }),
   (error) => {
     const global = useGlobal();
     if (error?.response?.status >= 500) {
@@ -36,21 +34,18 @@ const Auth = {
 };
 
 const Problem = {
+  // basic CRUD
   create: (body: ProblemForm) => fetcher.post("/problem/manage", body),
-  getTestCaseUrl: (problemId: number) => `${fetcher.defaults.baseURL}/problem/${problemId}/testcase`,
   modify: (id: string | number, body: ProblemForm) => fetcher.put(`/problem/manage/${id}`, body),
+  delete: (id: string | number) => fetcher.delete(`/problem/manage/${id}`),
+
+  // testcase uploads
   modifyTestdata: (id: string | number, body: FormData) =>
     fetcher.put(`/problem/manage/${id}`, body, {
       headers: { "Content-Type": "multipart/form-data" },
     }),
-  delete: (id: string | number) => fetcher.delete(`/problem/manage/${id}`),
-  initiateTestCaseUpload: (
-    problemId: number,
-    body: {
-      length: number;
-      partSize: number;
-    },
-  ) =>
+  getTestCaseUrl: (problemId: number) => `${fetcher.defaults.baseURL}/problem/${problemId}/testcase`,
+  initiateTestCaseUpload: (problemId: number, body: { length: number; partSize: number }) =>
     fetcher.post<{ upload_id: string; urls: string[] }>(
       `/problem/${problemId}/initiate-test-case-upload`,
       body,
@@ -60,20 +55,47 @@ const Problem = {
     uploadId: string,
     parts: { ETag: string; PartNumber: number }[],
   ) => fetcher.post(`/problem/${problemId}/complete-test-case-upload`, { uploadId, parts }),
+
+  // save configuration + pipeline meta only (no files)
+  saveMeta: (problemId: number, body: { config?: ProblemConfigExtra; pipeline?: ProblemPipeline }) =>
+    fetcher.put(`/problem/${problemId}/meta`, body),
+
+  // unified asset upload (v2)
+  uploadAssetsV2: (problemId: number, formData: FormData) =>
+    fetcher.put(`/problem/${problemId}/assets`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }),
+
+  // static analysis options
+  getStaticAnalysisOptions: () =>
+    fetcher.get<{ librarySymbols: { imports: string[]; headers: string[]; functions: string[] } }>(
+      `/problem/static-analysis/options`,
+    ),
 };
 
 const Submission = {
   create: (body: { problemId: number; languageType: number }) =>
     fetcher.post<{ submissionId: string }>("/submission", body),
+
   modify: (id: string, body: FormData) =>
     fetcher.put(`/submission/${id}`, body, {
       headers: { "Content-Type": "multipart/form-data" },
     }),
+
   rejudge: (id: string) => fetcher.get(`/submission/${id}/rejudge`),
+
+  getArtifactUrl: (id: string, kind: "compiledBinary" | "zip", taskIndex?: number) => {
+    const base = (fetcher.defaults.baseURL || "").toString().replace(/\/$/, "");
+    const path =
+      taskIndex != null
+        ? `/submission/${id}/artifact/${kind}/${taskIndex}`
+        : `/submission/${id}/artifact/${kind}`;
+    return `${base}${path}`;
+  },
 };
 
 const Copycat = {
-  detect: (body: { course: string; problemId: number; studentNicknames: { [k: string]: string } }) =>
+  detect: (body: { course: string; problemId: number; studentNicknames: Record<string, string> }) =>
     fetcher.post("/copycat", body),
 };
 

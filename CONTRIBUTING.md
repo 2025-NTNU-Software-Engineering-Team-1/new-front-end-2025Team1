@@ -16,9 +16,10 @@ If you'd like to contribute code to our project, please follow these steps:
 4. We recommend using VSCode & Volar for development.
 5. Use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) to write your commit message.
 6. Open a branch to commit your changes, using `feat/`, `fix/`, `refactor/` prefix to name your branch.
-7. For contributing test case, we currently have end-to-end testing installed with playwright, checkout the test commands in README.md. 
+7. For contributing test case, we currently have end-to-end testing installed with playwright, checkout the test commands in README.md.
 
 ## Getting Help
+
 If you need help or have questions while contributing to our project, please file an issue on our repository.
 
 Thank you for your contributions! We appreciate your help in making our project better.

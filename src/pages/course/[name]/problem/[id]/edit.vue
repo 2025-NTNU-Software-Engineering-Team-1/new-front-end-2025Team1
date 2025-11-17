@@ -5,13 +5,13 @@ import { useAxios } from "@vueuse/integrations/useAxios";
 import { useRoute, useRouter } from "vue-router";
 import api, { fetcher } from "@/models/api";
 import axios from "axios";
-import ProblemForm from "@/components/Problem/ProblemForm.vue";
+import AdminProblemForm from "@/components/Problem/Admin/AdminProblemForm.vue";
 
 const route = useRoute();
 const router = useRouter();
 useTitle(`Edit Problem - ${route.params.id} - ${route.params.name} | Normal OJ`);
 
-const formElement = ref<InstanceType<typeof ProblemForm>>();
+const formElement = ref<InstanceType<typeof AdminProblemForm>>();
 
 const {
   data: problem,
@@ -20,26 +20,93 @@ const {
 } = useAxios<Problem>(`/problem/view/${route.params.id}`, fetcher);
 
 const edittingProblem = ref<ProblemForm>();
+
 watchEffect(() => {
-  if (problem.value) {
-    edittingProblem.value = {
-      ...problem.value,
-      testCaseInfo: {
-        language: 0,
-        fillInTemplate: "",
-        tasks: problem.value.testCase.slice(),
+  if (!problem.value) return;
+
+  edittingProblem.value = {
+    ...problem.value,
+    testCaseInfo: {
+      language: 0,
+      fillInTemplate: "",
+      tasks: problem.value.testCase.slice(),
+    },
+    config: problem.value.config || {
+      trialMode: false,
+      aiVTuber: false,
+      aiVTuberMaxToken: 0,
+      aiVTuberMode: "guided",
+      acceptedFormat: "code",
+      maxStudentZipSizeMB: 50,
+      networkAccessRestriction: {
+        enabled: false,
+        firewallExtranet: { enabled: false, whitelist: [], blacklist: [] },
+        connectWithLocal: {
+          enabled: false,
+          whitelist: [],
+          blacklist: [],
+          localServiceZip: null,
+        },
       },
-    };
-  }
+      artifactCollection: [],
+    },
+    pipeline: {
+      fopen: (problem.value as any)?.pipeline?.fopen ?? false,
+      fwrite: (problem.value as any)?.pipeline?.fwrite ?? false,
+      executionMode: (problem.value as any)?.pipeline?.executionMode || "general",
+      customChecker: (problem.value as any)?.pipeline?.customChecker ?? false,
+      teacherFirst: (problem.value as any)?.pipeline?.teacherFirst ?? false,
+      staticAnalysis: {
+        libraryRestrictions: {
+          enabled: (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.enabled ?? false,
+          whitelist: {
+            syntax:
+              (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.whitelist?.syntax || [],
+            imports:
+              (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.whitelist?.imports || [],
+            headers:
+              (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.whitelist?.headers || [],
+            functions:
+              (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.whitelist?.functions ||
+              [],
+          },
+          blacklist: {
+            syntax:
+              (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.blacklist?.syntax || [],
+            imports:
+              (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.blacklist?.imports || [],
+            headers:
+              (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.blacklist?.headers || [],
+            functions:
+              (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.blacklist?.functions ||
+              [],
+          },
+        },
+      },
+      scoringScript: (problem.value as any)?.pipeline?.scoringScript || { custom: false },
+    },
+    assets: (problem.value as any).assets || {
+      aiVTuberFiles: null,
+      checkerPy: null,
+      makefileZip: null,
+      teacherFile: null,
+      scorePy: null,
+      localServiceZip: null,
+      testdataZip: null,
+    },
+  } as ProblemForm;
 });
+
 function update<K extends keyof ProblemForm>(key: K, value: ProblemForm[K]) {
   if (!edittingProblem.value) return;
   edittingProblem.value[key] = value;
 }
-provide<Ref<ProblemForm | undefined>>("problem", edittingProblem);
-const testdata = ref<File | null>(null);
 
-const openPreview = ref<boolean>(false);
+provide<Ref<ProblemForm | undefined>>("problem", edittingProblem);
+
+const openPreview = ref(false);
+const openJSON = ref(false);
+
 const mockProblemMeta = {
   owner: "",
   highScore: 0,
@@ -48,70 +115,58 @@ const mockProblemMeta = {
   submitter: 0,
 };
 
-const openJSON = ref<boolean>(false);
-
 async function submit() {
   if (!edittingProblem.value || !formElement.value) return;
-
   formElement.value.isLoading = true;
   try {
-    await api.Problem.modify(route.params.id as string, edittingProblem.value);
+    const pid = Number(route.params.id);
 
-    if (testdata.value) {
-      await uploadTestCase();
-    }
+    const cfg = {
+      ...edittingProblem.value.config,
+      aiVTuber: edittingProblem.value.config.aiVTuber,
+      aiVTuberMaxToken: edittingProblem.value.config.aiVTuberMaxToken,
+      aiVTuberMode: edittingProblem.value.config.aiVTuberMode,
+    };
+    const pipe = { ...edittingProblem.value.pipeline };
+
+    const fd = new FormData();
+    fd.append(
+      "meta",
+      JSON.stringify({
+        config: cfg,
+        pipeline: pipe,
+      }),
+    );
+
+    const assets = edittingProblem.value.assets;
+    if (assets?.aiVTuberACFiles) assets.aiVTuberACFiles.forEach((f) => fd.append("aiVTuberFiles", f));
+    if (assets?.testdataZip) fd.append("case", assets.testdataZip);
+    if (assets?.checkerPy) fd.append("checker.py", assets.checkerPy);
+    if (assets?.makefileZip) fd.append("makefile.zip", assets.makefileZip);
+    if (assets?.teacherFile) fd.append("Teacher_file", assets.teacherFile);
+    if (assets?.scorePy) fd.append("score.py", assets.scorePy);
+    if (assets?.localServiceZip) fd.append("local_service.zip", assets.localServiceZip);
+
+    await api.Problem.modify(pid, edittingProblem.value);
+    await api.Problem.uploadAssetsV2(pid, fd);
+
     router.push(`/course/${route.params.name}/problem/${route.params.id}`);
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.data?.message) {
-      formElement.value.errorMsg = error.response.data.message;
-    } else {
-      formElement.value.errorMsg = "Unknown error occurred :(";
-    }
+    formElement.value.errorMsg =
+      axios.isAxiosError(error) && error.response?.data?.message
+        ? error.response.data.message
+        : "Unknown error occurred :(";
     throw error;
   } finally {
     formElement.value.isLoading = false;
   }
 }
 
-async function uploadTestCase() {
-  const problemId = Number.parseInt(route.params.id as string, 10);
-  const length = testdata.value?.size;
-  if (!length) {
-    console.error("No file to upload or file size is 0");
-    return;
-  }
-  const partSize = 5 * 1024 * 1024;
-  const uploadInfo = (
-    await api.Problem.initiateTestCaseUpload(problemId, {
-      length,
-      partSize,
-    })
-  ).data;
-
-  const parts = [];
-  const partCount = uploadInfo.urls.length;
-  for (let i = 0; i < partCount; i++) {
-    const start = i * partSize;
-    const end = Math.min((i + 1) * partSize, length);
-    const part = testdata.value?.slice(start, end);
-    if (!part) {
-      console.error("Failed to slice file");
-      return;
-    }
-    const resp = await fetch(uploadInfo.urls[i], { method: "PUT", body: part });
-    parts.push({
-      ETag: resp.headers.get("ETag")!,
-      PartNumber: i + 1,
-    });
-  }
-
-  await api.Problem.completeTestCaseUpload(problemId, uploadInfo.upload_id, parts);
-}
-
 async function discard() {
   if (!confirm("Are u sure?")) return;
   router.push(`/course/${route.params.name}/problems`);
 }
+
 async function delete_() {
   if (!formElement.value) return;
   formElement.value.isLoading = true;
@@ -120,11 +175,10 @@ async function delete_() {
     await api.Problem.delete(route.params.id as string);
     router.push(`/course/${route.params.name}/problems`);
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.data?.message) {
-      formElement.value.errorMsg = error.response.data.message;
-    } else {
-      formElement.value.errorMsg = "Unknown error occurred :(";
-    }
+    formElement.value.errorMsg =
+      axios.isAxiosError(error) && error.response?.data?.message
+        ? error.response.data.message
+        : "Unknown error occurred :(";
     throw error;
   } finally {
     formElement.value.isLoading = false;
@@ -155,12 +209,10 @@ async function delete_() {
         </div>
 
         <data-status-wrapper :error="fetchError" :is-loading="isFetching">
-          <template #loading>
-            <skeleton-card />
-          </template>
+          <template #loading><skeleton-card /></template>
           <template #data>
             <template v-if="edittingProblem">
-              <problem-form ref="formElement" v-model:testdata="testdata" @update="update" @submit="submit" />
+              <admin-problem-form ref="formElement" @update="update" @submit="submit" />
 
               <div class="divider" />
 
@@ -186,7 +238,9 @@ async function delete_() {
                 <input v-model="openJSON" type="checkbox" class="toggle" />
               </div>
 
-              <pre v-if="openJSON">{{ JSON.stringify(edittingProblem, null, 2) }}</pre>
+              <pre v-if="openJSON" class="whitespace-pre-wrap rounded bg-base-200 p-2"
+                >{{ JSON.stringify(edittingProblem, null, 2) }}
+              </pre>
 
               <div class="mb-[50%]" />
             </template>

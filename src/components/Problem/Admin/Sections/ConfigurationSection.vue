@@ -2,7 +2,7 @@
 import { inject, Ref, ref, watch, nextTick } from "vue";
 import LanguageMultiSelect from "../../Forms/LanguageMultiSelect.vue";
 import MultiStringInput from "../Controls/MultiStringInput.vue";
-import { assertFileSizeOK } from "@/utils/checkFileSize";
+import { assertFileSizeOK, validateFilesForAIAC } from "@/utils/checkFileSize";
 
 const rawProblem = inject<Ref<ProblemForm> | undefined>("problem");
 if (!rawProblem || !rawProblem.value) throw new Error("ConfigurationSection requires problem injection");
@@ -217,25 +217,10 @@ watch(localMode, (newMode) => {
                 @change="
                   (e: any) => {
                     const files = Array.from(e.target.files || []) as File[];
-                    const valid = files.filter((f) => {
-                      if (!assertFileSizeOK(f, 'AI VTuber AC file')) {
-                        (e.target as HTMLInputElement).value = ''; // 清空 input
-                        return false;
-                      }
-                      const allowed = getAIFileExtensions().some((ext) => f.name.endsWith(ext));
-                      if (!allowed) {
-                        alert(
-                          `Invalid file type '${f.name}'. Allowed extensions: ${getAIFileExtensions().join(', ')}`
-                        );
-                      }
-                      return allowed;
-                    });
-
+                    const valid = validateFilesForAIAC(files, getAIFileExtensions());
                     problem.assets!.aiVTuberACFiles = valid;
-
-                    if (valid.length === 0 && files.length > 0) {
-                      alert('No valid files uploaded.');
-                      (e.target as HTMLInputElement).value = '';
+                    if (valid.length === 0) {
+                      (e.target as HTMLInputElement).value = ''; 
                     }
                   }
                 "

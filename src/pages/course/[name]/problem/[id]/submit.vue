@@ -82,11 +82,24 @@ async function submit() {
   if (!isFormCorrect) return;
   form.isLoading = true;
   form.isSubmitError = false;
+
   try {
+    if (acceptedFormat.value === "code") {
+      const maxGB = 1;
+      const codeBytes = new Blob([form.code], { type: "text/plain" }).size;
+      const maxBytes = maxGB * 1024 * 1024 * 1024;
+
+      if (codeBytes > maxBytes) {
+        const codeSizeMB = (codeBytes / 1024 / 1024).toFixed(2);
+        window.alert(`Your code is too large (${codeSizeMB} MB). Maximum allowed is ${maxGB} GB.`);
+        form.isLoading = false;
+        return;
+      }
+    }
+
     const formData = new FormData();
 
     if (acceptedFormat.value === "code") {
-      // 將貼上的程式碼包成 zip 後上傳（延用後端原接口）
       const blobWriter = new BlobWriter("application/zip");
       const writer = new ZipWriter(blobWriter);
       await writer.add(`main${LANGUAGE_EXTENSION[form.lang]}`, new TextReader(form.code));
@@ -94,24 +107,20 @@ async function submit() {
       const blob = await blobWriter.getData();
       formData.append("code", blob);
     } else {
-      // 直接上傳使用者選擇的 zip 檔
       if (!form.zip) throw new Error("No zip file selected");
 
-      // ---- 依照教師設定的 maxStudentZipSizeMB ----
-      const limitMB = (problem.value as any)?.config?.maxZipSizeMB ?? 50; // fallback 50
+      // 教師給的 ZIP 限制
+      const limitMB = (problem.value as any)?.config?.maxStudentZipSizeMB ?? 50;
       const maxSizeBytes = limitMB * 1024 * 1024;
-
       if (form.zip.size > maxSizeBytes) {
-        alert(
+        window.alert(
           `The uploaded file is too large (${(form.zip.size / 1024 / 1024).toFixed(
             2,
-          )} MB). Max allowed: ${limitMB} MB.`,
+          )} MB). Max allowed: ${limitMB} MB.`,
         );
         form.isLoading = false;
         return;
       }
-      // -------------------------------------------
-
       formData.append("code", form.zip);
     }
 

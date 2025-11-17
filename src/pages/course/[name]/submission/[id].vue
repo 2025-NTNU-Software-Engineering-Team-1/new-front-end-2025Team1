@@ -31,6 +31,14 @@ const {
   immediate: false,
 });
 
+// === Static Analysis Report ===
+const {
+  data: SAReport,
+  error: SAError,
+  isLoading: SALoading,
+  execute: fetchSAReport,
+} = useAxios<{ report: string }>("", fetcher, { immediate: false });
+
 // 題目資料，用來判斷 artifactCollection
 const {
   data: problem,
@@ -42,6 +50,13 @@ const {
 watchEffect(() => {
   if (submission.value && !problem.value) {
     fetchProblem(`/problem/view/${submission.value.problemId}`);
+  }
+
+  const hasStaticAnalysis =
+    (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.enabled === true;
+
+  if (hasStaticAnalysis && submission.value) {
+    fetchSAReport(`/submission/${submission.value.submissionId}/static-analysis`);
   }
 });
 
@@ -279,6 +294,42 @@ function downloadTaskZip(taskIndex: number) {
             </div>
             <div class="my-1" />
             <code-editor v-model="submission.code" readonly />
+          </div>
+        </div>
+
+        <!-- === Static Analysis Report === -->
+        <div class="my-6" />
+
+        <div class="card min-w-full rounded-none">
+           
+          <div class="card-body p-0">
+               
+            <div class="card-title md:text-xl lg:text-2xl">      Static Analysis Report    </div>
+
+               
+            <div class="my-2" />
+               
+            <data-status-wrapper :error="SAError" :is-loading="SALoading">
+                    <template #loading>         <ui-spinner />       </template>      
+              <template #data>
+                       
+                <div v-if="SAReport?.report && SAReport.report.trim()">
+                           
+                  <!-- 若後端回傳 markdown / text，可直接顯示 -->
+                           
+                  <pre class="whitespace-pre-wrap rounded bg-base-200 p-2">
+                    {{ SAReport.report }}
+                  </pre
+                  >
+                         
+                </div>
+                       
+                <div v-else>          <span class="italic opacity-70">Empty</span>        </div>
+                     
+              </template>
+                 
+            </data-status-wrapper>
+             
           </div>
         </div>
       </div>

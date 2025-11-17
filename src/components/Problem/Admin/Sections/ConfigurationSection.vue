@@ -212,7 +212,7 @@ watch(localMode, (newMode) => {
                 type="file"
                 multiple
                 :accept="getAIFileExtensions().join(',')"
-                class="file-input file-input-bordered"
+                class="file-input file-input-bordered file-input-sm w-56"
                 @change="
                   (e: any) =>
                     problem.assets!.aiVTuberACFiles = (Array.from(e.target.files ?? []) as File[]).filter((f) =>
@@ -229,7 +229,7 @@ watch(localMode, (newMode) => {
 
             <div class="form-control w-full max-w-xs">
               <label class="label mb-1"><span class="label-text">AI Conversation Mode</span></label>
-              <select class="select select-bordered w-full max-w-xs" v-model="problem.config!.aiVTuberMode">
+              <select class="select select-bordered select-sm w-56" v-model="problem.config!.aiVTuberMode">
                 <option value="guided">Guided Mode</option>
                 <option value="unlimited">Unlimited Mode</option>
               </select>
@@ -505,9 +505,9 @@ watch(localMode, (newMode) => {
   transform: translateY(-4px) scale(0.95);
 }
 .fly-digit {
-  font-size: 2.4rem;
+  font-size: 1.6rem;
   font-family: "Menlo", "Consolas", monospace;
-  font-weight: 900;
+  font-weight: 700;
   color: #fff;
   text-shadow: -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 3px 3px 0 #000;
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.6));

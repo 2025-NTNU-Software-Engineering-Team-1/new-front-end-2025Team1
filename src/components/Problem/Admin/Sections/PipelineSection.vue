@@ -83,7 +83,7 @@ const headerMode = ref<"whitelist" | "blacklist">("whitelist");
 const functionMode = ref<"whitelist" | "blacklist">("whitelist");
 
 // ===============================================
-// 當 syntaxMode 切換時，清空另一方的清單
+// 當 syntaxMode 切換時,清空另一方的清單
 // ===============================================
 watch(syntaxMode, (newMode) => {
   const oppositeMode = newMode === "whitelist" ? "blacklist" : "whitelist";
@@ -116,6 +116,19 @@ watch(
     allowHeaders.value = Boolean(lang & 1 || lang & 2); // c or cpp
   },
   { immediate: true },
+);
+
+// Execution Mode
+watch(
+  () => problem.value.pipeline!.executionMode,
+  (newMode) => {
+    if (newMode === "interactive") {
+      problem.value.pipeline!.customChecker = false;
+      if (problem.value.assets) {
+        problem.value.assets.checkerPy = null;
+      }
+    }
+  },
 );
 
 // ===============================================
@@ -434,7 +447,7 @@ function getAllowedFileExtensions(): string[] {
     <div class="form-control col-span-1 md:col-span-2">
       <div class="rounded-lg border border-gray-400 p-4">
         <label class="label mb-2">
-          <span class="label-text">Execution mode</span>
+          <span class="label-text">Execution Mode</span>
         </label>
 
         <!-- radio options -->
@@ -468,88 +481,140 @@ function getAllowedFileExtensions(): string[] {
           </label>
         </div>
 
-        <!-- Custom checker -->
-        <div class="form-control mb-3">
-          <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <label class="label mb-0 cursor-pointer justify-start gap-x-2">
-              <span class="label-text flex items-center gap-1">
-                <span>Custom Checker</span>
-                <i-uil-lock-alt
-                  v-if="problem.pipeline!.executionMode === 'interactive'"
-                  class="text-error"
-                  title="Disabled in interactive mode"
-                />
-              </span>
-              <input
-                type="checkbox"
-                class="toggle toggle-sm"
-                v-model="problem.pipeline!.customChecker"
-                :disabled="problem.pipeline!.executionMode === 'interactive'"
-              />
-            </label>
+        <!-- General mode fields -->
+        <div
+          v-if="problem.pipeline!.executionMode === 'general'"
+          class="rounded-lg border border-gray-400 p-4"
+        >
+          <!-- Custom checker -->
+          <div class="form-control">
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+              <label class="label mb-0 cursor-pointer justify-start gap-x-2">
+                <span class="label-text flex items-center gap-1">
+                  <span>Custom Checker</span>
+                </span>
+                <input type="checkbox" class="toggle toggle-sm" v-model="problem.pipeline!.customChecker" />
+              </label>
 
-            <div
-              v-if="problem.pipeline!.customChecker && problem.pipeline!.executionMode !== 'interactive'"
-              class="flex items-center gap-x-2"
-            >
-              <span class="text-sm opacity-80">Upload checker.py</span>
-              <input
-                type="file"
-                accept=".py"
-                class="file-input file-input-bordered file-input-sm w-56"
-                @change="(e: any) => (problem.assets!.checkerPy = e.target.files?.[0] || null)"
-              />
+              <div v-if="problem.pipeline!.customChecker" class="flex items-center gap-x-2">
+                <span class="text-sm opacity-80">Upload checker.py</span>
+                <input
+                  type="file"
+                  accept=".py"
+                  class="file-input file-input-bordered file-input-sm w-56"
+                  @change="(e: any) => (problem.assets!.checkerPy = e.target.files?.[0] || null)"
+                />
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- functionOnly makefile.zip -->
-        <div v-if="problem.pipeline!.executionMode === 'functionOnly'" class="form-control mb-3">
-          <label class="label"><span class="label-text">Upload makefile.zip</span></label>
-          <input
-            type="file"
-            accept=".zip"
-            class="file-input file-input-bordered file-input-sm w-56"
-            @change="(e: any) => (problem.assets!.makefileZip = e.target.files?.[0] || null)"
-          />
-        </div>
-
-        <!-- interactive 模式 -->
+        <!-- functionOnly fields -->
         <div
-          v-if="problem.pipeline!.executionMode === 'interactive'"
-          class="form-control col-span-1 md:col-span-2"
+          v-if="problem.pipeline!.executionMode === 'functionOnly'"
+          class="rounded-lg border border-gray-400 p-4"
         >
-          <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <!-- 左：Teacher first -->
-            <label class="label mb-0 cursor-pointer justify-start gap-x-2">
-              <span class="label-text flex items-center gap-1">Teacher first</span>
-              <input type="checkbox" class="toggle toggle-sm" v-model="problem.pipeline!.teacherFirst" />
-            </label>
+          <!-- Custom checker -->
+          <div class="form-control mb-3">
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+              <label class="label mb-0 cursor-pointer justify-start gap-x-2">
+                <span class="label-text flex items-center gap-1">
+                  <span>Custom Checker</span>
+                </span>
+                <input type="checkbox" class="toggle toggle-sm" v-model="problem.pipeline!.customChecker" />
+              </label>
 
-            <!-- 右：Teacher_file -->
-            <div class="flex flex-col">
-              <div class="flex items-center gap-x-2">
-                <span class="text-sm opacity-80">Upload Teacher_file</span>
+              <div v-if="problem.pipeline!.customChecker" class="flex items-center gap-x-2">
+                <span class="text-sm opacity-80">Upload checker.py</span>
                 <input
                   type="file"
-                  :accept="getAllowedFileExtensions().join(',')"
+                  accept=".py"
                   class="file-input file-input-bordered file-input-sm w-56"
-                  @change="
-                    (e: any) => {
-                      const file = (e.target.files as FileList)?.[0] || null;
-                      // 僅當符合副檔名才塞入
-                      if (file && getAllowedFileExtensions().some((ext) => file.name.endsWith(ext))) {
-                        problem.assets!.teacherFile = file;
-                      } else {
-                        problem.assets!.teacherFile = null;
-                      }
-                    }
-                  "
+                  @change="(e: any) => (problem.assets!.checkerPy = e.target.files?.[0] || null)"
                 />
               </div>
-              <span class="label-text-alt mt-1 text-sm opacity-70">
-                Allowed: {{ getAllowedFileExtensions().join(", ") }}
-              </span>
+            </div>
+          </div>
+
+          <!-- makefile.zip -->
+          <div class="form-control">
+            <label class="label"><span class="label-text">Upload makefile.zip</span></label>
+            <input
+              type="file"
+              accept=".zip"
+              class="file-input file-input-bordered file-input-sm w-56"
+              @change="(e: any) => (problem.assets!.makefileZip = e.target.files?.[0] || null)"
+            />
+          </div>
+        </div>
+
+        <!-- interactive fields -->
+        <div
+          v-if="problem.pipeline!.executionMode === 'interactive'"
+          class="rounded-lg border border-gray-400 p-4"
+        >
+          <!-- Custom checker (disabled in interactive) -->
+          <div class="form-control mb-3">
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+              <label class="label mb-0 cursor-pointer justify-start gap-x-2">
+                <span class="label-text flex items-center gap-1">
+                  <span>Custom Checker</span>
+                  <i-uil-lock-alt class="text-error" title="Disabled in interactive mode" />
+                </span>
+                <input
+                  type="checkbox"
+                  class="toggle toggle-sm"
+                  v-model="problem.pipeline!.customChecker"
+                  disabled
+                />
+              </label>
+
+              <div v-if="problem.pipeline!.customChecker" class="flex items-center gap-x-2">
+                <span class="text-sm opacity-80">Upload checker.py</span>
+                <input
+                  type="file"
+                  accept=".py"
+                  class="file-input file-input-bordered file-input-sm w-56"
+                  @change="(e: any) => (problem.assets!.checkerPy = e.target.files?.[0] || null)"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Teacher first & Teacher_file -->
+          <div class="form-control">
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+              <!-- 左：Teacher first -->
+              <label class="label mb-0 cursor-pointer justify-start gap-x-2">
+                <span class="label-text flex items-center gap-1">Teacher first</span>
+                <input type="checkbox" class="toggle toggle-sm" v-model="problem.pipeline!.teacherFirst" />
+              </label>
+
+              <!-- 右：Teacher_file -->
+              <div class="flex flex-col">
+                <div class="flex items-center gap-x-2">
+                  <span class="text-sm opacity-80">Upload Teacher_file</span>
+                  <input
+                    type="file"
+                    :accept="getAllowedFileExtensions().join(',')"
+                    class="file-input file-input-bordered file-input-sm w-56"
+                    @change="
+                      (e: any) => {
+                        const file = (e.target.files as FileList)?.[0] || null;
+                        // 僅當符合副檔名才塞入
+                        if (file && getAllowedFileExtensions().some((ext) => file.name.endsWith(ext))) {
+                          problem.assets!.teacherFile = file;
+                        } else {
+                          problem.assets!.teacherFile = null;
+                        }
+                      }
+                    "
+                  />
+                </div>
+                <span class="label-text-alt mt-1 text-sm opacity-70">
+                  Allowed: {{ getAllowedFileExtensions().join(", ") }}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -563,13 +628,16 @@ function getAllowedFileExtensions(): string[] {
           <span class="label-text">Custom Scoring Script</span>
           <input type="checkbox" class="toggle" v-model="(problem as any).pipeline.scoringScript.custom" />
         </label>
-        <div v-if="(problem as any).pipeline.scoringScript?.custom" class="mt-2">
+        <div
+          v-if="(problem as any).pipeline.scoringScript?.custom"
+          class="mt-3 rounded-lg border border-gray-400 p-4"
+        >
           <div class="form-control">
             <label class="label"><span class="label-text">Upload score.py</span></label>
             <input
               type="file"
               accept=".py"
-              class="file-input file-input-bordered"
+              class="file-input file-input-bordered file-input-sm w-56"
               @change="(e: any) => (problem.assets!.scorePy = e.target.files?.[0] || null)"
             />
           </div>

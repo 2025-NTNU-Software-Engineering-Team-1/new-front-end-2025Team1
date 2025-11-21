@@ -26,6 +26,10 @@ const navs = [
     name: t("components.courseSideBar.submissions"),
     path: "/submissions",
   },
+  {
+    name: t("components.courseSideBar.discussion"),
+    path: "/discussion",
+  },
   ...(session.isAdmin
     ? [
         {

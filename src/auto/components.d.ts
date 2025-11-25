@@ -28,6 +28,7 @@ declare module '@vue/runtime-core' {
     IUilChartLine: typeof import('~icons/uil/chart-line')['default']
     IUilCheck: typeof import('~icons/uil/check')['default']
     IUilCheckCircle: typeof import('~icons/uil/check-circle')['default']
+    IUilCommentAltSlash: typeof import('~icons/uil/comment-alt-slash')['default']
     IUilConstructor: typeof import('~icons/uil/constructor')['default']
     IUilEdit: typeof import('~icons/uil/edit')['default']
     IUilExclamationTriangle: typeof import('~icons/uil/exclamation-triangle')['default']

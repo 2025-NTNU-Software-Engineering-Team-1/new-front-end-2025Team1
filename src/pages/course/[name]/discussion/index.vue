@@ -68,7 +68,7 @@ const filtered = computed(() => {
                   class="btn md:btn-md lg:btn-lg"
                   :to="`/course/${$route.params.name}/discussion/Problems`"
                 >
-                  <i-uil-file-upload-alt /> {{ $t("discussion.problems") }}
+                  <i-uil-file-upload-alt /> {{ $t("discussion.problems.title") }}
                 </router-link>
               </div>
             </div>

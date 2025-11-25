@@ -192,7 +192,6 @@
   "discussion":{
     "placeholder":"Search discussions...",
     "post":"Post",
-    "problems":"Problems",
     "hot":"Hot",
     "new":"New",
     "create":{
@@ -217,6 +216,14 @@
       "likes":"{count} likes",
       "comments":"{count} comments",
       "views":"{count} views"
+    },
+    "problems":{
+      "title":"Problems",
+      "selectProblem":"Select a problem to view discussions",
+      "discussionCount":"{count} discussions",
+      "noDiscussions":"No discussions yet",
+      "backToProblems":"Back to Problems",
+      "backToDiscussion":"Back to Discussion"
     }
   },
   "components": {

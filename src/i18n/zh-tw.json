@@ -215,7 +215,6 @@
   "discussion":{
     "placeholder":"搜尋討論...",
     "post":"發文",
-    "problems":"題目",
     "hot":"熱門",
     "new":"最新",
     "create":{
@@ -240,6 +239,14 @@
       "likes":"{count} 個讚",
       "comments":"{count} 則留言",
       "views":"{count} 次觀看"
+    },
+    "problems":{
+      "title":"題目",
+      "selectProblem":"選擇題目以查看討論",
+      "discussionCount":"{count} 則討論",
+      "noDiscussions":"尚無討論",
+      "backToProblems":"返回題目列表",
+      "backToDiscussion":"返回討論區"
     }
   },
   "ann": {

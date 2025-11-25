@@ -9,6 +9,7 @@ export type Post = {
   comments: number;
   views: number;
   tags?: string[];
+  problemId?: string;
 };
 
 export const samplePosts: Post[] = [
@@ -49,3 +50,11 @@ export const samplePosts: Post[] = [
     tags: ['algorithm', 'python'],
   },
 ];
+
+export function addPost(p: Omit<Post, 'id' | 'time'> & { time?: string }) {
+  const id = String(Date.now());
+  const time = p.time ?? 'just now';
+  const newPost: Post = { ...p, id, time };
+  samplePosts.unshift(newPost);
+  return newPost;
+}

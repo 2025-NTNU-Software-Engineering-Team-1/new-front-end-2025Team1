@@ -190,9 +190,34 @@
     }
   },
   "discussion":{
-    "placeholder":"Search...",
+    "placeholder":"Search discussions...",
     "post":"Post",
-    "problems":"Problems"
+    "problems":"Problems",
+    "hot":"Hot",
+    "new":"New",
+    "create":{
+      "title":"Create Post",
+      "problem":"Problem",
+      "problemPlaceholder":"Select a problem",
+      "titleLabel":"Title",
+      "titlePlaceholder":"Enter title",
+      "contentLabel":"Content",
+      "contentPlaceholder":"Write your post content here...",
+      "submit":"Post",
+      "cancel":"Cancel"
+    },
+    "detail":{
+      "by":"By",
+      "comments":"Comments",
+      "noComments":"(No real comments — this is mock data.)",
+      "notFound":"Post not found.",
+      "mockContent":"This is mock content for post {id}. Replace with real API data later."
+    },
+    "card":{
+      "likes":"{count} likes",
+      "comments":"{count} comments",
+      "views":"{count} views"
+    }
   },
   "components": {
     "ann": {

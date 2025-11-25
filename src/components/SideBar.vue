@@ -84,7 +84,7 @@ const session = useSession();
       </side-bar-link>
     </li>
     <li>
-      <label class="btn btn-primary rounded-none p-2" @click="() => toggleDark()">
+      <label class="btn btn-primary rounded-none p-2" @click="toggleDark()">
         <i-uil-sun v-if="isDark" class="swap-on h-6 w-6" />
         <i-uil-moon v-else class="swap-off h-6 w-6" />
       </label>

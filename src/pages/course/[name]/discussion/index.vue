@@ -3,48 +3,7 @@ import { ref, computed } from "vue";
 import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import PostCard from "@/components/Discussion/PostCard.vue";
-type Post = {
-  id: string;
-  title: string;
-  excerpt: string;
-  author: string;
-  avatarColor?: string;
-  time: string;
-  createdAt?: string;
-  likes: number;
-  comments: number;
-  views: number;
-  tags?: string[];
-};
-
-const samplePosts: Post[] = [
-  {
-    id: "1",
-    title: "Welcome to the discussion",
-    excerpt: "This is a mock post used for development and testing.",
-    author: "Alice",
-    avatarColor: "#F97316",
-    time: "2025-01-01T12:00:00Z",
-    createdAt: "2025-01-01",
-    likes: 5,
-    comments: 2,
-    views: 120,
-    tags: ["welcome"],
-  },
-  {
-    id: "2",
-    title: "Problem with sample data",
-    excerpt: "Another mock post example.",
-    author: "Bob",
-    avatarColor: "#06B6D4",
-    time: "2025-02-01T09:30:00Z",
-    createdAt: "2025-02-01",
-    likes: 3,
-    comments: 1,
-    views: 45,
-    tags: ["bug"],
-  },
-];
+import { samplePosts, type Post } from "./mockData";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -64,82 +23,96 @@ const filtered = computed(() => {
 </script>
 
 <template>
-  <div class="px-4 py-6">
-    <!-- Header: search + actions -->
-    <div class="flex items-start gap-6">
-      <div class="flex-1">
-        <div class="flex items-center gap-4">
-          <div
-            class="flex h-12 w-full max-w-2xl items-center justify-between rounded-xl border bg-slate-200 px-4"
-          >
-            <input
-              v-model="query"
-              :placeholder="t('discussion.placeholder')"
-              class="w-full rounded-xl bg-transparent focus:outline-none"
-            />
-            <button class="ml-2 rounded-full p-2 hover:bg-gray-300">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path
-                  d="M11 6C13.7614 6 16 8.23858 16 11M16.6588 16.6549L21 21M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z"
-                  stroke="#000"
-                  stroke-width="1"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
+  <div class="card-container">
+    <div class="card min-w-full">
+      <div class="card-body">
+        <!-- Header: search + actions -->
+        <div class="flex items-start gap-6">
+          <div class="flex-1">
+            <div class="flex items-center gap-4">
+              <div class="relative max-w-2xl flex-1">
+                <input
+                  v-model="query"
+                  :placeholder="t('discussion.placeholder')"
+                  class="input input-bordered w-full pr-10"
                 />
-              </svg>
-            </button>
+                <button
+                  class="absolute right-2 top-1/2 -translate-y-1/2 transform rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-700"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="18"
+                    height="18"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M11 6C13.7614 6 16 8.23858 16 11M16.6588 16.6549L21 21M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              <div class="flex gap-4">
+                <router-link
+                  class="btn md:btn-md lg:btn-lg"
+                  :to="`/course/${$route.params.name}/discussion/Post`"
+                >
+                  <i-uil-file-upload-alt /> {{ $t("discussion.post") }}
+                </router-link>
+                <router-link
+                  class="btn md:btn-md lg:btn-lg"
+                  :to="`/course/${$route.params.name}/discussion/Problems`"
+                >
+                  <i-uil-file-upload-alt /> {{ $t("discussion.problems") }}
+                </router-link>
+              </div>
+            </div>
+
+            <!-- Tag area (mock) -->
+            <div class="mt-4 max-w-2xl">
+              <div class="card bg-base-200">
+                <div class="card-body p-4">
+                  <div class="mb-2 text-sm font-semibold">{{ t('discussion.hot') }}</div>
+                  <div class="flex gap-2">
+                    <span class="badge badge-outline">python</span>
+                    <span class="badge badge-outline">c</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="mt-6 border-b">
+              <nav class="flex gap-6">
+                <button
+                  :class="['pb-2', activeTab === 'hot' ? 'border-b-2 border-black' : 'text-gray-500']"
+                  @click="activeTab = 'hot'"
+                >
+                  {{ t('discussion.hot') }}
+                </button>
+                <button
+                  :class="['pb-2', activeTab === 'new' ? 'border-b-2 border-black' : 'text-gray-500']"
+                  @click="activeTab = 'new'"
+                >
+                  {{ t('discussion.new') }}
+                </button>
+              </nav>
+            </div>
+
+            <!-- Posts list -->
+            <div class="mt-4 space-y-4">
+              <template v-for="post in filtered" :key="post.id">
+                <router-link :to="`/course/${route.params.name}/discussion/${post.id}`" class="block">
+                  <PostCard :post="post" />
+                </router-link>
+              </template>
+            </div>
           </div>
-
-          <div class="flex gap-4">
-            <router-link
-              class="btn md:btn-md lg:btn-lg"
-              :to="`/course/${$route.params.name}/discussion/Post`"
-            >
-              <i-uil-file-upload-alt /> {{ $t("discussion.post") }}
-            </router-link>
-            <router-link
-              class="btn md:btn-md lg:btn-lg"
-              :to="`/course/${$route.params.name}/discussion/Problems`"
-            >
-              <i-uil-file-upload-alt /> {{ $t("discussion.problems") }}
-            </router-link>
-          </div>
-        </div>
-
-        <!-- Tag area (mock) -->
-        <div class="mt-4 max-w-2xl rounded-lg border bg-white p-4">
-          <div class="mb-2 text-sm font-semibold">Hot</div>
-          <div class="flex gap-2">
-            <span class="rounded-full bg-gray-200 px-2 py-1 text-sm">python</span>
-            <span class="rounded-full bg-gray-200 px-2 py-1 text-sm">c</span>
-          </div>
-        </div>
-
-        <!-- Tabs -->
-        <div class="mt-6 border-b">
-          <nav class="flex gap-6">
-            <button
-              :class="['pb-2', activeTab === 'hot' ? 'border-b-2 border-black' : 'text-gray-500']"
-              @click="activeTab = 'hot'"
-            >
-              Hot
-            </button>
-            <button
-              :class="['pb-2', activeTab === 'new' ? 'border-b-2 border-black' : 'text-gray-500']"
-              @click="activeTab = 'new'"
-            >
-              New
-            </button>
-          </nav>
-        </div>
-
-        <!-- Posts list -->
-        <div class="mt-4 space-y-4">
-          <template v-for="post in filtered" :key="post.id">
-            <router-link :to="`/course/${route.params.name}/discussion/${post.id}`" class="block">
-              <PostCard :post="post" />
-            </router-link>
-          </template>
         </div>
       </div>
     </div>

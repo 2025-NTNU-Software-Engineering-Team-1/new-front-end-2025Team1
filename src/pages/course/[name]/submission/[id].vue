@@ -37,7 +37,7 @@ const {
   error: SAError,
   isLoading: SALoading,
   execute: fetchSAReport,
-} = useAxios<{ report: string }>("", fetcher, { immediate: false });
+} = useAxios<{ report: string; reportUrl?: string }>("", fetcher, { immediate: false });
 
 // 題目資料，用來判斷 artifactCollection
 const {
@@ -313,19 +313,26 @@ function downloadTaskZip(taskIndex: number) {
                     <template #loading>         <ui-spinner />       </template>      
               <template #data>
                        
-                <div v-if="SAReport?.report && SAReport.report.trim()">
-                           
-                  <!-- 若後端回傳 markdown / text，可直接顯示 -->
-                           
-                  <pre class="whitespace-pre-wrap rounded bg-base-200 p-2">
-                    {{ SAReport.report }}
+                <div class="flex flex-col gap-2">
+                  <div class="flex items-center gap-2" v-if="SAReport?.reportUrl">
+                    <a class="btn btn-sm" :href="SAReport.reportUrl" target="_blank" rel="noopener">
+                      <i-uil-file-download class="mr-1" /> Download report
+                    </a>
+                  </div>
+                  <div v-if="SAReport?.report && SAReport.report.trim()">
+                            
+                    <!-- 若後端回傳 markdown / text，可直接顯示 -->
+                            
+                    <pre class="whitespace-pre-wrap rounded bg-base-200 p-2">
+               {{ SAReport.report }}
                   </pre
-                  >
+                    >
                          
+                  </div>
+                         
+                  <div v-else>          <span class="italic opacity-70">Empty</span>        </div>
                 </div>
-                       
-                <div v-else>          <span class="italic opacity-70">Empty</span>        </div>
-                     
+                   
               </template>
                  
             </data-status-wrapper>

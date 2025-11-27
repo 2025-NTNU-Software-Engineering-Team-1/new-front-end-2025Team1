@@ -66,6 +66,15 @@ const enableCompiledBinary = computed(
 const enableZipArtifact = computed(
   () => !!(problem.value as any)?.config?.artifactCollection?.includes("zip"),
 );
+const saStatusBadge = computed(() => {
+  if (!submission.value || submission.value.status === SUBMISSION_STATUS_CODE.PENDING) return null;
+  const status = submission.value.saStatus;
+  if (status === 0) return { label: "SA Passed", className: "badge-success" };
+  if (status === 1) return { label: "SA Failed", className: "badge-error" };
+  if (status === null) return { label: "SA Skipped", className: "badge-ghost" };
+  return null;
+});
+const saMessage = computed(() => submission.value?.saMessage || "");
 
 const { copy, copied, isSupported } = useClipboard();
 
@@ -301,18 +310,23 @@ function downloadTaskZip(taskIndex: number) {
         <div class="my-6" />
 
         <div class="card min-w-full rounded-none">
-           
           <div class="card-body p-0">
-               
-            <div class="card-title md:text-xl lg:text-2xl">      Static Analysis Report    </div>
+            <div class="flex items-center gap-3">
+              <div class="card-title md:text-xl lg:text-2xl">Static Analysis Report</div>
+              <span
+                v-if="saStatusBadge"
+                :class="['badge', saStatusBadge.className]"
+              >
+                {{ saStatusBadge.label }}
+              </span>
+            </div>
+            <div class="my-1" />
 
-               
-            <div class="my-2" />
-               
             <data-status-wrapper :error="SAError" :is-loading="SALoading">
-                    <template #loading>         <ui-spinner />       </template>      
+              <template #loading>
+                <ui-spinner />
+              </template>
               <template #data>
-                       
                 <div class="flex flex-col gap-2">
                   <div class="flex items-center gap-2" v-if="SAReport?.reportUrl">
                     <a class="btn btn-sm" :href="SAReport.reportUrl" target="_blank" rel="noopener">
@@ -320,23 +334,14 @@ function downloadTaskZip(taskIndex: number) {
                     </a>
                   </div>
                   <div v-if="SAReport?.report && SAReport.report.trim()">
-                            
-                    <!-- 若後端回傳 markdown / text，可直接顯示 -->
-                            
-                    <pre class="whitespace-pre-wrap rounded bg-base-200 p-2">
-               {{ SAReport.report }}
-                  </pre
-                    >
-                         
+                    <code-editor v-model="SAReport!.report" readonly />
                   </div>
-                         
-                  <div v-else>          <span class="italic opacity-70">Empty</span>        </div>
+                  <div v-else>
+                    <span class="italic opacity-70">Empty</span>
+                  </div>
                 </div>
-                   
               </template>
-                 
             </data-status-wrapper>
-             
           </div>
         </div>
       </div>

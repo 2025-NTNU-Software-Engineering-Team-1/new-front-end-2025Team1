@@ -13,6 +13,127 @@ useTitle(`Edit Problem - ${route.params.id} - ${route.params.name} | Normal OJ`)
 
 const formElement = ref<InstanceType<typeof AdminProblemForm>>();
 
+function normalizeTestCases(raw: any): ProblemTestCase[] {
+  if (Array.isArray(raw)) return raw.slice();
+  if (Array.isArray(raw?.tasks)) return raw.tasks.slice();
+  return [];
+}
+
+function normalizeConfig(config?: ProblemConfigExtra): ProblemConfigExtra {
+  const base: ProblemConfigExtra = {
+    trialMode: false,
+    aiVTuber: false,
+    aiVTuberMaxToken: 0,
+    aiVTuberMode: "guided",
+    acceptedFormat: "code",
+    maxStudentZipSizeMB: 50,
+    networkAccessRestriction: {
+      enabled: false,
+      firewallExtranet: { enabled: false, whitelist: [], blacklist: [] },
+      connectWithLocal: {
+        enabled: false,
+        whitelist: [],
+        blacklist: [],
+        localServiceZip: null,
+      },
+    },
+    artifactCollection: [],
+  };
+  const merged: ProblemConfigExtra = {
+    ...base,
+    ...(config || {}),
+    trialMode: config?.trialMode ?? base.trialMode,
+    aiVTuber: config?.aiVTuber ?? base.aiVTuber,
+    aiVTuberMaxToken: config?.aiVTuberMaxToken ?? base.aiVTuberMaxToken,
+    aiVTuberMode: config?.aiVTuberMode ?? base.aiVTuberMode,
+    acceptedFormat: config?.acceptedFormat ?? base.acceptedFormat,
+    maxStudentZipSizeMB: config?.maxStudentZipSizeMB ?? base.maxStudentZipSizeMB,
+    artifactCollection: config?.artifactCollection ?? base.artifactCollection,
+    networkAccessRestriction: {
+      ...base.networkAccessRestriction!,
+      ...(config?.networkAccessRestriction || {}),
+      firewallExtranet: {
+        ...base.networkAccessRestriction!.firewallExtranet!,
+        ...(config?.networkAccessRestriction?.firewallExtranet || {}),
+      },
+      connectWithLocal: {
+        ...base.networkAccessRestriction!.connectWithLocal!,
+        ...(config?.networkAccessRestriction?.connectWithLocal || {}),
+      },
+    },
+  };
+  const nar = merged.networkAccessRestriction!;
+  nar.enabled ??= false;
+  nar.firewallExtranet!.enabled ??= false;
+  nar.connectWithLocal!.enabled ??= false;
+  return { ...merged, networkAccessRestriction: nar };
+}
+
+function normalizePipeline(raw: any): ProblemPipeline {
+  const base: ProblemPipeline = {
+    fopen: false,
+    fwrite: false,
+    executionMode: "general",
+    customChecker: false,
+    teacherFirst: false,
+    staticAnalysis: {
+      libraryRestrictions: {
+        enabled: false,
+        whitelist: { syntax: [], imports: [], headers: [], functions: [] },
+        blacklist: { syntax: [], imports: [], headers: [], functions: [] },
+      },
+    },
+    scoringScript: { custom: false },
+  };
+  const pipeline: ProblemPipeline = {
+    fopen: raw?.fopen ?? base.fopen,
+    fwrite: raw?.fwrite ?? base.fwrite,
+    executionMode: raw?.executionMode ?? base.executionMode,
+    customChecker: raw?.customChecker ?? base.customChecker,
+    teacherFirst: raw?.teacherFirst ?? base.teacherFirst,
+    scoringScript: raw?.scoringScript ?? base.scoringScript,
+    staticAnalysis: {
+      ...base.staticAnalysis!,
+      ...(raw?.staticAnalysis || {}),
+      libraryRestrictions: {
+        ...base.staticAnalysis!.libraryRestrictions!,
+        ...(raw?.staticAnalysis?.libraryRestrictions || {}),
+        whitelist: {
+          ...base.staticAnalysis!.libraryRestrictions!.whitelist,
+          ...(raw?.staticAnalysis?.libraryRestrictions?.whitelist || {}),
+        },
+        blacklist: {
+          ...base.staticAnalysis!.libraryRestrictions!.blacklist,
+          ...(raw?.staticAnalysis?.libraryRestrictions?.blacklist || {}),
+        },
+      },
+    },
+  };
+  pipeline.staticAnalysis!.libraryRestrictions!.enabled ??= false;
+  const libs = pipeline.staticAnalysis!.libraryRestrictions!;
+  ["whitelist", "blacklist"].forEach((key) => {
+    if (!(libs as any)[key]) (libs as any)[key] = {};
+    ["syntax", "imports", "headers", "functions"].forEach((f) => {
+      if (!Array.isArray((libs as any)[key][f])) (libs as any)[key][f] = [];
+    });
+  });
+  return pipeline;
+}
+
+function normalizeAssets(raw: any): ProblemAssets {
+  const base: ProblemAssets = {
+    aiVTuberACFiles: null,
+    checkerPy: null,
+    makefileZip: null,
+    teacherFile: null,
+    scorePy: null,
+    localServiceZip: null,
+    testdataZip: null,
+  };
+  if (raw?.aiVTuberFiles && !raw.aiVTuberACFiles) raw.aiVTuberACFiles = raw.aiVTuberFiles;
+  return { ...base, ...(raw || {}) };
+}
+
 const {
   data: problem,
   error: fetchError,
@@ -24,76 +145,18 @@ const edittingProblem = ref<ProblemForm>();
 watchEffect(() => {
   if (!problem.value) return;
 
+  const testCases = normalizeTestCases((problem.value as any).testCase ?? (problem.value as any).testCaseInfo);
+
   edittingProblem.value = {
     ...problem.value,
     testCaseInfo: {
       language: 0,
       fillInTemplate: "",
-      tasks: problem.value.testCase.slice(),
+      tasks: testCases,
     },
-    config: problem.value.config || {
-      trialMode: false,
-      aiVTuber: false,
-      aiVTuberMaxToken: 0,
-      aiVTuberMode: "guided",
-      acceptedFormat: "code",
-      maxStudentZipSizeMB: 50,
-      networkAccessRestriction: {
-        enabled: false,
-        firewallExtranet: { enabled: false, whitelist: [], blacklist: [] },
-        connectWithLocal: {
-          enabled: false,
-          whitelist: [],
-          blacklist: [],
-          localServiceZip: null,
-        },
-      },
-      artifactCollection: [],
-    },
-    pipeline: {
-      fopen: (problem.value as any)?.pipeline?.fopen ?? false,
-      fwrite: (problem.value as any)?.pipeline?.fwrite ?? false,
-      executionMode: (problem.value as any)?.pipeline?.executionMode || "general",
-      customChecker: (problem.value as any)?.pipeline?.customChecker ?? false,
-      teacherFirst: (problem.value as any)?.pipeline?.teacherFirst ?? false,
-      staticAnalysis: {
-        libraryRestrictions: {
-          enabled: (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.enabled ?? false,
-          whitelist: {
-            syntax:
-              (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.whitelist?.syntax || [],
-            imports:
-              (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.whitelist?.imports || [],
-            headers:
-              (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.whitelist?.headers || [],
-            functions:
-              (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.whitelist?.functions ||
-              [],
-          },
-          blacklist: {
-            syntax:
-              (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.blacklist?.syntax || [],
-            imports:
-              (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.blacklist?.imports || [],
-            headers:
-              (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.blacklist?.headers || [],
-            functions:
-              (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.blacklist?.functions ||
-              [],
-          },
-        },
-      },
-      scoringScript: (problem.value as any)?.pipeline?.scoringScript || { custom: false },
-    },
-    assets: (problem.value as any).assets || {
-      aiVTuberFiles: null,
-      checkerPy: null,
-      makefileZip: null,
-      teacherFile: null,
-      scorePy: null,
-      localServiceZip: null,
-      testdataZip: null,
-    },
+    config: normalizeConfig(problem.value.config),
+    pipeline: normalizePipeline((problem.value as any).pipeline),
+    assets: normalizeAssets((problem.value as any).assets),
   } as ProblemForm;
 });
 
@@ -139,7 +202,7 @@ async function submit() {
     );
 
     const assets = edittingProblem.value.assets;
-    if (assets?.aiVTuberACFiles) assets.aiVTuberACFiles.forEach((f) => fd.append("aiVTuberFiles", f));
+    if (assets?.aiVTuberACFiles) assets.aiVTuberACFiles.forEach((f) => fd.append("aiVTuberACFiles", f));
     if (assets?.testdataZip) fd.append("case", assets.testdataZip);
     if (assets?.checkerPy) fd.append("checker.py", assets.checkerPy);
     if (assets?.makefileZip) fd.append("makefile.zip", assets.makefileZip);

@@ -67,7 +67,12 @@ interface Problem {
   quota: number;
   type: ProblemType;
   status: ProblemStatus;
-  testCase: ProblemTestCase[];
+  testCase?: ProblemTestCase[];
+  testCaseInfo?: {
+    language?: number;
+    fillInTemplate?: string;
+    tasks?: ProblemTestCase[];
+  };
   canViewStdout: boolean;
   owner: string;
   defaultCode: string;
@@ -77,6 +82,8 @@ interface Problem {
   submitter: number;
 
   config?: ProblemConfigExtra;
+  pipeline?: ProblemPipeline;
+  assets?: ProblemAssets;
 }
 
 /* ------------------------------
@@ -184,6 +191,7 @@ interface ProblemPipeline {
  * ASSETS
  * =========================================================== */
 interface ProblemAssets {
+  aiVTuberFiles?: File[] | null;
   aiVTuberACFiles?: File[] | null;
   checkerPy?: File | null;
   makefileZip?: File | null;

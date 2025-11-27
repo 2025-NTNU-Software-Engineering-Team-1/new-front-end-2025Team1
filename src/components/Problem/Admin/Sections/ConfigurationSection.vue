@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { inject, Ref, ref, watch, nextTick } from "vue";
+import { inject, Ref, ref, watch, nextTick, computed } from "vue";
+import { useRoute } from "vue-router";
 import LanguageMultiSelect from "../../Forms/LanguageMultiSelect.vue";
 import MultiStringInput from "../Controls/MultiStringInput.vue";
 import { assertFileSizeOK, validateFilesForAIAC } from "@/utils/checkFileSize";
@@ -7,6 +8,7 @@ import { assertFileSizeOK, validateFilesForAIAC } from "@/utils/checkFileSize";
 const rawProblem = inject<Ref<ProblemForm> | undefined>("problem");
 if (!rawProblem || !rawProblem.value) throw new Error("ConfigurationSection requires problem injection");
 const problem = rawProblem as Ref<ProblemForm>;
+const route = useRoute();
 
 const quotaError = ref("");
 const localQuota = ref<number | "">(problem.value?.quota ?? "");
@@ -62,6 +64,15 @@ function ensureConfig() {
   }
 }
 ensureConfig();
+
+const assetPaths = computed<Record<string, string>>(
+  () => ((problem.value.config as any)?.assetPaths as Record<string, string>) || {},
+);
+const hasAsset = (key: string) => Boolean(assetPaths.value && assetPaths.value[key]);
+const assetDownloadUrl = (key: string) =>
+  assetPaths.value && assetPaths.value[key]
+    ? `/api/problem/${route.params.id}/asset/${key}/download`
+    : null;
 
 function onQuotaInput(e: Event) {
   const inputEl = e.target as HTMLInputElement;
@@ -160,11 +171,11 @@ watch(localMode, (newMode) => {
       <div class="flex flex-wrap items-center gap-6">
         <label class="label cursor-pointer gap-2">
           <input type="radio" class="radio" value="code" v-model="(problem.config!.acceptedFormat as any)" />
-          <span class="label-text">code</span>
+          <span class="label-text">Code</span>
         </label>
         <label class="label cursor-pointer gap-2">
           <input type="radio" class="radio" value="zip" v-model="(problem.config!.acceptedFormat as any)" />
-          <span class="label-text">zip</span>
+          <span class="label-text">Zip</span>
         </label>
       </div>
 
@@ -197,7 +208,7 @@ watch(localMode, (newMode) => {
       <div class="flex items-center gap-4">
         <label class="label cursor-pointer justify-start gap-x-4">
           <span class="label-text">AI VTuber</span>
-          <input type="checkbox" class="toggle toggle-primary" v-model="problem.config!.aiVTuber" />
+          <input type="checkbox" class="toggle" v-model="problem.config!.aiVTuber" />
         </label>
       </div>
 
@@ -296,7 +307,7 @@ watch(localMode, (newMode) => {
     <div class="form-control col-span-2 rounded-lg border border-base-300 p-4">
       <label class="label ml-1 cursor-pointer justify-start gap-x-4">
         <span class="label-text">Trial Mode</span>
-        <input type="checkbox" class="toggle toggle-primary" v-model="problem.config!.trialMode" />
+        <input type="checkbox" class="toggle" v-model="problem.config!.trialMode" />
       </label>
     </div>
 
@@ -422,7 +433,23 @@ watch(localMode, (newMode) => {
             />
 
             <div class="form-control">
-              <label class="label"><span class="label-text">Upload local_service.zip</span></label>
+              <label class="label justify-start gap-x-4">
+                <span class="label-text">Upload Local_Service.zip</span>
+                <div class="flex items-center gap-2">
+                  <div v-if="hasAsset('local_service')" class="flex items-center gap-2">
+                    <span class="badge badge-outline badge-success text-xs">Uploaded</span>
+                    <a
+                      :href="assetDownloadUrl('local_service') || '#'"
+                      class="btn btn-xs"
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      Download
+                    </a>
+                  </div>
+                  <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
+                </div>
+              </label>
               <input
                 type="file"
                 accept=".zip"
@@ -477,7 +504,7 @@ watch(localMode, (newMode) => {
                   ))
             "
           />
-          <span class="label-text">zip</span>
+          <span class="label-text">Zip</span>
         </label>
       </div>
     </div>

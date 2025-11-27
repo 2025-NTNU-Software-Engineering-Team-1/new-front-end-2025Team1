@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { inject, Ref, ref, watch } from "vue";
+import { inject, Ref, ref, watch, computed } from "vue";
+import { useRoute } from "vue-router";
 import { ZipReader, BlobReader } from "@zip.js/zip.js";
 import { assertFileSizeOK } from "@/utils/checkFileSize";
 
@@ -7,6 +8,9 @@ defineProps<{ v$: any }>();
 
 const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
 const isDrag = ref(false);
+const route = useRoute();
+const downloadUrl = computed(() => `/api/problem/${route.params.id}/testcase`);
+const hasExistingTasks = computed(() => (problem.value.testCaseInfo?.tasks?.length ?? 0) > 0);
 
 watch(
   () => problem.value.assets?.testdataZip,
@@ -47,6 +51,14 @@ watch(
   <div class="form-control col-span-2">
     <label class="label">
       <span class="label-text">Test Data Zip</span>
+      <div class="flex items-center gap-2">
+        <span v-if="hasExistingTasks" class="badge badge-outline badge-success text-xs">
+          Current: {{ problem.testCaseInfo.tasks.length }} task(s)
+        </span>
+        <a class="btn btn-xs" :href="downloadUrl" target="_blank" rel="noopener">
+          Download current
+        </a>
+      </div>
     </label>
 
     <!-- Test Data Upload Row -->

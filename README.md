@@ -10,7 +10,7 @@ To run the entire project, including the `new-front-end`, refer to the `README.m
 
 Issues and PRs are welcome, please read the [contribution guide](CONTRIBUTING.md) to prepare a proper development environment.
 
-Clone the repo, then install the dependencies by [pnpm](https://pnpm.io/installation):
+Clone the repo, then install the dependencies by [pnpm](https://pnpm.io/installation) (Node.js >= 20.17 is expected; `.nvmrc` is provided):
 
 ```bash
 cd new-front-end

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onMounted, inject, Ref, ref, watch } from "vue";
+import { onMounted, inject, Ref, ref, watch, computed } from "vue";
+import { useRoute } from "vue-router";
 import MultiStringInput from "../Controls/MultiStringInput.vue";
 import api from "@/models/api";
 import { assertFileSizeOK } from "@/utils/checkFileSize";
@@ -86,19 +87,19 @@ const functionMode = ref<"whitelist" | "blacklist">("whitelist");
 // ===============================================
 // 當 syntaxMode 切換時,清空另一方的清單
 // ===============================================
-watch(syntaxMode, (newMode) => {
+watch(syntaxMode, (newMode: "whitelist" | "blacklist") => {
   const oppositeMode = newMode === "whitelist" ? "blacklist" : "whitelist";
   problem.value.pipeline!.staticAnalysis!.libraryRestrictions![oppositeMode]!.syntax = [];
 });
-watch(importMode, (newMode) => {
+watch(importMode, (newMode: "whitelist" | "blacklist") => {
   const oppositeMode = newMode === "whitelist" ? "blacklist" : "whitelist";
   problem.value.pipeline!.staticAnalysis!.libraryRestrictions![oppositeMode]!.imports = [];
 });
-watch(headerMode, (newMode) => {
+watch(headerMode, (newMode: "whitelist" | "blacklist") => {
   const oppositeMode = newMode === "whitelist" ? "blacklist" : "whitelist";
   problem.value.pipeline!.staticAnalysis!.libraryRestrictions![oppositeMode]!.headers = [];
 });
-watch(functionMode, (newMode) => {
+watch(functionMode, (newMode: "whitelist" | "blacklist") => {
   const oppositeMode = newMode === "whitelist" ? "blacklist" : "whitelist";
   problem.value.pipeline!.staticAnalysis!.libraryRestrictions![oppositeMode]!.functions = [];
 });
@@ -110,9 +111,10 @@ const defaultSyntaxOptions = ["while", "for", "recursive"];
 // ===============================================
 const allowImports = ref(false);
 const allowHeaders = ref(false);
+const route = useRoute();
 watch(
   () => problem.value.allowedLanguage,
-  (lang) => {
+  (lang: number) => {
     allowImports.value = Boolean(lang & 4); // python
     allowHeaders.value = Boolean(lang & 1 || lang & 2); // c or cpp
   },
@@ -122,7 +124,7 @@ watch(
 // Execution Mode
 watch(
   () => problem.value.pipeline!.executionMode,
-  (newMode) => {
+  (newMode: string) => {
     if (newMode === "interactive") {
       problem.value.pipeline!.customChecker = false;
       if (problem.value.assets) {
@@ -149,6 +151,16 @@ function getAllowedFileExtensions(): string[] {
   if (lang & 4) list.push(".py");
   return list;
 }
+
+const assetPaths = computed<Record<string, string>>(
+  () => ((problem.value.config as any)?.assetPaths as Record<string, string>) || {},
+);
+
+const hasAsset = (key: string) => Boolean(assetPaths.value && assetPaths.value[key]);
+const assetDownloadUrl = (key: string) =>
+  assetPaths.value && assetPaths.value[key]
+    ? `/api/problem/${route.params.id}/asset/${key}/download`
+    : null;
 </script>
 
 <template>
@@ -460,7 +472,7 @@ function getAllowedFileExtensions(): string[] {
               value="general"
               v-model="(problem.pipeline!.executionMode as any)"
             />
-            <span class="label-text">general</span>
+            <span class="label-text">General</span>
           </label>
           <label class="label cursor-pointer gap-2">
             <input
@@ -469,7 +481,7 @@ function getAllowedFileExtensions(): string[] {
               value="functionOnly"
               v-model="(problem.pipeline!.executionMode as any)"
             />
-            <span class="label-text">functionOnly</span>
+            <span class="label-text">Function Only</span>
           </label>
           <label class="label cursor-pointer gap-2">
             <input
@@ -478,86 +490,39 @@ function getAllowedFileExtensions(): string[] {
               value="interactive"
               v-model="(problem.pipeline!.executionMode as any)"
             />
-            <span class="label-text">interactive</span>
+            <span class="label-text">Interactive</span>
           </label>
         </div>
 
-        <!-- General mode fields -->
-        <div
-          v-if="problem.pipeline!.executionMode === 'general'"
-          class="rounded-lg border border-gray-400 p-4"
-        >
-          <!-- Custom checker -->
-          <div class="form-control">
-            <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
-              <label class="label mb-0 cursor-pointer justify-start gap-x-2">
-                <span class="label-text flex items-center gap-1">
-                  <span>Custom Checker</span>
-                </span>
-                <input type="checkbox" class="toggle toggle-sm" v-model="problem.pipeline!.customChecker" />
-              </label>
 
-              <div v-if="problem.pipeline!.customChecker" class="flex items-center gap-x-2">
-                <span class="text-sm opacity-80">Upload checker.py</span>
-                <input
-                  type="file"
-                  accept=".py"
-                  class="file-input file-input-bordered file-input-sm w-56"
-                  @change="
-                    (e: any) => {
-                      const file = e.target.files?.[0];
-                      if (file && !assertFileSizeOK(file, 'Custom Checker')) {
-                        e.target.value = '';
-                        return;
-                      }
-                      problem.assets!.checkerPy = file || null;
-                    }
-                  "
-                />
-              </div>
-            </div>
-          </div>
-        </div>
+
+        <!-- General mode fields -->
+
 
         <!-- functionOnly fields -->
         <div
           v-if="problem.pipeline!.executionMode === 'functionOnly'"
           class="rounded-lg border border-gray-400 p-4"
         >
-          <!-- Custom checker -->
-          <div class="form-control mb-3">
-            <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
-              <label class="label mb-0 cursor-pointer justify-start gap-x-2">
-                <span class="label-text flex items-center gap-1">
-                  <span>Custom Checker</span>
-                </span>
-                <input type="checkbox" class="toggle toggle-sm" v-model="problem.pipeline!.customChecker" />
-              </label>
-
-              <div v-if="problem.pipeline!.customChecker" class="flex items-center gap-x-2">
-                <span class="text-sm opacity-80">Upload checker.py</span>
-                <input
-                  type="file"
-                  accept=".py"
-                  class="file-input file-input-bordered file-input-sm w-56"
-                  @change="
-                    (e: any) => {
-                      const file = e.target.files?.[0];
-                      if (file && !assertFileSizeOK(file, 'Custom checker')) {
-                        e.target.value = '';
-                        return;
-                      }
-                      problem.assets!.checkerPy = file || null;
-                    }
-                  "
-                />
-              </div>
-            </div>
-          </div>
-
           <!-- makefile.zip -->
           <div class="form-control">
-            <label class="label"><span class="label-text">Upload makefile.zip</span></label>
+            <label class="label justify-start gap-x-4">
+              <span class="label-text">Upload Makefile.zip</span>
+              <div class="flex items-center gap-2">
+                <div v-if="hasAsset('makefile')" class="flex items-center gap-2">
+                  <span class="badge badge-outline badge-success text-xs">Uploaded</span>
+                  <a
+                    :href="assetDownloadUrl('makefile') || '#'"
+                    class="btn btn-xs"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    Download
+                  </a>
+                </div>
+                <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
+              </div>
+            </label>
             <input
               type="file"
               accept=".zip"
@@ -581,56 +546,33 @@ function getAllowedFileExtensions(): string[] {
           v-if="problem.pipeline!.executionMode === 'interactive'"
           class="rounded-lg border border-gray-400 p-4"
         >
-          <!-- Custom checker (disabled in interactive) -->
-          <div class="form-control mb-3">
-            <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
-              <label class="label mb-0 cursor-pointer justify-start gap-x-2">
-                <span class="label-text flex items-center gap-1">
-                  <span>Custom Checker</span>
-                  <i-uil-lock-alt class="text-error" title="Disabled in interactive mode" />
-                </span>
-                <input
-                  type="checkbox"
-                  class="toggle toggle-sm"
-                  v-model="problem.pipeline!.customChecker"
-                  disabled
-                />
-              </label>
-
-              <div v-if="problem.pipeline!.customChecker" class="flex items-center gap-x-2">
-                <span class="text-sm opacity-80">Upload checker.py</span>
-                <input
-                  type="file"
-                  accept=".py"
-                  class="file-input file-input-bordered file-input-sm w-56"
-                  @change="
-                    (e: any) => {
-                      const file = e.target.files?.[0];
-                      if (file && !assertFileSizeOK(file, 'checkerPy')) {
-                        e.target.value = '';
-                        return;
-                      }
-                      problem.assets!.checkerPy = file || null;
-                    }
-                  "
-                />
-              </div>
-            </div>
-          </div>
-
           <!-- Teacher first & Teacher_file -->
           <div class="form-control">
             <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
               <!-- 左：Teacher first -->
               <label class="label mb-0 cursor-pointer justify-start gap-x-2">
-                <span class="label-text flex items-center gap-1">Teacher first</span>
+                <span class="label-text flex items-center gap-1">Teacher First</span>
                 <input type="checkbox" class="toggle toggle-sm" v-model="problem.pipeline!.teacherFirst" />
               </label>
 
-              <!-- 右：Teacher_file -->
+              <!-- 右：Teacher_Code -->
               <div class="flex flex-col">
                 <div class="flex items-center gap-x-2">
-                  <span class="text-sm opacity-80">Upload Teacher_file</span>
+                  <span class="text-sm opacity-80">Upload Teacher_Code</span>
+                  <div class="flex items-center gap-2">
+                    <div v-if="hasAsset('teacher_file')" class="flex items-center gap-2">
+                      <span class="badge badge-outline badge-success text-xs">Uploaded</span>
+                      <a
+                        :href="assetDownloadUrl('teacher_file') || '#'"
+                        class="btn btn-xs"
+                        target="_blank"
+                        rel="noopener"
+                      >
+                        Download
+                      </a>
+                    </div>
+                    <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
+                  </div>
                   <input
                     type="file"
                     :accept="getAllowedFileExtensions().join(',')"
@@ -638,7 +580,7 @@ function getAllowedFileExtensions(): string[] {
                     @change="
                       (e: any) => {
                         const file = (e.target.files as FileList)?.[0] || null;
-                        if (file && getAllowedFileExtensions().some((ext) => file.name.endsWith(ext))) {
+                        if (file && getAllowedFileExtensions().some((ext: string) => file.name.endsWith(ext))) {
                           if (!assertFileSizeOK(file, 'teacherFile')) {
                             (e.target as HTMLInputElement).value = '';
                             problem.assets!.teacherFile = null;
@@ -664,35 +606,116 @@ function getAllowedFileExtensions(): string[] {
       </div>
     </div>
 
+    <!-- Custom checker (shared) -->
+    <div class="form-control col-span-1 md:col-span-2">
+      <div class="rounded-lg border border-gray-400 p-4">
+        <div class="flex items-center gap-4">
+          <label class="label cursor-pointer justify-start gap-x-4">
+            <span class="label-text flex items-center gap-1">
+              <span>Custom Checker</span>
+              <i-uil-lock-alt
+                v-if="problem.pipeline!.executionMode === 'interactive'"
+                class="text-error"
+                title="Disabled in interactive mode"
+              />
+            </span>
+            <input
+              type="checkbox"
+              class="toggle"
+              v-model="problem.pipeline!.customChecker"
+              :disabled="problem.pipeline!.executionMode === 'interactive'"
+            />
+          </label>
+
+          <div class="flex items-center gap-2">
+            <div v-if="hasAsset('checker')" class="flex items-center gap-2">
+              <span class="badge badge-outline badge-success text-xs">Uploaded</span>
+              <a
+                :href="assetDownloadUrl('checker') || '#'"
+                class="btn btn-xs"
+                target="_blank"
+                rel="noopener"
+              >
+                Download
+              </a>
+            </div>
+            <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
+          </div>
+        </div>
+
+        <div v-if="problem.pipeline!.customChecker" class="flex items-center gap-x-2">
+            <span class="text-sm opacity-80">Upload Checker.py</span>
+          <input
+            type="file"
+            accept=".py"
+            class="file-input file-input-bordered file-input-sm w-56"
+            :disabled="problem.pipeline!.executionMode === 'interactive'"
+            @change="
+              (e: any) => {
+                const file = e.target.files?.[0];
+                if (file && !assertFileSizeOK(file, 'checker.py')) {
+                  e.target.value = '';
+                  return;
+                }
+                problem.assets!.checkerPy = file || null;
+              }
+            "
+          />
+        </div>
+        <div v-else class="text-xs opacity-70">
+          {{
+            problem.pipeline!.executionMode === 'interactive'
+              ? 'Custom Checker disabled in Interactive mode.'
+              : 'Enable to upload Checker.py'
+          }}
+        </div>
+      </div>
+    </div>
+
     <!-- Custom Scoring Script -->
     <div class="form-control col-span-1 md:col-span-2">
       <div class="rounded-lg border border-gray-400 p-4">
-        <label class="label cursor-pointer justify-start gap-x-4">
-          <span class="label-text">Custom Scoring Script</span>
-          <input type="checkbox" class="toggle" v-model="(problem as any).pipeline.scoringScript.custom" />
-        </label>
-        <div
-          v-if="(problem as any).pipeline.scoringScript?.custom"
-          class="mt-3 rounded-lg border border-gray-400 p-4"
-        >
-          <div class="form-control">
-            <label class="label"><span class="label-text">Upload score.py</span></label>
-            <input
-              type="file"
-              accept=".py"
-              class="file-input file-input-bordered file-input-sm w-56"
-              @change="
-                (e: any) => {
-                  const file = e.target.files?.[0];
-                  if (file && !assertFileSizeOK(file, 'scorePy')) {
-                    e.target.value = '';
-                    return;
-                  }
-                  problem.assets!.scorePy = file || null;
-                }
-              "
-            />
+        <div class="flex items-center gap-4">
+          <label class="label cursor-pointer justify-start gap-x-4">
+            <span class="label-text">Custom Scoring Script</span>
+            <input type="checkbox" class="toggle" v-model="(problem as any).pipeline.scoringScript.custom" />
+          </label>
+          <div class="flex items-center gap-2">
+            <div v-if="hasAsset('scoring_script')" class="flex items-center gap-2">
+              <span class="badge badge-outline badge-success text-xs">Uploaded</span>
+              <a
+                :href="assetDownloadUrl('scoring_script') || '#'"
+                class="btn btn-xs"
+                target="_blank"
+                rel="noopener"
+              >
+                Download
+              </a>
+            </div>
+            <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
           </div>
+        </div>
+
+        <div v-if="(problem as any).pipeline.scoringScript?.custom" class="flex items-center gap-x-2">
+            <span class="text-sm opacity-80">Upload Score.py</span>
+          <input
+            type="file"
+            accept=".py"
+            class="file-input file-input-bordered file-input-sm w-56"
+            @change="
+              (e: any) => {
+                const file = e.target.files?.[0];
+                if (file && !assertFileSizeOK(file, 'scorePy')) {
+                  e.target.value = '';
+                  return;
+                }
+                problem.assets!.scorePy = file || null;
+              }
+            "
+          />
+        </div>
+        <div v-else class="text-xs opacity-70">
+          Enable to upload Score.py
         </div>
       </div>
     </div>

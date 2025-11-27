@@ -3,6 +3,10 @@
   "private": true,
   "license": "MPL-2.0",
   "version": "0.0.0",
+  "engines": {
+    "node": ">=20.17.0",
+    "pnpm": ">=10.6.1"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",

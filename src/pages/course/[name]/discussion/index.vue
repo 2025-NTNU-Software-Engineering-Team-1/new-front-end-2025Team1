@@ -1,24 +1,129 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import PostCard from "@/components/Discussion/PostCard.vue";
-import { samplePosts, type Post } from "./mockData";
+import API from "@/models/api";
+import type { 
+  DiscussionPost, 
+  GetPostsResponse, 
+  SearchPostsResponse,
+  PaginationInfo 
+} from "@/types/discussion";
 
 const { t } = useI18n();
 const route = useRoute();
 
 const query = ref("");
-const activeTab = ref<"hot" | "new">("hot");
+const activeTab = ref<"Hot" | "New">("Hot");
+const posts = ref<DiscussionPost[]>([]);
+const loading = ref(false);
+const error = ref<string>("");
 
-const posts = ref<Post[]>(samplePosts);
+// 分頁相關
+const pagination = ref<PaginationInfo>({
+  page: 1,
+  limit: 20,
+  total: 0,
+  totalPages: 0,
+});
 
-const filtered = computed(() => {
-  const q = query.value.trim().toLowerCase();
-  return posts.value.filter((p) => {
-    const matchQ = !q || p.title.toLowerCase().includes(q) || p.excerpt.toLowerCase().includes(q);
-    return matchQ;
-  });
+// 載入貼文列表
+const loadPosts = async () => {
+  try {
+    loading.value = true;
+    error.value = "";
+    
+    const params = {
+      Mode: activeTab.value,
+      Limit: pagination.value.limit,
+      Page: pagination.value.page,
+    };
+
+    const response = await API.Discussion.getPosts(params) as unknown as GetPostsResponse;
+    
+    if (response.Status === "OK") {
+      posts.value = response.Posts || [];
+    } else {
+      error.value = "Failed to load posts";
+    }
+  } catch (err) {
+    console.error("Error loading posts:", err);
+    error.value = "Network error occurred";
+  } finally {
+    loading.value = false;
+  }
+};
+
+// 搜尋貼文
+const searchPosts = async () => {
+  if (!query.value.trim()) {
+    return loadPosts();
+  }
+
+  try {
+    loading.value = true;
+    error.value = "";
+    
+    const params = {
+      Words: query.value.trim(),
+      Limit: pagination.value.limit,
+      Page: pagination.value.page,
+    };
+
+    const response = await API.Discussion.searchPosts(params) as unknown as SearchPostsResponse;
+    
+    if (response.Status === "OK") {
+      posts.value = response.Post || [];
+    } else {
+      error.value = "Failed to search posts";
+    }
+  } catch (err) {
+    console.error("Error searching posts:", err);
+    error.value = "Network error occurred";
+  } finally {
+    loading.value = false;
+  }
+};
+
+// 轉換貼文資料格式為 PostCard 組件需要的格式
+const transformedPosts = computed(() => {
+  return posts.value.map(post => ({
+    id: post.Post_Id.toString(),
+    author: post.Author,
+    time: post.Created_Time,
+    title: post.Title,
+    excerpt: "", // API 沒有提供摘要，可以從內容截取
+    likes: post.Like_Count,
+    comments: post.Reply_Count,
+    isPinned: post.Is_Pinned,
+  }));
+});
+
+// 處理搜尋輸入
+const handleSearch = () => {
+  pagination.value.page = 1;
+  searchPosts();
+};
+
+// 處理標籤切換
+const handleTabChange = (tab: "Hot" | "New") => {
+  activeTab.value = tab;
+  pagination.value.page = 1;
+  if (query.value.trim()) {
+    searchPosts();
+  } else {
+    loadPosts();
+  }
+};
+
+// 監聽路由變化
+watch(() => route.params.name, () => {
+  loadPosts();
+});
+
+onMounted(() => {
+  loadPosts();
 });
 </script>
 
@@ -35,9 +140,11 @@ const filtered = computed(() => {
                   v-model="query"
                   :placeholder="t('discussion.placeholder')"
                   class="input input-bordered w-full pr-10"
+                  @keyup.enter="handleSearch"
                 />
                 <button
                   class="absolute right-2 top-1/2 -translate-y-1/2 transform rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  @click="handleSearch"
                 >
                   <svg
                     viewBox="0 0 24 24"
@@ -90,23 +197,39 @@ const filtered = computed(() => {
             <div class="mt-6 border-b">
               <nav class="flex gap-6">
                 <button
-                  :class="['pb-2', activeTab === 'hot' ? 'border-b-2 border-black' : 'text-gray-500']"
-                  @click="activeTab = 'hot'"
+                  :class="['pb-2', activeTab === 'Hot' ? 'border-b-2 border-black' : 'text-gray-500']"
+                  @click="handleTabChange('Hot')"
+                  :disabled="loading"
                 >
                   {{ t('discussion.hot') }}
                 </button>
                 <button
-                  :class="['pb-2', activeTab === 'new' ? 'border-b-2 border-black' : 'text-gray-500']"
-                  @click="activeTab = 'new'"
+                  :class="['pb-2', activeTab === 'New' ? 'border-b-2 border-black' : 'text-gray-500']"
+                  @click="handleTabChange('New')"
+                  :disabled="loading"
                 >
                   {{ t('discussion.new') }}
                 </button>
               </nav>
             </div>
 
+            <!-- Loading state -->
+            <div v-if="loading" class="mt-4 flex justify-center">
+              <div class="loading loading-spinner loading-lg"></div>
+            </div>
+
+            <!-- Error state -->
+            <div v-else-if="error" class="mt-4 alert alert-error">
+              <span>{{ error }}</span>
+              <button class="btn btn-sm btn-ghost" @click="loadPosts">重試</button>
+            </div>
+
             <!-- Posts list -->
-            <div class="mt-4 space-y-4">
-              <template v-for="post in filtered" :key="post.id">
+            <div v-else class="mt-4 space-y-4">
+              <div v-if="transformedPosts.length === 0" class="text-center text-gray-500 py-8">
+                {{ query ? t('discussion.noSearchResults') : t('discussion.noPosts') }}
+              </div>
+              <template v-for="post in transformedPosts" :key="post.id">
                 <router-link :to="`/course/${route.params.name}/discussion/${post.id}`" class="block">
                   <PostCard :post="post" />
                 </router-link>

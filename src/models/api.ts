@@ -96,6 +96,71 @@ const User = {
   modify: (username: string, body: UserEditionForm) => fetcher.patch(`/user/${username}`, body),
 };
 
+const Discussion = {
+  // 1. 取得貼文列表 (New/Hot 切換)
+  getPosts: (params: {
+    Mode?: string;
+    Limit?: number;
+    Page?: number;
+    Problem_Id?: string;
+  }) => fetcher.get("/discussion/posts", { params }),
+
+  // 2. 依關鍵字搜尋貼文
+  searchPosts: (params: {
+    Words: string;
+    Limit?: number;
+    Page?: number;
+  }) => fetcher.get("/discussion/search", { params }),
+
+  // 3. 發佈文章
+  createPost: (body: {
+    Title: string;
+    Content: string;
+    Problem_id?: string;
+    Category?: string;
+    Language?: string;
+    Contains_Code?: boolean;
+  }) => fetcher.post("/discussion/post", body),
+
+  // 4. 回覆文章
+  createReply: (postId: string | number, body: {
+    Reply_To?: number;
+    Content: string;
+    Contains_Code?: boolean;
+  }) => fetcher.post(`/discussion/posts/${postId}/reply`, body),
+
+  // 5. 按讚
+  likePost: (postId: string | number, body: {
+    ID: number;
+    Action: boolean;
+  }) => fetcher.post(`/discussion/posts/${postId}/like`, body),
+
+  // 6. 取得貼文內部細項 (留言/按讚數)
+  getPostDetail: (postId: string | number) => fetcher.get(`/discussion/posts/${postId}`),
+
+  // 7. 管理文章狀態 (置頂/關帖/標已解決/刪除)
+  managePostStatus: (postId: string | number, body: {
+    Action: string;
+  }) => fetcher.post(`/discussion/posts/${postId}/status`, body),
+
+  // 8. 刪除功能 (留言/貼文)
+  deletePost: (postId: string | number, body: {
+    Type: string;
+    Id: number;
+  }) => fetcher.delete(`/discussion/posts/${postId}/delete`, { data: body }),
+
+  // 9. 取得題目列表
+  getProblems: (params: {
+    Mode?: string;
+    Limit?: number;
+    Page?: number;
+  }) => fetcher.get("/discussion/problems", { params }),
+
+  // 11. 角色權限&&截止時間
+  getProblemMeta: (problemId: string | number) => 
+    fetcher.get(`/discussion/problems/${problemId}/meta`),
+};
+
 export default {
   Auth,
   Problem,
@@ -105,4 +170,5 @@ export default {
   Homework,
   Course,
   User,
+  Discussion,
 };

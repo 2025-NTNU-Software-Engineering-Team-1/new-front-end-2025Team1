@@ -158,9 +158,7 @@ const assetPaths = computed<Record<string, string>>(
 
 const hasAsset = (key: string) => Boolean(assetPaths.value && assetPaths.value[key]);
 const assetDownloadUrl = (key: string) =>
-  assetPaths.value && assetPaths.value[key]
-    ? `/api/problem/${route.params.id}/asset/${key}/download`
-    : null;
+  assetPaths.value && assetPaths.value[key] ? `/api/problem/${route.params.id}/asset/${key}/download` : null;
 </script>
 
 <template>
@@ -494,10 +492,7 @@ const assetDownloadUrl = (key: string) =>
           </label>
         </div>
 
-
-
         <!-- General mode fields -->
-
 
         <!-- functionOnly fields -->
         <div
@@ -510,7 +505,7 @@ const assetDownloadUrl = (key: string) =>
               <span class="label-text">Upload Makefile.zip</span>
               <div class="flex items-center gap-2">
                 <div v-if="hasAsset('makefile')" class="flex items-center gap-2">
-                  <span class="badge badge-outline badge-success text-xs">Uploaded</span>
+                  <span class="badge badge-success badge-outline text-xs">Uploaded</span>
                   <a
                     :href="assetDownloadUrl('makefile') || '#'"
                     class="btn btn-xs"
@@ -561,7 +556,7 @@ const assetDownloadUrl = (key: string) =>
                   <span class="text-sm opacity-80">Upload Teacher_Code</span>
                   <div class="flex items-center gap-2">
                     <div v-if="hasAsset('teacher_file')" class="flex items-center gap-2">
-                      <span class="badge badge-outline badge-success text-xs">Uploaded</span>
+                      <span class="badge badge-success badge-outline text-xs">Uploaded</span>
                       <a
                         :href="assetDownloadUrl('teacher_file') || '#'"
                         class="btn btn-xs"
@@ -629,13 +624,8 @@ const assetDownloadUrl = (key: string) =>
 
           <div class="flex items-center gap-2">
             <div v-if="hasAsset('checker')" class="flex items-center gap-2">
-              <span class="badge badge-outline badge-success text-xs">Uploaded</span>
-              <a
-                :href="assetDownloadUrl('checker') || '#'"
-                class="btn btn-xs"
-                target="_blank"
-                rel="noopener"
-              >
+              <span class="badge badge-success badge-outline text-xs">Uploaded</span>
+              <a :href="assetDownloadUrl('checker') || '#'" class="btn btn-xs" target="_blank" rel="noopener">
                 Download
               </a>
             </div>
@@ -644,7 +634,7 @@ const assetDownloadUrl = (key: string) =>
         </div>
 
         <div v-if="problem.pipeline!.customChecker" class="flex items-center gap-x-2">
-            <span class="text-sm opacity-80">Upload Checker.py</span>
+          <span class="text-sm opacity-80">Upload Checker.py</span>
           <input
             type="file"
             accept=".py"
@@ -664,9 +654,9 @@ const assetDownloadUrl = (key: string) =>
         </div>
         <div v-else class="text-xs opacity-70">
           {{
-            problem.pipeline!.executionMode === 'interactive'
-              ? 'Custom Checker disabled in Interactive mode.'
-              : 'Enable to upload Checker.py'
+            problem.pipeline!.executionMode === "interactive"
+              ? "Custom Checker disabled in Interactive mode."
+              : "Enable to upload Checker.py"
           }}
         </div>
       </div>
@@ -682,7 +672,7 @@ const assetDownloadUrl = (key: string) =>
           </label>
           <div class="flex items-center gap-2">
             <div v-if="hasAsset('scoring_script')" class="flex items-center gap-2">
-              <span class="badge badge-outline badge-success text-xs">Uploaded</span>
+              <span class="badge badge-success badge-outline text-xs">Uploaded</span>
               <a
                 :href="assetDownloadUrl('scoring_script') || '#'"
                 class="btn btn-xs"
@@ -697,7 +687,7 @@ const assetDownloadUrl = (key: string) =>
         </div>
 
         <div v-if="(problem as any).pipeline.scoringScript?.custom" class="flex items-center gap-x-2">
-            <span class="text-sm opacity-80">Upload Score.py</span>
+          <span class="text-sm opacity-80">Upload Score.py</span>
           <input
             type="file"
             accept=".py"
@@ -714,9 +704,7 @@ const assetDownloadUrl = (key: string) =>
             "
           />
         </div>
-        <div v-else class="text-xs opacity-70">
-          Enable to upload Score.py
-        </div>
+        <div v-else class="text-xs opacity-70">Enable to upload Score.py</div>
       </div>
     </div>
   </div>

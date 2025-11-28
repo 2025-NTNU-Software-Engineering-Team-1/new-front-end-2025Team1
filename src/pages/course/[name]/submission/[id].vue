@@ -313,10 +313,7 @@ function downloadTaskZip(taskIndex: number) {
           <div class="card-body p-0">
             <div class="flex items-center gap-3">
               <div class="card-title md:text-xl lg:text-2xl">Static Analysis Report</div>
-              <span
-                v-if="saStatusBadge"
-                :class="['badge', saStatusBadge.className]"
-              >
+              <span v-if="saStatusBadge" :class="['badge', saStatusBadge.className]">
                 {{ saStatusBadge.label }}
               </span>
             </div>

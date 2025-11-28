@@ -145,7 +145,9 @@ const edittingProblem = ref<ProblemForm>();
 watchEffect(() => {
   if (!problem.value) return;
 
-  const testCases = normalizeTestCases((problem.value as any).testCase ?? (problem.value as any).testCaseInfo);
+  const testCases = normalizeTestCases(
+    (problem.value as any).testCase ?? (problem.value as any).testCaseInfo,
+  );
 
   edittingProblem.value = {
     ...problem.value,

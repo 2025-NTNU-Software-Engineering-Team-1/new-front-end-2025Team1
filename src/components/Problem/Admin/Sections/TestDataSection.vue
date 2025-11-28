@@ -52,12 +52,10 @@ watch(
     <label class="label">
       <span class="label-text">Test Data Zip</span>
       <div class="flex items-center gap-2">
-        <span v-if="hasExistingTasks" class="badge badge-outline badge-success text-xs">
+        <span v-if="hasExistingTasks" class="badge badge-success badge-outline text-xs">
           Current: {{ problem.testCaseInfo.tasks.length }} task(s)
         </span>
-        <a class="btn btn-xs" :href="downloadUrl" target="_blank" rel="noopener">
-          Download current
-        </a>
+        <a class="btn btn-xs" :href="downloadUrl" target="_blank" rel="noopener"> Download current </a>
       </div>
     </label>
 

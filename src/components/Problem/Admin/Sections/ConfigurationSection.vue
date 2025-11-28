@@ -70,9 +70,7 @@ const assetPaths = computed<Record<string, string>>(
 );
 const hasAsset = (key: string) => Boolean(assetPaths.value && assetPaths.value[key]);
 const assetDownloadUrl = (key: string) =>
-  assetPaths.value && assetPaths.value[key]
-    ? `/api/problem/${route.params.id}/asset/${key}/download`
-    : null;
+  assetPaths.value && assetPaths.value[key] ? `/api/problem/${route.params.id}/asset/${key}/download` : null;
 
 function onQuotaInput(e: Event) {
   const inputEl = e.target as HTMLInputElement;
@@ -231,7 +229,7 @@ watch(localMode, (newMode) => {
                     const valid = validateFilesForAIAC(files, getAIFileExtensions());
                     problem.assets!.aiVTuberACFiles = valid;
                     if (valid.length === 0) {
-                      (e.target as HTMLInputElement).value = ''; 
+                      (e.target as HTMLInputElement).value = '';
                     }
                   }
                 "
@@ -437,7 +435,7 @@ watch(localMode, (newMode) => {
                 <span class="label-text">Upload Local_Service.zip</span>
                 <div class="flex items-center gap-2">
                   <div v-if="hasAsset('local_service')" class="flex items-center gap-2">
-                    <span class="badge badge-outline badge-success text-xs">Uploaded</span>
+                    <span class="badge badge-success badge-outline text-xs">Uploaded</span>
                     <a
                       :href="assetDownloadUrl('local_service') || '#'"
                       class="btn btn-xs"

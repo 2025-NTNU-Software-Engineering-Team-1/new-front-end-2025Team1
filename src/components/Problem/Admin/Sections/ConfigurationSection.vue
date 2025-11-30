@@ -8,6 +8,7 @@ import { assertFileSizeOK, validateFilesForAIAC } from "@/utils/checkFileSize";
 const rawProblem = inject<Ref<ProblemForm> | undefined>("problem");
 if (!rawProblem || !rawProblem.value) throw new Error("ConfigurationSection requires problem injection");
 const problem = rawProblem as Ref<ProblemForm>;
+const v$ = inject<any>("v$"); // Inject validation object
 const route = useRoute();
 
 const quotaError = ref("");
@@ -452,17 +453,22 @@ watch(localMode, (newMode) => {
                 type="file"
                 accept=".zip"
                 class="file-input file-input-bordered"
+                :class="{ 'input-error': v$?.assets?.localServiceZip?.$error }"
                 @change="
                   (e: any) => {
-                    const file = e.target.files?.[0];
-                    if (file && !assertFileSizeOK(file, 'checker.py')) {
+                    const file = e.target.files?.[0] || null;
+                    problem.assets!.localServiceZip = file;
+                    v$?.assets?.localServiceZip?.$touch();
+                    if (!file || !assertFileSizeOK(file, 'local_service.zip')) {
+                      problem.assets!.localServiceZip = null;
                       e.target.value = '';
-                      return;
                     }
-                    problem.assets!.localServiceZip = file || null;
                   }
                 "
               />
+              <label v-if="v$?.assets?.localServiceZip?.$error" class="label">
+                <span class="label-text-alt text-error">{{ v$.assets.localServiceZip.$errors[0]?.$message }}</span>
+              </label>
             </div>
           </div>
         </div>

@@ -70,7 +70,7 @@ const newProblem = ref<ProblemForm>({
   // === ASSETS ===
   assets: {
     aiVTuberACFiles: null,
-    checkerPy: null,
+    customCheckerPy: null,
     makefileZip: null,
     teacherFile: null,
     scorePy: null,
@@ -113,7 +113,7 @@ async function submit() {
     const assets = newProblem.value.assets;
     if (assets?.aiVTuberACFiles) assets.aiVTuberACFiles.forEach((f) => fd.append("aiVTuberACFiles", f));
     if (assets?.testdataZip) fd.append("case", assets.testdataZip);
-    if (assets?.checkerPy) fd.append("checker.py", assets.checkerPy);
+    if (assets?.customCheckerPy) fd.append("custom_checker.py", assets.customCheckerPy);
     if (assets?.makefileZip) fd.append("makefile.zip", assets.makefileZip);
     if (assets?.teacherFile) fd.append("Teacher_file", assets.teacherFile);
     if (assets?.scorePy) fd.append("score.py", assets.scorePy);

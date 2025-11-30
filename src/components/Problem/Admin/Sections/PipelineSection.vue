@@ -6,6 +6,7 @@ import api from "@/models/api";
 import { assertFileSizeOK } from "@/utils/checkFileSize";
 
 const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
+const v$ = inject<any>("v$"); // Inject validation object
 
 // ===============================================
 // pipeline 完整層級
@@ -126,10 +127,10 @@ watch(
   () => problem.value.pipeline!.executionMode,
   (newMode: string) => {
     if (newMode === "interactive") {
-      problem.value.pipeline!.customChecker = false;
-      if (problem.value.assets) {
-        problem.value.assets.checkerPy = null;
-      }
+            problem.value.pipeline!.customChecker = false;
+            if (problem.value.assets) {
+              problem.value.assets.customCheckerPy = null;
+            }
     }
   },
 );
@@ -150,6 +151,13 @@ function getAllowedFileExtensions(): string[] {
   if (lang & 2) list.push(".cpp");
   if (lang & 4) list.push(".py");
   return list;
+}
+
+function isTeacherFileAllowed(file: File | null): boolean {
+  if (!file) return false;
+  const allowed = getAllowedFileExtensions().map((ext) => ext.toLowerCase());
+  const name = file.name.toLowerCase();
+  return allowed.some((ext) => name.endsWith(ext));
 }
 
 const assetPaths = computed<Record<string, string>>(
@@ -522,17 +530,22 @@ const assetDownloadUrl = (key: string) =>
               type="file"
               accept=".zip"
               class="file-input file-input-bordered file-input-sm w-56"
+              :class="{ 'input-error': v$?.assets?.makefileZip?.$error }"
               @change="
                 (e: any) => {
-                  const file = e.target.files?.[0];
-                  if (file && !assertFileSizeOK(file, 'makefileZip')) {
+                  const file = e.target.files?.[0] || null;
+                  problem.assets!.makefileZip = file;
+                  v$?.assets?.makefileZip?.$touch();
+                  if (!file || !assertFileSizeOK(file, 'makefileZip')) {
+                    problem.assets!.makefileZip = null;
                     e.target.value = '';
-                    return;
                   }
-                  problem.assets!.makefileZip = file || null;
                 }
               "
             />
+            <label v-if="v$?.assets?.makefileZip?.$error" class="label">
+              <span class="label-text-alt text-error">{{ v$.assets.makefileZip.$errors[0]?.$message }}</span>
+            </label>
           </div>
         </div>
 
@@ -572,18 +585,13 @@ const assetDownloadUrl = (key: string) =>
                     type="file"
                     :accept="getAllowedFileExtensions().join(',')"
                     class="file-input file-input-bordered file-input-sm w-56"
+                    :class="{ 'input-error': v$?.assets?.teacherFile?.$error }"
                     @change="
                       (e: any) => {
                         const file = (e.target.files as FileList)?.[0] || null;
-                        if (file && getAllowedFileExtensions().some((ext: string) => file.name.endsWith(ext))) {
-                          if (!assertFileSizeOK(file, 'teacherFile')) {
-                            (e.target as HTMLInputElement).value = '';
-                            problem.assets!.teacherFile = null;
-                            return;
-                          }
-
-                          problem.assets!.teacherFile = file;
-                        } else {
+                        problem.assets!.teacherFile = file;
+                        v$?.assets?.teacherFile?.$touch();
+                        if (!file || !assertFileSizeOK(file, 'teacherFile')) {
                           problem.assets!.teacherFile = null;
                           (e.target as HTMLInputElement).value = '';
                         }
@@ -594,6 +602,9 @@ const assetDownloadUrl = (key: string) =>
                 <span class="label-text-alt mt-1 text-sm opacity-70">
                   Allowed: {{ getAllowedFileExtensions().join(", ") }}
                 </span>
+                <label v-if="v$?.assets?.teacherFile?.$error" class="label">
+                  <span class="label-text-alt text-error">{{ v$.assets.teacherFile.$errors[0]?.$message }}</span>
+                </label>
               </div>
             </div>
           </div>
@@ -633,24 +644,31 @@ const assetDownloadUrl = (key: string) =>
           </div>
         </div>
 
-        <div v-if="problem.pipeline!.customChecker" class="flex items-center gap-x-2">
-          <span class="text-sm opacity-80">Upload Checker.py</span>
-          <input
-            type="file"
-            accept=".py"
-            class="file-input file-input-bordered file-input-sm w-56"
-            :disabled="problem.pipeline!.executionMode === 'interactive'"
-            @change="
-              (e: any) => {
-                const file = e.target.files?.[0];
-                if (file && !assertFileSizeOK(file, 'checker.py')) {
-                  e.target.value = '';
-                  return;
+        <div v-if="problem.pipeline!.customChecker" class="flex flex-col gap-x-2">
+          <div class="flex items-center gap-x-2">
+            <span class="text-sm opacity-80">Upload custom_checker.py</span>
+            <input
+              type="file"
+              accept=".py"
+              class="file-input file-input-bordered file-input-sm w-56"
+              :class="{ 'input-error': v$?.assets?.checkerPy?.$error }"
+              :disabled="problem.pipeline!.executionMode === 'interactive'"
+              @change="
+                (e: any) => {
+                  const file = e.target.files?.[0] || null;
+                  problem.assets!.customCheckerPy = file;
+                  v$?.assets?.customCheckerPy?.$touch();
+                  if (!file || !assertFileSizeOK(file, 'custom_checker.py')) {
+                    problem.assets!.customCheckerPy = null;
+                    e.target.value = '';
+                  }
                 }
-                problem.assets!.checkerPy = file || null;
-              }
-            "
-          />
+              "
+            />
+          </div>
+          <label v-if="v$?.assets?.customCheckerPy?.$error" class="label">
+            <span class="label-text-alt text-error">{{ v$.assets.customCheckerPy.$errors[0]?.$message }}</span>
+          </label>
         </div>
         <div v-else class="text-xs opacity-70">
           {{
@@ -686,23 +704,30 @@ const assetDownloadUrl = (key: string) =>
           </div>
         </div>
 
-        <div v-if="(problem as any).pipeline.scoringScript?.custom" class="flex items-center gap-x-2">
-          <span class="text-sm opacity-80">Upload Score.py</span>
-          <input
-            type="file"
-            accept=".py"
-            class="file-input file-input-bordered file-input-sm w-56"
-            @change="
-              (e: any) => {
-                const file = e.target.files?.[0];
-                if (file && !assertFileSizeOK(file, 'scorePy')) {
-                  e.target.value = '';
-                  return;
+        <div v-if="(problem as any).pipeline.scoringScript?.custom" class="flex flex-col gap-x-2">
+          <div class="flex items-center gap-x-2">
+            <span class="text-sm opacity-80">Upload Score.py</span>
+            <input
+              type="file"
+              accept=".py"
+              class="file-input file-input-bordered file-input-sm w-56"
+              :class="{ 'input-error': v$?.assets?.scorePy?.$error }"
+              @change="
+                (e: any) => {
+                  const file = e.target.files?.[0] || null;
+                  problem.assets!.scorePy = file;
+                  v$?.assets?.scorePy?.$touch();
+                  if (!file || !assertFileSizeOK(file, 'scorePy')) {
+                    problem.assets!.scorePy = null;
+                    e.target.value = '';
+                  }
                 }
-                problem.assets!.scorePy = file || null;
-              }
-            "
-          />
+              "
+            />
+          </div>
+          <label v-if="v$?.assets?.scorePy?.$error" class="label">
+            <span class="label-text-alt text-error">{{ v$.assets.scorePy.$errors[0]?.$message }}</span>
+          </label>
         </div>
         <div v-else class="text-xs opacity-70">Enable to upload Score.py</div>
       </div>

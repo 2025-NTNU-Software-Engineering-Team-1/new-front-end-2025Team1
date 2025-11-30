@@ -193,7 +193,7 @@ interface ProblemPipeline {
 interface ProblemAssets {
   aiVTuberFiles?: File[] | null;
   aiVTuberACFiles?: File[] | null;
-  checkerPy?: File | null;
+  customCheckerPy?: File | null;
   makefileZip?: File | null;
   teacherFile?: File | null;
   scorePy?: File | null;

@@ -651,7 +651,7 @@ const assetDownloadUrl = (key: string) =>
               type="file"
               accept=".py"
               class="file-input file-input-bordered file-input-sm w-56"
-              :class="{ 'input-error': v$?.assets?.checkerPy?.$error }"
+              :class="{ 'input-error': v$?.assets?.customCheckerPy?.$error }"
               :disabled="problem.pipeline!.executionMode === 'interactive'"
               @change="
                 (e: any) => {

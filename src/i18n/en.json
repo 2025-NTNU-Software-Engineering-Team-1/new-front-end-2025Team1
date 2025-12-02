@@ -189,43 +189,43 @@
       "back": "Back"
     }
   },
-  "discussion":{
-    "placeholder":"Search discussions...",
-    "post":"Post",
-    "hot":"Hot",
-    "new":"New",
-    "noPosts":"No posts yet",
-    "noSearchResults":"No posts found matching your search",
-    "create":{
-      "title":"Create Post",
-      "problem":"Problem",
-      "problemPlaceholder":"Select a problem",
-      "titleLabel":"Title",
-      "titlePlaceholder":"Enter title",
-      "contentLabel":"Content",
-      "contentPlaceholder":"Write your post content here...",
-      "submit":"Post",
-      "cancel":"Cancel"
+  "discussion": {
+    "placeholder": "Search discussions...",
+    "post": "Post",
+    "hot": "Hot",
+    "new": "New",
+    "noPosts": "No posts yet",
+    "noSearchResults": "No posts found matching your search",
+    "create": {
+      "title": "Create Post",
+      "problem": "Problem",
+      "problemPlaceholder": "Select a problem",
+      "titleLabel": "Title",
+      "titlePlaceholder": "Enter title",
+      "contentLabel": "Content",
+      "contentPlaceholder": "Write your post content here...",
+      "submit": "Post",
+      "cancel": "Cancel"
     },
-    "detail":{
-      "by":"By",
-      "comments":"Comments",
-      "noComments":"(No real comments — this is mock data.)",
-      "notFound":"Post not found.",
-      "mockContent":"This is mock content for post {id}. Replace with real API data later."
+    "detail": {
+      "by": "By",
+      "comments": "Comments",
+      "noComments": "(No real comments — this is mock data.)",
+      "notFound": "Post not found.",
+      "mockContent": "This is mock content for post {id}. Replace with real API data later."
     },
-    "card":{
-      "likes":"{count} likes",
-      "comments":"{count} comments",
-      "views":"{count} views"
+    "card": {
+      "likes": "{count} likes",
+      "comments": "{count} comments",
+      "views": "{count} views"
     },
-    "problems":{
-      "title":"Problems",
-      "selectProblem":"Select a problem to view discussions",
-      "discussionCount":"{count} discussions",
-      "noDiscussions":"No discussions yet",
-      "backToProblems":"Back to Problems",
-      "backToDiscussion":"Back to Discussion"
+    "problems": {
+      "title": "Problems",
+      "selectProblem": "Select a problem to view discussions",
+      "discussionCount": "{count} discussions",
+      "noDiscussions": "No discussions yet",
+      "backToProblems": "Back to Problems",
+      "backToDiscussion": "Back to Discussion"
     }
   },
   "components": {

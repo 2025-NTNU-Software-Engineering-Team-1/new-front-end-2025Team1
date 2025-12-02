@@ -88,9 +88,7 @@ const searchPosts = async () => {
       // 在前端進行關鍵字過濾
       const allPosts = postsData || [];
       const searchTerm = query.value.trim().toLowerCase();
-      posts.value = allPosts.filter((post: any) => 
-        post.Title?.toLowerCase().includes(searchTerm)
-      );
+      posts.value = allPosts.filter((post: any) => post.Title?.toLowerCase().includes(searchTerm));
       console.log("Found", posts.value.length, "posts matching search term out of", allPosts.length, "total");
       // 搜尋結果為空不是錯誤
     } else {

@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
-import { useSession } from '@/stores/session';
-import { useI18n } from 'vue-i18n';
+import { ref, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { useSession } from "@/stores/session";
+import { useI18n } from "vue-i18n";
 import API from "@/models/api";
-import type { 
+import type {
   DiscussionProblem,
   CreatePostParams,
   CreatePostResponse,
   GetProblemsResponse,
-  GetProblemMetaResponse
+  GetProblemMetaResponse,
 } from "@/types/discussion";
 
 const router = useRouter();
@@ -18,11 +18,11 @@ const session = useSession();
 const { t } = useI18n();
 
 // Form fields
-const problemId = ref('');
-const title = ref('');
-const content = ref('');
-const category = ref('');
-const language = ref('');
+const problemId = ref("");
+const title = ref("");
+const content = ref("");
+const category = ref("");
+const language = ref("");
 const containsCode = ref(false);
 
 // Data
@@ -37,19 +37,19 @@ const userRole = ref("");
 
 // Language options
 const languageOptions = [
-  { value: '', label: '無' },
-  { value: 'c', label: 'C' },
-  { value: 'cpp', label: 'C++' },
-  { value: 'python', label: 'Python' },
+  { value: "", label: "無" },
+  { value: "c", label: "C" },
+  { value: "cpp", label: "C++" },
+  { value: "python", label: "Python" },
 ];
 
 // Category options
 const categoryOptions = [
-  { value: '', label: '一般討論' },
-  { value: 'question', label: '問題求助' },
-  { value: 'solution', label: '解法分享' },
-  { value: 'bug', label: '錯誤報告' },
-  { value: 'suggestion', label: '建議' },
+  { value: "", label: "一般討論" },
+  { value: "question", label: "問題求助" },
+  { value: "solution", label: "解法分享" },
+  { value: "bug", label: "錯誤報告" },
+  { value: "suggestion", label: "建議" },
 ];
 
 // Load problems list
@@ -58,10 +58,9 @@ const loadProblems = async () => {
     loading.value = true;
     const response: any = await API.Discussion.getProblems({
       Limit: 100,
-      Page: 1
+      Page: 1,
     });
-    
-    
+
     // axios interceptor 將 response.data 展開到 response 層級
     const status = response.Status || response.data?.Status;
     const problemsData = response.Problems || response.data?.Problems;
@@ -84,10 +83,12 @@ const loadProblems = async () => {
 // Load problem meta information
 const loadProblemMeta = async (problemIdValue: string) => {
   if (!problemIdValue) return;
-  
+
   try {
-    const response = await API.Discussion.getProblemMeta(problemIdValue) as unknown as GetProblemMetaResponse;
-    
+    const response = (await API.Discussion.getProblemMeta(
+      problemIdValue,
+    )) as unknown as GetProblemMetaResponse;
+
     if (response.Status === "OK") {
       codeAllowed.value = response.Code_Allowed;
       userRole.value = response.Role;
@@ -100,18 +101,18 @@ const loadProblemMeta = async (problemIdValue: string) => {
 // Auto-detect if content contains code
 const detectCodeContent = () => {
   const codePatterns = [
-    /```[\s\S]*```/,  // Code blocks
-    /`[^`\n]+`/,      // Inline code
-    /function\s*\(/,   // Function declarations
-    /class\s+\w+/,     // Class declarations
+    /```[\s\S]*```/, // Code blocks
+    /`[^`\n]+`/, // Inline code
+    /function\s*\(/, // Function declarations
+    /class\s+\w+/, // Class declarations
     /import\s+.*from/, // Import statements
-    /export\s+/,       // Export statements
-    /#include\s*</,    // C/C++ includes
-    /def\s+\w+\s*\(/,  // Python functions
-    /public\s+class/,  // Java class
+    /export\s+/, // Export statements
+    /#include\s*</, // C/C++ includes
+    /def\s+\w+\s*\(/, // Python functions
+    /public\s+class/, // Java class
   ];
-  
-  containsCode.value = codePatterns.some(pattern => pattern.test(content.value));
+
+  containsCode.value = codePatterns.some((pattern) => pattern.test(content.value));
 };
 
 // Submit post
@@ -120,21 +121,21 @@ const submitPost = async () => {
     error.value = "標題不能為空";
     return;
   }
-  
+
   if (!content.value.trim()) {
     error.value = "內容不能為空";
     return;
   }
-  
+
   if (!problemId.value) {
     error.value = "請選擇題目";
     return;
   }
-  
+
   try {
     submitting.value = true;
     error.value = "";
-    
+
     const postData: CreatePostParams = {
       Title: title.value.trim(),
       Content: content.value.trim(),
@@ -143,14 +144,14 @@ const submitPost = async () => {
       Language: language.value || undefined,
       Contains_Code: containsCode.value,
     };
-    
-    console.log('Submitting post:', postData);
+
+    console.log("Submitting post:", postData);
     const response: any = await API.Discussion.createPost(postData);
-    console.log('Submit response:', response);
-    
+    console.log("Submit response:", response);
+
     const status = response.Status || response.data?.Status;
     const postId = response.Post_ID || response.data?.Post_ID;
-    
+
     if (status === "OK" && postId) {
       // Navigate to the new post
       router.push(`/course/${route.params.name}/discussion/${postId}`);
@@ -186,9 +187,9 @@ onMounted(() => {
 
 <template>
   <div class="card-container">
-    <div class="card max-w-5xl w-full mx-auto">
+    <div class="card mx-auto w-full max-w-5xl">
       <div class="card-body px-8">
-        <h2 class="text-2xl font-semibold mb-4">{{ t('discussion.create.title') }}</h2>
+        <h2 class="mb-4 text-2xl font-semibold">{{ t("discussion.create.title") }}</h2>
         <!-- Error display -->
         <div v-if="error" class="alert alert-error mb-4">
           <span>{{ error }}</span>
@@ -196,13 +197,9 @@ onMounted(() => {
 
         <!-- Problem selection -->
         <div class="mb-4">
-          <label class="block text-sm font-medium mb-1">{{ t('discussion.create.problem') }}</label>
-          <select 
-            v-model="problemId" 
-            class="w-full select select-bordered" 
-            @change="onProblemChange"
-          >
-            <option value="">{{ t('discussion.create.problemPlaceholder') }}</option>
+          <label class="mb-1 block text-sm font-medium">{{ t("discussion.create.problem") }}</label>
+          <select v-model="problemId" class="select select-bordered w-full" @change="onProblemChange">
+            <option value="">{{ t("discussion.create.problemPlaceholder") }}</option>
             <option v-for="problem in problems" :key="problem.Problem_Id" :value="problem.Problem_Id">
               {{ problem.Problem_Name }}
             </option>
@@ -211,8 +208,8 @@ onMounted(() => {
 
         <!-- Category selection -->
         <div class="mb-4">
-          <label class="block text-sm font-medium mb-1">分類</label>
-          <select v-model="category" class="w-full select select-bordered">
+          <label class="mb-1 block text-sm font-medium">分類</label>
+          <select v-model="category" class="select select-bordered w-full">
             <option v-for="option in categoryOptions" :key="option.value" :value="option.value">
               {{ option.label }}
             </option>
@@ -221,8 +218,8 @@ onMounted(() => {
 
         <!-- Language selection (if code allowed) -->
         <div v-if="codeAllowed" class="mb-4">
-          <label class="block text-sm font-medium mb-1">程式語言</label>
-          <select v-model="language" class="w-full select select-bordered">
+          <label class="mb-1 block text-sm font-medium">程式語言</label>
+          <select v-model="language" class="select select-bordered w-full">
             <option v-for="option in languageOptions" :key="option.value" :value="option.value">
               {{ option.label }}
             </option>
@@ -231,33 +228,33 @@ onMounted(() => {
 
         <!-- Title -->
         <div class="mb-4">
-          <label class="block text-sm font-medium mb-1">{{ t('discussion.create.titleLabel') }}</label>
-          <input 
-            v-model="title" 
-            class="w-full input input-bordered" 
-            :placeholder="t('discussion.create.titlePlaceholder')" 
+          <label class="mb-1 block text-sm font-medium">{{ t("discussion.create.titleLabel") }}</label>
+          <input
+            v-model="title"
+            class="input input-bordered w-full"
+            :placeholder="t('discussion.create.titlePlaceholder')"
             maxlength="200"
           />
-          <div class="text-xs text-gray-500 mt-1">{{ title.length }}/200</div>
+          <div class="mt-1 text-xs text-gray-500">{{ title.length }}/200</div>
         </div>
 
         <!-- Content -->
         <div class="mb-4">
-          <label class="block text-sm font-medium mb-1">{{ t('discussion.create.contentLabel') }}</label>
-          <textarea 
-            v-model="content" 
-            rows="12" 
-            class="w-full textarea textarea-bordered" 
+          <label class="mb-1 block text-sm font-medium">{{ t("discussion.create.contentLabel") }}</label>
+          <textarea
+            v-model="content"
+            rows="12"
+            class="textarea textarea-bordered w-full"
             :placeholder="t('discussion.create.contentPlaceholder')"
             @input="detectCodeContent"
           ></textarea>
-          <div class="flex justify-between items-center mt-1">
+          <div class="mt-1 flex items-center justify-between">
             <div class="text-xs text-gray-500">支援 Markdown 語法</div>
             <div class="flex items-center gap-2">
               <span class="text-xs text-gray-500">包含程式碼：</span>
-              <input 
-                type="checkbox" 
-                v-model="containsCode" 
+              <input
+                type="checkbox"
+                v-model="containsCode"
                 class="checkbox checkbox-xs"
                 :disabled="!codeAllowed"
               />
@@ -272,16 +269,16 @@ onMounted(() => {
 
         <!-- Submit buttons -->
         <div class="flex gap-3">
-          <button 
-            class="btn btn-primary" 
+          <button
+            class="btn btn-primary"
             @click="submitPost"
             :disabled="submitting || !title.trim() || !content.trim()"
           >
-            <span v-if="submitting" class="loading loading-spinner loading-sm"></span>
-            {{ submitting ? '發布中...' : t('discussion.create.submit') }}
+            <span v-if="submitting" class="loading-spinner loading-sm loading"></span>
+            {{ submitting ? "發布中..." : t("discussion.create.submit") }}
           </button>
           <button class="btn btn-ghost" @click="cancel" :disabled="submitting">
-            {{ t('discussion.create.cancel') }}
+            {{ t("discussion.create.cancel") }}
           </button>
         </div>
       </div>

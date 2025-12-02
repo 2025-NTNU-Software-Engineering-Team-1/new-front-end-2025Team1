@@ -1,11 +1,17 @@
-import { ref } from 'vue';
+import { ref } from "vue";
 import API from "@/models/api";
-import type { 
-  ManagePostStatusResponse,
-  DeleteResponse,
-  ManagePostStatusParams,
-  DeleteParams
-} from "@/types/discussion";
+import type { ManagePostStatusParams, DeleteParams } from "@/types/discussion";
+
+interface ApiResponse {
+  Status?: string;
+  Message?: string;
+  New_Status?: boolean;
+  data?: {
+    Status?: string;
+    Message?: string;
+    New_Status?: boolean;
+  };
+}
 
 export function useDiscussionManagement() {
   const loading = ref(false);
@@ -16,15 +22,15 @@ export function useDiscussionManagement() {
     try {
       loading.value = true;
       error.value = "";
-      
+
       const params: ManagePostStatusParams = { Action: action };
-      console.log('Managing post status:', { postId, action });
-      const response: any = await API.Discussion.managePostStatus(postId, params);
-      console.log('Manage status response:', response);
-      
+      console.log("Managing post status:", { postId, action });
+      const response = (await API.Discussion.managePostStatus(postId, params)) as ApiResponse;
+      console.log("Manage status response:", response);
+
       const status = response.Status || response.data?.Status;
       const newStatus = response.New_Status || response.data?.New_Status;
-      
+
       if (status === "OK") {
         return {
           success: true,
@@ -35,9 +41,12 @@ export function useDiscussionManagement() {
         error.value = errorMsg;
         return { success: false };
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error managing post status:", err);
-      const errorMsg = err.response?.data?.Message || err.message || "網路錯誤";
+      const errorMsg =
+        (err as { response?: { data?: { Message?: string } }; message?: string }).response?.data?.Message ||
+        (err as { message?: string }).message ||
+        "網路錯誤";
       error.value = errorMsg;
       return { success: false };
     } finally {
@@ -68,19 +77,19 @@ export function useDiscussionManagement() {
     try {
       loading.value = true;
       error.value = "";
-      
-      const params: DeleteParams = { 
+
+      const params: DeleteParams = {
         Type: type,
-        Id: itemId 
+        Id: itemId,
       };
-      
-      console.log('Deleting item:', { postId, type, itemId, params });
-      const response: any = await API.Discussion.deletePost(postId, params);
-      console.log('Delete response:', response);
-      
+
+      console.log("Deleting item:", { postId, type, itemId, params });
+      const response = (await API.Discussion.deletePost(postId, params)) as ApiResponse;
+      console.log("Delete response:", response);
+
       const status = response.Status || response.data?.Status;
       const message = response.Message || response.data?.Message;
-      
+
       if (status === "OK") {
         return {
           success: true,
@@ -91,9 +100,12 @@ export function useDiscussionManagement() {
         error.value = errorMsg;
         return { success: false };
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error deleting item:", err);
-      const errorMsg = err.response?.data?.Message || err.message || "網路錯誤";
+      const errorMsg =
+        (err as { response?: { data?: { Message?: string } }; message?: string }).response?.data?.Message ||
+        (err as { message?: string }).message ||
+        "網路錯誤";
       error.value = errorMsg;
       return { success: false };
     } finally {
@@ -128,23 +140,23 @@ export function useDiscussionPermissions() {
   const isAdmin = (userRole: string) => userRole === "Admin";
   const isTeacher = (userRole: string) => userRole === "Teacher";
   const isStudent = (userRole: string) => userRole === "Student";
-  
+
   const canManagePost = (userRole: string, isAuthor: boolean = false) => {
     return isAdmin(userRole) || isTeacher(userRole) || isAuthor;
   };
-  
+
   const canDeleteAnyPost = (userRole: string) => {
     return isAdmin(userRole) || isTeacher(userRole);
   };
-  
+
   const canPinPost = (userRole: string) => {
     return isAdmin(userRole) || isTeacher(userRole);
   };
-  
+
   const canMarkSolved = (userRole: string) => {
     return isAdmin(userRole) || isTeacher(userRole);
   };
-  
+
   const canClosePost = (userRole: string) => {
     return isAdmin(userRole) || isTeacher(userRole);
   };

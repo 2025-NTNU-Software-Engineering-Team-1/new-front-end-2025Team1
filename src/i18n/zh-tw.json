@@ -212,43 +212,43 @@
     "wrongPassword": "密碼錯誤",
     "operationFailed": "操作失敗，請稍後再重試"
   },
-  "discussion":{
-    "placeholder":"搜尋討論...",
-    "post":"發文",
-    "hot":"熱門",
-    "new":"最新",
-    "noPosts":"尚無貼文",
-    "noSearchResults":"找不到符合搜尋條件的貼文",
-    "create":{
-      "title":"建立貼文",
-      "problem":"題目",
-      "problemPlaceholder":"選擇題目",
-      "titleLabel":"標題",
-      "titlePlaceholder":"輸入標題",
-      "contentLabel":"內容",
-      "contentPlaceholder":"在此輸入貼文內容...",
-      "submit":"發表",
-      "cancel":"取消"
+  "discussion": {
+    "placeholder": "搜尋討論...",
+    "post": "發文",
+    "hot": "熱門",
+    "new": "最新",
+    "noPosts": "尚無貼文",
+    "noSearchResults": "找不到符合搜尋條件的貼文",
+    "create": {
+      "title": "建立貼文",
+      "problem": "題目",
+      "problemPlaceholder": "選擇題目",
+      "titleLabel": "標題",
+      "titlePlaceholder": "輸入標題",
+      "contentLabel": "內容",
+      "contentPlaceholder": "在此輸入貼文內容...",
+      "submit": "發表",
+      "cancel": "取消"
     },
-    "detail":{
-      "by":"由",
-      "comments":"留言",
-      "noComments":"（無真實留言 — 這是模擬資料）",
-      "notFound":"找不到貼文。",
-      "mockContent":"這是貼文 {id} 的模擬內容。稍後將替換為真實 API 資料。"
+    "detail": {
+      "by": "由",
+      "comments": "留言",
+      "noComments": "（無真實留言 — 這是模擬資料）",
+      "notFound": "找不到貼文。",
+      "mockContent": "這是貼文 {id} 的模擬內容。稍後將替換為真實 API 資料。"
     },
-    "card":{
-      "likes":"{count} 個讚",
-      "comments":"{count} 則留言",
-      "views":"{count} 次觀看"
+    "card": {
+      "likes": "{count} 個讚",
+      "comments": "{count} 則留言",
+      "views": "{count} 次觀看"
     },
-    "problems":{
-      "title":"題目",
-      "selectProblem":"選擇題目以查看討論",
-      "discussionCount":"{count} 則討論",
-      "noDiscussions":"尚無討論",
-      "backToProblems":"返回題目列表",
-      "backToDiscussion":"返回討論區"
+    "problems": {
+      "title": "題目",
+      "selectProblem": "選擇題目以查看討論",
+      "discussionCount": "{count} 則討論",
+      "noDiscussions": "尚無討論",
+      "backToProblems": "返回題目列表",
+      "backToDiscussion": "返回討論區"
     }
   },
   "ann": {

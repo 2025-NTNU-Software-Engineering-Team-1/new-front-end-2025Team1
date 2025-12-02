@@ -1,5 +1,5 @@
 <script setup>
-import PostDetail from './PostDetail.vue';
+import PostDetail from "./PostDetail.vue";
 </script>
 
 <template>

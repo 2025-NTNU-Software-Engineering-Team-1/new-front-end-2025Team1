@@ -55,6 +55,7 @@ const newProblem = ref<ProblemForm>({
   pipeline: {
     fopen: false,
     fwrite: false,
+    exposeTestcase: false,
     executionMode: "general",
     customChecker: false,
     teacherFirst: false,

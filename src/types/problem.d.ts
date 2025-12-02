@@ -154,6 +154,7 @@ interface ProblemConfigExtra {
     };
   };
 
+  exposeTestcase?: boolean;
   artifactCollection: ArtifactCollection[];
 }
 
@@ -163,6 +164,7 @@ interface ProblemConfigExtra {
 interface ProblemPipeline {
   fopen: boolean;
   fwrite: boolean;
+  exposeTestcase?: boolean;
   executionMode: ExecutionMode;
   customChecker: boolean;
   teacherFirst?: boolean;

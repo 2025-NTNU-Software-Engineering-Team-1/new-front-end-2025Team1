@@ -167,6 +167,14 @@ const assetPaths = computed<Record<string, string>>(
 const hasAsset = (key: string) => Boolean(assetPaths.value && assetPaths.value[key]);
 const assetDownloadUrl = (key: string) =>
   assetPaths.value && assetPaths.value[key] ? `/api/problem/${route.params.id}/asset/${key}/download` : null;
+
+function ensureDefaults() {
+  problem.value.pipeline = problem.value.pipeline || ({} as any);
+  if (problem.value.pipeline!.exposeTestcase === undefined) {
+    problem.value.pipeline!.exposeTestcase = false;
+  }
+}
+ensureDefaults();
 </script>
 
 <template>
@@ -174,7 +182,7 @@ const assetDownloadUrl = (key: string) =>
     <!-- File Process -->
     <div class="col-span-2 rounded-lg border border-gray-400 p-4">
       <div class="mb-2 text-sm font-semibold">File Process</div>
-      <div class="flex gap-x-8">
+      <div class="flex flex-wrap gap-6">
         <div class="form-control">
           <label class="label cursor-pointer justify-start gap-x-2">
             <span class="label-text">fopen</span>
@@ -185,6 +193,12 @@ const assetDownloadUrl = (key: string) =>
           <label class="label cursor-pointer justify-start gap-x-2">
             <span class="label-text">fwrite</span>
             <input type="checkbox" class="toggle" v-model="problem.pipeline!.fwrite" />
+          </label>
+        </div>
+        <div class="form-control">
+          <label class="label cursor-pointer justify-start gap-x-2">
+            <span class="label-text">Expose Testcase</span>
+            <input type="checkbox" class="toggle" v-model="problem.pipeline!.exposeTestcase" />
           </label>
         </div>
       </div>

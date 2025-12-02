@@ -64,6 +64,7 @@ const loadPostDetail = async () => {
         ...postData,
         Is_Pinned: postData.Is_Pinned ?? false,
         Is_Solved: postData.Is_Solved ?? false,
+        Is_Closed: postData.Is_Closed ?? false,
         Category: postData.Category || "",
       };
       replies.value = postData.Replies || [];
@@ -167,7 +168,7 @@ const submitReply = async () => {
 const replyToComment = (replyId: number, authorName: string) => {
   replyToId.value = replyId;
   showReplyForm.value = true;
-  replyContent.value = `@${authorName} `;
+  // 不再使用 @ 功能
 };
 
 // 取消回覆
@@ -183,6 +184,92 @@ const canManagePost = computed(() => {
   const isTeacher = session.role === 1;
   const isAuthor = session.username === post.value?.Author;
   return isAdmin || isTeacher || isAuthor;
+});
+
+// 建立巢狀回覆結構
+const nestedReplies = computed(() => {
+  const replyMap = new Map<number, DiscussionReply & { children: DiscussionReply[] }>();
+  const rootReplies: (DiscussionReply & { children: DiscussionReply[] })[] = [];
+
+  console.log("Building nested replies from:", replies.value);
+  replies.value.forEach((r) => {
+    console.log(`Reply ${r.Reply_ID}: Reply_To=${r.Reply_To}, Author=${r.Author}`);
+  });
+
+  // 初始化所有回覆，添加 children 陣列
+  replies.value.forEach((reply) => {
+    replyMap.set(reply.Reply_ID, { ...reply, children: [] });
+  });
+
+  // 檢測循環引用並標記為根回覆
+  const visited = new Set<number>();
+  const inPath = new Set<number>();
+  const cycleNodes = new Set<number>();
+
+  const detectCycle = (replyId: number): boolean => {
+    if (inPath.has(replyId)) {
+      // 找到循環，標記路徑中的所有節點
+      cycleNodes.add(replyId);
+      return true;
+    }
+    if (visited.has(replyId)) return false;
+
+    visited.add(replyId);
+    inPath.add(replyId);
+
+    const reply = replies.value.find((r) => r.Reply_ID === replyId);
+    if (reply?.Reply_To && replyMap.has(reply.Reply_To)) {
+      if (detectCycle(reply.Reply_To)) {
+        cycleNodes.add(replyId);
+      }
+    }
+
+    inPath.delete(replyId);
+    return false;
+  };
+
+  // 檢測所有可能的循環
+  replies.value.forEach((reply) => {
+    if (!visited.has(reply.Reply_ID)) {
+      detectCycle(reply.Reply_ID);
+    }
+  });
+
+  console.log("Cycle nodes detected:", Array.from(cycleNodes));
+
+  // 第一遍：找出所有根回覆
+  replies.value.forEach((reply) => {
+    const replyWithChildren = replyMap.get(reply.Reply_ID);
+    if (!replyWithChildren) return;
+
+    // 如果沒有 Reply_To、Reply_To 不存在、或在循環中，視為根回覆
+    if (!reply.Reply_To || !replyMap.has(reply.Reply_To) || cycleNodes.has(reply.Reply_ID)) {
+      rootReplies.push(replyWithChildren);
+      console.log(
+        `Reply ${reply.Reply_ID} added as root reply (Reply_To: ${reply.Reply_To}, in cycle: ${cycleNodes.has(
+          reply.Reply_ID,
+        )})`,
+      );
+    }
+  });
+
+  // 第二遍：建立父子關係（跳過循環引用）
+  replies.value.forEach((reply) => {
+    const replyWithChildren = replyMap.get(reply.Reply_ID);
+    if (!replyWithChildren) return;
+
+    // 如果有有效的父回覆且不在循環中，添加到父回覆的 children 中
+    if (reply.Reply_To && replyMap.has(reply.Reply_To) && !cycleNodes.has(reply.Reply_ID)) {
+      const parent = replyMap.get(reply.Reply_To);
+      if (parent) {
+        parent.children.push(replyWithChildren);
+        console.log(`Reply ${reply.Reply_ID} added as child of ${reply.Reply_To}`);
+      }
+    }
+  });
+
+  console.log("Root replies:", rootReplies.length, rootReplies);
+  return rootReplies;
 });
 
 onMounted(() => {
@@ -212,9 +299,10 @@ onMounted(() => {
             <div class="flex items-start justify-between">
               <div class="flex-1">
                 <div class="mb-2 flex items-center gap-2">
+                  <span v-if="post.Is_Pinned" class="text-2xl">📌</span>
                   <h1 class="text-2xl font-bold">{{ post.Title }}</h1>
-                  <span v-if="post.Is_Pinned" class="badge badge-primary">置頂</span>
-                  <span v-if="post.Is_Solved" class="badge badge-success">已解決</span>
+                  <span v-if="post.Is_Solved" class="badge badge-success">✓ 已解決</span>
+                  <span v-if="post.Is_Closed" class="badge badge-error">🔒 已關閉</span>
                 </div>
                 <div class="text-sm text-gray-500 dark:text-gray-400">
                   {{ t("discussion.detail.by") }} {{ post.Author }} ·
@@ -252,7 +340,8 @@ onMounted(() => {
                 class="btn btn-ghost btn-sm gap-2"
                 :class="{ 'text-red-500': userLikeStatus }"
                 @click="toggleLike"
-                :disabled="likingPost"
+                :disabled="likingPost || post.Is_Closed"
+                :title="post.Is_Closed ? '此討論已關閉' : ''"
               >
                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                   <path
@@ -264,7 +353,12 @@ onMounted(() => {
                 {{ post.Like_Count }}
               </button>
 
-              <button class="btn btn-ghost btn-sm gap-2" @click="showReplyForm = !showReplyForm">
+              <button
+                class="btn btn-ghost btn-sm gap-2"
+                @click="showReplyForm = !showReplyForm"
+                :disabled="post.Is_Closed"
+                :title="post.Is_Closed ? '此討論已關閉' : ''"
+              >
                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                   <path
                     fill-rule="evenodd"
@@ -277,8 +371,26 @@ onMounted(() => {
             </div>
           </div>
 
+          <!-- Closed discussion notice -->
+          <div v-if="post.Is_Closed" class="alert alert-warning mb-6">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-6 w-6 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
+            </svg>
+            <span>此討論已被關閉，無法留言或按讚</span>
+          </div>
+
           <!-- Reply form -->
-          <div v-if="showReplyForm" class="mb-6 rounded-lg bg-base-200 p-4">
+          <div v-else-if="showReplyForm" class="mb-6 rounded-lg bg-base-200 p-4">
             <div class="mb-2">
               <label class="text-sm font-medium">
                 {{ replyToId ? "回覆留言" : "發表回覆" }}
@@ -313,7 +425,7 @@ onMounted(() => {
 
             <div v-else class="space-y-4">
               <ReplyItem
-                v-for="reply in replies"
+                v-for="reply in nestedReplies"
                 :key="reply.Reply_ID"
                 :reply="reply"
                 :post-id="postId"

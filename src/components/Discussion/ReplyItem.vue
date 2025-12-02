@@ -5,8 +5,13 @@ import ReplyManagementDropdown from "./ReplyManagementDropdown.vue";
 import type { DiscussionReply } from "@/types/discussion";
 import { formatFriendlyTime } from "@/composables/useDateTime";
 
+// 擴展 DiscussionReply 類型以包含 children
+interface ReplyWithChildren extends DiscussionReply {
+  children?: ReplyWithChildren[];
+}
+
 const props = defineProps<{
-  reply: DiscussionReply;
+  reply: ReplyWithChildren;
   postId?: string | number;
 }>();
 
@@ -65,7 +70,6 @@ const handleReply = () => {
         <div class="flex items-center gap-2 text-sm">
           <span class="font-semibold">{{ reply.Author }}</span>
           <span class="text-gray-500">{{ formatFriendlyTime(reply.Created_Time) }}</span>
-          <span v-if="reply.Reply_To" class="text-xs text-blue-500"> 回覆 #{{ reply.Reply_To }} </span>
         </div>
 
         <!-- Actions dropdown -->
@@ -115,6 +119,21 @@ const handleReply = () => {
           </svg>
           {{ reply.Like_Count }}
         </button>
+      </div>
+
+      <!-- Nested replies (子回覆) -->
+      <div
+        v-if="reply.children && reply.children.length > 0"
+        class="mt-4 space-y-3 border-l-2 border-base-300 pl-4"
+      >
+        <ReplyItem
+          v-for="childReply in reply.children"
+          :key="childReply.Reply_ID"
+          :reply="childReply"
+          :post-id="postId"
+          @reply="(id, author) => emit('reply', id, author)"
+          @refresh="() => emit('refresh')"
+        />
       </div>
     </div>
   </div>

@@ -15,6 +15,9 @@ const props = defineProps<{
     comments: number;
     views?: number;
     tags?: string[];
+    isPinned?: boolean;
+    isSolved?: boolean;
+    isClosed?: boolean;
   };
 }>();
 
@@ -46,7 +49,12 @@ const formattedTime = computed(() => formatFriendlyTime(post.time));
           </div>
 
           <div class="mt-3">
-            <div class="text-lg font-bold">{{ post.title }}</div>
+            <div class="flex items-center gap-2">
+              <span v-if="post.isPinned" class="text-lg">📌</span>
+              <div class="text-lg font-bold">{{ post.title }}</div>
+              <span v-if="post.isSolved" class="badge badge-success badge-sm">✓</span>
+              <span v-if="post.isClosed" class="badge badge-error badge-sm">🔒</span>
+            </div>
             <div class="mt-2 text-sm text-gray-600 dark:text-gray-300">{{ post.excerpt }}</div>
           </div>
 

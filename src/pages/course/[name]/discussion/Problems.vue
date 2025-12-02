@@ -57,16 +57,43 @@ const loadProblems = async () => {
   }
 };
 
-// 計算題目討論數量（這裡可以在後端API中提供，或者通過額外的API調用獲取）
+// 討論貼文列表（用於統計數量）
+const allPosts = ref<any[]>([]);
+
+// 載入所有討論貼文
+const loadAllPosts = async () => {
+  try {
+    const response: any = await API.Discussion.getPosts({ Limit: 1000 });
+    const status = response.Status || response.data?.Status;
+    const postsData = response.Posts || response.data?.Posts;
+
+    if (status === "OK") {
+      allPosts.value = postsData || [];
+      console.log("Loaded all posts for counting:", allPosts.value.length);
+    }
+  } catch (err) {
+    console.error("Error loading posts for counting:", err);
+  }
+};
+
+// 計算題目討論數量
 const problemDiscussionCounts = computed(() => {
-  // 這裡應該從API獲取每個題目的討論數量
-  // 暫時使用空對象，實際應用中可以調用額外的API
   const counts: Record<number, number> = {};
+
+  allPosts.value.forEach((post) => {
+    const problemId = post.Problem_id;
+    if (problemId) {
+      counts[problemId] = (counts[problemId] || 0) + 1;
+    }
+  });
+
+  console.log("Discussion counts:", counts);
   return counts;
 });
 
-onMounted(() => {
-  loadProblems();
+onMounted(async () => {
+  await loadProblems();
+  await loadAllPosts();
 });
 </script>
 

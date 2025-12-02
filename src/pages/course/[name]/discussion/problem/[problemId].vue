@@ -154,6 +154,8 @@ const transformedPosts = computed(() => {
     likes: post.Like_Count,
     comments: post.Reply_Count,
     isPinned: post.Is_Pinned,
+    isSolved: post.Is_Solved ?? false,
+    isClosed: post.Is_Closed ?? false,
   }));
 });
 

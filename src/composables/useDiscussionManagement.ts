@@ -18,20 +18,27 @@ export function useDiscussionManagement() {
       error.value = "";
       
       const params: ManagePostStatusParams = { Action: action };
-      const response = await API.Discussion.managePostStatus(postId, params) as unknown as ManagePostStatusResponse;
+      console.log('Managing post status:', { postId, action });
+      const response: any = await API.Discussion.managePostStatus(postId, params);
+      console.log('Manage status response:', response);
       
-      if (response.Status === "OK") {
+      const status = response.Status || response.data?.Status;
+      const newStatus = response.New_Status || response.data?.New_Status;
+      
+      if (status === "OK") {
         return {
           success: true,
-          newStatus: response.New_Status,
+          newStatus: newStatus,
         };
       } else {
-        error.value = "操作失敗";
+        const errorMsg = response.Message || response.data?.Message || "操作失敗";
+        error.value = errorMsg;
         return { success: false };
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error managing post status:", err);
-      error.value = "網路錯誤";
+      const errorMsg = err.response?.data?.Message || err.message || "網路錯誤";
+      error.value = errorMsg;
       return { success: false };
     } finally {
       loading.value = false;
@@ -67,20 +74,27 @@ export function useDiscussionManagement() {
         Id: itemId 
       };
       
-      const response = await API.Discussion.deletePost(postId, params) as unknown as DeleteResponse;
+      console.log('Deleting item:', { postId, type, itemId, params });
+      const response: any = await API.Discussion.deletePost(postId, params);
+      console.log('Delete response:', response);
       
-      if (response.Status === "OK") {
+      const status = response.Status || response.data?.Status;
+      const message = response.Message || response.data?.Message;
+      
+      if (status === "OK") {
         return {
           success: true,
-          message: response.Message,
+          message: message || "刪除成功",
         };
       } else {
-        error.value = "刪除失敗";
+        const errorMsg = message || "刪除失敗";
+        error.value = errorMsg;
         return { success: false };
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error deleting item:", err);
-      error.value = "網路錯誤";
+      const errorMsg = err.response?.data?.Message || err.message || "網路錯誤";
+      error.value = errorMsg;
       return { success: false };
     } finally {
       loading.value = false;

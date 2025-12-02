@@ -41,8 +41,6 @@ const languageOptions = [
   { value: 'c', label: 'C' },
   { value: 'cpp', label: 'C++' },
   { value: 'python', label: 'Python' },
-  { value: 'java', label: 'Java' },
-  { value: 'javascript', label: 'JavaScript' },
 ];
 
 // Category options
@@ -57,16 +55,29 @@ const categoryOptions = [
 // Load problems list
 const loadProblems = async () => {
   try {
-    const response = await API.Discussion.getProblems({
+    loading.value = true;
+    const response: any = await API.Discussion.getProblems({
       Limit: 100,
       Page: 1
-    }) as unknown as GetProblemsResponse;
+    });
     
-    if (response.Status === "OK") {
-      problems.value = response.Problems || [];
+    
+    // axios interceptor 將 response.data 展開到 response 層級
+    const status = response.Status || response.data?.Status;
+    const problemsData = response.Problems || response.data?.Problems;
+
+    if (status === "OK") {
+      problems.value = problemsData || [];
+      // 空題目列表不是錯誤，只是課程還沒有題目
+    } else {
+      const errorMsg = response.Message || response.data?.Message || "未知錯誤";
+      error.value = "無法載入題目列表：" + errorMsg;
     }
   } catch (err) {
     console.error("Error loading problems:", err);
+    error.value = "載入題目列表時發生錯誤";
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -115,6 +126,11 @@ const submitPost = async () => {
     return;
   }
   
+  if (!problemId.value) {
+    error.value = "請選擇題目";
+    return;
+  }
+  
   try {
     submitting.value = true;
     error.value = "";
@@ -122,23 +138,30 @@ const submitPost = async () => {
     const postData: CreatePostParams = {
       Title: title.value.trim(),
       Content: content.value.trim(),
-      Problem_id: problemId.value || undefined,
+      Problem_id: problemId.value,
       Category: category.value || undefined,
       Language: language.value || undefined,
       Contains_Code: containsCode.value,
     };
     
-    const response = await API.Discussion.createPost(postData) as unknown as CreatePostResponse;
+    console.log('Submitting post:', postData);
+    const response: any = await API.Discussion.createPost(postData);
+    console.log('Submit response:', response);
     
-    if (response.Status === "OK") {
+    const status = response.Status || response.data?.Status;
+    const postId = response.Post_ID || response.data?.Post_ID;
+    
+    if (status === "OK" && postId) {
       // Navigate to the new post
-      router.push(`/course/${route.params.name}/discussion/${response.Post_ID}`);
+      router.push(`/course/${route.params.name}/discussion/${postId}`);
     } else {
-      error.value = "發布失敗，請稍後再試";
+      const errorMsg = response.Message || response.data?.Message || "未知錯誤";
+      error.value = "發布失敗：" + errorMsg;
     }
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error submitting post:", err);
-    error.value = "網路錯誤，請檢查網路連接";
+    const errorMsg = err.response?.data?.Message || err.message || "網路錯誤";
+    error.value = "發布失敗：" + errorMsg;
   } finally {
     submitting.value = false;
   }

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
+import { formatFriendlyTime } from "@/composables/useDateTime";
 
 const props = defineProps<{
   post: {
@@ -21,6 +22,7 @@ const { post } = props;
 const { t } = useI18n();
 
 const initials = computed(() => post.author?.[0] ?? "?");
+const formattedTime = computed(() => formatFriendlyTime(post.time));
 </script>
 
 <template>
@@ -39,7 +41,7 @@ const initials = computed(() => post.author?.[0] ?? "?");
           <div class="flex items-start justify-between">
             <div>
               <div class="text-sm font-semibold">{{ post.author }}</div>
-              <div class="text-xs text-gray-500 dark:text-gray-400">{{ post.time }}</div>
+              <div class="text-xs text-gray-500 dark:text-gray-400">{{ formattedTime }}</div>
             </div>
           </div>
 

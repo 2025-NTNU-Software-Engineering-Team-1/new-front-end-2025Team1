@@ -4,11 +4,11 @@ import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import PostCard from "@/components/Discussion/PostCard.vue";
 import API from "@/models/api";
-import type { 
-  DiscussionPost, 
-  GetPostsResponse, 
+import type {
+  DiscussionPost,
+  GetPostsResponse,
   SearchPostsResponse,
-  PaginationInfo 
+  PaginationInfo,
 } from "@/types/discussion";
 
 const { t } = useI18n();
@@ -33,29 +33,35 @@ const loadPosts = async () => {
   try {
     loading.value = true;
     error.value = "";
-    
+
     const params = {
       Mode: activeTab.value,
       Limit: pagination.value.limit,
       Page: pagination.value.page,
     };
 
-    const response = await API.Discussion.getPosts(params) as unknown as GetPostsResponse;
-    
-    if (response.Status === "OK") {
-      posts.value = response.Posts || [];
+    const response: any = await API.Discussion.getPosts(params);
+
+    // axios interceptor 將 response.data 展開到 response 層級
+    const status = response.Status || response.data?.Status;
+    const postsData = response.Posts || response.data?.Posts;
+
+    if (status === "OK") {
+      posts.value = postsData || [];
+      // 空資料不是錯誤，只是沒有貼文
     } else {
-      error.value = "Failed to load posts";
+      // 只有在真正的錯誤時才設置 error
+      const errorMsg = response.Message || response.data?.Message || "未知錯誤";
+      error.value = "載入貼文失敗：" + errorMsg;
     }
   } catch (err) {
-    console.error("Error loading posts:", err);
-    error.value = "Network error occurred";
+    error.value = "網路錯誤，請檢查連線或稍後再試";
   } finally {
     loading.value = false;
   }
 };
 
-// 搜尋貼文
+// 搜尋貼文（在前端進行過濾）
 const searchPosts = async () => {
   if (!query.value.trim()) {
     return loadPosts();
@@ -64,23 +70,37 @@ const searchPosts = async () => {
   try {
     loading.value = true;
     error.value = "";
-    
+
     const params = {
-      Words: query.value.trim(),
-      Limit: pagination.value.limit,
-      Page: pagination.value.page,
+      Limit: 100, // 載入更多以便搜尋
+      Page: 1,
     };
 
-    const response = await API.Discussion.searchPosts(params) as unknown as SearchPostsResponse;
-    
-    if (response.Status === "OK") {
-      posts.value = response.Post || [];
+    console.log("Searching posts with params:", params);
+    const response: any = await API.Discussion.getPosts(params);
+    console.log("Search response:", response);
+
+    // axios interceptor 將 response.data 展開到 response 層級
+    const status = response.Status || response.data?.Status;
+    const postsData = response.Posts || response.data?.Posts;
+
+    if (status === "OK") {
+      // 在前端進行關鍵字過濾
+      const allPosts = postsData || [];
+      const searchTerm = query.value.trim().toLowerCase();
+      posts.value = allPosts.filter((post: any) => 
+        post.Title?.toLowerCase().includes(searchTerm)
+      );
+      console.log("Found", posts.value.length, "posts matching search term out of", allPosts.length, "total");
+      // 搜尋結果為空不是錯誤
     } else {
-      error.value = "Failed to search posts";
+      console.error("Search API returned non-OK status:", response);
+      const errorMsg = response.Message || response.data?.Message || "未知錯誤";
+      error.value = "搜尋失敗：" + errorMsg;
     }
   } catch (err) {
     console.error("Error searching posts:", err);
-    error.value = "Network error occurred";
+    error.value = "網路錯誤，請檢查連線或稍後再試";
   } finally {
     loading.value = false;
   }
@@ -88,7 +108,7 @@ const searchPosts = async () => {
 
 // 轉換貼文資料格式為 PostCard 組件需要的格式
 const transformedPosts = computed(() => {
-  return posts.value.map(post => ({
+  return posts.value.map((post) => ({
     id: post.Post_Id.toString(),
     author: post.Author,
     time: post.Created_Time,
@@ -118,9 +138,12 @@ const handleTabChange = (tab: "Hot" | "New") => {
 };
 
 // 監聽路由變化
-watch(() => route.params.name, () => {
-  loadPosts();
-});
+watch(
+  () => route.params.name,
+  () => {
+    loadPosts();
+  },
+);
 
 onMounted(() => {
   loadPosts();
@@ -180,19 +203,6 @@ onMounted(() => {
               </div>
             </div>
 
-            <!-- Tag area (mock) -->
-            <div class="mt-4 max-w-2xl">
-              <div class="card bg-base-200">
-                <div class="card-body p-4">
-                  <div class="mb-2 text-sm font-semibold">{{ t('discussion.hot') }}</div>
-                  <div class="flex gap-2">
-                    <span class="badge badge-outline">python</span>
-                    <span class="badge badge-outline">c</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             <!-- Tabs -->
             <div class="mt-6 border-b">
               <nav class="flex gap-6">
@@ -201,33 +211,33 @@ onMounted(() => {
                   @click="handleTabChange('Hot')"
                   :disabled="loading"
                 >
-                  {{ t('discussion.hot') }}
+                  {{ t("discussion.hot") }}
                 </button>
                 <button
                   :class="['pb-2', activeTab === 'New' ? 'border-b-2 border-black' : 'text-gray-500']"
                   @click="handleTabChange('New')"
                   :disabled="loading"
                 >
-                  {{ t('discussion.new') }}
+                  {{ t("discussion.new") }}
                 </button>
               </nav>
             </div>
 
             <!-- Loading state -->
             <div v-if="loading" class="mt-4 flex justify-center">
-              <div class="loading loading-spinner loading-lg"></div>
+              <div class="loading-spinner loading-lg loading"></div>
             </div>
 
             <!-- Error state -->
-            <div v-else-if="error" class="mt-4 alert alert-error">
+            <div v-else-if="error" class="alert alert-error mt-4">
               <span>{{ error }}</span>
-              <button class="btn btn-sm btn-ghost" @click="loadPosts">重試</button>
+              <button class="btn btn-ghost btn-sm" @click="loadPosts">重試</button>
             </div>
 
             <!-- Posts list -->
             <div v-else class="mt-4 space-y-4">
-              <div v-if="transformedPosts.length === 0" class="text-center text-gray-500 py-8">
-                {{ query ? t('discussion.noSearchResults') : t('discussion.noPosts') }}
+              <div v-if="transformedPosts.length === 0" class="py-8 text-center text-gray-500">
+                {{ query ? t("discussion.noSearchResults") : t("discussion.noPosts") }}
               </div>
               <template v-for="post in transformedPosts" :key="post.id">
                 <router-link :to="`/course/${route.params.name}/discussion/${post.id}`" class="block">

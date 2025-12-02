@@ -11,6 +11,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   refresh: [];
   statusChanged: [newStatus: string];
+  deleted: [];
 }>();
 
 const session = useSession();
@@ -42,14 +43,22 @@ const confirmMessage = ref("");
 
 // 權限檢查
 const userRole = computed(() => {
+  console.log('Session role:', session.role);
   if (session.role === 0) return "Admin";
   if (session.role === 1) return "Teacher";
   if (session.role === 2) return "Student";
   return "Guest";
 });
-const isAuthor = computed(() => session.username === props.post.Author);
+const isAuthor = computed(() => {
+  console.log('Session username:', session.username, 'Post author:', props.post.Author);
+  return session.username === props.post.Author;
+});
 
-const canManage = computed(() => canManagePost(userRole.value, isAuthor.value));
+const canManage = computed(() => {
+  const result = canManagePost(userRole.value, isAuthor.value);
+  console.log('Can manage:', result, 'Role:', userRole.value, 'Is author:', isAuthor.value);
+  return result;
+});
 const canDelete = computed(() => canDeleteAnyPost(userRole.value) || isAuthor.value);
 const canPin = computed(() => canPinPost(userRole.value));
 const canMarkStatus = computed(() => canMarkSolved(userRole.value));
@@ -124,18 +133,26 @@ const handleClose = () => {
   );
 };
 
-const handleDelete = () => {
+const handleDelete = async () => {
   showConfirm(
     "刪除貼文",
     "刪除後無法復原，確定要刪除此貼文嗎？",
-    () => executeAction(() => deletePost(props.post.Post_Id), "貼文已刪除")
+    async () => {
+      const result = await deletePost(props.post.Post_Id);
+      if (result.success) {
+        console.log("貼文已刪除");
+        // 刪除成功後導航回討論區首頁
+        emit('deleted');
+        closeConfirmDialog();
+      }
+    }
   );
 };
 </script>
 
 <template>
   <div v-if="canManage" class="dropdown dropdown-end">
-    <label tabindex="0" class="btn btn-ghost btn-sm" :disabled="loading">
+    <label tabindex="0" class="btn btn-ghost btn-sm" :class="{ 'btn-disabled': loading }">
       <svg v-if="!loading" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
         <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/>
       </svg>

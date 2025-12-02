@@ -217,6 +217,8 @@
     "post":"發文",
     "hot":"熱門",
     "new":"最新",
+    "noPosts":"尚無貼文",
+    "noSearchResults":"找不到符合搜尋條件的貼文",
     "create":{
       "title":"建立貼文",
       "problem":"題目",

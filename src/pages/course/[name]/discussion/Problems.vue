@@ -31,21 +31,31 @@ const loadProblems = async () => {
     error.value = "";
     
     const params = {
-      Mode: "New",
+      Mode: "All",  // 後端只支援 "All" 模式
       Limit: pagination.value.limit,
       Page: pagination.value.page,
     };
 
-    const response = await API.Discussion.getProblems(params) as unknown as GetProblemsResponse;
+    console.log('Loading problems with params:', params);
+    const response: any = await API.Discussion.getProblems(params);
+    console.log('Problems response:', response);
     
-    if (response.Status === "OK") {
-      problems.value = response.Problems || [];
+    // axios interceptor 將 response.data 展開到 response 層級
+    const status = response.Status || response.data?.Status;
+    const problemsData = response.Problems || response.data?.Problems;
+    
+    if (status === "OK") {
+      problems.value = problemsData || [];
+      console.log('Loaded problems count:', problems.value.length);
     } else {
-      error.value = "Failed to load problems";
+      console.error('Failed to load problems:', response);
+      const errorMsg = response.Message || response.data?.Message || "未知錯誤";
+      error.value = "載入題目失敗：" + errorMsg;
     }
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error loading problems:", err);
-    error.value = "Network error occurred";
+    const errorMsg = err.response?.data?.Message || err.message || "網路錯誤";
+    error.value = "載入題目失敗：" + errorMsg;
   } finally {
     loading.value = false;
   }

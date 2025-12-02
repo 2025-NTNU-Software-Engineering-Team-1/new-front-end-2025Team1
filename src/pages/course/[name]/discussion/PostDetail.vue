@@ -6,6 +6,7 @@ import { useSession } from "@/stores/session";
 import API from "@/models/api";
 import ReplyItem from "@/components/Discussion/ReplyItem.vue";
 import PostManagementDropdown from "@/components/Discussion/PostManagementDropdown.vue";
+import { formatFriendlyTime } from "@/composables/useDateTime";
 import type { 
   DiscussionPostDetail, 
   DiscussionReply,
@@ -42,17 +43,38 @@ const loadPostDetail = async () => {
     loading.value = true;
     error.value = "";
     
-    const response = await API.Discussion.getPostDetail(postId) as unknown as GetPostDetailResponse;
+    const response: any = await API.Discussion.getPostDetail(postId);
     
-    if (response.Status === "OK" && response.Post && response.Post.length > 0) {
-      post.value = response.Post[0];
-      replies.value = response.Post[0].Replies || [];
+    console.log('Post detail response:', response);
+    console.log('response.data:', response.data);
+    
+    // axios interceptor 將 response.data 展開到 response 層級
+    const status = response.Status || response.data?.Status;
+    const postArray = response.Post || response.data?.Post;
+    
+    console.log('Parsed status:', status);
+    console.log('Parsed post array:', postArray);
+    
+    if (status === "OK" && postArray && Array.isArray(postArray) && postArray.length > 0) {
+      const postData = postArray[0];
+      console.log('Post data:', postData);
+      
+      // 確保必要欄位有預設值
+      post.value = {
+        ...postData,
+        Is_Pinned: postData.Is_Pinned ?? false,
+        Is_Solved: postData.Is_Solved ?? false,
+        Category: postData.Category || '',
+      };
+      replies.value = postData.Replies || [];
+      console.log('Post loaded successfully:', post.value?.Title || 'Untitled');
     } else {
-      error.value = "Post not found";
+      console.error('Invalid response - status:', status, 'postArray:', postArray);
+      error.value = "找不到貼文";
     }
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error loading post detail:", err);
-    error.value = "Failed to load post";
+    error.value = "載入貼文失敗：" + (err?.message || "未知錯誤");
   } finally {
     loading.value = false;
   }
@@ -68,17 +90,31 @@ const toggleLike = async () => {
     const currentLikeStatus = userLikeStatus.value ?? false;
     const newAction = !currentLikeStatus;
     
-    const response = await API.Discussion.likePost(postId, {
+    console.log('Toggling like:', { currentLikeStatus, newAction, postId });
+    
+    const response: any = await API.Discussion.likePost(postId, {
       ID: post.value.Post_Id,
       Action: newAction
-    }) as unknown as LikeActionResponse;
+    });
     
-    if (response.Status === "OK") {
-      post.value.Like_Count = response.Like_Count;
-      userLikeStatus.value = response.Like_Status;
+    console.log('Like response:', response);
+    
+    const status = response.Status || response.data?.Status;
+    const likeCount = response.Like_Count ?? response.data?.Like_Count;
+    const likeStatus = response.Like_Status ?? response.data?.Like_Status;
+    
+    if (status === "OK") {
+      // 立即更新 UI
+      post.value.Like_Count = likeCount;
+      userLikeStatus.value = likeStatus;
+      console.log('Like updated:', { likeCount, likeStatus });
+    } else {
+      console.error('Like failed:', response);
     }
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error toggling like:", err);
+    const errorMsg = err.response?.data?.Message || err.message;
+    console.error('Like error details:', errorMsg);
   } finally {
     likingPost.value = false;
   }
@@ -97,9 +133,13 @@ const submitReply = async () => {
       ...(replyToId.value && { Reply_To: replyToId.value })
     };
     
-    const response = await API.Discussion.createReply(postId, replyData) as unknown as CreateReplyResponse;
+    console.log('Submitting reply:', replyData);
+    const response: any = await API.Discussion.createReply(postId, replyData);
+    console.log('Reply response:', response);
     
-    if (response.Status === "OK") {
+    const status = response.Status || response.data?.Status;
+    
+    if (status === "OK") {
       // 重新載入貼文以獲取最新的回覆
       await loadPostDetail();
       
@@ -107,9 +147,17 @@ const submitReply = async () => {
       replyContent.value = "";
       showReplyForm.value = false;
       replyToId.value = undefined;
+      
+      console.log('Reply submitted successfully');
+    } else {
+      console.error('Reply failed:', response);
+      const errorMsg = response.Message || response.data?.Message || '回覆失敗';
+      alert('發表回覆失敗：' + errorMsg);
     }
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error submitting reply:", err);
+    const errorMsg = err.response?.data?.Message || err.message || '網路錯誤';
+    alert('發表回覆失敗：' + errorMsg);
   } finally {
     submittingReply.value = false;
   }
@@ -169,7 +217,7 @@ onMounted(() => {
                   <span v-if="post.Is_Solved" class="badge badge-success">已解決</span>
                 </div>
                 <div class="text-sm text-gray-500 dark:text-gray-400">
-                  {{ t('discussion.detail.by') }} {{ post.Author }} · {{ post.Created_Time }}
+                  {{ t('discussion.detail.by') }} {{ post.Author }} · {{ formatFriendlyTime(post.Created_Time) }}
                 </div>
                 <div v-if="post.Category" class="mt-1">
                   <span class="badge badge-outline">{{ post.Category }}</span>
@@ -182,6 +230,7 @@ onMounted(() => {
                 :post="post"
                 @refresh="loadPostDetail"
                 @status-changed="(newStatus) => { /* Handle status change */ }"
+                @deleted="() => router.push(`/course/${route.params.name}/discussion`)"
               />
             </div>
           </div>
@@ -251,7 +300,7 @@ onMounted(() => {
             </h3>
             
             <div v-if="replies.length === 0" class="text-center text-gray-500 py-4">
-              {{ t('discussion.detail.noComments') }}
+              尚無留言
             </div>
             
             <div v-else class="space-y-4">

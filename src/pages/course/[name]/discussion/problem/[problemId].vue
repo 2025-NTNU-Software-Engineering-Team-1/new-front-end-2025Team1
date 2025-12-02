@@ -47,16 +47,25 @@ const loadProblemPosts = async () => {
       Page: pagination.value.page,
     };
 
-    const response = await API.Discussion.getPosts(params) as unknown as GetPostsResponse;
+    console.log("Loading posts for problem:", problemId, "with params:", params);
+    const response: any = await API.Discussion.getPosts(params);
+    console.log("Problem posts response:", response);
     
-    if (response.Status === "OK") {
-      posts.value = response.Posts || [];
+    // axios interceptor 將 response.data 展開到 response 層級
+    const status = response.Status || response.data?.Status;
+    const postsData = response.Posts || response.data?.Posts;
+    
+    if (status === "OK") {
+      posts.value = postsData || [];
+      console.log("Loaded", posts.value.length, "posts for problem", problemId);
     } else {
-      error.value = "Failed to load posts";
+      console.error("Failed to load problem posts, response:", response);
+      const errorMsg = response.Message || response.data?.Message || "未知錯誤";
+      error.value = "載入貼文失敗：" + errorMsg;
     }
   } catch (err) {
     console.error("Error loading problem posts:", err);
-    error.value = "Network error occurred";
+    error.value = "網路錯誤，請檢查連線或稍後再試";
   } finally {
     loading.value = false;
   }
@@ -65,21 +74,33 @@ const loadProblemPosts = async () => {
 // 載入題目資訊
 const loadProblemMeta = async () => {
   try {
-    const response = await API.Discussion.getProblemMeta(problemId) as unknown as GetProblemMetaResponse;
+    console.log("Loading problem meta for:", problemId);
+    const response: any = await API.Discussion.getProblemMeta(problemId);
+    console.log("Problem meta response:", response);
     
-    if (response.Status === "OK") {
+    // axios interceptor 將 response.data 展開到 response 層級
+    const status = response.Status || response.data?.Status;
+    
+    if (status === "OK") {
+      // 設置題目名稱
+      const name = response.Problem_Name || response.data?.Problem_Name;
+      if (name) {
+        problemName.value = name;
+      }
+      
       problemMeta.value = {
-        Role: response.Role,
-        Deadline: response.Deadline,
-        Code_Allowed: response.Code_Allowed,
+        Role: response.Role || response.data?.Role,
+        Deadline: response.Deadline || response.data?.Deadline,
+        Code_Allowed: response.Code_Allowed ?? response.data?.Code_Allowed,
       };
+      console.log("Problem meta loaded:", problemMeta.value);
     }
   } catch (err) {
     console.error("Error loading problem meta:", err);
   }
 };
 
-// 搜尋題目相關貼文
+// 搜尋題目相關貼文（在前端進行過濾）
 const searchProblemPosts = async () => {
   if (!query.value.trim()) {
     return loadProblemPosts();
@@ -90,22 +111,35 @@ const searchProblemPosts = async () => {
     error.value = "";
     
     const params = {
-      Words: `${query.value.trim()} problem:${problemId}`,
-      Limit: pagination.value.limit,
-      Page: pagination.value.page,
+      Problem_Id: problemId,
+      Limit: 100, // 載入更多以便搜尋
+      Page: 1,
     };
 
-    const response = await API.Discussion.searchPosts(params) as unknown as SearchPostsResponse;
+    console.log("Searching problem posts with params:", params);
+    const response: any = await API.Discussion.getPosts(params);
+    console.log("Search response:", response);
     
-    if (response.Status === "OK") {
-      // 過濾出屬於當前題目的貼文
-      posts.value = (response.Post || []).filter(post => post.Problem_id === problemId);
+    // axios interceptor 將 response.data 展開到 response 層級
+    const status = response.Status || response.data?.Status;
+    const postsData = response.Posts || response.data?.Posts;
+    
+    if (status === "OK") {
+      // 在前端進行關鍵字過濾
+      const allPosts = postsData || [];
+      const searchTerm = query.value.trim().toLowerCase();
+      posts.value = allPosts.filter((post: any) => 
+        post.Title?.toLowerCase().includes(searchTerm)
+      );
+      console.log("Found", posts.value.length, "posts matching search term out of", allPosts.length, "total");
     } else {
-      error.value = "Failed to search posts";
+      console.error("Search failed, response:", response);
+      const errorMsg = response.Message || response.data?.Message || "未知錯誤";
+      error.value = "搜尋失敗：" + errorMsg;
     }
   } catch (err) {
     console.error("Error searching problem posts:", err);
-    error.value = "Network error occurred";
+    error.value = "網路錯誤，請檢查連線或稍後再試";
   } finally {
     loading.value = false;
   }
@@ -142,8 +176,6 @@ watch(() => route.params.problemId, (newProblemId) => {
 onMounted(() => {
   loadProblemPosts();
   loadProblemMeta();
-  // 設置題目名稱（可以從API或其他地方獲取）
-  problemName.value = `Problem ${problemId}`;
 });
 </script>
 
@@ -188,10 +220,6 @@ onMounted(() => {
               <div v-if="problemMeta?.Deadline" class="mt-1 text-sm text-gray-500">
                 截止時間: {{ problemMeta.Deadline }}
               </div>
-            </div>
-            
-            <div v-if="problemMeta" class="badge badge-outline">
-              {{ problemMeta.Role }}
             </div>
           </div>
         </div>

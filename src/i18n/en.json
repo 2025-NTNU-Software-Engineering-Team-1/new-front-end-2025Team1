@@ -194,6 +194,8 @@
     "post":"Post",
     "hot":"Hot",
     "new":"New",
+    "noPosts":"No posts yet",
+    "noSearchResults":"No posts found matching your search",
     "create":{
       "title":"Create Post",
       "problem":"Problem",

@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import { useSession } from "@/stores/session";
 import ReplyManagementDropdown from "./ReplyManagementDropdown.vue";
 import type { DiscussionReply } from "@/types/discussion";
+import { formatFriendlyTime } from "@/composables/useDateTime";
 
 const props = defineProps<{
   reply: DiscussionReply;
@@ -12,7 +13,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   reply: [replyId: number, authorName: string];
   refresh: [];
-}>; 
+}>(); 
 
 const session = useSession();
 
@@ -57,7 +58,7 @@ const handleReply = () => {
       <div class="flex items-center justify-between mb-2">
         <div class="flex items-center gap-2 text-sm">
           <span class="font-semibold">{{ reply.Author }}</span>
-          <span class="text-gray-500">{{ reply.Created_Time }}</span>
+          <span class="text-gray-500">{{ formatFriendlyTime(reply.Created_Time) }}</span>
           <span v-if="reply.Reply_To" class="text-blue-500 text-xs">
             回覆 #{{ reply.Reply_To }}
           </span>

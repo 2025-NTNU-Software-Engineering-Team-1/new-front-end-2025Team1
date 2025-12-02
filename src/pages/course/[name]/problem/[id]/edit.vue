@@ -23,8 +23,8 @@ function normalizeConfig(config?: ProblemConfigExtra): ProblemConfigExtra {
   const base: ProblemConfigExtra = {
     trialMode: false,
     aiVTuber: false,
-    aiVTuberMaxToken: 0,
-    aiVTuberMode: "guided",
+    aiVTuberApiKeys: [],
+    aiVTuberMode: "gemini-2.5-flash-lite",
     acceptedFormat: "code",
     maxStudentZipSizeMB: 50,
     networkAccessRestriction: {
@@ -44,8 +44,8 @@ function normalizeConfig(config?: ProblemConfigExtra): ProblemConfigExtra {
     ...(config || {}),
     trialMode: config?.trialMode ?? base.trialMode,
     aiVTuber: config?.aiVTuber ?? base.aiVTuber,
-    aiVTuberMaxToken: config?.aiVTuberMaxToken ?? base.aiVTuberMaxToken,
     aiVTuberMode: config?.aiVTuberMode ?? base.aiVTuberMode,
+    aiVTuberApiKeys: Array.isArray(config?.aiVTuberApiKeys) ? config!.aiVTuberApiKeys : base.aiVTuberApiKeys,
     acceptedFormat: config?.acceptedFormat ?? base.acceptedFormat,
     maxStudentZipSizeMB: config?.maxStudentZipSizeMB ?? base.maxStudentZipSizeMB,
     artifactCollection: config?.artifactCollection ?? base.artifactCollection,
@@ -191,7 +191,7 @@ async function submit() {
     const cfg = {
       ...edittingProblem.value.config,
       aiVTuber: edittingProblem.value.config.aiVTuber,
-      aiVTuberMaxToken: edittingProblem.value.config.aiVTuberMaxToken,
+      aiVTuberApiKeys: edittingProblem.value.config.aiVTuberApiKeys || [],
       aiVTuberMode: edittingProblem.value.config.aiVTuberMode,
     };
     const pipe = { ...edittingProblem.value.pipeline };

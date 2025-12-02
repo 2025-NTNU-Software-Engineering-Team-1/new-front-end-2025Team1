@@ -5,9 +5,9 @@ import { required, maxLength, between, helpers } from "@vuelidate/validators";
 
 function getAllowedFileExtensions(allowedLanguage: number): string[] {
   const list: string[] = [];
-  if (allowedLanguage & 1) list.push('.c');
-  if (allowedLanguage & 2) list.push('.cpp');
-  if (allowedLanguage & 4) list.push('.py');
+  if (allowedLanguage & 1) list.push(".c");
+  if (allowedLanguage & 2) list.push(".cpp");
+  if (allowedLanguage & 4) list.push(".py");
   return list;
 }
 
@@ -159,12 +159,12 @@ const rules = {
       validExtension: helpers.withMessage(
         (ctx) => {
           const exts = getAllowedFileExtensions(problem.value.allowedLanguage);
-          return `Teacher file must have one of the following extensions: ${exts.join(', ')}`;
+          return `Teacher file must have one of the following extensions: ${exts.join(", ")}`;
         },
         () => {
           const file = problem.value.assets?.teacherFile;
           if (!file) return true; // Allow null/undefined
-          if (problem.value.pipeline?.executionMode !== 'interactive') return true; // Only validate in interactive mode
+          if (problem.value.pipeline?.executionMode !== "interactive") return true; // Only validate in interactive mode
           const exts = getAllowedFileExtensions(problem.value.allowedLanguage);
           const fileName = file.name.toLowerCase();
           return exts.some((ext) => fileName.endsWith(ext.toLowerCase()));
@@ -172,49 +172,37 @@ const rules = {
       ),
     },
     makefileZip: {
-      validExtension: helpers.withMessage(
-        'Makefile must be a .zip file',
-        () => {
-          const file = problem.value.assets?.makefileZip;
-          if (!file) return true; // Allow null/undefined
-          if (problem.value.pipeline?.executionMode !== 'functionOnly') return true; // Only validate in functionOnly mode
-          return file.name.toLowerCase().endsWith('.zip');
-        },
-      ),
+      validExtension: helpers.withMessage("Makefile must be a .zip file", () => {
+        const file = problem.value.assets?.makefileZip;
+        if (!file) return true; // Allow null/undefined
+        if (problem.value.pipeline?.executionMode !== "functionOnly") return true; // Only validate in functionOnly mode
+        return file.name.toLowerCase().endsWith(".zip");
+      }),
     },
     customCheckerPy: {
-      validExtension: helpers.withMessage(
-        'Custom checker must be a .py file',
-        () => {
-          const file = problem.value.assets?.customCheckerPy;
-          if (!file) return true; // Allow null/undefined
-          if (!problem.value.pipeline?.customChecker) return true; // Only validate when custom checker is enabled
-          return file.name.toLowerCase().endsWith('.py');
-        },
-      ),
+      validExtension: helpers.withMessage("Custom checker must be a .py file", () => {
+        const file = problem.value.assets?.customCheckerPy;
+        if (!file) return true; // Allow null/undefined
+        if (!problem.value.pipeline?.customChecker) return true; // Only validate when custom checker is enabled
+        return file.name.toLowerCase().endsWith(".py");
+      }),
     },
     scorePy: {
-      validExtension: helpers.withMessage(
-        'Scoring script must be a .py file',
-        () => {
-          const file = problem.value.assets?.scorePy;
-          if (!file) return true; // Allow null/undefined
-          if (!problem.value.pipeline?.scoringScript?.custom) return true; // Only validate when custom scoring is enabled
-          return file.name.toLowerCase().endsWith('.py');
-        },
-      ),
+      validExtension: helpers.withMessage("Scoring script must be a .py file", () => {
+        const file = problem.value.assets?.scorePy;
+        if (!file) return true; // Allow null/undefined
+        if (!problem.value.pipeline?.scoringScript?.custom) return true; // Only validate when custom scoring is enabled
+        return file.name.toLowerCase().endsWith(".py");
+      }),
     },
     localServiceZip: {
-      validExtension: helpers.withMessage(
-        'Local service must be a .zip file',
-        () => {
-          const file = problem.value.assets?.localServiceZip;
-          if (!file) return true; // Allow null/undefined
-          const netRestriction = problem.value.config?.networkAccessRestriction;
-          if (!netRestriction?.connectWithLocal?.enabled) return true; // Only validate when connectWithLocal is enabled
-          return file.name.toLowerCase().endsWith('.zip');
-        },
-      ),
+      validExtension: helpers.withMessage("Local service must be a .zip file", () => {
+        const file = problem.value.assets?.localServiceZip;
+        if (!file) return true; // Allow null/undefined
+        const netRestriction = problem.value.config?.networkAccessRestriction;
+        if (!netRestriction?.connectWithLocal?.enabled) return true; // Only validate when connectWithLocal is enabled
+        return file.name.toLowerCase().endsWith(".zip");
+      }),
     },
   },
 };

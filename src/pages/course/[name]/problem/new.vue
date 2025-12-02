@@ -40,8 +40,8 @@ const newProblem = ref<ProblemForm>({
   config: {
     trialMode: false,
     aiVTuber: false,
-    aiVTuberMaxToken: 0,
-    aiVTuberMode: "guided",
+    aiVTuberApiKeys: [],
+    aiVTuberMode: "gemini-2.5-flash-lite",
     acceptedFormat: "code",
     maxStudentZipSizeMB: 50,
     networkAccessRestriction: {
@@ -96,7 +96,7 @@ async function submit() {
     const cfg = {
       ...newProblem.value.config,
       aiVTuber: newProblem.value.config.aiVTuber,
-      aiVTuberMaxToken: newProblem.value.config.aiVTuberMaxToken,
+      aiVTuberApiKeys: newProblem.value.config.aiVTuberApiKeys || [],
       aiVTuberMode: newProblem.value.config.aiVTuberMode,
     };
     const pipe = { ...newProblem.value.pipeline };

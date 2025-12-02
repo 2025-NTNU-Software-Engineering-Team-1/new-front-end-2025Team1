@@ -127,10 +127,10 @@ watch(
   () => problem.value.pipeline!.executionMode,
   (newMode: string) => {
     if (newMode === "interactive") {
-            problem.value.pipeline!.customChecker = false;
-            if (problem.value.assets) {
-              problem.value.assets.customCheckerPy = null;
-            }
+      problem.value.pipeline!.customChecker = false;
+      if (problem.value.assets) {
+        problem.value.assets.customCheckerPy = null;
+      }
     }
   },
 );
@@ -617,7 +617,9 @@ ensureDefaults();
                   Allowed: {{ getAllowedFileExtensions().join(", ") }}
                 </span>
                 <label v-if="v$?.assets?.teacherFile?.$error" class="label">
-                  <span class="label-text-alt text-error">{{ v$.assets.teacherFile.$errors[0]?.$message }}</span>
+                  <span class="label-text-alt text-error">{{
+                    v$.assets.teacherFile.$errors[0]?.$message
+                  }}</span>
                 </label>
               </div>
             </div>
@@ -681,7 +683,9 @@ ensureDefaults();
             />
           </div>
           <label v-if="v$?.assets?.customCheckerPy?.$error" class="label">
-            <span class="label-text-alt text-error">{{ v$.assets.customCheckerPy.$errors[0]?.$message }}</span>
+            <span class="label-text-alt text-error">{{
+              v$.assets.customCheckerPy.$errors[0]?.$message
+            }}</span>
           </label>
         </div>
         <div v-else class="text-xs opacity-70">

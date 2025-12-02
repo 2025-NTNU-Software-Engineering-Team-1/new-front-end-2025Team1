@@ -135,8 +135,8 @@ interface ProblemConfigExtra {
   maxStudentZipSizeMB?: number;
 
   // AI VTuber
-  aiVTuberMaxToken?: number;
-  aiVTuberMode?: "guided" | "unlimited";
+  aiVTuberMode?: "gemini-2.5-flash-lite" | "gemini-2.5-flash" | "gemini-2.5-pro";
+  aiVTuberApiKeys?: string[];
 
   // Network Access Restriction
   networkAccessRestriction?: {

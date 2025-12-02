@@ -1,86 +1,48 @@
 <script setup lang="ts">
-import { inject, Ref, ref, watch, nextTick, computed } from "vue";
+import { inject, Ref, ref, reactive, watch, computed, onMounted, onBeforeUnmount } from "vue";
 import { useRoute } from "vue-router";
+
 import LanguageMultiSelect from "../../Forms/LanguageMultiSelect.vue";
 import MultiStringInput from "../Controls/MultiStringInput.vue";
-import { assertFileSizeOK, validateFilesForAIAC } from "@/utils/checkFileSize";
 
+import { assertFileSizeOK, validateFilesForAIAC } from "@/utils/checkFileSize";
+import { fetcher } from "@/models/api";
+import api from "@/models/api";
+
+/* -------------------- Injection & Setup -------------------- */
 const rawProblem = inject<Ref<ProblemForm> | undefined>("problem");
 if (!rawProblem || !rawProblem.value) throw new Error("ConfigurationSection requires problem injection");
+
 const problem = rawProblem as Ref<ProblemForm>;
-const v$ = inject<any>("v$"); // Inject validation object
+const v$ = inject<any>("v$");
 const route = useRoute();
 
-const quotaError = ref("");
-const localQuota = ref<number | "">(problem.value?.quota ?? "");
+/* -------------------- Course -------------------- */
+const courseId = ref<number | null>(null);
 
-// --- AI Token 效果 ---
-const isFlipping = ref(false);
-const flyNumber = ref<number | null>(null);
-const showParticles = ref(false);
-
-function spinAndRandomToken() {
-  if (isFlipping.value) return;
-  isFlipping.value = true;
-  setTimeout(async () => {
-    const r = Math.floor(2000 + Math.random() * 7000);
-    flyNumber.value = r;
-    problem.value.config!.aiVTuberMaxToken = r;
-    showParticles.value = false;
-    await nextTick();
-    showParticles.value = true;
-    setTimeout(() => (showParticles.value = false), 900);
-    setTimeout(() => (flyNumber.value = null), 1200);
-    isFlipping.value = false;
-  }, 320 + Math.random() * 330);
-}
-
-// 初始化
-watch(
-  () => problem.value,
-  (n, o) => {
-    if (n !== o) {
-      localQuota.value = n?.quota ?? "";
-      quotaError.value = "";
-    }
-  },
-  { deep: false },
-);
-function ensureConfig() {
-  if (!problem.value.config) {
-    problem.value.config = {
-      trialMode: false,
-      aiVTuber: false,
-      acceptedFormat: "code",
-      maxStudentZipSizeMB: 50,
-      aiVTuberMaxToken: 0,
-      aiVTuberMode: "guided",
-      networkAccessRestriction: {
-        enabled: false,
-        firewallExtranet: { enabled: false, whitelist: [], blacklist: [] },
-        connectWithLocal: { enabled: false, whitelist: [], blacklist: [], localServiceZip: null },
-      },
-      artifactCollection: [],
-    };
+async function fetchCourseId() {
+  try {
+    const resp = await fetcher.get(`/course/${route.params.name}`);
+    courseId.value = resp.data.id;
+  } catch {
+    console.warn("Failed to fetch course id");
   }
 }
-ensureConfig();
 
-const assetPaths = computed<Record<string, string>>(
-  () => ((problem.value.config as any)?.assetPaths as Record<string, string>) || {},
-);
-const hasAsset = (key: string) => Boolean(assetPaths.value && assetPaths.value[key]);
-const assetDownloadUrl = (key: string) =>
-  assetPaths.value && assetPaths.value[key] ? `/api/problem/${route.params.id}/asset/${key}/download` : null;
+/* -------------------- Quota -------------------- */
+const quotaError = ref("");
+const localQuota = ref<number | "">(problem.value?.quota ?? "");
 
 function onQuotaInput(e: Event) {
   const inputEl = e.target as HTMLInputElement;
   const valStr = inputEl.value;
+
   if (valStr === "") {
     localQuota.value = "";
     quotaError.value = "";
     return;
   }
+
   const val = Number(valStr);
   if (val === -1 || (val >= 1 && val <= 500)) {
     localQuota.value = val;
@@ -93,6 +55,42 @@ function onQuotaInput(e: Event) {
   }
 }
 
+/* -------------------- Problem Config Ensure -------------------- */
+function ensureConfig() {
+  if (!problem.value.config) {
+    problem.value.config = {
+      trialMode: false,
+      aiVTuber: false,
+      acceptedFormat: "code",
+      maxStudentZipSizeMB: 50,
+      aiVTuberApiKeys: [],
+      aiVTuberMode: "gemini-2.5-flash-lite",
+      networkAccessRestriction: {
+        enabled: false,
+        firewallExtranet: { enabled: false, whitelist: [], blacklist: [] },
+        connectWithLocal: {
+          enabled: false,
+          whitelist: [],
+          blacklist: [],
+          localServiceZip: null,
+        },
+      },
+      artifactCollection: [],
+    };
+  }
+}
+ensureConfig();
+
+/* -------------------- Assets -------------------- */
+const assetPaths = computed<Record<string, string>>(
+  () => ((problem.value.config as any)?.assetPaths as Record<string, string>) || {},
+);
+
+const hasAsset = (key: string) => !!(assetPaths.value && assetPaths.value[key]);
+const assetDownloadUrl = (key: string) =>
+  assetPaths.value[key] ? `/api/problem/${route.params.id}/asset/${key}/download` : null;
+
+/* -------------------- AI File Extensions -------------------- */
 function getAIFileExtensions() {
   const lang = problem.value.allowedLanguage;
   const list: string[] = [];
@@ -102,37 +100,162 @@ function getAIFileExtensions() {
   return list;
 }
 
+/* -------------------- API Keys -------------------- */
+const apiKeys = reactive<{ active: any[]; inactive: any[] }>({
+  active: [],
+  inactive: [],
+});
+const selectedKeys = ref<string[]>([]);
+const isFetchingKeys = ref(false);
+const fetchError = ref("");
+const showActiveKeys = ref(true);
+const showInactiveKeys = ref(true);
+
+async function fetchKeys() {
+  if (!courseId.value) await fetchCourseId();
+
+  isFetchingKeys.value = true;
+  fetchError.value = "";
+  try {
+    const { data } = await api.AIVTuber.getCourseKeys(courseId.value!);
+    const allKeys = data.keys || [];
+    apiKeys.active = allKeys.filter((k) => k.is_active);
+    apiKeys.inactive = allKeys.filter((k) => !k.is_active);
+  } catch {
+    fetchError.value = "Failed to load keys.";
+  } finally {
+    isFetchingKeys.value = false;
+  }
+}
+
+/* -------------------- Key Search -------------------- */
+const searchQuery = ref("");
+const activeKeyRefs = ref<Record<string, HTMLElement | null>>({});
+const inactiveKeyRefs = ref<Record<string, HTMLElement | null>>({});
+
+function scrollToKey() {
+  const query = searchQuery.value.trim().toLowerCase();
+  if (!query) return;
+
+  const matchActive = apiKeys.active.find((k) => k.key_name.toLowerCase().includes(query));
+  const matchInactive = apiKeys.inactive.find((k) => k.key_name.toLowerCase().includes(query));
+
+  if (matchActive) {
+    showActiveKeys.value = true;
+    requestAnimationFrame(() => {
+      activeKeyRefs.value[matchActive.id]?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    });
+  } else if (matchInactive) {
+    showInactiveKeys.value = true;
+    requestAnimationFrame(() => {
+      inactiveKeyRefs.value[matchInactive.id]?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    });
+  }
+}
+
+/* -------------------- Suggestion Tooltip -------------------- */
+const showSuggestionTooltip = ref(false);
+const keySuggestion = ref<{
+  student_count?: number;
+  suggested_key_count?: number;
+  reason?: string;
+} | null>(null);
+
+const isFetchingSuggestion = ref(false);
+const suggestionError = ref("");
+
+async function fetchKeySuggestion() {
+  if (!courseId.value) await fetchCourseId();
+
+  const model = problem.value.config?.aiVTuberMode || "gemini-2.5-flash-lite";
+
+  isFetchingSuggestion.value = true;
+  suggestionError.value = "";
+
+  try {
+    const { data } = await api.AIVTuber.getKeySuggestion(courseId.value!, model);
+    keySuggestion.value = data;
+  } catch (err: any) {
+    suggestionError.value = err?.response?.data?.detail || "Failed to fetch suggestion.";
+    keySuggestion.value = null;
+  } finally {
+    isFetchingSuggestion.value = false;
+  }
+}
+
+/* -------------------- Tooltip Outside Click -------------------- */
+function onClickOutside(event: MouseEvent) {
+  const tooltipEl = document.querySelector(".key-suggestion-tooltip");
+  const buttonEl = document.querySelector(".btn-key-suggestion");
+
+  if (tooltipEl?.contains(event.target as Node) || buttonEl?.contains(event.target as Node)) return;
+
+  showSuggestionTooltip.value = false;
+}
+
+/* -------------------- Firewall & Local Modes -------------------- */
 const firewallMode = ref<"whitelist" | "blacklist">("whitelist");
 const localMode = ref<"whitelist" | "blacklist">("whitelist");
 
-// 監聽切換時清空對方清單
+/* -------------------- Watches -------------------- */
+watch(
+  () => problem.value,
+  (n, o) => {
+    if (n !== o) {
+      localQuota.value = n?.quota ?? "";
+      quotaError.value = "";
+    }
+  },
+);
+
 watch(firewallMode, (newMode) => {
   const oppositeMode = newMode === "whitelist" ? "blacklist" : "whitelist";
   problem.value.config!.networkAccessRestriction!.firewallExtranet![oppositeMode] = [];
 });
+
 watch(localMode, (newMode) => {
   const oppositeMode = newMode === "whitelist" ? "blacklist" : "whitelist";
   problem.value.config!.networkAccessRestriction!.connectWithLocal![oppositeMode] = [];
+});
+
+watch(selectedKeys, (keys) => {
+  problem.value.config!.aiVTuberApiKeys = keys;
+});
+
+/* -------------------- Lifecycle -------------------- */
+onMounted(() => {
+  fetchKeys();
+  document.addEventListener("click", onClickOutside);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("click", onClickOutside);
 });
 </script>
 
 <template>
   <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
     <!-- Allowed Languages -->
-    <div class="form-control w-full max-w-xs rounded-lg border border-base-300 p-4">
+    <div class="form-control rounded-lg border border-base-300 p-4">
       <label class="label"><span class="label-text">Allowed Languages</span></label>
-      <language-multi-select
+      <LanguageMultiSelect
         :model-value="problem.allowedLanguage"
         @update:model-value="(v) => (problem.allowedLanguage = v)"
       />
     </div>
 
     <!-- Tags -->
-    <div class="form-control w-full max-w-xs rounded-lg border border-base-300 p-4">
+    <div class="form-control rounded-lg border border-base-300 p-4">
       <label class="label"><span class="label-text">Tags</span></label>
       <input
         type="text"
-        class="input input-bordered w-full max-w-xs"
+        class="input input-bordered"
         :value="problem.tags.join(',')"
         @input="
           problem.tags = ($event.target as HTMLInputElement).value
@@ -145,14 +268,14 @@ watch(localMode, (newMode) => {
     </div>
 
     <!-- Quota -->
-    <div class="form-control w-full max-w-xs rounded-lg border border-base-300 p-4">
+    <div class="form-control rounded-lg border border-base-300 p-4">
       <label class="label"><span class="label-text">Quota</span></label>
       <input
         type="number"
         :min="-1"
         :max="500"
         step="1"
-        :class="['input input-bordered w-full max-w-xs', quotaError && 'input-error']"
+        :class="['input input-bordered w-full', quotaError && 'input-error']"
         :value="localQuota"
         @input="onQuotaInput"
         placeholder="-1 (unlimited) or 1–500"
@@ -165,7 +288,7 @@ watch(localMode, (newMode) => {
     </div>
 
     <!-- Accepted Format -->
-    <div class="form-control w-full max-w-xs rounded-lg border border-base-300 p-4">
+    <div class="form-control rounded-lg border border-base-300 p-4">
       <label class="label"><span class="label-text">Accepted Format</span></label>
       <div class="flex flex-wrap items-center gap-6">
         <label class="label cursor-pointer gap-2">
@@ -177,11 +300,9 @@ watch(localMode, (newMode) => {
           <span class="label-text">Zip</span>
         </label>
       </div>
-
-      <!-- ZIP setting -->
       <div
         v-if="problem.config!.acceptedFormat === 'zip'"
-        class="mt-3 flex items-center gap-2 rounded bg-base-300 p-3"
+        class="mt-3 flex items-center gap-2 rounded border border-base-300 p-3"
       >
         <span class="label-text">Max ZIP Size (MB)</span>
         <input
@@ -203,7 +324,7 @@ watch(localMode, (newMode) => {
     </div>
 
     <!-- AI VTuber -->
-    <div class="col-span-2 mt-4 rounded-lg border border-base-300 p-4">
+    <div class="col-span-2 rounded-lg border border-base-300 p-4">
       <div class="flex items-center gap-4">
         <label class="label cursor-pointer justify-start gap-x-4">
           <span class="label-text">AI VTuber</span>
@@ -215,88 +336,218 @@ watch(localMode, (newMode) => {
         enter-active-class="transition ease-out duration-200"
         leave-active-class="transition ease-in duration-150"
       >
-        <div v-if="problem.config!.aiVTuber" class="mt-3 space-y-3 rounded bg-base-300 p-3">
-          <div class="flex flex-col md:flex-row md:items-start md:gap-6">
-            <div class="form-control w-full max-w-xs">
-              <label class="label mb-1"><span class="label-text">Upload AC files</span></label>
-              <input
-                type="file"
-                multiple
-                :accept="getAIFileExtensions().join(',')"
-                class="file-input file-input-bordered file-input-sm w-56"
-                @change="
-                  (e: any) => {
-                    const files = Array.from(e.target.files || []) as File[];
-                    const valid = validateFilesForAIAC(files, getAIFileExtensions());
-                    problem.assets!.aiVTuberACFiles = valid;
-                    if (valid.length === 0) {
-                      (e.target as HTMLInputElement).value = '';
-                    }
-                  }
-                "
-              />
-              <label class="label">
-                <span class="label-text-alt text-sm opacity-70">
-                  Allowed: {{ getAIFileExtensions().join(", ") }}
-                </span>
-              </label>
-            </div>
-
-            <div class="form-control w-full max-w-xs">
-              <label class="label mb-1"><span class="label-text">AI Conversation Mode</span></label>
-              <select class="select select-bordered select-sm w-56" v-model="problem.config!.aiVTuberMode">
-                <option value="guided">Guided Mode</option>
-                <option value="unlimited">Unlimited Mode</option>
-              </select>
+        <div v-if="problem.config!.aiVTuber" class="mt-3 space-y-4 rounded border border-base-300 p-4">
+          <div class="mt-3 space-y-4 rounded border border-base-300 p-4">
+            <div class="flex flex-wrap items-center gap-x-8 gap-y-4">
+              <div class="flex min-w-[260px] flex-1 items-center gap-3">
+                <label class="label mb-0 w-28">
+                  <span class="label-text text-base">AI Model</span>
+                </label>
+                <select
+                  class="select select-bordered select-sm flex-1"
+                  v-model="problem.config!.aiVTuberMode"
+                >
+                  <option value="gemini-2.5-flash-lite">gemini‑2.5‑flash‑lite</option>
+                  <option value="gemini-2.5-flash">gemini‑2.5‑flash</option>
+                  <option value="gemini-2.5-pro">gemini‑2.5‑pro</option>
+                </select>
+              </div>
+              <div class="flex min-w-[300px] flex-1 items-center gap-3">
+                <label class="label mb-0 w-32">
+                  <span class="label-text text-base">Upload AC files</span>
+                </label>
+                <div class="w-full">
+                  <input
+                    type="file"
+                    multiple
+                    :accept="getAIFileExtensions().join(',')"
+                    class="file-input file-input-bordered file-input-sm w-full"
+                    @change="
+                      (e: any) => {
+                        const files = Array.from(e.target.files || []) as File[];
+                        const valid = validateFilesForAIAC(files, getAIFileExtensions());
+                        problem.assets!.aiVTuberACFiles = valid;
+                        if (valid.length === 0) (e.target as HTMLInputElement).value = '';
+                      }
+                    "
+                  />
+                  <label class="label mt-1">
+                    <span class="label-text-alt text-sm opacity-70">
+                      Allowed: {{ getAIFileExtensions().join(", ") }}
+                    </span>
+                  </label>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="inline-block w-fit rounded-md border border-gray-400/60 p-3">
-            <div class="relative flex items-center gap-2">
-              <span class="label-text">Max Token</span>
-              <input
-                type="number"
-                min="0"
-                class="input input-bordered input-sm w-20 text-center"
-                :value="problem.config!.aiVTuberMaxToken"
-                @input="problem.config!.aiVTuberMaxToken = Number(($event.target as HTMLInputElement).value)"
-              />
-              <button
-                class="btn btn-ghost btn-xs relative ml-2 flex items-center"
-                :disabled="isFlipping"
-                @click="spinAndRandomToken"
-                style="width: 34px; height: 34px"
-              >
-                <span class="relative block" style="width: 22px; height: 22px">
-                  <svg :class="{ 'flip-y': isFlipping }" viewBox="0 0 24 24" width="22" height="22">
-                    <circle cx="12" cy="12" r="10" fill="#666" stroke="#222" stroke-width="0.5" />
-                    <text
-                      x="50%"
-                      y="62%"
-                      text-anchor="middle"
-                      fill="#fff"
-                      font-size="13"
-                      font-weight="bold"
-                      font-family="monospace"
-                    >
-                      T
-                    </text>
-                  </svg>
-                  <transition name="fly-up-token">
+          <div class="form-control">
+            <div class="mb-2 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <label class="label-text">Select API Keys</label>
+                <!-- 問號按鈕 -->
+                <div class="relative">
+                  <button
+                    type="button"
+                    class="btn-key-suggestion btn btn-circle btn-ghost btn-xs"
+                    @click="
+                      showSuggestionTooltip = !showSuggestionTooltip;
+                      if (showSuggestionTooltip && !keySuggestion) fetchKeySuggestion();
+                    "
+                  >
+                    <i-uil-question-circle class="text-info" />
+                  </button>
+
+                  <!-- 懸浮視窗 -->
+                  <transition name="fade">
                     <div
-                      v-if="flyNumber !== null"
-                      class="absolute -top-6 left-1/2"
-                      style="transform: translate(-50%, -100%); pointer-events: none"
+                      v-if="showSuggestionTooltip"
+                      class="key-suggestion-tooltip absolute left-6 top-full z-50 mt-2 w-72 rounded-md border border-base-300 bg-base-100 p-3 shadow-xl"
                     >
-                      <span class="fly-digit">{{ flyNumber }}</span>
-                      <template v-if="showParticles">
-                        <span v-for="i in 18" :key="i" class="particle" />
-                      </template>
+                      <div v-if="isFetchingSuggestion" class="flex items-center text-sm">
+                        <ui-spinner class="mr-2" /> Fetching suggestion...
+                      </div>
+                      <div v-else-if="suggestionError" class="text-sm text-error">
+                        {{ suggestionError }}
+                      </div>
+                      <div v-else-if="keySuggestion" class="space-y-1 text-sm">
+                        <div><b>Student count:</b> {{ keySuggestion.student_count }}</div>
+                        <div><b>Suggested keys:</b> {{ keySuggestion.suggested_key_count }}</div>
+                        <div><b>Reason:</b> {{ keySuggestion.reason }}</div>
+                      </div>
                     </div>
                   </transition>
-                </span>
-              </button>
+                </div>
+              </div>
             </div>
+
+            <!-- 搜尋欄 -->
+            <div class="mb-2 flex items-center gap-2">
+              <input
+                v-model="searchQuery"
+                type="text"
+                class="input input-bordered input-sm flex-1"
+                placeholder="Search by Key Name"
+                @keyup.enter="scrollToKey"
+              />
+              <button class="btn btn-sm" @click="scrollToKey">Search</button>
+            </div>
+
+            <div v-if="isFetchingKeys" class="flex items-center gap-2 py-4 text-sm opacity-70">
+              <span class="loading-spinner loading-sm loading"></span> Loading keys...
+            </div>
+
+            <div v-else class="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <!-- Active Keys -->
+              <div class="overflow-hidden rounded-lg border border-base-300">
+                <button
+                  type="button"
+                  @click="showActiveKeys = !showActiveKeys"
+                  class="flex w-full items-center justify-between px-4 py-2 transition-colors hover:bg-base-200"
+                >
+                  <div class="flex items-center gap-2">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-4 w-4 transition-transform duration-200"
+                      :class="{ 'rotate-90': showActiveKeys }"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                    <span class="label-text">active keys</span>
+                    <span class="badge badge-info badge-sm">{{ apiKeys.active.length }}</span>
+                  </div>
+                </button>
+
+                <!-- 限高可捲動區域 -->
+                <div v-show="showActiveKeys" class="h-64 overflow-y-auto p-3">
+                  <label
+                    v-for="key in apiKeys.active"
+                    :key="key.id"
+                    :ref="(el) => (activeKeyRefs[key.id] = el as HTMLElement)"
+                    class="flex cursor-pointer items-start gap-3 rounded-lg border border-transparent p-3 transition hover:border-info/30 hover:bg-base-200"
+                  >
+                    <input
+                      type="checkbox"
+                      class="checkbox checkbox-info checkbox-sm mt-1"
+                      :value="key.id"
+                      v-model="selectedKeys"
+                    />
+                    <div class="flex-1">
+                      <div class="truncate text-sm font-semibold">Key: {{ key.key_name }}</div>
+                      <div class="mt-1 text-xs text-gray-400">
+                        Creator: {{ key.created_by }} // {{ key.masked_value }}
+                      </div>
+                      <div class="mt-1 text-xs text-gray-400">
+                        Number of Requests: {{ key.request_count }}
+                      </div>
+                      <div class="mt-1 text-xs text-gray-400">
+                        Token: input*{{ key.input_token }} ; output*{{ key.output_token }}
+                      </div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Inactive Keys -->
+              <div class="overflow-hidden rounded-lg border border-base-300">
+                <button
+                  type="button"
+                  @click="showInactiveKeys = !showInactiveKeys"
+                  class="flex w-full items-center justify-between px-4 py-2 transition-colors hover:bg-base-200"
+                >
+                  <div class="flex items-center gap-2">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="h-4 w-4 transition-transform duration-200"
+                      :class="{ 'rotate-90': showInactiveKeys }"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                    <span class="label-text">inactive keys</span>
+                    <span class="badge badge-error badge-sm">{{ apiKeys.inactive.length }}</span>
+                  </div>
+                </button>
+
+                <!-- 限高可捲動區域 -->
+                <div v-show="showInactiveKeys" class="h-64 overflow-y-auto p-3">
+                  <label
+                    v-for="key in apiKeys.inactive"
+                    :key="key.id"
+                    :ref="(el) => (inactiveKeyRefs[key.id] = el as HTMLElement)"
+                    class="flex cursor-pointer items-start gap-3 rounded-lg border border-transparent p-3 transition hover:border-error/30 hover:bg-base-200"
+                  >
+                    <input
+                      type="checkbox"
+                      class="checkbox checkbox-error checkbox-sm mt-1"
+                      :value="key.id"
+                      v-model="selectedKeys"
+                    />
+                    <div class="flex-1">
+                      <div class="truncate text-sm font-semibold">Key: {{ key.key_name }}</div>
+                      <div class="mt-1 text-xs text-gray-400">
+                        Creator: {{ key.created_by }} // {{ key.masked_value }}
+                      </div>
+                      <div class="mt-1 text-xs text-gray-400">
+                        Number of Requests: {{ key.request_count }}
+                      </div>
+                      <div class="mt-1 text-xs text-gray-400">
+                        Token: input*{{ key.input_token }} ; output*{{ key.output_token }}
+                      </div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div v-if="fetchError" class="alert alert-error mt-2 text-sm">{{ fetchError }}</div>
           </div>
         </div>
       </transition>
@@ -467,7 +718,9 @@ watch(localMode, (newMode) => {
                 "
               />
               <label v-if="v$?.assets?.localServiceZip?.$error" class="label">
-                <span class="label-text-alt text-error">{{ v$.assets.localServiceZip.$errors[0]?.$message }}</span>
+                <span class="label-text-alt text-error">{{
+                  v$.assets.localServiceZip.$errors[0]?.$message
+                }}</span>
               </label>
             </div>
           </div>
@@ -516,116 +769,6 @@ watch(localMode, (newMode) => {
 </template>
 
 <style scoped>
-.spin-crazy {
-  animation: crazy-spin 0.4s linear infinite;
-}
-@keyframes crazy-spin {
-  0% {
-    transform: rotate(0);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-.fly-up-token-enter-active {
-  transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.fly-up-token-leave-active {
-  transition: all 0.4s;
-}
-.fly-up-token-enter-from {
-  opacity: 0;
-  transform: translateY(18px) scale(0.7);
-}
-.fly-up-token-enter-to {
-  opacity: 1;
-  transform: translateY(-15px) scale(1.14);
-}
-.fly-up-token-leave-from {
-  opacity: 1;
-  transform: translateY(-15px) scale(1.14);
-}
-.fly-up-token-leave-to {
-  opacity: 0;
-  transform: translateY(-4px) scale(0.95);
-}
-.fly-digit {
-  font-size: 1.6rem;
-  font-family: "Menlo", "Consolas", monospace;
-  font-weight: 700;
-  color: #fff;
-  text-shadow: -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 3px 3px 0 #000;
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.6));
-  pointer-events: none;
-  animation: digit-pulse 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.flip-y {
-  animation: coin-flip 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  transform-style: preserve-3d;
-}
-@keyframes coin-flip {
-  0% {
-    transform: rotateY(0deg) scale(1);
-  }
-  15% {
-    transform: rotateY(90deg) scale(1.15);
-  }
-  50% {
-    transform: rotateY(450deg) scale(1.2);
-  }
-  85% {
-    transform: rotateY(720deg) scale(1.05);
-  }
-  100% {
-    transform: rotateY(720deg) scale(1);
-  }
-}
-@keyframes digit-pulse {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.08);
-  }
-}
-.particle {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: var(--size, 10px);
-  height: var(--size, 10px);
-  border-radius: 50%;
-  background: var(--color, #222);
-  opacity: 0;
-  pointer-events: none;
-  animation: explode-particle 0.8s cubic-bezier(0.25, 1.5, 0.5, 0.9) forwards;
-  animation-delay: var(--delay, 0s);
-}
-@keyframes explode-particle {
-  0% {
-    transform: translate(-50%, -50%) scale(0.3) rotate(var(--angle, 0deg));
-    opacity: 0;
-  }
-  15% {
-    opacity: 0.7;
-    transform: translate(-50%, -50%) scale(1.4) rotate(var(--angle, 0deg)) translateY(-8px);
-  }
-  40% {
-    opacity: 0.6;
-    transform: translate(-50%, -50%) scale(1.2) rotate(var(--angle, 0deg)) translateY(-15px);
-  }
-  70% {
-    opacity: 0.3;
-    transform: translate(-50%, -50%) scale(0.9) rotate(var(--angle, 0deg))
-      translateY(calc(var(--distance, 30px) * 0.7));
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.5) rotate(var(--angle, 0deg)) translateY(var(--distance, 40px));
-  }
-}
-
 /* 黑白名單切換器 */
 .mode-switcher {
   display: flex;

@@ -119,6 +119,26 @@ const User = {
   modify: (username: string, body: UserEditionForm) => fetcher.patch(`/user/${username}`, body),
 };
 
+const AIVTuber = {
+  getCourseKeys: (courseId: number) =>
+    fetcher.get<{
+      keys: {
+        id: string;
+        key_name: string;
+        masked_value: string;
+        is_active: boolean;
+        input_token: number;
+        output_token: number;
+        request_count: number;
+        created_by: string;
+      }[];
+    }>(`/course/${courseId}/ai/key`),
+  getKeySuggestion: (courseId: number, model: string) =>
+    fetcher.get(`/course/${courseId}/ai/key/suggestion`, {
+      params: { model },
+    }),
+};
+
 const APIToken = {
   getAll: () => fetcher.get<{ Tokens: APIToken[] }>("/profile/api_token"),
   getScopes: () => fetcher.get<{ Scope: string[] }>("/profile/api_token/getscope"),
@@ -140,4 +160,5 @@ export default {
   Course,
   User,
   APIToken,
+  AIVTuber,
 };

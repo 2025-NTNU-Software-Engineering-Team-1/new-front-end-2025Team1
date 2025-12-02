@@ -73,6 +73,7 @@ function normalizePipeline(raw: any): ProblemPipeline {
   const base: ProblemPipeline = {
     fopen: false,
     fwrite: false,
+    exposeTestcase: false,
     executionMode: "general",
     customChecker: false,
     teacherFirst: false,
@@ -88,6 +89,7 @@ function normalizePipeline(raw: any): ProblemPipeline {
   const pipeline: ProblemPipeline = {
     fopen: raw?.fopen ?? base.fopen,
     fwrite: raw?.fwrite ?? base.fwrite,
+    exposeTestcase: raw?.exposeTestcase ?? base.exposeTestcase,
     executionMode: raw?.executionMode ?? base.executionMode,
     customChecker: raw?.customChecker ?? base.customChecker,
     teacherFirst: raw?.teacherFirst ?? base.teacherFirst,

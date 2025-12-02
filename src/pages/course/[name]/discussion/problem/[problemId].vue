@@ -207,16 +207,18 @@ onMounted(() => {
           <div class="flex items-start justify-between">
             <div>
               <h1 class="mb-2 text-2xl font-bold">{{ problemName }}</h1>
-              <div class="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+              <div class="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
                 <span>ID: {{ problemId }}</span>
                 <span>{{ posts.length }} 個討論</span>
-                <span v-if="problemMeta?.Code_Allowed" class="badge badge-success badge-sm">
-                  可分享程式碼
-                </span>
-                <span v-else class="badge badge-warning badge-sm"> 不可分享程式碼 </span>
               </div>
-              <div v-if="problemMeta?.Deadline" class="mt-1 text-sm text-gray-500">
-                截止時間: {{ problemMeta.Deadline }}
+              <div class="mt-2 flex items-center gap-2">
+                <span v-if="problemMeta?.Code_Allowed" class="badge badge-success badge-sm">
+                  ✓ 可分享程式碼
+                </span>
+                <span v-else class="badge badge-warning badge-sm"> ⚠ 不可分享程式碼 </span>
+              </div>
+              <div v-if="problemMeta?.Deadline" class="mt-2 text-sm text-gray-500">
+                📅 截止時間: {{ new Date(problemMeta.Deadline).toLocaleString("zh-TW") }}
               </div>
             </div>
           </div>

@@ -10,22 +10,10 @@ const { t } = useI18n();
 
 const session = useSession();
 const navs = [
-  {
-    name: t("components.courseSideBar.ann"),
-    path: "/announcements",
-  },
-  {
-    name: t("components.courseSideBar.hw"),
-    path: "/homeworks",
-  },
-  {
-    name: t("components.courseSideBar.problems"),
-    path: "/problems",
-  },
-  {
-    name: t("components.courseSideBar.submissions"),
-    path: "/submissions",
-  },
+  { name: t("components.courseSideBar.ann"), path: "/announcements" },
+  { name: t("components.courseSideBar.hw"), path: "/homeworks" },
+  { name: t("components.courseSideBar.problems"), path: "/problems" },
+  { name: t("components.courseSideBar.submissions"), path: "/submissions" },
   ...(session.isAdmin
     ? [
         {
@@ -34,6 +22,7 @@ const navs = [
         },
       ]
     : []),
+  ...(session.role === 1 || session.isAdmin ? [{ name: "API Usage", path: "/apiusage" }] : []),
 ];
 </script>
 

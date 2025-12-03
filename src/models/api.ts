@@ -119,6 +119,27 @@ const User = {
   modify: (username: string, body: UserEditionForm) => fetcher.patch(`/user/${username}`, body),
 };
 
+const CourseAPIUsage = {
+  getCourseUsage: (courseName: string) =>
+    fetcher.get<{
+      totalToken: number;
+      keys: {
+        key_id: string | number;
+        key_name: string;
+        created_by: string;
+        masked_value: string;
+        total_token: number;
+        max_problem?: { problem_id: number; problem_name: string; token: number };
+        min_problem?: { problem_id: number; problem_name: string; token: number };
+        problem_usages: {
+          problem_id: number;
+          problem_name: string;
+          token: number;
+        }[];
+      }[];
+    }>(`/course/${courseName}/apiusage`),
+};
+
 const AIVTuber = {
   getCourseKeys: (courseId: number) =>
     fetcher.get<{
@@ -161,4 +182,5 @@ export default {
   User,
   APIToken,
   AIVTuber,
+  CourseAPIUsage,
 };

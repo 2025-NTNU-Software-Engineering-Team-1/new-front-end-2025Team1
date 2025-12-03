@@ -242,7 +242,7 @@ onBeforeUnmount(() => {
 <template>
   <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
     <!-- Allowed Languages -->
-    <div class="form-control rounded-lg border border-base-300 p-4">
+    <div class="form-control rounded-lg border border-gray-400 p-4">
       <label class="label"><span class="label-text">Allowed Languages</span></label>
       <LanguageMultiSelect
         :model-value="problem.allowedLanguage"
@@ -251,7 +251,7 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- Tags -->
-    <div class="form-control rounded-lg border border-base-300 p-4">
+    <div class="form-control rounded-lg border border-gray-400 p-4">
       <label class="label"><span class="label-text">Tags</span></label>
       <input
         type="text"
@@ -268,7 +268,7 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- Quota -->
-    <div class="form-control rounded-lg border border-base-300 p-4">
+    <div class="form-control rounded-lg border border-gray-400 p-4">
       <label class="label"><span class="label-text">Quota</span></label>
       <input
         type="number"
@@ -288,7 +288,7 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- Accepted Format -->
-    <div class="form-control rounded-lg border border-base-300 p-4">
+    <div class="form-control rounded-lg border border-gray-400 p-4">
       <label class="label"><span class="label-text">Accepted Format</span></label>
       <div class="flex flex-wrap items-center gap-6">
         <label class="label cursor-pointer gap-2">
@@ -302,7 +302,7 @@ onBeforeUnmount(() => {
       </div>
       <div
         v-if="problem.config!.acceptedFormat === 'zip'"
-        class="mt-3 flex items-center gap-2 rounded border border-base-300 p-3"
+        class="mt-3 flex items-center gap-2 rounded border border-gray-400 p-3"
       >
         <span class="label-text">Max ZIP Size (MB)</span>
         <input
@@ -324,7 +324,7 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- AI VTuber -->
-    <div class="col-span-2 rounded-lg border border-base-300 p-4">
+    <div class="col-span-2 rounded-lg border border-gray-400 p-4">
       <div class="flex items-center gap-4">
         <label class="label cursor-pointer justify-start gap-x-4">
           <span class="label-text">AI VTuber</span>
@@ -336,12 +336,12 @@ onBeforeUnmount(() => {
         enter-active-class="transition ease-out duration-200"
         leave-active-class="transition ease-in duration-150"
       >
-        <div v-if="problem.config!.aiVTuber" class="mt-3 space-y-4 rounded border border-base-300 p-4">
-          <div class="mt-3 space-y-4 rounded border border-base-300 p-4">
+        <div v-if="problem.config!.aiVTuber" class="mt-3 space-y-4 rounded border-none p-4">
+          <div class="mt-3 space-y-4 rounded border border-gray-400 p-4">
             <div class="flex flex-wrap items-center gap-x-8 gap-y-4">
               <div class="flex min-w-[260px] flex-1 items-center gap-3">
                 <label class="label mb-0 w-28">
-                  <span class="label-text text-base">AI Model</span>
+                  <span class="label-text">AI Model</span>
                 </label>
                 <select
                   class="select select-bordered select-sm flex-1"
@@ -354,7 +354,7 @@ onBeforeUnmount(() => {
               </div>
               <div class="flex min-w-[300px] flex-1 items-center gap-3">
                 <label class="label mb-0 w-32">
-                  <span class="label-text text-base">Upload AC files</span>
+                  <span class="label-text">Upload AC files</span>
                 </label>
                 <div class="w-full">
                   <input
@@ -385,7 +385,7 @@ onBeforeUnmount(() => {
             <div class="mb-2 flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <label class="label-text">Select API Keys</label>
-                <!-- 問號按鈕 -->
+                <!-- 問號 -->
                 <div class="relative">
                   <button
                     type="button"
@@ -402,7 +402,7 @@ onBeforeUnmount(() => {
                   <transition name="fade">
                     <div
                       v-if="showSuggestionTooltip"
-                      class="key-suggestion-tooltip absolute left-6 top-full z-50 mt-2 w-72 rounded-md border border-base-300 bg-base-100 p-3 shadow-xl"
+                      class="key-suggestion-tooltip absolute left-6 top-full z-50 mt-2 w-72 rounded-md border border-gray-400 bg-base-100 p-3 shadow-xl"
                     >
                       <div v-if="isFetchingSuggestion" class="flex items-center text-sm">
                         <ui-spinner class="mr-2" /> Fetching suggestion...
@@ -439,7 +439,7 @@ onBeforeUnmount(() => {
 
             <div v-else class="grid grid-cols-1 gap-3 md:grid-cols-2">
               <!-- Active Keys -->
-              <div class="overflow-hidden rounded-lg border border-base-300">
+              <div class="overflow-hidden rounded-lg border border-gray-400">
                 <button
                   type="button"
                   @click="showActiveKeys = !showActiveKeys"
@@ -493,7 +493,7 @@ onBeforeUnmount(() => {
               </div>
 
               <!-- Inactive Keys -->
-              <div class="overflow-hidden rounded-lg border border-base-300">
+              <div class="overflow-hidden rounded-lg border border-gray-400">
                 <button
                   type="button"
                   @click="showInactiveKeys = !showInactiveKeys"
@@ -554,7 +554,7 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- Trial Mode -->
-    <div class="form-control col-span-2 rounded-lg border border-base-300 p-4">
+    <div class="form-control col-span-2 rounded-lg border border-gray-400 p-4">
       <label class="label ml-1 cursor-pointer justify-start gap-x-4">
         <span class="label-text">Trial Mode</span>
         <input type="checkbox" class="toggle" v-model="problem.config!.trialMode" />
@@ -562,7 +562,7 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- Network Access Restriction -->
-    <div class="form-control col-span-2 rounded-lg border border-base-300 p-4">
+    <div class="form-control col-span-2 rounded-lg border border-gray-400 p-4">
       <label class="label cursor-pointer justify-start gap-x-4">
         <span class="label-text">Network Access Restriction</span>
         <input type="checkbox" class="toggle" v-model="problem.config!.networkAccessRestriction!.enabled" />
@@ -570,10 +570,10 @@ onBeforeUnmount(() => {
 
       <div
         v-if="problem.config!.networkAccessRestriction!.enabled"
-        class="mt-3 grid grid-cols-1 gap-3 rounded bg-base-300 p-3 md:grid-cols-2"
+        class="mt-3 grid grid-cols-1 gap-3 p-3 md:grid-cols-2"
       >
         <!-- Firewall Extranet -->
-        <div class="rounded bg-base-100 p-3">
+        <div class="rounded border border-gray-400 p-3">
           <label class="label cursor-pointer justify-start gap-x-4">
             <span class="label-text">Firewall Extranet</span>
             <input
@@ -585,7 +585,7 @@ onBeforeUnmount(() => {
 
           <div
             v-if="problem.config!.networkAccessRestriction!.firewallExtranet!.enabled"
-            class="mt-2 space-y-3 rounded bg-base-300 p-3"
+            class="mt-2 space-y-3 rounded border border-gray-400 p-3"
           >
             <!-- 滑動開關 -->
             <div class="flex justify-center">
@@ -629,7 +629,7 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- Connect With Local -->
-        <div class="rounded bg-base-100 p-3">
+        <div class="rounded border border-gray-400 p-3">
           <label class="label cursor-pointer justify-start gap-x-4">
             <span class="label-text">Connect With Local</span>
             <input
@@ -641,7 +641,7 @@ onBeforeUnmount(() => {
 
           <div
             v-if="problem.config!.networkAccessRestriction!.connectWithLocal!.enabled"
-            class="mt-2 space-y-3 rounded bg-base-300 p-3"
+            class="mt-2 space-y-3 rounded border border-gray-400 p-3"
           >
             <!-- 滑動開關 -->
             <div class="flex justify-center">
@@ -729,7 +729,7 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- Artifact Collection -->
-    <div class="form-control col-span-1 rounded-lg border border-base-300 p-4 md:col-span-2">
+    <div class="form-control col-span-1 rounded-lg border border-gray-400 p-4 md:col-span-2">
       <label class="label"><span class="label-text">Artifact Collection (optional)</span></label>
       <div class="flex gap-4">
         <label class="label cursor-pointer gap-2">

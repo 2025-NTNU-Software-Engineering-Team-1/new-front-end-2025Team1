@@ -39,6 +39,7 @@ const newProblem = ref<ProblemForm>({
   // === CONFIG ===
   config: {
     trialMode: false,
+    maxNumberOfTrial: -1,
     aiVTuber: false,
     aiVTuberApiKeys: [],
     aiVTuberMode: "gemini-2.5-flash-lite",
@@ -70,6 +71,8 @@ const newProblem = ref<ProblemForm>({
   },
   // === ASSETS ===
   assets: {
+    trialModePublicTestDataZip: null,
+    trialModeACFiles: null,
     aiVTuberACFiles: null,
     customCheckerPy: null,
     makefileZip: null,

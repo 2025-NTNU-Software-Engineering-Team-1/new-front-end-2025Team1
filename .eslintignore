@@ -9,3 +9,6 @@ postcss.config.js
 # Auto generated files
 dist
 src/auto/**
+
+# TypeScript auto‑generated helper types (ignore linting)
+src/types/vue-global.d.ts

@@ -181,7 +181,7 @@ ensureDefaults();
   <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
     <!-- File Process -->
     <div class="col-span-2 rounded-lg border border-gray-400 p-4">
-      <div class="mb-2 text-sm font-semibold">File Process</div>
+      <div class="mb-2 text-sm">File Process</div>
       <div class="flex flex-wrap gap-6">
         <div class="form-control">
           <label class="label cursor-pointer justify-start gap-x-2">

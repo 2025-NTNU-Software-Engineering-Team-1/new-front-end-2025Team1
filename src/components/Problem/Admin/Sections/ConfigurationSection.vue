@@ -6,6 +6,7 @@ import LanguageMultiSelect from "../../Forms/LanguageMultiSelect.vue";
 import MultiStringInput from "../Controls/MultiStringInput.vue";
 
 import { assertFileSizeOK, validateFilesForAIAC } from "@/utils/checkFileSize";
+import { ZipReader, BlobReader } from "@zip.js/zip.js";
 import { fetcher } from "@/models/api";
 import api from "@/models/api";
 
@@ -52,6 +53,54 @@ function onQuotaInput(e: Event) {
     inputEl.value = "";
     localQuota.value = "";
     quotaError.value = "Quota must be -1 (unlimited) or between 1 and 500";
+  }
+}
+
+/* Trial Mode */
+const trialQuotaError = ref("");
+const localTrialLimit = ref<number | "">(problem.value?.config?.maxNumberOfTrial ?? "");
+const trialPublicZipError = ref<string>("");
+
+function onTrialLimitInput(e: Event) {
+  const inputEl = e.target as HTMLInputElement;
+  const valStr = inputEl.value;
+
+  if (valStr === "") {
+    localTrialLimit.value = "";
+    trialQuotaError.value = "";
+    problem.value.config!.maxNumberOfTrial = undefined;
+    return;
+  }
+
+  const val = Number(valStr);
+  if (val === -1 || (val >= 1 && val <= 500)) {
+    localTrialLimit.value = val;
+    trialQuotaError.value = "";
+    problem.value.config!.maxNumberOfTrial = val;
+  } else {
+    inputEl.value = "";
+    localTrialLimit.value = "";
+    problem.value.config!.maxNumberOfTrial = undefined;
+    trialQuotaError.value = "Trial limit must be -1 (unlimited) or between 1 and 500";
+  }
+}
+
+async function validateTrialPublicZip(file: File): Promise<boolean> {
+  try {
+    const reader = new ZipReader(new BlobReader(file));
+    const entries = await reader.getEntries();
+    await reader.close?.();
+
+    if (!entries.length) return false;
+
+    // ONLY .in
+    const invalid = entries.filter(({ filename }) => !filename.endsWith(".in"));
+    if (invalid.length > 0) return false;
+
+    return true;
+  } catch (err) {
+    console.error("Failed to read zip:", err);
+    return false;
   }
 }
 
@@ -559,6 +608,83 @@ onBeforeUnmount(() => {
         <span class="label-text">Trial Mode</span>
         <input type="checkbox" class="toggle" v-model="problem.config!.trialMode" />
       </label>
+      <div v-if="problem.config!.trialMode" class="mt-3 space-y-4 rounded border border-gray-400 p-4">
+        <!-- Max Number of Trial -->
+        <div class="form-control w-full max-w-xs">
+          <label class="label">
+            <span class="label-text">Max Number of Trial</span>
+          </label>
+          <input
+            type="number"
+            :min="-1"
+            :max="500"
+            step="1"
+            :class="['input input-bordered w-full', trialQuotaError && 'input-error']"
+            :value="localTrialLimit"
+            @input="onTrialLimitInput"
+            placeholder="-1 (unlimited) or 1–500"
+          />
+          <label class="label">
+            <span class="label-text-alt" :class="trialQuotaError ? 'text-error' : ''">
+              {{ trialQuotaError || "-1 means unlimited" }}
+            </span>
+          </label>
+        </div>
+
+        <!-- Upload Public Test Data -->
+        <div class="form-control w-full max-w-xs">
+          <label class="label">
+            <span class="label-text">Upload Public Test Data (.zip)</span>
+          </label>
+          <input
+            type="file"
+            accept=".zip"
+            class="file-input file-input-bordered file-input-sm w-full"
+            @change="
+              async (e: any) => {
+                const inputEl = e.target as HTMLInputElement;
+                const file = inputEl.files?.[0] || null;
+                problem.assets!.trialModePublicTestDataZip = null;
+                inputEl.value = '';
+                if (!file) return;
+                if (!file.name.endsWith('.zip')) return;
+                if (!assertFileSizeOK(file, 'Public Test Data')) return;
+                const ok = await validateTrialPublicZip(file);
+                if (!ok) return;
+                problem.assets!.trialModePublicTestDataZip = file;
+              }
+            "
+          />
+          <label class="label">
+            <span class="label-text-alt opacity-70"> Only <code>.in</code> files inside ZIP; ≤ 1 GB </span>
+          </label>
+        </div>
+
+        <!-- Upload AC files -->
+        <div class="form-control w-full">
+          <label class="label"><span class="label-text">Upload AC Files</span></label>
+
+          <input
+            type="file"
+            multiple
+            :accept="getAIFileExtensions().join(',')"
+            class="file-input file-input-bordered file-input-sm w-full"
+            @change="
+              (e: any) => {
+                const files = Array.from(e.target.files || []) as File[];
+                const valid = validateFilesForAIAC(files, getAIFileExtensions());
+                problem.assets!.trialModeACFiles = valid;
+                if (valid.length === 0) (e.target as HTMLInputElement).value = '';
+              }
+            "
+          />
+          <label class="label mt-1">
+            <span class="label-text-alt text-sm opacity-70">
+              Allowed: {{ getAIFileExtensions().join(", ") }}
+            </span>
+          </label>
+        </div>
+      </div>
     </div>
 
     <!-- Network Access Restriction -->

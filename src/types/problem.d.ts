@@ -129,12 +129,15 @@ type ArtifactCollection = "compiledBinary" | "zip";
  * CONFIG (設定)
  * =========================================================== */
 interface ProblemConfigExtra {
-  trialMode: boolean;
-  aiVTuber: boolean;
   acceptedFormat: AcceptedFormat;
   maxStudentZipSizeMB?: number;
 
+  // Trial Mode
+  trialMode: boolean;
+  maxNumberOfTrial?: number;
+
   // AI VTuber
+  aiVTuber: boolean;
   aiVTuberMode?: "gemini-2.5-flash-lite" | "gemini-2.5-flash" | "gemini-2.5-pro";
   aiVTuberApiKeys?: string[];
 
@@ -193,6 +196,8 @@ interface ProblemPipeline {
  * ASSETS
  * =========================================================== */
 interface ProblemAssets {
+  trialModePublicTestDataZip?: File | null;
+  trialModeACFiles?: File[] | null;
   aiVTuberFiles?: File[] | null;
   aiVTuberACFiles?: File[] | null;
   customCheckerPy?: File | null;

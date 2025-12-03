@@ -22,6 +22,7 @@ function normalizeTestCases(raw: any): ProblemTestCase[] {
 function normalizeConfig(config?: ProblemConfigExtra): ProblemConfigExtra {
   const base: ProblemConfigExtra = {
     trialMode: false,
+    maxNumberOfTrial: -1,
     aiVTuber: false,
     aiVTuberApiKeys: [],
     aiVTuberMode: "gemini-2.5-flash-lite",
@@ -43,6 +44,7 @@ function normalizeConfig(config?: ProblemConfigExtra): ProblemConfigExtra {
     ...base,
     ...(config || {}),
     trialMode: config?.trialMode ?? base.trialMode,
+    maxNumberOfTrial: config?.maxNumberOfTrial ?? -1,
     aiVTuber: config?.aiVTuber ?? base.aiVTuber,
     aiVTuberMode: config?.aiVTuberMode ?? base.aiVTuberMode,
     aiVTuberApiKeys: Array.isArray(config?.aiVTuberApiKeys) ? config!.aiVTuberApiKeys : base.aiVTuberApiKeys,
@@ -124,6 +126,8 @@ function normalizePipeline(raw: any): ProblemPipeline {
 
 function normalizeAssets(raw: any): ProblemAssets {
   const base: ProblemAssets = {
+    trialModePublicTestDataZip: raw?.trialModePublicTestDataZip ?? null,
+    trialModeACFiles: raw?.trialModeACFiles ?? null,
     aiVTuberACFiles: null,
     customCheckerPy: null,
     makefileZip: null,

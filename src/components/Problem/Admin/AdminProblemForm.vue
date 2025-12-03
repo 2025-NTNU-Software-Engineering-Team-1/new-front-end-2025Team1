@@ -3,6 +3,14 @@ import { inject, ref, Ref, watchEffect, provide } from "vue";
 import useVuelidate from "@vuelidate/core";
 import { required, maxLength, between, helpers } from "@vuelidate/validators";
 
+import DescriptionSection from "./Sections/DescriptionSection.vue";
+import ConfigurationSection from "./Sections/ConfigurationSection.vue";
+import PipelineSection from "./Sections/PipelineSection.vue";
+import TestDataSection from "./Sections/TestDataSection.vue";
+
+/* ========================================================
+   工具函式
+   ======================================================== */
 function getAllowedFileExtensions(allowedLanguage: number): string[] {
   const list: string[] = [];
   if (allowedLanguage & 1) list.push(".c");
@@ -11,11 +19,9 @@ function getAllowedFileExtensions(allowedLanguage: number): string[] {
   return list;
 }
 
-import DescriptionSection from "./Sections/DescriptionSection.vue";
-import ConfigurationSection from "./Sections/ConfigurationSection.vue";
-import PipelineSection from "./Sections/PipelineSection.vue";
-import TestDataSection from "./Sections/TestDataSection.vue";
-
+/* ========================================================
+   初始化與 Ref
+   ======================================================== */
 const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
 
 const emits = defineEmits<{
@@ -25,6 +31,7 @@ const emits = defineEmits<{
 
 const isLoading = ref(false);
 const errorMsg = ref("");
+
 defineExpose({ isLoading, errorMsg });
 
 /* ========================================================
@@ -86,7 +93,6 @@ function normalizeLibraryRestrictions(raw: any) {
 /* ========================================================
    在表單初始化自動修正結構
    ======================================================== */
-
 watchEffect(() => {
   if (!problem.value) return;
 
@@ -104,8 +110,12 @@ watchEffect(() => {
   }
 });
 
+/* ========================================================
+   驗證規則
+   ======================================================== */
 const rules = {
   problemName: { required, maxLength: maxLength(64) },
+
   description: {
     description: { maxLength: maxLength(10000) },
     input: { maxLength: maxLength(10000) },
@@ -122,8 +132,13 @@ const rules = {
       ),
     },
   },
-  tags: { itemMaxLength: (v: string[]) => v.every((d) => d.length <= 16) },
+
+  tags: {
+    itemMaxLength: (v: string[]) => v.every((d) => d.length <= 16),
+  },
+
   allowedLanguage: { required, between: between(1, 7) },
+
   quota: {
     required,
     validRange: helpers.withMessage(
@@ -131,6 +146,7 @@ const rules = {
       (v: number) => v === -1 || (v >= 1 && v <= 500),
     ),
   },
+
   testCaseInfo: {
     tasks: {
       scoreSum: helpers.withMessage(
@@ -139,6 +155,7 @@ const rules = {
       ),
     },
   },
+
   config: {
     acceptedFormat: {
       required: helpers.withMessage(
@@ -146,7 +163,16 @@ const rules = {
         () => !!problem.value.config.acceptedFormat,
       ),
     },
+    vtuberApiKeyRequired: helpers.withMessage(
+      "AI VTuber is enabled: please select at least one API key.",
+      () => {
+        const cfg = problem.value.config;
+        if (!cfg?.aiVTuber) return true;
+        return (cfg.aiVTuberApiKeys?.length ?? 0) > 0;
+      },
+    ),
   },
+
   pipeline: {
     executionMode: {
       required: helpers.withMessage("Execution mode is required", () =>
@@ -154,7 +180,41 @@ const rules = {
       ),
     },
   },
+
   assets: {
+    aiVTuberACFiles: {
+      requiredWhenVtuber: helpers.withMessage(
+        "AI VTuber is enabled: please upload at least one AC file.",
+        () => {
+          const cfg = problem.value.config;
+          if (!cfg?.aiVTuber) return true;
+          return (problem.value.assets?.aiVTuberACFiles?.length ?? 0) > 0;
+        },
+      ),
+    },
+
+    trialModeACFiles: {
+      requiredWhenTrial: helpers.withMessage(
+        "Trial Mode is enabled: please upload at least one AC file.",
+        () => {
+          const cfg = problem.value.config;
+          if (!cfg?.trialMode) return true;
+          return (problem.value.assets?.trialModeACFiles?.length ?? 0) > 0;
+        },
+      ),
+    },
+
+    trialModePublicTestDataZip: {
+      requiredWhenTrial: helpers.withMessage(
+        "Trial Mode is enabled: please upload Public Test Data (.zip).",
+        () => {
+          const cfg = problem.value.config;
+          if (!cfg?.trialMode) return true;
+          return !!problem.value.assets?.trialModePublicTestDataZip;
+        },
+      ),
+    },
+
     teacherFile: {
       validExtension: helpers.withMessage(
         (ctx) => {
@@ -164,49 +224,56 @@ const rules = {
         () => {
           const file = problem.value.assets?.teacherFile;
           if (!file) return true; // Allow null/undefined
-          if (problem.value.pipeline?.executionMode !== "interactive") return true; // Only validate in interactive mode
+          if (problem.value.pipeline?.executionMode !== "interactive") return true;
           const exts = getAllowedFileExtensions(problem.value.allowedLanguage);
           const fileName = file.name.toLowerCase();
           return exts.some((ext) => fileName.endsWith(ext.toLowerCase()));
         },
       ),
     },
+
     makefileZip: {
       validExtension: helpers.withMessage("Makefile must be a .zip file", () => {
         const file = problem.value.assets?.makefileZip;
-        if (!file) return true; // Allow null/undefined
-        if (problem.value.pipeline?.executionMode !== "functionOnly") return true; // Only validate in functionOnly mode
+        if (!file) return true;
+        if (problem.value.pipeline?.executionMode !== "functionOnly") return true;
         return file.name.toLowerCase().endsWith(".zip");
       }),
     },
+
     customCheckerPy: {
       validExtension: helpers.withMessage("Custom checker must be a .py file", () => {
         const file = problem.value.assets?.customCheckerPy;
-        if (!file) return true; // Allow null/undefined
-        if (!problem.value.pipeline?.customChecker) return true; // Only validate when custom checker is enabled
+        if (!file) return true;
+        if (!problem.value.pipeline?.customChecker) return true;
         return file.name.toLowerCase().endsWith(".py");
       }),
     },
+
     scorePy: {
       validExtension: helpers.withMessage("Scoring script must be a .py file", () => {
         const file = problem.value.assets?.scorePy;
-        if (!file) return true; // Allow null/undefined
-        if (!problem.value.pipeline?.scoringScript?.custom) return true; // Only validate when custom scoring is enabled
+        if (!file) return true;
+        if (!problem.value.pipeline?.scoringScript?.custom) return true;
         return file.name.toLowerCase().endsWith(".py");
       }),
     },
+
     localServiceZip: {
       validExtension: helpers.withMessage("Local service must be a .zip file", () => {
         const file = problem.value.assets?.localServiceZip;
-        if (!file) return true; // Allow null/undefined
+        if (!file) return true;
         const netRestriction = problem.value.config?.networkAccessRestriction;
-        if (!netRestriction?.connectWithLocal?.enabled) return true; // Only validate when connectWithLocal is enabled
+        if (!netRestriction?.connectWithLocal?.enabled) return true;
         return file.name.toLowerCase().endsWith(".zip");
       }),
     },
   },
 };
 
+/* ========================================================
+   Vuelidate 初始化 & 方法
+   ======================================================== */
 const v$ = useVuelidate(rules, problem);
 
 // Provide v$ to child components (e.g., PipelineSection)
@@ -234,14 +301,18 @@ async function submit() {
   <!-- 第一層：題名與隱藏開關 -->
   <div class="grid grid-cols-2 gap-y-4">
     <div class="form-control w-full max-w-xs">
-      <label class="label"><span class="label-text">Problem name</span></label>
+      <label class="label">
+        <span class="label-text">Problem name</span>
+      </label>
+
       <input
         type="text"
         :class="['input input-bordered w-full max-w-xs', v$.problemName.$error && 'input-error']"
         :value="problem.problemName"
         @input="update('problemName', ($event.target as HTMLInputElement).value)"
       />
-      <label class="label" v-show="v$.problemName.$error">
+
+      <label v-show="v$.problemName.$error" class="label">
         <span class="label-text-alt text-error" v-text="v$.problemName.$errors[0]?.$message" />
       </label>
     </div>
@@ -294,6 +365,7 @@ async function submit() {
     </div>
   </div>
 
+  <!-- 提交按鈕 -->
   <div class="mt-6 flex justify-end">
     <button :class="['btn btn-success', isLoading && 'loading']" @click="submit">
       <i-uil-file-upload-alt class="mr-1 lg:h-5 lg:w-5" /> Submit

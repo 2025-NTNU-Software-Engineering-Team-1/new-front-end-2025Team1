@@ -19,12 +19,12 @@ const v$ = inject<any>("v$");
 const route = useRoute();
 
 /* -------------------- Course -------------------- */
-const courseId = ref<number | null>(null);
+const courseName = ref<string | null>(null);
 
-async function fetchCourseId() {
+async function fetchCourseName() {
   try {
     const resp = await fetcher.get(`/course/${route.params.name}`);
-    courseId.value = resp.data.id;
+    courseName.value = resp.data;
   } catch {
     console.warn("Failed to fetch course id");
   }
@@ -161,12 +161,12 @@ const showActiveKeys = ref(true);
 const showInactiveKeys = ref(true);
 
 async function fetchKeys() {
-  if (!courseId.value) await fetchCourseId();
+  if (!courseName.value) await fetchCourseName();
 
   isFetchingKeys.value = true;
   fetchError.value = "";
   try {
-    const { data } = await api.AIVTuber.getCourseKeys(courseId.value!);
+    const { data } = await api.AIVTuber.getCourseKeys(courseName.value!);
     const allKeys = data.keys || [];
     apiKeys.active = allKeys.filter((k) => k.is_active);
     apiKeys.inactive = allKeys.filter((k) => !k.is_active);
@@ -220,7 +220,7 @@ const isFetchingSuggestion = ref(false);
 const suggestionError = ref("");
 
 async function fetchKeySuggestion() {
-  if (!courseId.value) await fetchCourseId();
+  if (!courseName.value) await fetchCourseName();
 
   const model = problem.value.config?.aiVTuberMode || "gemini-2.5-flash-lite";
 
@@ -228,7 +228,7 @@ async function fetchKeySuggestion() {
   suggestionError.value = "";
 
   try {
-    const { data } = await api.AIVTuber.getKeySuggestion(courseId.value!, model);
+    const { data } = await api.AIVTuber.getKeySuggestion(courseName.value!, model);
     keySuggestion.value = data;
   } catch (err: any) {
     suggestionError.value = err?.response?.data?.detail || "Failed to fetch suggestion.";
@@ -396,9 +396,9 @@ onBeforeUnmount(() => {
                   class="select select-bordered select-sm flex-1"
                   v-model="problem.config!.aiVTuberMode"
                 >
-                  <option value="gemini-2.5-flash-lite">gemini‑2.5‑flash‑lite</option>
-                  <option value="gemini-2.5-flash">gemini‑2.5‑flash</option>
-                  <option value="gemini-2.5-pro">gemini‑2.5‑pro</option>
+                  <option value="gemini-2.5-flash-lite">gemini 2.5 flash lite</option>
+                  <option value="gemini-2.5-flash">gemini 2.5 flash</option>
+                  <option value="gemini-2.5-pro">gemini 2.5 pro</option>
                 </select>
               </div>
               <div class="flex min-w-[300px] flex-1 items-center gap-3">
@@ -656,7 +656,7 @@ onBeforeUnmount(() => {
             "
           />
           <label class="label">
-            <span class="label-text-alt opacity-70"> Only <code>.in</code> files inside ZIP; ≤ 1 GB </span>
+            <span class="label-text-alt opacity-70"> Only <code>.in</code> files inside ZIP; ≤ 1 GB </span>
           </label>
         </div>
 
@@ -671,7 +671,7 @@ onBeforeUnmount(() => {
             class="file-input file-input-bordered file-input-sm w-full"
             @change="
               (e: any) => {
-                const files = Array.from(e.target.files || []) as File[];
+               const files = Array.from(e.target.files || []) as File[];
                 const valid = validateFilesForAIAC(files, getAIFileExtensions());
                 problem.assets!.trialModeACFiles = valid;
                 if (valid.length === 0) (e.target as HTMLInputElement).value = '';

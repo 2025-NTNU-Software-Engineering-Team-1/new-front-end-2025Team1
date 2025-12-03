@@ -141,7 +141,7 @@ const CourseAPIUsage = {
 };
 
 const AIVTuber = {
-  getCourseKeys: (courseId: number) =>
+  getCourseKeys: (courseName: string) =>
     fetcher.get<{
       keys: {
         id: string;
@@ -153,9 +153,9 @@ const AIVTuber = {
         request_count: number;
         created_by: string;
       }[];
-    }>(`/course/${courseId}/ai/key`),
-  getKeySuggestion: (courseId: number, model: string) =>
-    fetcher.get(`/course/${courseId}/ai/key/suggestion`, {
+    }>(`/course/${courseName}/ai/key`),
+  getKeySuggestion: (courseName: string, model: string) =>
+    fetcher.get(`/course/${courseName}/ai/key/suggestion`, {
       params: { model },
     }),
 };

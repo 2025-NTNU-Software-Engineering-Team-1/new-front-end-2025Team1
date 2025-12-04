@@ -9,23 +9,66 @@ const route = useRoute();
 const { t } = useI18n();
 useTitle(`AI Usage - ${route.params.name} | Normal OJ`);
 
-const data = ref<any>(null);
 const isLoading = ref(false);
 const error = ref<unknown>(null);
 const expandedKeys = ref<Record<string, boolean>>({});
+
+interface KeyItem {
+  key_id: string;
+  key_name: string;
+  created_by: string;
+  problem_usages: ProblemUsage[];
+  total_token: number;
+  max_problems: ProblemUsage[];
+  min_problems: ProblemUsage[];
+}
+
+const data = ref<{
+  totalToken: number;
+  keys: KeyItem[];
+} | null>(null);
+
+interface ProblemUsage {
+  problem_id: number;
+  problem_name: string;
+  token?: number;
+}
 
 onMounted(async () => {
   isLoading.value = true;
   try {
     const res = await api.CourseAPIUsage.getCourseUsage(route.params.name as string);
     const resultData = res?.data ?? {};
+
+    // === 統計
+    const keys = (resultData.keys || []).map((key: any) => {
+      const usages: ProblemUsage[] = key.problem_usages || [];
+
+      // total token
+      const totalToken = usages.reduce<number>((sum, p) => sum + (p.token ?? 0), 0);
+
+      // 找出最大最小 token 值
+      const tokens = usages.map((p: { token?: number }) => p.token ?? 0);
+      const maxVal = Math.max(...tokens);
+      const minVal = Math.min(...tokens);
+
+      const max_problems: ProblemUsage[] = usages.filter((p) => p.token === maxVal);
+      const min_problems: ProblemUsage[] = usages.filter((p) => p.token === minVal);
+      return {
+        ...key,
+        total_token: totalToken,
+        max_problems,
+        min_problems,
+      };
+    });
+
+    // 課程總 Token
     data.value = {
-      totalToken: resultData.totalToken ?? 0,
-      keys: Array.isArray(resultData.keys) ? resultData.keys : [],
+      totalToken: keys.reduce((sum, k) => sum + (k.total_token || 0), 0),
+      keys,
     };
-    if (data.value.keys.length > 0) {
-      data.value.keys.forEach((k: any) => (expandedKeys.value[k.key_id] = false));
-    }
+
+    keys.forEach((k: any) => (expandedKeys.value[k.key_id] = false));
   } catch (err) {
     console.error("Failed to load API usage data:", err);
     error.value = err;
@@ -91,6 +134,7 @@ const toggleExpand = (id: string) => {
                   • Created by {{ keyItem.created_by }}
                 </div>
               </div>
+
               <transition name="fade">
                 <div v-if="expandedKeys[keyItem.key_id]" class="mt-4 border-t border-base-300 pt-4">
                   <table class="table table-compact w-full">
@@ -113,12 +157,19 @@ const toggleExpand = (id: string) => {
                         </td>
                         <td>
                           {{ usage.problem_name }}
-                          <span v-if="usage.problem_id === keyItem.max_problem?.problem_id"> (Max) </span>
-                          <span v-else-if="usage.problem_id === keyItem.min_problem?.problem_id">
-                            (Min)
-                          </span>
+                          <!-- 多筆 max / min 支援 -->
+                          <template
+                            v-if="keyItem.max_problems.some((p) => p.problem_id === usage.problem_id)"
+                          >
+                            <span>(Max)</span>
+                          </template>
+                          <template
+                            v-if="keyItem.min_problems.some((p) => p.problem_id === usage.problem_id)"
+                          >
+                            <span>(Min)</span>
+                          </template>
                         </td>
-                        <td>{{ usage.token.toLocaleString() }}</td>
+                        <td>{{ usage.token?.toLocaleString?.() || 0 }}</td>
                       </tr>
                     </tbody>
                   </table>

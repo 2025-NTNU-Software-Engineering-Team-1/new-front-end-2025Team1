@@ -122,15 +122,11 @@ const User = {
 const CourseAPIUsage = {
   getCourseUsage: (courseName: string) =>
     fetcher.get<{
-      totalToken: number;
       keys: {
         key_id: string | number;
         key_name: string;
         created_by: string;
         masked_value: string;
-        total_token: number;
-        max_problem?: { problem_id: number; problem_name: string; token: number };
-        min_problem?: { problem_id: number; problem_name: string; token: number };
         problem_usages: {
           problem_id: number;
           problem_name: string;
@@ -159,13 +155,13 @@ const AIVTuber = {
     courseName: string,
     body: { key_name: string; value: string; is_active?: boolean; created_by?: string },
   ) =>
-    fetcher.post<{ status: string; message: string; mask_id: string }>(`/course/${courseName}/ai/key`, body),
+    fetcher.post<{ status: string; message: string; masked_id: string }>(
+      `/course/${courseName}/ai/key`,
+      body,
+    ),
 
-  updateKey: (
-    courseName: string,
-    keyId: string,
-    body: { key_name?: string; is_active?: boolean; created_by?: string },
-  ) => fetcher.patch<{ status: string; message: string }>(`/course/${courseName}/ai/key/${keyId}`, body),
+  updateKey: (courseName: string, keyId: string, body: { key_name?: string; is_active?: boolean }) =>
+    fetcher.patch<{ status: string; message: string }>(`/course/${courseName}/ai/key/${keyId}`, body),
 
   deleteKey: (courseName: string, keyId: string) =>
     fetcher.delete<{ status: string; message: string }>(`/course/${courseName}/ai/key/${keyId}`),

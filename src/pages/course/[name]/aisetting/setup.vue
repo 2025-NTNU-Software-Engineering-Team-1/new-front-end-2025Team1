@@ -39,8 +39,8 @@ async function fetchKeys() {
     isLoading.value = true;
     const { data } = await api.AIVTuber.getCourseKeys(route.params.name as string);
     apiKeys.value = data.keys || [];
-  } catch {
-    errorMsg.value = "Failed to load keys.";
+  } catch (err: any) {
+    errorMsg.value = err?.response?.data?.message ?? "Failed to load keys.";
   } finally {
     isLoading.value = false;
   }
@@ -59,24 +59,31 @@ async function addKey() {
 
   try {
     // 使用目前登入者的 username 當作建立者
-    const { data } = await api.AIVTuber.addKey(route.params.name as string, {
+    const res = await api.AIVTuber.addKey(route.params.name as string, {
       key_name: newKey.value.name,
       value: newKey.value.value,
       is_active: true,
       created_by: session.username,
     });
+    const data = res.data;
 
     if (data.status === "OK") {
       successMsg.value = data.message;
-      newKey.value.maskedDisplay = newKey.value.value.slice(0, 4) + "****" + newKey.value.value.slice(-4);
+      // 顯示回傳的 masked_id
+      if (data.masked_id) {
+        newKey.value.maskedDisplay = data.masked_id;
+      } else {
+        newKey.value.maskedDisplay = "";
+      }
+      // 清空輸入欄位
       newKey.value.value = "";
       newKey.value.name = "";
       await fetchKeys();
     } else {
       errorMsg.value = data.message || "Failed to add key.";
     }
-  } catch {
-    errorMsg.value = "Failed to create key.";
+  } catch (err: any) {
+    errorMsg.value = err?.response?.data?.message ?? "Failed to add key.";
   } finally {
     isLoading.value = false;
   }
@@ -92,7 +99,6 @@ async function updateKey(key: any) {
     const { data } = await api.AIVTuber.updateKey(route.params.name as string, key.id, {
       key_name: key.key_name,
       is_active: key.is_active,
-      created_by: key.created_by,
     });
 
     if (data.status === "OK") {
@@ -101,8 +107,8 @@ async function updateKey(key: any) {
     } else {
       errorMsg.value = data.message || "Failed to update key.";
     }
-  } catch {
-    errorMsg.value = "Failed to update key.";
+  } catch (err: any) {
+    errorMsg.value = err?.response?.data?.message ?? "Failed to update key.";
   } finally {
     isLoading.value = false;
   }
@@ -123,10 +129,10 @@ async function deleteKey(keyId: string) {
       successMsg.value = data.message;
       await fetchKeys();
     } else {
-      errorMsg.value = "Failed to delete key.";
+      errorMsg.value = data.message || "Failed to delete key.";
     }
-  } catch {
-    errorMsg.value = "Failed to delete key.";
+  } catch (err: any) {
+    errorMsg.value = err?.response?.data?.message ?? "Failed to delete key.";
   } finally {
     isLoading.value = false;
   }
@@ -184,8 +190,9 @@ onMounted(fetchKeys);
             </button>
           </div>
 
+          <!-- 顯示後端回傳 masked_id -->
           <div v-if="newKey.maskedDisplay" class="mt-3 font-mono text-sm text-success">
-            Masked Display: {{ newKey.maskedDisplay }}
+            Masked ID: {{ newKey.maskedDisplay }}
           </div>
         </div>
 

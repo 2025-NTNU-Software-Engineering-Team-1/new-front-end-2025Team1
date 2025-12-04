@@ -661,9 +661,10 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- Upload AC files -->
-        <div class="form-control w-full">
-          <label class="label"><span class="label-text">Upload AC Files</span></label>
-
+        <div class="form-control w-full max-w-xs">
+          <label class="label">
+            <span class="label-text">Upload AC files</span>
+          </label>
           <input
             type="file"
             multiple

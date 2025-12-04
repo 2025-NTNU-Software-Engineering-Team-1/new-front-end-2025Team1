@@ -19,8 +19,8 @@ const router = useRouter();
 type TestCase = {
   id: number;
   status: SubmissionStatusCodes;
-  execTime: number;
-  memoryUsage: number;
+  exec_time: number;
+  memory_usage: number;
   input?: string;
   expectedOutput?: string;
   actualOutput?: string;
@@ -29,8 +29,8 @@ type TestCase = {
 type TestTask = {
   taskId: number;
   cases: TestCase[];
-  execTime: number;
-  memoryUsage: number;
+  exec_time: number;
+  memory_usage: number;
   score: number;
   status: SubmissionStatusCodes;
 };
@@ -85,30 +85,30 @@ onMounted(async () => {
         displayedName: session.displayedName || "Unknown",
       },
       status: mapStatusToCode(response.data.status),
-      runTime: Math.max(...response.data.tasks.map((t) => t.exec_Time)),
-      memoryUsage: Math.max(...response.data.tasks.map((t) => t.memory_Usage)),
+      runTime: Math.max(...(response.data.tasks?.map(t => t.exec_time)??[0])),
+      memoryUsage: Math.max(...(response.data.tasks?.map(t => t.memory_usage)??[0])),
       score: response.data.score,
       languageType: 1, // TODO: Get from backend
       timestamp: new Date(response.data.timestamp).getTime(),
       code: "", // TODO: Get code from backend
-      tasks: response.data.tasks.map((task, idx) => ({
+      tasks: response.data.tasks?.map((task, idx) => ({
         taskId: idx,
-        execTime: task.exec_Time,
-        memoryUsage: task.memory_Usage,
+        exec_time: task.exec_time,
+        memory_usage: task.memory_usage,
         score: task.score,
         status: mapStatusToCode(task.status),
         cases: [
           {
             id: 0,
             status: mapStatusToCode(task.status),
-            execTime: task.exec_Time,
-            memoryUsage: task.memory_Usage,
+            exec_time: task.exec_time,
+            memory_usage: task.memory_usage,
             input: "",
             expectedOutput: "",
             actualOutput: task.stdout,
           },
         ],
-      })),
+      }))??[],
     };
 
     console.log("Loaded trial submission details:", testResult.value);
@@ -174,14 +174,14 @@ function openTaskDetailModal(taskIndex: number) {
   const data = {
     stage: taskIndex,
     status: task.status,
-    execTime: `${task.execTime} ms`,
-    memoryUsage: `${task.memoryUsage} KB`,
+    exec_time: `${task.exec_time} ms`,
+    memory_usage: `${task.memory_usage} KB`,
     score: task.score,
     cases: task.cases.map((c, idx) => ({
       case: idx,
       status: c.status,
-      execTime: `${c.execTime} ms`,
-      memoryUsage: `${c.memoryUsage} KB`,
+      exec_time: `${c.exec_time} ms`,
+      memory_usage: `${c.memory_usage} KB`,
       input: c.input || `Input data for case ${idx}`,
       answer: c.expectedOutput || `Expected output for case ${idx}`,
       output: c.actualOutput || `Actual output for case ${idx}`,
@@ -205,8 +205,8 @@ function openCaseDetailModal(taskIndex: number, caseIndex: number) {
     stage: taskIndex,
     case: caseIndex,
     status: testCase.status,
-    execTime: `${testCase.execTime} ms`,
-    memoryUsage: `${testCase.memoryUsage} KB`,
+    exec_time: `${testCase.exec_time} ms`,
+    memory_usage: `${testCase.memory_usage} KB`,
     input: testCase.input || `Input data for case ${taskIndex}-${caseIndex}`,
     answer: testCase.expectedOutput || `Expected output for case ${taskIndex}-${caseIndex}`,
     output: testCase.actualOutput || `Actual output for case ${taskIndex}-${caseIndex}`,
@@ -247,8 +247,8 @@ function downloadCaseResult(taskIndex: number, caseIndex: number) {
     stage: taskIndex,
     case: caseIndex,
     status: testCase.status,
-    execTime: `${testCase.execTime} ms`,
-    memoryUsage: `${testCase.memoryUsage} KB`,
+    exec_time: `${testCase.exec_time} ms`,
+    memory_usage: `${testCase.memory_usage} KB`,
     input: testCase.input || `Input data for case ${taskIndex}-${caseIndex}`,
     answer: testCase.expectedOutput || `Expected output for case ${taskIndex}-${caseIndex}`,
     output: testCase.actualOutput || `Actual output for case ${taskIndex}-${caseIndex}`,

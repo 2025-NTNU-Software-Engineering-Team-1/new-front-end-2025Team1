@@ -75,16 +75,16 @@ const Submission = {
 };
 
 type TrialHistoryItem = {
-  Trial_Submission_Id: string;
-  Problem_Id: string;
-  Status: string;
-  Score: number;
-  Language_Type: number;
-  Timestamp: Date; 
+  trial_Submission_td: string;
+  problem_Id: string;
+  status: string;
+  score: number;
+  language_Type: number;
+  timestamp: Date; 
 };
 type TrialHistoryInnerData = {
-  Total_Count: number;
-  History: TrialHistoryItem[];
+  total_count: number;
+  history: TrialHistoryItem[];
 };
 type TrialHistoryMergedResponse = {
   status: string; 
@@ -98,27 +98,27 @@ const TrialSubmission = {
   getPublicTestCases: (problemId: number) =>
     fetcher.get<{
       status: string;
-      Trial_Cases: Array<{
-        File_Name: string;
-        Memory_Limit: number; // KB
-        Time_Limit: number; // ms
-        Input_Content: string;
-        Output_Content: string;
+      trial_cases: Array<{
+        fFile_name: string;
+        nemory_limit: number; // KB
+        time_limit: number; // ms
+        input_content: string;
+        output_content: string;
       }>;
     }>(`/problem/${problemId}/public-testcases`),
 
   // API 2: 提交 Trial Submission 請求
   // POST /problem/<problem_id>/trial/request
   createTrialRequest: (body: {
-    Problem_Id: number;
-    Language_Type: number; // 0: Python, 1: C++, 2: C
-    Use_Default_Test_Cases: boolean;
+    problem_id: number;
+    language_type: number; // 0: Python, 1: C++, 2: C
+    use_default_test_cases: boolean;
   }) =>
     fetcher.post<{
       status: string;
       message: string;
-      Trial_Submission_Id?: string;
-    }>(`/problem/${body.Problem_Id}/trial/request`, body),
+      trial_submission_id?: string;
+    }>(`/problem/${body.problem_id}/trial/request`, body),
 
   // API 3: 送出 Trial Submission 的程式以及測試測資
   // PUT /trial-submission/<Trial_Submission_Id>/files
@@ -146,8 +146,8 @@ const TrialSubmission = {
       score: number;
       tasks: Array<{
         status: string; // (AC, WA, TLE)
-        exec_Time: number;
-        memory_Usage: number;
+        exec_time: number;
+        memory_usage: number;
         score: number;
         stdout: string;
         stderr: string;

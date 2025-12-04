@@ -38,13 +38,13 @@ onMounted(async () => {
     if (response.status === "ok") {
       error.value = undefined;
       // Convert backend response to frontend format
-      testHistory.value = response.data?.History?.map((item:any) => ({
-        id: item.Trial_Submission_Id,
-        pid: item.Problem_Id,
-        result: mapStatusToCode(item.Status),
-        score: item.Score,
-        lang: LANG[item.Language_Type] || "Unknown",
-        timestamp: String(item.Timestamp),
+      testHistory.value = response.data?.history?.map((item:any) => ({
+        id: item.trial_submission_id,
+        pid: item.problem_Id,
+        result: mapStatusToCode(item.status),
+        score: item.score,
+        lang: LANG[item.language_type] || "Unknown",
+        timestamp: String(item.timestamp),
       }))||[];
       console.log("Loaded trial history:", testHistory.value);
     } else {
@@ -71,8 +71,11 @@ function mapStatusToCode(status: string): SubmissionStatusCodes {
     JE: SUBMISSION_STATUS_CODE.JUDGE_ERROR,
     OLE: SUBMISSION_STATUS_CODE.OUTPUT_LIMIT_EXCEED,
     Pending: SUBMISSION_STATUS_CODE.PENDING,
+    err: SUBMISSION_STATUS_CODE.JUDGE_ERROR,
+    Error: SUBMISSION_STATUS_CODE.JUDGE_ERROR,
+    ERROR: SUBMISSION_STATUS_CODE.JUDGE_ERROR,
   };
-  return statusMap[status] ?? SUBMISSION_STATUS_CODE.PENDING;
+  return statusMap[status] ?? SUBMISSION_STATUS_CODE.JUDGE_ERROR;
 }
 
 function viewTestDetail(testId: string | number) {

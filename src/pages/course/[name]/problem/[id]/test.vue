@@ -71,29 +71,7 @@ watchEffect(() => {
 
 const selectedTestcaseContent = ref("");
 
-// Load test settings when component mounts
-onMounted(async () => {
-  try {
-    // Load test settings from backend
-    const response = await fetcher.get(`/problem/${route.params.id}/test-settings`);
-    if (response.data) {
-      useDefaultTestcases.value = response.data.use_default_testcases ?? true;
 
-      // If custom testcases exist, load them
-      if (!useDefaultTestcases.value && response.data.custom_testcases_url) {
-        const testcasesResponse = await fetcher.get(response.data.custom_testcases_url, {
-          responseType: "blob",
-        });
-        customTestcasesBlob.value = testcasesResponse.data;
-      }
-    }
-  } catch (error) {
-    console.error("Error loading test settings:", error);
-    // Default to using default testcases if loading fails
-    useDefaultTestcases.value = true;
-    customTestcasesBlob.value = null;
-  }
-});
 
 async function test() {
   const isFormCorrect = await v$.value.$validate();
@@ -111,8 +89,8 @@ async function test() {
       Use_Default_Test_Cases: useDefaultTestcases.value,
     });
 
-    if (requestResponse.data.Status === "ERR" || !requestResponse.data.Trial_Submission_Id) {
-      throw new Error(requestResponse.data.Message || "Failed to create trial submission");
+    if (requestResponse.data.status === "ERR" || !requestResponse.data.Trial_Submission_Id) {
+      throw new Error(requestResponse.data.message || "Failed to create trial submission");
     }
 
     const trialSubmissionId = requestResponse.data.Trial_Submission_Id;
@@ -134,8 +112,8 @@ async function test() {
 
     const uploadResponse = await api.TrialSubmission.uploadTrialFiles(trialSubmissionId, formData);
 
-    if (uploadResponse.data.Status === "ERR") {
-      throw new Error(uploadResponse.data.Message || "Failed to upload trial submission files");
+    if (uploadResponse.data.status === "ERR") {
+      throw new Error(uploadResponse.data.message || "Failed to upload trial submission files");
     }
 
     // Navigate to test history

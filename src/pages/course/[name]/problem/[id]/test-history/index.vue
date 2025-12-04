@@ -33,22 +33,23 @@ const isLoading = ref(false);
 onMounted(async () => {
   try {
     isLoading.value = true;
-    const response = await api.TrialSubmission.getTrialHistory(Number(route.params.id));
+    const response:any = await api.TrialSubmission.getTrialHistory(Number(route.params.id));
 
-    if (response.data.Type === "OK") {
+    if (response.status === "ok") {
+      error.value = undefined;
       // Convert backend response to frontend format
-      testHistory.value = response.data.Data.History.map((item) => ({
+      testHistory.value = response.data?.History?.map((item:any) => ({
         id: item.Trial_Submission_Id,
         pid: item.Problem_Id,
         result: mapStatusToCode(item.Status),
         score: item.Score,
         lang: LANG[item.Language_Type] || "Unknown",
         timestamp: String(item.Timestamp),
-      }));
+      }))||[];
       console.log("Loaded trial history:", testHistory.value);
     } else {
-      console.error("Failed to load trial history:", response.data.Message);
-      error.value = new Error(response.data.Message) as AxiosError;
+      console.error("Failed to load trial history:", response.data.message);
+      error.value = new Error(response.message) as AxiosError;
     }
   } catch (err) {
     console.error("Error loading trial history:", err);

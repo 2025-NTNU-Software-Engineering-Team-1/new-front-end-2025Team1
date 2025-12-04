@@ -78,34 +78,34 @@ onMounted(async () => {
 
     // Convert backend response to frontend format
     testResult.value = {
-      id: response.data.Trial_Submission_Id,
+      id: response.data.trial_submission_id,
       problemId: route.params.id as string,
       user: {
         username: session.username || "Unknown",
         displayedName: session.displayedName || "Unknown",
       },
-      status: mapStatusToCode(response.data.Status),
-      runTime: Math.max(...response.data.Tasks.map((t) => t.Exec_Time)),
-      memoryUsage: Math.max(...response.data.Tasks.map((t) => t.Memory_Usage)),
-      score: response.data.Score,
+      status: mapStatusToCode(response.data.status),
+      runTime: Math.max(...response.data.tasks.map((t) => t.exec_Time)),
+      memoryUsage: Math.max(...response.data.tasks.map((t) => t.memory_Usage)),
+      score: response.data.score,
       languageType: 1, // TODO: Get from backend
-      timestamp: new Date(response.data.Timestamp).getTime(),
+      timestamp: new Date(response.data.timestamp).getTime(),
       code: "", // TODO: Get code from backend
-      tasks: response.data.Tasks.map((task, idx) => ({
+      tasks: response.data.tasks.map((task, idx) => ({
         taskId: idx,
-        execTime: task.Exec_Time,
-        memoryUsage: task.Memory_Usage,
-        score: task.Score,
-        status: mapStatusToCode(task.Status),
+        execTime: task.exec_Time,
+        memoryUsage: task.memory_Usage,
+        score: task.score,
+        status: mapStatusToCode(task.status),
         cases: [
           {
             id: 0,
-            status: mapStatusToCode(task.Status),
-            execTime: task.Exec_Time,
-            memoryUsage: task.Memory_Usage,
+            status: mapStatusToCode(task.status),
+            execTime: task.exec_Time,
+            memoryUsage: task.memory_Usage,
             input: "",
             expectedOutput: "",
-            actualOutput: task.Stdout,
+            actualOutput: task.stdout,
           },
         ],
       })),

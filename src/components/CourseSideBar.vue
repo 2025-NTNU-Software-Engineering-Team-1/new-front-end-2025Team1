@@ -22,7 +22,7 @@ const navs = [
         },
       ]
     : []),
-  ...(session.role === 1 || session.isAdmin ? [{ name: "API Usage", path: "/apiusage" }] : []),
+  ...(session.role === 1 || session.isAdmin ? [{ name: "API Setting", path: "/apisetting" }] : []),
 ];
 </script>
 
@@ -30,7 +30,9 @@ const navs = [
   <ul v-if="displayType === 'side'" class="menu menu-compact w-40 bg-base-100 p-2 lg:menu-normal">
     <li
       v-for="{ name, path } in navs"
-      :class="[{ 'border-l-4 border-blue-500': $route.path === `/course/${$route.params.name}${path}` }]"
+      :class="[
+        $route.path.startsWith(`/course/${$route.params.name}${path}`) && 'border-l-4 border-blue-500',
+      ]"
     >
       <router-link :to="`/course/${$route.params.name}${path}`">{{ name }}</router-link>
     </li>

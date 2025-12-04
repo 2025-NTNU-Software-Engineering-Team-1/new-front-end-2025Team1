@@ -85,10 +85,10 @@ const toggleExpand = (id: string) => {
                   {{ keyItem.key_name }}
                 </div>
                 <div class="text-sm">
-                  Used by {{ keyItem.problem_usages.length }} problems · Token {{
+                  Used by {{ keyItem.problem_usages.length }} problems • Token {{
                     keyItem.total_token.toLocaleString()
                   }}
-                  · Created by {{ keyItem.created_by }}
+                  • Created by {{ keyItem.created_by }}
                 </div>
               </div>
               <transition name="fade">

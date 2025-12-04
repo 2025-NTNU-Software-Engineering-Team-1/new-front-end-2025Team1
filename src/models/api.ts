@@ -154,6 +154,22 @@ const AIVTuber = {
         created_by: string;
       }[];
     }>(`/course/${courseName}/ai/key`),
+
+  addKey: (
+    courseName: string,
+    body: { key_name: string; value: string; is_active?: boolean; created_by?: string },
+  ) =>
+    fetcher.post<{ status: string; message: string; mask_id: string }>(`/course/${courseName}/ai/key`, body),
+
+  updateKey: (
+    courseName: string,
+    keyId: string,
+    body: { key_name?: string; is_active?: boolean; created_by?: string },
+  ) => fetcher.patch<{ status: string; message: string }>(`/course/${courseName}/ai/key/${keyId}`, body),
+
+  deleteKey: (courseName: string, keyId: string) =>
+    fetcher.delete<{ status: string; message: string }>(`/course/${courseName}/ai/key/${keyId}`),
+
   getKeySuggestion: (courseName: string, model: string) =>
     fetcher.get(`/course/${courseName}/ai/key/suggestion`, {
       params: { model },

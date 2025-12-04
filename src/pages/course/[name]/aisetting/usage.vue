@@ -80,7 +80,7 @@ const toggleExpand = (id: string) => {
               >
                 <div class="flex items-center gap-2 text-lg font-semibold">
                   <span>
-                    {{ expandedKeys[keyItem.key_id] ? "▼" : ">" }}
+                    {{ expandedKeys[keyItem.key_id] ? "▼" : "▸" }}
                   </span>
                   {{ keyItem.key_name }}
                 </div>

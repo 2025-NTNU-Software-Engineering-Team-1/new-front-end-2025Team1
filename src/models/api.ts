@@ -137,7 +137,7 @@ const CourseAPIUsage = {
           token: number;
         }[];
       }[];
-    }>(`/course/${courseName}/apisetting/usage`),
+    }>(`/course/${courseName}/aisetting/usage`),
 };
 
 const AIVTuber = {

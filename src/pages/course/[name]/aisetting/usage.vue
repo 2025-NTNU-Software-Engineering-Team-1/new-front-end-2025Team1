@@ -7,7 +7,7 @@ import { useI18n } from "vue-i18n";
 
 const route = useRoute();
 const { t } = useI18n();
-useTitle(`API Usage - ${route.params.name} | Normal OJ`);
+useTitle(`AI Usage - ${route.params.name} | Normal OJ`);
 
 const data = ref<any>(null);
 const isLoading = ref(false);

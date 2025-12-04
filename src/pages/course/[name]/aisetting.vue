@@ -7,13 +7,13 @@ import { useI18n } from "vue-i18n";
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
-useTitle(`API Setting - ${route.params.name} | Normal OJ`);
+useTitle(`AI Setting - ${route.params.name} | Normal OJ`);
 
 // 預設 redirect 到 setup
 watchEffect(() => {
   // 僅當路徑剛好在 /apisetting 結尾時才 redirect
-  if (route.path.endsWith("/apisetting") || route.path.endsWith("/apisetting/")) {
-    router.replace(`/course/${route.params.name}/apisetting/setup`);
+  if (route.path.endsWith("/aisetting") || route.path.endsWith("/aisetting/")) {
+    router.replace(`/course/${route.params.name}/aisetting/setup`);
   }
 });
 </script>
@@ -24,12 +24,12 @@ watchEffect(() => {
       <div class="card-body">
         <div class="tabs mb-4">
           <router-link
-            :to="`/course/${route.params.name}/apisetting/setup`"
+            :to="`/course/${route.params.name}/aisetting/setup`"
             :class="['tab tab-bordered', route.path.endsWith('/setup') && 'tab-active']"
             >Set Up</router-link
           >
           <router-link
-            :to="`/course/${route.params.name}/apisetting/usage`"
+            :to="`/course/${route.params.name}/aisetting/usage`"
             :class="['tab tab-bordered', route.path.endsWith('/usage') && 'tab-active']"
             >Usage</router-link
           >

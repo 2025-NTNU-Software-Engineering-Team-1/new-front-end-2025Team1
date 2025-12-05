@@ -89,12 +89,14 @@ export class LAppLive2DManager {
       if (LAppDefine.DebugLogEnable) {
         LAppPal.printMessage(`[APP]hit area: [${LAppDefine.HitAreaNameBody}]`);
       }
+      /*
       model.startRandomMotion(
         LAppDefine.MotionGroupTapBody,
         LAppDefine.PriorityNormal,
         this.finishedMotion,
         this.beganMotion,
       );
+      */
     }
   }
 
@@ -165,6 +167,13 @@ export class LAppLive2DManager {
   public nextScene(): void {
     const no: number = (this._sceneIndex + 1) % LAppDefine.ModelDirSize;
     this.changeScene(no);
+  }
+
+  public setTalking(isTalking: boolean): void {
+    const model = this._models.at(0);
+    if (model) {
+      model.setTalking(isTalking);
+    }
   }
 
   /**

@@ -162,6 +162,32 @@ export class LAppDelegate {
     }
   }
 
+  public setExpression(expressionId: string): void {
+    // 檢查有沒有子委派 (通常會有一個)
+    if (!this._subdelegates || this._subdelegates.getSize() === 0) return;
+
+    // 取得 Live2D Manager
+    const live2dManager = this._subdelegates.at(0).getLive2DManager();
+    
+    // 取得當前的模型 (通常只有一個)
+    const model = live2dManager._models.at(0);
+    
+    if (model) {
+      model.setExpression(expressionId);
+      console.log(`[APP] 切換表情到: ${expressionId}`);
+    }
+  }
+  public static setTalking(isTalking: boolean): void {
+    // 檢查實例是否存在
+    if (!s_instance) return;
+
+    // 檢查是否有 subdelegates (通常只有一個)
+    if (s_instance._subdelegates.getSize() > 0) {
+        // 透過 Manager 去設定 Model
+        s_instance._subdelegates.at(0).getLive2DManager().setTalking(isTalking);
+    }
+  }
+
   /**
    * 解放する。
    */

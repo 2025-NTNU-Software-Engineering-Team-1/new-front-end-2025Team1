@@ -351,6 +351,13 @@ export class LAppModel extends CubismUserModel {
       for (let i = 0; i < lipSyncIdCount; ++i) {
         this._lipSyncIds.pushBack(this._modelSetting.getLipSyncParameterId(i));
       }
+
+      if (this._lipSyncIds.getSize() === 0) {
+        const mouthId = CubismFramework.getIdManager().getId(CubismDefaultParameterId.ParamMouthOpenY);
+        this._lipSyncIds.pushBack(mouthId);
+        LAppPal.printMessage("[APP] 沒有在 model3.json 定義 lipsync，改用 ParamMouthOpenY 當嘴巴參數");
+      }
+
       this._state = LoadStep.SetupLayout;
 
       // callback
@@ -494,7 +501,7 @@ export class LAppModel extends CubismUserModel {
     this._model.loadParameters(); // 前回セーブされた状態をロード
     if (this._motionManager.isFinished()) {
       // モーションの再生がない場合、待機モーションの中からランダムで再生する
-      this.startRandomMotion(LAppDefine.MotionGroupIdle, LAppDefine.PriorityIdle);
+      //this.startRandomMotion(LAppDefine.MotionGroupIdle, LAppDefine.PriorityIdle);
     } else {
       motionUpdated = this._motionManager.updateMotion(this._model, deltaTimeSeconds); // モーションを更新
     }
@@ -537,8 +544,17 @@ export class LAppModel extends CubismUserModel {
     }
 
     // リップシンクの設定
-    if (this._lipsync) {
-      let value = 0.0; // リアルタイムでリップシンクを行う場合、システムから音量を取得して、0~1の範囲で値を入力します。
+    if (this._isTalking) {
+      // 說話模式優先：用時間做嘴型動畫
+      const value = (Math.sin(this._userTimeSeconds * 15) + 1) * 0.4;
+
+      for (let i = 0; i < this._lipSyncIds.getSize(); ++i) {
+        this._model.addParameterValueById(this._lipSyncIds.at(i), value, 0.8);
+      }
+    }
+    else if (this._lipsync) {
+      // 平常才走 lipsync（有聲音輸入時用 RMS 控制）
+      let value = 0.0;
 
       this._wavFileHandler.update(deltaTimeSeconds);
       value = this._wavFileHandler.getRms();
@@ -547,6 +563,8 @@ export class LAppModel extends CubismUserModel {
         this._model.addParameterValueById(this._lipSyncIds.at(i), value, 0.8);
       }
     }
+
+
 
     // ポーズの設定
     if (this._pose != null) {
@@ -659,6 +677,11 @@ export class LAppModel extends CubismUserModel {
     const no: number = Math.floor(Math.random() * this._modelSetting.getMotionCount(group));
 
     return this.startMotion(group, no, priority, onFinishedMotionHandler, onBeganMotionHandler);
+  }
+
+  // 設定是否說話
+  public setTalking(isTalking: boolean): void {
+      this._isTalking = isTalking;
   }
 
   /**
@@ -882,6 +905,8 @@ export class LAppModel extends CubismUserModel {
     this._subdelegate = subdelegate;
   }
 
+  private _isTalking: boolean = false; // 是否正在說話
+
   /**
    * コンストラクタ
    */
@@ -894,6 +919,8 @@ export class LAppModel extends CubismUserModel {
 
     this._eyeBlinkIds = new csmVector<CubismIdHandle>();
     this._lipSyncIds = new csmVector<CubismIdHandle>();
+
+    (this as any)._lipsync = false;
 
     this._motions = new csmMap<string, ACubismMotion>();
     this._expressions = new csmMap<string, ACubismMotion>();

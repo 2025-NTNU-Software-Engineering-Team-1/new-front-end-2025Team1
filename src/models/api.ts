@@ -108,6 +108,25 @@ const APIToken = {
     fetcher.patch<{ Type: string; Message: string }>(`/profile/api_token/deactivate/${id}`),
 };
 
+const Chatbot = {
+  // 使用者發問：POST /ai/chatbot/ask
+  ask: (body: {
+    message: string;
+    current_code: string;
+    course_name: string;
+    problem_id: string;
+  }) =>
+    fetcher.post<{
+      data: { text: string; emotion?: string }[];
+    }>("/ai/chatbot/ask", body),
+
+  // 取得歷史紀錄：GET /ai/chatbot/history?course_id=...&username=...
+  getHistory: (params: { course_id: string; username: string }) =>
+    fetcher.get<{
+      data: { role: string; text: string }[];
+    }>("/ai/chatbot/history", { params }),
+};
+
 export default {
   Auth,
   Problem,
@@ -118,4 +137,5 @@ export default {
   Course,
   User,
   APIToken,
+  Chatbot,
 };

@@ -263,8 +263,6 @@ const rules = {
       validExtension: helpers.withMessage("Local service must be a .zip file", () => {
         const file = problem.value.assets?.localServiceZip;
         if (!file) return true;
-        const netRestriction = problem.value.config?.networkAccessRestriction;
-        if (!netRestriction?.connectWithLocal?.enabled) return true;
         return file.name.toLowerCase().endsWith(".zip");
       }),
     },

@@ -46,9 +46,12 @@ const newProblem = ref<ProblemForm>({
     acceptedFormat: "code",
     maxStudentZipSizeMB: 50,
     networkAccessRestriction: {
-      enabled: false,
-      firewallExtranet: { enabled: false, whitelist: [], blacklist: [] },
-      connectWithLocal: { enabled: false, whitelist: [], blacklist: [], localServiceZip: null },
+      sidecars: [],
+      external: {
+        model: "Black", // or "White"
+        ip: [],
+        url: [],
+      },
     },
     artifactCollection: [],
   },

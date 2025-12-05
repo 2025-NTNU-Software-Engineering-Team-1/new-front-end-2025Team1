@@ -143,17 +143,16 @@ interface ProblemConfigExtra {
 
   // Network Access Restriction
   networkAccessRestriction?: {
-    enabled: boolean;
-    firewallExtranet?: {
-      enabled: boolean;
-      whitelist: string[];
-      blacklist: string[];
-    };
-    connectWithLocal?: {
-      enabled: boolean;
-      whitelist: string[];
-      blacklist: string[];
-      localServiceZip?: File | null;
+    sidecars: {
+      image: string;
+      name: string;
+      env?: Record<string, string>;
+      args?: string[];
+    }[];
+    external: {
+      model: "Black" | "White";
+      ip: string[];
+      url: string[];
     };
   };
 

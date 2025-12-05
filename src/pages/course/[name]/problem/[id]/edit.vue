@@ -29,13 +29,11 @@ function normalizeConfig(config?: ProblemConfigExtra): ProblemConfigExtra {
     acceptedFormat: "code",
     maxStudentZipSizeMB: 50,
     networkAccessRestriction: {
-      enabled: false,
-      firewallExtranet: { enabled: false, whitelist: [], blacklist: [] },
-      connectWithLocal: {
-        enabled: false,
-        whitelist: [],
-        blacklist: [],
-        localServiceZip: null,
+      sidecars: [],
+      external: {
+        model: "Black", // or "White"
+        ip: [],
+        url: [],
       },
     },
     artifactCollection: [],
@@ -54,21 +52,20 @@ function normalizeConfig(config?: ProblemConfigExtra): ProblemConfigExtra {
     networkAccessRestriction: {
       ...base.networkAccessRestriction!,
       ...(config?.networkAccessRestriction || {}),
-      firewallExtranet: {
-        ...base.networkAccessRestriction!.firewallExtranet!,
-        ...(config?.networkAccessRestriction?.firewallExtranet || {}),
-      },
-      connectWithLocal: {
-        ...base.networkAccessRestriction!.connectWithLocal!,
-        ...(config?.networkAccessRestriction?.connectWithLocal || {}),
+      external: {
+        ...base.networkAccessRestriction!.external,
+        ...(config?.networkAccessRestriction?.external || {}),
       },
     },
   };
   const nar = merged.networkAccessRestriction!;
-  nar.enabled ??= false;
-  nar.firewallExtranet!.enabled ??= false;
-  nar.connectWithLocal!.enabled ??= false;
-  return { ...merged, networkAccessRestriction: nar };
+  if (!Array.isArray(nar.sidecars)) nar.sidecars = [];
+  if (!nar.external) nar.external = { model: "Black", ip: [], url: [] };
+  if (!Array.isArray(nar.external.ip)) nar.external.ip = [];
+  if (!Array.isArray(nar.external.url)) nar.external.url = [];
+  
+  nar.external.model = nar.external.model || "Black";
+  return merged;
 }
 
 function normalizePipeline(raw: any): ProblemPipeline {

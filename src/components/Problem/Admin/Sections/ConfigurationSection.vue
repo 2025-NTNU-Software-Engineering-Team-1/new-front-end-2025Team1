@@ -115,17 +115,29 @@ function ensureConfig() {
       aiVTuberApiKeys: [],
       aiVTuberMode: "gemini-2.5-flash-lite",
       networkAccessRestriction: {
-        enabled: false,
-        firewallExtranet: { enabled: false, whitelist: [], blacklist: [] },
-        connectWithLocal: {
-          enabled: false,
-          whitelist: [],
-          blacklist: [],
-          localServiceZip: null,
+        sidecars: [],
+        external: {
+          model: "Black",
+          ip: [],
+          url: [],
         },
       },
       artifactCollection: [],
     };
+  }else {
+    if (!problem.value.config.networkAccessRestriction) {
+      problem.value.config.networkAccessRestriction = {
+        sidecars: [],
+        external: {
+          model: "Black",
+          ip: [],
+          url: [],
+        },
+      };
+    }
+    const nar = problem.value.config.networkAccessRestriction;
+    if (!nar.sidecars) nar.sidecars = [];
+    if (!nar.external) nar.external = { model: "Black", ip: [], url: [] };
   }
 }
 ensureConfig();
@@ -248,9 +260,24 @@ function onClickOutside(event: MouseEvent) {
   showSuggestionTooltip.value = false;
 }
 
-/* -------------------- Firewall & Local Modes -------------------- */
-const firewallMode = ref<"whitelist" | "blacklist">("whitelist");
-const localMode = ref<"whitelist" | "blacklist">("whitelist");
+
+/* -------------------- Sidecars Helper -------------------- */
+function addSidecar() {
+  if (!problem.value.config!.networkAccessRestriction!.sidecars) {
+    problem.value.config!.networkAccessRestriction!.sidecars = [];
+  }
+  // default empty sidecar
+  problem.value.config!.networkAccessRestriction!.sidecars.push({
+    name: "new-sidecar",
+    image: "alpine:latest",
+    env: {},
+    args: [],
+  });
+}
+
+function removeSidecar(index: number) {
+  problem.value.config!.networkAccessRestriction!.sidecars.splice(index, 1);
+}
 
 /* -------------------- Watches -------------------- */
 watch(
@@ -262,16 +289,6 @@ watch(
     }
   },
 );
-
-watch(firewallMode, (newMode) => {
-  const oppositeMode = newMode === "whitelist" ? "blacklist" : "whitelist";
-  problem.value.config!.networkAccessRestriction!.firewallExtranet![oppositeMode] = [];
-});
-
-watch(localMode, (newMode) => {
-  const oppositeMode = newMode === "whitelist" ? "blacklist" : "whitelist";
-  problem.value.config!.networkAccessRestriction!.connectWithLocal![oppositeMode] = [];
-});
 
 watch(selectedKeys, (keys) => {
   problem.value.config!.aiVTuberApiKeys = keys;
@@ -690,168 +707,153 @@ onBeforeUnmount(() => {
 
     <!-- Network Access Restriction -->
     <div class="form-control col-span-2 rounded-lg border border-gray-400 p-4">
-      <label class="label cursor-pointer justify-start gap-x-4">
-        <span class="label-text">Network Access Restriction</span>
-        <input type="checkbox" class="toggle" v-model="problem.config!.networkAccessRestriction!.enabled" />
+      <div class="flex items-center gap-4">
+        <label class="label mb-0"><span class="label-text font-semibold">Network Access Restriction (External)</span></label>
+      </div>
+
+      <div class="mt-3 grid grid-cols-1 gap-4 p-1 md:grid-cols-2">
+        <div class="col-span-1 md:col-span-2 flex items-center gap-4">
+          <span class="label-text">Access Model:</span>
+          <div class="mode-switcher">
+            <div class="mode-switcher-container">
+              <div
+                class="mode-switcher-slider"
+                :class="{ 'slider-blacklist': problem.config!.networkAccessRestriction!.external!.model === 'Black' }"
+              ></div>
+              <button
+                class="mode-switcher-option"
+                :class="{ active: problem.config!.networkAccessRestriction!.external!.model === 'White' }"
+                @click="problem.config!.networkAccessRestriction!.external!.model = 'White'"
+              >
+                <span>Whitelist</span>
+              </button>
+              <button
+                class="mode-switcher-option"
+                :class="{ active: problem.config!.networkAccessRestriction!.external!.model === 'Black' }"
+                @click="problem.config!.networkAccessRestriction!.external!.model = 'Black'"
+              >
+                <span>Blacklist</span>
+              </button>
+            </div>
+          </div>
+          <div class="text-xs opacity-70 ml-2">
+            <span v-if="problem.config!.networkAccessRestriction!.external!.model === 'White'">
+              Only allow specific IPs/URLs. Block everything else.
+            </span>
+            <span v-else>
+              Block specific IPs/URLs. Allow everything else.
+            </span>
+          </div>
+        </div>
+
+        <div>
+          <label class="label"><span class="label-text">IP List</span></label>
+          <MultiStringInput
+            v-model="problem.config!.networkAccessRestriction!.external!.ip"
+            placeholder="e.g. 8.8.8.8"
+            :badge-class="problem.config!.networkAccessRestriction!.external!.model === 'White' ? 'badge-info' : 'badge-error'"
+          />
+        </div>
+
+        <div>
+          <label class="label"><span class="label-text">URL List</span></label>
+          <MultiStringInput
+            v-model="problem.config!.networkAccessRestriction!.external!.url"
+            placeholder="e.g. google.com"
+            :badge-class="problem.config!.networkAccessRestriction!.external!.model === 'White' ? 'badge-info' : 'badge-error'"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="form-control col-span-2 rounded-lg border border-gray-400 p-4">
+      <div class="flex items-center justify-between">
+        <label class="label"><span class="label-text font-semibold">Sidecars</span></label>
+        <button class="btn btn-sm btn-outline" @click="addSidecar">
+          <i-uil-plus class="mr-1" /> Add Sidecar
+        </button>
+      </div>
+
+      <div class="mt-3 space-y-3">
+        <div 
+          v-for="(sidecar, idx) in problem.config!.networkAccessRestriction!.sidecars" 
+          :key="idx"
+          class="flex gap-3 items-end border border-base-content/20 p-3 rounded-lg bg-base-100"
+        >
+          <div class="form-control flex-1">
+            <label class="label py-1"><span class="label-text-alt">Name</span></label>
+            <input 
+              type="text" 
+              class="input input-sm input-bordered" 
+              v-model="sidecar.name" 
+              placeholder="e.g. mysql-db"
+            />
+          </div>
+          
+          <div class="form-control flex-[2]">
+            <label class="label py-1"><span class="label-text-alt">Image</span></label>
+            <input 
+              type="text" 
+              class="input input-sm input-bordered" 
+              v-model="sidecar.image" 
+              placeholder="e.g. mysql:8.0"
+            />
+          </div>
+
+          <button class="btn btn-sm btn-square btn-error btn-outline" @click="removeSidecar(idx)">
+            <i-uil-trash-alt />
+          </button>
+        </div>
+        
+        <div v-if="problem.config!.networkAccessRestriction!.sidecars.length === 0" class="text-sm opacity-50 text-center py-2">
+          No sidecars configured.
+        </div>
+      </div>
+    </div>
+
+    <div class="form-control col-span-2 rounded-lg border border-gray-400 p-4">
+       <label class="label justify-start gap-x-4">
+        <span class="label-text font-semibold">Local Service Assets</span>
+        <div class="flex items-center gap-2">
+          <div v-if="hasAsset('local_service')" class="flex items-center gap-2">
+            <span class="badge badge-success badge-outline text-xs">Uploaded</span>
+            <a
+              :href="assetDownloadUrl('local_service') || '#'"
+              class="btn btn-xs"
+              target="_blank"
+              rel="noopener"
+            >
+              Download
+            </a>
+          </div>
+          <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
+        </div>
       </label>
-
-      <div
-        v-if="problem.config!.networkAccessRestriction!.enabled"
-        class="mt-3 grid grid-cols-1 gap-3 p-3 md:grid-cols-2"
-      >
-        <!-- Firewall Extranet -->
-        <div class="rounded border border-gray-400 p-3">
-          <label class="label cursor-pointer justify-start gap-x-4">
-            <span class="label-text">Firewall Extranet</span>
-            <input
-              type="checkbox"
-              class="toggle"
-              v-model="problem.config!.networkAccessRestriction!.firewallExtranet!.enabled"
-            />
-          </label>
-
-          <div
-            v-if="problem.config!.networkAccessRestriction!.firewallExtranet!.enabled"
-            class="mt-2 space-y-3 rounded border border-gray-400 p-3"
-          >
-            <!-- 滑動開關 -->
-            <div class="flex justify-center">
-              <div class="mode-switcher">
-                <div class="mode-switcher-container">
-                  <div
-                    class="mode-switcher-slider"
-                    :class="{ 'slider-blacklist': firewallMode === 'blacklist' }"
-                  ></div>
-                  <button
-                    class="mode-switcher-option"
-                    :class="{ active: firewallMode === 'whitelist' }"
-                    @click="firewallMode = 'whitelist'"
-                  >
-                    <span>Whitelist</span>
-                  </button>
-                  <button
-                    class="mode-switcher-option"
-                    :class="{ active: firewallMode === 'blacklist' }"
-                    @click="firewallMode = 'blacklist'"
-                  >
-                    <span>Blacklist</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <MultiStringInput
-              v-if="firewallMode === 'whitelist'"
-              v-model="problem.config!.networkAccessRestriction!.firewallExtranet!.whitelist"
-              placeholder="Add whitelist host/IP"
-              badge-class="badge-info"
-            />
-            <MultiStringInput
-              v-else
-              v-model="problem.config!.networkAccessRestriction!.firewallExtranet!.blacklist"
-              placeholder="Add blacklist host/IP"
-              badge-class="badge-error"
-            />
-          </div>
-        </div>
-
-        <!-- Connect With Local -->
-        <div class="rounded border border-gray-400 p-3">
-          <label class="label cursor-pointer justify-start gap-x-4">
-            <span class="label-text">Connect With Local</span>
-            <input
-              type="checkbox"
-              class="toggle"
-              v-model="problem.config!.networkAccessRestriction!.connectWithLocal!.enabled"
-            />
-          </label>
-
-          <div
-            v-if="problem.config!.networkAccessRestriction!.connectWithLocal!.enabled"
-            class="mt-2 space-y-3 rounded border border-gray-400 p-3"
-          >
-            <!-- 滑動開關 -->
-            <div class="flex justify-center">
-              <div class="mode-switcher">
-                <div class="mode-switcher-container">
-                  <div
-                    class="mode-switcher-slider"
-                    :class="{ 'slider-blacklist': localMode === 'blacklist' }"
-                  ></div>
-                  <button
-                    class="mode-switcher-option"
-                    :class="{ active: localMode === 'whitelist' }"
-                    @click="localMode = 'whitelist'"
-                  >
-                    <span>Whitelist</span>
-                  </button>
-                  <button
-                    class="mode-switcher-option"
-                    :class="{ active: localMode === 'blacklist' }"
-                    @click="localMode = 'blacklist'"
-                  >
-                    <span>Blacklist</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <MultiStringInput
-              v-if="localMode === 'whitelist'"
-              v-model="problem.config!.networkAccessRestriction!.connectWithLocal!.whitelist"
-              placeholder="Add whitelist host/IP/URL"
-              badge-class="badge-info"
-            />
-            <MultiStringInput
-              v-else
-              v-model="problem.config!.networkAccessRestriction!.connectWithLocal!.blacklist"
-              placeholder="Add blacklist host/IP/URL"
-              badge-class="badge-error"
-            />
-
-            <div class="form-control">
-              <label class="label justify-start gap-x-4">
-                <span class="label-text">Upload Local_Service.zip</span>
-                <div class="flex items-center gap-2">
-                  <div v-if="hasAsset('local_service')" class="flex items-center gap-2">
-                    <span class="badge badge-success badge-outline text-xs">Uploaded</span>
-                    <a
-                      :href="assetDownloadUrl('local_service') || '#'"
-                      class="btn btn-xs"
-                      target="_blank"
-                      rel="noopener"
-                    >
-                      Download
-                    </a>
-                  </div>
-                  <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
-                </div>
-              </label>
-              <input
-                type="file"
-                accept=".zip"
-                class="file-input file-input-bordered"
-                :class="{ 'input-error': v$?.assets?.localServiceZip?.$error }"
-                @change="
-                  (e: any) => {
-                    const file = e.target.files?.[0] || null;
-                    problem.assets!.localServiceZip = file;
-                    v$?.assets?.localServiceZip?.$touch();
-                    if (!file || !assertFileSizeOK(file, 'local_service.zip')) {
-                      problem.assets!.localServiceZip = null;
-                      e.target.value = '';
-                    }
-                  }
-                "
-              />
-              <label v-if="v$?.assets?.localServiceZip?.$error" class="label">
-                <span class="label-text-alt text-error">{{
-                  v$.assets.localServiceZip.$errors[0]?.$message
-                }}</span>
-              </label>
-            </div>
-          </div>
-        </div>
+      <div class="mt-2">
+        <label class="label"><span class="label-text">Upload Local_Service.zip</span></label>
+        <input
+          type="file"
+          accept=".zip"
+          class="file-input file-input-bordered w-full max-w-xs"
+          :class="{ 'input-error': v$?.assets?.localServiceZip?.$error }"
+          @change="
+            (e: any) => {
+              const file = e.target.files?.[0] || null;
+              problem.assets!.localServiceZip = file;
+              v$?.assets?.localServiceZip?.$touch();
+              if (!file || !assertFileSizeOK(file, 'local_service.zip')) {
+                problem.assets!.localServiceZip = null;
+                e.target.value = '';
+              }
+            }
+          "
+        />
+        <label v-if="v$?.assets?.localServiceZip?.$error" class="label">
+          <span class="label-text-alt text-error">{{
+            v$.assets.localServiceZip.$errors[0]?.$message
+          }}</span>
+        </label>
+        <label class="label"><span class="label-text-alt opacity-70">Used by Sidecars or ConnectWithLocal logic.</span></label>
       </div>
     </div>
 

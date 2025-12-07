@@ -30,6 +30,13 @@ const {
           >
             <i-uil-plus-circle class="mr-1 lg:h-5 lg:w-5" /> {{ $t("course.ann.index.new") }}
           </router-link>
+          <router-link
+            v-if="session.isTeacher"
+            class="btn btn-success"
+            :to="`/course/${$route.params.name}/announcements/new`"
+          >
+            <i-uil-plus-circle class="mr-1 lg:h-5 lg:w-5" /> {{ $t("course.ann.index.new") }}
+          </router-link>
         </div>
 
         <div class="my-2" />
@@ -46,6 +53,7 @@ const {
                   <th>{{ $t("course.ann.index.table.author") }}</th>
                   <th>{{ $t("course.ann.index.table.time") }}</th>
                   <th v-if="session.isAdmin"></th>
+                  <th v-if="session.isTeacher"></th>
                 </tr>
               </thead>
               <tbody>
@@ -61,6 +69,16 @@ const {
                   <td>{{ creator.displayedName }}</td>
                   <td>{{ formatTime(createTime) }}</td>
                   <td v-if="session.isAdmin">
+                    <div class="tooltip" data-tip="Edit">
+                      <router-link
+                        class="btn btn-circle btn-ghost btn-sm"
+                        :to="`/course/${$route.params.name}/announcements/${annId}/edit`"
+                      >
+                        <i-uil-edit class="lg:h-5 lg:w-5" />
+                      </router-link>
+                    </div>
+                  </td>
+                  <td v-if="session.isTeacher">
                     <div class="tooltip" data-tip="Edit">
                       <router-link
                         class="btn btn-circle btn-ghost btn-sm"

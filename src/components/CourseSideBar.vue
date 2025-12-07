@@ -26,14 +26,16 @@ const navs = [
     name: t("components.courseSideBar.submissions"),
     path: "/submissions",
   },
-  ...(session.isAdmin
-    ? [
-        {
-          name: t("components.courseSideBar.members"),
-          path: "/members",
-        },
-      ]
-    : []),
+  ...((session.isAdmin || session.isTeacher)
+  ? [
+      {
+        name: t("components.courseSideBar.members"),
+        path: "/members",
+      },
+    ]
+  : []),
+
+   
 ];
 </script>
 

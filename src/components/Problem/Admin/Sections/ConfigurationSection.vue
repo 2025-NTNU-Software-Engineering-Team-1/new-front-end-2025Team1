@@ -4,6 +4,7 @@ import { useRoute } from "vue-router";
 
 import LanguageMultiSelect from "../../Forms/LanguageMultiSelect.vue";
 import MultiStringInput from "../Controls/MultiStringInput.vue";
+import SidecarInput from "../Controls/SidecarInput.vue";
 
 import { assertFileSizeOK, validateFilesForAIAC } from "@/utils/checkFileSize";
 import { ZipReader, BlobReader } from "@zip.js/zip.js";
@@ -262,22 +263,19 @@ function onClickOutside(event: MouseEvent) {
 
 
 /* -------------------- Sidecars Helper -------------------- */
-function addSidecar() {
-  if (!problem.value.config!.networkAccessRestriction!.sidecars) {
-    problem.value.config!.networkAccessRestriction!.sidecars = [];
-  }
-  // default empty sidecar
-  problem.value.config!.networkAccessRestriction!.sidecars.push({
-    name: "new-sidecar",
-    image: "alpine:latest",
-    env: {},
-    args: [],
-  });
-}
+const hasExistingNetworkConfig = computed(() => {
+  const nar = problem.value.config?.networkAccessRestriction;
+  const hasExternal = (nar?.external?.ip?.length ?? 0) > 0 || (nar?.external?.url?.length ?? 0) > 0;
+  const hasSidecars = (nar?.sidecars?.length ?? 0) > 0;
+  const hasDocker = !!problem.value.assets?.dockerfilesZip || hasAsset('dockerfiles');
+  return hasExternal || hasSidecars || hasDocker;
+});
+const showNetworkSection = ref(false);
 
-function removeSidecar(index: number) {
-  problem.value.config!.networkAccessRestriction!.sidecars.splice(index, 1);
-}
+watch(hasExistingNetworkConfig, (val) => {
+  if (val) showNetworkSection.value = true;
+}, { immediate: true });
+
 
 /* -------------------- Watches -------------------- */
 watch(
@@ -708,153 +706,135 @@ onBeforeUnmount(() => {
     <!-- Network Access Restriction -->
     <div class="form-control col-span-2 rounded-lg border border-gray-400 p-4">
       <div class="flex items-center gap-4">
-        <label class="label mb-0"><span class="label-text font-semibold">Network Access Restriction (External)</span></label>
+        <label class="label ml-1 cursor-pointer justify-start gap-x-4">
+          <span class="label-text">Network & Sidecars</span>
+          <input type="checkbox" class="toggle" v-model="showNetworkSection" />
+        </label>
       </div>
 
-      <div class="mt-3 grid grid-cols-1 gap-4 p-1 md:grid-cols-2">
-        <div class="col-span-1 md:col-span-2 flex items-center gap-4">
-          <span class="label-text">Access Model:</span>
-          <div class="mode-switcher">
-            <div class="mode-switcher-container">
-              <div
-                class="mode-switcher-slider"
-                :class="{ 'slider-blacklist': problem.config!.networkAccessRestriction!.external!.model === 'Black' }"
-              ></div>
-              <button
-                class="mode-switcher-option"
-                :class="{ active: problem.config!.networkAccessRestriction!.external!.model === 'White' }"
-                @click="problem.config!.networkAccessRestriction!.external!.model = 'White'"
-              >
-                <span>Whitelist</span>
-              </button>
-              <button
-                class="mode-switcher-option"
-                :class="{ active: problem.config!.networkAccessRestriction!.external!.model === 'Black' }"
-                @click="problem.config!.networkAccessRestriction!.external!.model = 'Black'"
-              >
-                <span>Blacklist</span>
-              </button>
+      <transition
+        enter-active-class="transition ease-out duration-200"
+        leave-active-class="transition ease-in duration-150"
+      >
+        <div v-if="showNetworkSection" class="mt-3 space-y-4 rounded border-none p-2">
+          
+          <div class="rounded border border-gray-400 p-4">
+             <label class="label mb-2"><span class="label-text font-semibold">Network Access Restriction (External)</span></label>
+             <div class="grid grid-cols-1 gap-4 p-1 md:grid-cols-2">
+              <div class="col-span-1 md:col-span-2 flex items-center gap-4">
+                <span class="label-text">Access Model:</span>
+                <div class="mode-switcher">
+                  <div class="mode-switcher-container">
+                    <div
+                      class="mode-switcher-slider"
+                      :class="{ 'slider-blacklist': problem.config!.networkAccessRestriction!.external!.model === 'Black' }"
+                    ></div>
+                    <button
+                      class="mode-switcher-option"
+                      :class="{ active: problem.config!.networkAccessRestriction!.external!.model === 'White' }"
+                      @click="problem.config!.networkAccessRestriction!.external!.model = 'White'"
+                    >
+                      <span>Whitelist</span>
+                    </button>
+                    <button
+                      class="mode-switcher-option"
+                      :class="{ active: problem.config!.networkAccessRestriction!.external!.model === 'Black' }"
+                      @click="problem.config!.networkAccessRestriction!.external!.model = 'Black'"
+                    >
+                      <span>Blacklist</span>
+                    </button>
+                  </div>
+                </div>
+                <div class="text-xs opacity-70 ml-2">
+                  <span v-if="problem.config!.networkAccessRestriction!.external!.model === 'White'">
+                    Only allow specific IPs/URLs. Block everything else.
+                  </span>
+                  <span v-else>
+                    Block specific IPs/URLs. Allow everything else.
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <label class="label"><span class="label-text">IP List</span></label>
+                <MultiStringInput
+                  v-model="problem.config!.networkAccessRestriction!.external!.ip"
+                  placeholder="e.g. 8.8.8.8"
+                  :badge-class="problem.config!.networkAccessRestriction!.external!.model === 'White' ? 'badge-info' : 'badge-error'"
+                />
+              </div>
+
+              <div>
+                <label class="label"><span class="label-text">URL List</span></label>
+                <MultiStringInput
+                  v-model="problem.config!.networkAccessRestriction!.external!.url"
+                  placeholder="e.g. google.com"
+                  :badge-class="problem.config!.networkAccessRestriction!.external!.model === 'White' ? 'badge-info' : 'badge-error'"
+                />
+              </div>
             </div>
           </div>
-          <div class="text-xs opacity-70 ml-2">
-            <span v-if="problem.config!.networkAccessRestriction!.external!.model === 'White'">
-              Only allow specific IPs/URLs. Block everything else.
-            </span>
-            <span v-else>
-              Block specific IPs/URLs. Allow everything else.
-            </span>
+          <div class="rounded border border-gray-400 p-4">
+              <label class="label mb-2 justify-between">
+                <span class="label-text font-semibold">Sandbox Environment (Sidecars & Dockerfiles)</span>
+              </label>
+
+              <div class="mb-6">
+               <SidecarInput 
+                 v-model="problem.config!.networkAccessRestriction!.sidecars" 
+               />
+              </div>
+
+              <div class="divider"></div>
+
+              <div class="form-control">
+                <label class="label justify-start gap-x-4">
+                  <span class="label-text font-semibold">Dockerfiles</span>
+                  <div class="flex items-center gap-2">
+                  <div v-if="hasAsset('dockerfiles')" class="flex items-center gap-2">
+                      <span class="badge badge-success badge-outline text-xs">Uploaded</span>
+                      <a
+                      :href="assetDownloadUrl('dockerfiles') || '#'"
+                      class="btn btn-xs"
+                      target="_blank"
+                      rel="noopener"
+                      >
+                      Download
+                      </a>
+                  </div>
+                  <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
+                  </div>
+                </label>
+              <div class="mt-2">
+                  <label class="label"><span class="label-text">Upload dockerfiles.zip</span></label>
+                  <input
+                  type="file"
+                  accept=".zip"
+                  class="file-input file-input-bordered w-full max-w-xs"
+                  :class="{ 'input-error': v$?.assets?.dockerfilesZip?.$error }"
+                  @change="
+                      (e: any) => {
+                      const file = e.target.files?.[0] || null;
+                      problem.assets!.dockerfilesZip = file;
+                      v$?.assets?.dockerfilesZip?.$touch();
+                      if (!file || !assertFileSizeOK(file, 'dockerfiles.zip')) {
+                          problem.assets!.dockerfilesZip = null;
+                          e.target.value = '';
+                      }
+                      }
+                  "
+                  />
+                  <label v-if="v$?.assets?.dockerfilesZip?.$error" class="label">
+                  <span class="label-text-alt text-error">{{
+                      v$.assets.dockerfilesZip.$errors[0]?.$message
+                  }}</span>
+                  </label>
+                  <label class="label"><span class="label-text-alt opacity-70">Used by Sidecars or ConnectWithLocal logic.</span></label>
+              </div>
+              </div>
           </div>
         </div>
-
-        <div>
-          <label class="label"><span class="label-text">IP List</span></label>
-          <MultiStringInput
-            v-model="problem.config!.networkAccessRestriction!.external!.ip"
-            placeholder="e.g. 8.8.8.8"
-            :badge-class="problem.config!.networkAccessRestriction!.external!.model === 'White' ? 'badge-info' : 'badge-error'"
-          />
-        </div>
-
-        <div>
-          <label class="label"><span class="label-text">URL List</span></label>
-          <MultiStringInput
-            v-model="problem.config!.networkAccessRestriction!.external!.url"
-            placeholder="e.g. google.com"
-            :badge-class="problem.config!.networkAccessRestriction!.external!.model === 'White' ? 'badge-info' : 'badge-error'"
-          />
-        </div>
-      </div>
-    </div>
-
-    <div class="form-control col-span-2 rounded-lg border border-gray-400 p-4">
-      <div class="flex items-center justify-between">
-        <label class="label"><span class="label-text font-semibold">Sidecars</span></label>
-        <button class="btn btn-sm btn-outline" @click="addSidecar">
-          <i-uil-plus class="mr-1" /> Add Sidecar
-        </button>
-      </div>
-
-      <div class="mt-3 space-y-3">
-        <div 
-          v-for="(sidecar, idx) in problem.config!.networkAccessRestriction!.sidecars" 
-          :key="idx"
-          class="flex gap-3 items-end border border-base-content/20 p-3 rounded-lg bg-base-100"
-        >
-          <div class="form-control flex-1">
-            <label class="label py-1"><span class="label-text-alt">Name</span></label>
-            <input 
-              type="text" 
-              class="input input-sm input-bordered" 
-              v-model="sidecar.name" 
-              placeholder="e.g. mysql-db"
-            />
-          </div>
-          
-          <div class="form-control flex-[2]">
-            <label class="label py-1"><span class="label-text-alt">Image</span></label>
-            <input 
-              type="text" 
-              class="input input-sm input-bordered" 
-              v-model="sidecar.image" 
-              placeholder="e.g. mysql:8.0"
-            />
-          </div>
-
-          <button class="btn btn-sm btn-square btn-error btn-outline" @click="removeSidecar(idx)">
-            <i-uil-trash-alt />
-          </button>
-        </div>
-        
-        <div v-if="problem.config!.networkAccessRestriction!.sidecars.length === 0" class="text-sm opacity-50 text-center py-2">
-          No sidecars configured.
-        </div>
-      </div>
-    </div>
-
-    <div class="form-control col-span-2 rounded-lg border border-gray-400 p-4">
-       <label class="label justify-start gap-x-4">
-        <span class="label-text font-semibold">Local Service Assets</span>
-        <div class="flex items-center gap-2">
-          <div v-if="hasAsset('local_service')" class="flex items-center gap-2">
-            <span class="badge badge-success badge-outline text-xs">Uploaded</span>
-            <a
-              :href="assetDownloadUrl('local_service') || '#'"
-              class="btn btn-xs"
-              target="_blank"
-              rel="noopener"
-            >
-              Download
-            </a>
-          </div>
-          <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
-        </div>
-      </label>
-      <div class="mt-2">
-        <label class="label"><span class="label-text">Upload Local_Service.zip</span></label>
-        <input
-          type="file"
-          accept=".zip"
-          class="file-input file-input-bordered w-full max-w-xs"
-          :class="{ 'input-error': v$?.assets?.localServiceZip?.$error }"
-          @change="
-            (e: any) => {
-              const file = e.target.files?.[0] || null;
-              problem.assets!.localServiceZip = file;
-              v$?.assets?.localServiceZip?.$touch();
-              if (!file || !assertFileSizeOK(file, 'local_service.zip')) {
-                problem.assets!.localServiceZip = null;
-                e.target.value = '';
-              }
-            }
-          "
-        />
-        <label v-if="v$?.assets?.localServiceZip?.$error" class="label">
-          <span class="label-text-alt text-error">{{
-            v$.assets.localServiceZip.$errors[0]?.$message
-          }}</span>
-        </label>
-        <label class="label"><span class="label-text-alt opacity-70">Used by Sidecars or ConnectWithLocal logic.</span></label>
-      </div>
+      </transition>
     </div>
 
     <!-- Artifact Collection -->

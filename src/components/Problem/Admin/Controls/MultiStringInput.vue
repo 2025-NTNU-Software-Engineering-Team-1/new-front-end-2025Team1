@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from "vue";
 const props = defineProps<{
   modelValue: string[];
   placeholder?: string;
@@ -6,12 +7,16 @@ const props = defineProps<{
 }>();
 const emits = defineEmits<{ (e: "update:modelValue", v: string[]): void }>();
 
-let buf = "";
+const buf = ref("");
+
 function add() {
-  const v = buf.trim();
+  const v = buf.value.trim();
   if (!v) return;
+  if (props.modelValue.includes(v)) {
+    return;
+  }
   emits("update:modelValue", [...props.modelValue, v]);
-  buf = "";
+  buf.value = "";
 }
 function remove(i: number) {
   const next = props.modelValue.slice();

@@ -259,9 +259,9 @@ const rules = {
       }),
     },
 
-    localServiceZip: {
-      validExtension: helpers.withMessage("Local service must be a .zip file", () => {
-        const file = problem.value.assets?.localServiceZip;
+    dockerfilesZip: {
+      validExtension: helpers.withMessage("Dockerfiles must be a .zip file", () => {
+        const file = problem.value.assets?.dockerfilesZip;
         if (!file) return true;
         return file.name.toLowerCase().endsWith(".zip");
       }),

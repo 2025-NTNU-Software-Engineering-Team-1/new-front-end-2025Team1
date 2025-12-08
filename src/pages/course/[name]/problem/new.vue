@@ -34,7 +34,7 @@ const newProblem = ref<ProblemForm>({
     fillInTemplate: "",
     tasks: [],
   },
-  canViewStdout: false,
+  canViewStdout: true,
   defaultCode: "",
   // === CONFIG ===
   config: {
@@ -81,7 +81,7 @@ const newProblem = ref<ProblemForm>({
     makefileZip: null,
     teacherFile: null,
     scorePy: null,
-    localServiceZip: null,
+    dockerfilesZip: null,
     testdataZip: null,
   },
 });
@@ -124,8 +124,8 @@ async function submit() {
     if (assets?.makefileZip) fd.append("makefile.zip", assets.makefileZip);
     if (assets?.teacherFile) fd.append("Teacher_file", assets.teacherFile);
     if (assets?.scorePy) fd.append("score.py", assets.scorePy);
-    if (assets?.localServiceZip) fd.append("local_service.zip", assets.localServiceZip);
-
+    if (assets?.dockerfilesZip) fd.append("dockerfiles.zip", assets.dockerfilesZip);
+    
     // Step 4: 上傳所有資產
     await api.Problem.uploadAssetsV2(problemId, fd);
     router.push(`/course/${route.params.name}/problem/${problemId}`);

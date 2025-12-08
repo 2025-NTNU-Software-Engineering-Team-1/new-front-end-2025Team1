@@ -155,7 +155,7 @@ interface ProblemConfigExtra {
       url: string[];
     };
   };
-
+  assetPaths?: Record<string, string>;
   exposeTestcase?: boolean;
   artifactCollection: ArtifactCollection[];
 }
@@ -203,6 +203,6 @@ interface ProblemAssets {
   makefileZip?: File | null;
   teacherFile?: File | null;
   scorePy?: File | null;
-  localServiceZip?: File | null;
+  dockerfilesZip?: File | null;
   testdataZip?: File | null;
 }

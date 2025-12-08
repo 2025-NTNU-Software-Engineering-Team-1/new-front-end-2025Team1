@@ -31,7 +31,7 @@ function normalizeConfig(config?: ProblemConfigExtra): ProblemConfigExtra {
     networkAccessRestriction: {
       sidecars: [],
       external: {
-        model: "Black", // or "White"
+        model: "White",
         ip: [],
         url: [],
       },
@@ -60,11 +60,11 @@ function normalizeConfig(config?: ProblemConfigExtra): ProblemConfigExtra {
   };
   const nar = merged.networkAccessRestriction!;
   if (!Array.isArray(nar.sidecars)) nar.sidecars = [];
-  if (!nar.external) nar.external = { model: "Black", ip: [], url: [] };
+  if (!nar.external) nar.external = { model: "White", ip: [], url: [] };
   if (!Array.isArray(nar.external.ip)) nar.external.ip = [];
   if (!Array.isArray(nar.external.url)) nar.external.url = [];
   
-  nar.external.model = nar.external.model || "Black";
+  nar.external.model = nar.external.model || "White";
   return merged;
 }
 
@@ -130,7 +130,7 @@ function normalizeAssets(raw: any): ProblemAssets {
     makefileZip: null,
     teacherFile: null,
     scorePy: null,
-    localServiceZip: null,
+    dockerfilesZip: null,
     testdataZip: null,
   };
   if (raw?.aiVTuberFiles && !raw.aiVTuberACFiles) raw.aiVTuberACFiles = raw.aiVTuberFiles;
@@ -213,7 +213,7 @@ async function submit() {
     if (assets?.makefileZip) fd.append("makefile.zip", assets.makefileZip);
     if (assets?.teacherFile) fd.append("Teacher_file", assets.teacherFile);
     if (assets?.scorePy) fd.append("score.py", assets.scorePy);
-    if (assets?.localServiceZip) fd.append("local_service.zip", assets.localServiceZip);
+    if (assets?.dockerfilesZip) fd.append("dockerfiles.zip", assets.dockerfilesZip);
 
     await api.Problem.modify(pid, edittingProblem.value);
     await api.Problem.uploadAssetsV2(pid, fd);

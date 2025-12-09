@@ -27,7 +27,7 @@ test("Student can see visible problem", async ({ page }) => {
     if (name == "Prob1")
     {
       const pid_td = problem_tds.nth(i * 5);
-      PID = await problem_tds.nth(i * 5).innerText();
+      PID = await pid_td.innerText();
       
       const link = await pid_td.locator("a");
       await link.click();
@@ -53,7 +53,7 @@ test("Student can see visible problem", async ({ page }) => {
   
 });
 
-//004
+//004 Can't submit
 test.skip("Student can submit visible problem", async ({ page }) => {
   //Get into the problems page
   await page.getByRole("link", { name: "Course" }).click();
@@ -73,7 +73,7 @@ test.skip("Student can submit visible problem", async ({ page }) => {
     if (name == "Prob1")
     {
       const pid_td = tds.nth(i * 5);
-      PID = await tds.nth(i * 5).innerText();
+      PID = await pid_td.innerText();
       
       const link = await pid_td.locator("a");
       await link.click();
@@ -103,14 +103,25 @@ test("Student can't see hidden problem", async ({ page }) => {
 });
 
 //006
-test("Student can't see hidden problem", async ({ page }) => {
+test("Student can't submit expired Homework", async ({ page }) => {
   //Get into the problems page
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
-  await page.getByRole("link", { name: "Homeworks" }).click();
+  await page.getByRole("link", { name: "Homeworks" }).click();  
   
-  
-  
+  const hw1Card = page.locator('.card-body')
+                      .filter({ has: page.locator('.card-title', { hasText: 'Hw1' }) });
+
+  const probRow = hw1Card.locator('tr')
+                         .filter({ hasText: 'Prob1' })
+                         .locator('visible=true');
+
+  await probRow.locator('a.link').first().click();
+
+  const submitBtn = page.getByRole('button', { name: 'Submit' })
+                        .or(page.getByRole('link', { name: 'Submit' }));
+
+  await expect(submitBtn).toBeHidden();
 });
 
 

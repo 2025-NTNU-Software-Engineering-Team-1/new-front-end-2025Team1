@@ -152,6 +152,81 @@ const hasAsset = (key: string) => !!(assetPaths.value && assetPaths.value[key]);
 const assetDownloadUrl = (key: string) =>
   assetPaths.value[key] ? `/api/problem/${route.params.id}/asset/${key}/download` : null;
 
+/* -------------------- Docker Zip Inspection -------------------- */
+const detectedDockerEnvs = ref<string[]>([]);
+const dockerZipError = ref("");
+
+// Helper: Read saved env list
+function loadSavedDockerEnvs() {
+  const nar = problem.value.config?.networkAccessRestriction as any;
+  if (nar?.custom_env?.env_list && Array.isArray(nar.custom_env.env_list)) {
+    detectedDockerEnvs.value = nar.custom_env.env_list;
+  }
+}
+
+watch(
+  () => problem.value.config?.networkAccessRestriction,
+  () => {
+    if (detectedDockerEnvs.value.length === 0) {
+      loadSavedDockerEnvs();
+    }
+  },
+  { immediate: true, deep: true }
+);
+
+async function inspectDockerZip(file: File) {
+  detectedDockerEnvs.value = [];
+  dockerZipError.value = "";
+  
+  try {
+    const reader = new ZipReader(new BlobReader(file));
+    const entries = await reader.getEntries();
+    await reader.close();
+
+    const dockerfiles = entries.filter((e) => !e.directory && e.filename.endsWith("Dockerfile"));
+
+    if (dockerfiles.length === 0) {
+      dockerZipError.value = "Not found any 'Dockerfile'.";
+      return false;
+    }
+
+    const envs: string[] = [];
+    for (const entry of dockerfiles) {
+      const parts = entry.filename.split('/');
+      
+
+      if (parts.length !== 2) {
+         dockerZipError.value = `Structure error: ${entry.filename}. Please ensure the structure is "environment_folder/Dockerfile" without an extra directory level.`;
+         return false;
+      }
+      
+      envs.push(parts[0]);
+    }
+
+    const sortedEnvs = envs.sort();
+    detectedDockerEnvs.value = sortedEnvs;
+
+    const nar = problem.value.config!.networkAccessRestriction as any;
+    if (!nar.custom_env) {
+      nar.custom_env = {};
+    }
+    nar.custom_env.env_list = sortedEnvs;
+
+    return true;
+  } catch (e) {
+    console.error(e);
+    dockerZipError.value = "Failed to read Zip file, please ensure the file is not corrupted.";
+    return false;
+  }
+}
+function removeDockerEnv(index: number) {
+  detectedDockerEnvs.value.splice(index, 1);
+  const nar = problem.value.config?.networkAccessRestriction as any;
+  if (nar?.custom_env) {
+    nar.custom_env.env_list = detectedDockerEnvs.value;
+  }
+}
+
 /* -------------------- AI File Extensions -------------------- */
 function getAIFileExtensions() {
   const lang = problem.value.allowedLanguage;
@@ -791,10 +866,10 @@ onBeforeUnmount(() => {
                 <label class="label justify-start gap-x-4">
                   <span class="label-text font-semibold">Dockerfiles</span>
                   <div class="flex items-center gap-2">
-                  <div v-if="hasAsset('dockerfiles')" class="flex items-center gap-2">
+                  <div v-if="hasAsset('network_dockerfile')" class="flex items-center gap-2">
                       <span class="badge badge-success badge-outline text-xs">Uploaded</span>
                       <a
-                      :href="assetDownloadUrl('dockerfiles') || '#'"
+                      :href="assetDownloadUrl('network_dockerfile') || '#'"
                       class="btn btn-xs"
                       target="_blank"
                       rel="noopener"
@@ -811,25 +886,69 @@ onBeforeUnmount(() => {
                   type="file"
                   accept=".zip"
                   class="file-input file-input-bordered w-full max-w-xs"
-                  :class="{ 'input-error': v$?.assets?.dockerfilesZip?.$error }"
+                  :class="{ 'input-error': v$?.assets?.dockerfilesZip?.$error || dockerZipError }"
                   @change="
-                      (e: any) => {
+                      async (e: any) => {
                       const file = e.target.files?.[0] || null;
-                      problem.assets!.dockerfilesZip = file;
-                      v$?.assets?.dockerfilesZip?.$touch();
-                      if (!file || !assertFileSizeOK(file, 'dockerfiles.zip')) {
-                          problem.assets!.dockerfilesZip = null;
-                          e.target.value = '';
+                      
+                      // Reset previous 
+                      detectedDockerEnvs = [];
+                      dockerZipError = '';
+
+                      const nar = problem.config!.networkAccessRestriction as any;
+                      if(nar?.custom_env) nar.custom_env.env_list = [];
+                      
+                      if (file) {
+                        // file size
+                        if (!assertFileSizeOK(file, 'dockerfiles.zip')) {
+                                problem.assets!.dockerfilesZip = null;
+                                e.target.value = '';
+                                return;
+                        }
+                        // check zip structure
+                        const isValid = await inspectDockerZip(file);
+                        if (!isValid) {
+                            problem.assets!.dockerfilesZip = null;
+                            e.target.value = '';
+                            return;
+                        }
+                        problem.assets!.dockerfilesZip = file;
+                      } else {
+                        problem.assets!.dockerfilesZip = null;
+                        loadSavedDockerEnvs();
                       }
+                        v$?.assets?.dockerfilesZip?.$touch();
                       }
                   "
                   />
-                  <label v-if="v$?.assets?.dockerfilesZip?.$error" class="label">
-                  <span class="label-text-alt text-error">{{
-                      v$.assets.dockerfilesZip.$errors[0]?.$message
-                  }}</span>
+                  <label v-if="v$?.assets?.dockerfilesZip?.$error || dockerZipError" class="label">
+                    <span class="label-text-alt text-error whitespace-pre-line">
+                        {{ v$?.assets?.dockerfilesZip?.$errors[0]?.$message || dockerZipError }}
+                    </span>
                   </label>
-                  <label class="label"><span class="label-text-alt opacity-70">Used by Sidecars or ConnectWithLocal logic.</span></label>
+
+                  <div v-if="detectedDockerEnvs.length > 0" class="mt-2 rounded bg-base-200 p-3 text-xs border border-success/30 w-full max-w-xs">
+                    <div class="mb-2 font-bold text-success flex items-center gap-1">
+                        <i-uil-check-circle /> 
+                        {{ problem.assets?.dockerfilesZip ? 'Environment(s) to be established:' : 'List of environments:'}}
+                    </div>
+                    <ul class="list-inside space-y-1 opacity-80">
+                        <li v-for="(env, index) in detectedDockerEnvs" :key="env" class="flex items-center justify-between hover:bg-base-300 rounded px-1 transition-colors">
+                            <div>
+                                <span class="font-mono font-bold">{{ env }}</span> 
+                            </div>
+                            
+                            <button 
+                                type="button" 
+                                class="btn btn-ghost btn-xs text-error min-h-0 h-6 w-6 p-0"
+                                @click="removeDockerEnv(index)"
+                                title="Remove this environment"
+                            >
+                                <i-uil-trash-alt />
+                            </button>
+                        </li>
+                    </ul>
+                  </div>
               </div>
               </div>
           </div>

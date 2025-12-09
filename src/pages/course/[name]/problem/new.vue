@@ -48,7 +48,7 @@ const newProblem = ref<ProblemForm>({
     networkAccessRestriction: {
       sidecars: [],
       external: {
-        model: "Black", // or "White"
+        model: "White",
         ip: [],
         url: [],
       },

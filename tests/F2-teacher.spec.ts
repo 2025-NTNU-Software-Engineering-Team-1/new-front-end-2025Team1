@@ -33,11 +33,11 @@ test("Teacher can set problem", async ({ page }) => {
   
   //submit
   await page.locator('button:has-text("Submit")').click();
-  await page.waitForTimeout(2000);
+  await page.waitForTimeout(1000);
 
   //check if success
-  const currentUrl = page.url(); // Get the current URL
-  console.log('Current URL:', currentUrl);
+  const PID = await page.locator('span').nth(0).textContent();
+  await expect(page).toHaveURL(`http://localhost:8080/course/meow/problem/${PID}`);
 });
 
 

@@ -21,8 +21,6 @@ fetcher.interceptors.response.use(
   },
 );
 
-
-
 const Auth = {
   getSession: () => fetcher.get<UserProperties>("/auth/me"),
   login: (body: { username: string; password: string }) => fetcher.post("/auth/session", body),
@@ -102,16 +100,16 @@ type TrialHistoryItem = {
   status: string;
   score: number;
   language_Type: number;
-  timestamp: Date; 
+  timestamp: Date;
 };
 type TrialHistoryInnerData = {
   total_count: number;
   history: TrialHistoryItem[];
 };
 type TrialHistoryMergedResponse = {
-  status: string; 
-  message: string; 
-  data: TrialHistoryInnerData; 
+  status: string;
+  message: string;
+  data: TrialHistoryInnerData;
 };
 // Trial Submission APIs
 const TrialSubmission = {
@@ -234,7 +232,7 @@ const AIVTuber = {
   getCourseKeys: (courseName: string) =>
     fetcher.get<{
       keys: {
-        id: string;
+        key_id: string;
         key_name: string;
         masked_value: string;
         is_active: boolean;
@@ -279,12 +277,7 @@ const APIToken = {
 
 const Chatbot = {
   // 使用者發問：POST /ai/chatbot/ask
-  ask: (body: {
-    message: string;
-    current_code: string;
-    course_name: string;
-    problem_id: string;
-  }) =>
+  ask: (body: { message: string; current_code: string; course_name: string; problem_id: string }) =>
     fetcher.post<{
       data: { text: string; emotion?: string }[];
     }>("/ai/chatbot/ask", body),

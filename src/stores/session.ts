@@ -29,6 +29,9 @@ export const useSession = defineStore("session", {
     isAdmin(state) {
       return state.role === UserRole.Admin;
     },
+    isTeacher(state) {
+      return state.role === UserRole.Teacher;
+    },
     isNotValidated(state) {
       return state.state === SessionState.NotValidated;
     },
@@ -50,7 +53,7 @@ export const useSession = defineStore("session", {
         this.role = role;
         this.email = email;
         this.state = SessionState.IsLogin;
-      } catch (error) {
+      } catch {
         this.$reset();
         this.state = SessionState.IsNotLogin;
       }

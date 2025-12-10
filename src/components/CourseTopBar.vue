@@ -39,6 +39,54 @@ const items: ComputedRef<{ [k: string | symbol]: { path: null | string; text: st
       },
       { path: null, text: "Submit" },
     ],
+    "course-name-problem-id-test": [
+      problemsPage,
+      {
+        path: `/course/${route.params.name}/problem/${route.params.id}`,
+        text: `${route.params.id}`,
+      },
+      { path: null, text: "Test" },
+    ],
+    "course-name-problem-id-test-cases": [
+      problemsPage,
+      {
+        path: `/course/${route.params.name}/problem/${route.params.id}`,
+        text: `${route.params.id}`,
+      },
+      {
+        path: `/course/${route.params.name}/problem/${route.params.id}/test`,
+        text: "Test",
+      },
+      { path: null, text: "Test Cases" },
+    ],
+    "course-name-problem-id-test-history": [
+      problemsPage,
+      {
+        path: `/course/${route.params.name}/problem/${route.params.id}`,
+        text: `${route.params.id}`,
+      },
+      {
+        path: `/course/${route.params.name}/problem/${route.params.id}/test`,
+        text: "Test",
+      },
+      { path: null, text: "Test History" },
+    ],
+    "course-name-problem-id-test-history-testId": [
+      problemsPage,
+      {
+        path: `/course/${route.params.name}/problem/${route.params.id}`,
+        text: `${route.params.id}`,
+      },
+      {
+        path: `/course/${route.params.name}/problem/${route.params.id}/test`,
+        text: "Test",
+      },
+      {
+        path: `/course/${route.params.name}/problem/${route.params.id}/test-history`,
+        text: "Test History",
+      },
+      { path: null, text: `${route.params.testId}` },
+    ],
     "course-name-submissions": [{ path: null, text: "Submissions" }],
     "course-name-submission-id": [submissionsPage, { path: null, text: `${route.params.id}` }],
     "course-name-members": [{ path: null, text: "Members" }],

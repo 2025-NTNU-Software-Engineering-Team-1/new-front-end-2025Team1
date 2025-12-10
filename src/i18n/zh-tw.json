@@ -59,6 +59,55 @@
         },
         "text": "提交"
       },
+      "test": {
+        "err": {
+          "code": "請在此貼上你的原始碼以利測試。",
+          "lang": "請選擇程式語言。",
+          "msg": "Oops! 測試程式碼時發生錯誤。請稍後再試。"
+        },
+        "card": {
+          "title": "測試題號 ",
+          "code": "原始碼",
+          "testInput": "測試輸入",
+          "placeholder": "在此貼上程式碼",
+          "testInputPlaceholder": "在此輸入測試資料"
+        },
+        "lang": {
+          "text": "語言",
+          "select": "選擇語言"
+        },
+        "text": "執行測試",
+        "submit": "提交",
+        "history": "歷史記錄",
+        "testcase": "測資",
+        "run": "執行",
+        "submitModal": {
+          "title": "提交確認",
+          "message": "確定要提交此程式碼進行正式評分嗎？",
+          "cancel": "取消",
+          "confirm": "確定提交"
+        },
+        "historyModal": {
+          "title": "測試歷史記錄",
+          "table": {
+            "id": "編號",
+            "result": "結果",
+            "score": "分數",
+            "time": "時間"
+          },
+          "detail": "詳細資訊",
+          "close": "關閉"
+        },
+        "testcaseModal": {
+          "title": "測資設定",
+          "useDefault": "使用預設測資",
+          "customTestcases": "自訂測資",
+          "files": "檔案",
+          "preview": "預覽",
+          "cancel": "取消",
+          "save": "儲存變更"
+        }
+      },
       "stats": {
         "pieTitle": "繳交結果",
         "title": "數據檢視－題號",
@@ -284,6 +333,7 @@
         "quota": "額度",
         "score": "得分",
         "submit": "提交",
+        "test": "測試",
         "stats": "數據",
         "desc": "說明",
         "input": "輸入",

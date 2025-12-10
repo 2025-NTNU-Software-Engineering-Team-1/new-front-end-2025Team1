@@ -50,6 +50,13 @@ const maxPage = computed(() => {
           >
             <i-uil-plus-circle class="mr-1 lg:h-5 lg:w-5" /> {{ $t("course.problems.new") }}
           </router-link>
+          <router-link
+            v-if="session.isTeacher"
+            class="btn btn-success"
+            :to="`/course/${$route.params.name}/problem/new`"
+          >
+            <i-uil-plus-circle class="mr-1 lg:h-5 lg:w-5" /> {{ $t("course.problems.new") }}
+          </router-link>
         </div>
 
         <div class="my-2" />
@@ -120,9 +127,27 @@ const maxPage = computed(() => {
                         <i-uil-file-exclamation-alt class="lg:h-5 lg:w-5" />
                       </router-link>
                     </div>
+                    <div class="tooltip" data-tip="Copycat">
+                      <router-link
+                        v-if="session.isTeacher"
+                        class="btn btn-circle btn-ghost btn-sm mr-1"
+                        :to="`/course/${$route.params.name}/problem/${problemId}/copycat`"
+                      >
+                        <i-uil-file-exclamation-alt class="lg:h-5 lg:w-5" />
+                      </router-link>
+                    </div>
                     <div class="tooltip" data-tip="Edit">
                       <router-link
                         v-if="session.isAdmin"
+                        class="btn btn-circle btn-ghost btn-sm"
+                        :to="`/course/${$route.params.name}/problem/${problemId}/edit`"
+                      >
+                        <i-uil-edit class="lg:h-5 lg:w-5" />
+                      </router-link>
+                    </div>
+                    <div class="tooltip" data-tip="Edit">
+                      <router-link
+                        v-if="session.isTeacher"
                         class="btn btn-circle btn-ghost btn-sm"
                         :to="`/course/${$route.params.name}/problem/${problemId}/edit`"
                       >
@@ -149,6 +174,16 @@ const maxPage = computed(() => {
                 :tags="tags"
                 :visible="status"
                 :is-admin="session.isAdmin"
+              />
+              <problem-info
+                :id="problemId"
+                :problem-name="problemName"
+                :unlimited-quota="isQuotaUnlimited(quota)"
+                :quota-limit="quota"
+                :quota-remaining="quota - submitCount"
+                :tags="tags"
+                :visible="status"
+                :is-admin="session.isTeacher"
               />
             </template>
           </template>

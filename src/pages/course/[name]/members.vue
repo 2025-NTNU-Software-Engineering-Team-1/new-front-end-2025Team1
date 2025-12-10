@@ -39,7 +39,7 @@ const members = computed(() => {
   });
 });
 
-const rolesCanCreateCourse = [UserRole.Admin, UserRole.Teacher];
+const rolesCanCreateCourse = [UserRole.Admin];
 
 const isOpen = ref(false);
 const newMembers = ref<File | null>();

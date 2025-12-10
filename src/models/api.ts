@@ -222,7 +222,7 @@ const CourseAPIUsage = {
         problem_usages: {
           problem_id: number;
           problem_name: string;
-          token: number;
+          total_token: number;
         }[];
       }[];
     }>(`/course/${courseName}/aisetting/usage`),

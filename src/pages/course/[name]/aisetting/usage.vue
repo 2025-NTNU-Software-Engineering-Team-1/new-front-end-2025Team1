@@ -31,7 +31,7 @@ const data = ref<{
 interface ProblemUsage {
   problem_id: number;
   problem_name: string;
-  token?: number;
+  total_token?: number;
 }
 
 onMounted(async () => {
@@ -45,15 +45,15 @@ onMounted(async () => {
       const usages: ProblemUsage[] = key.problem_usages || [];
 
       // total token
-      const totalToken = usages.reduce<number>((sum, p) => sum + (p.token ?? 0), 0);
+      const totalToken = usages.reduce<number>((sum, p) => sum + (p.total_token ?? 0), 0);
 
       // 找出最大最小 token 值
-      const tokens = usages.map((p: { token?: number }) => p.token ?? 0);
+      const tokens = usages.map((p: { total_token?: number }) => p.total_token ?? 0);
       const maxVal = Math.max(...tokens);
       const minVal = Math.min(...tokens);
 
-      const max_problems: ProblemUsage[] = usages.filter((p) => p.token === maxVal);
-      const min_problems: ProblemUsage[] = usages.filter((p) => p.token === minVal);
+      const max_problems: ProblemUsage[] = usages.filter((p) => p.total_token === maxVal);
+      const min_problems: ProblemUsage[] = usages.filter((p) => p.total_token === minVal);
       return {
         ...key,
         total_token: totalToken,
@@ -68,7 +68,7 @@ onMounted(async () => {
       keys,
     };
 
-    keys.forEach((k: any) => (expandedKeys.value[k.key_id] = false));
+    keys.forEach((k: any) => (expandedKeys.value[k.id] = false));
   } catch (err) {
     console.error("Failed to load API usage data:", err);
     error.value = err;
@@ -169,7 +169,7 @@ const toggleExpand = (id: string) => {
                             <span>(Min)</span>
                           </template>
                         </td>
-                        <td>{{ usage.token?.toLocaleString?.() || 0 }}</td>
+                        <td>{{ usage.total_token?.toLocaleString?.() || 0 }}</td>
                       </tr>
                     </tbody>
                   </table>

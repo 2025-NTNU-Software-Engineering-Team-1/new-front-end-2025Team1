@@ -43,6 +43,10 @@ type SubmissionList = SubmissionListItem[];
 interface Submission extends SubmissionListItem {
   code: string;
   tasks: Task[];
+  saStatus?: number | null;
+  saMessage?: string;
+  saReport?: string;
+  saReportPath?: string;
 }
 
 interface GetSubmissionListResponse {

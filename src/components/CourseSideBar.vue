@@ -10,32 +10,19 @@ const { t } = useI18n();
 
 const session = useSession();
 const navs = [
-  {
-    name: t("components.courseSideBar.ann"),
-    path: "/announcements",
-  },
-  {
-    name: t("components.courseSideBar.hw"),
-    path: "/homeworks",
-  },
-  {
-    name: t("components.courseSideBar.problems"),
-    path: "/problems",
-  },
-  {
-    name: t("components.courseSideBar.submissions"),
-    path: "/submissions",
-  },
-  ...((session.isAdmin || session.isTeacher)
-  ? [
-      {
-        name: t("components.courseSideBar.members"),
-        path: "/members",
-      },
-    ]
-  : []),
-
-   
+  { name: t("components.courseSideBar.ann"), path: "/announcements" },
+  { name: t("components.courseSideBar.hw"), path: "/homeworks" },
+  { name: t("components.courseSideBar.problems"), path: "/problems" },
+  { name: t("components.courseSideBar.submissions"), path: "/submissions" },
+  ...(session.isAdmin
+    ? [
+        {
+          name: t("components.courseSideBar.members"),
+          path: "/members",
+        },
+      ]
+    : []),
+  ...(session.role === 1 || session.isAdmin ? [{ name: "API Setting", path: "/aisetting" }] : []),
 ];
 </script>
 
@@ -43,7 +30,9 @@ const navs = [
   <ul v-if="displayType === 'side'" class="menu menu-compact w-40 bg-base-100 p-2 lg:menu-normal">
     <li
       v-for="{ name, path } in navs"
-      :class="[{ 'border-l-4 border-blue-500': $route.path === `/course/${$route.params.name}${path}` }]"
+      :class="[
+        $route.path.startsWith(`/course/${$route.params.name}${path}`) && 'border-l-4 border-blue-500',
+      ]"
     >
       <router-link :to="`/course/${$route.params.name}${path}`">{{ name }}</router-link>
     </li>

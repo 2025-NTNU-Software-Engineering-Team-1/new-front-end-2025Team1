@@ -4,14 +4,15 @@ import { useTitle } from "@vueuse/core";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import api from "@/models/api";
-import ProblemForm from "@/components/Problem/ProblemForm.vue";
+import AdminProblemForm from "@/components/Problem/Admin/AdminProblemForm.vue";
 
 const route = useRoute();
 const router = useRouter();
 useTitle(`New Problem - ${route.params.name} | Normal OJ`);
 
-const formElement = ref<InstanceType<typeof ProblemForm>>();
+const formElement = ref<InstanceType<typeof AdminProblemForm>>();
 
+// 初始化 newProblem
 const newProblem = ref<ProblemForm>({
   problemName: "",
   description: {
@@ -23,7 +24,6 @@ const newProblem = ref<ProblemForm>({
     sampleOutput: [""],
   },
   courses: [route.params.name as string],
-  defaultCode: "",
   tags: [],
   allowedLanguage: 3,
   quota: 10,
@@ -34,48 +34,107 @@ const newProblem = ref<ProblemForm>({
     fillInTemplate: "",
     tasks: [],
   },
-  canViewStdout: false,
+  canViewStdout: true,
+  defaultCode: "",
+  // === CONFIG ===
+  config: {
+    trialMode: false,
+    maxNumberOfTrial: -1,
+    aiVTuber: false,
+    aiVTuberApiKeys: [],
+    aiVTuberMode: "gemini-2.5-flash-lite",
+    acceptedFormat: "code",
+    resourceData: false,
+    resourceDataTeacher: false,
+    maxStudentZipSizeMB: 50,
+    networkAccessRestriction: {
+      sidecars: [],
+      external: {
+        model: "White",
+        ip: [],
+        url: [],
+      },
+    },
+    artifactCollection: [],
+  },
+  // === PIPELINE ===
+  pipeline: {
+    allowRead: false,
+    allowWrite: false,
+    executionMode: "general",
+    customChecker: false,
+    teacherFirst: false,
+    staticAnalysis: {
+      libraryRestrictions: {
+        enabled: false,
+        whitelist: { syntax: [], imports: [], headers: [], functions: [] },
+        blacklist: { syntax: [], imports: [], headers: [], functions: [] },
+      },
+    },
+    scoringScript: { custom: false },
+  },
+  // === ASSETS ===
+  assets: {
+    trialModePublicTestDataZip: null,
+    trialModeACFiles: null,
+    aiVTuberACFiles: null,
+    customCheckerPy: null,
+    makefileZip: null,
+    teacherFile: null,
+    scorePy: null,
+    dockerfilesZip: null,
+    localServiceZip: null,
+    testdataZip: null,
+    resourceDataZip: null,
+    resourceDataTeacherZip: null,
+  },
 });
-function update<K extends keyof ProblemForm>(
-  key: K,
-  value: ProblemForm[K] | ((arg: ProblemForm[K]) => ProblemForm[K]),
-) {
-  if (typeof value === "function") {
-    newProblem.value[key] = value(newProblem.value[key]);
-  } else {
-    newProblem.value[key] = value;
-  }
+
+function update<K extends keyof ProblemForm>(key: K, value: ProblemForm[K]) {
+  newProblem.value[key] = value;
 }
 provide<Ref<ProblemForm>>("problem", newProblem);
-const testdata = ref<File | null>(null);
 
 async function submit() {
   if (!formElement.value) return;
-  if (!testdata.value) {
-    alert("Testdata not provided");
-    return;
-  }
   formElement.value.isLoading = true;
   try {
-    const { problemId } = (
-      await api.Problem.create({
-        ...newProblem.value,
-      })
-    ).data;
+    // Step 1: 建立 Problem metadata
+    const { problemId } = (await api.Problem.create({ ...newProblem.value })).data;
 
-    const testdataForm = new FormData();
-    testdataForm.append("case", testdata.value);
-    try {
-      await api.Problem.modifyTestdata(problemId, testdataForm);
-    } catch (error) {
-      const errorMsg =
-        axios.isAxiosError(error) && error.response?.data?.message
-          ? error.response.data.message
-          : "Unknown error occurred :(";
-      alert(`Problem created, but testdata upload failed: ${errorMsg}`);
-      router.push(`/course/${route.params.name}/problem/${problemId}/edit`);
-      throw error;
-    }
+    // Step 2: 準備 config/pipeline 給上傳
+    const cfg = {
+      ...newProblem.value.config,
+      aiVTuber: newProblem.value.config.aiVTuber,
+      aiVTuberApiKeys: newProblem.value.config.aiVTuberApiKeys || [],
+      aiVTuberMode: newProblem.value.config.aiVTuberMode,
+    };
+    const pipe = { ...newProblem.value.pipeline };
+
+    const fd = new FormData();
+    fd.append(
+      "meta",
+      JSON.stringify({
+        config: cfg,
+        pipeline: pipe,
+      }),
+    );
+
+    // Step 3: 加入檔案資產
+    const assets = newProblem.value.assets;
+    if (assets?.aiVTuberACFiles) assets.aiVTuberACFiles.forEach((f) => fd.append("aiVTuberACFiles", f));
+    if (assets?.testdataZip) fd.append("case", assets.testdataZip);
+    if (assets?.customCheckerPy) fd.append("custom_checker.py", assets.customCheckerPy);
+    if (assets?.makefileZip) fd.append("makefile.zip", assets.makefileZip);
+    if (assets?.teacherFile) fd.append("Teacher_file", assets.teacherFile);
+    if (assets?.scorePy) fd.append("score.py", assets.scorePy);
+    if (assets?.dockerfilesZip) fd.append("dockerfiles.zip", assets.dockerfilesZip);
+    if (assets?.localServiceZip) fd.append("local_service.zip", assets.localServiceZip);
+    if (assets?.resourceDataZip) fd.append("resource_data.zip", assets.resourceDataZip);
+    if (assets?.resourceDataTeacherZip) fd.append("resource_data_teacher.zip", assets.resourceDataTeacherZip);
+    
+    // Step 4: 上傳所有資產
+    await api.Problem.uploadAssetsV2(problemId, fd);
     router.push(`/course/${route.params.name}/problem/${problemId}`);
   } catch (error) {
     formElement.value.errorMsg =
@@ -88,7 +147,7 @@ async function submit() {
   }
 }
 
-const openPreview = ref<boolean>(false);
+const openPreview = ref(false);
 const mockProblemMeta = {
   owner: "",
   highScore: 0,
@@ -96,25 +155,23 @@ const mockProblemMeta = {
   ACUser: 0,
   submitter: 0,
 };
-
-const openJSON = ref<boolean>(false);
+const openJSON = ref(false);
 </script>
 
 <template>
   <div class="card-container">
     <div class="card min-w-full">
       <div class="card-body">
-        <div class="card-title mb-3 justify-between">{{ $t("course.problem.new.title") }}</div>
+        <div class="card-title mb-3 justify-between">New Problem</div>
 
-        <problem-form ref="formElement" v-model:testdata="testdata" @update="update" @submit="submit" />
+        <admin-problem-form ref="formElement" @update="update" @submit="submit" />
 
         <div class="divider" />
 
         <div class="card-title mb-3">
-          {{ $t("course.problem.new.preview") }}
+          Preview
           <input v-model="openPreview" type="checkbox" class="toggle" />
         </div>
-
         <problem-card
           v-if="openPreview"
           :problem="{ ...mockProblemMeta, ...newProblem, testCase: newProblem.testCaseInfo.tasks }"
@@ -124,12 +181,10 @@ const openJSON = ref<boolean>(false);
         <div class="divider my-4" />
 
         <div class="card-title mb-3">
-          {{ $t("course.problem.new.json") }}
+          JSON
           <input v-model="openJSON" type="checkbox" class="toggle" />
         </div>
-
         <pre v-if="openJSON">{{ JSON.stringify(newProblem, null, 2) }}</pre>
-
         <div class="mb-[50%]" />
       </div>
     </div>

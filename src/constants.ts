@@ -8,6 +8,9 @@ export const LANGUAGE_OPTIONS: LangOption[] = [
 
 export const ROLE = ["Admin", "Teacher", "Student"];
 
+export const MAX_UPLOAD_SIZE_MB = 1024; // 1 GB
+export const MAX_UPLOAD_SIZE_BYTES = MAX_UPLOAD_SIZE_MB * 1024 * 1024;
+
 // keyof SUBMISSION_STATUS_REPR please refer to '@/types/submission.d.ts'
 export const SUBMISSION_STATUS_REPR = {
   [-1]: {

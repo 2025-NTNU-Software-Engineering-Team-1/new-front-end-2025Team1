@@ -1,1 +1,4 @@
 **/src/auto
+
+# Vue auto type helper
+src/types/vue-global.d.ts

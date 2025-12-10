@@ -10,6 +10,5 @@ postcss.config.js
 dist
 src/auto/**
 
-# 不對 Live2D 官方 SDK / Sample 做 lint
-src/live2d/Framework/**
-src/live2d/Samples/**
+# TypeScript auto‑generated helper types (ignore linting)
+src/types/vue-global.d.ts

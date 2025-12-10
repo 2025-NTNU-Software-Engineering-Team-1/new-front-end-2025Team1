@@ -18,7 +18,7 @@ const session = useSession();
 // === 現有 API Keys ===
 const apiKeys = ref<
   {
-    key_id: string;
+    id: string;
     key_name: string;
     masked_value: string;
     is_active: boolean;
@@ -206,7 +206,7 @@ onMounted(fetchKeys);
           <div v-else class="space-y-3">
             <div
               v-for="k in apiKeys"
-              :key="k.key_id"
+              :key="k.id"
               class="grid grid-cols-1 gap-2 rounded-lg border border-base-200 bg-base-100 p-3 md:grid-cols-7 md:items-center"
             >
               <div class="col-span-2">
@@ -237,7 +237,7 @@ onMounted(fetchKeys);
               </div>
               <div class="flex justify-end gap-2">
                 <button class="btn btn-success btn-xs" @click="updateKey(k)">Save</button>
-                <button class="btn btn-error btn-xs" @click="deleteKey(k.key_id)">Delete</button>
+                <button class="btn btn-error btn-xs" @click="deleteKey(k.id)">Delete</button>
               </div>
             </div>
           </div>

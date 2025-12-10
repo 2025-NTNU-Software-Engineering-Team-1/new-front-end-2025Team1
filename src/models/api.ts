@@ -232,7 +232,7 @@ const AIVTuber = {
   getCourseKeys: (courseName: string) =>
     fetcher.get<{
       keys: {
-        key_id: string;
+        id: string;
         key_name: string;
         masked_value: string;
         is_active: boolean;

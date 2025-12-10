@@ -49,7 +49,7 @@ const scrollToBottom = () => {
   });
 };
 
-// 共用的表情切換（等同以前「按鈕切表情」）
+
 const changeExpression = (expId: string) => {
   try {
     const app = LAppDelegate.getInstance();
@@ -96,7 +96,7 @@ const applyEmotion = (emotion?: string) => {
   }
 };
 
-// 安全呼叫 Live2D 嘴巴開關（對應 lappmodel.ts 的 _isTalking）
+
 const setLive2DTalking = (isTalking: boolean) => {
   if (!live2dInited.value) {
     console.warn("[Live2D] 嘗試 setTalking，但 Live2D 尚未初始化，略過。isTalking =", isTalking);
@@ -125,8 +125,6 @@ const pushDefaultGreeting = () => {
 const isLoadingHistory = ref(false);
 
 const loadHistory = async () => {
-  // 如果 Chatbot API 沒設定好就直接跳過
-  // @ts-ignore
   if (!api.Chatbot || !api.Chatbot.getHistory) {
     console.error("[AIChat] Chatbot API 尚未設定，略過載入歷史紀錄");
     pushDefaultGreeting();
@@ -171,12 +169,10 @@ const loadHistory = async () => {
   }
 };
 
-// ====== AI 回覆打字動畫（表情＋嘴巴） ======
 
 const typeAiMessage = (fullText: string, emotion?: string) => {
   const id = nextId++;
 
-  // 記錄這一句話開始前的表情（沒有就視為預設 F01）
   const prevExpressionId = currentExpression.value ?? "F01";
 
   messages.value.push({
@@ -202,7 +198,6 @@ const typeAiMessage = (fullText: string, emotion?: string) => {
     // 進入打字階段
     messages.value[msgIndex].phase = "typing";
 
-    // 套用這一輪 emotion 表情 ＋ 嘴巴開始動
     applyEmotion(emotion);
     setLive2DTalking(true);
 
@@ -212,7 +207,6 @@ const typeAiMessage = (fullText: string, emotion?: string) => {
         clearInterval(timer);
         typingTimers.delete(id);
 
-        // 被打斷：嘴巴停＋表情還原
         setLive2DTalking(false);
         const brokenMsg = messages.value.find((m) => m.id === id);
         const prev = brokenMsg?.prevExpressionId ?? "F01";
@@ -248,7 +242,7 @@ const typeAiMessage = (fullText: string, emotion?: string) => {
   thinkingTimers.set(id, thinkingTimer);
 };
 
-// ====== 測試用：本地模擬 AI 回覆（不呼叫後端） ======
+// 測試用
 
 const simulateAiReply = () => {
   const replies = [
@@ -266,10 +260,9 @@ const simulateAiReply = () => {
   }
 };
 
-// ====== 呼叫 Ask API（正式用，現在先保留不動） ======
+
 
 const requestAiReply = async (userText: string) => {
-  // 先 push 一個「思考中」訊息（只顯示點點點動畫）
   const thinkingId = nextId++;
   messages.value.push({
     id: thinkingId,
@@ -290,7 +283,6 @@ const requestAiReply = async (userText: string) => {
 
     const data = res.data ?? [];
 
-    // 移除 thinking 訊息
     messages.value = messages.value.filter((m) => m.id !== thinkingId);
 
     if (!Array.isArray(data) || data.length === 0) {
@@ -298,14 +290,12 @@ const requestAiReply = async (userText: string) => {
       return;
     }
 
-    // 一筆一筆 data 顯示，每筆都有自己的 emotion
     for (const item of data) {
       typeAiMessage(item.text, item.emotion);
     }
   } catch (e) {
     console.error("[AIChat] ask 發生錯誤:", e);
 
-    // thinking 訊息改成錯誤提示
     const idx = messages.value.findIndex((m) => m.id === thinkingId);
     if (idx !== -1) {
       messages.value[idx].phase = "done";
@@ -328,7 +318,6 @@ const requestAiReply = async (userText: string) => {
   }
 };
 
-// ====== 送出訊息 ======
 
 const send = () => {
   const text = draft.value.trim();
@@ -346,10 +335,10 @@ const send = () => {
   scrollToBottom();
 
   // 測試：使用假資料，不打後端
-  simulateAiReply();
+  //simulateAiReply();
 
   // 之後要接後端的時候，改回這行
-  // requestAiReply(text);
+  requestAiReply(text);
 };
 
 // ====== Live2D 初始化 ======

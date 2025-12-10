@@ -5,7 +5,6 @@ import { useGlobal } from "@/stores/global";
 import { TransitionRoot } from "@headlessui/vue";
 import { useI18n } from "vue-i18n";
 import dayjs from "dayjs";
-import AIChatbot from "@/components/AIChatbot.vue"; // 3. 匯入我們的新元件
 
 const global = useGlobal();
 const route = useRoute(); // 4. 取得當前路由
@@ -25,13 +24,7 @@ watchEffect(() => {
   }
 });
 
-// 5. 加入這個 computed 屬性
-const showChatbot = computed(() => {
-  const path = route.path;
-  // 檢查路徑是否包含 /problem/ 或 /submission
-  // 這樣 /course/[name]/problem/[id] 和 /course/[name]/submission/[id] 都會觸發
-  return path.includes("/problem/") || path.includes("/submission");
-});
+
 </script>
 
 <template>
@@ -65,6 +58,5 @@ const showChatbot = computed(() => {
       </div>
     </TransitionRoot>
 
-    <AIChatbot v-if="showChatbot" />
   </div>
 </template>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, ref, Ref, watchEffect, provide } from "vue";
+import { inject, ref, Ref, onMounted, provide } from "vue";
 import useVuelidate from "@vuelidate/core";
 import { required, maxLength, between, helpers } from "@vuelidate/validators";
 
@@ -7,6 +7,7 @@ import DescriptionSection from "./Sections/DescriptionSection.vue";
 import ConfigurationSection from "./Sections/ConfigurationSection.vue";
 import PipelineSection from "./Sections/PipelineSection.vue";
 import TestDataSection from "./Sections/TestDataSection.vue";
+import ResourceDataSection from "./Sections/ResourceDataSection.vue";
 
 /* ========================================================
    工具函式
@@ -91,9 +92,9 @@ function normalizeLibraryRestrictions(raw: any) {
 }
 
 /* ========================================================
-   在表單初始化自動修正結構
+   在表單初始化自動修正結構（只執行一次，避免重置用戶的修改）
    ======================================================== */
-watchEffect(() => {
+function initFormStructure() {
   if (!problem.value) return;
 
   // 防止 pipeline 或 staticAnalysis 未初始化
@@ -108,6 +109,11 @@ watchEffect(() => {
   } else {
     staticAnalysis.libraryRestrictions = normalizeLibraryRestrictions(libs);
   }
+}
+
+// 在組件掛載時執行一次初始化
+onMounted(() => {
+  initFormStructure();
 });
 
 /* ========================================================
@@ -359,6 +365,17 @@ async function submit() {
       <div class="collapse-title font-semibold">Set Test Data</div>
       <div class="collapse-content">
         <TestDataSection :v$="v$" />
+      </div>
+    </div>
+
+    <div class="collapse collapse-arrow rounded-box bg-base-200">
+      <input type="checkbox" class="peer" />
+      <div class="collapse-title font-semibold">Set Resource Data</div>
+      <div class="collapse-content">
+        <div class="flex flex-col gap-4">
+          <ResourceDataSection variant="student" />
+          <ResourceDataSection variant="teacher" />
+        </div>
       </div>
     </div>
   </div>

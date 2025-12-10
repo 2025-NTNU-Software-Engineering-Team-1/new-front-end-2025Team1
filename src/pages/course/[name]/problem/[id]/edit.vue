@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watchEffect, provide, Ref } from "vue";
+import { ref, watch, provide, Ref } from "vue";
 import { useTitle } from "@vueuse/core";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import { useRoute, useRouter } from "vue-router";
@@ -27,6 +27,8 @@ function normalizeConfig(config?: ProblemConfigExtra): ProblemConfigExtra {
     aiVTuberApiKeys: [],
     aiVTuberMode: "gemini-2.5-flash-lite",
     acceptedFormat: "code",
+    resourceData: false,
+    resourceDataTeacher: false,
     maxStudentZipSizeMB: 50,
     networkAccessRestriction: {
       sidecars: [],
@@ -48,7 +50,11 @@ function normalizeConfig(config?: ProblemConfigExtra): ProblemConfigExtra {
     aiVTuberApiKeys: Array.isArray(config?.aiVTuberApiKeys) ? config!.aiVTuberApiKeys : base.aiVTuberApiKeys,
     acceptedFormat: config?.acceptedFormat ?? base.acceptedFormat,
     maxStudentZipSizeMB: config?.maxStudentZipSizeMB ?? base.maxStudentZipSizeMB,
-    artifactCollection: config?.artifactCollection ?? base.artifactCollection,
+    artifactCollection:
+      config?.artifactCollection ??
+      (config as any)?.artifact_collection ??
+      base.artifactCollection,
+    resourceDataTeacher: config?.resourceDataTeacher ?? base.resourceDataTeacher,
     networkAccessRestriction: {
       ...base.networkAccessRestriction!,
       ...(config?.networkAccessRestriction || {}),
@@ -69,10 +75,10 @@ function normalizeConfig(config?: ProblemConfigExtra): ProblemConfigExtra {
 }
 
 function normalizePipeline(raw: any): ProblemPipeline {
+  if (!raw) raw = {};
   const base: ProblemPipeline = {
-    fopen: false,
-    fwrite: false,
-    exposeTestcase: false,
+    allowRead: false,
+    allowWrite: false,
     executionMode: "general",
     customChecker: false,
     teacherFirst: false,
@@ -85,10 +91,25 @@ function normalizePipeline(raw: any): ProblemPipeline {
     },
     scoringScript: { custom: false },
   };
+  const allowReadVal =
+    raw?.allowRead ??
+    raw?.allow_read ??
+    raw?.fopen ??
+    raw?.config?.allowRead ??
+    raw?.config?.allow_read ??
+    raw?.config?.fopen ??
+    base.allowRead;
+  const allowWriteVal =
+    raw?.allowWrite ??
+    raw?.allow_write ??
+    raw?.fwrite ??
+    raw?.config?.allowWrite ??
+    raw?.config?.allow_write ??
+    raw?.config?.fwrite ??
+    base.allowWrite;
   const pipeline: ProblemPipeline = {
-    fopen: raw?.fopen ?? base.fopen,
-    fwrite: raw?.fwrite ?? base.fwrite,
-    exposeTestcase: raw?.exposeTestcase ?? base.exposeTestcase,
+    allowRead: Boolean(allowReadVal),
+    allowWrite: Boolean(allowReadVal && allowWriteVal),
     executionMode: raw?.executionMode ?? base.executionMode,
     customChecker: raw?.customChecker ?? base.customChecker,
     teacherFirst: raw?.teacherFirst ?? base.teacherFirst,
@@ -126,13 +147,16 @@ function normalizeAssets(raw: any): ProblemAssets {
     trialModePublicTestDataZip: raw?.trialModePublicTestDataZip ?? null,
     trialModeACFiles: raw?.trialModeACFiles ?? null,
     aiVTuberACFiles: null,
-    customCheckerPy: null,
-    makefileZip: null,
-    teacherFile: null,
-    scorePy: null,
-    dockerfilesZip: null,
-    testdataZip: null,
-  };
+  customCheckerPy: null,
+  makefileZip: null,
+  teacherFile: null,
+  scorePy: null,
+  dockerfilesZip: null,
+  localServiceZip: null,
+  testdataZip: null,
+  resourceDataZip: null,
+  resourceDataTeacherZip: null,
+};
   if (raw?.aiVTuberFiles && !raw.aiVTuberACFiles) raw.aiVTuberACFiles = raw.aiVTuberFiles;
   return { ...base, ...(raw || {}) };
 }
@@ -145,25 +169,56 @@ const {
 
 const edittingProblem = ref<ProblemForm>();
 
-watchEffect(() => {
-  if (!problem.value) return;
+// 只在後端資料加載完成時初始化一次 edittingProblem（使用 watch + once: true 避免用戶修改被重置）
+watch(
+  () => problem.value,
+  (newProblem) => {
+    if (!newProblem || edittingProblem.value) return; // 已初始化則跳過
 
-  const testCases = normalizeTestCases(
-    (problem.value as any).testCase ?? (problem.value as any).testCaseInfo,
-  );
+    const testCases = normalizeTestCases(
+      (newProblem as any).testCase ?? (newProblem as any).testCaseInfo,
+    );
 
-  edittingProblem.value = {
-    ...problem.value,
-    testCaseInfo: {
-      language: 0,
-      fillInTemplate: "",
-      tasks: testCases,
-    },
-    config: normalizeConfig(problem.value.config),
-    pipeline: normalizePipeline((problem.value as any).pipeline),
-    assets: normalizeAssets((problem.value as any).assets),
-  } as ProblemForm;
-});
+    edittingProblem.value = {
+      ...newProblem,
+      testCaseInfo: {
+        language: 0,
+        fillInTemplate: "",
+        tasks: testCases,
+      },
+      config: normalizeConfig(newProblem.config),
+      pipeline: normalizePipeline(
+        (() => {
+          const basePipe =
+            (newProblem as any).pipeline ||
+            (newProblem as any).pipelineConf ||
+            (newProblem as any).pipeline_conf ||
+            (newProblem as any).config?.pipeline;
+          // 將 config 併入原始 payload，讓 normalizePipeline 可以讀到 allowRead/allowWrite/fopen/fwrite
+          const cfg = (newProblem as any).config;
+          if (basePipe && cfg) return { ...basePipe, config: cfg };
+          if (basePipe) return basePipe;
+          if (cfg) return { config: cfg };
+          return {};
+        })(),
+      ),
+      assets: normalizeAssets((newProblem as any).assets),
+    } as ProblemForm;
+
+    // 確保 allowRead/allowWrite 有值（部分回傳可能只在 config 上）
+    const cfg = edittingProblem.value.config;
+    const pipe = edittingProblem.value.pipeline;
+    if (pipe) {
+      if (pipe.allowRead === undefined || pipe.allowRead === null) {
+        pipe.allowRead = Boolean((cfg as any)?.allowRead ?? false);
+      }
+      if (pipe.allowWrite === undefined || pipe.allowWrite === null) {
+        pipe.allowWrite = Boolean((cfg as any)?.allowWrite ?? false);
+      }
+    }
+  },
+  { immediate: true },
+);
 
 function update<K extends keyof ProblemForm>(key: K, value: ProblemForm[K]) {
   if (!edittingProblem.value) return;
@@ -214,6 +269,10 @@ async function submit() {
     if (assets?.teacherFile) fd.append("Teacher_file", assets.teacherFile);
     if (assets?.scorePy) fd.append("score.py", assets.scorePy);
     if (assets?.dockerfilesZip) fd.append("dockerfiles.zip", assets.dockerfilesZip);
+    if (assets?.localServiceZip) fd.append("local_service.zip", assets.localServiceZip);
+    if (assets?.resourceDataZip) fd.append("resource_data.zip", assets.resourceDataZip);
+    if (assets?.resourceDataTeacherZip)
+      fd.append("resource_data_teacher.zip", assets.resourceDataTeacherZip);
 
     await api.Problem.modify(pid, edittingProblem.value);
     await api.Problem.uploadAssetsV2(pid, fd);

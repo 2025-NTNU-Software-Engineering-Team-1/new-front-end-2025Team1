@@ -141,7 +141,44 @@ function ensureConfig() {
     if (!nar.external) nar.external = { model: "Black", ip: [], url: [] };
   }
 }
-ensureConfig();
+// 初始化 artifactCollection 的函數（會在 onMounted 中呼叫，只執行一次）
+function initArtifactCollection() {
+  ensureConfig();
+  const cfg = problem.value.config as any;
+  if (cfg && !Array.isArray(cfg.artifactCollection)) {
+    cfg.artifactCollection = Array.isArray(cfg.artifact_collection) ? cfg.artifact_collection : [];
+  }
+  if (Array.isArray(cfg.pipeline?.artifactCollection) && cfg.artifactCollection.length === 0) {
+    cfg.artifactCollection = cfg.pipeline.artifactCollection.slice();
+  }
+}
+// 同步初始化檢查（確保在 onMounted 之前就有正確的初始值）
+if (!Array.isArray(problem.value.config.artifactCollection)) {
+  const cfgAny = problem.value.config as any;
+  problem.value.config.artifactCollection = Array.isArray(cfgAny?.artifact_collection)
+    ? cfgAny.artifact_collection
+    : [];
+}
+
+const artifactCompiledBinary = computed({
+  get: () => problem.value.config!.artifactCollection.includes("compiledBinary"),
+  set: (val: boolean) => {
+    const list = problem.value.config!.artifactCollection;
+    const next = new Set(list);
+    val ? next.add("compiledBinary") : next.delete("compiledBinary");
+    problem.value.config!.artifactCollection = Array.from(next);
+  },
+});
+
+const artifactZip = computed({
+  get: () => problem.value.config!.artifactCollection.includes("zip"),
+  set: (val: boolean) => {
+    const list = problem.value.config!.artifactCollection;
+    const next = new Set(list);
+    val ? next.add("zip") : next.delete("zip");
+    problem.value.config!.artifactCollection = Array.from(next);
+  },
+});
 
 /* -------------------- Assets -------------------- */
 const assetPaths = computed<Record<string, string>>(
@@ -294,6 +331,8 @@ watch(selectedKeys, (keys) => {
 
 /* -------------------- Lifecycle -------------------- */
 onMounted(() => {
+  // 只在組件掛載時初始化一次 artifactCollection（避免 reactive 依賴導致重複執行）
+  initArtifactCollection();
   fetchKeys();
   document.addEventListener("click", onClickOutside);
 });
@@ -838,21 +877,14 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- Artifact Collection -->
-    <div class="form-control col-span-1 rounded-lg border border-gray-400 p-4 md:col-span-2">
-      <label class="label"><span class="label-text">Artifact Collection (optional)</span></label>
+    <div class="form-control col-span-1 rounded-lg border border-base-300 p-4 md:col-span-2">
+      <label class="label"><span class="label-text">Artifact Collection (Optional)</span></label>
       <div class="flex gap-4">
         <label class="label cursor-pointer gap-2">
           <input
             type="checkbox"
             class="checkbox"
-            :checked="problem.config!.artifactCollection.includes('compiledBinary')"
-            @change="
-              ($event.target as HTMLInputElement).checked
-                ? problem.config!.artifactCollection.push('compiledBinary')
-                : (problem.config!.artifactCollection = problem.config!.artifactCollection.filter(
-                    (v) => v !== 'compiledBinary',
-                  ))
-            "
+            v-model="artifactCompiledBinary"
           />
           <span class="label-text">Compiled Binary</span>
         </label>
@@ -861,16 +893,9 @@ onBeforeUnmount(() => {
           <input
             type="checkbox"
             class="checkbox"
-            :checked="problem.config!.artifactCollection.includes('zip')"
-            @change="
-              ($event.target as HTMLInputElement).checked
-                ? problem.config!.artifactCollection.push('zip')
-                : (problem.config!.artifactCollection = problem.config!.artifactCollection.filter(
-                    (v) => v !== 'zip',
-                  ))
-            "
+            v-model="artifactZip"
           />
-          <span class="label-text">Zip</span>
+          <span class="label-text">Student Artifact (Zip)</span>
         </label>
       </div>
     </div>

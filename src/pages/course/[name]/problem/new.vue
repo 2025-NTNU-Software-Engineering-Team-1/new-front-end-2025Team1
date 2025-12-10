@@ -44,6 +44,8 @@ const newProblem = ref<ProblemForm>({
     aiVTuberApiKeys: [],
     aiVTuberMode: "gemini-2.5-flash-lite",
     acceptedFormat: "code",
+    resourceData: false,
+    resourceDataTeacher: false,
     maxStudentZipSizeMB: 50,
     networkAccessRestriction: {
       sidecars: [],
@@ -57,9 +59,8 @@ const newProblem = ref<ProblemForm>({
   },
   // === PIPELINE ===
   pipeline: {
-    fopen: false,
-    fwrite: false,
-    exposeTestcase: false,
+    allowRead: false,
+    allowWrite: false,
     executionMode: "general",
     customChecker: false,
     teacherFirst: false,
@@ -82,7 +83,10 @@ const newProblem = ref<ProblemForm>({
     teacherFile: null,
     scorePy: null,
     dockerfilesZip: null,
+    localServiceZip: null,
     testdataZip: null,
+    resourceDataZip: null,
+    resourceDataTeacherZip: null,
   },
 });
 
@@ -125,6 +129,9 @@ async function submit() {
     if (assets?.teacherFile) fd.append("Teacher_file", assets.teacherFile);
     if (assets?.scorePy) fd.append("score.py", assets.scorePy);
     if (assets?.dockerfilesZip) fd.append("dockerfiles.zip", assets.dockerfilesZip);
+    if (assets?.localServiceZip) fd.append("local_service.zip", assets.localServiceZip);
+    if (assets?.resourceDataZip) fd.append("resource_data.zip", assets.resourceDataZip);
+    if (assets?.resourceDataTeacherZip) fd.append("resource_data_teacher.zip", assets.resourceDataTeacherZip);
     
     // Step 4: 上傳所有資產
     await api.Problem.uploadAssetsV2(problemId, fd);

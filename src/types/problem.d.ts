@@ -131,6 +131,13 @@ type ArtifactCollection = "compiledBinary" | "zip";
 interface ProblemConfigExtra {
   acceptedFormat: AcceptedFormat;
   maxStudentZipSizeMB?: number;
+  resourceData?: boolean;
+  allowRead?: boolean;
+  allowWrite?: boolean;
+  allow_read?: boolean;
+  allow_write?: boolean;
+  fopen?: boolean;
+  fwrite?: boolean;
 
   // Trial Mode
   trialMode: boolean;
@@ -158,15 +165,15 @@ interface ProblemConfigExtra {
   assetPaths?: Record<string, string>;
   exposeTestcase?: boolean;
   artifactCollection: ArtifactCollection[];
+  resourceDataTeacher?: boolean;
 }
 
 /* ===========================================================
  * PIPELINE
  * =========================================================== */
 interface ProblemPipeline {
-  fopen: boolean;
-  fwrite: boolean;
-  exposeTestcase?: boolean;
+  allowRead: boolean;
+  allowWrite: boolean;
   executionMode: ExecutionMode;
   customChecker: boolean;
   teacherFirst?: boolean;
@@ -204,5 +211,8 @@ interface ProblemAssets {
   teacherFile?: File | null;
   scorePy?: File | null;
   dockerfilesZip?: File | null;
+  localServiceZip?: File | null;
   testdataZip?: File | null;
+  resourceDataZip?: File | null;
+  resourceDataTeacherZip?: File | null;
 }

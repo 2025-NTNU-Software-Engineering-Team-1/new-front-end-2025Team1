@@ -14,8 +14,9 @@ const v$ = inject<any>("v$"); // Inject validation object
 function ensurePipeline() {
   if (!problem.value.pipeline) {
     problem.value.pipeline = {
-      fopen: false,
-      fwrite: false,
+      allowRead: Boolean(problem.value.config?.allowRead ?? (problem.value.config as any)?.fopen ?? false),
+      allowWrite:
+        Boolean(problem.value.config?.allowWrite ?? (problem.value.config as any)?.fwrite ?? false),
       executionMode: "general",
       customChecker: false,
       teacherFirst: false,
@@ -29,6 +30,17 @@ function ensurePipeline() {
       scoringScript: { custom: false },
     };
   } else {
+    // 回填缺失的檔案權限設定
+    if (problem.value.pipeline.allowRead === undefined || problem.value.pipeline.allowRead === null) {
+      problem.value.pipeline.allowRead = Boolean(
+        problem.value.config?.allowRead ?? (problem.value.config as any)?.fopen ?? false,
+      );
+    }
+    if (problem.value.pipeline.allowWrite === undefined || problem.value.pipeline.allowWrite === null) {
+      problem.value.pipeline.allowWrite = Boolean(
+        problem.value.config?.allowWrite ?? (problem.value.config as any)?.fwrite ?? false,
+      );
+    }
     const libs = problem.value.pipeline.staticAnalysis?.libraryRestrictions;
     if (!libs) {
       problem.value.pipeline.staticAnalysis = {
@@ -48,7 +60,64 @@ function ensurePipeline() {
     }
   }
 }
-ensurePipeline();
+// 只在組件掛載時初始化一次（使用 onMounted 避免 reactive 依賴導致重複執行）
+function initPipelineValues() {
+  ensurePipeline();
+  const pipe = problem.value.pipeline!;
+  const cfg = (problem.value.config as any) || {};
+  // 優先使用 pipeline 上已有的值，否則從 config 讀取
+  const backendAllowRead = pipe.allowRead ?? cfg.allowRead ?? cfg.allow_read ?? cfg.fopen ?? false;
+  const backendAllowWrite = pipe.allowWrite ?? cfg.allowWrite ?? cfg.allow_write ?? cfg.fwrite ?? false;
+  pipe.allowRead = Boolean(backendAllowRead);
+  pipe.allowWrite = Boolean(backendAllowRead && backendAllowWrite);
+}
+
+// 追蹤 allowWrite 是否被 allowRead 連動關閉（用於決定警告文字顏色）
+const allowWriteForceClosed = ref(false);
+
+// 依賴規則：Allow Write 需要 Allow Read，Resource Data 需要 Allow Read
+const allowReadToggle = computed({
+  get: () => Boolean(problem.value.pipeline?.allowRead),
+  set: (val: boolean) => {
+    ensurePipeline();
+    problem.value.pipeline!.allowRead = Boolean(val);
+    // 當關閉 allowRead 時，連動關閉 allowWrite 和 resourceData (student)
+    if (!val) {
+      // 只有在 allowWrite 原本是開啟的情況下，才標記為被強制關閉
+      if (problem.value.pipeline!.allowWrite) {
+        allowWriteForceClosed.value = true;
+      }
+      problem.value.pipeline!.allowWrite = false;
+      problem.value.config.resourceData = false;
+    } else {
+      // 開啟 allowRead 時，清除強制關閉標記
+      allowWriteForceClosed.value = false;
+    }
+  },
+});
+
+const allowWriteToggle = computed({
+  get: () => Boolean(problem.value.pipeline?.allowWrite && allowReadToggle.value),
+  set: (val: boolean) => {
+    ensurePipeline();
+    problem.value.pipeline!.allowWrite = Boolean(val && allowReadToggle.value);
+    // 手動操作時清除強制關閉標記
+    allowWriteForceClosed.value = false;
+  },
+});
+
+const resourceDataEnabled = computed({
+  get: () => problem.value.config.resourceData,
+  set: (val: boolean) => {
+    problem.value.config.resourceData = val;
+  },
+});
+
+// 鎖頭和警告訊息直接用 computed 根據 allowReadToggle 計算
+const allowWriteDisabled = computed(() => !allowReadToggle.value);
+const allowWriteWarning = computed(() => !allowReadToggle.value ? "Allow Write requires Allow Read." : "");
+// 被連動關閉時顯示紅色，正常情況（先關 allowWrite 再關 allowRead）顯示灰色
+const allowWriteWarningError = computed(() => allowWriteForceClosed.value);
 
 // ===============================================
 // 後端 static-analysis options
@@ -61,6 +130,9 @@ const libraryOptions = ref({
 
 // 不論後端有無資料都安全渲染
 onMounted(async () => {
+  // 只在組件掛載時初始化一次 allowRead/allowWrite
+  initPipelineValues();
+
   let imports: string[] = [];
   let headers: string[] = [];
   let functions: string[] = [];
@@ -153,9 +225,16 @@ function getAllowedFileExtensions(): string[] {
   return list;
 }
 
+function teacherAllowedExtensions(): string[] {
+  if (problem.value.pipeline?.executionMode === "interactive") {
+    return [".c", ".cpp", ".py"];
+  }
+  return getAllowedFileExtensions();
+}
+
 function isTeacherFileAllowed(file: File | null): boolean {
   if (!file) return false;
-  const allowed = getAllowedFileExtensions().map((ext) => ext.toLowerCase());
+  const allowed = teacherAllowedExtensions().map((ext) => ext.toLowerCase());
   const name = file.name.toLowerCase();
   return allowed.some((ext) => name.endsWith(ext));
 }
@@ -168,38 +247,41 @@ const hasAsset = (key: string) => Boolean(assetPaths.value && assetPaths.value[k
 const assetDownloadUrl = (key: string) =>
   assetPaths.value && assetPaths.value[key] ? `/api/problem/${route.params.id}/asset/${key}/download` : null;
 
-function ensureDefaults() {
-  problem.value.pipeline = problem.value.pipeline || ({} as any);
-  if (problem.value.pipeline!.exposeTestcase === undefined) {
-    problem.value.pipeline!.exposeTestcase = false;
-  }
-}
-ensureDefaults();
+problem.value.pipeline = problem.value.pipeline || ({} as any);
 </script>
 
 <template>
   <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-    <!-- File Process -->
+    <!-- File Access -->
     <div class="col-span-2 rounded-lg border border-gray-400 p-4">
-      <div class="mb-2 text-sm">File Process</div>
+      <div class="mb-2 text-sm font-semibold">File Access</div>
       <div class="flex flex-wrap gap-6">
         <div class="form-control">
           <label class="label cursor-pointer justify-start gap-x-2">
-            <span class="label-text">fopen</span>
-            <input type="checkbox" class="toggle" v-model="problem.pipeline!.fopen" />
+            <span class="label-text">Allow Read</span>
+            <input type="checkbox" class="toggle" v-model="allowReadToggle" />
           </label>
         </div>
         <div class="form-control">
           <label class="label cursor-pointer justify-start gap-x-2">
-            <span class="label-text">fwrite</span>
-            <input type="checkbox" class="toggle" v-model="problem.pipeline!.fwrite" />
+            <span class="label-text flex items-center gap-2">
+              <span>Allow Write</span>
+              <i-uil-lock-alt v-if="!allowReadToggle" class="text-error" />
+            </span>
+            <input
+              type="checkbox"
+              class="toggle"
+              :disabled="!allowReadToggle"
+              v-model="allowWriteToggle"
+            />
           </label>
-        </div>
-        <div class="form-control">
-          <label class="label cursor-pointer justify-start gap-x-2">
-            <span class="label-text">Expose Testcase</span>
-            <input type="checkbox" class="toggle" v-model="problem.pipeline!.exposeTestcase" />
-          </label>
+          <p
+            v-if="allowWriteWarning"
+            class="mt-1 text-xs pl-1"
+            :class="allowWriteWarningError ? 'text-error' : 'opacity-70'"
+          >
+            {{ allowWriteWarning }}
+          </p>
         </div>
       </div>
     </div>
@@ -523,12 +605,18 @@ ensureDefaults();
         >
           <!-- makefile.zip -->
           <div class="form-control">
-            <label class="label justify-start gap-x-4">
-              <span class="label-text">Upload Makefile.zip</span>
+            <div class="flex flex-wrap items-center gap-4">
+              <label class="label mb-0 cursor-pointer justify-start gap-x-2">
+                <span class="label-text">Upload Makefile.zip</span>
+              </label>
               <div class="flex items-center gap-2">
-                <div v-if="hasAsset('makefile')" class="flex items-center gap-2">
+                <div
+                  v-if="hasAsset('makefile') || problem.assets?.makefileZip"
+                  class="flex items-center gap-2"
+                >
                   <span class="badge badge-success badge-outline text-xs">Uploaded</span>
                   <a
+                    v-if="hasAsset('makefile')"
                     :href="assetDownloadUrl('makefile') || '#'"
                     class="btn btn-xs"
                     target="_blank"
@@ -539,24 +627,24 @@ ensureDefaults();
                 </div>
                 <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
               </div>
-            </label>
-            <input
-              type="file"
-              accept=".zip"
-              class="file-input file-input-bordered file-input-sm w-56"
-              :class="{ 'input-error': v$?.assets?.makefileZip?.$error }"
-              @change="
-                (e: any) => {
-                  const file = e.target.files?.[0] || null;
-                  problem.assets!.makefileZip = file;
-                  v$?.assets?.makefileZip?.$touch();
-                  if (!file || !assertFileSizeOK(file, 'makefileZip')) {
-                    problem.assets!.makefileZip = null;
-                    e.target.value = '';
+              <input
+                type="file"
+                accept=".zip"
+                class="file-input file-input-bordered file-input-sm w-56"
+                :class="{ 'input-error': v$?.assets?.makefileZip?.$error }"
+                @change="
+                  (e: any) => {
+                    const file = e.target.files?.[0] || null;
+                    problem.assets!.makefileZip = file;
+                    v$?.assets?.makefileZip?.$touch();
+                    if (!file || !assertFileSizeOK(file, 'makefileZip')) {
+                      problem.assets!.makefileZip = null;
+                      e.target.value = '';
+                    }
                   }
-                }
-              "
-            />
+                "
+              />
+            </div>
             <label v-if="v$?.assets?.makefileZip?.$error" class="label">
               <span class="label-text-alt text-error">{{ v$.assets.makefileZip.$errors[0]?.$message }}</span>
             </label>
@@ -578,50 +666,49 @@ ensureDefaults();
               </label>
 
               <!-- 右：Teacher_Code -->
-              <div class="flex flex-col">
                 <div class="flex items-center gap-x-2">
-                  <span class="text-sm opacity-80">Upload Teacher_Code</span>
+                  <span class="text-sm opacity-80">Upload Teacher Code</span>
                   <div class="flex items-center gap-2">
-                    <div v-if="hasAsset('teacher_file')" class="flex items-center gap-2">
-                      <span class="badge badge-success badge-outline text-xs">Uploaded</span>
-                      <a
-                        :href="assetDownloadUrl('teacher_file') || '#'"
-                        class="btn btn-xs"
-                        target="_blank"
-                        rel="noopener"
-                      >
-                        Download
-                      </a>
-                    </div>
-                    <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
+                    <div
+                    v-if="hasAsset('teacher_file') || problem.assets?.teacherFile"
+                    class="flex items-center gap-2"
+                  >
+                    <span class="badge badge-success badge-outline text-xs">Uploaded</span>
+                    <a
+                      v-if="hasAsset('teacher_file')"
+                      :href="assetDownloadUrl('teacher_file') || '#'"
+                      class="btn btn-xs"
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      Download
+                    </a>
                   </div>
-                  <input
-                    type="file"
-                    :accept="getAllowedFileExtensions().join(',')"
-                    class="file-input file-input-bordered file-input-sm w-56"
-                    :class="{ 'input-error': v$?.assets?.teacherFile?.$error }"
-                    @change="
-                      (e: any) => {
-                        const file = (e.target.files as FileList)?.[0] || null;
-                        problem.assets!.teacherFile = file;
-                        v$?.assets?.teacherFile?.$touch();
-                        if (!file || !assertFileSizeOK(file, 'teacherFile')) {
-                          problem.assets!.teacherFile = null;
-                          (e.target as HTMLInputElement).value = '';
-                        }
-                      }
-                    "
-                  />
+                  <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
                 </div>
-                <span class="label-text-alt mt-1 text-sm opacity-70">
-                  Allowed: {{ getAllowedFileExtensions().join(", ") }}
-                </span>
-                <label v-if="v$?.assets?.teacherFile?.$error" class="label">
-                  <span class="label-text-alt text-error">{{
-                    v$.assets.teacherFile.$errors[0]?.$message
-                  }}</span>
-                </label>
+                <input
+                  type="file"
+                  :accept="teacherAllowedExtensions().join(',')"
+                  class="file-input file-input-bordered file-input-sm w-56"
+                  :class="{ 'input-error': v$?.assets?.teacherFile?.$error }"
+                  @change="
+                    (e: any) => {
+                      const file = (e.target.files as FileList)?.[0] || null;
+                      problem.assets!.teacherFile = file;
+                      v$?.assets?.teacherFile?.$touch();
+                      if (!file || !assertFileSizeOK(file, 'teacherFile')) {
+                        problem.assets!.teacherFile = null;
+                        (e.target as HTMLInputElement).value = '';
+                      }
+                    }
+                  "
+                />
               </div>
+              <label v-if="v$?.assets?.teacherFile?.$error" class="label">
+                <span class="label-text-alt text-error">{{
+                  v$.assets.teacherFile.$errors[0]?.$message
+                }}</span>
+              </label>
             </div>
           </div>
         </div>
@@ -650,9 +737,18 @@ ensureDefaults();
           </label>
 
           <div class="flex items-center gap-2">
-            <div v-if="hasAsset('checker')" class="flex items-center gap-2">
+            <div
+              v-if="hasAsset('checker') || problem.assets?.customCheckerPy"
+              class="flex items-center gap-2"
+            >
               <span class="badge badge-success badge-outline text-xs">Uploaded</span>
-              <a :href="assetDownloadUrl('checker') || '#'" class="btn btn-xs" target="_blank" rel="noopener">
+              <a
+                v-if="hasAsset('checker')"
+                :href="assetDownloadUrl('checker') || '#'"
+                class="btn btn-xs"
+                target="_blank"
+                rel="noopener"
+              >
                 Download
               </a>
             </div>
@@ -662,7 +758,7 @@ ensureDefaults();
 
         <div v-if="problem.pipeline!.customChecker" class="flex flex-col gap-x-2">
           <div class="flex items-center gap-x-2">
-            <span class="text-sm opacity-80">Upload custom_checker.py</span>
+            <span class="text-sm opacity-80 pl-1">Upload Custom_Checker.py</span>
             <input
               type="file"
               accept=".py"
@@ -688,11 +784,11 @@ ensureDefaults();
             }}</span>
           </label>
         </div>
-        <div v-else class="text-xs opacity-70">
+        <div v-else class="text-xs opacity-70 pl-1">
           {{
             problem.pipeline!.executionMode === "interactive"
               ? "Custom Checker disabled in Interactive mode."
-              : "Enable to upload Checker.py"
+              : "Enable to upload Custom_Checker.py"
           }}
         </div>
       </div>
@@ -707,9 +803,13 @@ ensureDefaults();
             <input type="checkbox" class="toggle" v-model="(problem as any).pipeline.scoringScript.custom" />
           </label>
           <div class="flex items-center gap-2">
-            <div v-if="hasAsset('scoring_script')" class="flex items-center gap-2">
+            <div
+              v-if="hasAsset('scoring_script') || problem.assets?.scorePy"
+              class="flex items-center gap-2"
+            >
               <span class="badge badge-success badge-outline text-xs">Uploaded</span>
               <a
+                v-if="hasAsset('scoring_script')"
                 :href="assetDownloadUrl('scoring_script') || '#'"
                 class="btn btn-xs"
                 target="_blank"
@@ -724,7 +824,7 @@ ensureDefaults();
 
         <div v-if="(problem as any).pipeline.scoringScript?.custom" class="flex flex-col gap-x-2">
           <div class="flex items-center gap-x-2">
-            <span class="text-sm opacity-80">Upload Score.py</span>
+            <span class="text-sm opacity-80 pl-1">Upload Custom_Scorer.py</span>
             <input
               type="file"
               accept=".py"
@@ -747,7 +847,7 @@ ensureDefaults();
             <span class="label-text-alt text-error">{{ v$.assets.scorePy.$errors[0]?.$message }}</span>
           </label>
         </div>
-        <div v-else class="text-xs opacity-70">Enable to upload Score.py</div>
+        <div v-else class="text-xs opacity-70 pl-1">Enable to upload Custom_Scorer.py</div>
       </div>
     </div>
   </div>

@@ -9,8 +9,21 @@ defineProps<{ v$: any }>();
 const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
 const isDrag = ref(false);
 const route = useRoute();
-const downloadUrl = computed(() => `/api/problem/${route.params.id}/testcase`);
+const downloadUrl = computed(() => {
+  const id = route.params.id;
+  if (!id || Array.isArray(id)) return null;
+  return `/api/problem/${id}/testcase`;
+});
+const hasRemoteTestcase = computed(
+  () => Boolean((problem.value.config as any)?.assetPaths?.case),
+);
 const hasExistingTasks = computed(() => (problem.value.testCaseInfo?.tasks?.length ?? 0) > 0);
+const hasBackendTestcase = computed(() => hasExistingTasks.value || hasRemoteTestcase.value);
+const currentTaskLabel = computed(() => {
+  if (!hasBackendTestcase.value) return "";
+  const len = problem.value.testCaseInfo?.tasks?.length ?? 0;
+  return len > 0 ? `${len} task(s)` : "remote";
+});
 
 watch(
   () => problem.value.assets?.testdataZip,
@@ -52,10 +65,19 @@ watch(
     <label class="label">
       <span class="label-text">Test Data Zip</span>
       <div class="flex items-center gap-2">
-        <span v-if="hasExistingTasks" class="badge badge-success badge-outline text-xs">
-          Current: {{ problem.testCaseInfo.tasks.length }} task(s)
+        <span v-if="hasBackendTestcase" class="badge badge-success badge-outline text-xs">
+          Current: {{ currentTaskLabel }}
         </span>
-        <a class="btn btn-xs" :href="downloadUrl" target="_blank" rel="noopener"> Download current </a>
+        <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
+        <a
+          v-if="hasBackendTestcase && downloadUrl"
+          class="btn btn-xs"
+          :href="downloadUrl"
+          target="_blank"
+          rel="noopener"
+        >
+          Download current
+        </a>
       </div>
     </label>
 

@@ -14,7 +14,7 @@ const error = ref<unknown>(null);
 const expandedKeys = ref<Record<string, boolean>>({});
 
 interface KeyItem {
-  key_id: string;
+  id: string;
   key_name: string;
   created_by: string;
   problem_usages: ProblemUsage[];
@@ -114,16 +114,16 @@ const toggleExpand = (id: string) => {
           <div v-if="data?.keys?.length">
             <div
               v-for="keyItem in data.keys"
-              :key="keyItem.key_id"
+              :key="keyItem.id"
               class="mb-6 rounded-lg border border-base-200 bg-base-100 p-4 shadow"
             >
               <div
                 class="flex cursor-pointer select-none flex-wrap items-center justify-between gap-3"
-                @click="toggleExpand(keyItem.key_id)"
+                @click="toggleExpand(keyItem.id)"
               >
                 <div class="flex items-center gap-2 text-lg font-semibold">
                   <span>
-                    {{ expandedKeys[keyItem.key_id] ? "▼" : "▸" }}
+                    {{ expandedKeys[keyItem.id] ? "▼" : "▸" }}
                   </span>
                   {{ keyItem.key_name }}
                 </div>
@@ -136,7 +136,7 @@ const toggleExpand = (id: string) => {
               </div>
 
               <transition name="fade">
-                <div v-if="expandedKeys[keyItem.key_id]" class="mt-4 border-t border-base-300 pt-4">
+                <div v-if="expandedKeys[keyItem.id]" class="mt-4 border-t border-base-300 pt-4">
                   <table class="table table-compact w-full">
                     <thead>
                       <tr>

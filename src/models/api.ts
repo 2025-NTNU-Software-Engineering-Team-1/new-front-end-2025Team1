@@ -215,7 +215,7 @@ const CourseAPIUsage = {
   getCourseUsage: (courseName: string) =>
     fetcher.get<{
       keys: {
-        key_id: string | number;
+        id: string | number;
         key_name: string;
         created_by: string;
         masked_value: string;

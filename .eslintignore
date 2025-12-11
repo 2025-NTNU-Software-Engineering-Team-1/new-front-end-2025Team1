@@ -10,5 +10,9 @@ postcss.config.js
 dist
 src/auto/**
 
+# Live2D
+src/live2d/**
+tests/**
+
 # TypeScript auto‑generated helper types (ignore linting)
 src/types/vue-global.d.ts

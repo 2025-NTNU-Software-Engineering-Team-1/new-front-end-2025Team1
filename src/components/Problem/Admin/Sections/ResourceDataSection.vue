@@ -36,8 +36,8 @@ const resourceDataWarning = computed(() => {
   return "";
 });
 const resourceCaseCount = ref<number | null>(null);
-const hasRemoteAsset = computed(
-  () => Boolean((problem.value.config as any)?.assetPaths?.[assetPathKey.value]),
+const hasRemoteAsset = computed(() =>
+  Boolean((problem.value.config as any)?.assetPaths?.[assetPathKey.value]),
 );
 const remoteTaskCount = computed(() => {
   const len = problem.value.testCaseInfo?.tasks?.length ?? 0;
@@ -56,9 +56,7 @@ const enableDisabledReason = computed(() => {
   if (!allowReadSatisfied.value) return "Allow Read required";
   return "";
 });
-const showDisabledText = computed(() =>
-  Boolean(enableDisabledReason.value || resourceDataWarning.value),
-);
+const showDisabledText = computed(() => Boolean(enableDisabledReason.value || resourceDataWarning.value));
 
 const enableRef = computed({
   get: () => (problem.value.config as any)?.[enableKey.value],
@@ -147,14 +145,15 @@ watch(
           class="toggle"
           :disabled="Boolean(enableDisabledReason)"
           v-model="enableRef"
-          @change="() => { if (!enableRef) fileRef = null; }"
+          @change="
+            () => {
+              if (!enableRef) fileRef = null;
+            }
+          "
         />
       </label>
       <i-uil-lock-alt v-if="enableDisabledReason" class="text-error" />
-      <span
-        v-if="showDisabledText"
-        class="text-sm text-error whitespace-nowrap"
-      >
+      <span v-if="showDisabledText" class="whitespace-nowrap text-sm text-error">
         {{ resourceDataWarning || enableDisabledReason }}
       </span>
       <div class="ml-auto flex items-center gap-2">
@@ -162,14 +161,9 @@ watch(
           v-if="resourceCaseCount !== null || hasRemoteAsset"
           class="badge badge-success badge-outline text-xs"
         >
-          Current: {{ resourceCaseCount ?? remoteTaskCount ?? 'remote' }} task(s)
+          Current: {{ resourceCaseCount ?? remoteTaskCount ?? "remote" }} task(s)
         </span>
-        <span
-          v-else-if="fileRef"
-          class="badge badge-success badge-outline text-xs"
-        >
-          Uploaded
-        </span>
+        <span v-else-if="fileRef" class="badge badge-success badge-outline text-xs"> Uploaded </span>
         <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
         <a
           v-if="downloadUrl && hasRemoteAsset"

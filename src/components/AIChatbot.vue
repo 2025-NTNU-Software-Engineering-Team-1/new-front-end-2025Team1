@@ -49,7 +49,6 @@ const scrollToBottom = () => {
   });
 };
 
-
 const changeExpression = (expId: string) => {
   try {
     const app = LAppDelegate.getInstance();
@@ -95,7 +94,6 @@ const applyEmotion = (emotion?: string) => {
     changeExpression(expId);
   }
 };
-
 
 const setLive2DTalking = (isTalking: boolean) => {
   if (!live2dInited.value) {
@@ -168,7 +166,6 @@ const loadHistory = async () => {
     scrollToBottom();
   }
 };
-
 
 const typeAiMessage = (fullText: string, emotion?: string) => {
   const id = nextId++;
@@ -260,8 +257,6 @@ const simulateAiReply = () => {
   }
 };
 
-
-
 const requestAiReply = async (userText: string) => {
   const thinkingId = nextId++;
   messages.value.push({
@@ -317,7 +312,6 @@ const requestAiReply = async (userText: string) => {
     setDefaultExpression();
   }
 };
-
 
 const send = () => {
   const text = draft.value.trim();
@@ -399,12 +393,6 @@ onBeforeUnmount(() => {
   thinkingTimers.clear();
 });
 </script>
-
-
-
-
-
-
 
 <template>
   <div
@@ -567,8 +555,6 @@ onBeforeUnmount(() => {
     </Transition>
   </div>
 </template>
-
-
 
 <style scoped>
 /* 開啟 / 關閉聊天框動畫 */

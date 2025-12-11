@@ -13,62 +13,81 @@ const isLoading = ref(false);
 const error = ref<unknown>(null);
 const expandedKeys = ref<Record<string, boolean>>({});
 
-interface KeyItem {
-  id: string;
-  key_name: string;
-  created_by: string;
-  problem_usages: ProblemUsage[];
-  total_token: number;
-  max_problems: ProblemUsage[];
-  min_problems: ProblemUsage[];
-}
-
-const data = ref<{
-  totalToken: number;
-  keys: KeyItem[];
-} | null>(null);
-
+// 後端原始回傳結構
 interface ProblemUsage {
   problem_id: number;
   problem_name: string;
   total_token?: number;
 }
 
-onMounted(async () => {
+interface RawKeyItem {
+  id: string | number;
+  key_name: string;
+  created_by: string;
+  masked_value: string;
+  problem_usages: ProblemUsage[];
+}
+
+// 前端加上的統計欄位
+interface KeyItem extends RawKeyItem {
+  all_total_token: number;
+  max_problems: ProblemUsage[];
+  min_problems: ProblemUsage[];
+}
+
+interface CourseUsageData {
+  totalToken: number;
+  keys: KeyItem[];
+}
+
+const data = ref<CourseUsageData | null>(null);
+
+function calcKeyStatistics(usages: ProblemUsage[]): {
+  total: number;
+  maxProblems: ProblemUsage[];
+  minProblems: ProblemUsage[];
+} {
+  if (!usages || usages.length === 0) {
+    return { total: 0, maxProblems: [], minProblems: [] };
+  }
+
+  const total = usages.reduce((acc, u) => acc + (u.total_token ?? 0), 0);
+  const tokenValues = usages.map((u) => u.total_token ?? 0);
+
+  const maxVal = Math.max(...tokenValues);
+  const minVal = Math.min(...tokenValues);
+
+  const maxProblems = usages.filter((u) => u.total_token === maxVal);
+  const minProblems = usages.filter((u) => u.total_token === minVal);
+
+  return { total, maxProblems, minProblems };
+}
+
+// 從後端抓資料並處理成統計資訊
+async function fetchUsage() {
   isLoading.value = true;
+  error.value = null;
+
   try {
     const res = await api.CourseAPIUsage.getCourseUsage(route.params.name as string);
-    const resultData = res?.data ?? {};
+    const rawKeys: RawKeyItem[] = res?.data?.keys || [];
 
-    // === 統計
-    const keys = (resultData.keys || []).map((key: any) => {
-      const usages: ProblemUsage[] = key.problem_usages || [];
-
-      // total token
-      const totalToken = usages.reduce<number>((sum, p) => sum + (p.total_token ?? 0), 0);
-
-      // 找出最大最小 token 值
-      const tokens = usages.map((p: { total_token?: number }) => p.total_token ?? 0);
-      const maxVal = Math.max(...tokens);
-      const minVal = Math.min(...tokens);
-
-      const max_problems: ProblemUsage[] = usages.filter((p) => p.total_token === maxVal);
-      const min_problems: ProblemUsage[] = usages.filter((p) => p.total_token === minVal);
+    const keys: KeyItem[] = rawKeys.map((key) => {
+      const { total, maxProblems, minProblems } = calcKeyStatistics(key.problem_usages);
       return {
         ...key,
-        total_token: totalToken,
-        max_problems,
-        min_problems,
+        all_total_token: total,
+        max_problems: maxProblems,
+        min_problems: minProblems,
       };
     });
 
-    // 課程總 Token
-    data.value = {
-      totalToken: keys.reduce((sum, k) => sum + (k.total_token || 0), 0),
-      keys,
-    };
+    const totalToken = keys.reduce((sum, k) => sum + (k.all_total_token || 0), 0);
 
-    keys.forEach((k: any) => (expandedKeys.value[k.id] = false));
+    data.value = { totalToken, keys };
+
+    // 初始化折疊狀態
+    expandedKeys.value = Object.fromEntries(keys.map((k) => [String(k.id), false]));
   } catch (err) {
     console.error("Failed to load API usage data:", err);
     error.value = err;
@@ -76,11 +95,13 @@ onMounted(async () => {
   } finally {
     isLoading.value = false;
   }
-});
+}
 
-const toggleExpand = (id: string) => {
+function toggleExpand(id: string) {
   expandedKeys.value[id] = !expandedKeys.value[id];
-};
+}
+
+onMounted(fetchUsage);
 </script>
 
 <template>
@@ -89,6 +110,7 @@ const toggleExpand = (id: string) => {
       <div class="card-body">
         <div class="card-title mb-4">API Usage ({{ route.params.name }})</div>
 
+        <!-- 總 Token -->
         <div
           v-if="data?.totalToken != null"
           class="mb-8 rounded-lg border border-base-300 bg-base-200 p-4 text-center text-lg font-semibold"
@@ -97,6 +119,7 @@ const toggleExpand = (id: string) => {
           <span>{{ data.totalToken.toLocaleString() }}</span>
         </div>
 
+        <!-- 加載或錯誤狀態 -->
         <template v-if="isLoading">
           <ui-spinner />
         </template>
@@ -110,8 +133,9 @@ const toggleExpand = (id: string) => {
           </div>
         </template>
 
+        <!-- 資料顯示 -->
         <template v-else>
-          <div v-if="data?.keys?.length">
+          <div v-if="data?.keys.length">
             <div
               v-for="keyItem in data.keys"
               :key="keyItem.id"
@@ -119,17 +143,15 @@ const toggleExpand = (id: string) => {
             >
               <div
                 class="flex cursor-pointer select-none flex-wrap items-center justify-between gap-3"
-                @click="toggleExpand(keyItem.id)"
+                @click="toggleExpand(String(keyItem.id))"
               >
                 <div class="flex items-center gap-2 text-lg font-semibold">
-                  <span>
-                    {{ expandedKeys[keyItem.id] ? "▼" : "▸" }}
-                  </span>
+                  <span>{{ expandedKeys[keyItem.id] ? "▼" : "▸" }}</span>
                   {{ keyItem.key_name }}
                 </div>
                 <div class="text-sm">
                   Used by {{ keyItem.problem_usages.length }} problems • Token {{
-                    keyItem.total_token.toLocaleString()
+                    keyItem.all_total_token.toLocaleString()
                   }}
                   • Created by {{ keyItem.created_by }}
                 </div>
@@ -157,7 +179,6 @@ const toggleExpand = (id: string) => {
                         </td>
                         <td>
                           {{ usage.problem_name }}
-                          <!-- 多筆 max / min 支援 -->
                           <template
                             v-if="keyItem.max_problems.some((p) => p.problem_id === usage.problem_id)"
                           >

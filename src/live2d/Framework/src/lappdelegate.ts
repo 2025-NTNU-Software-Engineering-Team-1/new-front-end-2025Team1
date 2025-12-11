@@ -168,10 +168,10 @@ export class LAppDelegate {
 
     // 取得 Live2D Manager
     const live2dManager = this._subdelegates.at(0).getLive2DManager();
-    
+
     // 取得當前的模型 (通常只有一個)
     const model = live2dManager._models.at(0);
-    
+
     if (model) {
       model.setExpression(expressionId);
       console.log(`[APP] 切換表情到: ${expressionId}`);
@@ -183,8 +183,8 @@ export class LAppDelegate {
 
     // 檢查是否有 subdelegates (通常只有一個)
     if (s_instance._subdelegates.getSize() > 0) {
-        // 透過 Manager 去設定 Model
-        s_instance._subdelegates.at(0).getLive2DManager().setTalking(isTalking);
+      // 透過 Manager 去設定 Model
+      s_instance._subdelegates.at(0).getLive2DManager().setTalking(isTalking);
     }
   }
 

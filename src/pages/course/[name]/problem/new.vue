@@ -132,7 +132,7 @@ async function submit() {
     if (assets?.localServiceZip) fd.append("local_service.zip", assets.localServiceZip);
     if (assets?.resourceDataZip) fd.append("resource_data.zip", assets.resourceDataZip);
     if (assets?.resourceDataTeacherZip) fd.append("resource_data_teacher.zip", assets.resourceDataTeacherZip);
-    
+
     // Step 4: 上傳所有資產
     await api.Problem.uploadAssetsV2(problemId, fd);
     router.push(`/course/${route.params.name}/problem/${problemId}`);

@@ -15,8 +15,7 @@ function ensurePipeline() {
   if (!problem.value.pipeline) {
     problem.value.pipeline = {
       allowRead: Boolean(problem.value.config?.allowRead ?? (problem.value.config as any)?.fopen ?? false),
-      allowWrite:
-        Boolean(problem.value.config?.allowWrite ?? (problem.value.config as any)?.fwrite ?? false),
+      allowWrite: Boolean(problem.value.config?.allowWrite ?? (problem.value.config as any)?.fwrite ?? false),
       executionMode: "general",
       customChecker: false,
       teacherFirst: false,
@@ -115,7 +114,7 @@ const resourceDataEnabled = computed({
 
 // 鎖頭和警告訊息直接用 computed 根據 allowReadToggle 計算
 const allowWriteDisabled = computed(() => !allowReadToggle.value);
-const allowWriteWarning = computed(() => !allowReadToggle.value ? "Allow Write requires Allow Read." : "");
+const allowWriteWarning = computed(() => (!allowReadToggle.value ? "Allow Write requires Allow Read." : ""));
 // 被連動關閉時顯示紅色，正常情況（先關 allowWrite 再關 allowRead）顯示灰色
 const allowWriteWarningError = computed(() => allowWriteForceClosed.value);
 
@@ -268,16 +267,11 @@ problem.value.pipeline = problem.value.pipeline || ({} as any);
               <span>Allow Write</span>
               <i-uil-lock-alt v-if="!allowReadToggle" class="text-error" />
             </span>
-            <input
-              type="checkbox"
-              class="toggle"
-              :disabled="!allowReadToggle"
-              v-model="allowWriteToggle"
-            />
+            <input type="checkbox" class="toggle" :disabled="!allowReadToggle" v-model="allowWriteToggle" />
           </label>
           <p
             v-if="allowWriteWarning"
-            class="mt-1 text-xs pl-1"
+            class="mt-1 pl-1 text-xs"
             :class="allowWriteWarningError ? 'text-error' : 'opacity-70'"
           >
             {{ allowWriteWarning }}
@@ -666,10 +660,10 @@ problem.value.pipeline = problem.value.pipeline || ({} as any);
               </label>
 
               <!-- 右：Teacher_Code -->
-                <div class="flex items-center gap-x-2">
-                  <span class="text-sm opacity-80">Upload Teacher Code</span>
-                  <div class="flex items-center gap-2">
-                    <div
+              <div class="flex items-center gap-x-2">
+                <span class="text-sm opacity-80">Upload Teacher Code</span>
+                <div class="flex items-center gap-2">
+                  <div
                     v-if="hasAsset('teacher_file') || problem.assets?.teacherFile"
                     class="flex items-center gap-2"
                   >
@@ -758,7 +752,7 @@ problem.value.pipeline = problem.value.pipeline || ({} as any);
 
         <div v-if="problem.pipeline!.customChecker" class="flex flex-col gap-x-2">
           <div class="flex items-center gap-x-2">
-            <span class="text-sm opacity-80 pl-1">Upload Custom_Checker.py</span>
+            <span class="pl-1 text-sm opacity-80">Upload Custom_Checker.py</span>
             <input
               type="file"
               accept=".py"
@@ -784,7 +778,7 @@ problem.value.pipeline = problem.value.pipeline || ({} as any);
             }}</span>
           </label>
         </div>
-        <div v-else class="text-xs opacity-70 pl-1">
+        <div v-else class="pl-1 text-xs opacity-70">
           {{
             problem.pipeline!.executionMode === "interactive"
               ? "Custom Checker disabled in Interactive mode."
@@ -803,10 +797,7 @@ problem.value.pipeline = problem.value.pipeline || ({} as any);
             <input type="checkbox" class="toggle" v-model="(problem as any).pipeline.scoringScript.custom" />
           </label>
           <div class="flex items-center gap-2">
-            <div
-              v-if="hasAsset('scoring_script') || problem.assets?.scorePy"
-              class="flex items-center gap-2"
-            >
+            <div v-if="hasAsset('scoring_script') || problem.assets?.scorePy" class="flex items-center gap-2">
               <span class="badge badge-success badge-outline text-xs">Uploaded</span>
               <a
                 v-if="hasAsset('scoring_script')"
@@ -824,7 +815,7 @@ problem.value.pipeline = problem.value.pipeline || ({} as any);
 
         <div v-if="(problem as any).pipeline.scoringScript?.custom" class="flex flex-col gap-x-2">
           <div class="flex items-center gap-x-2">
-            <span class="text-sm opacity-80 pl-1">Upload Custom_Scorer.py</span>
+            <span class="pl-1 text-sm opacity-80">Upload Custom_Scorer.py</span>
             <input
               type="file"
               accept=".py"
@@ -847,7 +838,7 @@ problem.value.pipeline = problem.value.pipeline || ({} as any);
             <span class="label-text-alt text-error">{{ v$.assets.scorePy.$errors[0]?.$message }}</span>
           </label>
         </div>
-        <div v-else class="text-xs opacity-70 pl-1">Enable to upload Custom_Scorer.py</div>
+        <div v-else class="pl-1 text-xs opacity-70">Enable to upload Custom_Scorer.py</div>
       </div>
     </div>
   </div>

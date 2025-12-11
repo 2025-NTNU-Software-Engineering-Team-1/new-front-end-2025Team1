@@ -71,8 +71,6 @@ watchEffect(() => {
 
 const selectedTestcaseContent = ref("");
 
-
-
 async function test() {
   const isFormCorrect = await v$.value.$validate();
   if (!isFormCorrect) return;

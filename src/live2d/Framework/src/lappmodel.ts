@@ -551,8 +551,7 @@ export class LAppModel extends CubismUserModel {
       for (let i = 0; i < this._lipSyncIds.getSize(); ++i) {
         this._model.addParameterValueById(this._lipSyncIds.at(i), value, 0.8);
       }
-    }
-    else if (this._lipsync) {
+    } else if (this._lipsync) {
       // 平常才走 lipsync（有聲音輸入時用 RMS 控制）
       let value = 0.0;
 
@@ -563,8 +562,6 @@ export class LAppModel extends CubismUserModel {
         this._model.addParameterValueById(this._lipSyncIds.at(i), value, 0.8);
       }
     }
-
-
 
     // ポーズの設定
     if (this._pose != null) {
@@ -681,7 +678,7 @@ export class LAppModel extends CubismUserModel {
 
   // 設定是否說話
   public setTalking(isTalking: boolean): void {
-      this._isTalking = isTalking;
+    this._isTalking = isTalking;
   }
 
   /**

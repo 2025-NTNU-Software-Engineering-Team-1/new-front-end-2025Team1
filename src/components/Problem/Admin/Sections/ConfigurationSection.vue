@@ -125,7 +125,7 @@ function ensureConfig() {
       },
       artifactCollection: [],
     };
-  }else {
+  } else {
     if (!problem.value.config.networkAccessRestriction) {
       problem.value.config.networkAccessRestriction = {
         sidecars: [],
@@ -208,13 +208,13 @@ watch(
       loadSavedDockerEnvs();
     }
   },
-  { immediate: true, deep: true }
+  { immediate: true, deep: true },
 );
 
 async function inspectDockerZip(file: File) {
   detectedDockerEnvs.value = [];
   dockerZipError.value = "";
-  
+
   try {
     const reader = new ZipReader(new BlobReader(file));
     const entries = await reader.getEntries();
@@ -229,14 +229,13 @@ async function inspectDockerZip(file: File) {
 
     const envs: string[] = [];
     for (const entry of dockerfiles) {
-      const parts = entry.filename.split('/');
-      
+      const parts = entry.filename.split("/");
 
       if (parts.length !== 2) {
-         dockerZipError.value = `Structure error: ${entry.filename}. Please ensure the structure is "environment_folder/Dockerfile" without an extra directory level.`;
-         return false;
+        dockerZipError.value = `Structure error: ${entry.filename}. Please ensure the structure is "environment_folder/Dockerfile" without an extra directory level.`;
+        return false;
       }
-      
+
       envs.push(parts[0]);
     }
 
@@ -373,21 +372,23 @@ function onClickOutside(event: MouseEvent) {
   showSuggestionTooltip.value = false;
 }
 
-
 /* -------------------- Sidecars Helper -------------------- */
 const hasExistingNetworkConfig = computed(() => {
   const nar = problem.value.config?.networkAccessRestriction;
   const hasExternal = (nar?.external?.ip?.length ?? 0) > 0 || (nar?.external?.url?.length ?? 0) > 0;
   const hasSidecars = (nar?.sidecars?.length ?? 0) > 0;
-  const hasDocker = !!problem.value.assets?.dockerfilesZip || hasAsset('dockerfiles');
+  const hasDocker = !!problem.value.assets?.dockerfilesZip || hasAsset("dockerfiles");
   return hasExternal || hasSidecars || hasDocker;
 });
 const showNetworkSection = ref(false);
 
-watch(hasExistingNetworkConfig, (val) => {
-  if (val) showNetworkSection.value = true;
-}, { immediate: true });
-
+watch(
+  hasExistingNetworkConfig,
+  (val) => {
+    if (val) showNetworkSection.value = true;
+  },
+  { immediate: true },
+);
 
 /* -------------------- Watches -------------------- */
 watch(
@@ -831,11 +832,12 @@ onBeforeUnmount(() => {
         leave-active-class="transition ease-in duration-150"
       >
         <div v-if="showNetworkSection" class="mt-3 space-y-4 rounded border-none p-2">
-          
           <div class="rounded border border-gray-400 p-4">
-             <label class="label mb-2"><span class="label-text font-semibold">Network Access Restriction (External)</span></label>
-             <div class="grid grid-cols-1 gap-4 p-1 md:grid-cols-2">
-              <div class="col-span-1 md:col-span-2 flex items-center gap-4">
+            <label class="label mb-2"
+              ><span class="label-text font-semibold">Network Access Restriction (External)</span></label
+            >
+            <div class="grid grid-cols-1 gap-4 p-1 md:grid-cols-2">
+              <div class="col-span-1 flex items-center gap-4 md:col-span-2">
                 <span class="label-text">Access Model:</span>
                 <div class="mode-switcher">
                   <div class="mode-switcher-container">
@@ -859,13 +861,11 @@ onBeforeUnmount(() => {
                     </button>
                   </div>
                 </div>
-                <div class="text-xs opacity-70 ml-2">
+                <div class="ml-2 text-xs opacity-70">
                   <span v-if="problem.config!.networkAccessRestriction!.external!.model === 'White'">
                     Only allow specific IPs/URLs. Block everything else.
                   </span>
-                  <span v-else>
-                    Block specific IPs/URLs. Allow everything else.
-                  </span>
+                  <span v-else> Block specific IPs/URLs. Allow everything else. </span>
                 </div>
               </div>
 
@@ -889,107 +889,116 @@ onBeforeUnmount(() => {
             </div>
           </div>
           <div class="rounded border border-gray-400 p-4">
-              <label class="label mb-2 justify-between">
-                <span class="label-text font-semibold">Sandbox Environment (Sidecars & Dockerfiles)</span>
-              </label>
+            <label class="label mb-2 justify-between">
+              <span class="label-text font-semibold">Sandbox Environment (Sidecars & Dockerfiles)</span>
+            </label>
 
-              <div class="mb-6">
-               <SidecarInput 
-                 v-model="problem.config!.networkAccessRestriction!.sidecars" 
-               />
-              </div>
+            <div class="mb-6">
+              <SidecarInput v-model="problem.config!.networkAccessRestriction!.sidecars" />
+            </div>
 
-              <div class="divider"></div>
+            <div class="divider"></div>
 
-              <div class="form-control">
-                <label class="label justify-start gap-x-4">
-                  <span class="label-text font-semibold">Dockerfiles</span>
-                  <div class="flex items-center gap-2">
+            <div class="form-control">
+              <label class="label justify-start gap-x-4">
+                <span class="label-text font-semibold">Dockerfiles</span>
+                <div class="flex items-center gap-2">
                   <div v-if="hasAsset('network_dockerfile')" class="flex items-center gap-2">
-                      <span class="badge badge-success badge-outline text-xs">Uploaded</span>
-                      <a
+                    <span class="badge badge-success badge-outline text-xs">Uploaded</span>
+                    <a
                       :href="assetDownloadUrl('network_dockerfile') || '#'"
                       class="btn btn-xs"
                       target="_blank"
                       rel="noopener"
-                      >
+                    >
                       Download
-                      </a>
+                    </a>
                   </div>
                   <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
-                  </div>
-                </label>
+                </div>
+              </label>
               <div class="mt-2">
-                  <label class="label"><span class="label-text">Upload dockerfiles.zip</span></label>
-                  <input
+                <label class="label"><span class="label-text">Upload dockerfiles.zip</span></label>
+                <input
                   type="file"
                   accept=".zip"
                   class="file-input file-input-bordered w-full max-w-xs"
                   :class="{ 'input-error': v$?.assets?.dockerfilesZip?.$error || dockerZipError }"
                   @change="
-                      async (e: any) => {
+                    async (e: any) => {
                       const file = e.target.files?.[0] || null;
-                      
-                      // Reset previous 
+
+                      // Reset previous
                       detectedDockerEnvs = [];
                       dockerZipError = '';
 
                       const nar = problem.config!.networkAccessRestriction as any;
-                      if(nar?.custom_env) nar.custom_env.env_list = [];
-                      
+                      if (nar?.custom_env) nar.custom_env.env_list = [];
+
                       if (file) {
                         // file size
                         if (!assertFileSizeOK(file, 'dockerfiles.zip')) {
-                                problem.assets!.dockerfilesZip = null;
-                                e.target.value = '';
-                                return;
+                          problem.assets!.dockerfilesZip = null;
+                          e.target.value = '';
+                          return;
                         }
                         // check zip structure
                         const isValid = await inspectDockerZip(file);
                         if (!isValid) {
-                            problem.assets!.dockerfilesZip = null;
-                            e.target.value = '';
-                            return;
+                          problem.assets!.dockerfilesZip = null;
+                          e.target.value = '';
+                          return;
                         }
                         problem.assets!.dockerfilesZip = file;
                       } else {
                         problem.assets!.dockerfilesZip = null;
                         loadSavedDockerEnvs();
                       }
-                        v$?.assets?.dockerfilesZip?.$touch();
-                      }
+                      v$?.assets?.dockerfilesZip?.$touch();
+                    }
                   "
-                  />
-                  <label v-if="v$?.assets?.dockerfilesZip?.$error || dockerZipError" class="label">
-                    <span class="label-text-alt text-error whitespace-pre-line">
-                        {{ v$?.assets?.dockerfilesZip?.$errors[0]?.$message || dockerZipError }}
-                    </span>
-                  </label>
+                />
+                <label v-if="v$?.assets?.dockerfilesZip?.$error || dockerZipError" class="label">
+                  <span class="label-text-alt whitespace-pre-line text-error">
+                    {{ v$?.assets?.dockerfilesZip?.$errors[0]?.$message || dockerZipError }}
+                  </span>
+                </label>
 
-                  <div v-if="detectedDockerEnvs.length > 0" class="mt-2 rounded bg-base-200 p-3 text-xs border border-success/30 w-full max-w-xs">
-                    <div class="mb-2 font-bold text-success flex items-center gap-1">
-                        <i-uil-check-circle /> 
-                        {{ problem.assets?.dockerfilesZip ? 'Environment(s) to be established:' : 'List of environments:'}}
-                    </div>
-                    <ul class="list-inside space-y-1 opacity-80">
-                        <li v-for="(env, index) in detectedDockerEnvs" :key="env" class="flex items-center justify-between hover:bg-base-300 rounded px-1 transition-colors">
-                            <div>
-                                <span class="font-mono font-bold">{{ env }}</span> 
-                            </div>
-                            
-                            <button 
-                                type="button" 
-                                class="btn btn-ghost btn-xs text-error min-h-0 h-6 w-6 p-0"
-                                @click="removeDockerEnv(index)"
-                                title="Remove this environment"
-                            >
-                                <i-uil-trash-alt />
-                            </button>
-                        </li>
-                    </ul>
+                <div
+                  v-if="detectedDockerEnvs.length > 0"
+                  class="mt-2 w-full max-w-xs rounded border border-success/30 bg-base-200 p-3 text-xs"
+                >
+                  <div class="mb-2 flex items-center gap-1 font-bold text-success">
+                    <i-uil-check-circle />
+                    {{
+                      problem.assets?.dockerfilesZip
+                        ? "Environment(s) to be established:"
+                        : "List of environments:"
+                    }}
                   </div>
+                  <ul class="list-inside space-y-1 opacity-80">
+                    <li
+                      v-for="(env, index) in detectedDockerEnvs"
+                      :key="env"
+                      class="flex items-center justify-between rounded px-1 transition-colors hover:bg-base-300"
+                    >
+                      <div>
+                        <span class="font-mono font-bold">{{ env }}</span>
+                      </div>
+
+                      <button
+                        type="button"
+                        class="btn btn-ghost btn-xs h-6 min-h-0 w-6 p-0 text-error"
+                        @click="removeDockerEnv(index)"
+                        title="Remove this environment"
+                      >
+                        <i-uil-trash-alt />
+                      </button>
+                    </li>
+                  </ul>
+                </div>
               </div>
-              </div>
+            </div>
           </div>
         </div>
       </transition>
@@ -1000,20 +1009,12 @@ onBeforeUnmount(() => {
       <label class="label"><span class="label-text">Artifact Collection (Optional)</span></label>
       <div class="flex gap-4">
         <label class="label cursor-pointer gap-2">
-          <input
-            type="checkbox"
-            class="checkbox"
-            v-model="artifactCompiledBinary"
-          />
+          <input type="checkbox" class="checkbox" v-model="artifactCompiledBinary" />
           <span class="label-text">Compiled Binary</span>
         </label>
 
         <label class="label cursor-pointer gap-2">
-          <input
-            type="checkbox"
-            class="checkbox"
-            v-model="artifactZip"
-          />
+          <input type="checkbox" class="checkbox" v-model="artifactZip" />
           <span class="label-text">Student Artifact (Zip)</span>
         </label>
       </div>

@@ -14,9 +14,7 @@ const downloadUrl = computed(() => {
   if (!id || Array.isArray(id)) return null;
   return `/api/problem/${id}/testcase`;
 });
-const hasRemoteTestcase = computed(
-  () => Boolean((problem.value.config as any)?.assetPaths?.case),
-);
+const hasRemoteTestcase = computed(() => Boolean((problem.value.config as any)?.assetPaths?.case));
 const hasExistingTasks = computed(() => (problem.value.testCaseInfo?.tasks?.length ?? 0) > 0);
 const hasBackendTestcase = computed(() => hasExistingTasks.value || hasRemoteTestcase.value);
 const currentTaskLabel = computed(() => {

@@ -85,30 +85,31 @@ onMounted(async () => {
         displayedName: session.displayedName || "Unknown",
       },
       status: mapStatusToCode(response.data.status),
-      runTime: Math.max(...(response.data.tasks?.map(t => t.exec_time)??[0])),
-      memoryUsage: Math.max(...(response.data.tasks?.map(t => t.memory_usage)??[0])),
+      runTime: Math.max(...(response.data.tasks?.map((t) => t.exec_time) ?? [0])),
+      memoryUsage: Math.max(...(response.data.tasks?.map((t) => t.memory_usage) ?? [0])),
       score: response.data.score,
       languageType: 1, // TODO: Get from backend
       timestamp: new Date(response.data.timestamp).getTime(),
       code: "", // TODO: Get code from backend
-      tasks: response.data.tasks?.map((task, idx) => ({
-        taskId: idx,
-        exec_time: task.exec_time,
-        memory_usage: task.memory_usage,
-        score: task.score,
-        status: mapStatusToCode(task.status),
-        cases: [
-          {
-            id: 0,
-            status: mapStatusToCode(task.status),
-            exec_time: task.exec_time,
-            memory_usage: task.memory_usage,
-            input: "",
-            expectedOutput: "",
-            actualOutput: task.stdout,
-          },
-        ],
-      }))??[],
+      tasks:
+        response.data.tasks?.map((task, idx) => ({
+          taskId: idx,
+          exec_time: task.exec_time,
+          memory_usage: task.memory_usage,
+          score: task.score,
+          status: mapStatusToCode(task.status),
+          cases: [
+            {
+              id: 0,
+              status: mapStatusToCode(task.status),
+              exec_time: task.exec_time,
+              memory_usage: task.memory_usage,
+              input: "",
+              expectedOutput: "",
+              actualOutput: task.stdout,
+            },
+          ],
+        })) ?? [],
     };
 
     console.log("Loaded trial submission details:", testResult.value);

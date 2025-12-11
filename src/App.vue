@@ -23,8 +23,6 @@ watchEffect(() => {
       break;
   }
 });
-
-
 </script>
 
 <template>
@@ -57,6 +55,5 @@ watchEffect(() => {
         </div>
       </div>
     </TransitionRoot>
-
   </div>
 </template>

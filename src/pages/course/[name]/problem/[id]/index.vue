@@ -9,8 +9,6 @@ import AIChatbot from "@/components/AIChatbot.vue";
 const route = useRoute();
 const session = useSession();
 
-
-
 useTitle(`Problem - ${route.params.id} - ${route.params.name} | Normal OJ`);
 const { data: problem, error, isLoading } = useAxios<Problem>(`/problem/view/${route.params.id}`, fetcher);
 </script>
@@ -23,13 +21,13 @@ const { data: problem, error, isLoading } = useAxios<Problem>(`/problem/view/${r
       </template>
       <template #data>
         <problem-card v-if="problem" :problem="problem" />
-        
-        <AIChatbot 
-          v-if="problem && (problem.config?.aiVTuber || true)" 
+
+        <AIChatbot
+          v-if="problem && (problem.config?.aiVTuber || true)"
           :course-id="route.params.name as string"
           :course-name="route.params.name as string"
           :problem-id="route.params.id as string"
-          :current-code="''" 
+          :current-code="''"
           :username="session.username"
         />
       </template>

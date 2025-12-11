@@ -20,7 +20,7 @@ const currentExpression = ref("F01");
 const changeExpression = (expId: string) => {
   currentExpression.value = expId;
   const app = LAppDelegate.getInstance();
-  
+
   // 呼叫剛剛在 LAppDelegate 新增的方法
   // @ts-ignore
   if (app.setExpression) {
@@ -49,18 +49,18 @@ onBeforeUnmount(() => {
   <div class="relative h-full w-full">
     <div id="live2d-container" class="h-full w-full" style="position: relative; overflow: hidden"></div>
 
-    <div class="absolute bottom-4 left-4 p-4 bg-white/80 backdrop-blur-sm rounded-lg shadow-lg z-10 max-w-xs border border-gray-200">
-      <h3 class="text-sm font-bold text-gray-700 mb-2">✨ 表情測試區</h3>
-      <div class="text-xs text-blue-600 mb-2 font-mono">
-        當前表情: {{ currentExpression }}
-      </div>
+    <div
+      class="absolute bottom-4 left-4 z-10 max-w-xs rounded-lg border border-gray-200 bg-white/80 p-4 shadow-lg backdrop-blur-sm"
+    >
+      <h3 class="mb-2 text-sm font-bold text-gray-700">✨ 表情測試區</h3>
+      <div class="mb-2 font-mono text-xs text-blue-600">當前表情: {{ currentExpression }}</div>
       <div class="grid grid-cols-2 gap-2">
         <button
           v-for="exp in expressions"
           :key="exp.id"
           @click="changeExpression(exp.id)"
-          class="px-3 py-1 text-xs bg-blue-100 hover:bg-blue-200 text-blue-800 rounded transition-colors"
-          :class="{ 'ring-2 ring-blue-500 font-bold': currentExpression === exp.id }"
+          class="rounded bg-blue-100 px-3 py-1 text-xs text-blue-800 transition-colors hover:bg-blue-200"
+          :class="{ 'font-bold ring-2 ring-blue-500': currentExpression === exp.id }"
         >
           {{ exp.id }}
         </button>

@@ -371,6 +371,7 @@
       "student": "Student",
       "teacher": "Teacher",
       "admin": "Admin",
+      "ta": "TA",
       "select-role": "Select Role",
       "row-count": "Row Count: {n}",
       "search-name": "Search Name"

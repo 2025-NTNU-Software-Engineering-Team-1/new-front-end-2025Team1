@@ -5,6 +5,43 @@ import { useTitle } from "@vueuse/core";
 import api from "@/models/api";
 import { useI18n } from "vue-i18n";
 
+// ==========================================
+// [CONFIG] Console  1=open, 0=close
+const DEBUG_MODE = 1;
+// ==========================================
+
+// --- Logger Utility ---
+const logger = {
+  log: (label: string, data?: any) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Log] ${label}`, "color: #3b82f6; font-weight: bold;", data || "");
+  },
+  success: (label: string, data?: any) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Success] ${label}`, "color: #10b981; font-weight: bold;", data || "");
+  },
+  error: (label: string, error?: any) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Error] ${label}`, "color: #ef4444; font-weight: bold;", error || "");
+  },
+  group: (label: string) => {
+    if (!DEBUG_MODE) return;
+    console.group(`%c[Group] ${label}`, "color: #8b5cf6; font-weight: bold;");
+  },
+  groupCollapsed: (label: string) => {
+    if (!DEBUG_MODE) return;
+    console.groupCollapsed(`%c[Detail] ${label}`, "color: #6366f1; font-weight: bold;");
+  },
+  groupEnd: () => {
+    if (!DEBUG_MODE) return;
+    console.groupEnd();
+  },
+  table: (data: any) => {
+    if (!DEBUG_MODE) return;
+    console.table(data);
+  },
+};
+
 const route = useRoute();
 const { t } = useI18n();
 useTitle(`AI Usage - ${route.params.name} | Normal OJ`);
@@ -13,7 +50,6 @@ const isLoading = ref(false);
 const error = ref<unknown>(null);
 const expandedKeys = ref<Record<string, boolean>>({});
 
-// 後端原始回傳結構
 interface ProblemUsage {
   problem_id: number;
   problem_name: string;
@@ -28,7 +64,6 @@ interface RawKeyItem {
   problem_usages: ProblemUsage[];
 }
 
-// 前端加上的統計欄位
 interface KeyItem extends RawKeyItem {
   all_total_token: number;
   max_problems: ProblemUsage[];
@@ -63,19 +98,64 @@ function calcKeyStatistics(usages: ProblemUsage[]): {
   return { total, maxProblems, minProblems };
 }
 
-// 從後端抓資料並處理成統計資訊
 async function fetchUsage() {
+  logger.group(`Fetch Usage Started: ${route.params.name}`);
   isLoading.value = true;
   error.value = null;
 
   try {
     const res = await api.CourseAPIUsage.getCourseUsage(route.params.name as string);
-    const rawKeys: RawKeyItem[] = res?.data?.keys || [];
+    logger.log("Raw Response Received", res);
 
-    const keys: KeyItem[] = rawKeys.map((key) => {
-      const { total, maxProblems, minProblems } = calcKeyStatistics(key.problem_usages);
+    const rawKeys: RawKeyItem[] = res?.data?.keys || [];
+    logger.log(`Found ${rawKeys.length} keys`);
+
+    const keys: KeyItem[] = rawKeys.map((key, index) => {
+      // Data Integrity Check
+      const missingFields: string[] = [];
+
+      if (key.id == null) missingFields.push("id");
+      if (!key.key_name) missingFields.push("key_name");
+      if (!key.created_by) missingFields.push("created_by");
+      if (!key.problem_usages) missingFields.push("problem_usages (CRITICAL)");
+
+      if (missingFields.length > 0) {
+        logger.error(`Missing Data Detected at Index ${index} (ID: ${key.id || "Unknown"})`, {
+          missing: missingFields,
+          rawObject: key,
+        });
+      }
+
+      if (key.problem_usages && Array.isArray(key.problem_usages)) {
+        key.problem_usages.forEach((u, i) => {
+          if (!u.problem_id || !u.problem_name) {
+            logger.error(`Incomplete Problem Data at Key ID ${key.id}, Item ${i}`, u);
+          }
+        });
+      }
+
+      logger.groupCollapsed(`Processing Key: ${key.key_name} (ID: ${key.id})`);
+
+      const safeUsages = key.problem_usages || [];
+
+      const { total, maxProblems, minProblems } = calcKeyStatistics(safeUsages);
+
+      // Console debug info specific to calculation
+      logger.log(`Problem Usages Count: ${safeUsages.length}`);
+      logger.log(`Calculated Total Token: ${total}`);
+      if (safeUsages.length > 0) {
+        logger.table(
+          safeUsages.map((u) => ({ id: u.problem_id, name: u.problem_name, token: u.total_token })),
+        );
+      }
+
+      logger.groupEnd(); // End key detail
+
       return {
         ...key,
+        problem_usages: safeUsages,
+        key_name: key.key_name || "Unknown Key",
+        created_by: key.created_by || "Unknown User",
         all_total_token: total,
         max_problems: maxProblems,
         min_problems: minProblems,
@@ -83,22 +163,25 @@ async function fetchUsage() {
     });
 
     const totalToken = keys.reduce((sum, k) => sum + (k.all_total_token || 0), 0);
+    logger.success("Final Calculation Complete", { totalToken, keysCount: keys.length });
 
     data.value = { totalToken, keys };
 
-    // 初始化折疊狀態
     expandedKeys.value = Object.fromEntries(keys.map((k) => [String(k.id), false]));
+    logger.log("Initialized Expanded State", expandedKeys.value);
   } catch (err) {
-    console.error("Failed to load API usage data:", err);
+    logger.error("Failed to load API usage data", err);
     error.value = err;
     data.value = null;
   } finally {
     isLoading.value = false;
+    logger.groupEnd(); // End Fetch Group
   }
 }
 
 function toggleExpand(id: string) {
   expandedKeys.value[id] = !expandedKeys.value[id];
+  logger.log(`Toggled Key ID [${id}]`, expandedKeys.value[id] ? "Expanded (▼)" : "Collapsed (▸)");
 }
 
 onMounted(fetchUsage);
@@ -110,7 +193,6 @@ onMounted(fetchUsage);
       <div class="card-body">
         <div class="card-title mb-4">API Usage ({{ route.params.name }})</div>
 
-        <!-- 總 Token -->
         <div
           v-if="data?.totalToken != null"
           class="mb-8 rounded-lg border border-base-300 bg-base-200 p-4 text-center text-lg font-semibold"
@@ -119,7 +201,6 @@ onMounted(fetchUsage);
           <span>{{ data.totalToken.toLocaleString() }}</span>
         </div>
 
-        <!-- 加載或錯誤狀態 -->
         <template v-if="isLoading">
           <ui-spinner />
         </template>
@@ -133,7 +214,6 @@ onMounted(fetchUsage);
           </div>
         </template>
 
-        <!-- 資料顯示 -->
         <template v-else>
           <div v-if="data?.keys.length">
             <div
@@ -182,12 +262,12 @@ onMounted(fetchUsage);
                           <template
                             v-if="keyItem.max_problems.some((p) => p.problem_id === usage.problem_id)"
                           >
-                            <span>(Max)</span>
+                            <span class="font-bold text-warning">(Max)</span>
                           </template>
                           <template
                             v-if="keyItem.min_problems.some((p) => p.problem_id === usage.problem_id)"
                           >
-                            <span>(Min)</span>
+                            <span class="font-bold text-info">(Min)</span>
                           </template>
                         </td>
                         <td>{{ usage.total_token?.toLocaleString?.() || 0 }}</td>

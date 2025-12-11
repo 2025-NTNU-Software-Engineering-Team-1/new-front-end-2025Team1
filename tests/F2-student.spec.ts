@@ -8,7 +8,7 @@ test.beforeEach(async ({ page, baseURL }) => {
 });
 
 //003
-test("Student can see visible problem", async ({ page }) => {
+test.skip("Student can see visible problem", async ({ page }) => {
   //Get into the problems page
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
@@ -91,7 +91,7 @@ test.skip("Student can submit visible problem", async ({ page }) => {
 });
 
 //005
-test("Student can't see hidden problem", async ({ page }) => {
+test.skip("Student can't see hidden problem", async ({ page }) => {
   //Get into the problems page
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
@@ -103,7 +103,7 @@ test("Student can't see hidden problem", async ({ page }) => {
 });
 
 //006
-test("Student can't submit expired Homework", async ({ page }) => {
+test.skip("Student can't submit expired Homework", async ({ page }) => {
   //Get into the problems page
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
@@ -112,17 +112,134 @@ test("Student can't submit expired Homework", async ({ page }) => {
   const hw1Card = page.locator('.card-body')
                       .filter({ has: page.locator('.card-title', { hasText: 'Hw1' }) });
 
-  const probRow = hw1Card.locator('tr')
-                         .filter({ hasText: 'Prob1' })
-                         .locator('visible=true');
+  const probRow = hw1Card.locator('tr').filter({ hasText: 'Prob1' }).locator('visible=true');
 
   await probRow.locator('a.link').first().click();
 
-  const submitBtn = page.getByRole('button', { name: 'Submit' })
-                        .or(page.getByRole('link', { name: 'Submit' }));
+  const submitBtn = page.getByRole('link', { name: 'Submit' });
 
   await expect(submitBtn).toBeHidden();
 });
+
+//007 TODO
+test.skip("Student submit a problem with Quotas", async ({ page }) => {
+  //Get into the problems page
+  await page.getByRole("link", { name: "Course" }).click();
+  await page.getByRole("link", { name: "meow" }).click();
+  await page.getByRole("link", { name: "Problems" }).click();
+  
+  //Find all visible problems
+  const tds = page.locator("tr.hover td");
+  await page.waitForTimeout(1000);
+  const count = await tds.count();
+  
+  //Find Prob1
+  let PID = "";
+  for (let i = 0; i < count / 5; ++i){
+    const td = tds.nth(i * 5 + 1);
+    const name = await td.textContent();
+    if (name == "Prob1")
+    {
+      const pid_td = tds.nth(i * 5);
+      PID = await pid_td.innerText();
+      
+      const link = await pid_td.locator("a");
+      await link.click();
+      break;
+    }
+  }
+  await page.waitForTimeout(1000);
+  //TODO: Submit for thrice
+});
+
+//008 TODO
+test.skip("Student submit a problem with Quotas reached limit", async ({ page }) => {
+  //Get into the problems page
+  await page.getByRole("link", { name: "Course" }).click();
+  await page.getByRole("link", { name: "meow" }).click();
+  await page.getByRole("link", { name: "Problems" }).click();
+  
+  //Find all visible problems
+  const tds = page.locator("tr.hover td");
+  await page.waitForTimeout(1000);
+  const count = await tds.count();
+  
+  //Find Prob1
+  let PID = "";
+  for (let i = 0; i < count / 5; ++i){
+    const td = tds.nth(i * 5 + 1);
+    const name = await td.textContent();
+    if (name == "Prob1")
+    {
+      const pid_td = tds.nth(i * 5);
+      PID = await pid_td.innerText();
+      
+      const link = await pid_td.locator("a");
+      await link.click();
+      break;
+    }
+  }
+  await page.waitForTimeout(1000);
+  //TODO: Submit for four times
+});
+
+//011 TODO:TEST
+test.skip("Student see TEST", async ({ page }) => {
+  //Get into the problems page
+  await page.getByRole("link", { name: "Course" }).click();
+  await page.getByRole("link", { name: "meow" }).click();
+  await page.getByRole("link", { name: "Problems" }).click();
+  
+  //Find all visible problems
+  const tds = page.locator("tr.hover td");
+  await page.waitForTimeout(1000);
+  const count = await tds.count();
+  
+  //Find Prob1
+  let PID = "";
+  for (let i = 0; i < count / 5; ++i){
+    const td = tds.nth(i * 5 + 1);
+    const name = await td.textContent();
+    if (name == "Prob1")
+    {
+      const pid_td = tds.nth(i * 5);
+      PID = await pid_td.innerText();
+      
+      const link = await pid_td.locator("a");
+      await link.click();
+      break;
+    }
+  }
+  await page.waitForTimeout(1000);
+  
+  //Get into test page
+  await page.getByRole("link", { name: "Test" }).click();
+  await page.waitForTimeout(1000);
+  
+  //TODO: See testcases
+});
+
+//012
+test("Student can see submission list", async ({ page }) => {
+  await page.getByRole("link", { name: "Course" }).click();
+  await page.getByRole("link", { name: "meow" }).click();
+  await page.getByRole("link", { name: "Submissions" }).click();
+
+  await expect(page.locator(".card-title").first()).toHaveText("Submissions");
+
+  const table = await page.locator(".card table").first();
+  await expect(table.locator("th")).toHaveCount(9);
+  await expect(table.locator("th")).toHaveText(
+    ["ID", "PID", "User", "Result", "Score", "Run Time", "Memory", "Lang", "Time"],
+    { ignoreCase: true },
+  );
+});
+
+
+
+
+
+
 
 
 

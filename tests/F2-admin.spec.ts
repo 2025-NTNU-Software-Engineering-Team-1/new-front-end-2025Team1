@@ -45,3 +45,42 @@ test.skip("Admin can set problem", async ({ page }) => {
   const PID = await page.locator("span").nth(0).textContent();
   await expect(page).toHaveURL(`http://localhost:8080/course/meow/problem/${PID}`);
 });
+
+//010 TODO:TEST
+test.skip("Admin set TEST", async ({ page }) => {
+  //Get into the problems page
+  await page.getByRole("link", { name: "Course" }).click();
+  await page.getByRole("link", { name: "meow" }).click();
+  await page.getByRole("link", { name: "Problems" }).click();
+  
+  //Find all visible problems
+  const tds = page.locator("tr.hover td");
+  await page.waitForTimeout(1000);
+  const count = await tds.count();
+  
+  //Find Prob1
+  let PID = "";
+  for (let i = 0; i < count / 5; ++i){
+    const td = tds.nth(i * 5 + 1);
+    const name = await td.textContent();
+    if (name == "Prob1")
+    {
+      const pid_td = tds.nth(i * 5);
+      PID = await pid_td.innerText();
+      
+      const link = await pid_td.locator("a");
+      await link.click();
+      break;
+    }
+  }
+  await page.waitForTimeout(1000);
+  
+  //Get into setting
+  await page.getByRole("link", { name: "Test" }).click();
+  await page.waitForTimeout(1000);
+  await page.getByRole("link", { name: "Test" }).click();
+  await page.waitForTimeout(1000);
+  
+  //TODO: Upload testcase
+});
+

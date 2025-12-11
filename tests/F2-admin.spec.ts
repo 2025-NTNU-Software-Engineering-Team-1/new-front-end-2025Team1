@@ -7,7 +7,7 @@ test.beforeEach(async ({ page, baseURL }) => {
 });
 
 //002
-test.skip("Admin can set problem", async ({ page }) => {
+test("Admin can set problem", async ({ page }) => {
   // Get in New prob setting pages
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
@@ -46,7 +46,7 @@ test.skip("Admin can set problem", async ({ page }) => {
   await expect(page).toHaveURL(`http://localhost:8080/course/meow/problem/${PID}`);
 });
 
-//010 TODO:TEST
+//010 TODO
 test.skip("Admin set TEST", async ({ page }) => {
   //Get into the problems page
   await page.getByRole("link", { name: "Course" }).click();
@@ -100,20 +100,16 @@ test("Admin can see submission list", async ({ page }) => {
   );
 });
 
-//016 TODO
-test("Admin can create submission list", async ({ page }) => {
+//016
+test("Admin can download submission list", async ({ page }) => {
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
   await page.getByRole("link", { name: "Submissions" }).click();
-
-  await expect(page.locator(".card-title").first()).toHaveText("Submissions");
-
-  const table = await page.locator(".card table").first();
-  await expect(table.locator("th")).toHaveCount(10);
-  await expect(table.locator("th")).toHaveText(
-    ["ID", "PID", "User", "Result", "Score", "Run Time", "Memory", "Lang", "Time", "IP ADDRESS"],
-    { ignoreCase: true },
-  );
   
-  //TODO: Create
+  const [ download ] = await Promise.all([page.waitForEvent("download"), page.locator("xpath=//*[@id=\"app\"]/div/div[1]/div[2]/div[2]/div/div/div/div/div[1]/div/div/div").click()]);
+
+  await download.saveAs("submissions.json");
+  console.log("Download saved!");
 });
+
+

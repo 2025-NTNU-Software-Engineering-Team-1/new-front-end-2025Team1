@@ -8,7 +8,7 @@ test.beforeEach(async ({ page, baseURL }) => {
 });
 
 //003
-test.skip("Student can see visible problem", async ({ page }) => {
+test("Student can see visible problem", async ({ page }) => {
   //Get into the problems page
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
@@ -91,7 +91,7 @@ test.skip("Student can submit visible problem", async ({ page }) => {
 });
 
 //005
-test.skip("Student can't see hidden problem", async ({ page }) => {
+test("Student can't see hidden problem", async ({ page }) => {
   //Get into the problems page
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
@@ -103,7 +103,7 @@ test.skip("Student can't see hidden problem", async ({ page }) => {
 });
 
 //006
-test.skip("Student can't submit expired Homework", async ({ page }) => {
+test("Student can't submit expired Homework", async ({ page }) => {
   //Get into the problems page
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
@@ -183,7 +183,7 @@ test.skip("Student submit a problem with Quotas reached limit", async ({ page })
   //TODO: Submit for four times
 });
 
-//011 TODO:TEST
+//011 TODO
 test.skip("Student see TEST", async ({ page }) => {
   //Get into the problems page
   await page.getByRole("link", { name: "Course" }).click();

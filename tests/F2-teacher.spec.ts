@@ -7,7 +7,7 @@ test.beforeEach(async ({ page, baseURL }) => {
 });
 
 //001
-test.skip("Teacher can set problem", async ({ page }) => {
+test("Teacher can set problem", async ({ page }) => {
   // Get in New prob setting pages
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
@@ -46,7 +46,7 @@ test.skip("Teacher can set problem", async ({ page }) => {
   await expect(page).toHaveURL(`http://localhost:8080/course/meow/problem/${PID}`);
 });
 
-//009 TODO:TEST
+//009 TODO
 test.skip("Teacher set TEST", async ({ page }) => {
   //Get into the problems page
   await page.getByRole("link", { name: "Course" }).click();
@@ -93,27 +93,21 @@ test("Teacher can see submission list", async ({ page }) => {
   await expect(page.locator(".card-title").first()).toHaveText("Submissions");
 
   const table = await page.locator(".card table").first();
-  await expect(table.locator("th")).toHaveCount(9);
+  await expect(table.locator("th")).toHaveCount(10);
   await expect(table.locator("th")).toHaveText(
     ["ID", "PID", "User", "Result", "Score", "Run Time", "Memory", "Lang", "Time", "IP ADDRESS"],
     { ignoreCase: true },
   );
 });
 
-//015 TODO
-test("Teacher can create submission list", async ({ page }) => {
+//015
+test("Teacher can download submission list", async ({ page }) => {
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
   await page.getByRole("link", { name: "Submissions" }).click();
-
-  await expect(page.locator(".card-title").first()).toHaveText("Submissions");
-
-  const table = await page.locator(".card table").first();
-  await expect(table.locator("th")).toHaveCount(10);
-  await expect(table.locator("th")).toHaveText(
-    ["ID", "PID", "User", "Result", "Score", "Run Time", "Memory", "Lang", "Time", "IP ADDRESS"],
-    { ignoreCase: true },
-  );
   
-  //TODO: Create
+  const [ download ] = await Promise.all([page.waitForEvent("download"), page.locator("xpath=//*[@id=\"app\"]/div/div[1]/div[2]/div[2]/div/div/div/div/div[1]/div/div/div").click()]);
+
+  await download.saveAs("submissions.json");
+  console.log("Download saved!");
 });

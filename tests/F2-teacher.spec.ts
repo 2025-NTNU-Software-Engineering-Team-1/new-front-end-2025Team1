@@ -111,3 +111,4 @@ test("Teacher can download submission list", async ({ page }) => {
   await download.saveAs("submissions.json");
   console.log("Download saved!");
 });
+

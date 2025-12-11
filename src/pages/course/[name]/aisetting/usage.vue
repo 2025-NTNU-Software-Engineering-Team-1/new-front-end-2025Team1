@@ -77,6 +77,15 @@ interface CourseUsageData {
 
 const data = ref<CourseUsageData | null>(null);
 
+function parseApiResponse(res: any) {
+  const data = res?.data;
+  const rawStatus = data?.status || res?.status;
+  const statusStr = String(rawStatus || "").toLowerCase();
+  const message = data?.message || res?.message || "Unknown response";
+  const isSuccess = statusStr === "ok" || statusStr === "success" || rawStatus === 200;
+  return { isSuccess, message, data, rawStatus };
+}
+
 function calcKeyStatistics(usages: ProblemUsage[]): {
   total: number;
   maxProblems: ProblemUsage[];
@@ -105,13 +114,19 @@ async function fetchUsage() {
 
   try {
     const res = await api.CourseAPIUsage.getCourseUsage(route.params.name as string);
-    logger.log("Raw Response Received", res);
+    // logger.log("Raw Response Received", res);
 
-    const rawKeys: RawKeyItem[] = res?.data?.keys || [];
+    const { isSuccess, data: resData, message } = parseApiResponse(res);
+
+    if (!isSuccess && !resData) {
+      throw new Error(message || "Failed to fetch usage data");
+    }
+
+    const rawKeys: RawKeyItem[] = resData?.keys || [];
     logger.log(`Found ${rawKeys.length} keys`);
 
     const keys: KeyItem[] = rawKeys.map((key, index) => {
-      // Data Integrity Check
+      // --- Data Integrity Check ---
       const missingFields: string[] = [];
 
       if (key.id == null) missingFields.push("id");
@@ -140,9 +155,9 @@ async function fetchUsage() {
 
       const { total, maxProblems, minProblems } = calcKeyStatistics(safeUsages);
 
-      // Console debug info specific to calculation
       logger.log(`Problem Usages Count: ${safeUsages.length}`);
       logger.log(`Calculated Total Token: ${total}`);
+
       if (safeUsages.length > 0) {
         logger.table(
           safeUsages.map((u) => ({ id: u.problem_id, name: u.problem_name, token: u.total_token })),
@@ -153,9 +168,10 @@ async function fetchUsage() {
 
       return {
         ...key,
-        problem_usages: safeUsages,
+        id: key.id || `temp-${index}`,
         key_name: key.key_name || "Unknown Key",
         created_by: key.created_by || "Unknown User",
+        problem_usages: safeUsages,
         all_total_token: total,
         max_problems: maxProblems,
         min_problems: minProblems,
@@ -169,9 +185,10 @@ async function fetchUsage() {
 
     expandedKeys.value = Object.fromEntries(keys.map((k) => [String(k.id), false]));
     logger.log("Initialized Expanded State", expandedKeys.value);
-  } catch (err) {
-    logger.error("Failed to load API usage data", err);
-    error.value = err;
+  } catch (err: any) {
+    const errMsg = err?.response?.data?.message || err?.message || "Failed to load API usage data";
+    logger.error("Fetch Usage Error", err);
+    error.value = errMsg;
     data.value = null;
   } finally {
     isLoading.value = false;
@@ -209,7 +226,7 @@ onMounted(fetchUsage);
           <div class="alert alert-error shadow-lg">
             <div>
               <i-uil-times-circle />
-              <span>Failed to load API usage data.</span>
+              <span>{{ error }}</span>
             </div>
           </div>
         </template>
@@ -230,10 +247,8 @@ onMounted(fetchUsage);
                   {{ keyItem.key_name }}
                 </div>
                 <div class="text-sm">
-                  Used by {{ keyItem.problem_usages.length }} problems • Token {{
-                    keyItem.all_total_token.toLocaleString()
-                  }}
-                  • Created by {{ keyItem.created_by }}
+                  Used by {{ keyItem.problem_usages.length }} problems • Token
+                  {{ keyItem.all_total_token.toLocaleString() }} • Created by {{ keyItem.created_by }}
                 </div>
               </div>
 
@@ -243,7 +258,7 @@ onMounted(fetchUsage);
                     <thead>
                       <tr>
                         <th>ID</th>
-                        <th>Problem Name (max/min shown)</th>
+                        <th>Problem Name (max/min shown)</th>
                         <th>Token Used</th>
                       </tr>
                     </thead>
@@ -279,7 +294,7 @@ onMounted(fetchUsage);
             </div>
           </div>
 
-          <p v-else class="italic text-base-content/70">No API key usage data.</p>
+          <p v-else class="italic text-base-content/70">No API key usage data.</p>
         </template>
       </div>
     </div>

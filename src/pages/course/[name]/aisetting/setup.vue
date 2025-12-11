@@ -7,7 +7,8 @@ import { useI18n } from "vue-i18n";
 import { useSession } from "@/stores/session";
 
 // ==========================================
-// [CONFIG] Console  1=open, 0=close
+// [CONFIG] Console Debug Mode
+// 1 = Enable Logs, 0 = Disable Logs
 const DEBUG_MODE = 1;
 // ==========================================
 
@@ -56,49 +57,54 @@ interface ApiKey {
   created_by: string;
 }
 
-// === 現有 API Keys ===
 const apiKeys = ref<ApiKey[]>([]);
 
-// === 新增 key 表單 ===
 const newKey = ref({
   name: "",
   value: "",
   maskedDisplay: "",
 });
 
+function parseApiResponse(res: any) {
+  const data = res?.data;
+  const rawStatus = data?.status || res?.status;
+  const statusStr = String(rawStatus || "").toLowerCase();
+  const message = data?.message || res?.message || "Unknown response from server";
+  const isSuccess = statusStr === "ok" || statusStr === "success" || rawStatus === 200;
+  return { isSuccess, message, data, rawStatus };
+}
+
 async function fetchKeys() {
   logger.group(`Fetch Keys: ${route.params.name}`);
   isLoading.value = true;
+  errorMsg.value = "";
 
   try {
     const res = await api.AIVTuber.getCourseKeys(route.params.name as string);
-    logger.log("Raw Response", res);
 
     const rawKeys = res?.data?.keys || [];
     logger.log(`Found ${rawKeys.length} keys`);
 
+    // clean
     apiKeys.value = rawKeys.map((k: any, index: number) => {
-      const missingFields: string[] = [];
-      if (!k.id) missingFields.push("id");
-      if (!k.key_name) missingFields.push("key_name");
-      if (k.masked_value === undefined) missingFields.push("masked_value");
-      if (k.is_active === undefined) missingFields.push("is_active");
+      const missing: string[] = [];
+      if (!k.id) missing.push("id");
+      if (!k.key_name) missing.push("key_name");
+      if (k.is_active === undefined) missing.push("is_active");
 
-      if (missingFields.length > 0) {
-        logger.error(`Missing Data at Index ${index}`, { missing: missingFields, raw: k });
+      if (missing.length > 0) {
+        logger.error(`Key at index ${index} missing fields:`, missing);
       }
 
-      // Safe Object
+      // safe object
       return {
-        id: k.id || `temp-id-${index}`,
-        key_name: k.key_name || "",
+        id: k.id || `temp-id-${index}-${Date.now()}`,
+        key_name: k.key_name || "(Unnamed Key)",
         masked_value: k.masked_value || "******",
         is_active: !!k.is_active,
         created_by: k.created_by || "Unknown",
       };
     });
-
-    logger.success("Keys Loaded & Sanitized", apiKeys.value);
   } catch (err: any) {
     logger.error("Fetch Failed", err);
     errorMsg.value = err?.response?.data?.message ?? "Failed to load keys.";
@@ -112,9 +118,10 @@ async function fetchKeys() {
 async function addKey() {
   logger.group("Action: Add Key");
 
+  // 前端驗證
   if (!newKey.value.name.trim() || !newKey.value.value.trim()) {
-    logger.error("Validation Failed", "Name or Value is empty");
     errorMsg.value = "Key name and value are required.";
+    logger.error("Validation Error", "Empty fields");
     logger.groupEnd();
     return;
   }
@@ -130,30 +137,28 @@ async function addKey() {
     created_by: session.username,
   };
 
-  logger.log("Payload", payload);
-
   try {
     const res = await api.AIVTuber.addKey(route.params.name as string, payload);
-    const data = res.data;
-    logger.log("API Response", data);
+    logger.log("API Response", res);
 
-    if (data.status === "OK") {
-      logger.success("Key Added Successfully");
-      successMsg.value = data.message;
+    const { isSuccess, message, data } = parseApiResponse(res);
 
-      // 顯示回傳的 masked_id
-      newKey.value.maskedDisplay = data.masked_id || "";
+    if (isSuccess) {
+      logger.success("Add Success", message);
+      successMsg.value = message;
 
-      // 清空輸入欄位
+      newKey.value.maskedDisplay = data?.masked_id || "";
+
       newKey.value.value = "";
       newKey.value.name = "";
+
       await fetchKeys();
     } else {
-      logger.error("API returned non-OK status", data);
-      errorMsg.value = data.message || "Failed to add key.";
+      logger.error("Add Failed", message);
+      errorMsg.value = message;
     }
   } catch (err: any) {
-    logger.error("Add Key Exception", err);
+    logger.error("Add Exception", err);
     errorMsg.value = err?.response?.data?.message ?? "Failed to add key.";
   } finally {
     isLoading.value = false;
@@ -175,20 +180,23 @@ async function updateKey(key: ApiKey) {
   logger.log("Payload", payload);
 
   try {
-    const { data } = await api.AIVTuber.updateKey(route.params.name as string, key.id, payload);
-    logger.log("API Response", data);
+    const res = await api.AIVTuber.updateKey(route.params.name as string, key.id, payload);
+    logger.log("API Response Object", res);
 
-    if (data.status === "OK") {
-      logger.success("Update Success");
-      successMsg.value = data.message;
-      await fetchKeys();
+    const { isSuccess, message, rawStatus } = parseApiResponse(res);
+
+    if (isSuccess) {
+      logger.success(`Update Success (Status: ${rawStatus})`, message);
+      successMsg.value = message;
     } else {
-      logger.error("Update Failed", data);
-      errorMsg.value = data.message || "Failed to update key.";
+      logger.error(`Update Failed (Status: ${rawStatus})`, message);
+      errorMsg.value = message || "Failed to update key.";
+      await fetchKeys();
     }
   } catch (err: any) {
     logger.error("Update Exception", err);
     errorMsg.value = err?.response?.data?.message ?? "Failed to update key.";
+    await fetchKeys();
   } finally {
     isLoading.value = false;
     logger.groupEnd();
@@ -210,16 +218,18 @@ async function deleteKey(keyId: string) {
   isLoading.value = true;
 
   try {
-    const { data } = await api.AIVTuber.deleteKey(route.params.name as string, keyId);
-    logger.log("API Response", data);
+    const res = await api.AIVTuber.deleteKey(route.params.name as string, keyId);
+    logger.log("API Response", res);
 
-    if (data.status === "OK") {
-      logger.success("Delete Success");
-      successMsg.value = data.message;
+    const { isSuccess, message } = parseApiResponse(res);
+
+    if (isSuccess) {
+      logger.success("Delete Success", message);
+      successMsg.value = message;
       await fetchKeys();
     } else {
-      logger.error("Delete Failed", data);
-      errorMsg.value = data.message || "Failed to delete key.";
+      logger.error("Delete Failed", message);
+      errorMsg.value = message || "Failed to delete key.";
     }
   } catch (err: any) {
     logger.error("Delete Exception", err);
@@ -287,10 +297,13 @@ onMounted(fetchKeys);
 
         <div class="rounded-lg border border-base-300 p-4">
           <h3 class="mb-4 text-lg font-semibold">Existing Keys</h3>
-          <div v-if="isLoading && apiKeys.length === 0" class="text-center opacity-60">
+
+          <div v-if="isLoading && apiKeys.length === 0" class="py-4 text-center opacity-60">
             <ui-spinner />
           </div>
-          <div v-else-if="apiKeys.length === 0" class="italic opacity-70">No keys yet.</div>
+
+          <div v-else-if="apiKeys.length === 0" class="py-2 italic opacity-70">No keys yet.</div>
+
           <div v-else class="space-y-3">
             <div
               v-for="k in apiKeys"

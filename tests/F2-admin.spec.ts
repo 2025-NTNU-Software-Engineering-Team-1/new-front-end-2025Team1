@@ -84,3 +84,36 @@ test.skip("Admin set TEST", async ({ page }) => {
   //TODO: Upload testcase
 });
 
+//014
+test("Admin can see submission list", async ({ page }) => {
+  await page.getByRole("link", { name: "Course" }).click();
+  await page.getByRole("link", { name: "meow" }).click();
+  await page.getByRole("link", { name: "Submissions" }).click();
+
+  await expect(page.locator(".card-title").first()).toHaveText("Submissions");
+
+  const table = await page.locator(".card table").first();
+  await expect(table.locator("th")).toHaveCount(10);
+  await expect(table.locator("th")).toHaveText(
+    ["ID", "PID", "User", "Result", "Score", "Run Time", "Memory", "Lang", "Time", "IP ADDRESS"],
+    { ignoreCase: true },
+  );
+});
+
+//016 TODO
+test("Admin can create submission list", async ({ page }) => {
+  await page.getByRole("link", { name: "Course" }).click();
+  await page.getByRole("link", { name: "meow" }).click();
+  await page.getByRole("link", { name: "Submissions" }).click();
+
+  await expect(page.locator(".card-title").first()).toHaveText("Submissions");
+
+  const table = await page.locator(".card table").first();
+  await expect(table.locator("th")).toHaveCount(10);
+  await expect(table.locator("th")).toHaveText(
+    ["ID", "PID", "User", "Result", "Score", "Run Time", "Memory", "Lang", "Time", "IP ADDRESS"],
+    { ignoreCase: true },
+  );
+  
+  //TODO: Create
+});

@@ -47,7 +47,7 @@ test.skip("Teacher can set problem", async ({ page }) => {
 });
 
 //009 TODO:TEST
-test.skip("Admin set TEST", async ({ page }) => {
+test.skip("Teacher set TEST", async ({ page }) => {
   //Get into the problems page
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
@@ -84,4 +84,36 @@ test.skip("Admin set TEST", async ({ page }) => {
   //TODO: Upload testcase
 });
 
+//013
+test("Teacher can see submission list", async ({ page }) => {
+  await page.getByRole("link", { name: "Course" }).click();
+  await page.getByRole("link", { name: "meow" }).click();
+  await page.getByRole("link", { name: "Submissions" }).click();
 
+  await expect(page.locator(".card-title").first()).toHaveText("Submissions");
+
+  const table = await page.locator(".card table").first();
+  await expect(table.locator("th")).toHaveCount(9);
+  await expect(table.locator("th")).toHaveText(
+    ["ID", "PID", "User", "Result", "Score", "Run Time", "Memory", "Lang", "Time", "IP ADDRESS"],
+    { ignoreCase: true },
+  );
+});
+
+//015 TODO
+test("Teacher can create submission list", async ({ page }) => {
+  await page.getByRole("link", { name: "Course" }).click();
+  await page.getByRole("link", { name: "meow" }).click();
+  await page.getByRole("link", { name: "Submissions" }).click();
+
+  await expect(page.locator(".card-title").first()).toHaveText("Submissions");
+
+  const table = await page.locator(".card table").first();
+  await expect(table.locator("th")).toHaveCount(10);
+  await expect(table.locator("th")).toHaveText(
+    ["ID", "PID", "User", "Result", "Score", "Run Time", "Memory", "Lang", "Time", "IP ADDRESS"],
+    { ignoreCase: true },
+  );
+  
+  //TODO: Create
+});

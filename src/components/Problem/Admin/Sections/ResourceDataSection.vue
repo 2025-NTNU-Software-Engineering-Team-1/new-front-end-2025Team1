@@ -2,7 +2,7 @@
 // ==========================================
 // Imports
 // ==========================================
-import { inject, Ref, ref, watch, computed, defineProps, withDefaults } from "vue";
+import { inject, Ref, ref, watch, computed } from "vue";
 import { useRoute } from "vue-router";
 import { ZipReader, BlobReader } from "@zip.js/zip.js";
 import { assertFileSizeOK } from "@/utils/checkFileSize";

@@ -1,4 +1,7 @@
 <script setup lang="ts">
+// ==========================================
+// Imports
+// ==========================================
 import { ref, provide, Ref } from "vue";
 import { useTitle } from "@vueuse/core";
 import { useRoute, useRouter } from "vue-router";
@@ -6,13 +9,51 @@ import axios from "axios";
 import api from "@/models/api";
 import AdminProblemForm from "@/components/Problem/Admin/AdminProblemForm.vue";
 
+// ==========================================
+// [CONFIG] Console Debug Mode
+// ==========================================
+const DEBUG_MODE = 1;
+
+// ==========================================
+// Logger Utility
+// ==========================================
+const logger = {
+  log: (label: string, data?: any) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Log] ${label}`, "color: #3b82f6; font-weight: bold;", data || "");
+  },
+  success: (label: string, data?: any) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Success] ${label}`, "color: #10b981; font-weight: bold;", data || "");
+  },
+  error: (label: string, error?: any) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Error] ${label}`, "color: #ef4444; font-weight: bold;", error || "");
+  },
+  warn: (label: string, data?: any) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Warn] ${label}`, "color: #f59e0b; font-weight: bold;", data || "");
+  },
+  group: (label: string) => {
+    if (!DEBUG_MODE) return;
+    console.group(`%c[Group] ${label}`, "color: #8b5cf6; font-weight: bold;");
+  },
+  groupEnd: () => {
+    if (!DEBUG_MODE) return;
+    console.groupEnd();
+  },
+};
+
+// ==========================================
+// Setup & State
+// ==========================================
 const route = useRoute();
 const router = useRouter();
 useTitle(`New Problem - ${route.params.name} | Normal OJ`);
 
 const formElement = ref<InstanceType<typeof AdminProblemForm>>();
 
-// 初始化 newProblem
+// Initialize newProblem state
 const newProblem = ref<ProblemForm>({
   problemName: "",
   description: {
@@ -93,16 +134,29 @@ const newProblem = ref<ProblemForm>({
 function update<K extends keyof ProblemForm>(key: K, value: ProblemForm[K]) {
   newProblem.value[key] = value;
 }
+
+// Provide state to child components
 provide<Ref<ProblemForm>>("problem", newProblem);
 
+// ==========================================
+// Submit Logic
+// ==========================================
 async function submit() {
   if (!formElement.value) return;
-  formElement.value.isLoading = true;
-  try {
-    // Step 1: 建立 Problem metadata
-    const { problemId } = (await api.Problem.create({ ...newProblem.value })).data;
 
-    // Step 2: 準備 config/pipeline 給上傳
+  logger.group("Submit New Problem");
+  formElement.value.isLoading = true;
+
+  try {
+    // Step 1: Create Problem Metadata
+    logger.log("Step 1: Creating Problem Metadata...", newProblem.value);
+    const res = await api.Problem.create({ ...newProblem.value });
+    const { problemId } = res.data;
+
+    if (!problemId) throw new Error("API did not return a problemId");
+    logger.success("Problem Created", problemId);
+
+    // Step 2: Prepare config/pipeline for upload
     const cfg = {
       ...newProblem.value.config,
       aiVTuber: newProblem.value.config.aiVTuber,
@@ -119,34 +173,81 @@ async function submit() {
         pipeline: pipe,
       }),
     );
+    logger.log("Step 2: Metadata prepared", { config: cfg, pipeline: pipe });
 
-    // Step 3: 加入檔案資產
+    // Step 3: Append Assets
     const assets = newProblem.value.assets;
-    if (assets?.aiVTuberACFiles) assets.aiVTuberACFiles.forEach((f) => fd.append("aiVTuberACFiles", f));
-    if (assets?.testdataZip) fd.append("case", assets.testdataZip);
-    if (assets?.customCheckerPy) fd.append("custom_checker.py", assets.customCheckerPy);
-    if (assets?.makefileZip) fd.append("makefile.zip", assets.makefileZip);
-    if (assets?.teacherFile) fd.append("Teacher_file", assets.teacherFile);
-    if (assets?.scorePy) fd.append("score.py", assets.scorePy);
-    if (assets?.dockerfilesZip) fd.append("dockerfiles.zip", assets.dockerfilesZip);
-    if (assets?.localServiceZip) fd.append("local_service.zip", assets.localServiceZip);
-    if (assets?.resourceDataZip) fd.append("resource_data.zip", assets.resourceDataZip);
-    if (assets?.resourceDataTeacherZip) fd.append("resource_data_teacher.zip", assets.resourceDataTeacherZip);
+    const attachedFiles: string[] = [];
 
-    // Step 4: 上傳所有資產
+    if (assets?.aiVTuberACFiles) {
+      assets.aiVTuberACFiles.forEach((f) => fd.append("aiVTuberACFiles", f));
+      attachedFiles.push(`aiVTuberACFiles (${assets.aiVTuberACFiles.length})`);
+    }
+    if (assets?.testdataZip) {
+      fd.append("case", assets.testdataZip);
+      attachedFiles.push("case");
+    }
+    if (assets?.customCheckerPy) {
+      fd.append("custom_checker.py", assets.customCheckerPy);
+      attachedFiles.push("custom_checker.py");
+    }
+    if (assets?.makefileZip) {
+      fd.append("makefile.zip", assets.makefileZip);
+      attachedFiles.push("makefile.zip");
+    }
+    if (assets?.teacherFile) {
+      fd.append("Teacher_file", assets.teacherFile);
+      attachedFiles.push("Teacher_file");
+    }
+    if (assets?.scorePy) {
+      fd.append("score.py", assets.scorePy);
+      attachedFiles.push("score.py");
+    }
+    if (assets?.dockerfilesZip) {
+      fd.append("dockerfiles.zip", assets.dockerfilesZip);
+      attachedFiles.push("dockerfiles.zip");
+    }
+    if (assets?.localServiceZip) {
+      fd.append("local_service.zip", assets.localServiceZip);
+      attachedFiles.push("local_service.zip");
+    }
+    if (assets?.resourceDataZip) {
+      fd.append("resource_data.zip", assets.resourceDataZip);
+      attachedFiles.push("resource_data.zip");
+    }
+    if (assets?.resourceDataTeacherZip) {
+      fd.append("resource_data_teacher.zip", assets.resourceDataTeacherZip);
+      attachedFiles.push("resource_data_teacher.zip");
+    }
+
+    logger.log("Step 3: Files attached", attachedFiles);
+
+    // Step 4: Upload All Assets
+    logger.log("Step 4: Uploading Assets V2...");
     await api.Problem.uploadAssetsV2(problemId, fd);
+
+    logger.success("All assets uploaded successfully");
+
+    // Redirect
     router.push(`/course/${route.params.name}/problem/${problemId}`);
   } catch (error) {
+    logger.error("Submission Failed", error);
+
     formElement.value.errorMsg =
       axios.isAxiosError(error) && error.response?.data?.message
         ? error.response.data.message
         : "Unknown error occurred :(";
+
     throw error;
   } finally {
     formElement.value.isLoading = false;
+    logger.groupEnd();
   }
 }
 
+// ==========================================
+// Misc
+// ==========================================
 const openPreview = ref(false);
 const mockProblemMeta = {
   owner: "",

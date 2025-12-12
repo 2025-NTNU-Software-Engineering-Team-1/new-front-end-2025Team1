@@ -1,22 +1,29 @@
 <script setup lang="ts">
+// ==========================================
+// Imports
+// ==========================================
 import { inject, Ref, ref, reactive, watch, computed, onMounted, onBeforeUnmount } from "vue";
 import { useRoute } from "vue-router";
+import { ZipReader, BlobReader } from "@zip.js/zip.js";
 
+// Components
 import LanguageMultiSelect from "../../Forms/LanguageMultiSelect.vue";
 import MultiStringInput from "../Controls/MultiStringInput.vue";
 import SidecarInput from "../Controls/SidecarInput.vue";
 
+// Utils & API
 import { assertFileSizeOK, validateFilesForAIAC } from "@/utils/checkFileSize";
-import { ZipReader, BlobReader } from "@zip.js/zip.js";
 import { fetcher } from "@/models/api";
 import api from "@/models/api";
 
 // ==========================================
 // [CONFIG] Console Debug Mode
-const DEBUG_MODE = 1;
 // ==========================================
+const DEBUG_MODE = 1;
 
-// --- Logger Utility ---
+// ==========================================
+// Logger Utility
+// ==========================================
 const logger = {
   log: (label: string, data?: any) => {
     if (!DEBUG_MODE) return;
@@ -44,7 +51,9 @@ const logger = {
   },
 };
 
-// --- API Response Parser ---
+// ==========================================
+// Helper: API Response Parser
+// ==========================================
 function parseApiResponse(res: any) {
   const data = res?.data;
   const rawStatus = data?.status || res?.status;
@@ -56,15 +65,21 @@ function parseApiResponse(res: any) {
   return { isSuccess, message, data, rawStatus };
 }
 
-/* -------------------- Injection & Setup -------------------- */
+// ==========================================
+// Injection & Setup
+// ==========================================
 const rawProblem = inject<Ref<ProblemForm> | undefined>("problem");
-if (!rawProblem || !rawProblem.value) throw new Error("ConfigurationSection requires problem injection");
+if (!rawProblem || !rawProblem.value) {
+  throw new Error("ConfigurationSection requires problem injection");
+}
 
 const problem = rawProblem as Ref<ProblemForm>;
 const v$ = inject<any>("v$");
 const route = useRoute();
 
-/* -------------------- Course -------------------- */
+// ==========================================
+// Section: Course Information
+// ==========================================
 const courseName = ref<string | null>(null);
 
 async function fetchCourseName() {
@@ -75,10 +90,11 @@ async function fetchCourseName() {
 
     const val = resp?.data;
 
-    // 🔥 [關鍵修正]：防止將物件賦值給字串，導致 API 網址變成 [object Object]
+    // [CRITICAL FIX]: Prevent assigning an object to a string variable.
+    // This prevents the API URL from becoming ".../[object Object]/..." which causes 404s.
     if (val && typeof val === "object") {
       logger.warn("Received Object instead of String ID/Name. Extracting name...", val);
-      // 嘗試從物件中提取 name 或 id，若都沒有則使用路由參數
+      // Attempt to extract 'name' or 'id', fallback to route param if missing.
       courseName.value = val.name || val.id || (route.params.name as string);
     } else {
       courseName.value = val || (route.params.name as string);
@@ -87,14 +103,16 @@ async function fetchCourseName() {
     logger.success("Course Name Resolved", courseName.value);
   } catch (err) {
     logger.error("Failed to fetch course info", err);
-    // 即使失敗，也嘗試使用路由參數作為備案
+    // Fallback to route param on failure
     courseName.value = route.params.name as string;
   } finally {
     logger.groupEnd();
   }
 }
 
-/* -------------------- Quota -------------------- */
+// ==========================================
+// Section: Quota Management
+// ==========================================
 const quotaError = ref("");
 const localQuota = ref<number | "">(problem.value?.quota ?? "");
 
@@ -120,7 +138,9 @@ function onQuotaInput(e: Event) {
   }
 }
 
-/* Trial Mode */
+// ==========================================
+// Section: Trial Mode
+// ==========================================
 const trialQuotaError = ref("");
 const localTrialLimit = ref<number | "">(problem.value?.config?.maxNumberOfTrial ?? "");
 const trialPublicZipError = ref<string>("");
@@ -161,7 +181,7 @@ async function validateTrialPublicZip(file: File): Promise<boolean> {
       return false;
     }
 
-    // ONLY .in
+    // Validation: ONLY .in files allowed
     const invalid = entries.filter(({ filename }) => !filename.endsWith(".in"));
     if (invalid.length > 0) {
       logger.error(
@@ -181,7 +201,9 @@ async function validateTrialPublicZip(file: File): Promise<boolean> {
   }
 }
 
-/* -------------------- Problem Config Ensure -------------------- */
+// ==========================================
+// Section: Problem Config Initialization
+// ==========================================
 function ensureConfig() {
   if (!problem.value.config) {
     problem.value.config = {
@@ -202,6 +224,7 @@ function ensureConfig() {
       artifactCollection: [],
     };
   } else {
+    // Ensure network structure exists
     if (!problem.value.config.networkAccessRestriction) {
       problem.value.config.networkAccessRestriction = {
         sidecars: [],
@@ -218,19 +241,21 @@ function ensureConfig() {
   }
 }
 
-// 初始化 artifactCollection
+// Initialize artifactCollection
 function initArtifactCollection() {
   ensureConfig();
   const cfg = problem.value.config as any;
+  // Backward compatibility check
   if (cfg && !Array.isArray(cfg.artifactCollection)) {
     cfg.artifactCollection = Array.isArray(cfg.artifact_collection) ? cfg.artifact_collection : [];
   }
+  // Check pipeline compatibility
   if (Array.isArray(cfg.pipeline?.artifactCollection) && cfg.artifactCollection.length === 0) {
     cfg.artifactCollection = cfg.pipeline.artifactCollection.slice();
   }
 }
 
-// 同步初始化檢查
+// Synchronous initialization check (to ensure value exists before mount if possible)
 if (!Array.isArray(problem.value.config.artifactCollection)) {
   const cfgAny = problem.value.config as any;
   problem.value.config.artifactCollection = Array.isArray(cfgAny?.artifact_collection)
@@ -238,6 +263,7 @@ if (!Array.isArray(problem.value.config.artifactCollection)) {
     : [];
 }
 
+// Computed properties for Artifact checkboxes
 const artifactCompiledBinary = computed({
   get: () => problem.value.config!.artifactCollection.includes("compiledBinary"),
   set: (val: boolean) => {
@@ -258,7 +284,9 @@ const artifactZip = computed({
   },
 });
 
-/* -------------------- Assets -------------------- */
+// ==========================================
+// Section: Assets Helper
+// ==========================================
 const assetPaths = computed<Record<string, string>>(
   () => ((problem.value.config as any)?.assetPaths as Record<string, string>) || {},
 );
@@ -267,11 +295,13 @@ const hasAsset = (key: string) => !!(assetPaths.value && assetPaths.value[key]);
 const assetDownloadUrl = (key: string) =>
   assetPaths.value[key] ? `/api/problem/${route.params.id}/asset/${key}/download` : null;
 
-/* -------------------- Docker Zip Inspection -------------------- */
+// ==========================================
+// Section: Docker Zip Inspection
+// ==========================================
 const detectedDockerEnvs = ref<string[]>([]);
 const dockerZipError = ref("");
 
-// Helper: Read saved env list
+// Helper: Read saved env list from config
 function loadSavedDockerEnvs() {
   const nar = problem.value.config?.networkAccessRestriction as any;
   if (nar?.custom_env?.env_list && Array.isArray(nar.custom_env.env_list)) {
@@ -279,6 +309,7 @@ function loadSavedDockerEnvs() {
   }
 }
 
+// Watch for config changes to load saved envs
 watch(
   () => problem.value.config?.networkAccessRestriction,
   () => {
@@ -314,7 +345,7 @@ async function inspectDockerZip(file: File) {
     for (const entry of dockerfiles) {
       const parts = entry.filename.split("/");
 
-      // 檢查目錄結構：必須是 folder/Dockerfile
+      // Validation: Structure must be "folder/Dockerfile"
       if (parts.length !== 2) {
         dockerZipError.value = `Structure error: ${entry.filename}. Please ensure the structure is "environment_folder/Dockerfile".`;
         logger.error("Structure error", entry.filename);
@@ -327,6 +358,7 @@ async function inspectDockerZip(file: File) {
     const sortedEnvs = envs.sort();
     detectedDockerEnvs.value = sortedEnvs;
 
+    // Save to config
     const nar = problem.value.config!.networkAccessRestriction as any;
     if (!nar.custom_env) {
       nar.custom_env = {};
@@ -352,7 +384,9 @@ function removeDockerEnv(index: number) {
   }
 }
 
-/* -------------------- AI File Extensions -------------------- */
+// ==========================================
+// Section: AI File Extension Helper
+// ==========================================
 function getAIFileExtensions() {
   const lang = problem.value.allowedLanguage;
   const list: string[] = [];
@@ -362,7 +396,9 @@ function getAIFileExtensions() {
   return list;
 }
 
-/* -------------------- API Keys -------------------- */
+// ==========================================
+// Section: API Keys Management
+// ==========================================
 const apiKeys = reactive<{ active: any[]; inactive: any[] }>({
   active: [],
   inactive: [],
@@ -376,7 +412,7 @@ const showInactiveKeys = ref(true);
 async function fetchKeys() {
   if (!courseName.value) await fetchCourseName();
 
-  // 若 fetchCourseName 仍失敗，則不進行 API 呼叫避免 404
+  // If fetchCourseName failed or returned invalid data, skip to avoid 404
   if (!courseName.value || typeof courseName.value !== "string") {
     logger.error("Skipping fetchKeys: Invalid courseName", courseName.value);
     fetchError.value = "Invalid Course Name";
@@ -400,7 +436,7 @@ async function fetchKeys() {
     const rawKeys = data?.keys || [];
     logger.log(`Found ${rawKeys.length} keys`);
 
-    // 資料清洗與分類
+    // Data Sanitization and Classification
     const safeKeys = rawKeys.map((k: any, index: number) => {
       // Integrity Check
       const missing: string[] = [];
@@ -433,7 +469,9 @@ async function fetchKeys() {
   }
 }
 
-/* -------------------- Key Search -------------------- */
+// ==========================================
+// Section: Key Search
+// ==========================================
 const searchQuery = ref("");
 const activeKeyRefs = ref<Record<string, HTMLElement | null>>({});
 const inactiveKeyRefs = ref<Record<string, HTMLElement | null>>({});
@@ -464,7 +502,9 @@ function scrollToKey() {
   }
 }
 
-/* -------------------- Suggestion Tooltip -------------------- */
+// ==========================================
+// Section: Suggestion Tooltip
+// ==========================================
 const showSuggestionTooltip = ref(false);
 const keySuggestion = ref<{
   student_count?: number;
@@ -508,7 +548,6 @@ async function fetchKeySuggestion() {
   }
 }
 
-/* -------------------- Tooltip Outside Click -------------------- */
 function onClickOutside(event: MouseEvent) {
   const tooltipEl = document.querySelector(".key-suggestion-tooltip");
   const buttonEl = document.querySelector(".btn-key-suggestion");
@@ -518,7 +557,9 @@ function onClickOutside(event: MouseEvent) {
   showSuggestionTooltip.value = false;
 }
 
-/* -------------------- Sidecars Helper -------------------- */
+// ==========================================
+// Section: Sidecars & Network Helper
+// ==========================================
 const hasExistingNetworkConfig = computed(() => {
   const nar = problem.value.config?.networkAccessRestriction;
   const hasExternal = (nar?.external?.ip?.length ?? 0) > 0 || (nar?.external?.url?.length ?? 0) > 0;
@@ -536,7 +577,9 @@ watch(
   { immediate: true },
 );
 
-/* -------------------- Watches -------------------- */
+// ==========================================
+// Section: Watchers
+// ==========================================
 watch(
   () => problem.value,
   (n, o) => {
@@ -551,7 +594,9 @@ watch(selectedKeys, (keys) => {
   problem.value.config!.aiVTuberApiKeys = keys;
 });
 
-/* -------------------- Lifecycle -------------------- */
+// ==========================================
+// Section: Lifecycle Hooks
+// ==========================================
 onMounted(() => {
   initArtifactCollection();
   fetchKeys();

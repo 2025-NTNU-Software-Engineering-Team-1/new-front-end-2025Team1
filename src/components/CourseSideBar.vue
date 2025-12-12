@@ -22,7 +22,7 @@ const navs = [
         },
       ]
     : []),
-  ...(session.role === 1 || session.isAdmin ? [{ name: "API Setting", path: "/aisetting" }] : []),
+  ...(session.role === 1 || session.isAdmin ? [{ name: "AI Setting", path: "/aisetting" }] : []),
 ];
 </script>
 

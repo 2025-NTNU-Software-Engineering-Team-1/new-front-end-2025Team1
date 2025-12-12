@@ -1,22 +1,76 @@
 <script setup lang="ts">
+// ==========================================
+// Imports
+// ==========================================
 import { onMounted, inject, Ref, ref, watch, computed } from "vue";
 import { useRoute } from "vue-router";
+
+// Components
 import MultiStringInput from "../Controls/MultiStringInput.vue";
+
+// Utils & API
 import api from "@/models/api";
 import { assertFileSizeOK } from "@/utils/checkFileSize";
 
+// ==========================================
+// [CONFIG] Console Debug Mode
+// ==========================================
+const DEBUG_MODE = 1;
+
+// ==========================================
+// Logger Utility
+// ==========================================
+const logger = {
+  log: (label: string, data?: any) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Log] ${label}`, "color: #3b82f6; font-weight: bold;", data || "");
+  },
+  success: (label: string, data?: any) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Success] ${label}`, "color: #10b981; font-weight: bold;", data || "");
+  },
+  error: (label: string, error?: any) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Error] ${label}`, "color: #ef4444; font-weight: bold;", error || "");
+  },
+  warn: (label: string, data?: any) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Warn] ${label}`, "color: #f59e0b; font-weight: bold;", data || "");
+  },
+  group: (label: string) => {
+    if (!DEBUG_MODE) return;
+    console.group(`%c[Group] ${label}`, "color: #8b5cf6; font-weight: bold;");
+  },
+  groupEnd: () => {
+    if (!DEBUG_MODE) return;
+    console.groupEnd();
+  },
+};
+
+// ==========================================
+// Injection & Setup
+// ==========================================
 const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
 const v$ = inject<any>("v$"); // Inject validation object
+const route = useRoute();
 
-// ===============================================
-// pipeline 完整層級
-// ===============================================
+if (!problem || !problem.value) {
+  logger.error("Problem injection failed");
+  throw new Error("PipelineSection requires problem injection");
+}
+
+// ==========================================
+// Section: Pipeline Initialization
+// ==========================================
+
+/**
+ * Ensures the pipeline object structure exists and populates defaults if missing.
+ */
 function ensurePipeline() {
   if (!problem.value.pipeline) {
     problem.value.pipeline = {
       allowRead: Boolean(problem.value.config?.allowRead ?? (problem.value.config as any)?.fopen ?? false),
-      allowWrite:
-        Boolean(problem.value.config?.allowWrite ?? (problem.value.config as any)?.fwrite ?? false),
+      allowWrite: Boolean(problem.value.config?.allowWrite ?? (problem.value.config as any)?.fwrite ?? false),
       executionMode: "general",
       customChecker: false,
       teacherFirst: false,
@@ -30,7 +84,7 @@ function ensurePipeline() {
       scoringScript: { custom: false },
     };
   } else {
-    // 回填缺失的檔案權限設定
+    // Backfill missing file permission settings
     if (problem.value.pipeline.allowRead === undefined || problem.value.pipeline.allowRead === null) {
       problem.value.pipeline.allowRead = Boolean(
         problem.value.config?.allowRead ?? (problem.value.config as any)?.fopen ?? false,
@@ -41,6 +95,8 @@ function ensurePipeline() {
         problem.value.config?.allowWrite ?? (problem.value.config as any)?.fwrite ?? false,
       );
     }
+
+    // Ensure static analysis structure
     const libs = problem.value.pipeline.staticAnalysis?.libraryRestrictions;
     if (!libs) {
       problem.value.pipeline.staticAnalysis = {
@@ -51,6 +107,7 @@ function ensurePipeline() {
         },
       };
     } else {
+      // Ensure deep structure for whitelist/blacklist
       ["whitelist", "blacklist"].forEach((key) => {
         if (!(libs as any)[key]) (libs as any)[key] = {};
         ["syntax", "imports", "headers", "functions"].forEach((f) => {
@@ -60,48 +117,69 @@ function ensurePipeline() {
     }
   }
 }
-// 只在組件掛載時初始化一次（使用 onMounted 避免 reactive 依賴導致重複執行）
+
+/**
+ * Initialize pipeline values from backend config (legacy support).
+ * Runs only once on mount to avoid reactive dependency loops.
+ */
 function initPipelineValues() {
   ensurePipeline();
   const pipe = problem.value.pipeline!;
   const cfg = (problem.value.config as any) || {};
-  // 優先使用 pipeline 上已有的值，否則從 config 讀取
+
+  // Prioritize existing pipeline values, fallback to config (legacy keys: fopen, fwrite)
   const backendAllowRead = pipe.allowRead ?? cfg.allowRead ?? cfg.allow_read ?? cfg.fopen ?? false;
   const backendAllowWrite = pipe.allowWrite ?? cfg.allowWrite ?? cfg.allow_write ?? cfg.fwrite ?? false;
+
   pipe.allowRead = Boolean(backendAllowRead);
   pipe.allowWrite = Boolean(backendAllowRead && backendAllowWrite);
+
+  logger.log("Pipeline Values Initialized", { read: pipe.allowRead, write: pipe.allowWrite });
 }
 
-// 追蹤 allowWrite 是否被 allowRead 連動關閉（用於決定警告文字顏色）
+// ==========================================
+// Section: File Permissions (Read/Write)
+// ==========================================
+
+// Track if allowWrite was forcibly closed by allowRead (determines warning color)
 const allowWriteForceClosed = ref(false);
 
-// 依賴規則：Allow Write 需要 Allow Read，Resource Data 需要 Allow Read
+/**
+ * Toggle for Allow Read.
+ * Logic: Allow Write & Resource Data depend on Allow Read.
+ */
 const allowReadToggle = computed({
   get: () => Boolean(problem.value.pipeline?.allowRead),
   set: (val: boolean) => {
     ensurePipeline();
     problem.value.pipeline!.allowRead = Boolean(val);
-    // 當關閉 allowRead 時，連動關閉 allowWrite 和 resourceData (student)
+
+    // When closing allowRead, cascade disable allowWrite and resourceData
     if (!val) {
-      // 只有在 allowWrite 原本是開啟的情況下，才標記為被強制關閉
+      // Mark as forcibly closed ONLY if allowWrite was originally active
       if (problem.value.pipeline!.allowWrite) {
         allowWriteForceClosed.value = true;
       }
       problem.value.pipeline!.allowWrite = false;
       problem.value.config.resourceData = false;
     } else {
-      // 開啟 allowRead 時，清除強制關閉標記
+      // When opening allowRead, clear the force closed flag
       allowWriteForceClosed.value = false;
     }
   },
 });
 
+/**
+ * Toggle for Allow Write.
+ */
 const allowWriteToggle = computed({
   get: () => Boolean(problem.value.pipeline?.allowWrite && allowReadToggle.value),
   set: (val: boolean) => {
     ensurePipeline();
+    // allowWrite can only be true if allowRead is also true
     problem.value.pipeline!.allowWrite = Boolean(val && allowReadToggle.value);
-    // 手動操作時清除強制關閉標記
+
+    // Manual operation clears the force closed flag
     allowWriteForceClosed.value = false;
   },
 });
@@ -113,88 +191,103 @@ const resourceDataEnabled = computed({
   },
 });
 
-// 鎖頭和警告訊息直接用 computed 根據 allowReadToggle 計算
+// Computed properties for UI warnings
 const allowWriteDisabled = computed(() => !allowReadToggle.value);
-const allowWriteWarning = computed(() => !allowReadToggle.value ? "Allow Write requires Allow Read." : "");
-// 被連動關閉時顯示紅色，正常情況（先關 allowWrite 再關 allowRead）顯示灰色
+const allowWriteWarning = computed(() => (!allowReadToggle.value ? "Allow Write requires Allow Read." : ""));
+// Show red if forcibly closed, otherwise gray
 const allowWriteWarningError = computed(() => allowWriteForceClosed.value);
 
-// ===============================================
-// 後端 static-analysis options
-// ===============================================
+// ==========================================
+// Section: Static Analysis Options
+// ==========================================
 const libraryOptions = ref({
   imports: [] as string[],
   headers: [] as string[],
   functions: [] as string[],
 });
 
-// 不論後端有無資料都安全渲染
-onMounted(async () => {
-  // 只在組件掛載時初始化一次 allowRead/allowWrite
-  initPipelineValues();
-
+// Fetch options from backend
+async function fetchStaticAnalysisOptions() {
+  logger.group("Fetch Static Analysis Options");
   let imports: string[] = [];
   let headers: string[] = [];
   let functions: string[] = [];
+
   try {
     const resp = await api.Problem.getStaticAnalysisOptions();
+    // logger.log("Raw Response", resp);
+
     const libs = (resp && resp.data && (resp.data as any).librarySymbols) || {};
     imports = Array.isArray(libs.imports) ? libs.imports : [];
     headers = Array.isArray(libs.headers) ? libs.headers : [];
     functions = Array.isArray(libs.functions) ? libs.functions : [];
+
+    logger.success("Options Loaded", {
+      imports: imports.length,
+      headers: headers.length,
+      functions: functions.length,
+    });
   } catch (err) {
-    console.warn("StaticAnalysisOptions fetch failed, using empty lists:", err);
+    logger.warn("StaticAnalysisOptions fetch failed, using empty lists:", err);
   } finally {
     libraryOptions.value = { imports, headers, functions };
+    logger.groupEnd();
   }
-});
+}
 
-// ===============================================
-// 模式控制與開關 - 加入 watch 監聽切換時清空對方清單
-// ===============================================
+// ==========================================
+// Section: Mode Switching (White/Blacklist)
+// ==========================================
 const syntaxMode = ref<"whitelist" | "blacklist">("whitelist");
 const importMode = ref<"whitelist" | "blacklist">("whitelist");
 const headerMode = ref<"whitelist" | "blacklist">("whitelist");
 const functionMode = ref<"whitelist" | "blacklist">("whitelist");
 
-// ===============================================
-// 當 syntaxMode 切換時,清空另一方的清單
-// ===============================================
-watch(syntaxMode, (newMode: "whitelist" | "blacklist") => {
+// Watchers: Clear the opposite list when mode switches
+watch(syntaxMode, (newMode) => {
   const oppositeMode = newMode === "whitelist" ? "blacklist" : "whitelist";
-  problem.value.pipeline!.staticAnalysis!.libraryRestrictions![oppositeMode]!.syntax = [];
+  if (problem.value.pipeline?.staticAnalysis?.libraryRestrictions?.[oppositeMode]) {
+    problem.value.pipeline.staticAnalysis.libraryRestrictions[oppositeMode].syntax = [];
+  }
 });
-watch(importMode, (newMode: "whitelist" | "blacklist") => {
+watch(importMode, (newMode) => {
   const oppositeMode = newMode === "whitelist" ? "blacklist" : "whitelist";
-  problem.value.pipeline!.staticAnalysis!.libraryRestrictions![oppositeMode]!.imports = [];
+  if (problem.value.pipeline?.staticAnalysis?.libraryRestrictions?.[oppositeMode]) {
+    problem.value.pipeline.staticAnalysis.libraryRestrictions[oppositeMode].imports = [];
+  }
 });
-watch(headerMode, (newMode: "whitelist" | "blacklist") => {
+watch(headerMode, (newMode) => {
   const oppositeMode = newMode === "whitelist" ? "blacklist" : "whitelist";
-  problem.value.pipeline!.staticAnalysis!.libraryRestrictions![oppositeMode]!.headers = [];
+  if (problem.value.pipeline?.staticAnalysis?.libraryRestrictions?.[oppositeMode]) {
+    problem.value.pipeline.staticAnalysis.libraryRestrictions[oppositeMode].headers = [];
+  }
 });
-watch(functionMode, (newMode: "whitelist" | "blacklist") => {
+watch(functionMode, (newMode) => {
   const oppositeMode = newMode === "whitelist" ? "blacklist" : "whitelist";
-  problem.value.pipeline!.staticAnalysis!.libraryRestrictions![oppositeMode]!.functions = [];
+  if (problem.value.pipeline?.staticAnalysis?.libraryRestrictions?.[oppositeMode]) {
+    problem.value.pipeline.staticAnalysis.libraryRestrictions[oppositeMode].functions = [];
+  }
 });
 
 const defaultSyntaxOptions = ["while", "for", "recursive"];
 
-// ===============================================
-// 語言權限控制 (imports ➜ python, headers ➜ c/cpp)
-// ===============================================
-const allowImports = ref(false);
-const allowHeaders = ref(false);
-const route = useRoute();
+// ==========================================
+// Section: Language Permissions
+// ==========================================
+// Bitmask: 1=C, 2=CPP, 4=Python
+const allowImports = ref(false); // for Python
+const allowHeaders = ref(false); // for C/C++
+
 watch(
   () => problem.value.allowedLanguage,
   (lang: number) => {
-    allowImports.value = Boolean(lang & 4); // python
-    allowHeaders.value = Boolean(lang & 1 || lang & 2); // c or cpp
+    allowImports.value = Boolean(lang & 4);
+    allowHeaders.value = Boolean(lang & 1 || lang & 2);
   },
   { immediate: true },
 );
 
-// Execution Mode
+// Execution Mode Watcher
 watch(
   () => problem.value.pipeline!.executionMode,
   (newMode: string) => {
@@ -207,9 +300,9 @@ watch(
   },
 );
 
-// ===============================================
-// 共用邏輯與預設項目
-// ===============================================
+// ==========================================
+// Section: Helpers
+// ==========================================
 function toggleItem(arr: string[], item: string) {
   const idx = arr.indexOf(item);
   if (idx >= 0) arr.splice(idx, 1);
@@ -239,6 +332,7 @@ function isTeacherFileAllowed(file: File | null): boolean {
   return allowed.some((ext) => name.endsWith(ext));
 }
 
+// Asset Helper
 const assetPaths = computed<Record<string, string>>(
   () => ((problem.value.config as any)?.assetPaths as Record<string, string>) || {},
 );
@@ -247,7 +341,16 @@ const hasAsset = (key: string) => Boolean(assetPaths.value && assetPaths.value[k
 const assetDownloadUrl = (key: string) =>
   assetPaths.value && assetPaths.value[key] ? `/api/problem/${route.params.id}/asset/${key}/download` : null;
 
+// Ensure pipeline object exists at script end (safety check)
 problem.value.pipeline = problem.value.pipeline || ({} as any);
+
+// ==========================================
+// Lifecycle Hooks
+// ==========================================
+onMounted(async () => {
+  initPipelineValues();
+  await fetchStaticAnalysisOptions();
+});
 </script>
 
 <template>
@@ -268,16 +371,11 @@ problem.value.pipeline = problem.value.pipeline || ({} as any);
               <span>Allow Write</span>
               <i-uil-lock-alt v-if="!allowReadToggle" class="text-error" />
             </span>
-            <input
-              type="checkbox"
-              class="toggle"
-              :disabled="!allowReadToggle"
-              v-model="allowWriteToggle"
-            />
+            <input type="checkbox" class="toggle" :disabled="!allowReadToggle" v-model="allowWriteToggle" />
           </label>
           <p
             v-if="allowWriteWarning"
-            class="mt-1 text-xs pl-1"
+            class="mt-1 pl-1 text-xs"
             :class="allowWriteWarningError ? 'text-error' : 'opacity-70'"
           >
             {{ allowWriteWarning }}
@@ -666,10 +764,10 @@ problem.value.pipeline = problem.value.pipeline || ({} as any);
               </label>
 
               <!-- 右：Teacher_Code -->
-                <div class="flex items-center gap-x-2">
-                  <span class="text-sm opacity-80">Upload Teacher Code</span>
-                  <div class="flex items-center gap-2">
-                    <div
+              <div class="flex items-center gap-x-2">
+                <span class="text-sm opacity-80">Upload Teacher Code</span>
+                <div class="flex items-center gap-2">
+                  <div
                     v-if="hasAsset('teacher_file') || problem.assets?.teacherFile"
                     class="flex items-center gap-2"
                   >
@@ -758,7 +856,7 @@ problem.value.pipeline = problem.value.pipeline || ({} as any);
 
         <div v-if="problem.pipeline!.customChecker" class="flex flex-col gap-x-2">
           <div class="flex items-center gap-x-2">
-            <span class="text-sm opacity-80 pl-1">Upload Custom_Checker.py</span>
+            <span class="pl-1 text-sm opacity-80">Upload Custom_Checker.py</span>
             <input
               type="file"
               accept=".py"
@@ -784,7 +882,7 @@ problem.value.pipeline = problem.value.pipeline || ({} as any);
             }}</span>
           </label>
         </div>
-        <div v-else class="text-xs opacity-70 pl-1">
+        <div v-else class="pl-1 text-xs opacity-70">
           {{
             problem.pipeline!.executionMode === "interactive"
               ? "Custom Checker disabled in Interactive mode."
@@ -803,10 +901,7 @@ problem.value.pipeline = problem.value.pipeline || ({} as any);
             <input type="checkbox" class="toggle" v-model="(problem as any).pipeline.scoringScript.custom" />
           </label>
           <div class="flex items-center gap-2">
-            <div
-              v-if="hasAsset('scoring_script') || problem.assets?.scorePy"
-              class="flex items-center gap-2"
-            >
+            <div v-if="hasAsset('scoring_script') || problem.assets?.scorePy" class="flex items-center gap-2">
               <span class="badge badge-success badge-outline text-xs">Uploaded</span>
               <a
                 v-if="hasAsset('scoring_script')"
@@ -824,7 +919,7 @@ problem.value.pipeline = problem.value.pipeline || ({} as any);
 
         <div v-if="(problem as any).pipeline.scoringScript?.custom" class="flex flex-col gap-x-2">
           <div class="flex items-center gap-x-2">
-            <span class="text-sm opacity-80 pl-1">Upload Custom_Scorer.py</span>
+            <span class="pl-1 text-sm opacity-80">Upload Custom_Scorer.py</span>
             <input
               type="file"
               accept=".py"
@@ -847,7 +942,7 @@ problem.value.pipeline = problem.value.pipeline || ({} as any);
             <span class="label-text-alt text-error">{{ v$.assets.scorePy.$errors[0]?.$message }}</span>
           </label>
         </div>
-        <div v-else class="text-xs opacity-70 pl-1">Enable to upload Custom_Scorer.py</div>
+        <div v-else class="pl-1 text-xs opacity-70">Enable to upload Custom_Scorer.py</div>
       </div>
     </div>
   </div>

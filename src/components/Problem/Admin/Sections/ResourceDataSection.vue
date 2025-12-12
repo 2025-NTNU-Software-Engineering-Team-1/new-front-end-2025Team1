@@ -1,33 +1,108 @@
 <script setup lang="ts">
-import { inject, Ref, ref, watch, computed, defineProps, withDefaults } from "vue";
+// ==========================================
+// Imports
+// ==========================================
+import { inject, Ref, ref, watch, computed } from "vue";
 import { useRoute } from "vue-router";
 import { ZipReader, BlobReader } from "@zip.js/zip.js";
 import { assertFileSizeOK } from "@/utils/checkFileSize";
 
+// ==========================================
+// [CONFIG] Console Debug Mode
+// ==========================================
+const DEBUG_MODE = 1;
+
+// ==========================================
+// Logger Utility
+// ==========================================
+const logger = {
+  log: (label: string, data?: any) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Log] ${label}`, "color: #3b82f6; font-weight: bold;", data || "");
+  },
+  success: (label: string, data?: any) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Success] ${label}`, "color: #10b981; font-weight: bold;", data || "");
+  },
+  error: (label: string, error?: any) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Error] ${label}`, "color: #ef4444; font-weight: bold;", error || "");
+  },
+  warn: (label: string, data?: any) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Warn] ${label}`, "color: #f59e0b; font-weight: bold;", data || "");
+  },
+  group: (label: string) => {
+    if (!DEBUG_MODE) return;
+    console.group(`%c[Group] ${label}`, "color: #8b5cf6; font-weight: bold;");
+  },
+  groupEnd: () => {
+    if (!DEBUG_MODE) return;
+    console.groupEnd();
+  },
+};
+
+// ==========================================
+// Props & Setup
+// ==========================================
 const props = withDefaults(defineProps<{ variant?: "student" | "teacher" }>(), {
   variant: "student",
 });
+
 const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
-const isDrag = ref(false);
 const route = useRoute();
+const isDrag = ref(false);
+
+// Safety Check
+if (!problem || !problem.value) {
+  logger.error("Problem injection failed");
+  throw new Error("ResourceDataSection requires problem injection");
+}
+
+// ==========================================
+// Section: Dynamic Keys (Teacher vs Student)
+// ==========================================
 const isTeacher = computed(() => props.variant === "teacher");
+
+// Determine config keys based on variant
 const enableKey = computed(() => (isTeacher.value ? "resourceDataTeacher" : "resourceData"));
 const assetKey = computed(() => (isTeacher.value ? "resourceDataTeacherZip" : "resourceDataZip"));
 const assetPathKey = computed(() => (isTeacher.value ? "resource_data_teacher" : "resource_data"));
 const labelText = computed(() =>
   isTeacher.value ? "Set ResourceData (Teacher)" : "Set ResourceData (Student)",
 );
+
+// ==========================================
+// Section: Permissions & Status
+// ==========================================
+
+// Check if Allow Read is enabled in pipeline or legacy config
 const allowReadRef = computed(() => {
   const pipe = problem.value.pipeline || {};
   const cfg = problem.value.config || ({} as any);
   return Boolean(pipe.allowRead ?? cfg.allowRead ?? cfg.allow_read ?? cfg.fopen ?? false);
 });
+
+// Teachers always have permission; Students need Allow Read
 const allowReadSatisfied = computed(() => isTeacher.value || allowReadRef.value);
+
+// Check if test cases exist (Remote or Local)
 const hasRemoteTestcase = computed(() => Boolean((problem.value.config as any)?.assetPaths?.case));
 const hasTestdata = computed(
   () => hasRemoteTestcase.value || (problem.value.testCaseInfo?.tasks?.length ?? 0) > 0,
 );
-// 警告訊息直接用 computed 計算（不需要 watch 和初始化標記）
+
+const hasExistingTasks = computed(() => (problem.value.testCaseInfo?.tasks?.length ?? 0) > 0);
+
+const hasRemoteAsset = computed(() =>
+  Boolean((problem.value.config as any)?.assetPaths?.[assetPathKey.value]),
+);
+
+// ==========================================
+// Section: Validation Messages
+// ==========================================
+
+// Warning message (Computed directly, no need for watchers)
 const resourceDataWarning = computed(() => {
   if (isTeacher.value) return "";
   if (!allowReadSatisfied.value && enableRef.value) {
@@ -35,14 +110,47 @@ const resourceDataWarning = computed(() => {
   }
   return "";
 });
-const resourceCaseCount = ref<number | null>(null);
-const hasRemoteAsset = computed(
-  () => Boolean((problem.value.config as any)?.assetPaths?.[assetPathKey.value]),
-);
-const remoteTaskCount = computed(() => {
-  const len = problem.value.testCaseInfo?.tasks?.length ?? 0;
-  return len > 0 ? len : null;
+
+const enableDisabledReason = computed(() => {
+  if (!hasTestdata.value) return "Upload TestData first";
+  if (!allowReadSatisfied.value) return "Allow Read required";
+  return "";
 });
+
+const showDisabledText = computed(() => Boolean(enableDisabledReason.value || resourceDataWarning.value));
+
+// ==========================================
+// Section: State Accessors (Get/Set)
+// ==========================================
+
+// Toggle Switch Reference
+const enableRef = computed({
+  get: () => (problem.value.config as any)?.[enableKey.value],
+  set: (val: boolean) => {
+    (problem.value.config as any)[enableKey.value] = val;
+  },
+});
+
+// File Object Reference
+const fileRef = computed({
+  get: () => (problem.value.assets as any)?.[assetKey.value] ?? null,
+  set: (val: File | null) => {
+    if (problem.value.assets) (problem.value.assets as any)[assetKey.value] = val;
+  },
+});
+
+// Download URL Generator
+const downloadUrl = computed(() => {
+  const pid = route.params.id;
+  if (!pid || Array.isArray(pid)) return null;
+  const assetPaths = (problem.value.config as any)?.assetPaths;
+  if (assetPaths && !assetPaths[assetPathKey.value]) return null;
+  return `/api/problem/${pid}/asset/${assetPathKey.value}/download`;
+});
+
+// Reset count if feature is disabled
+const resourceCaseCount = ref<number | null>(null);
+
 watch(
   () => problem.value.config?.resourceData,
   (val) => {
@@ -51,38 +159,17 @@ watch(
     }
   },
 );
-const enableDisabledReason = computed(() => {
-  if (!hasTestdata.value) return "Upload TestData first";
-  if (!allowReadSatisfied.value) return "Allow Read required";
-  return "";
-});
-const showDisabledText = computed(() =>
-  Boolean(enableDisabledReason.value || resourceDataWarning.value),
-);
 
-const enableRef = computed({
-  get: () => (problem.value.config as any)?.[enableKey.value],
-  set: (val: boolean) => {
-    (problem.value.config as any)[enableKey.value] = val;
-  },
+const remoteTaskCount = computed(() => {
+  const len = problem.value.testCaseInfo?.tasks?.length ?? 0;
+  return len > 0 ? len : null;
 });
 
-const fileRef = computed({
-  get: () => (problem.value.assets as any)?.[assetKey.value] ?? null,
-  set: (val: File | null) => {
-    if (problem.value.assets) (problem.value.assets as any)[assetKey.value] = val;
-  },
-});
+// ==========================================
+// Section: Zip Validation Logic
+// ==========================================
 
-const downloadUrl = computed(() => {
-  const pid = route.params.id;
-  if (!pid || Array.isArray(pid)) return null;
-  const assetPaths = (problem.value.config as any)?.assetPaths;
-  if (assetPaths && !assetPaths[assetPathKey.value]) return null;
-  return `/api/problem/${pid}/asset/${assetPathKey.value}/download`;
-});
-const hasExistingTasks = computed(() => (problem.value.testCaseInfo?.tasks?.length ?? 0) > 0);
-
+// Generate expected prefixes (e.g., "0001", "0002") based on Task/Case count
 const expectedPrefixes = computed(() => {
   const tasks = problem.value.testCaseInfo?.tasks || [];
   const prefixes: string[] = [];
@@ -94,44 +181,83 @@ const expectedPrefixes = computed(() => {
   return prefixes;
 });
 
+// Watch file changes to validate structure
 watch(
   () => fileRef.value,
   async () => {
     isDrag.value = false;
     const file = fileRef.value;
+
     if (!file) {
       resourceCaseCount.value = null;
       return;
     }
+
+    logger.group("Validate Resource Data Zip");
+    logger.log("File Selected", file.name);
+
+    // Pre-check: Do test tasks exist?
     if (!hasExistingTasks.value) {
+      logger.warn("No existing tasks found. Clearing file.");
       fileRef.value = null;
+      logger.groupEnd();
       return;
     }
-    const reader = new ZipReader(new BlobReader(file));
-    const entries = await reader.getEntries();
-    const filenames = entries.map(({ filename }) => filename).filter((f) => !f.endsWith("/"));
-    const prefixes = expectedPrefixes.value;
-    const prefixSet = new Set(prefixes);
-    const seenCases = new Set<string>();
-    const seenTasks = new Set<string>();
-    for (const name of filenames) {
-      const base = name.split("/").pop() || name;
-      const [prefix] = base.split("_");
-      if (!prefixSet.has(prefix)) {
-        alert(`ResourceData 檔名前綴不符測資結構: ${base}`);
+
+    try {
+      // 1. Read Zip
+      const reader = new ZipReader(new BlobReader(file));
+      const entries = await reader.getEntries();
+
+      // Filter out folders
+      const filenames = entries.map(({ filename }) => filename).filter((f) => !f.endsWith("/"));
+
+      const prefixes = expectedPrefixes.value;
+      const prefixSet = new Set(prefixes);
+
+      const seenCases = new Set<string>();
+      const seenTasks = new Set<string>();
+
+      // 2. Iterate entries
+      for (const name of filenames) {
+        const base = name.split("/").pop() || name;
+        const [prefix] = base.split("_");
+
+        // Check if prefix matches defined TestData (0001, 0002...)
+        if (!prefixSet.has(prefix)) {
+          const msg = `ResourceData 檔名前綴不符測資結構: ${base}`;
+          logger.error("Validation Failed", msg);
+          alert(msg);
+          fileRef.value = null;
+          logger.groupEnd();
+          return;
+        }
+
+        seenCases.add(prefix);
+        seenTasks.add(prefix.slice(0, 2));
+      }
+
+      // 3. Verify completeness (Every test case must have a resource file?)
+      // Logic from original code: sizes must match exactly.
+      if (seenCases.size !== prefixSet.size) {
+        const msg = "ResourceData 檔案數量與 TestData 測資數量不一致，請確認每個 case 都有對應資源。";
+        logger.error("Count Mismatch", { seen: seenCases.size, expected: prefixSet.size });
+        alert(msg);
         fileRef.value = null;
+        resourceCaseCount.value = null;
+        logger.groupEnd();
         return;
       }
-      seenCases.add(prefix);
-      seenTasks.add(prefix.slice(0, 2));
-    }
-    if (seenCases.size !== prefixSet.size) {
-      alert("ResourceData 檔案數量與 TestData 測資數量不一致，請確認每個 case 都有對應資源。");
+
+      // 4. Success
+      resourceCaseCount.value = seenTasks.size;
+      logger.success("Validation Passed", { taskCount: seenTasks.size });
+    } catch (err) {
+      logger.error("Zip Processing Error", err);
       fileRef.value = null;
-      resourceCaseCount.value = null;
-      return;
+    } finally {
+      logger.groupEnd();
     }
-    resourceCaseCount.value = seenTasks.size;
   },
 );
 </script>
@@ -147,14 +273,15 @@ watch(
           class="toggle"
           :disabled="Boolean(enableDisabledReason)"
           v-model="enableRef"
-          @change="() => { if (!enableRef) fileRef = null; }"
+          @change="
+            () => {
+              if (!enableRef) fileRef = null;
+            }
+          "
         />
       </label>
       <i-uil-lock-alt v-if="enableDisabledReason" class="text-error" />
-      <span
-        v-if="showDisabledText"
-        class="text-sm text-error whitespace-nowrap"
-      >
+      <span v-if="showDisabledText" class="whitespace-nowrap text-sm text-error">
         {{ resourceDataWarning || enableDisabledReason }}
       </span>
       <div class="ml-auto flex items-center gap-2">
@@ -162,14 +289,9 @@ watch(
           v-if="resourceCaseCount !== null || hasRemoteAsset"
           class="badge badge-success badge-outline text-xs"
         >
-          Current: {{ resourceCaseCount ?? remoteTaskCount ?? 'remote' }} task(s)
+          Current: {{ resourceCaseCount ?? remoteTaskCount ?? "remote" }} task(s)
         </span>
-        <span
-          v-else-if="fileRef"
-          class="badge badge-success badge-outline text-xs"
-        >
-          Uploaded
-        </span>
+        <span v-else-if="fileRef" class="badge badge-success badge-outline text-xs"> Uploaded </span>
         <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
         <a
           v-if="downloadUrl && hasRemoteAsset"

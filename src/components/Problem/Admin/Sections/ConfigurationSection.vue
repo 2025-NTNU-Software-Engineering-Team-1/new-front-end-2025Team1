@@ -1,37 +1,118 @@
 <script setup lang="ts">
+// ==========================================
+// Imports
+// ==========================================
 import { inject, Ref, ref, reactive, watch, computed, onMounted, onBeforeUnmount } from "vue";
 import { useRoute } from "vue-router";
+import { ZipReader, BlobReader } from "@zip.js/zip.js";
 
+// Components
 import LanguageMultiSelect from "../../Forms/LanguageMultiSelect.vue";
 import MultiStringInput from "../Controls/MultiStringInput.vue";
 import SidecarInput from "../Controls/SidecarInput.vue";
 
+// Utils & API
 import { assertFileSizeOK, validateFilesForAIAC } from "@/utils/checkFileSize";
-import { ZipReader, BlobReader } from "@zip.js/zip.js";
 import { fetcher } from "@/models/api";
 import api from "@/models/api";
 
-/* -------------------- Injection & Setup -------------------- */
+// ==========================================
+// [CONFIG] Console Debug Mode
+// ==========================================
+const DEBUG_MODE = 1;
+
+// ==========================================
+// Logger Utility
+// ==========================================
+const logger = {
+  log: (label: string, data?: any) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Log] ${label}`, "color: #3b82f6; font-weight: bold;", data || "");
+  },
+  success: (label: string, data?: any) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Success] ${label}`, "color: #10b981; font-weight: bold;", data || "");
+  },
+  error: (label: string, error?: any) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Error] ${label}`, "color: #ef4444; font-weight: bold;", error || "");
+  },
+  warn: (label: string, data?: any) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Warn] ${label}`, "color: #f59e0b; font-weight: bold;", data || "");
+  },
+  group: (label: string) => {
+    if (!DEBUG_MODE) return;
+    console.group(`%c[Group] ${label}`, "color: #8b5cf6; font-weight: bold;");
+  },
+  groupEnd: () => {
+    if (!DEBUG_MODE) return;
+    console.groupEnd();
+  },
+};
+
+// ==========================================
+// Helper: API Response Parser
+// ==========================================
+function parseApiResponse(res: any) {
+  const data = res?.data;
+  const rawStatus = data?.status || res?.status;
+  const statusStr = String(rawStatus || "").toLowerCase();
+  const message = data?.message || res?.message || "Unknown response";
+
+  const isSuccess = statusStr === "ok" || statusStr === "success" || rawStatus === 200;
+
+  return { isSuccess, message, data, rawStatus };
+}
+
+// ==========================================
+// Injection & Setup
+// ==========================================
 const rawProblem = inject<Ref<ProblemForm> | undefined>("problem");
-if (!rawProblem || !rawProblem.value) throw new Error("ConfigurationSection requires problem injection");
+if (!rawProblem || !rawProblem.value) {
+  throw new Error("ConfigurationSection requires problem injection");
+}
 
 const problem = rawProblem as Ref<ProblemForm>;
 const v$ = inject<any>("v$");
 const route = useRoute();
 
-/* -------------------- Course -------------------- */
+// ==========================================
+// Section: Course Information
+// ==========================================
 const courseName = ref<string | null>(null);
 
 async function fetchCourseName() {
+  logger.group("Fetch Course Name");
   try {
     const resp = await fetcher.get(`/course/${route.params.name}`);
-    courseName.value = resp.data;
-  } catch {
-    console.warn("Failed to fetch course id");
+    logger.log("Raw Response", resp);
+
+    const val = resp?.data;
+
+    // [CRITICAL FIX]: Prevent assigning an object to a string variable.
+    // This prevents the API URL from becoming ".../[object Object]/..." which causes 404s.
+    if (val && typeof val === "object") {
+      logger.warn("Received Object instead of String ID/Name. Extracting name...", val);
+      // Attempt to extract 'name' or 'id', fallback to route param if missing.
+      courseName.value = val.name || val.id || (route.params.name as string);
+    } else {
+      courseName.value = val || (route.params.name as string);
+    }
+
+    logger.success("Course Name Resolved", courseName.value);
+  } catch (err) {
+    logger.error("Failed to fetch course info", err);
+    // Fallback to route param on failure
+    courseName.value = route.params.name as string;
+  } finally {
+    logger.groupEnd();
   }
 }
 
-/* -------------------- Quota -------------------- */
+// ==========================================
+// Section: Quota Management
+// ==========================================
 const quotaError = ref("");
 const localQuota = ref<number | "">(problem.value?.quota ?? "");
 
@@ -57,7 +138,9 @@ function onQuotaInput(e: Event) {
   }
 }
 
-/* Trial Mode */
+// ==========================================
+// Section: Trial Mode
+// ==========================================
 const trialQuotaError = ref("");
 const localTrialLimit = ref<number | "">(problem.value?.config?.maxNumberOfTrial ?? "");
 const trialPublicZipError = ref<string>("");
@@ -87,25 +170,40 @@ function onTrialLimitInput(e: Event) {
 }
 
 async function validateTrialPublicZip(file: File): Promise<boolean> {
+  logger.group("Validate Trial Zip");
   try {
     const reader = new ZipReader(new BlobReader(file));
     const entries = await reader.getEntries();
     await reader.close?.();
 
-    if (!entries.length) return false;
+    if (!entries.length) {
+      logger.error("Zip is empty");
+      return false;
+    }
 
-    // ONLY .in
+    // Validation: ONLY .in files allowed
     const invalid = entries.filter(({ filename }) => !filename.endsWith(".in"));
-    if (invalid.length > 0) return false;
+    if (invalid.length > 0) {
+      logger.error(
+        "Invalid files found (must be .in)",
+        invalid.map((e) => e.filename),
+      );
+      return false;
+    }
 
+    logger.success("Validation OK", entries.length + " files");
     return true;
   } catch (err) {
-    console.error("Failed to read zip:", err);
+    logger.error("Failed to read zip", err);
     return false;
+  } finally {
+    logger.groupEnd();
   }
 }
 
-/* -------------------- Problem Config Ensure -------------------- */
+// ==========================================
+// Section: Problem Config Initialization
+// ==========================================
 function ensureConfig() {
   if (!problem.value.config) {
     problem.value.config = {
@@ -125,7 +223,8 @@ function ensureConfig() {
       },
       artifactCollection: [],
     };
-  }else {
+  } else {
+    // Ensure network structure exists
     if (!problem.value.config.networkAccessRestriction) {
       problem.value.config.networkAccessRestriction = {
         sidecars: [],
@@ -141,18 +240,22 @@ function ensureConfig() {
     if (!nar.external) nar.external = { model: "Black", ip: [], url: [] };
   }
 }
-// 初始化 artifactCollection 的函數（會在 onMounted 中呼叫，只執行一次）
+
+// Initialize artifactCollection
 function initArtifactCollection() {
   ensureConfig();
   const cfg = problem.value.config as any;
+  // Backward compatibility check
   if (cfg && !Array.isArray(cfg.artifactCollection)) {
     cfg.artifactCollection = Array.isArray(cfg.artifact_collection) ? cfg.artifact_collection : [];
   }
+  // Check pipeline compatibility
   if (Array.isArray(cfg.pipeline?.artifactCollection) && cfg.artifactCollection.length === 0) {
     cfg.artifactCollection = cfg.pipeline.artifactCollection.slice();
   }
 }
-// 同步初始化檢查（確保在 onMounted 之前就有正確的初始值）
+
+// Synchronous initialization check (to ensure value exists before mount if possible)
 if (!Array.isArray(problem.value.config.artifactCollection)) {
   const cfgAny = problem.value.config as any;
   problem.value.config.artifactCollection = Array.isArray(cfgAny?.artifact_collection)
@@ -160,6 +263,7 @@ if (!Array.isArray(problem.value.config.artifactCollection)) {
     : [];
 }
 
+// Computed properties for Artifact checkboxes
 const artifactCompiledBinary = computed({
   get: () => problem.value.config!.artifactCollection.includes("compiledBinary"),
   set: (val: boolean) => {
@@ -180,7 +284,9 @@ const artifactZip = computed({
   },
 });
 
-/* -------------------- Assets -------------------- */
+// ==========================================
+// Section: Assets Helper
+// ==========================================
 const assetPaths = computed<Record<string, string>>(
   () => ((problem.value.config as any)?.assetPaths as Record<string, string>) || {},
 );
@@ -189,11 +295,13 @@ const hasAsset = (key: string) => !!(assetPaths.value && assetPaths.value[key]);
 const assetDownloadUrl = (key: string) =>
   assetPaths.value[key] ? `/api/problem/${route.params.id}/asset/${key}/download` : null;
 
-/* -------------------- Docker Zip Inspection -------------------- */
+// ==========================================
+// Section: Docker Zip Inspection
+// ==========================================
 const detectedDockerEnvs = ref<string[]>([]);
 const dockerZipError = ref("");
 
-// Helper: Read saved env list
+// Helper: Read saved env list from config
 function loadSavedDockerEnvs() {
   const nar = problem.value.config?.networkAccessRestriction as any;
   if (nar?.custom_env?.env_list && Array.isArray(nar.custom_env.env_list)) {
@@ -201,6 +309,7 @@ function loadSavedDockerEnvs() {
   }
 }
 
+// Watch for config changes to load saved envs
 watch(
   () => problem.value.config?.networkAccessRestriction,
   () => {
@@ -208,13 +317,14 @@ watch(
       loadSavedDockerEnvs();
     }
   },
-  { immediate: true, deep: true }
+  { immediate: true, deep: true },
 );
 
 async function inspectDockerZip(file: File) {
+  logger.group("Inspect Docker Zip");
   detectedDockerEnvs.value = [];
   dockerZipError.value = "";
-  
+
   try {
     const reader = new ZipReader(new BlobReader(file));
     const entries = await reader.getEntries();
@@ -224,38 +334,48 @@ async function inspectDockerZip(file: File) {
 
     if (dockerfiles.length === 0) {
       dockerZipError.value = "Not found any 'Dockerfile'.";
+      logger.error(
+        "No Dockerfile found in zip",
+        entries.map((e) => e.filename),
+      );
       return false;
     }
 
     const envs: string[] = [];
     for (const entry of dockerfiles) {
-      const parts = entry.filename.split('/');
-      
+      const parts = entry.filename.split("/");
 
+      // Validation: Structure must be "folder/Dockerfile"
       if (parts.length !== 2) {
-         dockerZipError.value = `Structure error: ${entry.filename}. Please ensure the structure is "environment_folder/Dockerfile" without an extra directory level.`;
-         return false;
+        dockerZipError.value = `Structure error: ${entry.filename}. Please ensure the structure is "environment_folder/Dockerfile".`;
+        logger.error("Structure error", entry.filename);
+        return false;
       }
-      
+
       envs.push(parts[0]);
     }
 
     const sortedEnvs = envs.sort();
     detectedDockerEnvs.value = sortedEnvs;
 
+    // Save to config
     const nar = problem.value.config!.networkAccessRestriction as any;
     if (!nar.custom_env) {
       nar.custom_env = {};
     }
     nar.custom_env.env_list = sortedEnvs;
 
+    logger.success("Docker inspection success", sortedEnvs);
     return true;
   } catch (e) {
-    console.error(e);
+    logger.error("Zip read error", e);
     dockerZipError.value = "Failed to read Zip file, please ensure the file is not corrupted.";
     return false;
+  } finally {
+    logger.groupEnd();
   }
 }
+
 function removeDockerEnv(index: number) {
   detectedDockerEnvs.value.splice(index, 1);
   const nar = problem.value.config?.networkAccessRestriction as any;
@@ -264,7 +384,9 @@ function removeDockerEnv(index: number) {
   }
 }
 
-/* -------------------- AI File Extensions -------------------- */
+// ==========================================
+// Section: AI File Extension Helper
+// ==========================================
 function getAIFileExtensions() {
   const lang = problem.value.allowedLanguage;
   const list: string[] = [];
@@ -274,7 +396,9 @@ function getAIFileExtensions() {
   return list;
 }
 
-/* -------------------- API Keys -------------------- */
+// ==========================================
+// Section: API Keys Management
+// ==========================================
 const apiKeys = reactive<{ active: any[]; inactive: any[] }>({
   active: [],
   inactive: [],
@@ -288,21 +412,66 @@ const showInactiveKeys = ref(true);
 async function fetchKeys() {
   if (!courseName.value) await fetchCourseName();
 
+  // If fetchCourseName failed or returned invalid data, skip to avoid 404
+  if (!courseName.value || typeof courseName.value !== "string") {
+    logger.error("Skipping fetchKeys: Invalid courseName", courseName.value);
+    fetchError.value = "Invalid Course Name";
+    return;
+  }
+
+  logger.group(`Fetch Keys: ${courseName.value}`);
   isFetchingKeys.value = true;
   fetchError.value = "";
+
   try {
-    const { data } = await api.AIVTuber.getCourseKeys(courseName.value!);
-    const allKeys = data.keys || [];
-    apiKeys.active = allKeys.filter((k) => k.is_active);
-    apiKeys.inactive = allKeys.filter((k) => !k.is_active);
-  } catch {
-    fetchError.value = "Failed to load keys.";
+    const res = await api.AIVTuber.getCourseKeys(courseName.value!);
+    // logger.log("Raw Response", res);
+
+    const { isSuccess, data, message } = parseApiResponse(res);
+
+    if (!isSuccess && !data) {
+      throw new Error(message || "Failed to response keys");
+    }
+
+    const rawKeys = data?.keys || [];
+    logger.log(`Found ${rawKeys.length} keys`);
+
+    // Data Sanitization and Classification
+    const safeKeys = rawKeys.map((k: any, index: number) => {
+      // Integrity Check
+      const missing: string[] = [];
+      if (!k.id) missing.push("id");
+      if (!k.key_name) missing.push("key_name");
+
+      if (missing.length > 0) {
+        logger.warn(`Key data incomplete at index ${index}`, missing);
+      }
+
+      return {
+        id: k.id || `temp-${index}`,
+        key_name: k.key_name || "(Unknown Name)",
+        masked_value: k.masked_value || "******",
+        is_active: !!k.is_active,
+        created_by: k.created_by || "",
+      };
+    });
+
+    apiKeys.active = safeKeys.filter((k: any) => k.is_active);
+    apiKeys.inactive = safeKeys.filter((k: any) => !k.is_active);
+
+    logger.success("Keys Loaded", { active: apiKeys.active.length, inactive: apiKeys.inactive.length });
+  } catch (err: any) {
+    logger.error("Fetch Keys Error", err);
+    fetchError.value = err?.message || "Failed to load keys.";
   } finally {
     isFetchingKeys.value = false;
+    logger.groupEnd();
   }
 }
 
-/* -------------------- Key Search -------------------- */
+// ==========================================
+// Section: Key Search
+// ==========================================
 const searchQuery = ref("");
 const activeKeyRefs = ref<Record<string, HTMLElement | null>>({});
 const inactiveKeyRefs = ref<Record<string, HTMLElement | null>>({});
@@ -333,7 +502,9 @@ function scrollToKey() {
   }
 }
 
-/* -------------------- Suggestion Tooltip -------------------- */
+// ==========================================
+// Section: Suggestion Tooltip
+// ==========================================
 const showSuggestionTooltip = ref(false);
 const keySuggestion = ref<{
   student_count?: number;
@@ -347,23 +518,36 @@ const suggestionError = ref("");
 async function fetchKeySuggestion() {
   if (!courseName.value) await fetchCourseName();
 
+  if (!courseName.value || typeof courseName.value !== "string") {
+    return;
+  }
+
   const model = problem.value.config?.aiVTuberMode || "gemini-2.5-flash-lite";
 
+  logger.group("Fetch Key Suggestion");
   isFetchingSuggestion.value = true;
   suggestionError.value = "";
 
   try {
-    const { data } = await api.AIVTuber.getKeySuggestion(courseName.value!, model);
-    keySuggestion.value = data;
+    const res = await api.AIVTuber.getKeySuggestion(courseName.value!, model);
+    const { isSuccess, data, message } = parseApiResponse(res);
+
+    if (isSuccess) {
+      keySuggestion.value = data;
+      logger.success("Suggestion", data);
+    } else {
+      throw new Error(message || "API returned failed status");
+    }
   } catch (err: any) {
-    suggestionError.value = err?.response?.data?.detail || "Failed to fetch suggestion.";
+    logger.error("Suggestion Error", err);
+    suggestionError.value = err?.response?.data?.detail || err?.message || "Failed to fetch suggestion.";
     keySuggestion.value = null;
   } finally {
     isFetchingSuggestion.value = false;
+    logger.groupEnd();
   }
 }
 
-/* -------------------- Tooltip Outside Click -------------------- */
 function onClickOutside(event: MouseEvent) {
   const tooltipEl = document.querySelector(".key-suggestion-tooltip");
   const buttonEl = document.querySelector(".btn-key-suggestion");
@@ -373,23 +557,29 @@ function onClickOutside(event: MouseEvent) {
   showSuggestionTooltip.value = false;
 }
 
-
-/* -------------------- Sidecars Helper -------------------- */
+// ==========================================
+// Section: Sidecars & Network Helper
+// ==========================================
 const hasExistingNetworkConfig = computed(() => {
   const nar = problem.value.config?.networkAccessRestriction;
   const hasExternal = (nar?.external?.ip?.length ?? 0) > 0 || (nar?.external?.url?.length ?? 0) > 0;
   const hasSidecars = (nar?.sidecars?.length ?? 0) > 0;
-  const hasDocker = !!problem.value.assets?.dockerfilesZip || hasAsset('dockerfiles');
+  const hasDocker = !!problem.value.assets?.dockerfilesZip || hasAsset("dockerfiles");
   return hasExternal || hasSidecars || hasDocker;
 });
 const showNetworkSection = ref(false);
 
-watch(hasExistingNetworkConfig, (val) => {
-  if (val) showNetworkSection.value = true;
-}, { immediate: true });
+watch(
+  hasExistingNetworkConfig,
+  (val) => {
+    if (val) showNetworkSection.value = true;
+  },
+  { immediate: true },
+);
 
-
-/* -------------------- Watches -------------------- */
+// ==========================================
+// Section: Watchers
+// ==========================================
 watch(
   () => problem.value,
   (n, o) => {
@@ -404,9 +594,10 @@ watch(selectedKeys, (keys) => {
   problem.value.config!.aiVTuberApiKeys = keys;
 });
 
-/* -------------------- Lifecycle -------------------- */
+// ==========================================
+// Section: Lifecycle Hooks
+// ==========================================
 onMounted(() => {
-  // 只在組件掛載時初始化一次 artifactCollection（避免 reactive 依賴導致重複執行）
   initArtifactCollection();
   fetchKeys();
   document.addEventListener("click", onClickOutside);
@@ -831,11 +1022,12 @@ onBeforeUnmount(() => {
         leave-active-class="transition ease-in duration-150"
       >
         <div v-if="showNetworkSection" class="mt-3 space-y-4 rounded border-none p-2">
-          
           <div class="rounded border border-gray-400 p-4">
-             <label class="label mb-2"><span class="label-text font-semibold">Network Access Restriction (External)</span></label>
-             <div class="grid grid-cols-1 gap-4 p-1 md:grid-cols-2">
-              <div class="col-span-1 md:col-span-2 flex items-center gap-4">
+            <label class="label mb-2"
+              ><span class="label-text font-semibold">Network Access Restriction (External)</span></label
+            >
+            <div class="grid grid-cols-1 gap-4 p-1 md:grid-cols-2">
+              <div class="col-span-1 flex items-center gap-4 md:col-span-2">
                 <span class="label-text">Access Model:</span>
                 <div class="mode-switcher">
                   <div class="mode-switcher-container">
@@ -859,13 +1051,11 @@ onBeforeUnmount(() => {
                     </button>
                   </div>
                 </div>
-                <div class="text-xs opacity-70 ml-2">
+                <div class="ml-2 text-xs opacity-70">
                   <span v-if="problem.config!.networkAccessRestriction!.external!.model === 'White'">
                     Only allow specific IPs/URLs. Block everything else.
                   </span>
-                  <span v-else>
-                    Block specific IPs/URLs. Allow everything else.
-                  </span>
+                  <span v-else> Block specific IPs/URLs. Allow everything else. </span>
                 </div>
               </div>
 
@@ -889,107 +1079,116 @@ onBeforeUnmount(() => {
             </div>
           </div>
           <div class="rounded border border-gray-400 p-4">
-              <label class="label mb-2 justify-between">
-                <span class="label-text font-semibold">Sandbox Environment (Sidecars & Dockerfiles)</span>
-              </label>
+            <label class="label mb-2 justify-between">
+              <span class="label-text font-semibold">Sandbox Environment (Sidecars & Dockerfiles)</span>
+            </label>
 
-              <div class="mb-6">
-               <SidecarInput 
-                 v-model="problem.config!.networkAccessRestriction!.sidecars" 
-               />
-              </div>
+            <div class="mb-6">
+              <SidecarInput v-model="problem.config!.networkAccessRestriction!.sidecars" />
+            </div>
 
-              <div class="divider"></div>
+            <div class="divider"></div>
 
-              <div class="form-control">
-                <label class="label justify-start gap-x-4">
-                  <span class="label-text font-semibold">Dockerfiles</span>
-                  <div class="flex items-center gap-2">
+            <div class="form-control">
+              <label class="label justify-start gap-x-4">
+                <span class="label-text font-semibold">Dockerfiles</span>
+                <div class="flex items-center gap-2">
                   <div v-if="hasAsset('network_dockerfile')" class="flex items-center gap-2">
-                      <span class="badge badge-success badge-outline text-xs">Uploaded</span>
-                      <a
+                    <span class="badge badge-success badge-outline text-xs">Uploaded</span>
+                    <a
                       :href="assetDownloadUrl('network_dockerfile') || '#'"
                       class="btn btn-xs"
                       target="_blank"
                       rel="noopener"
-                      >
+                    >
                       Download
-                      </a>
+                    </a>
                   </div>
                   <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
-                  </div>
-                </label>
+                </div>
+              </label>
               <div class="mt-2">
-                  <label class="label"><span class="label-text">Upload dockerfiles.zip</span></label>
-                  <input
+                <label class="label"><span class="label-text">Upload dockerfiles.zip</span></label>
+                <input
                   type="file"
                   accept=".zip"
                   class="file-input file-input-bordered w-full max-w-xs"
                   :class="{ 'input-error': v$?.assets?.dockerfilesZip?.$error || dockerZipError }"
                   @change="
-                      async (e: any) => {
+                    async (e: any) => {
                       const file = e.target.files?.[0] || null;
-                      
-                      // Reset previous 
+
+                      // Reset previous
                       detectedDockerEnvs = [];
                       dockerZipError = '';
 
                       const nar = problem.config!.networkAccessRestriction as any;
-                      if(nar?.custom_env) nar.custom_env.env_list = [];
-                      
+                      if (nar?.custom_env) nar.custom_env.env_list = [];
+
                       if (file) {
                         // file size
                         if (!assertFileSizeOK(file, 'dockerfiles.zip')) {
-                                problem.assets!.dockerfilesZip = null;
-                                e.target.value = '';
-                                return;
+                          problem.assets!.dockerfilesZip = null;
+                          e.target.value = '';
+                          return;
                         }
                         // check zip structure
                         const isValid = await inspectDockerZip(file);
                         if (!isValid) {
-                            problem.assets!.dockerfilesZip = null;
-                            e.target.value = '';
-                            return;
+                          problem.assets!.dockerfilesZip = null;
+                          e.target.value = '';
+                          return;
                         }
                         problem.assets!.dockerfilesZip = file;
                       } else {
                         problem.assets!.dockerfilesZip = null;
                         loadSavedDockerEnvs();
                       }
-                        v$?.assets?.dockerfilesZip?.$touch();
-                      }
+                      v$?.assets?.dockerfilesZip?.$touch();
+                    }
                   "
-                  />
-                  <label v-if="v$?.assets?.dockerfilesZip?.$error || dockerZipError" class="label">
-                    <span class="label-text-alt text-error whitespace-pre-line">
-                        {{ v$?.assets?.dockerfilesZip?.$errors[0]?.$message || dockerZipError }}
-                    </span>
-                  </label>
+                />
+                <label v-if="v$?.assets?.dockerfilesZip?.$error || dockerZipError" class="label">
+                  <span class="label-text-alt whitespace-pre-line text-error">
+                    {{ v$?.assets?.dockerfilesZip?.$errors[0]?.$message || dockerZipError }}
+                  </span>
+                </label>
 
-                  <div v-if="detectedDockerEnvs.length > 0" class="mt-2 rounded bg-base-200 p-3 text-xs border border-success/30 w-full max-w-xs">
-                    <div class="mb-2 font-bold text-success flex items-center gap-1">
-                        <i-uil-check-circle /> 
-                        {{ problem.assets?.dockerfilesZip ? 'Environment(s) to be established:' : 'List of environments:'}}
-                    </div>
-                    <ul class="list-inside space-y-1 opacity-80">
-                        <li v-for="(env, index) in detectedDockerEnvs" :key="env" class="flex items-center justify-between hover:bg-base-300 rounded px-1 transition-colors">
-                            <div>
-                                <span class="font-mono font-bold">{{ env }}</span> 
-                            </div>
-                            
-                            <button 
-                                type="button" 
-                                class="btn btn-ghost btn-xs text-error min-h-0 h-6 w-6 p-0"
-                                @click="removeDockerEnv(index)"
-                                title="Remove this environment"
-                            >
-                                <i-uil-trash-alt />
-                            </button>
-                        </li>
-                    </ul>
+                <div
+                  v-if="detectedDockerEnvs.length > 0"
+                  class="mt-2 w-full max-w-xs rounded border border-success/30 bg-base-200 p-3 text-xs"
+                >
+                  <div class="mb-2 flex items-center gap-1 font-bold text-success">
+                    <i-uil-check-circle />
+                    {{
+                      problem.assets?.dockerfilesZip
+                        ? "Environment(s) to be established:"
+                        : "List of environments:"
+                    }}
                   </div>
+                  <ul class="list-inside space-y-1 opacity-80">
+                    <li
+                      v-for="(env, index) in detectedDockerEnvs"
+                      :key="env"
+                      class="flex items-center justify-between rounded px-1 transition-colors hover:bg-base-300"
+                    >
+                      <div>
+                        <span class="font-mono font-bold">{{ env }}</span>
+                      </div>
+
+                      <button
+                        type="button"
+                        class="btn btn-ghost btn-xs h-6 min-h-0 w-6 p-0 text-error"
+                        @click="removeDockerEnv(index)"
+                        title="Remove this environment"
+                      >
+                        <i-uil-trash-alt />
+                      </button>
+                    </li>
+                  </ul>
+                </div>
               </div>
-              </div>
+            </div>
           </div>
         </div>
       </transition>
@@ -1000,20 +1199,12 @@ onBeforeUnmount(() => {
       <label class="label"><span class="label-text">Artifact Collection (Optional)</span></label>
       <div class="flex gap-4">
         <label class="label cursor-pointer gap-2">
-          <input
-            type="checkbox"
-            class="checkbox"
-            v-model="artifactCompiledBinary"
-          />
+          <input type="checkbox" class="checkbox" v-model="artifactCompiledBinary" />
           <span class="label-text">Compiled Binary</span>
         </label>
 
         <label class="label cursor-pointer gap-2">
-          <input
-            type="checkbox"
-            class="checkbox"
-            v-model="artifactZip"
-          />
+          <input type="checkbox" class="checkbox" v-model="artifactZip" />
           <span class="label-text">Student Artifact (Zip)</span>
         </label>
       </div>

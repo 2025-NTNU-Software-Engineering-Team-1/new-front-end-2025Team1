@@ -9,9 +9,44 @@ import PipelineSection from "./Sections/PipelineSection.vue";
 import TestDataSection from "./Sections/TestDataSection.vue";
 import ResourceDataSection from "./Sections/ResourceDataSection.vue";
 
-/* ========================================================
-   工具函式
-   ======================================================== */
+// ==========================================
+// [CONFIG] Console Debug Mode
+// ==========================================
+const DEBUG_MODE = 1;
+
+// ==========================================
+// Logger Utility
+// ==========================================
+const logger = {
+  log: (label: string, data?: any) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Log] ${label}`, "color: #3b82f6; font-weight: bold;", data || "");
+  },
+  success: (label: string, data?: any) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Success] ${label}`, "color: #10b981; font-weight: bold;", data || "");
+  },
+  error: (label: string, error?: any) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Error] ${label}`, "color: #ef4444; font-weight: bold;", error || "");
+  },
+  warn: (label: string, data?: any) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Warn] ${label}`, "color: #f59e0b; font-weight: bold;", data || "");
+  },
+  group: (label: string) => {
+    if (!DEBUG_MODE) return;
+    console.group(`%c[Group] ${label}`, "color: #8b5cf6; font-weight: bold;");
+  },
+  groupEnd: () => {
+    if (!DEBUG_MODE) return;
+    console.groupEnd();
+  },
+};
+
+// ==========================================
+// Section: Utility Functions
+// ==========================================
 function getAllowedFileExtensions(allowedLanguage: number): string[] {
   const list: string[] = [];
   if (allowedLanguage & 1) list.push(".c");
@@ -20,10 +55,15 @@ function getAllowedFileExtensions(allowedLanguage: number): string[] {
   return list;
 }
 
-/* ========================================================
-   初始化與 Ref
-   ======================================================== */
+// ==========================================
+// Section: Initialization & Refs
+// ==========================================
 const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
+
+if (!problem || !problem.value) {
+  logger.error("Problem injection failed");
+  throw new Error("ProblemFormParent requires problem injection");
+}
 
 const emits = defineEmits<{
   (e: "update", key: keyof ProblemForm, value: ProblemForm[typeof key]): void;
@@ -35,9 +75,14 @@ const errorMsg = ref("");
 
 defineExpose({ isLoading, errorMsg });
 
-/* ========================================================
-   雙版本相容的 normalize 函式
-   ======================================================== */
+// ==========================================
+// Section: Data Normalization
+// ==========================================
+
+/**
+ * Dual-version compatible normalize function for library restrictions.
+ * Handles both legacy array format and new object format.
+ */
 function normalizeLibraryRestrictions(raw: any) {
   const base = {
     enabled: false,
@@ -46,7 +91,7 @@ function normalizeLibraryRestrictions(raw: any) {
   };
   if (!raw) return base;
 
-  // 若是新版 (含物件內部 keys)，直接回傳
+  // Check if it's the new structure (contains internal keys)
   const isNewStructure =
     typeof raw.whitelist === "object" &&
     raw.whitelist !== null &&
@@ -54,7 +99,7 @@ function normalizeLibraryRestrictions(raw: any) {
     Array.isArray(raw.blacklist.syntax);
 
   if (isNewStructure) {
-    // 保留全部，但確保 keys 存在
+    // Preserve all fields but ensure keys exist
     return {
       enabled: !!raw.enabled,
       whitelist: {
@@ -72,7 +117,8 @@ function normalizeLibraryRestrictions(raw: any) {
     };
   }
 
-  // 舊版: whitelist / blacklist 直接是陣列
+  // Legacy format: whitelist/blacklist are direct arrays (usually syntax)
+  logger.warn("Legacy LibraryRestrictions format detected, normalizing...");
   const asArr = (v: any) => (Array.isArray(v) ? v : []);
   return {
     enabled: !!raw.enabled,
@@ -91,34 +137,45 @@ function normalizeLibraryRestrictions(raw: any) {
   };
 }
 
-/* ========================================================
-   在表單初始化自動修正結構（只執行一次，避免重置用戶的修改）
-   ======================================================== */
+/**
+ * Auto-correct form structure on initialization.
+ * Runs only once to avoid resetting user edits during hot-reload.
+ */
 function initFormStructure() {
-  if (!problem.value) return;
+  logger.group("Init Form Structure");
+  if (!problem.value) {
+    logger.warn("Problem value is null");
+    logger.groupEnd();
+    return;
+  }
 
-  // 防止 pipeline 或 staticAnalysis 未初始化
+  // Ensure pipeline and staticAnalysis exist
   if (!problem.value.pipeline) problem.value.pipeline = {} as any;
   if (!problem.value.pipeline.staticAnalysis) problem.value.pipeline.staticAnalysis = {} as any;
 
   const staticAnalysis = (problem.value.pipeline.staticAnalysis ??= {} as any);
   const libs = staticAnalysis.libraryRestrictions;
 
+  // Normalize Library Restrictions
   if (!libs || typeof libs !== "object") {
+    logger.log("Initializing Library Restrictions (Empty)");
     staticAnalysis.libraryRestrictions = normalizeLibraryRestrictions(null);
   } else {
+    // logger.log("Normalizing existing Library Restrictions");
     staticAnalysis.libraryRestrictions = normalizeLibraryRestrictions(libs);
   }
+
+  logger.success("Form Structure Initialized");
+  logger.groupEnd();
 }
 
-// 在組件掛載時執行一次初始化
 onMounted(() => {
   initFormStructure();
 });
 
-/* ========================================================
-   驗證規則
-   ======================================================== */
+// ==========================================
+// Section: Validation Rules
+// ==========================================
 const rules = {
   problemName: { required, maxLength: maxLength(64) },
 
@@ -275,22 +332,39 @@ const rules = {
   },
 };
 
-/* ========================================================
-   Vuelidate 初始化 & 方法
-   ======================================================== */
+// ==========================================
+// Section: Vuelidate & Methods
+// ==========================================
 const v$ = useVuelidate(rules, problem);
 
 // Provide v$ to child components (e.g., PipelineSection)
 provide("v$", v$);
 
 function update<K extends keyof ProblemForm>(key: K, value: ProblemForm[K]) {
+  // logger.log(`Update Field: ${String(key)}`, value); // Optional: verbose logging
   emits("update", key, value);
   if ((v$.value as any)[key]) (v$.value as any)[key].$touch?.();
 }
 
 async function submit() {
+  logger.group("Form Submission");
   const ok = await v$.value.$validate();
-  if (ok) emits("submit");
+
+  if (ok) {
+    logger.success("Validation Passed. Emitting submit.");
+    emits("submit");
+  } else {
+    logger.error("Validation Failed");
+    // Debug: Log invalid fields
+    if (DEBUG_MODE) {
+      const errors = v$.value.$errors;
+      logger.warn(
+        "Invalid Fields:",
+        errors.map((e: any) => e.$property),
+      );
+    }
+  }
+  logger.groupEnd();
 }
 </script>
 

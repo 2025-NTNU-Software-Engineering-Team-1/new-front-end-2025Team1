@@ -51,9 +51,7 @@ function normalizeConfig(config?: ProblemConfigExtra): ProblemConfigExtra {
     acceptedFormat: config?.acceptedFormat ?? base.acceptedFormat,
     maxStudentZipSizeMB: config?.maxStudentZipSizeMB ?? base.maxStudentZipSizeMB,
     artifactCollection:
-      config?.artifactCollection ??
-      (config as any)?.artifact_collection ??
-      base.artifactCollection,
+      config?.artifactCollection ?? (config as any)?.artifact_collection ?? base.artifactCollection,
     resourceDataTeacher: config?.resourceDataTeacher ?? base.resourceDataTeacher,
     networkAccessRestriction: {
       ...base.networkAccessRestriction!,
@@ -69,7 +67,7 @@ function normalizeConfig(config?: ProblemConfigExtra): ProblemConfigExtra {
   if (!nar.external) nar.external = { model: "White", ip: [], url: [] };
   if (!Array.isArray(nar.external.ip)) nar.external.ip = [];
   if (!Array.isArray(nar.external.url)) nar.external.url = [];
-  
+
   nar.external.model = nar.external.model || "White";
   return merged;
 }
@@ -147,16 +145,16 @@ function normalizeAssets(raw: any): ProblemAssets {
     trialModePublicTestDataZip: raw?.trialModePublicTestDataZip ?? null,
     trialModeACFiles: raw?.trialModeACFiles ?? null,
     aiVTuberACFiles: null,
-  customCheckerPy: null,
-  makefileZip: null,
-  teacherFile: null,
-  scorePy: null,
-  dockerfilesZip: null,
-  localServiceZip: null,
-  testdataZip: null,
-  resourceDataZip: null,
-  resourceDataTeacherZip: null,
-};
+    customCheckerPy: null,
+    makefileZip: null,
+    teacherFile: null,
+    scorePy: null,
+    dockerfilesZip: null,
+    localServiceZip: null,
+    testdataZip: null,
+    resourceDataZip: null,
+    resourceDataTeacherZip: null,
+  };
   if (raw?.aiVTuberFiles && !raw.aiVTuberACFiles) raw.aiVTuberACFiles = raw.aiVTuberFiles;
   return { ...base, ...(raw || {}) };
 }
@@ -175,9 +173,7 @@ watch(
   (newProblem) => {
     if (!newProblem || edittingProblem.value) return; // 已初始化則跳過
 
-    const testCases = normalizeTestCases(
-      (newProblem as any).testCase ?? (newProblem as any).testCaseInfo,
-    );
+    const testCases = normalizeTestCases((newProblem as any).testCase ?? (newProblem as any).testCaseInfo);
 
     edittingProblem.value = {
       ...newProblem,
@@ -271,8 +267,7 @@ async function submit() {
     if (assets?.dockerfilesZip) fd.append("dockerfiles.zip", assets.dockerfilesZip);
     if (assets?.localServiceZip) fd.append("local_service.zip", assets.localServiceZip);
     if (assets?.resourceDataZip) fd.append("resource_data.zip", assets.resourceDataZip);
-    if (assets?.resourceDataTeacherZip)
-      fd.append("resource_data_teacher.zip", assets.resourceDataTeacherZip);
+    if (assets?.resourceDataTeacherZip) fd.append("resource_data_teacher.zip", assets.resourceDataTeacherZip);
 
     await api.Problem.modify(pid, edittingProblem.value);
     await api.Problem.uploadAssetsV2(pid, fd);

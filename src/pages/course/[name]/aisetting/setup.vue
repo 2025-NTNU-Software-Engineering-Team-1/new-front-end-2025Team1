@@ -6,6 +6,40 @@ import api from "@/models/api";
 import { useI18n } from "vue-i18n";
 import { useSession } from "@/stores/session";
 
+// ==========================================
+// [CONFIG] Console Debug Mode
+// 1 = Enable Logs, 0 = Disable Logs
+const DEBUG_MODE = 1;
+// ==========================================
+
+// --- Logger Utility ---
+const logger = {
+  log: (label: string, data?: any) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Log] ${label}`, "color: #3b82f6; font-weight: bold;", data || "");
+  },
+  success: (label: string, data?: any) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Success] ${label}`, "color: #10b981; font-weight: bold;", data || "");
+  },
+  error: (label: string, error?: any) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Error] ${label}`, "color: #ef4444; font-weight: bold;", error || "");
+  },
+  group: (label: string) => {
+    if (!DEBUG_MODE) return;
+    console.group(`%c[Group] ${label}`, "color: #8b5cf6; font-weight: bold;");
+  },
+  groupCollapsed: (label: string) => {
+    if (!DEBUG_MODE) return;
+    console.groupCollapsed(`%c[Detail] ${label}`, "color: #6366f1; font-weight: bold;");
+  },
+  groupEnd: () => {
+    if (!DEBUG_MODE) return;
+    console.groupEnd();
+  },
+};
+
 const route = useRoute();
 const { t } = useI18n();
 useTitle(`AI Setting - ${route.params.name} | Normal OJ`);
@@ -15,41 +49,80 @@ const errorMsg = ref("");
 const successMsg = ref("");
 const session = useSession();
 
-// === 現有 API Keys ===
-const apiKeys = ref<
-  {
-    id: string;
-    key_name: string;
-    masked_value: string;
-    is_active: boolean;
-    created_by: string;
-  }[]
->([]);
+interface ApiKey {
+  id: string;
+  key_name: string;
+  masked_value: string;
+  is_active: boolean;
+  created_by: string;
+}
 
-// === 新增 key 表單 ===
+const apiKeys = ref<ApiKey[]>([]);
+
 const newKey = ref({
   name: "",
   value: "",
   maskedDisplay: "",
 });
 
-// === 載入資料 ===
+function parseApiResponse(res: any) {
+  const data = res?.data;
+  const rawStatus = data?.status || res?.status;
+  const statusStr = String(rawStatus || "").toLowerCase();
+  const message = data?.message || res?.message || "Unknown response from server";
+  const isSuccess = statusStr === "ok" || statusStr === "success" || rawStatus === 200;
+  return { isSuccess, message, data, rawStatus };
+}
+
 async function fetchKeys() {
+  logger.group(`Fetch Keys: ${route.params.name}`);
+  isLoading.value = true;
+  errorMsg.value = "";
+
   try {
-    isLoading.value = true;
-    const { data } = await api.AIVTuber.getCourseKeys(route.params.name as string);
-    apiKeys.value = data.keys || [];
+    const res = await api.AIVTuber.getCourseKeys(route.params.name as string);
+
+    const rawKeys = res?.data?.keys || [];
+    logger.log(`Found ${rawKeys.length} keys`);
+
+    // clean
+    apiKeys.value = rawKeys.map((k: any, index: number) => {
+      const missing: string[] = [];
+      if (!k.id) missing.push("id");
+      if (!k.key_name) missing.push("key_name");
+      if (k.is_active === undefined) missing.push("is_active");
+
+      if (missing.length > 0) {
+        logger.error(`Key at index ${index} missing fields:`, missing);
+      }
+
+      // safe object
+      return {
+        id: k.id || `temp-id-${index}-${Date.now()}`,
+        key_name: k.key_name || "(Unnamed Key)",
+        masked_value: k.masked_value || "******",
+        is_active: !!k.is_active,
+        created_by: k.created_by || "Unknown",
+      };
+    });
   } catch (err: any) {
+    logger.error("Fetch Failed", err);
     errorMsg.value = err?.response?.data?.message ?? "Failed to load keys.";
   } finally {
     isLoading.value = false;
+    logger.groupEnd();
   }
 }
 
 // === 新增 Key ===
 async function addKey() {
+  logger.group("Action: Add Key");
+
+  // 前端驗證
   if (!newKey.value.name.trim() || !newKey.value.value.trim()) {
     errorMsg.value = "Key name and value are required.";
+    logger.error("Validation Error", "Empty fields");
+    logger.groupEnd();
     return;
   }
 
@@ -57,84 +130,113 @@ async function addKey() {
   successMsg.value = "";
   isLoading.value = true;
 
-  try {
-    // 使用目前登入者的 username 當作建立者
-    const res = await api.AIVTuber.addKey(route.params.name as string, {
-      key_name: newKey.value.name,
-      value: newKey.value.value,
-      is_active: true,
-      created_by: session.username,
-    });
-    const data = res.data;
+  const payload = {
+    key_name: newKey.value.name,
+    value: newKey.value.value,
+    is_active: true,
+    created_by: session.username,
+  };
 
-    if (data.status === "OK") {
-      successMsg.value = data.message;
-      // 顯示回傳的 masked_id
-      if (data.masked_id) {
-        newKey.value.maskedDisplay = data.masked_id;
-      } else {
-        newKey.value.maskedDisplay = "";
-      }
-      // 清空輸入欄位
+  try {
+    const res = await api.AIVTuber.addKey(route.params.name as string, payload);
+    logger.log("API Response", res);
+
+    const { isSuccess, message, data } = parseApiResponse(res);
+
+    if (isSuccess) {
+      logger.success("Add Success", message);
+      successMsg.value = message;
+
+      newKey.value.maskedDisplay = data?.masked_id || "";
+
       newKey.value.value = "";
       newKey.value.name = "";
+
       await fetchKeys();
     } else {
-      errorMsg.value = data.message || "Failed to add key.";
+      logger.error("Add Failed", message);
+      errorMsg.value = message;
     }
   } catch (err: any) {
+    logger.error("Add Exception", err);
     errorMsg.value = err?.response?.data?.message ?? "Failed to add key.";
   } finally {
     isLoading.value = false;
+    logger.groupEnd();
   }
 }
 
 // === 更新 Key ===
-async function updateKey(key: any) {
+async function updateKey(key: ApiKey) {
+  logger.group(`Action: Update Key [${key.id}]`);
   isLoading.value = true;
   successMsg.value = "";
   errorMsg.value = "";
 
-  try {
-    const { data } = await api.AIVTuber.updateKey(route.params.name as string, key.id, {
-      key_name: key.key_name,
-      is_active: key.is_active,
-    });
+  const payload = {
+    key_name: key.key_name,
+    is_active: key.is_active,
+  };
+  logger.log("Payload", payload);
 
-    if (data.status === "OK") {
-      successMsg.value = data.message;
-      await fetchKeys();
+  try {
+    const res = await api.AIVTuber.updateKey(route.params.name as string, key.id, payload);
+    logger.log("API Response Object", res);
+
+    const { isSuccess, message, rawStatus } = parseApiResponse(res);
+
+    if (isSuccess) {
+      logger.success(`Update Success (Status: ${rawStatus})`, message);
+      successMsg.value = message;
     } else {
-      errorMsg.value = data.message || "Failed to update key.";
+      logger.error(`Update Failed (Status: ${rawStatus})`, message);
+      errorMsg.value = message || "Failed to update key.";
+      await fetchKeys();
     }
   } catch (err: any) {
+    logger.error("Update Exception", err);
     errorMsg.value = err?.response?.data?.message ?? "Failed to update key.";
+    await fetchKeys();
   } finally {
     isLoading.value = false;
+    logger.groupEnd();
   }
 }
 
 // === 刪除 Key ===
 async function deleteKey(keyId: string) {
-  if (!confirm("Are you sure to delete this key?")) return;
+  logger.group(`Action: Delete Key [${keyId}]`);
+
+  if (!confirm("Are you sure to delete this key?")) {
+    logger.log("User Cancelled");
+    logger.groupEnd();
+    return;
+  }
 
   successMsg.value = "";
   errorMsg.value = "";
   isLoading.value = true;
 
   try {
-    const { data } = await api.AIVTuber.deleteKey(route.params.name as string, keyId);
+    const res = await api.AIVTuber.deleteKey(route.params.name as string, keyId);
+    logger.log("API Response", res);
 
-    if (data.status === "OK") {
-      successMsg.value = data.message;
+    const { isSuccess, message } = parseApiResponse(res);
+
+    if (isSuccess) {
+      logger.success("Delete Success", message);
+      successMsg.value = message;
       await fetchKeys();
     } else {
-      errorMsg.value = data.message || "Failed to delete key.";
+      logger.error("Delete Failed", message);
+      errorMsg.value = message || "Failed to delete key.";
     }
   } catch (err: any) {
+    logger.error("Delete Exception", err);
     errorMsg.value = err?.response?.data?.message ?? "Failed to delete key.";
   } finally {
     isLoading.value = false;
+    logger.groupEnd();
   }
 }
 
@@ -145,7 +247,7 @@ onMounted(fetchKeys);
   <div class="card-container pb-20">
     <div class="card min-w-full">
       <div class="card-body">
-        <div class="card-title mb-4">AI Setting – Set Up</div>
+        <div class="card-title mb-4">AI Setting – Set Up</div>
 
         <div v-if="errorMsg" class="alert alert-error shadow-lg">
           <div>
@@ -158,9 +260,8 @@ onMounted(fetchKeys);
           </div>
         </div>
 
-        <!-- === 新增 Key 表單 === -->
         <div class="mb-8 rounded-lg border border-base-300 p-4">
-          <h3 class="mb-2 text-lg font-semibold">Add New API Key</h3>
+          <h3 class="mb-2 text-lg font-semibold">Add New API Key</h3>
 
           <div class="grid gap-3 md:grid-cols-3">
             <input
@@ -175,7 +276,6 @@ onMounted(fetchKeys);
               placeholder="API Key Value *"
               class="input input-bordered w-full"
             />
-            <!-- 自動顯示登入使用者 -->
             <input
               type="text"
               :value="session.displayedName || session.username"
@@ -190,19 +290,20 @@ onMounted(fetchKeys);
             </button>
           </div>
 
-          <!-- 顯示後端回傳 masked_id -->
           <div v-if="newKey.maskedDisplay" class="mt-3 font-mono text-sm text-success">
             Masked ID: {{ newKey.maskedDisplay }}
           </div>
         </div>
 
-        <!-- === 現有 Keys === -->
         <div class="rounded-lg border border-base-300 p-4">
           <h3 class="mb-4 text-lg font-semibold">Existing Keys</h3>
-          <div v-if="isLoading" class="text-center opacity-60">
+
+          <div v-if="isLoading && apiKeys.length === 0" class="py-4 text-center opacity-60">
             <ui-spinner />
           </div>
-          <div v-else-if="apiKeys.length === 0" class="italic opacity-70">No keys yet.</div>
+
+          <div v-else-if="apiKeys.length === 0" class="py-2 italic opacity-70">No keys yet.</div>
+
           <div v-else class="space-y-3">
             <div
               v-for="k in apiKeys"

@@ -33,6 +33,9 @@ export const useSession = defineStore("session", {
     isTeacher(state) {
       return state.role === UserRole.Teacher;
     },
+    isTA(state) {
+      return state.role === UserRole.TA;
+    },
     isNotValidated(state) {
       return state.state === SessionState.NotValidated;
     },

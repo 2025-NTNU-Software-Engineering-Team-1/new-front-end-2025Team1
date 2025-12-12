@@ -11,6 +11,51 @@ import { ZipReader, BlobReader } from "@zip.js/zip.js";
 import { fetcher } from "@/models/api";
 import api from "@/models/api";
 
+// ==========================================
+// [CONFIG] Console Debug Mode
+const DEBUG_MODE = 1;
+// ==========================================
+
+// --- Logger Utility ---
+const logger = {
+  log: (label: string, data?: any) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Log] ${label}`, "color: #3b82f6; font-weight: bold;", data || "");
+  },
+  success: (label: string, data?: any) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Success] ${label}`, "color: #10b981; font-weight: bold;", data || "");
+  },
+  error: (label: string, error?: any) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Error] ${label}`, "color: #ef4444; font-weight: bold;", error || "");
+  },
+  warn: (label: string, data?: any) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Warn] ${label}`, "color: #f59e0b; font-weight: bold;", data || "");
+  },
+  group: (label: string) => {
+    if (!DEBUG_MODE) return;
+    console.group(`%c[Group] ${label}`, "color: #8b5cf6; font-weight: bold;");
+  },
+  groupEnd: () => {
+    if (!DEBUG_MODE) return;
+    console.groupEnd();
+  },
+};
+
+// --- API Response Parser ---
+function parseApiResponse(res: any) {
+  const data = res?.data;
+  const rawStatus = data?.status || res?.status;
+  const statusStr = String(rawStatus || "").toLowerCase();
+  const message = data?.message || res?.message || "Unknown response";
+
+  const isSuccess = statusStr === "ok" || statusStr === "success" || rawStatus === 200;
+
+  return { isSuccess, message, data, rawStatus };
+}
+
 /* -------------------- Injection & Setup -------------------- */
 const rawProblem = inject<Ref<ProblemForm> | undefined>("problem");
 if (!rawProblem || !rawProblem.value) throw new Error("ConfigurationSection requires problem injection");
@@ -23,11 +68,29 @@ const route = useRoute();
 const courseName = ref<string | null>(null);
 
 async function fetchCourseName() {
+  logger.group("Fetch Course Name");
   try {
     const resp = await fetcher.get(`/course/${route.params.name}`);
-    courseName.value = resp.data;
-  } catch {
-    console.warn("Failed to fetch course id");
+    logger.log("Raw Response", resp);
+
+    const val = resp?.data;
+
+    // 🔥 [關鍵修正]：防止將物件賦值給字串，導致 API 網址變成 [object Object]
+    if (val && typeof val === "object") {
+      logger.warn("Received Object instead of String ID/Name. Extracting name...", val);
+      // 嘗試從物件中提取 name 或 id，若都沒有則使用路由參數
+      courseName.value = val.name || val.id || (route.params.name as string);
+    } else {
+      courseName.value = val || (route.params.name as string);
+    }
+
+    logger.success("Course Name Resolved", courseName.value);
+  } catch (err) {
+    logger.error("Failed to fetch course info", err);
+    // 即使失敗，也嘗試使用路由參數作為備案
+    courseName.value = route.params.name as string;
+  } finally {
+    logger.groupEnd();
   }
 }
 
@@ -87,21 +150,34 @@ function onTrialLimitInput(e: Event) {
 }
 
 async function validateTrialPublicZip(file: File): Promise<boolean> {
+  logger.group("Validate Trial Zip");
   try {
     const reader = new ZipReader(new BlobReader(file));
     const entries = await reader.getEntries();
     await reader.close?.();
 
-    if (!entries.length) return false;
+    if (!entries.length) {
+      logger.error("Zip is empty");
+      return false;
+    }
 
     // ONLY .in
     const invalid = entries.filter(({ filename }) => !filename.endsWith(".in"));
-    if (invalid.length > 0) return false;
+    if (invalid.length > 0) {
+      logger.error(
+        "Invalid files found (must be .in)",
+        invalid.map((e) => e.filename),
+      );
+      return false;
+    }
 
+    logger.success("Validation OK", entries.length + " files");
     return true;
   } catch (err) {
-    console.error("Failed to read zip:", err);
+    logger.error("Failed to read zip", err);
     return false;
+  } finally {
+    logger.groupEnd();
   }
 }
 
@@ -141,7 +217,8 @@ function ensureConfig() {
     if (!nar.external) nar.external = { model: "Black", ip: [], url: [] };
   }
 }
-// 初始化 artifactCollection 的函數（會在 onMounted 中呼叫，只執行一次）
+
+// 初始化 artifactCollection
 function initArtifactCollection() {
   ensureConfig();
   const cfg = problem.value.config as any;
@@ -152,7 +229,8 @@ function initArtifactCollection() {
     cfg.artifactCollection = cfg.pipeline.artifactCollection.slice();
   }
 }
-// 同步初始化檢查（確保在 onMounted 之前就有正確的初始值）
+
+// 同步初始化檢查
 if (!Array.isArray(problem.value.config.artifactCollection)) {
   const cfgAny = problem.value.config as any;
   problem.value.config.artifactCollection = Array.isArray(cfgAny?.artifact_collection)
@@ -212,6 +290,7 @@ watch(
 );
 
 async function inspectDockerZip(file: File) {
+  logger.group("Inspect Docker Zip");
   detectedDockerEnvs.value = [];
   dockerZipError.value = "";
 
@@ -224,6 +303,10 @@ async function inspectDockerZip(file: File) {
 
     if (dockerfiles.length === 0) {
       dockerZipError.value = "Not found any 'Dockerfile'.";
+      logger.error(
+        "No Dockerfile found in zip",
+        entries.map((e) => e.filename),
+      );
       return false;
     }
 
@@ -231,8 +314,10 @@ async function inspectDockerZip(file: File) {
     for (const entry of dockerfiles) {
       const parts = entry.filename.split("/");
 
+      // 檢查目錄結構：必須是 folder/Dockerfile
       if (parts.length !== 2) {
-        dockerZipError.value = `Structure error: ${entry.filename}. Please ensure the structure is "environment_folder/Dockerfile" without an extra directory level.`;
+        dockerZipError.value = `Structure error: ${entry.filename}. Please ensure the structure is "environment_folder/Dockerfile".`;
+        logger.error("Structure error", entry.filename);
         return false;
       }
 
@@ -248,13 +333,17 @@ async function inspectDockerZip(file: File) {
     }
     nar.custom_env.env_list = sortedEnvs;
 
+    logger.success("Docker inspection success", sortedEnvs);
     return true;
   } catch (e) {
-    console.error(e);
+    logger.error("Zip read error", e);
     dockerZipError.value = "Failed to read Zip file, please ensure the file is not corrupted.";
     return false;
+  } finally {
+    logger.groupEnd();
   }
 }
+
 function removeDockerEnv(index: number) {
   detectedDockerEnvs.value.splice(index, 1);
   const nar = problem.value.config?.networkAccessRestriction as any;
@@ -287,17 +376,60 @@ const showInactiveKeys = ref(true);
 async function fetchKeys() {
   if (!courseName.value) await fetchCourseName();
 
+  // 若 fetchCourseName 仍失敗，則不進行 API 呼叫避免 404
+  if (!courseName.value || typeof courseName.value !== "string") {
+    logger.error("Skipping fetchKeys: Invalid courseName", courseName.value);
+    fetchError.value = "Invalid Course Name";
+    return;
+  }
+
+  logger.group(`Fetch Keys: ${courseName.value}`);
   isFetchingKeys.value = true;
   fetchError.value = "";
+
   try {
-    const { data } = await api.AIVTuber.getCourseKeys(courseName.value!);
-    const allKeys = data.keys || [];
-    apiKeys.active = allKeys.filter((k) => k.is_active);
-    apiKeys.inactive = allKeys.filter((k) => !k.is_active);
-  } catch {
-    fetchError.value = "Failed to load keys.";
+    const res = await api.AIVTuber.getCourseKeys(courseName.value!);
+    // logger.log("Raw Response", res);
+
+    const { isSuccess, data, message } = parseApiResponse(res);
+
+    if (!isSuccess && !data) {
+      throw new Error(message || "Failed to response keys");
+    }
+
+    const rawKeys = data?.keys || [];
+    logger.log(`Found ${rawKeys.length} keys`);
+
+    // 資料清洗與分類
+    const safeKeys = rawKeys.map((k: any, index: number) => {
+      // Integrity Check
+      const missing: string[] = [];
+      if (!k.id) missing.push("id");
+      if (!k.key_name) missing.push("key_name");
+
+      if (missing.length > 0) {
+        logger.warn(`Key data incomplete at index ${index}`, missing);
+      }
+
+      return {
+        id: k.id || `temp-${index}`,
+        key_name: k.key_name || "(Unknown Name)",
+        masked_value: k.masked_value || "******",
+        is_active: !!k.is_active,
+        created_by: k.created_by || "",
+      };
+    });
+
+    apiKeys.active = safeKeys.filter((k: any) => k.is_active);
+    apiKeys.inactive = safeKeys.filter((k: any) => !k.is_active);
+
+    logger.success("Keys Loaded", { active: apiKeys.active.length, inactive: apiKeys.inactive.length });
+  } catch (err: any) {
+    logger.error("Fetch Keys Error", err);
+    fetchError.value = err?.message || "Failed to load keys.";
   } finally {
     isFetchingKeys.value = false;
+    logger.groupEnd();
   }
 }
 
@@ -346,19 +478,33 @@ const suggestionError = ref("");
 async function fetchKeySuggestion() {
   if (!courseName.value) await fetchCourseName();
 
+  if (!courseName.value || typeof courseName.value !== "string") {
+    return;
+  }
+
   const model = problem.value.config?.aiVTuberMode || "gemini-2.5-flash-lite";
 
+  logger.group("Fetch Key Suggestion");
   isFetchingSuggestion.value = true;
   suggestionError.value = "";
 
   try {
-    const { data } = await api.AIVTuber.getKeySuggestion(courseName.value!, model);
-    keySuggestion.value = data;
+    const res = await api.AIVTuber.getKeySuggestion(courseName.value!, model);
+    const { isSuccess, data, message } = parseApiResponse(res);
+
+    if (isSuccess) {
+      keySuggestion.value = data;
+      logger.success("Suggestion", data);
+    } else {
+      throw new Error(message || "API returned failed status");
+    }
   } catch (err: any) {
-    suggestionError.value = err?.response?.data?.detail || "Failed to fetch suggestion.";
+    logger.error("Suggestion Error", err);
+    suggestionError.value = err?.response?.data?.detail || err?.message || "Failed to fetch suggestion.";
     keySuggestion.value = null;
   } finally {
     isFetchingSuggestion.value = false;
+    logger.groupEnd();
   }
 }
 
@@ -407,7 +553,6 @@ watch(selectedKeys, (keys) => {
 
 /* -------------------- Lifecycle -------------------- */
 onMounted(() => {
-  // 只在組件掛載時初始化一次 artifactCollection（避免 reactive 依賴導致重複執行）
   initArtifactCollection();
   fetchKeys();
   document.addEventListener("click", onClickOutside);

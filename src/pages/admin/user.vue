@@ -35,9 +35,9 @@ const initialUserForm = {
 };
 const userForm = ref<UserEditionForm>({ ...initialUserForm });
 const rules = {
-  displayedName: { required, maxLength: maxLength(16) },
+  displayedName: { maxLength: maxLength(16) },
   role: { required, between: between(0, 3), integer },
-  password: { minLength: minLength(4) },
+  password: { minLength: minLength(1) },
 };
 const v$ = useVuelidate(rules, userForm);
 function editUser(username: string) {

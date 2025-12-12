@@ -142,6 +142,34 @@ async function downloadAllSubmissions() {
               @keydown.enter="mutateFilter({ username: searchUsername })"
             />
           </div>
+          <div v-if="session.isTeacher" class="flex justify-between gap-4">
+            <div class="tooltip tooltip-bottom" data-tip="Download submissions json file">
+              <div class="btn" @click="downloadAllSubmissions">
+                <i-uil-file-download class="h-5 w-5" />
+              </div>
+            </div>
+            <input
+              v-model="searchUsername"
+              type="text"
+              placeholder="Username (exact match)"
+              class="input input-bordered w-full max-w-xs"
+              @keydown.enter="mutateFilter({ username: searchUsername })"
+            />
+          </div>
+          <div v-if="session.isTA" class="flex justify-between gap-4">
+            <div class="tooltip tooltip-bottom" data-tip="Download submissions json file">
+              <div class="btn" @click="downloadAllSubmissions">
+                <i-uil-file-download class="h-5 w-5" />
+              </div>
+            </div>
+            <input
+              v-model="searchUsername"
+              type="text"
+              placeholder="Username (exact match)"
+              class="input input-bordered w-full max-w-xs"
+              @keydown.enter="mutateFilter({ username: searchUsername })"
+            />
+          </div>
         </div>
 
         <div class="my-2" />
@@ -204,6 +232,8 @@ async function downloadAllSubmissions() {
                   <th>{{ $t("course.submissions.table.lang") }}</th>
                   <th>{{ $t("course.submissions.table.time") }}</th>
                   <th v-if="session.isAdmin">{{ $t("course.submissions.table.ipAddr") }}</th>
+                  <th v-if="session.isTeacher">{{ $t("course.submissions.table.ipAddr") }}</th>
+                  <th v-if="session.isTA">{{ $t("course.submissions.table.ipAddr") }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -263,6 +293,8 @@ async function downloadAllSubmissions() {
                     </div>
                   </td>
                   <td v-if="session.isAdmin">{{ submission.ipAddr }}</td>
+                  <td v-if="session.isTeacher">{{ submission.ipAddr }}</td>
+                  <td v-if="session.isTA">{{ submission.ipAddr }}</td>
                 </tr>
               </tbody>
             </table>

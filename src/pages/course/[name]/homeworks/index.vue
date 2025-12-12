@@ -36,6 +36,20 @@ const homeworks = computed(() => {
           >
             <i-uil-plus-circle class="mr-1 lg:h-5 lg:w-5" /> {{ $t("course.hw.index.new") }}
           </router-link>
+          <router-link
+            v-if="session.isTeacher"
+            class="btn btn-success"
+            :to="`/course/${$route.params.name}/homeworks/new`"
+          >
+            <i-uil-plus-circle class="mr-1 lg:h-5 lg:w-5" /> {{ $t("course.hw.index.new") }}
+          </router-link>
+          <router-link
+            v-if="session.isTA"
+            class="btn btn-success"
+            :to="`/course/${$route.params.name}/homeworks/new`"
+          >
+            <i-uil-plus-circle class="mr-1 lg:h-5 lg:w-5" /> {{ $t("course.hw.index.new") }}
+          </router-link>
         </div>
         <data-status-wrapper :error="error || fetchProblemError" :is-loading="isLoading || isFetchingProblem">
           <template #loading>

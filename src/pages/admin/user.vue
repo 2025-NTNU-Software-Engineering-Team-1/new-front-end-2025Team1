@@ -36,7 +36,7 @@ const initialUserForm = {
 const userForm = ref<UserEditionForm>({ ...initialUserForm });
 const rules = {
   displayedName: { required, maxLength: maxLength(16) },
-  role: { required, between: between(0, 2), integer },
+  role: { required, between: between(0, 3), integer },
   password: { minLength: minLength(4) },
 };
 const v$ = useVuelidate(rules, userForm);
@@ -87,6 +87,7 @@ async function submit() {
       <option :value="0">{{ $t("admin.user.admin") }}</option>
       <option :value="1">{{ $t("admin.user.teacher") }}</option>
       <option :value="2">{{ $t("admin.user.student") }}</option>
+      <option :value="3">{{ $t("admin.user.ta") }}</option>
     </select>
 
     <span>{{ $t("admin.user.row-count", { n: filteredUsers?.length }) }}</span>
@@ -166,6 +167,7 @@ async function submit() {
           <option :value="0">{{ $t("admin.user.admin") }}</option>
           <option :value="1">{{ $t("admin.user.teacher") }}</option>
           <option :value="2">{{ $t("admin.user.student") }}</option>
+          <option :value="3">{{ $t("admin.user.ta") }}</option>
         </select>
       </div>
 

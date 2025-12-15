@@ -6,7 +6,7 @@ export const LANGUAGE_OPTIONS: LangOption[] = [
   { value: 2, text: "py", mask: 4 },
 ];
 
-export const ROLE = ["Admin", "Teacher", "Student"];
+export const ROLE = ["Admin", "Teacher", "Student", "TA"];
 
 // keyof SUBMISSION_STATUS_REPR please refer to '@/types/submission.d.ts'
 export const SUBMISSION_STATUS_REPR = {

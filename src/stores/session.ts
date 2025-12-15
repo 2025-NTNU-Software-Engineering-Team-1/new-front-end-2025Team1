@@ -12,6 +12,7 @@ export enum UserRole {
   Admin = 0,
   Teacher = 1,
   Student = 2,
+  TA = 3,
 }
 
 export const useSession = defineStore("session", {

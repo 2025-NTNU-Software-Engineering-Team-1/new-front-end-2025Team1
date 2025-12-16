@@ -31,15 +31,15 @@ test.skip("Make a post", async ({ page }) => {
 });
 
 //002
-test.skip("See the posts", async ({ page }) => {
+test("See the posts", async ({ page }) => {
   //Get into the discussion page
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
   await page.getByRole("link", { name: "Discussion" }).click();
   
   //check if success
-  const count = await page.$$eval('a[href^="/course/meow/discussion/"]', as => as.filter(a => /^\/course\/meow\/discussion\/\d+$/.test(a.href.replace(location.origin, ''))).length);
-  console.log(count);
-  //await expect(count).toBeGreaterThan(0);
+  await page.waitForTimeout(1000);
+  const cards = page.locator('div.card').filter({ hasNot: page.locator('div.card'),});
+  const count = await cards.count();await expect(count).toBeGreaterThan(0);
 
 });

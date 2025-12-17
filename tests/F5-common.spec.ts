@@ -7,6 +7,7 @@ test.beforeEach(async ({ page, baseURL }) => {
   await login_student(page, baseURL!);
 });
 
+
 //001
 test.skip("Make a post", async ({ page }) => {
   //Get into the discussion page
@@ -40,12 +41,13 @@ test.skip("See the posts", async ({ page }) => {
   //check if success
   await page.waitForTimeout(1000);
   const cards = page.locator('div.card').filter({ hasNot: page.locator('div.card'),});
-  const count = await cards.count();await expect(count).toBeGreaterThan(0);
+  const count = await cards.count();
+  expect(count).toBeGreaterThan(0);
 
 });
 
 //003 manual fail
-test("Code", async ({ page }) => {
+test.skip("Code", async ({ page }) => {
   //Get into the discussion page
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
@@ -75,7 +77,7 @@ test("Code", async ({ page }) => {
 });
 
 //004
-test("Search the posts", async ({ page }) => {
+test.skip("Search the posts", async ({ page }) => {
   //Get into the discussion page
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
@@ -87,14 +89,72 @@ test("Search the posts", async ({ page }) => {
   //check if success
   await page.waitForTimeout(1000);
   const cards = page.locator('div.card').filter({ hasNot: page.locator('div.card'),});
-  const count = await cards.count();await expect(count).toBeGreaterThan(0);
+  const count = await cards.count();
+  expect(count).toBeGreaterThan(0);
 
 });
 
+//005
+test.skip("Sort the posts by Hot", async ({ page }) => {
+  //Get into the discussion page
+  await page.getByRole("link", { name: "Course" }).click();
+  await page.getByRole("link", { name: "meow" }).click();
+  await page.getByRole("link", { name: "Discussion" }).click();
+  
+  //Hot
+  await page.getByRole("button", { name: "Hot" }).click();
+  
+  //check if success
+  const likes = await page.evaluate(() => { return Array.from(document.querySelectorAll('div.card'))
+  .filter(card => card.querySelector('div.card'))
+    .map(card => {
+      const likeBlock = card.querySelector('svg')?.parentElement;
+      const num = likeBlock?.textContent.match(/\d+/);
+      return num ? Number(num[0]) : 0;
+    });
+  });
 
+  const sorted = [...likes].sort((a, b) => b - a);
+  expect(likes).toEqual(sorted);
 
+});
 
+//006
+test.skip("Sort the posts by New", async ({ page }) => {
+  //Get into the discussion page
+  await page.getByRole("link", { name: "Course" }).click();
+  await page.getByRole("link", { name: "meow" }).click();
+  await page.getByRole("link", { name: "Discussion" }).click();
+  
+  //New
+  await page.getByRole("button", { name: "New" }).click();
+  
+  //check if success
+  const dateElements = await page.locator(".post-date").allTextContents();
+  const times = dateElements.map(dateStr => new Date(dateStr).getTime());
+  expect(times).toEqual([...times].sort((a, b) => b - a));
+  
+});
 
+//007
+test.skip("Show the posts by Problem", async ({ page }) => {
+  //Get into the discussion page
+  await page.getByRole("link", { name: "Course" }).click();
+  await page.getByRole("link", { name: "meow" }).click();
+  await page.getByRole("link", { name: "Discussion" }).click();
+  
+  //Get into Prob1
+  await page.locator('xpath=//*[@id="app"]/div/div[1]/div[2]/div[2]/div/div/div/div/div/div/div[1]/div[2]/a[2]').click();
+  await page.locator('h3.card-title:has-text("Prob1")').click();
+  
+  //check if success
+  await page.waitForTimeout(1000);
+  const cards = page.locator('div.card').filter({ hasNot: page.locator('div.card'),});
+  const count = await cards.count();
+  expect(count).toBeGreaterThan(0);
+  
+});
 
+//008 Can't press button by code
 
-
+//009 Can't press button by code

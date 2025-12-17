@@ -67,10 +67,10 @@ export function useDiscussionManagement() {
   const reopenPost = (postId: string | number) => managePostStatus(postId, "reopen");
 
   // 標記為已解決
-  const markSolved = (postId: string | number) => managePostStatus(postId, "solved");
+  const markSolved = (postId: string | number) => managePostStatus(postId, "solve");
 
   // 標記為未解決
-  const markUnsolved = (postId: string | number) => managePostStatus(postId, "unsolved");
+  const markUnsolved = (postId: string | number) => managePostStatus(postId, "unsolve");
 
   // 刪除貼文或回覆
   const deleteItem = async (postId: string | number, type: "post" | "reply", itemId: number) => {

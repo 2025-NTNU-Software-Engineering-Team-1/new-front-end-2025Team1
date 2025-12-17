@@ -194,6 +194,8 @@
     "post": "Post",
     "hot": "Hot",
     "new": "New",
+    "solved": "Solved",
+    "closed": "Closed",
     "noPosts": "No posts yet",
     "noSearchResults": "No posts found matching your search",
     "create": {

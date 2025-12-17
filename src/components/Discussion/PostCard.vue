@@ -52,8 +52,30 @@ const formattedTime = computed(() => formatFriendlyTime(post.time));
             <div class="flex items-center gap-2">
               <span v-if="post.isPinned" class="text-lg">📌</span>
               <div class="text-lg font-bold">{{ post.title }}</div>
-              <span v-if="post.isSolved" class="badge badge-success badge-sm">✓</span>
-              <span v-if="post.isClosed" class="badge badge-error badge-sm">🔒</span>
+              <span v-if="post.isSolved" class="badge badge-success gap-1">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M20 6L9 17L4 12"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                {{ t("discussion.solved") }}
+              </span>
+              <span v-if="post.isClosed" class="badge badge-error gap-1">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                  <path
+                    d="M17 11V7A5 5 0 0 0 7 7v4M6 11h12a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2Z"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+                {{ t("discussion.closed") }}
+              </span>
             </div>
             <div class="mt-2 text-sm text-gray-600 dark:text-gray-300">{{ post.excerpt }}</div>
           </div>

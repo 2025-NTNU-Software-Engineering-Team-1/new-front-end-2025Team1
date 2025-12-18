@@ -1,11 +1,12 @@
 import { test, expect } from "@playwright/test";
-import { login_teacher } from "./utils/arranges";
+import { login_admin } from "./utils/arranges";
+import path from "path";
 
 test.beforeEach(async ({ page, baseURL }) => {
-  await login_teacher(page, baseURL!);
+  await login_admin(page, baseURL!);
 });
 
-//011
+//019
 test.skip("Pin post to top", async ({ page }) => {
   //Get into the discussion page
   await page.getByRole("link", { name: "Course" }).click();
@@ -49,8 +50,8 @@ test.skip("Pin post to top", async ({ page }) => {
   
 });
 
-//012
-test.skip("Close a post", async ({ page }) => {
+//020
+test("Close a post", async ({ page }) => {
   //Get into the discussion page
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
@@ -85,7 +86,7 @@ test.skip("Close a post", async ({ page }) => {
   await expect(page.getByText(lock)).toBeVisible({ timeout: 10000 });
 });
 
-//013
+//021
 test.skip("Post solved", async ({ page }) => {
   //Get into the discussion page
   await page.getByRole("link", { name: "Course" }).click();
@@ -101,8 +102,7 @@ test.skip("Post solved", async ({ page }) => {
   //Solved
   const moreBtn = page.locator("label.btn.btn-ghost.btn-sm");
   await expect(moreBtn).toBeVisible();
-  await moreBtn.click({ force: true });  
-
+  await moreBtn.click({ force: true });
   const solveItem = page.locator("ul.dropdown-content >> text=標記為已解決");
   await expect(solveItem).toBeVisible();
   await solveItem.click();
@@ -129,7 +129,7 @@ test.skip("Post solved", async ({ page }) => {
   
 });
 
-//014
+//022
 test.skip("Delete a post", async ({ page }) => {
   //Get into the discussion page
   await page.getByRole("link", { name: "Course" }).click();

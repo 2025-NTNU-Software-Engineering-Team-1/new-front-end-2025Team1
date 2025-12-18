@@ -85,7 +85,7 @@ const closeConfirmDialog = () => {
               d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"
             />
           </svg>
-          編輯
+          {{ $t("discussion.components.reply.edit") }}
         </a>
       </li>
 
@@ -100,7 +100,7 @@ const closeConfirmDialog = () => {
               clip-rule="evenodd"
             />
           </svg>
-          刪除
+          {{  $t("discussion.components.reply.delete") }}
         </a>
       </li>
     </ul>
@@ -108,17 +108,17 @@ const closeConfirmDialog = () => {
     <!-- 確認刪除對話框 -->
     <div v-if="showConfirmDialog" class="modal modal-open">
       <div class="modal-box">
-        <h3 class="text-lg font-bold">刪除回覆</h3>
-        <p class="py-4">刪除後無法復原，確定要刪除此回覆嗎？</p>
+        <h3 class="text-lg font-bold">{{ $t("discussion.components.reply.delete_reply") }}</h3>
+        <p class="py-4">{{ $t("discussion.components.reply.delete_reply_info") }}</p>
         <div v-if="error" class="alert alert-error mb-4">
           <span>{{ error }}</span>
         </div>
         <div class="modal-action">
           <button class="btn btn-error" @click="confirmDelete" :disabled="loading">
             <span v-if="loading" class="loading-spinner loading-sm loading"></span>
-            確認刪除
+            {{ $t("discussion.components.reply.delete_confirm") }}
           </button>
-          <button class="btn btn-ghost" @click="closeConfirmDialog" :disabled="loading">取消</button>
+          <button class="btn btn-ghost" @click="closeConfirmDialog" :disabled="loading">{{ $t("discussion.components.cancel") }}</button>
         </div>
       </div>
       <div class="modal-backdrop" @click="closeConfirmDialog"></div>

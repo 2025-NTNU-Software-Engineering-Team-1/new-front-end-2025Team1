@@ -3,6 +3,9 @@ import { ref, computed } from "vue";
 import { useDiscussionManagement, useDiscussionPermissions } from "@/composables/useDiscussionManagement";
 import { useSession } from "@/stores/session";
 import type { DiscussionPostDetail } from "@/types/discussion";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n(); 
 
 const props = defineProps<{
   post: DiscussionPostDetail;
@@ -81,39 +84,39 @@ const closeConfirmDialog = () => {
 // 各種操作方法
 const handlePin = () => {
   if (props.post.Is_Pinned) {
-    showConfirm("取消置頂", "確定要取消置頂此貼文嗎？", () =>
-      executeAction(() => unpinPost(props.post.Post_Id), "已取消置頂"),
+    showConfirm(t("discussion.components.pin.action_Is_Pinned"), t("discussion.components.pin.info_Is_Pinned"), () =>
+      executeAction(() => unpinPost(props.post.Post_Id), t("discussion.components.pin.status_Is_Pinned")),
     );
   } else {
-    showConfirm("置頂貼文", "確定要置頂此貼文嗎？", () =>
-      executeAction(() => pinPost(props.post.Post_Id), "已置頂"),
+    showConfirm(t("discussion.components.pin.action_Not_Pinned"), t("discussion.components.pin.info_Not_Pinned"), () =>
+      executeAction(() => pinPost(props.post.Post_Id), t("discussion.components.pin.status_Not_Pinned")),
     );
   }
 };
 
 const handleSolved = () => {
   if (props.post.Is_Solved) {
-    showConfirm("標記為未解決", "確定要將此貼文標記為未解決嗎？", () =>
-      executeAction(() => markUnsolved(props.post.Post_Id), "已標記為未解決"),
+    showConfirm(t("discussion.components.pin.action_Is_Solved"), t("discussion.components.pin.info_Is_Solved"), () =>
+      executeAction(() => markUnsolved(props.post.Post_Id), t("discussion.components.pin.status_Is_Solved")),
     );
   } else {
-    showConfirm("標記為已解決", "確定要將此貼文標記為已解決嗎？", () =>
-      executeAction(() => markSolved(props.post.Post_Id), "已標記為已解決"),
+    showConfirm(t("discussion.components.pin.action_Not_Solved"), t("discussion.components.pin.info_Not_Solved"), () =>
+      executeAction(() => markSolved(props.post.Post_Id), t("discussion.components.pin.status_Not_Solved")),
     );
   }
 };
 
 const handleClose = () => {
-  showConfirm("關閉貼文", "關閉後將無法繼續回覆此貼文，確定要關閉嗎？", () =>
-    executeAction(() => closePost(props.post.Post_Id), "貼文已關閉"),
+  showConfirm(t("discussion.components.pin.close_title"), t("discussion.components.pin.close_info"), () =>
+    executeAction(() => closePost(props.post.Post_Id), t("discussion.components.pin.close_status")),
   );
 };
 
 const handleDelete = async () => {
-  showConfirm("刪除貼文", "刪除後無法復原，確定要刪除此貼文嗎？", async () => {
+  showConfirm(t("discussion.components.pin.delete_title"), t("discussion.components.pin.delete_info"), async () => {
     const result = await deletePost(props.post.Post_Id);
     if (result.success) {
-      console.log("貼文已刪除");
+      console.log(t("discussion.components.pin.delete_status"));
       // 刪除成功後導航回討論區首頁
       emit("deleted");
       closeConfirmDialog();
@@ -147,7 +150,7 @@ const handleDelete = async () => {
               d="M5 4a1 1 0 000 2h10a1 1 0 100-2H5zM4 8a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zm0 4a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1z"
             />
           </svg>
-          {{ post.Is_Pinned ? "取消置頂" : "置頂" }}
+          {{ post.Is_Pinned ? t("discussion.component.is_pined") : t("discussion.component.not_pined") }}
         </a>
       </li>
 
@@ -168,7 +171,7 @@ const handleDelete = async () => {
               clip-rule="evenodd"
             />
           </svg>
-          {{ post.Is_Solved ? "標記為未解決" : "標記為已解決" }}
+          {{ post.Is_Solved ? t("discussion.components.solved.action_Is_Solved") : t("discussion.components.solved.action_Not_Solved") }}
         </a>
       </li>
 
@@ -182,7 +185,7 @@ const handleDelete = async () => {
               clip-rule="evenodd"
             />
           </svg>
-          關閉討論
+          {{t("discussion.details.close")}}
         </a>
       </li>
 
@@ -199,7 +202,7 @@ const handleDelete = async () => {
               clip-rule="evenodd"
             />
           </svg>
-          刪除貼文
+          {{t("discussion.components.delete")}}
         </a>
       </li>
     </ul>
@@ -215,9 +218,9 @@ const handleDelete = async () => {
         <div class="modal-action">
           <button class="btn btn-error" @click="confirmAction" :disabled="loading">
             <span v-if="loading" class="loading-spinner loading-sm loading"></span>
-            確認
+            {{t("discussion.components.confirm")}}
           </button>
-          <button class="btn btn-ghost" @click="closeConfirmDialog" :disabled="loading">取消</button>
+          <button class="btn btn-ghost" @click="closeConfirmDialog" :disabled="loading">{{t("discussion.components.cancel")}}</button>
         </div>
       </div>
       <div class="modal-backdrop" @click="closeConfirmDialog"></div>

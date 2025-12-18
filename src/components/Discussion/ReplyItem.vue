@@ -102,7 +102,7 @@ const handleReply = () => {
               clip-rule="evenodd"
             />
           </svg>
-          回覆
+          {{ $t("discussion.reply.reply") }}
         </button>
 
         <button

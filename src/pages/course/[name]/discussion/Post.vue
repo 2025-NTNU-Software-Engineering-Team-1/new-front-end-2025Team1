@@ -4,13 +4,7 @@ import { useRouter, useRoute } from "vue-router";
 import { useSession } from "@/stores/session";
 import { useI18n } from "vue-i18n";
 import API from "@/models/api";
-import type {
-  DiscussionProblem,
-  CreatePostParams,
-  CreatePostResponse,
-  GetProblemsResponse,
-  GetProblemMetaResponse,
-} from "@/types/discussion";
+import type { DiscussionProblem, CreatePostParams } from "@/types/discussion";
 
 const router = useRouter();
 const route = useRoute();
@@ -32,7 +26,7 @@ const submitting = ref(false);
 const error = ref<string>("");
 
 // Meta information
-const codeAllowed = ref(true);
+const codeAllowed = ref(false);
 const userRole = ref("");
 
 // Language options
@@ -82,19 +76,30 @@ const loadProblems = async () => {
 
 // Load problem meta information
 const loadProblemMeta = async (problemIdValue: string) => {
-  if (!problemIdValue) return;
+  if (!problemIdValue) {
+    codeAllowed.value = false;
+    userRole.value = "";
+    return;
+  }
 
   try {
-    const response = (await API.Discussion.getProblemMeta(
-      problemIdValue,
-    )) as unknown as GetProblemMetaResponse;
+    const response: any = await API.Discussion.getProblemMeta(problemIdValue);
 
-    if (response.Status === "OK") {
-      codeAllowed.value = response.Code_Allowed;
-      userRole.value = response.Role;
+    // 檢查兩種可能的格式：直接在 response 或在 response.data 中
+    const apiStatus = response.Status || response.data?.Status;
+    const codeAllowedValue = response.Code_Allowed ?? response.data?.Code_Allowed;
+    const roleValue = response.Role || response.data?.Role;
+
+    if (apiStatus === "OK") {
+      codeAllowed.value = codeAllowedValue;
+      userRole.value = roleValue;
+    } else {
+      codeAllowed.value = false;
+      userRole.value = "";
     }
   } catch (err) {
-    console.error("Error loading problem meta:", err);
+    codeAllowed.value = false;
+    userRole.value = "";
   }
 };
 

@@ -30,7 +30,7 @@ const navs = [
     name: t("components.courseSideBar.discussion"),
     path: "/discussion",
   },
-  ...((session.isAdmin || session.isTeacher || session.isTA)
+  ...(session.isAdmin || session.isTeacher || session.isTA
     ? [
         {
           name: t("components.courseSideBar.members"),

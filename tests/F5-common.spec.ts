@@ -58,13 +58,12 @@ test.skip("Code", async ({ page }) => {
   //Select
   await page.locator("select.select-bordered").nth(0).selectOption({ label: "Prob1" });
   await page.locator("select.select-bordered").nth(2).selectOption({ label: "C++" });
-  await page.locator("input.input-bordered").nth(0).fill("```");
-  await page.locator("input.input-bordered").nth(0).fill("First Code");
+  await page.locator("input.input-bordered").nth(0).type("First Code");
+  await page.locator("textarea.textarea-bordered").nth(0).type("```\n");
   const code = fs.readFileSync('./tests/add.cpp', 'utf-8');
-  await page.locator("textarea.textarea-bordered").fill(code);
+  await page.locator("textarea.textarea-bordered").nth(0).type(code);
   await page.waitForTimeout(500);
-  await page.locator("input.input-bordered").nth(0).fill("```");
-  await page.locator('input[type="checkbox"].checkbox-xs').check();
+  await page.locator("textarea.textarea-bordered").nth(0).type("\n```");
     
   //Post
   await page.getByRole("button", { name: "Post" }).click();

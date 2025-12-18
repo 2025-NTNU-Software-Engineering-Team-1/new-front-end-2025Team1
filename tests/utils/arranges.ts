@@ -16,6 +16,14 @@ export async function login_teacher(page: Page, baseURL:string) {
   await expect(page.locator(".card-title.mb-2").first()).toHaveText(/^Welcome back,/, { timeout: 5000 });
 }
 
+export async function login_ta(page: Page, baseURL:string) {
+  await page.goto(baseURL);
+  await page.getByPlaceholder("username or email").fill("TAL");
+  await page.getByPlaceholder("password").fill("1234");
+  await page.getByRole("button", { name: "Sign In" }).click();
+  await expect(page.locator(".card-title.mb-2").first()).toHaveText(/^Welcome back,/, { timeout: 5000 });
+}
+
 export async function login_student(page: Page, baseURL:string) {
   await page.goto(baseURL);
   await page.getByPlaceholder("username or email").fill("stuA");

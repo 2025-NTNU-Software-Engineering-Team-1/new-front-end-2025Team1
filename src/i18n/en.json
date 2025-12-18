@@ -202,19 +202,66 @@
       "title": "Create Post",
       "problem": "Problem",
       "problemPlaceholder": "Select a problem",
+      "category": "Category",
+      "generalDiscussion": "general discussion",
+      "question": "question/help",
+      "solutionSharing": "solution sharing",
+      "bugReport": "bug report",
+      "suggestions": "suggestions",
+      "language": "Language",
+      "none": "none",
       "titleLabel": "Title",
       "titlePlaceholder": "Enter title",
       "contentLabel": "Content",
       "contentPlaceholder": "Write your post content here...",
+      "contentHint": "Support Markdown syntax ",
+      "contentIncluded": "Code included",
       "submit": "Post",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "submit_post_err": {
+        "title_required": "Title cannot be empty.",
+        "content_required": "Content cannot be empty.",
+        "problem_required": "Please select a problem.",
+        "contentallowed": "This problem does not allow sharing code, please remove the code content before posting.",
+        "submit_processing": "posting, please wait..."
+      }
+    },
+    "contentallowed": {
+      "role": "Role: {userRole} | Students cannot share code before the deadline",
+      "allowed": "This problem allows sharing code",
+      "not_allowed": "This problem does not allow sharing code",
+      "deadline": "Deadline: {deadline}"
+    },
+    "err": {
+      "err": "Retry loading the post.",
+      "err_unknown": "An unknown error occurred. Please try again later.",
+      "err_failed_load": "Failed to load the post.",
+      "err_failed_find": "Failed to find the post.",
+      "err_failed_reply": "Failed to reply to the post.",
+      "err_network": "Network error. ",
+      "err_problems_list": "Failed to load problems list.",
+      "err_failed_create": "Failed to create post",
+      "err_failed_search": "Failed to search posts"
     },
     "detail": {
       "by": "By",
       "comments": "Comments",
       "noComments": "(No real comments — this is mock data.)",
       "notFound": "Post not found.",
-      "mockContent": "This is mock content for post {id}. Replace with real API data later."
+      "mockContent": "This is mock content for post {id}. Replace with real API data later.",
+      "solved": "Solved",
+      "closed": "Closed",
+      "closed_msg": "This post is closed. You cannot add new comments.",
+      "reply": {
+        "title": "Add a Comment",
+        "placeholder": "Write a comment...",
+        "submit": "Submit",
+        "cancel": "Cancel",
+        "no_comments": "This post has no comments yet. Be the first to comment!",
+        "replyto_comment": "Replying to comment",
+        "post_reply": "Post Comment",
+        "start": "Start Discussion"
+      }
     },
     "card": {
       "likes": "{count} likes",

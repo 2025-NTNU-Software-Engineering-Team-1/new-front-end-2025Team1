@@ -51,11 +51,11 @@ const loadPosts = async () => {
       // 空資料不是錯誤，只是沒有貼文
     } else {
       // 只有在真正的錯誤時才設置 error
-      const errorMsg = response.Message || response.data?.Message || "未知錯誤";
-      error.value = "載入貼文失敗：" + errorMsg;
+      const errorMsg = response.Message || response.data?.Message || t("discussion.err.err_unknown");
+      error.value = t("discussion.err.err_failed_load") + errorMsg;
     }
   } catch (err) {
-    error.value = "網路錯誤，請檢查連線或稍後再試";
+    error.value = t("discussion.err.err_network") + t("discussion.err.err");
   } finally {
     loading.value = false;
   }
@@ -93,12 +93,12 @@ const searchPosts = async () => {
       // 搜尋結果為空不是錯誤
     } else {
       console.error("Search API returned non-OK status:", response);
-      const errorMsg = response.Message || response.data?.Message || "未知錯誤";
-      error.value = "搜尋失敗：" + errorMsg;
+      const errorMsg = response.Message || response.data?.Message || t("discussion.err.err_unknown");
+      error.value = t("discussion.err.err_failed_search") + errorMsg;
     }
   } catch (err) {
     console.error("Error searching posts:", err);
-    error.value = "網路錯誤，請檢查連線或稍後再試";
+    error.value = t("discussion.err.err_network") + t("discussion.err.err");
   } finally {
     loading.value = false;
   }
@@ -231,7 +231,7 @@ onMounted(() => {
             <!-- Error state -->
             <div v-else-if="error" class="alert alert-error mt-4">
               <span>{{ error }}</span>
-              <button class="btn btn-ghost btn-sm" @click="loadPosts">重試</button>
+              <button class="btn btn-ghost btn-sm" @click="loadPosts">{{ t("discussion.err.err") }}</button>
             </div>
 
             <!-- Posts list -->

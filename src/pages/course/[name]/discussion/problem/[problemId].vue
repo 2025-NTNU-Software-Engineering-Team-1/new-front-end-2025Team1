@@ -60,12 +60,12 @@ const loadProblemPosts = async () => {
       console.log("Loaded", posts.value.length, "posts for problem", problemId);
     } else {
       console.error("Failed to load problem posts, response:", response);
-      const errorMsg = response.Message || response.data?.Message || "未知錯誤";
-      error.value = "載入貼文失敗：" + errorMsg;
+      const errorMsg = response.Message || response.data?.Message || t("discussion.err.err_unknown");
+      error.value = t("discussion.err.err_failed_load") + errorMsg;
     }
   } catch (err) {
     console.error("Error loading problem posts:", err);
-    error.value = "網路錯誤，請檢查連線或稍後再試";
+    error.value = t("discussion.err.err_network") + t("discussion.err.err");
   } finally {
     loading.value = false;
   }
@@ -132,12 +132,12 @@ const searchProblemPosts = async () => {
       console.log("Found", posts.value.length, "posts matching search term out of", allPosts.length, "total");
     } else {
       console.error("Search failed, response:", response);
-      const errorMsg = response.Message || response.data?.Message || "未知錯誤";
-      error.value = "搜尋失敗：" + errorMsg;
+      const errorMsg = response.Message || response.data?.Message || t("discussion.err.err_unknown");
+      error.value = t("discussion.err.err_failed_search") + errorMsg;
     }
   } catch (err) {
     console.error("Error searching problem posts:", err);
-    error.value = "網路錯誤，請檢查連線或稍後再試";
+    error.value = t("discussion.err.err_network") + t("discussion.err.err");
   } finally {
     loading.value = false;
   }
@@ -209,16 +209,23 @@ onMounted(() => {
               <h1 class="mb-2 text-2xl font-bold">{{ problemName }}</h1>
               <div class="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
                 <span>ID: {{ problemId }}</span>
-                <span>{{ posts.length }} 個討論</span>
+                <span>{{ posts.length }}{{ t("discussion.problems.discussionCount") }}</span>
               </div>
               <div class="mt-2 flex items-center gap-2">
                 <span v-if="problemMeta?.Code_Allowed" class="badge badge-success badge-sm">
-                  ✓ 可分享程式碼
+                  ✓ {{ t("discussion.contentallowed.allowed") }}
                 </span>
-                <span v-else class="badge badge-warning badge-sm"> ⚠ 不可分享程式碼 </span>
+                <span v-else class="badge badge-warning badge-sm">
+                  ⚠ {{ t("discussion.contentallowed.not_allowed") }}
+                </span>
               </div>
               <div v-if="problemMeta?.Deadline" class="mt-2 text-sm text-gray-500">
-                📅 截止時間: {{ new Date(problemMeta.Deadline).toLocaleString("zh-TW") }}
+                📅
+                {{
+                  t("discussion.contentallowed.deadline", {
+                    deadline: new Date(problemMeta.Deadline).toLocaleString("zh-TW"),
+                  })
+                }}
               </div>
             </div>
           </div>
@@ -258,7 +265,9 @@ onMounted(() => {
         <!-- Error state -->
         <div v-else-if="error" class="alert alert-error">
           <span>{{ error }}</span>
-          <button class="btn btn-ghost btn-sm" @click="loadProblemPosts">重試</button>
+          <button class="btn btn-ghost btn-sm" @click="loadProblemPosts">
+            {{ t("discussion.err.err") }}
+          </button>
         </div>
 
         <!-- Posts list -->
@@ -280,8 +289,8 @@ onMounted(() => {
                 clip-rule="evenodd"
               />
             </svg>
-            <p class="text-lg">目前沒有相關討論</p>
-            <p class="mt-2 text-sm">成為第一個針對此題目發起討論的人！</p>
+            <p class="text-lg">{{ t("discussion.problem.noDiscussions") }}</p>
+            <p class="mt-2 text-sm">{{ t("discussin.reply.no_comments") }}</p>
           </div>
           <router-link
             class="btn btn-primary mt-4"
@@ -294,7 +303,7 @@ onMounted(() => {
                 clip-rule="evenodd"
               />
             </svg>
-            開始討論
+            {{ t("discussion.reply.start") }}
           </router-link>
         </div>
       </div>

@@ -225,19 +225,66 @@
       "title": "建立貼文",
       "problem": "題目",
       "problemPlaceholder": "選擇題目",
+      "category": "分類",
+      "generalDiscussion": "一般討論",
+      "question": "問題/求助",
+      "solutionSharing": "解題分享",
+      "bugReport": "錯誤回報",
+      "suggestions": "建議",
+      "language": "Language",
+      "none": "none",
       "titleLabel": "標題",
       "titlePlaceholder": "輸入標題",
       "contentLabel": "內容",
       "contentPlaceholder": "在此輸入貼文內容...",
+      "contentHint": "支援 Markdown 語法",
+      "contentIncluded": "包含程式碼",
       "submit": "發表",
-      "cancel": "取消"
+      "cancel": "取消",
+      "submit_post_err": {
+        "title_required": "標題不能為空。",
+        "content_required": "內容不能為空。",
+        "problem_required": "請選擇題目。",
+        "contentallowed": "此題目不允許分享程式碼，請刪除程式碼內容後再發布",
+        "submit_processing": "正在發布貼文，請稍後..."
+      }
+    },
+    "contentallowed": {
+      "role": "角色：{userRole} | 截止時間前學生無法分享程式碼",
+      "allowed": "此題目允許分享程式碼",
+      "not_allowed": "此題目不允許分享程式碼",
+      "deadline": "截止時間：{deadline}"
+    },
+    "err": {
+      "err": "請嘗試重新載入",
+      "err_unknown": "未知錯誤",
+      "err_failed_load": "載入失敗",
+      "err_failed_find": "無法找到該貼文。",
+      "err_failed_reply": "回覆失敗",
+      "err_network": "網路錯誤。 ",
+      "err_problems_list": "無法載入題目列表。",
+      "err_failed_create": "發布失敗",
+      "err_failed_search": "搜尋失敗"
     },
     "detail": {
       "by": "由",
       "comments": "留言",
       "noComments": "（無真實留言 — 這是模擬資料）",
       "notFound": "找不到貼文。",
-      "mockContent": "這是貼文 {id} 的模擬內容。稍後將替換為真實 API 資料。"
+      "mockContent": "這是貼文 {id} 的模擬內容。稍後將替換為真實 API 資料。",
+      "solved": "已解決",
+      "closed": "已關閉",
+      "closed_msg": "此貼文已關閉，無法新增留言。",
+      "reply": {
+        "title": "新增留言",
+        "placeholder": "輸入你的留言...",
+        "submit": "送出",
+        "cancel": "取消",
+        "no_comments": "此貼文尚無留言，成為第一個留言的人吧！",
+        "replyto_comment": "回覆留言",
+        "post_reply": "發表回覆",
+        "start": "開始討論"
+      }
     },
     "card": {
       "likes": "{count} 個讚",

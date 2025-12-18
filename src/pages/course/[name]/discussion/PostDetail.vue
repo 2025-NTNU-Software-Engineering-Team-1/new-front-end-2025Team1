@@ -71,11 +71,11 @@ const loadPostDetail = async () => {
       console.log("Post loaded successfully:", post.value?.Title || "Untitled");
     } else {
       console.error("Invalid response - status:", status, "postArray:", postArray);
-      error.value = "找不到貼文";
+      error.value = t("discussion.detail.err_failed_find");
     }
   } catch (err: any) {
     console.error("Error loading post detail:", err);
-    error.value = "載入貼文失敗：" + (err?.message || "未知錯誤");
+    error.value = t("discussion.err_failed_load") + (err?.message || t("discussion.err_failed_load"));
   } finally {
     loading.value = false;
   }
@@ -152,13 +152,13 @@ const submitReply = async () => {
       console.log("Reply submitted successfully");
     } else {
       console.error("Reply failed:", response);
-      const errorMsg = response.Message || response.data?.Message || "回覆失敗";
-      alert("發表回覆失敗：" + errorMsg);
+      const errorMsg = response.Message || response.data?.Message || t("discussion.err_failed_reply");
+      alert(t("discussion.err_failed_reply") + errorMsg);
     }
   } catch (err: any) {
     console.error("Error submitting reply:", err);
-    const errorMsg = err.response?.data?.Message || err.message || "網路錯誤";
-    alert("發表回覆失敗：" + errorMsg);
+    const errorMsg = err.response?.data?.Message || err.message || t("discussion.err_network");
+    alert(t("discussion.detail.err_failed_reply") + errorMsg);
   } finally {
     submittingReply.value = false;
   }
@@ -289,7 +289,9 @@ onMounted(() => {
         <!-- Error state -->
         <div v-else-if="error" class="alert alert-error">
           <span>{{ error }}</span>
-          <button class="btn btn-ghost btn-sm" @click="loadPostDetail">重試</button>
+          <button class="btn btn-ghost btn-sm" @click="loadPostDetail">
+            {{ t("discussion.detail.err") }}
+          </button>
         </div>
 
         <!-- Post content -->
@@ -301,8 +303,12 @@ onMounted(() => {
                 <div class="mb-2 flex items-center gap-2">
                   <span v-if="post.Is_Pinned" class="text-2xl">📌</span>
                   <h1 class="text-2xl font-bold">{{ post.Title }}</h1>
-                  <span v-if="post.Is_Solved" class="badge badge-success">✓ 已解決</span>
-                  <span v-if="post.Is_Closed" class="badge badge-error">🔒 已關閉</span>
+                  <span v-if="post.Is_Solved" class="badge badge-success"
+                    >✓ {{ t("discussion.detail.solved") }}</span
+                  >
+                  <span v-if="post.Is_Closed" class="badge badge-error"
+                    >🔒 {{ t("discussion.detail.closed") }}</span
+                  >
                 </div>
                 <div class="text-sm text-gray-500 dark:text-gray-400">
                   {{ t("discussion.detail.by") }} {{ post.Author }} ·
@@ -341,7 +347,7 @@ onMounted(() => {
                 :class="{ 'text-red-500': userLikeStatus }"
                 @click="toggleLike"
                 :disabled="likingPost || post.Is_Closed"
-                :title="post.Is_Closed ? '此討論已關閉' : ''"
+                :title="post.Is_Closed ? t('discussion.detail.closed_msg') : ''"
               >
                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                   <path
@@ -357,7 +363,7 @@ onMounted(() => {
                 class="btn btn-ghost btn-sm gap-2"
                 @click="showReplyForm = !showReplyForm"
                 :disabled="post.Is_Closed"
-                :title="post.Is_Closed ? '此討論已關閉' : ''"
+                :title="post.Is_Closed ? t('discussion.detail.closed_msg') : ''"
               >
                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                   <path
@@ -386,21 +392,25 @@ onMounted(() => {
                 d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
               />
             </svg>
-            <span>此討論已被關閉，無法留言或按讚</span>
+            <span>{{ t("discussion.detail.closed_msg") }}</span>
           </div>
 
           <!-- Reply form -->
           <div v-else-if="showReplyForm" class="mb-6 rounded-lg bg-base-200 p-4">
             <div class="mb-2">
               <label class="text-sm font-medium">
-                {{ replyToId ? "回覆留言" : "發表回覆" }}
+                {{
+                  replyToId
+                    ? t("discussion.detail.reply.replyto_comment")
+                    : t("discussion.detail.reply.post_reply")
+                }}
               </label>
             </div>
             <textarea
               v-model="replyContent"
               class="textarea textarea-bordered mb-3 w-full"
               rows="4"
-              placeholder="輸入你的回覆..."
+              :placeholder="t('discussion.detail.reply.placeholder')"
             ></textarea>
             <div class="flex gap-2">
               <button
@@ -409,9 +419,11 @@ onMounted(() => {
                 :disabled="!replyContent.trim() || submittingReply"
               >
                 <span v-if="submittingReply" class="loading-spinner loading-xs loading"></span>
-                提交回覆
+                {{ t("discussion.detail.reply.submit") }}
               </button>
-              <button class="btn btn-ghost btn-sm" @click="cancelReply">取消</button>
+              <button class="btn btn-ghost btn-sm" @click="cancelReply">
+                {{ t("discussion.detail.reply.cancel") }}
+              </button>
             </div>
           </div>
 
@@ -421,7 +433,9 @@ onMounted(() => {
               {{ t("discussion.detail.comments") }} ({{ replies.length }})
             </h3>
 
-            <div v-if="replies.length === 0" class="py-4 text-center text-gray-500">尚無留言</div>
+            <div v-if="replies.length === 0" class="py-4 text-center text-gray-500">
+              {{ t("discussion.detail.reply.no_comments") }}
+            </div>
 
             <div v-else class="space-y-4">
               <ReplyItem

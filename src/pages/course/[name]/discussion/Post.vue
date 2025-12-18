@@ -31,7 +31,7 @@ const userRole = ref("");
 
 // Language options
 const languageOptions = [
-  { value: "", label: "無" },
+  { value: "", label: t("discussion.create.none") },
   { value: "c", label: "C" },
   { value: "cpp", label: "C++" },
   { value: "python", label: "Python" },
@@ -39,11 +39,11 @@ const languageOptions = [
 
 // Category options
 const categoryOptions = [
-  { value: "", label: "一般討論" },
-  { value: "question", label: "問題求助" },
-  { value: "solution", label: "解法分享" },
-  { value: "bug", label: "錯誤報告" },
-  { value: "suggestion", label: "建議" },
+  { value: "", label: t("discussion.create.generalDiscussion") },
+  { value: "question", label: t("discussion.create.question") },
+  { value: "solution", label: t("discussion.create.solutionSharing") },
+  { value: "bug", label: t("discussion.create.bugReport") },
+  { value: "suggestion", label: t("discussion.create.suggestions") },
 ];
 
 // Load problems list
@@ -63,12 +63,12 @@ const loadProblems = async () => {
       problems.value = problemsData || [];
       // 空題目列表不是錯誤，只是課程還沒有題目
     } else {
-      const errorMsg = response.Message || response.data?.Message || "未知錯誤";
-      error.value = "無法載入題目列表：" + errorMsg;
+      const errorMsg = response.Message || response.data?.Message || t("discussion.err_unknown");
+      error.value = t("discussion.err_problems_list") + errorMsg;
     }
   } catch (err) {
     console.error("Error loading problems:", err);
-    error.value = "載入題目列表時發生錯誤";
+    error.value = t("discussion.err_problems_list");
   } finally {
     loading.value = false;
   }
@@ -123,23 +123,23 @@ const detectCodeContent = () => {
 // Submit post
 const submitPost = async () => {
   if (!title.value.trim()) {
-    error.value = "標題不能為空";
+    error.value = t("discussion.create.submit_post_err.title_required");
     return;
   }
 
   if (!content.value.trim()) {
-    error.value = "內容不能為空";
+    error.value = t("discussion.create.submit_post_err.content_required");
     return;
   }
 
   if (!problemId.value) {
-    error.value = "請選擇題目";
+    error.value = t("discussion.create.submit_post_err.problem_required");
     return;
   }
 
   // 檢查程式碼分享權限
   if (containsCode.value && !codeAllowed.value) {
-    error.value = "此題目不允許分享程式碼，請刪除程式碼內容後再發布";
+    error.value = t("discussion.create.submit_post_err.contentallowed");
     return;
   }
 
@@ -167,13 +167,13 @@ const submitPost = async () => {
       // Navigate to the new post
       router.push(`/course/${route.params.name}/discussion/${postId}`);
     } else {
-      const errorMsg = response.Message || response.data?.Message || "未知錯誤";
-      error.value = "發布失敗：" + errorMsg;
+      const errorMsg = response.Message || response.data?.Message || t("discussion.err_unknown");
+      error.value = t("discussion.err_failed_create") + errorMsg;
     }
   } catch (err: any) {
     console.error("Error submitting post:", err);
-    const errorMsg = err.response?.data?.Message || err.message || "網路錯誤";
-    error.value = "發布失敗：" + errorMsg;
+    const errorMsg = err.response?.data?.Message || err.message || t("discussion.err_network");
+    error.value = t("discussion.err_failed_create") + errorMsg;
   } finally {
     submitting.value = false;
   }
@@ -219,7 +219,7 @@ onMounted(() => {
 
         <!-- Category selection -->
         <div class="mb-4">
-          <label class="mb-1 block text-sm font-medium">分類</label>
+          <label class="mb-1 block text-sm font-medium">{{ t("discussion.create.category") }}</label>
           <select v-model="category" class="select select-bordered w-full">
             <option v-for="option in categoryOptions" :key="option.value" :value="option.value">
               {{ option.label }}
@@ -229,7 +229,7 @@ onMounted(() => {
 
         <!-- Language selection (if code allowed) -->
         <div v-if="codeAllowed" class="mb-4">
-          <label class="mb-1 block text-sm font-medium">程式語言</label>
+          <label class="mb-1 block text-sm font-medium">{{ t("discussion.create.language") }}</label>
           <select v-model="language" class="select select-bordered w-full">
             <option v-for="option in languageOptions" :key="option.value" :value="option.value">
               {{ option.label }}
@@ -260,9 +260,9 @@ onMounted(() => {
             @input="detectCodeContent"
           ></textarea>
           <div class="mt-1 flex items-center justify-between">
-            <div class="text-xs text-gray-500">支援 Markdown 語法</div>
+            <div class="text-xs text-gray-500">{{ t("discussion.create.contentHint") }}</div>
             <div class="flex items-center gap-2">
-              <span class="text-xs text-gray-500">包含程式碼：</span>
+              <span class="text-xs text-gray-500">{{ t("discussion.create.contentIncluded") }}</span>
               <input
                 type="checkbox"
                 v-model="containsCode"
@@ -289,8 +289,8 @@ onMounted(() => {
             />
           </svg>
           <div>
-            <div class="font-bold">此題目不允許分享程式碼</div>
-            <div class="text-xs">角色：{{ userRole }} | 截止時間前學生無法分享程式碼</div>
+            <div class="font-bold">{{ t("discussion.create.contentallowed") }}</div>
+            <div class="text-xs">{{ t("discussion.create.contentallowed.role", { userRole }) }}</div>
           </div>
         </div>
 
@@ -309,7 +309,7 @@ onMounted(() => {
               d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          <span>此題目允許分享程式碼</span>
+          <span>{{ t("discussion.create.contentallowed.allowed") }}</span>
         </div>
 
         <!-- Submit buttons -->
@@ -320,7 +320,7 @@ onMounted(() => {
             :disabled="submitting || !title.trim() || !content.trim()"
           >
             <span v-if="submitting" class="loading-spinner loading-sm loading"></span>
-            {{ submitting ? "發布中..." : t("discussion.create.submit") }}
+            {{ submitting ? t("discussion.create.submit_processing") : t("discussion.create.submit") }}
           </button>
           <button class="btn btn-ghost" @click="cancel" :disabled="submitting">
             {{ t("discussion.create.cancel") }}

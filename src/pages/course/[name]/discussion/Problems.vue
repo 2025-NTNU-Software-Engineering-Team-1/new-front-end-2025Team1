@@ -45,13 +45,13 @@ const loadProblems = async () => {
       console.log("Loaded problems count:", problems.value.length);
     } else {
       console.error("Failed to load problems:", response);
-      const errorMsg = response.Message || response.data?.Message || "未知錯誤";
-      error.value = "載入題目失敗：" + errorMsg;
+      const errorMsg = response.Message || response.data?.Message || t("discussion.err.err_unknown");
+      error.value = t("discussion.err.err_failed_load") + errorMsg;
     }
   } catch (err: any) {
     console.error("Error loading problems:", err);
-    const errorMsg = err.response?.data?.Message || err.message || "網路錯誤";
-    error.value = "載入題目失敗：" + errorMsg;
+    const errorMsg = err.response?.data?.Message || err.message || t("discussion.err.err_network");
+    error.value = t("discussion.err.err_failed_load") + errorMsg;
   } finally {
     loading.value = false;
   }
@@ -123,7 +123,7 @@ onMounted(async () => {
         <!-- Error state -->
         <div v-else-if="error" class="alert alert-error">
           <span>{{ error }}</span>
-          <button class="btn btn-ghost btn-sm" @click="loadProblems">重試</button>
+          <button class="btn btn-ghost btn-sm" @click="loadProblems">{{ t("discussion.err.err") }}</button>
         </div>
 
         <!-- Problems grid -->
@@ -138,9 +138,13 @@ onMounted(async () => {
               <h3 class="card-title text-lg">{{ problem.Problem_Name }}</h3>
               <div class="mt-2 text-sm text-gray-600 dark:text-gray-300">
                 <span v-if="problemDiscussionCounts[problem.Problem_Id]">
-                  {{ problemDiscussionCounts[problem.Problem_Id] }} 個討論
+                  {{
+                    t("discussion.problems.discussionCount", {
+                      count: problemDiscussionCounts[problem.Problem_Id],
+                    })
+                  }}
                 </span>
-                <span v-else> 暫無討論 </span>
+                <span v-else> {{ t("discussion.problems.noDiscussions") }}</span>
               </div>
               <div class="mt-2">
                 <div class="badge badge-outline badge-sm">ID: {{ problem.Problem_Id }}</div>
@@ -150,7 +154,7 @@ onMounted(async () => {
         </div>
 
         <!-- Empty state -->
-        <div v-else class="py-8 text-center text-gray-500">目前沒有可討論的題目</div>
+        <div v-else class="py-8 text-center text-gray-500">{{ t("discussion.problems.noDiscussions") }}</div>
       </div>
     </div>
   </div>

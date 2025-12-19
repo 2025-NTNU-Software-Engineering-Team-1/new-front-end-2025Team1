@@ -22,6 +22,63 @@ type ChatMessage = {
   prevExpressionId?: string | null;
 };
 
+// ====== TTS (Text-to-Speech) ======
+const speakingMsgId = ref<number | null>(null);
+
+const pickVoice = (lang = "zh-TW") => {
+  const voices = window.speechSynthesis?.getVoices?.() ?? [];
+  const exact = voices.find((v) => v.lang === lang);
+  if (exact) return exact;
+
+  const fallback = voices.find((v) => v.lang?.startsWith("zh"));
+  return fallback ?? null;
+};
+
+const speakText = (msgId: number, text: string) => {
+  if (!("speechSynthesis" in window)) {
+    console.warn("[TTS] browser not supported");
+    return;
+  }
+
+  const cleaned = (text ?? "").trim();
+  if (!cleaned) return;
+
+  if (speakingMsgId.value === msgId && window.speechSynthesis.speaking) {
+    window.speechSynthesis.cancel();
+    speakingMsgId.value = null;
+    return;
+  }
+
+  window.speechSynthesis.cancel();
+
+  const utter = new SpeechSynthesisUtterance(cleaned);
+  utter.lang = "zh-TW";
+  const voice = pickVoice("zh-TW");
+  if (voice) utter.voice = voice;
+
+  utter.rate = 1.0;  // 語速 0.1 ~ 10
+  utter.pitch = 1.0; // 音高 0 ~ 2
+  utter.volume = 1.0;
+
+  speakingMsgId.value = msgId;
+
+  utter.onend = () => {
+    if (speakingMsgId.value === msgId) speakingMsgId.value = null;
+  };
+  utter.onerror = () => {
+    if (speakingMsgId.value === msgId) speakingMsgId.value = null;
+  };
+
+  window.speechSynthesis.speak(utter);
+};
+
+// 關聊天窗時也停掉語音
+const stopSpeak = () => {
+  if (!("speechSynthesis" in window)) return;
+  window.speechSynthesis.cancel();
+  speakingMsgId.value = null;
+};
+
 // ====== 聊天 UI 狀態 ======
 const isOpen = ref(false);
 const showTrigger = ref(true);
@@ -29,6 +86,8 @@ const draft = ref("");
 const live2dInited = ref(false);
 
 const currentExpression = ref<string | null>(null);
+
+const chatScale = ref(1.15);
 
 // 聊天紀錄：一開始不要預設訊息，等 history 載入
 let nextId = 1;
@@ -109,17 +168,6 @@ const setLive2DTalking = (isTalking: boolean) => {
 
 // ====== 預設訊息 & 歷史紀錄 ======
 
-const pushDefaultGreeting = () => {
-  if (messages.value.length > 0) return;
-  messages.value.push({
-    id: nextId++,
-    from: "ai",
-    text: "嗨～有需要什麼幫助嗎？",
-    displayText: "嗨～有需要什麼幫助嗎？",
-    phase: "done",
-  });
-};
-
 const isLoadingHistory = ref(false);
 
 const loadHistory = async () => {
@@ -138,7 +186,6 @@ const loadHistory = async () => {
       let text = item.text ?? "";
       let emotion: string | undefined = undefined;
 
-      // ✅ 嘗試解析被存成 JSON 的 AI 回覆
       try {
         const obj = JSON.parse(text);
         if (Array.isArray(obj?.data)) {
@@ -184,14 +231,14 @@ const typeAiMessage = (fullText: string, emotion?: string) => {
     from: "ai",
     text: fullText,
     displayText: "",
-    phase: "thinking", // 一開始先顯示點點點
+    phase: "thinking",
     emotion,
     prevExpressionId,
   });
 
   scrollToBottom();
 
-  const thinkingDelay = 400; // 開始打字前的小停頓
+  const thinkingDelay = 400; // 開始打字前的停頓
   const thinkingTimer = window.setTimeout(() => {
     const msgIndex = messages.value.findIndex((m) => m.id === id);
     if (msgIndex === -1) return;
@@ -335,10 +382,7 @@ const requestAiReply = async (userText: string) => {
   }
 };
 
-const send = () => {
-  const text = draft.value.trim();
-  if (!text) return;
-
+const pushUserMessage = (text: string) => {
   messages.value.push({
     id: nextId++,
     from: "me",
@@ -347,15 +391,22 @@ const send = () => {
     phase: "done",
   });
 
-  draft.value = "";
   scrollToBottom();
-
-  // 測試：使用假資料，不打後端
-  //simulateAiReply();
-
-  // 之後要接後端的時候，改回這行
   requestAiReply(text);
 };
+
+const send = () => {
+  const text = draft.value.trim();
+  if (!text) return;
+
+  draft.value = "";
+  pushUserMessage(text);
+};
+
+const sendExplain = () => {
+  pushUserMessage("解釋這題");
+};
+
 
 // ====== Live2D 初始化 ======
 
@@ -395,6 +446,7 @@ const openChat = () => {
 
 const closeChat = () => {
   isOpen.value = false;
+  stopSpeak();
 };
 
 const onAfterLeave = () => {
@@ -417,13 +469,19 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
+  <!-- 背景遮罩 -->
   <div
     v-if="isOpen"
     class="fixed inset-0 z-40 bg-black/30 backdrop-blur-md transition-all duration-300"
     @click="closeChat"
   />
 
-  <div class="fixed bottom-6 right-6 z-50">
+  <!-- 右下角聊天區（整個一起 scale） -->
+  <div
+    class="fixed bottom-6 right-6 z-50 origin-bottom-right"
+    :style="{ transform: `scale(${chatScale})` }"
+  >
+    <!-- 開啟按鈕 -->
     <button
       v-if="showTrigger && !isOpen"
       class="chat-icon-btn chat-holo relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-purple-400 to-indigo-400 shadow-lg"
@@ -445,14 +503,20 @@ onBeforeUnmount(() => {
       </svg>
     </button>
 
+    <!-- 聊天窗 -->
     <Transition name="chat-pop" @after-leave="onAfterLeave">
       <div
         v-show="isOpen"
         class="chat-panel flex overflow-hidden rounded-3xl border border-white/30 bg-white/20 shadow-[0_0_40px_rgba(150,120,255,0.25)] backdrop-blur-lg"
-        style="width: 900px; height: 520px"
+        style="
+          width: 900px;
+          height: 520px;
+          max-width: calc(100vw - 48px);
+          max-height: calc(100vh - 48px);
+        "
         @click.stop
       >
-        <!-- === Live2D 區塊 === -->
+        <!-- Live2D -->
         <div
           class="relative flex w-2/5 flex-col items-center justify-center border-r border-white/30 bg-gradient-to-br from-purple-200/30 to-indigo-200/20"
         >
@@ -460,25 +524,22 @@ onBeforeUnmount(() => {
           <div class="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-white/30"></div>
         </div>
 
-        <!-- === 聊天區塊 === -->
+        <!-- 聊天內容 -->
         <div class="flex w-3/5 flex-col">
+          <!-- Header -->
           <header
             class="flex items-center justify-between bg-gradient-to-r from-purple-400 to-indigo-400 px-5 py-3 text-white shadow-md"
           >
             <div class="flex items-center gap-2">
               <div class="h-9 w-9 overflow-hidden rounded-full border border-white/70 shadow">
-                <img src="/live2d/hiyori_avatar.png" alt="" class="h-full w-full object-cover" />
+                <img src="/live2d/hiyori_avatar.png" class="h-full w-full object-cover" />
               </div>
-              <div>
-                <p class="text-xs opacity-80">AI 助教</p>
-              </div>
+              <p class="text-xs opacity-80">AI 助教</p>
             </div>
 
             <button
-              type="button"
               class="chat-icon-btn flex h-8 w-8 items-center justify-center rounded-full bg-white/10 hover:bg-white/20"
               @click="closeChat"
-              aria-label="關閉聊天窗"
             >
               <svg
                 class="h-4 w-4 text-white"
@@ -494,9 +555,10 @@ onBeforeUnmount(() => {
             </button>
           </header>
 
+          <!-- 訊息區 -->
           <main
             ref="chatBodyEl"
-            class="flex-1 space-y-3 overflow-y-auto bg-gradient-to-b from-indigo-50/30 to-purple-50/30 px-5 py-3"
+            class="flex-1 space-y-3 overflow-y-auto bg-gradient-to-b from-indigo-50/30 to-purple-50/30 px-5 pt-3 pb-6"
           >
             <div
               v-for="msg in messages"
@@ -505,35 +567,57 @@ onBeforeUnmount(() => {
               :class="msg.from === 'ai' ? 'justify-start' : 'justify-end'"
             >
               <!-- AI 訊息 -->
-              <div v-if="msg.from === 'ai'" class="flex max-w-[85%] items-start gap-2">
-                <div class="h-7 w-7 overflow-hidden rounded-full border border-purple-200 shadow">
-                  <img src="/live2d/hiyori_avatar.png" alt="" class="h-full w-full object-cover" />
-                </div>
-                <div
-                  class="rounded-2xl rounded-tl-sm border border-white/40 bg-white/40 px-3 py-2 text-sm text-slate-800 shadow-md backdrop-blur-sm"
-                  style="box-shadow: 0 0 15px rgba(180, 140, 255, 0.2)"
-                >
-                  <div class="flex flex-col gap-1">
-                    <!-- 思考中：顯示點點點動畫 -->
+              <div v-if="msg.from === 'ai'" class="flex max-w-[85%] items-start gap-1">
+                <div class="flex items-start gap-1">
+                  <div
+                    class="rounded-2xl rounded-tl-sm border border-white/40 bg-white/40 px-3 py-2 text-sm text-slate-800 shadow-md backdrop-blur-sm"
+                    style="box-shadow: 0 0 15px rgba(180,140,255,0.2)"
+                  >
                     <div v-if="msg.phase === 'thinking'" class="typing-dots">
-                      <span></span>
-                      <span></span>
-                      <span></span>
+                      <span></span><span></span><span></span>
                     </div>
-
-                    <!-- 已開始打字 / 完成：顯示文字 -->
-                    <div v-else class="whitespace-pre-wrap text-sm leading-relaxed">
+                    <div v-else class="whitespace-pre-wrap leading-relaxed">
                       {{ msg.displayText ?? msg.text }}
                     </div>
                   </div>
+
+                  <!-- 🔊 語音播放按鈕 -->
+                  <button
+                    v-if="msg.phase !== 'thinking' && String(msg.displayText ?? msg.text).trim()"
+                    class="tts-btn mt-1 flex h-7 w-7 items-center justify-center rounded-full border border-white/40 bg-white/30 backdrop-blur-sm hover:bg-white/50"
+                    @click="speakText(msg.id, String(msg.displayText ?? msg.text))"
+                    :title="speakingMsgId === msg.id ? '停止朗讀' : '播放語音'"
+                  >
+                    <svg
+                      v-if="speakingMsgId === msg.id"
+                      class="h-4 w-4 text-slate-700"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <rect x="7" y="7" width="10" height="10" rx="2" />
+                    </svg>
+                    <svg
+                      v-else
+                      class="h-4 w-4 text-slate-700"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M11 5L6 9H3v6h3l5 4V5z" />
+                      <path d="M15.5 8.5a4.5 4.5 0 0 1 0 7" />
+                      <path d="M18 6a8 8 0 0 1 0 12" />
+                    </svg>
+                  </button>
                 </div>
               </div>
 
               <!-- 使用者訊息 -->
-              <div v-else class="flex max-w-[85%] justify-end">
+              <div v-else class="max-w-[85%]">
                 <div
                   class="rounded-2xl rounded-tr-sm bg-gradient-to-r from-indigo-400 to-purple-500 px-3 py-2 text-sm text-white shadow-md"
-                  style="box-shadow: 0 0 15px rgba(150, 120, 255, 0.3)"
                 >
                   {{ msg.displayText ?? msg.text }}
                 </div>
@@ -541,23 +625,26 @@ onBeforeUnmount(() => {
             </div>
           </main>
 
+          <!-- 輸入區 -->
           <footer
-            class="flex items-center gap-2 border-t border-white/30 bg-white/40 px-4 py-2 backdrop-blur-md"
+            class="relative flex items-center gap-2 border-t border-white/30 bg-gradient-to-b from-indigo-50/50 to-purple-50/50 px-4 py-2 backdrop-blur-md"
           >
+            <button
+              class="chat-icon-btn no-shift-btn absolute -top-8 right-6 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 px-3 py-1 text-xs font-semibold text-white shadow-md"
+              @click="sendExplain"
+            >
+              解釋這題
+            </button>
             <input
               v-model="draft"
-              type="text"
-              placeholder="輸入訊息..."
               class="flex-1 rounded-2xl border border-white/40 bg-white/50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
+              placeholder="輸入訊息..."
               @keydown.enter.prevent="send"
             />
-
             <button
-              type="button"
-              class="chat-icon-btn flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-r from-purple-400 to-indigo-400 text-white shadow-md disabled:cursor-default disabled:opacity-40"
-              @click="send"
+              class="chat-icon-btn flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-r from-purple-400 to-indigo-400 text-white shadow-md"
               :disabled="!draft.trim()"
-              aria-label="送出訊息"
+              @click="send"
             >
               <svg
                 class="h-4 w-4"
@@ -577,6 +664,8 @@ onBeforeUnmount(() => {
     </Transition>
   </div>
 </template>
+
+
 
 <style scoped>
 /* 開啟 / 關閉聊天框動畫 */
@@ -677,6 +766,21 @@ onBeforeUnmount(() => {
 }
 .typing-dots span:nth-child(3) {
   animation-delay: 0.3s;
+}
+.tts-btn {
+  transition: transform 0.12s ease-out, box-shadow 0.12s ease-out, background-color 0.12s ease-out;
+}
+.tts-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 10px rgba(180, 140, 255, 0.25);
+}
+.tts-btn:active {
+  transform: translateY(0) scale(0.96);
+}
+.no-shift-btn,
+.no-shift-btn:hover,
+.no-shift-btn:active {
+  transform: none !important;
 }
 
 @keyframes typing-dot-bounce {

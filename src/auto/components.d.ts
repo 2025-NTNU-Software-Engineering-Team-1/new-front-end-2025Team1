@@ -21,7 +21,6 @@ declare module '@vue/runtime-core' {
     HomeworkCard: typeof import('./../components/Homework/HomeworkCard.vue')['default']
     HomeworkForm: typeof import('./../components/Homework/HomeworkForm.vue')['default']
     HomeworkProblems: typeof import('./../components/Homework/HomeworkProblems.vue')['default']
-    IUilAngleDoubleDown: typeof import('~icons/uil/angle-double-down')['default']
     IUilAngleDoubleLeft: typeof import('~icons/uil/angle-double-left')['default']
     IUilAngleDoubleRight: typeof import('~icons/uil/angle-double-right')['default']
     IUilAngleDown: typeof import('~icons/uil/angle-down')['default']
@@ -34,14 +33,20 @@ declare module '@vue/runtime-core' {
     IUilCheckCircle: typeof import('~icons/uil/check-circle')['default']
     IUilConstructor: typeof import('~icons/uil/constructor')['default']
     IUilEdit: typeof import('~icons/uil/edit')['default']
-    IUilExclamationTriangle: typeof import('~icons/uil/exclamation-triangle')['default']
     IUilEye: typeof import('~icons/uil/eye')['default']
+<<<<<<< HEAD
     IUilFacebook: typeof import('~icons/uil/facebook')['default']
+=======
+    IUilFileDownload: typeof import('~icons/uil/file-download')['default']
+>>>>>>> 2ca1aab0615d54e7f0efbe4e1a9cb193fc643eaf
     IUilFileExclamationAlt: typeof import('~icons/uil/file-exclamation-alt')['default']
     IUilFileUploadAlt: typeof import('~icons/uil/file-upload-alt')['default']
     IUilFlask: typeof import('~icons/uil/flask')['default']
     IUilFolderDownload: typeof import('~icons/uil/folder-download')['default']
+<<<<<<< HEAD
     IUilGithub: typeof import('~icons/uil/github')['default']
+=======
+>>>>>>> 2ca1aab0615d54e7f0efbe4e1a9cb193fc643eaf
     IUilHome: typeof import('~icons/uil/home')['default']
     IUilLanguage: typeof import('~icons/uil/language')['default']
     IUilLockAlt: typeof import('~icons/uil/lock-alt')['default']
@@ -49,7 +54,10 @@ declare module '@vue/runtime-core' {
     IUilMinus: typeof import('~icons/uil/minus')['default']
     IUilMonitor: typeof import('~icons/uil/monitor')['default']
     IUilMoon: typeof import('~icons/uil/moon')['default']
+<<<<<<< HEAD
     IUilPen: typeof import('~icons/uil/pen')['default']
+=======
+>>>>>>> 2ca1aab0615d54e7f0efbe4e1a9cb193fc643eaf
     IUilPlus: typeof import('~icons/uil/plus')['default']
     IUilPlusCircle: typeof import('~icons/uil/plus-circle')['default']
     IUilQuestionCircle: typeof import('~icons/uil/question-circle')['default']

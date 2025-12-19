@@ -123,47 +123,54 @@ const pushDefaultGreeting = () => {
 const isLoadingHistory = ref(false);
 
 const loadHistory = async () => {
-  if (!api.Chatbot || !api.Chatbot.getHistory) {
-    console.error("[AIChat] Chatbot API 尚未設定，略過載入歷史紀錄");
-    pushDefaultGreeting();
-    return;
-  }
-
-  if (!props.courseId || !props.username) {
-    console.warn("[AIChat] 缺少 courseId 或 username，無法載入歷史紀錄");
-    pushDefaultGreeting();
-    return;
-  }
-
-  isLoadingHistory.value = true;
   try {
     const res = await api.Chatbot.getHistory({
-      course_id: props.courseId,
+      course_name: props.courseName,
       username: props.username,
     });
 
-    const list = res.data ?? [];
-    messages.value = [];
+    const list = Array.isArray(res.data) ? res.data : Array.isArray(res.data?.data) ? res.data.data : [];
 
-    if (Array.isArray(list) && list.length > 0) {
-      for (const item of list) {
-        messages.value.push({
-          id: nextId++,
-          from: item.role === "user" ? "me" : "ai",
-          text: item.text,
-          displayText: item.text,
-          phase: "done",
-        });
+    messages.value = [];
+    let id = 0;
+
+    for (const item of list) {
+      let text = item.text ?? "";
+      let emotion: string | undefined = undefined;
+
+      // ✅ 嘗試解析被存成 JSON 的 AI 回覆
+      try {
+        const obj = JSON.parse(text);
+        if (Array.isArray(obj?.data)) {
+          text = obj.data
+            .map((x: any) => {
+              if (x?.text) {
+                emotion ||= x.emotion;
+                return x.text;
+              }
+              return "";
+            })
+            .join("\n")
+            .trim();
+        }
+      } catch {
+        // 不是 JSON，當正常文字
       }
-    } else {
-      pushDefaultGreeting();
+
+      messages.value.push({
+        id: id++,
+        from: item.role === "user" ? "me" : "ai",
+        text,
+        displayText: text,
+        phase: "done",
+        emotion,
+      });
     }
-  } catch (e) {
-    console.error("[AIChat] 讀取歷史紀錄失敗:", e);
-    pushDefaultGreeting();
-  } finally {
-    isLoadingHistory.value = false;
+
+    nextId = id;
     scrollToBottom();
+  } catch (e) {
+    console.error("[AIChat] 讀取歷史失敗:", e);
   }
 };
 
@@ -268,6 +275,17 @@ const requestAiReply = async (userText: string) => {
   });
   scrollToBottom();
 
+  const extractPayload = (res: any) => {
+    const a = res?.data;
+    const b = res?.data?.data;
+    const c = res?.data?.data?.data;
+
+    if (Array.isArray(a)) return a;
+    if (Array.isArray(b)) return b;
+    if (Array.isArray(c)) return c;
+    return [];
+  };
+
   try {
     const res = await api.Chatbot.ask({
       message: userText,
@@ -276,18 +294,23 @@ const requestAiReply = async (userText: string) => {
       problem_id: String(props.problemId ?? ""),
     });
 
-    const data = res.data ?? [];
+    const data = extractPayload(res);
 
     messages.value = messages.value.filter((m) => m.id !== thinkingId);
 
-    if (!Array.isArray(data) || data.length === 0) {
-      typeAiMessage("（AI 沒有回傳內容，請稍後再試）");
+    if (!data.length) {
+      typeAiMessage("AI 沒有回傳內容，請稍後再試");
+      setLive2DTalking(false);
+      setDefaultExpression();
       return;
     }
 
     for (const item of data) {
-      typeAiMessage(item.text, item.emotion);
+      typeAiMessage(item?.text ?? "", item?.emotion);
     }
+
+    setLive2DTalking(false);
+    setDefaultExpression();
   } catch (e) {
     console.error("[AIChat] ask 發生錯誤:", e);
 
@@ -307,7 +330,6 @@ const requestAiReply = async (userText: string) => {
       });
     }
 
-    // 發生錯誤時也回到預設表情 F01 並停嘴
     setLive2DTalking(false);
     setDefaultExpression();
   }

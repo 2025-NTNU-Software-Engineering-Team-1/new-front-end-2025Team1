@@ -283,7 +283,7 @@ const Chatbot = {
     }>("/ai/chatbot/ask", body),
 
   // 取得歷史紀錄：GET /ai/chatbot/history?course_id=...&username=...
-  getHistory: (params: { course_id: string; username: string }) =>
+  getHistory: (params: { course_name: string; username: string }) =>
     fetcher.get<{
       data: { role: string; text: string }[];
     }>("/ai/chatbot/history", { params }),

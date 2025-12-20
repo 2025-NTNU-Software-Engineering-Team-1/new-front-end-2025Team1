@@ -6,6 +6,7 @@ import { useSession } from "@/stores/session";
 import API from "@/models/api";
 import ReplyItem from "@/components/Discussion/ReplyItem.vue";
 import PostManagementDropdown from "@/components/Discussion/PostManagementDropdown.vue";
+import MarkdownRenderer from "@/components/MarkdownRenderer.vue";
 import { formatFriendlyTime } from "@/composables/useDateTime";
 import type {
   DiscussionPostDetail,
@@ -335,8 +336,8 @@ onMounted(() => {
           </div>
 
           <!-- Post content -->
-          <div class="prose mb-4 max-w-none rounded-lg bg-base-200 p-4">
-            <div v-html="post.Content" class="whitespace-pre-wrap"></div>
+          <div class="bg-base-200 mb-4 rounded-lg p-4">
+            <MarkdownRenderer :md="post.Content" />
           </div>
 
           <!-- Post actions -->
@@ -396,7 +397,7 @@ onMounted(() => {
           </div>
 
           <!-- Reply form -->
-          <div v-else-if="showReplyForm" class="mb-6 rounded-lg bg-base-200 p-4">
+          <div v-else-if="showReplyForm" class="bg-base-200 mb-6 rounded-lg p-4">
             <div class="mb-2">
               <label class="text-sm font-medium">
                 {{

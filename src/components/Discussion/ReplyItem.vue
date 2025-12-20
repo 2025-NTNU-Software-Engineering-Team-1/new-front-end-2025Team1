@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import { useSession } from "@/stores/session";
 import ReplyManagementDropdown from "./ReplyManagementDropdown.vue";
+import MarkdownRenderer from "@/components/MarkdownRenderer.vue";
 import type { DiscussionReply } from "@/types/discussion";
 import { formatFriendlyTime } from "@/composables/useDateTime";
 
@@ -52,7 +53,7 @@ const handleReply = () => {
 </script>
 
 <template>
-  <div class="flex gap-3 rounded-lg bg-base-100 p-4">
+  <div class="bg-base-100 flex gap-3 rounded-lg p-4">
     <!-- Avatar -->
     <div class="flex-shrink-0">
       <div
@@ -83,18 +84,13 @@ const handleReply = () => {
       </div>
 
       <!-- Reply content -->
-      <div class="prose prose-sm mb-3 max-w-none">
-        <div
-          class="whitespace-pre-wrap"
-          :class="{ 'rounded bg-base-200 p-3 font-mono text-sm': reply.Contains_Code }"
-        >
-          {{ reply.Content }}
-        </div>
+      <div class="mb-3">
+        <MarkdownRenderer :md="reply.Content" />
       </div>
 
       <!-- Actions -->
       <div class="flex items-center gap-4 text-xs">
-        <button class="flex items-center gap-1 text-gray-500 hover:text-primary" @click="handleReply">
+        <button class="hover:text-primary flex items-center gap-1 text-gray-500" @click="handleReply">
           <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
             <path
               fill-rule="evenodd"
@@ -124,7 +120,7 @@ const handleReply = () => {
       <!-- Nested replies (子回覆) -->
       <div
         v-if="reply.children && reply.children.length > 0"
-        class="mt-4 space-y-3 border-l-2 border-base-300 pl-4"
+        class="border-base-300 mt-4 space-y-3 border-l-2 pl-4"
       >
         <ReplyItem
           v-for="childReply in reply.children"

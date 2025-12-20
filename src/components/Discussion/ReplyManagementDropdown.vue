@@ -100,7 +100,7 @@ const closeConfirmDialog = () => {
               clip-rule="evenodd"
             />
           </svg>
-          {{  $t("discussion.components.reply.delete") }}
+          {{ $t("discussion.components.reply.delete") }}
         </a>
       </li>
     </ul>
@@ -118,7 +118,9 @@ const closeConfirmDialog = () => {
             <span v-if="loading" class="loading-spinner loading-sm loading"></span>
             {{ $t("discussion.components.reply.delete_confirm") }}
           </button>
-          <button class="btn btn-ghost" @click="closeConfirmDialog" :disabled="loading">{{ $t("discussion.components.cancel") }}</button>
+          <button class="btn btn-ghost" @click="closeConfirmDialog" :disabled="loading">
+            {{ $t("discussion.components.cancel") }}
+          </button>
         </div>
       </div>
       <div class="modal-backdrop" @click="closeConfirmDialog"></div>

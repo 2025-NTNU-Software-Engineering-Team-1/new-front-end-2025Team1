@@ -260,8 +260,7 @@
         "no_comments": "This post has no comments yet. Be the first to comment!",
         "replyto_comment": "Replying to comment",
         "post_reply": "Post Comment",
-        "start": "Start Discussion",
-        
+        "start": "Start Discussion"
       }
     },
     "card": {
@@ -277,16 +276,16 @@
       "backToProblems": "Back to Problems",
       "backToDiscussion": "Back to Discussion"
     },
-    "components":{
-      "pin":{
+    "components": {
+      "pin": {
         "action_Is_Pinned": "Unpin",
         "action_Not_Pinned": "Pin Post",
         "status_Is_Pinned": "Post unpinned",
-        "status_Not_Pinned":"Post pinned",
+        "status_Not_Pinned": "Post pinned",
         "info_Is_Pinned": "Are you sure you want to unpin this post?",
-        "info_Not_Pinned":"Are you sure you want to pin this post?"
+        "info_Not_Pinned": "Are you sure you want to pin this post?"
       },
-      "solve":{
+      "solve": {
         "action_Is_Solved": "Mark as Unsolved",
         "status_Is_Solved": "Marked as Unsolved",
         "info_Is_Solved": "Are you sure you want to mark this post as unsolved?",
@@ -294,7 +293,7 @@
         "status_Not_Solved": "Marked as Solved",
         "info_Not_Solved": "Are you sure you want to mark this post as solved?"
       },
-      "post_actions":{
+      "post_actions": {
         "close_title": "Close Post",
         "close_info": "After closing, you will no longer be able to reply to this post. Are you sure you want to close it?",
         "close_status": "Post closed",
@@ -303,18 +302,18 @@
         "delete_status": "Post deleted"
       },
       "is_pinned": "Pin",
-      "not_pinned":"Unpin",
-      "close":"Close Discussion",
-      "delete":"Delete Post",
-      "confirm":"Confirm",
-      "cancel":"Cancel",
-      "reply":{
-        "reply":"Reply",
-        "edit":"Edit",
-        "delete":"Delete",
-        "delete_reply":"Delete Reply",
-        "delete_reply_info":"Are you sure you want to delete this reply? This action cannot be undone.",
-        "delete_confirm":"Confirm Delete"
+      "not_pinned": "Unpin",
+      "close": "Close Discussion",
+      "delete": "Delete Post",
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "reply": {
+        "reply": "Reply",
+        "edit": "Edit",
+        "delete": "Delete",
+        "delete_reply": "Delete Reply",
+        "delete_reply_info": "Are you sure you want to delete this reply? This action cannot be undone.",
+        "delete_confirm": "Confirm Delete"
       }
     }
   },

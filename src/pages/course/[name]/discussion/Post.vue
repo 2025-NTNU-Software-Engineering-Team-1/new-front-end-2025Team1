@@ -28,6 +28,8 @@ const error = ref<string>("");
 // Meta information
 const codeAllowed = ref(false);
 const userRole = ref("");
+const metaLoading = ref(false);
+const metaLoaded = ref(false);
 
 // Language options
 const languageOptions = [
@@ -79,32 +81,57 @@ const loadProblemMeta = async (problemIdValue: string) => {
   if (!problemIdValue) {
     codeAllowed.value = false;
     userRole.value = "";
+    metaLoaded.value = false;
     return;
   }
 
   try {
+    metaLoading.value = true;
     const response: any = await API.Discussion.getProblemMeta(problemIdValue);
+    console.log("[Post.vue] getProblemMeta response:", response);
 
     // 檢查兩種可能的格式：直接在 response 或在 response.data 中
     const apiStatus = response.Status || response.data?.Status;
     const codeAllowedValue = response.Code_Allowed ?? response.data?.Code_Allowed;
     const roleValue = response.Role || response.data?.Role;
+    const deadlineValue = response.Deadline || response.data?.Deadline;
+
+    console.log("[Post.vue] Extracted values:", {
+      status: apiStatus,
+      codeAllowed: codeAllowedValue,
+      role: roleValue,
+      deadline: deadlineValue,
+    });
 
     if (apiStatus === "OK") {
-      codeAllowed.value = codeAllowedValue;
-      userRole.value = roleValue;
+      // 確保 codeAllowed 是布林值
+      codeAllowed.value = Boolean(codeAllowedValue);
+      userRole.value = roleValue || "";
+      metaLoaded.value = true;
+      console.log("[Post.vue] Set codeAllowed:", codeAllowed.value, "userRole:", userRole.value);
     } else {
       codeAllowed.value = false;
       userRole.value = "";
+      metaLoaded.value = false;
     }
   } catch (err) {
+    console.error("[Post.vue] Error loading problem meta:", err);
     codeAllowed.value = false;
     userRole.value = "";
+    metaLoaded.value = false;
+  } finally {
+    metaLoading.value = false;
   }
 };
 
 // Auto-detect if content contains code
 const detectCodeContent = () => {
+  // 如果不允許分享程式碼，不要自動勾選
+  if (!codeAllowed.value) {
+    containsCode.value = false;
+    return;
+  }
+
   const codePatterns = [
     /```[\s\S]*```/, // Code blocks
     /`[^`\n]+`/, // Inline code
@@ -138,6 +165,12 @@ const submitPost = async () => {
   }
 
   // 檢查程式碼分享權限
+  console.log("[Post.vue] Checking code permission:", {
+    containsCode: containsCode.value,
+    codeAllowed: codeAllowed.value,
+    userRole: userRole.value,
+  });
+
   if (containsCode.value && !codeAllowed.value) {
     error.value = t("discussion.create.submit_post_err.contentallowed");
     return;
@@ -185,9 +218,21 @@ const cancel = () => {
 };
 
 // Watch for problem selection changes
-const onProblemChange = () => {
+const onProblemChange = async () => {
+  console.log("[Post.vue] onProblemChange called, problemId:", problemId.value);
   if (problemId.value) {
-    loadProblemMeta(problemId.value);
+    await loadProblemMeta(problemId.value);
+    console.log("[Post.vue] After loadProblemMeta, codeAllowed:", codeAllowed.value);
+    // 如果不允許分享程式碼，清除 containsCode 標記
+    if (!codeAllowed.value) {
+      containsCode.value = false;
+      console.log("[Post.vue] Cleared containsCode because codeAllowed is false");
+    }
+  } else {
+    console.log("[Post.vue] No problemId, resetting values");
+    codeAllowed.value = false;
+    userRole.value = "";
+    containsCode.value = false;
   }
 };
 
@@ -273,8 +318,13 @@ onMounted(() => {
           </div>
         </div>
 
+        <!-- Debug info (remove after testing) -->
+        <!-- <div class="text-xs text-gray-500 mb-2">
+          Debug: problemId={{ problemId }}, codeAllowed={{ codeAllowed }}, userRole={{ userRole }}, metaLoaded={{ metaLoaded }}
+        </div> -->
+
         <!-- Code not allowed warning -->
-        <div v-if="problemId && !codeAllowed" class="alert alert-warning mb-4">
+        <div v-if="problemId && metaLoaded && !codeAllowed" class="alert alert-warning mb-4">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-6 w-6 shrink-0 stroke-current"
@@ -289,13 +339,13 @@ onMounted(() => {
             />
           </svg>
           <div>
-            <div class="font-bold">{{ t("discussion.create.contentallowed") }}</div>
-            <div class="text-xs">{{ t("discussion.create.contentallowed.role", { userRole }) }}</div>
+            <div class="font-bold">{{ t("discussion.contentallowed.not_allowed") }}</div>
+            <div class="text-xs">{{ t("discussion.contentallowed.role", { userRole }) }}</div>
           </div>
         </div>
 
         <!-- Code allowed info -->
-        <div v-else-if="problemId && codeAllowed" class="alert alert-success mb-4">
+        <div v-else-if="problemId && metaLoaded && codeAllowed" class="alert alert-success mb-4">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-6 w-6 shrink-0 stroke-current"
@@ -309,7 +359,7 @@ onMounted(() => {
               d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          <span>{{ t("discussion.create.contentallowed.allowed") }}</span>
+          <span>{{ t("discussion.contentallowed.allowed") }}</span>
         </div>
 
         <!-- Submit buttons -->

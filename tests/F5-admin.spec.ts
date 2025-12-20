@@ -1,6 +1,5 @@
 import { test, expect } from "@playwright/test";
 import { login_admin } from "./utils/arranges";
-import path from "path";
 
 test.beforeEach(async ({ page, baseURL }) => {
   await login_admin(page, baseURL!);

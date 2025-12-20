@@ -5,7 +5,7 @@ import { useSession } from "@/stores/session";
 import type { DiscussionPostDetail } from "@/types/discussion";
 import { useI18n } from "vue-i18n";
 
-const { t } = useI18n(); 
+const { t } = useI18n();
 
 const props = defineProps<{
   post: DiscussionPostDetail;
@@ -84,24 +84,39 @@ const closeConfirmDialog = () => {
 // 各種操作方法
 const handlePin = () => {
   if (props.post.Is_Pinned) {
-    showConfirm(t("discussion.components.pin.action_Is_Pinned"), t("discussion.components.pin.info_Is_Pinned"), () =>
-      executeAction(() => unpinPost(props.post.Post_Id), t("discussion.components.pin.status_Is_Pinned")),
+    showConfirm(
+      t("discussion.components.pin.action_Is_Pinned"),
+      t("discussion.components.pin.info_Is_Pinned"),
+      () =>
+        executeAction(() => unpinPost(props.post.Post_Id), t("discussion.components.pin.status_Is_Pinned")),
     );
   } else {
-    showConfirm(t("discussion.components.pin.action_Not_Pinned"), t("discussion.components.pin.info_Not_Pinned"), () =>
-      executeAction(() => pinPost(props.post.Post_Id), t("discussion.components.pin.status_Not_Pinned")),
+    showConfirm(
+      t("discussion.components.pin.action_Not_Pinned"),
+      t("discussion.components.pin.info_Not_Pinned"),
+      () =>
+        executeAction(() => pinPost(props.post.Post_Id), t("discussion.components.pin.status_Not_Pinned")),
     );
   }
 };
 
 const handleSolved = () => {
   if (props.post.Is_Solved) {
-    showConfirm(t("discussion.components.pin.action_Is_Solved"), t("discussion.components.pin.info_Is_Solved"), () =>
-      executeAction(() => markUnsolved(props.post.Post_Id), t("discussion.components.pin.status_Is_Solved")),
+    showConfirm(
+      t("discussion.components.pin.action_Is_Solved"),
+      t("discussion.components.pin.info_Is_Solved"),
+      () =>
+        executeAction(
+          () => markUnsolved(props.post.Post_Id),
+          t("discussion.components.pin.status_Is_Solved"),
+        ),
     );
   } else {
-    showConfirm(t("discussion.components.pin.action_Not_Solved"), t("discussion.components.pin.info_Not_Solved"), () =>
-      executeAction(() => markSolved(props.post.Post_Id), t("discussion.components.pin.status_Not_Solved")),
+    showConfirm(
+      t("discussion.components.pin.action_Not_Solved"),
+      t("discussion.components.pin.info_Not_Solved"),
+      () =>
+        executeAction(() => markSolved(props.post.Post_Id), t("discussion.components.pin.status_Not_Solved")),
     );
   }
 };
@@ -113,15 +128,19 @@ const handleClose = () => {
 };
 
 const handleDelete = async () => {
-  showConfirm(t("discussion.components.pin.delete_title"), t("discussion.components.pin.delete_info"), async () => {
-    const result = await deletePost(props.post.Post_Id);
-    if (result.success) {
-      console.log(t("discussion.components.pin.delete_status"));
-      // 刪除成功後導航回討論區首頁
-      emit("deleted");
-      closeConfirmDialog();
-    }
-  });
+  showConfirm(
+    t("discussion.components.pin.delete_title"),
+    t("discussion.components.pin.delete_info"),
+    async () => {
+      const result = await deletePost(props.post.Post_Id);
+      if (result.success) {
+        console.log(t("discussion.components.pin.delete_status"));
+        // 刪除成功後導航回討論區首頁
+        emit("deleted");
+        closeConfirmDialog();
+      }
+    },
+  );
 };
 </script>
 
@@ -171,7 +190,11 @@ const handleDelete = async () => {
               clip-rule="evenodd"
             />
           </svg>
-          {{ post.Is_Solved ? t("discussion.components.solved.action_Is_Solved") : t("discussion.components.solved.action_Not_Solved") }}
+          {{
+            post.Is_Solved
+              ? t("discussion.components.solved.action_Is_Solved")
+              : t("discussion.components.solved.action_Not_Solved")
+          }}
         </a>
       </li>
 
@@ -185,7 +208,7 @@ const handleDelete = async () => {
               clip-rule="evenodd"
             />
           </svg>
-          {{t("discussion.details.close")}}
+          {{ t("discussion.details.close") }}
         </a>
       </li>
 
@@ -202,7 +225,7 @@ const handleDelete = async () => {
               clip-rule="evenodd"
             />
           </svg>
-          {{t("discussion.components.delete")}}
+          {{ t("discussion.components.delete") }}
         </a>
       </li>
     </ul>
@@ -218,9 +241,11 @@ const handleDelete = async () => {
         <div class="modal-action">
           <button class="btn btn-error" @click="confirmAction" :disabled="loading">
             <span v-if="loading" class="loading-spinner loading-sm loading"></span>
-            {{t("discussion.components.confirm")}}
+            {{ t("discussion.components.confirm") }}
           </button>
-          <button class="btn btn-ghost" @click="closeConfirmDialog" :disabled="loading">{{t("discussion.components.cancel")}}</button>
+          <button class="btn btn-ghost" @click="closeConfirmDialog" :disabled="loading">
+            {{ t("discussion.components.cancel") }}
+          </button>
         </div>
       </div>
       <div class="modal-backdrop" @click="closeConfirmDialog"></div>

@@ -299,16 +299,16 @@
       "backToProblems": "返回題目列表",
       "backToDiscussion": "返回討論區"
     },
-    "components":{
-      "pin":{
+    "components": {
+      "pin": {
         "action_Is_Pinned": "取消置頂",
         "status_Is_Pinned": "已取消置頂",
         "info_Is_Pinned": "確定要取消置頂此貼文嗎？",
         "action_Not_Pinned": "置頂貼文",
-        "status_Not_Pinned":"已置頂",
-        "info_Not_Pinned":"確定要置頂此貼文嗎？"
+        "status_Not_Pinned": "已置頂",
+        "info_Not_Pinned": "確定要置頂此貼文嗎？"
       },
-      "solve":{
+      "solve": {
         "action_Is_Solved": "標記為未解決",
         "status_Is_Solved": "已標記為未解決",
         "info_Is_Solved": "確定要將此貼文標記為未解決嗎？",
@@ -316,7 +316,7 @@
         "status_Not_Solved": "已標記為已解決",
         "info_Not_Solved": "確定要將此貼文標記為已解決嗎？"
       },
-      "post_actions":{
+      "post_actions": {
         "close_title": "關閉貼文",
         "close_info": "關閉後將無法繼續回覆此貼文，確定要關閉嗎？",
         "close_status": "貼文已關閉",
@@ -325,18 +325,18 @@
         "delete_status": "貼文已刪除"
       },
       "is_pinned": "置頂",
-      "not_pinned":"取消置頂",
-      "close":"關閉討論",
-      "delete":"刪除貼文",
-      "confirm":"確認",
-      "cancel":"取消",
-      "reply":{
-        "reply":"回覆",
-        "edit":"編輯",
-        "delete":"刪除",
-        "delete_reply":"刪除回覆",
-        "delete_reply_info":"刪除後無法復原，確定要刪除此回覆嗎？",
-        "delete_confirm":"確認刪除"
+      "not_pinned": "取消置頂",
+      "close": "關閉討論",
+      "delete": "刪除貼文",
+      "confirm": "確認",
+      "cancel": "取消",
+      "reply": {
+        "reply": "回覆",
+        "edit": "編輯",
+        "delete": "刪除",
+        "delete_reply": "刪除回覆",
+        "delete_reply_info": "刪除後無法復原，確定要刪除此回覆嗎？",
+        "delete_confirm": "確認刪除"
       }
     }
   },

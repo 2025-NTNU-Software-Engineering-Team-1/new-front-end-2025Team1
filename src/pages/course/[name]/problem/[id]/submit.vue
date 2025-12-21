@@ -20,7 +20,8 @@ const { data: problem, error, isLoading } = useAxios<Problem>(`/problem/view/${r
 
 // 依題目 meta 判斷允許的提交� �式；� �設為 "code"
 const acceptedFormat = computed<AcceptedFormat>(() => {
-  const fmt = (problem.value as unknown)?.config?.acceptedFormat;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const fmt = (problem.value as any)?.config?.acceptedFormat;
   return fmt === "zip" ? "zip" : "code";
 });
 
@@ -110,7 +111,8 @@ async function submit() {
       if (!form.zip) throw new Error("No zip file selected");
 
       // 教師給的 ZIP 限制
-      const limitMB = (problem.value as unknown)?.config?.maxStudentZipSizeMB ?? 50;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const limitMB = (problem.value as any)?.config?.maxStudentZipSizeMB ?? 50;
       const maxSizeBytes = limitMB * 1024 * 1024;
       if (form.zip.size > maxSizeBytes) {
         window.alert(

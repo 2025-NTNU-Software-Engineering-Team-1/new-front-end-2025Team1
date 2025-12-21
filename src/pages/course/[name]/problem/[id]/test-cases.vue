@@ -37,7 +37,14 @@ onMounted(async () => {
     isLoadingPublicCases.value = true;
     const response = await api.TrialSubmission.getPublicTestCases(Number(route.params.id));
     if (response.data.status === "OK") {
-      publicTestCases.value = response.data.trial_cases;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      publicTestCases.value = response.data.trial_cases.map((tc: any) => ({
+        File_Name: tc.file_name,
+        Memory_Limit: tc.memory_limit,
+        Time_Limit: tc.time_limit,
+        Input_Content: tc.input_content,
+        Output_Content: tc.output_content,
+      }));
       console.log("Loaded public test cases:", publicTestCases.value);
     } else {
       console.error("Failed to load public test cases");

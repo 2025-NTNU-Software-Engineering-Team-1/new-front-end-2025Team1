@@ -214,7 +214,10 @@ async function downloadAllSubmissions() {
           </div>
         </div>
 
-        <data-status-wrapper :error="error || fetchProblemError" :is-loading="isLoading">
+        <data-status-wrapper
+          :error="(error as AxiosError) || (fetchProblemError as AxiosError)"
+          :is-loading="isLoading"
+        >
           <template #loading>
             <skeleton-table :col="9" :row="5" />
           </template>

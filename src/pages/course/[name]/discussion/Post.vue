@@ -47,14 +47,16 @@ const loadProblems = async () => {
     });
 
     // axios interceptor 將 response.data 展開到 response 層級
-    const status = response.Status || response.data?.Status;
-    const problemsData = response.Problems || response.data?.Problems;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const res = response as any;
+    const status = res.Status || res.data?.Status;
+    const problemsData = res.Problems || res.data?.Problems;
 
     if (status === "OK") {
       problems.value = problemsData || [];
       // 空題目列表不是錯誤，只是課程還沒有題目
     } else {
-      const errorMsg = response.Message || response.data?.Message || t("discussion.err_unknown");
+      const errorMsg = res.Message || res.data?.Message || t("discussion.err_unknown");
       error.value = t("discussion.err_problems_list") + errorMsg;
     }
   } catch (err) {

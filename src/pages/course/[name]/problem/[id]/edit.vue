@@ -13,7 +13,8 @@ useTitle(`Edit Problem - ${route.params.id} - ${route.params.name} | Normal OJ`)
 
 const formElement = ref<InstanceType<typeof AdminProblemForm>>();
 
-function normalizeTestCases(raw: unknown): ProblemTestCase[] {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function normalizeTestCases(raw: any): ProblemTestCase[] {
   if (Array.isArray(raw)) return raw.slice();
   if (Array.isArray(raw?.tasks)) return raw.tasks.slice();
   return [];
@@ -132,17 +133,19 @@ function normalizePipeline(raw: unknown): ProblemPipeline {
     },
   };
   pipeline.staticAnalysis!.libraryRestrictions!.enabled ??= false;
-  const libs = pipeline.staticAnalysis!.libraryRestrictions!;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const libs = pipeline.staticAnalysis!.libraryRestrictions! as any;
   ["whitelist", "blacklist"].forEach((key) => {
-    if (!(libs as unknown)[key]) (libs as unknown)[key] = {};
+    if (!libs[key]) libs[key] = {};
     ["syntax", "imports", "headers", "functions"].forEach((f) => {
-      if (!Array.isArray((libs as unknown)[key][f])) (libs as unknown)[key][f] = [];
+      if (!Array.isArray(libs[key][f])) libs[key][f] = [];
     });
   });
   return pipeline;
 }
 
-function normalizeAssets(raw: unknown): ProblemAssets {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function normalizeAssets(raw: any): ProblemAssets {
   const base: ProblemAssets = {
     trialModePublicTestDataZip: raw?.trialModePublicTestDataZip ?? null,
     trialModeACFiles: raw?.trialModeACFiles ?? null,
@@ -174,10 +177,9 @@ watch(
   () => problem.value,
   (newProblem) => {
     if (!newProblem || edittingProblem.value) return; // 已初始化則跳過
-
-    const testCases = normalizeTestCases(
-      (newProblem as unknown).testCase ?? (newProblem as unknown).testCaseInfo,
-    );
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const np = newProblem as any;
+    const testCases = normalizeTestCases(np.testCase ?? np.testCaseInfo);
 
     edittingProblem.value = {
       ...newProblem,
@@ -189,31 +191,28 @@ watch(
       config: normalizeConfig(newProblem.config),
       pipeline: normalizePipeline(
         (() => {
-          const basePipe =
-            (newProblem as unknown).pipeline ||
-            (newProblem as unknown).pipelineConf ||
-            (newProblem as unknown).pipeline_conf ||
-            (newProblem as unknown).config?.pipeline;
+          const basePipe = np.pipeline || np.pipelineConf || np.pipeline_conf || np.config?.pipeline;
           // 將 config 併入原始 payload，讓 normalizePipeline 可以讀到 allowRead/allowWrite/fopen/fwrite
-          const cfg = (newProblem as unknown).config;
+          const cfg = np.config;
           if (basePipe && cfg) return { ...basePipe, config: cfg };
           if (basePipe) return basePipe;
           if (cfg) return { config: cfg };
           return {};
         })(),
       ),
-      assets: normalizeAssets((newProblem as unknown).assets),
+      assets: normalizeAssets(np.assets),
     } as ProblemForm;
 
     // 確保 allowRead/allowWrite 有值（部分回傳可能只在 config 上）
-    const cfg = edittingProblem.value.config;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const cfg = edittingProblem.value.config as any;
     const pipe = edittingProblem.value.pipeline;
     if (pipe) {
       if (pipe.allowRead === undefined || pipe.allowRead === null) {
-        pipe.allowRead = Boolean((cfg as unknown)?.allowRead ?? false);
+        pipe.allowRead = Boolean(cfg?.allowRead ?? false);
       }
       if (pipe.allowWrite === undefined || pipe.allowWrite === null) {
-        pipe.allowWrite = Boolean((cfg as unknown)?.allowWrite ?? false);
+        pipe.allowWrite = Boolean(cfg?.allowWrite ?? false);
       }
     }
   },

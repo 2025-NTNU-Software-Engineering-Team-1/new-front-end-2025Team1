@@ -52,21 +52,23 @@ watchEffect(() => {
   if (submission.value && !problem.value) {
     fetchProblem(`/problem/view/${submission.value.problemId}`);
   }
-
-  const hasStaticAnalysis =
-    (problem.value as unknown)?.pipeline?.staticAnalysis?.libraryRestrictions?.enabled === true;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const prob = problem.value as any;
+  const hasStaticAnalysis = prob?.pipeline?.staticAnalysis?.libraryRestrictions?.enabled === true;
 
   if (hasStaticAnalysis && submission.value) {
     fetchSAReport(`/submission/${submission.value.submissionId}/static-analysis`);
   }
 });
 
-const enableCompiledBinary = computed(
-  () => !!(problem.value as unknown)?.config?.artifactCollection?.includes("compiledBinary"),
-);
-const enableZipArtifact = computed(
-  () => !!(problem.value as unknown)?.config?.artifactCollection?.includes("zip"),
-);
+const enableCompiledBinary = computed(() => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return !!(problem.value as any)?.config?.artifactCollection?.includes("compiledBinary");
+});
+const enableZipArtifact = computed(() => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return !!(problem.value as any)?.config?.artifactCollection?.includes("zip");
+});
 const saStatusBadge = computed(() => {
   if (!submission.value || submission.value.status === SUBMISSION_STATUS_CODE.PENDING) return null;
   const status = submission.value.saStatus;
@@ -324,7 +326,7 @@ function downloadTaskZip(taskIndex: number) {
             </div>
             <div class="my-1" />
 
-            <data-status-wrapper :error="SAError" :is-loading="SALoading">
+            <data-status-wrapper :error="SAError as AxiosError" :is-loading="SALoading">
               <template #loading>
                 <ui-spinner />
               </template>

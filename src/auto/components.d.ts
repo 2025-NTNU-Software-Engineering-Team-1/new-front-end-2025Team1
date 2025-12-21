@@ -8,7 +8,6 @@ export {}
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
     AdminProblemForm: typeof import('./../components/Problem/Admin/AdminProblemForm.vue')['default']
-    AIChatbot: typeof import('./../components/AIChatbot.vue')['default']
     AnnouncementCard: typeof import('./../components/Announcement/AnnouncementCard.vue')['default']
     AnnouncementForm: typeof import('./../components/Announcement/AnnouncementForm.vue')['default']
     CodeEditor: typeof import('./../components/CodeEditor.vue')['default']
@@ -37,7 +36,6 @@ declare module '@vue/runtime-core' {
     IUilFileExclamationAlt: typeof import('~icons/uil/file-exclamation-alt')['default']
     IUilFileUploadAlt: typeof import('~icons/uil/file-upload-alt')['default']
     IUilFilterSlash: typeof import('~icons/uil/filter-slash')['default']
-    IUilFlask: typeof import('~icons/uil/flask')['default']
     IUilFolderDownload: typeof import('~icons/uil/folder-download')['default']
     IUilHome: typeof import('~icons/uil/home')['default']
     IUilLanguage: typeof import('~icons/uil/language')['default']
@@ -57,7 +55,6 @@ declare module '@vue/runtime-core' {
     IUilUser: typeof import('~icons/uil/user')['default']
     JudgeStatus: typeof import('./../components/JudgeStatus.vue')['default']
     LanguageMultiSelect: typeof import('./../components/Problem/Forms/LanguageMultiSelect.vue')['default']
-    Live2DViewer: typeof import('./../components/Live2DViewer.vue')['default']
     LoginSection: typeof import('./../components/LoginSection.vue')['default']
     MarkdownRenderer: typeof import('./../components/MarkdownRenderer.vue')['default']
     MultiStringInput: typeof import('./../components/Problem/Admin/Controls/MultiStringInput.vue')['default']

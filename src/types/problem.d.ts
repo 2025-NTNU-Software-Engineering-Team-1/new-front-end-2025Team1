@@ -142,6 +142,8 @@ interface ProblemConfigExtra {
   // Trial Mode
   trialMode: boolean;
   maxNumberOfTrial?: number;
+  trialResultVisible: false;
+  trialResultDownloadable: false;
 
   // AI VTuber
   aiVTuber: boolean;

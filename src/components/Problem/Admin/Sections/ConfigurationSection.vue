@@ -208,6 +208,8 @@ function ensureConfig() {
   if (!problem.value.config) {
     problem.value.config = {
       trialMode: false,
+      trialResultVisible: false,
+      trialResultDownloadable: false,
       aiVTuber: false,
       acceptedFormat: "code",
       maxStudentZipSizeMB: 50,
@@ -929,7 +931,6 @@ onBeforeUnmount(() => {
         <input type="checkbox" class="toggle" v-model="problem.config!.trialMode" />
       </label>
       <div v-if="problem.config!.trialMode" class="mt-3 space-y-4 rounded border border-gray-400 p-4">
-        <!-- Max Number of Trial -->
         <div class="form-control w-full max-w-xs">
           <label class="label">
             <span class="label-text">Max Number of Trial</span>
@@ -951,7 +952,32 @@ onBeforeUnmount(() => {
           </label>
         </div>
 
-        <!-- Upload Public Test Data -->
+        <div class="flex flex-wrap gap-x-8 gap-y-4 rounded border border-gray-300 bg-base-100 p-3">
+          <div class="form-control">
+            <label class="label cursor-pointer gap-3">
+              <span class="label-text font-semibold">Result Visible</span>
+              <input
+                type="checkbox"
+                class="toggle toggle-success toggle-sm"
+                v-model="problem.config!.trialResultVisible"
+              />
+            </label>
+            <span class="px-1 text-xs opacity-70"> Allow viewing execution output. </span>
+          </div>
+
+          <div class="form-control">
+            <label class="label cursor-pointer gap-3">
+              <span class="label-text font-semibold">Result Downloadable</span>
+              <input
+                type="checkbox"
+                class="toggle toggle-success toggle-sm"
+                v-model="problem.config!.trialResultDownloadable"
+              />
+            </label>
+            <span class="px-1 text-xs opacity-70"> Allow downloading output files. </span>
+          </div>
+        </div>
+
         <div class="form-control w-full max-w-xs">
           <label class="label">
             <span class="label-text">Upload Public Test Data (.zip)</span>
@@ -980,7 +1006,6 @@ onBeforeUnmount(() => {
           </label>
         </div>
 
-        <!-- Upload AC files -->
         <div class="form-control w-full max-w-xs">
           <label class="label">
             <span class="label-text">Upload AC files</span>
@@ -991,13 +1016,13 @@ onBeforeUnmount(() => {
             :accept="getAIFileExtensions().join(',')"
             class="file-input file-input-bordered file-input-sm w-full"
             @change="
-              (e: any) => {
-               const files = Array.from(e.target.files || []) as File[];
-                const valid = validateFilesForAIAC(files, getAIFileExtensions());
-                problem.assets!.trialModeACFiles = valid;
-                if (valid.length === 0) (e.target as HTMLInputElement).value = '';
-              }
-            "
+                  (e: any) => {
+                  const files = Array.from(e.target.files || []) as File[];
+                    const valid = validateFilesForAIAC(files, getAIFileExtensions());
+                    problem.assets!.trialModeACFiles = valid;
+                    if (valid.length === 0) (e.target as HTMLInputElement).value = '';
+                  }
+                "
           />
           <label class="label mt-1">
             <span class="label-text-alt text-sm opacity-70">

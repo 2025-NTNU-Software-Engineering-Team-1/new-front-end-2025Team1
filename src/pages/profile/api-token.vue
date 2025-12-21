@@ -49,13 +49,13 @@ const getStatusClass = (status: string) => {
 };
 
 const scopeOptions = ref<string[]>([]);
-// 後端串接點 (2/5) - 取得可用的 Scope 選� �
+// 後端串接點 (2/5) - 取得可用的 Scope 選� �
 async function getScopeOptions() {
   try {
     const response = await api.APIToken.getScopes();
     scopeOptions.value = response.data.Scope;
   } catch (error) {
-    console.error("無法取得 Scope 選� �:", error);
+    console.error("無法取得 Scope 選� �:", error);
     scopeOptions.value = ["Read-only", "Read/Write", "Admin", "None"];
   }
 }
@@ -145,7 +145,7 @@ async function handleUpdate() {
   }
 }
 
-// Scope � 減
+// Scope � 減
 function addScope(form: "create" | "edit") {
   const targetForm = form === "create" ? newApiTokenForm : editApiTokenForm;
   targetForm.scopes.push("Read-only");
@@ -207,7 +207,7 @@ async function handleDeactivate() {
             {{ t("profile.apiToken.create_new_key") }}
           </button>
         </div>
-        <p class="text-base-content/70 mt-4 text-sm">
+        <p class="mt-4 text-sm text-base-content/70">
           {{ t("profile.apiToken.description") }}
         </p>
         <div class="form-control mt-4">
@@ -330,7 +330,7 @@ async function handleDeactivate() {
             >
             <div class="flex items-center gap-2">
               <select
-                class="select bg-base-200 text-base-content flex-grow"
+                class="select flex-grow bg-base-200 text-base-content"
                 v-model="newApiTokenForm.scopes[index]"
               >
                 <option v-for="option in scopeOptions" :key="option" :value="option">{{ option }}</option>
@@ -391,7 +391,7 @@ async function handleDeactivate() {
                 t("profile.apiToken.edit_modal.original_info")
               }}</span></label
             >
-            <div class="bg-base-300/20 rounded p-2 font-mono text-sm">
+            <div class="rounded bg-base-300/20 p-2 font-mono text-sm">
               {Name: "{{ editingToken?.Name }}"; Scope: {{ editingToken?.Scope.join(", ") }}}
             </div>
           </div>
@@ -411,7 +411,7 @@ async function handleDeactivate() {
             >
             <div class="flex items-center gap-2">
               <select
-                class="select bg-base-200 text-base-content flex-grow"
+                class="select flex-grow bg-base-200 text-base-content"
                 v-model="editApiTokenForm.scopes[index]"
               >
                 <option v-for="option in scopeOptions" :key="option" :value="option">{{ option }}</option>
@@ -498,7 +498,7 @@ async function handleDeactivate() {
               t("profile.apiToken.create_modal.scope_label")
             }}</span></label
           >
-          <div v-for="scope in viewingScopes" :key="scope" class="bg-base-200 text-base-content rounded p-3">
+          <div v-for="scope in viewingScopes" :key="scope" class="rounded bg-base-200 p-3 text-base-content">
             {{ scope }}
           </div>
         </div>
@@ -526,7 +526,7 @@ async function handleDeactivate() {
               t("profile.apiToken.deactivate_modal.token_info")
             }}</span></label
           >
-          <div class="bg-base-300/20 rounded p-2 text-left font-mono text-sm">
+          <div class="rounded bg-base-300/20 p-2 text-left font-mono text-sm">
             {Name: "{{ editingToken?.Name }}"; Scope: {{ editingToken?.Scope.join(", ") }}}
           </div>
         </div>

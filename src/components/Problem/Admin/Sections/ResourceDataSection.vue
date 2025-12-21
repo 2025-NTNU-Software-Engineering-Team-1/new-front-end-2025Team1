@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // ==========================================
 // Imports
 // ==========================================
@@ -79,7 +80,7 @@ const labelText = computed(() =>
 // Check if Allow Read is enabled in pipeline or legacy config
 const allowReadRef = computed(() => {
   const pipe = problem.value.pipeline || {};
-  const cfg = problem.value.config || ({} as unknown);
+  const cfg = problem.value.config || ({} as any);
   return Boolean(pipe.allowRead ?? cfg.allowRead ?? cfg.allow_read ?? cfg.fopen ?? false);
 });
 
@@ -87,7 +88,7 @@ const allowReadRef = computed(() => {
 const allowReadSatisfied = computed(() => isTeacher.value || allowReadRef.value);
 
 // Check if test cases exist (Remote or Local)
-const hasRemoteTestcase = computed(() => Boolean((problem.value.config as unknown)?.assetPaths?.case));
+const hasRemoteTestcase = computed(() => Boolean((problem.value.config as any)?.assetPaths?.case));
 const hasTestdata = computed(
   () => hasRemoteTestcase.value || (problem.value.testCaseInfo?.tasks?.length ?? 0) > 0,
 );
@@ -95,7 +96,7 @@ const hasTestdata = computed(
 const hasExistingTasks = computed(() => (problem.value.testCaseInfo?.tasks?.length ?? 0) > 0);
 
 const hasRemoteAsset = computed(() =>
-  Boolean((problem.value.config as unknown)?.assetPaths?.[assetPathKey.value]),
+  Boolean((problem.value.config as any)?.assetPaths?.[assetPathKey.value]),
 );
 
 // ==========================================
@@ -125,17 +126,17 @@ const showDisabledText = computed(() => Boolean(enableDisabledReason.value || re
 
 // Toggle Switch Reference
 const enableRef = computed({
-  get: () => (problem.value.config as unknown)?.[enableKey.value],
+  get: () => (problem.value.config as any)?.[enableKey.value],
   set: (val: boolean) => {
-    (problem.value.config as unknown)[enableKey.value] = val;
+    (problem.value.config as any)[enableKey.value] = val;
   },
 });
 
 // File Object Reference
 const fileRef = computed({
-  get: () => (problem.value.assets as unknown)?.[assetKey.value] ?? null,
+  get: () => (problem.value.assets as any)?.[assetKey.value] ?? null,
   set: (val: File | null) => {
-    if (problem.value.assets) (problem.value.assets as unknown)[assetKey.value] = val;
+    if (problem.value.assets) (problem.value.assets as any)[assetKey.value] = val;
   },
 });
 
@@ -143,7 +144,7 @@ const fileRef = computed({
 const downloadUrl = computed(() => {
   const pid = route.params.id;
   if (!pid || Array.isArray(pid)) return null;
-  const assetPaths = (problem.value.config as unknown)?.assetPaths;
+  const assetPaths = (problem.value.config as any)?.assetPaths;
   if (assetPaths && !assetPaths[assetPathKey.value]) return null;
   return `/api/problem/${pid}/asset/${assetPathKey.value}/download`;
 });
@@ -281,7 +282,7 @@ watch(
         />
       </label>
       <i-uil-lock-alt v-if="enableDisabledReason" class="text-error" />
-      <span v-if="showDisabledText" class="text-error text-sm whitespace-nowrap">
+      <span v-if="showDisabledText" class="text-error whitespace-nowrap text-sm">
         {{ resourceDataWarning || enableDisabledReason }}
       </span>
       <div class="ml-auto flex items-center gap-2">
@@ -307,9 +308,9 @@ watch(
 
     <div class="mt-2 overflow-hidden rounded-lg">
       <div class="grid grid-cols-5">
-        <div class="bg-base-300 col-span-1 flex items-center justify-center text-sm">zip file</div>
+        <div class="col-span-1 flex items-center justify-center bg-base-300 text-sm">zip file</div>
         <div
-          class="textarea-bordered bg-base-100 col-span-4 flex flex-col p-4"
+          class="textarea-bordered col-span-4 flex flex-col bg-base-100 p-4"
           :class="[isDrag && 'border-accent border']"
           @drop.prevent="fileRef = enableRef && !enableDisabledReason ? $event.dataTransfer!.files![0] : null"
           @dragover.prevent="isDrag = enableRef && !enableDisabledReason"
@@ -334,10 +335,10 @@ watch(
               class="file-input file-input-bordered file-input-sm w-full"
               :disabled="!enableRef || Boolean(enableDisabledReason)"
               @change="
-                (e: unknown) => {
-                  const file = e.target.files?.[0];
+                (e: Event) => {
+                  const file = (e.target as HTMLInputElement).files?.[0];
                   if (file && !assertFileSizeOK(file, 'resourceDataZip')) {
-                    e.target.value = '';
+                    (e.target as HTMLInputElement).value = '';
                     return;
                   }
                   fileRef = enableRef ? file || null : null;

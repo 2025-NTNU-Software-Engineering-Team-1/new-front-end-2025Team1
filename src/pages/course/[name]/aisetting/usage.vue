@@ -199,7 +199,7 @@ onMounted(fetchUsage);
 
         <div
           v-if="data?.totalToken != null"
-          class="border-base-300 bg-base-200 mb-8 rounded-lg border p-4 text-center text-lg font-semibold"
+          class="mb-8 rounded-lg border border-base-300 bg-base-200 p-4 text-center text-lg font-semibold"
         >
           Total Token Usage：
           <span>{{ data.totalToken.toLocaleString() }}</span>
@@ -223,10 +223,10 @@ onMounted(fetchUsage);
             <div
               v-for="keyItem in data.keys"
               :key="keyItem.id"
-              class="border-base-200 bg-base-100 mb-6 rounded-lg border p-4 shadow"
+              class="mb-6 rounded-lg border border-base-200 bg-base-100 p-4 shadow"
             >
               <div
-                class="flex cursor-pointer flex-wrap items-center justify-between gap-3 select-none"
+                class="flex cursor-pointer select-none flex-wrap items-center justify-between gap-3"
                 @click="toggleExpand(String(keyItem.id))"
               >
                 <div class="flex items-center gap-2 text-lg font-semibold">
@@ -240,10 +240,10 @@ onMounted(fetchUsage);
               </div>
 
               <transition name="fade">
-                <div v-if="expandedKeys[keyItem.id]" class="border-base-300 mt-4 border-t pt-4">
+                <div v-if="expandedKeys[keyItem.id]" class="mt-4 border-t border-base-300 pt-4">
                   <div
                     v-if="!keyItem.is_flat && keyItem.problem_usages.length > 0"
-                    class="text-base-content/60 mb-2 text-xs"
+                    class="mb-2 text-xs text-base-content/60"
                   >
                     Average: {{ Math.round(keyItem.average_token).toLocaleString() }} tokens / problem
                   </div>
@@ -287,7 +287,7 @@ onMounted(fetchUsage);
                         </td>
 
                         <td class="text-right font-mono">
-                          <span :class="{ 'text-base-content font-bold': index === 0 && !keyItem.is_flat }">
+                          <span :class="{ 'font-bold text-base-content': index === 0 && !keyItem.is_flat }">
                             {{ usage.total_token?.toLocaleString?.() || 0 }}
                           </span>
                         </td>
@@ -299,7 +299,7 @@ onMounted(fetchUsage);
             </div>
           </div>
 
-          <p v-else class="text-base-content/70 italic">No API key usage data.</p>
+          <p v-else class="italic text-base-content/70">No API key usage data.</p>
         </template>
       </div>
     </div>

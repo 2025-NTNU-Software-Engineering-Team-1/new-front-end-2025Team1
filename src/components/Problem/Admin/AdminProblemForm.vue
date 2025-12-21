@@ -83,7 +83,8 @@ defineExpose({ isLoading, errorMsg });
  * Dual-version compatible normalize function for library restrictions.
  * Handles both legacy array format and new object format.
  */
-function normalizeLibraryRestrictions(raw: unknown) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function normalizeLibraryRestrictions(raw: any) {
   const base = {
     enabled: false,
     whitelist: { syntax: [], imports: [], headers: [], functions: [] },
@@ -150,10 +151,12 @@ function initFormStructure() {
   }
 
   // Ensure pipeline and staticAnalysis exist
-  if (!problem.value.pipeline) problem.value.pipeline = {} as unknown;
-  if (!problem.value.pipeline.staticAnalysis) problem.value.pipeline.staticAnalysis = {} as unknown;
-
-  const staticAnalysis = (problem.value.pipeline.staticAnalysis ??= {} as unknown);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if (!problem.value.pipeline) problem.value.pipeline = {} as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if (!problem.value.pipeline.staticAnalysis) problem.value.pipeline.staticAnalysis = {} as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const staticAnalysis = (problem.value.pipeline.staticAnalysis ??= {} as any) as any;
   const libs = staticAnalysis.libraryRestrictions;
 
   // Normalize Library Restrictions
@@ -343,7 +346,8 @@ provide("v$", v$);
 function update<K extends keyof ProblemForm>(key: K, value: ProblemForm[K]) {
   // logger.log(`Update Field: ${String(key)}`, value); // Optional: verbose logging
   emits("update", key, value);
-  if ((v$.value as unknown)[key]) (v$.value as unknown)[key].$touch?.();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if ((v$.value as any)[key]) (v$.value as any)[key].$touch?.();
 }
 
 async function submit() {
@@ -357,10 +361,10 @@ async function submit() {
     logger.error("Validation Failed");
     // Debug: Log invalid fields
     if (DEBUG_MODE) {
-      const errors = v$.value.$errors;
+      const errors = v$.value.$errors as Array<{ $property: string }>;
       logger.warn(
         "Invalid Fields:",
-        errors.map((e: unknown) => e.$property),
+        errors.map((e) => e.$property),
       );
     }
   }
@@ -410,15 +414,15 @@ async function submit() {
 
   <!-- Section fold panels -->
   <div class="mt-4 flex flex-col gap-3">
-    <div class="collapse-arrow rounded-box bg-base-200 collapse">
+    <div class="collapse-arrow rounded-box collapse bg-base-200">
       <input type="checkbox" class="peer" />
       <div class="collapse-title font-semibold">Set Description</div>
       <div class="collapse-content">
-        <DescriptionSection :v$="v$" @update="update" />
+        <DescriptionSection :v$="v$ as any" @update="update" />
       </div>
     </div>
 
-    <div class="collapse-arrow rounded-box bg-base-200 collapse">
+    <div class="collapse-arrow rounded-box collapse bg-base-200">
       <input type="checkbox" class="peer" />
       <div class="collapse-title font-semibold">Set Configuration</div>
       <div class="collapse-content">
@@ -426,7 +430,7 @@ async function submit() {
       </div>
     </div>
 
-    <div class="collapse-arrow rounded-box bg-base-200 collapse">
+    <div class="collapse-arrow rounded-box collapse bg-base-200">
       <input type="checkbox" class="peer" />
       <div class="collapse-title font-semibold">Set Pipeline</div>
       <div class="collapse-content">
@@ -434,15 +438,15 @@ async function submit() {
       </div>
     </div>
 
-    <div class="collapse-arrow rounded-box bg-base-200 collapse">
+    <div class="collapse-arrow rounded-box collapse bg-base-200">
       <input type="checkbox" class="peer" />
       <div class="collapse-title font-semibold">Set Test Data</div>
       <div class="collapse-content">
-        <TestDataSection :v$="v$" />
+        <TestDataSection :v$="v$ as any" />
       </div>
     </div>
 
-    <div class="collapse-arrow rounded-box bg-base-200 collapse">
+    <div class="collapse-arrow rounded-box collapse bg-base-200">
       <input type="checkbox" class="peer" />
       <div class="collapse-title font-semibold">Set Resource Data</div>
       <div class="collapse-content">

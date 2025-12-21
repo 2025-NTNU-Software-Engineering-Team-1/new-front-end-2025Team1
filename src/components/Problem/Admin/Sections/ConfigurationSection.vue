@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // ==========================================
 // Imports
 // ==========================================
@@ -54,7 +55,7 @@ const logger = {
 // ==========================================
 // Helper: API Response Parser
 // ==========================================
-function parseApiResponse(res: unknown) {
+function parseApiResponse(res: any) {
   const data = res?.data;
   const rawStatus = data?.status || res?.status;
   const statusStr = String(rawStatus || "").toLowerCase();
@@ -74,7 +75,6 @@ if (!rawProblem || !rawProblem.value) {
 }
 
 const problem = rawProblem as Ref<ProblemForm>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const v$ = inject<any>("v$");
 const route = useRoute();
 
@@ -247,7 +247,7 @@ function ensureConfig() {
 // Initialize artifactCollection
 function initArtifactCollection() {
   ensureConfig();
-  const cfg = problem.value.config as unknown;
+  const cfg = problem.value.config as any;
   // Backward compatibility check
   if (cfg && !Array.isArray(cfg.artifactCollection)) {
     cfg.artifactCollection = Array.isArray(cfg.artifact_collection) ? cfg.artifact_collection : [];
@@ -260,7 +260,7 @@ function initArtifactCollection() {
 
 // Synchronous initialization check (to ensure value exists before mount if possible)
 if (!Array.isArray(problem.value.config.artifactCollection)) {
-  const cfgAny = problem.value.config as unknown;
+  const cfgAny = problem.value.config as any;
   problem.value.config.artifactCollection = Array.isArray(cfgAny?.artifact_collection)
     ? cfgAny.artifact_collection
     : [];
@@ -293,7 +293,7 @@ const artifactZip = computed({
 // Section: Assets Helper
 // ==========================================
 const assetPaths = computed<Record<string, string>>(
-  () => ((problem.value.config as unknown)?.assetPaths as Record<string, string>) || {},
+  () => ((problem.value.config as any)?.assetPaths as Record<string, string>) || {},
 );
 
 const hasAsset = (key: string) => !!(assetPaths.value && assetPaths.value[key]);
@@ -308,7 +308,7 @@ const dockerZipError = ref("");
 
 // Helper: Read saved env list from config
 function loadSavedDockerEnvs() {
-  const nar = problem.value.config?.networkAccessRestriction as unknown;
+  const nar = problem.value.config?.networkAccessRestriction as any;
   if (nar?.custom_env?.env_list && Array.isArray(nar.custom_env.env_list)) {
     detectedDockerEnvs.value = nar.custom_env.env_list;
   }
@@ -364,7 +364,7 @@ async function inspectDockerZip(file: File) {
     detectedDockerEnvs.value = sortedEnvs;
 
     // Save to config
-    const nar = problem.value.config!.networkAccessRestriction as unknown;
+    const nar = problem.value.config!.networkAccessRestriction as any;
     if (!nar.custom_env) {
       nar.custom_env = {};
     }
@@ -383,7 +383,7 @@ async function inspectDockerZip(file: File) {
 
 function removeDockerEnv(index: number) {
   detectedDockerEnvs.value.splice(index, 1);
-  const nar = problem.value.config?.networkAccessRestriction as unknown;
+  const nar = problem.value.config?.networkAccessRestriction as any;
   if (nar?.custom_env) {
     nar.custom_env.env_list = detectedDockerEnvs.value;
   }
@@ -442,7 +442,7 @@ async function fetchKeys() {
     logger.log(`Found ${rawKeys.length} keys`);
 
     // Data Sanitization and Classification
-    const safeKeys = rawKeys.map((k: unknown, index: number) => {
+    const safeKeys = rawKeys.map((k: any, index: number) => {
       // Integrity Check
       const missing: string[] = [];
       if (!k.id) missing.push("id");
@@ -460,12 +460,11 @@ async function fetchKeys() {
         created_by: k.created_by || "",
       };
     });
-
-    apiKeys.active = safeKeys.filter((k: unknown) => k.is_active);
-    apiKeys.inactive = safeKeys.filter((k: unknown) => !k.is_active);
+    apiKeys.active = safeKeys.filter((k: any) => k.is_active);
+    apiKeys.inactive = safeKeys.filter((k: any) => !k.is_active);
 
     logger.success("Keys Loaded", { active: apiKeys.active.length, inactive: apiKeys.inactive.length });
-  } catch (err: unknown) {
+  } catch (err: any) {
     logger.error("Fetch Keys Error", err);
     fetchError.value = err?.message || "Failed to load keys.";
   } finally {
@@ -485,8 +484,8 @@ function scrollToKey() {
   const query = searchQuery.value.trim().toLowerCase();
   if (!query) return;
 
-  const matchActive = apiKeys.active.find((k) => k.key_name.toLowerCase().includes(query));
-  const matchInactive = apiKeys.inactive.find((k) => k.key_name.toLowerCase().includes(query));
+  const matchActive = apiKeys.active.find((k: any) => k.key_name.toLowerCase().includes(query)) as any;
+  const matchInactive = apiKeys.inactive.find((k: any) => k.key_name.toLowerCase().includes(query)) as any;
 
   if (matchActive) {
     showActiveKeys.value = true;
@@ -543,7 +542,7 @@ async function fetchKeySuggestion() {
     } else {
       throw new Error(message || "API returned failed status");
     }
-  } catch (err: unknown) {
+  } catch (err: any) {
     logger.error("Suggestion Error", err);
     suggestionError.value = err?.response?.data?.detail || err?.message || "Failed to fetch suggestion.";
     keySuggestion.value = null;
@@ -666,16 +665,11 @@ onBeforeUnmount(() => {
       <label class="label"><span class="label-text">Accepted Format</span></label>
       <div class="flex flex-wrap items-center gap-6">
         <label class="label cursor-pointer gap-2">
-          <input
-            type="radio"
-            class="radio"
-            value="code"
-            v-model="problem.config!.acceptedFormat as unknown"
-          />
+          <input type="radio" class="radio" value="code" v-model="problem.config!.acceptedFormat as any" />
           <span class="label-text">Code</span>
         </label>
         <label class="label cursor-pointer gap-2">
-          <input type="radio" class="radio" value="zip" v-model="problem.config!.acceptedFormat as unknown" />
+          <input type="radio" class="radio" value="zip" v-model="problem.config!.acceptedFormat as any" />
           <span class="label-text">Zip</span>
         </label>
       </div>
@@ -698,7 +692,7 @@ onBeforeUnmount(() => {
             )
           "
         />
-        <span class="text-xs whitespace-nowrap opacity-70">(default 50 MB)</span>
+        <span class="whitespace-nowrap text-xs opacity-70">(default 50 MB)</span>
       </div>
     </div>
 
@@ -742,8 +736,8 @@ onBeforeUnmount(() => {
                     :accept="getAIFileExtensions().join(',')"
                     class="file-input file-input-bordered file-input-sm w-full"
                     @change="
-                      (e: unknown) => {
-                        const files = Array.from(e.target.files || []) as File[];
+                      (e: Event) => {
+                        const files = Array.from((e.target as HTMLInputElement).files || []) as File[];
                         const valid = validateFilesForAIAC(files, getAIFileExtensions());
                         problem.assets!.aiVTuberACFiles = valid;
                         if (valid.length === 0) (e.target as HTMLInputElement).value = '';
@@ -781,7 +775,7 @@ onBeforeUnmount(() => {
                   <transition name="fade">
                     <div
                       v-if="showSuggestionTooltip"
-                      class="key-suggestion-tooltip bg-base-100 absolute top-full left-6 z-50 mt-2 w-72 rounded-md border border-gray-400 p-3 shadow-xl"
+                      class="key-suggestion-tooltip absolute left-6 top-full z-50 mt-2 w-72 rounded-md border border-gray-400 bg-base-100 p-3 shadow-xl"
                     >
                       <div v-if="isFetchingSuggestion" class="flex items-center text-sm">
                         <ui-spinner class="mr-2" /> Fetching suggestion...
@@ -822,7 +816,7 @@ onBeforeUnmount(() => {
                 <button
                   type="button"
                   @click="showActiveKeys = !showActiveKeys"
-                  class="hover:bg-base-200 flex w-full items-center justify-between px-4 py-2 transition-colors"
+                  class="flex w-full items-center justify-between px-4 py-2 transition-colors hover:bg-base-200"
                 >
                   <div class="flex items-center gap-2">
                     <svg
@@ -844,10 +838,10 @@ onBeforeUnmount(() => {
                 <!-- 限高可捲動區域 -->
                 <div v-show="showActiveKeys" class="h-64 overflow-y-auto p-3">
                   <label
-                    v-for="key in apiKeys.active"
-                    :key="key.id"
-                    :ref="(el) => (activeKeyRefs[key.id] = el as HTMLElement)"
-                    class="hover:border-info/30 hover:bg-base-200 flex cursor-pointer items-start gap-3 rounded-lg border border-transparent p-3 transition"
+                    v-for="key in apiKeys.active as any[]"
+                    :key="(key as any).id"
+                    :ref="(el) => (activeKeyRefs[(key as any).id] = el as HTMLElement)"
+                    class="hover:border-info/30 flex cursor-pointer items-start gap-3 rounded-lg border border-transparent p-3 transition hover:bg-base-200"
                   >
                     <input
                       type="checkbox"
@@ -876,7 +870,7 @@ onBeforeUnmount(() => {
                 <button
                   type="button"
                   @click="showInactiveKeys = !showInactiveKeys"
-                  class="hover:bg-base-200 flex w-full items-center justify-between px-4 py-2 transition-colors"
+                  class="flex w-full items-center justify-between px-4 py-2 transition-colors hover:bg-base-200"
                 >
                   <div class="flex items-center gap-2">
                     <svg
@@ -898,10 +892,10 @@ onBeforeUnmount(() => {
                 <!-- 限高可捲動區域 -->
                 <div v-show="showInactiveKeys" class="h-64 overflow-y-auto p-3">
                   <label
-                    v-for="key in apiKeys.inactive"
-                    :key="key.id"
-                    :ref="(el) => (inactiveKeyRefs[key.id] = el as HTMLElement)"
-                    class="hover:border-error/30 hover:bg-base-200 flex cursor-pointer items-start gap-3 rounded-lg border border-transparent p-3 transition"
+                    v-for="key in apiKeys.inactive as any[]"
+                    :key="(key as any).id"
+                    :ref="(el) => (inactiveKeyRefs[(key as any).id] = el as HTMLElement)"
+                    class="hover:border-error/30 flex cursor-pointer items-start gap-3 rounded-lg border border-transparent p-3 transition hover:bg-base-200"
                   >
                     <input
                       type="checkbox"
@@ -960,7 +954,7 @@ onBeforeUnmount(() => {
           </label>
         </div>
 
-        <div class="bg-base-100 flex flex-wrap gap-x-8 gap-y-4 rounded border border-gray-300 p-3">
+        <div class="flex flex-wrap gap-x-8 gap-y-4 rounded border border-gray-300 bg-base-100 p-3">
           <div class="form-control">
             <label class="label cursor-pointer gap-3">
               <span class="label-text font-semibold">Result Visible</span>
@@ -995,7 +989,7 @@ onBeforeUnmount(() => {
             accept=".zip"
             class="file-input file-input-bordered file-input-sm w-full"
             @change="
-              async (e: unknown) => {
+              async (e: Event) => {
                 const inputEl = e.target as HTMLInputElement;
                 const file = inputEl.files?.[0] || null;
                 problem.assets!.trialModePublicTestDataZip = null;
@@ -1024,8 +1018,8 @@ onBeforeUnmount(() => {
             :accept="getAIFileExtensions().join(',')"
             class="file-input file-input-bordered file-input-sm w-full"
             @change="
-              (e: unknown) => {
-                const files = Array.from(e.target.files || []) as File[];
+              (e: Event) => {
+                const files = Array.from((e.target as HTMLInputElement).files || []) as File[];
                 const valid = validateFilesForAIAC(files, getAIFileExtensions());
                 problem.assets!.trialModeACFiles = valid;
                 if (valid.length === 0) (e.target as HTMLInputElement).value = '';
@@ -1163,28 +1157,27 @@ onBeforeUnmount(() => {
                   class="file-input file-input-bordered w-full max-w-xs"
                   :class="{ 'input-error': v$?.assets?.dockerfilesZip?.$error || dockerZipError }"
                   @change="
-                    async (e: unknown) => {
-                      const file = e.target.files?.[0] || null;
-
+                    async (e: Event) => {
+                      const file = (e.target as HTMLInputElement).files?.[0] || null;
                       // Reset previous
                       detectedDockerEnvs = [];
                       dockerZipError = '';
 
-                      const nar = problem.config!.networkAccessRestriction as unknown;
+                      const nar = problem.config!.networkAccessRestriction as any;
                       if (nar?.custom_env) nar.custom_env.env_list = [];
 
                       if (file) {
                         // file size
                         if (!assertFileSizeOK(file, 'dockerfiles.zip')) {
                           problem.assets!.dockerfilesZip = null;
-                          e.target.value = '';
+                          (e.target as HTMLInputElement).value = '';
                           return;
                         }
                         // check zip structure
                         const isValid = await inspectDockerZip(file);
                         if (!isValid) {
                           problem.assets!.dockerfilesZip = null;
-                          e.target.value = '';
+                          (e.target as HTMLInputElement).value = '';
                           return;
                         }
                         problem.assets!.dockerfilesZip = file;
@@ -1204,7 +1197,7 @@ onBeforeUnmount(() => {
 
                 <div
                   v-if="detectedDockerEnvs.length > 0"
-                  class="border-success/30 bg-base-200 mt-2 w-full max-w-xs rounded border p-3 text-xs"
+                  class="border-success/30 mt-2 w-full max-w-xs rounded border bg-base-200 p-3 text-xs"
                 >
                   <div class="text-success mb-2 flex items-center gap-1 font-bold">
                     <i-uil-check-circle />
@@ -1218,7 +1211,7 @@ onBeforeUnmount(() => {
                     <li
                       v-for="(env, index) in detectedDockerEnvs"
                       :key="env"
-                      class="hover:bg-base-300 flex items-center justify-between rounded px-1 transition-colors"
+                      class="flex items-center justify-between rounded px-1 transition-colors hover:bg-base-300"
                     >
                       <div>
                         <span class="font-mono font-bold">{{ env }}</span>
@@ -1243,7 +1236,7 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- Artifact Collection -->
-    <div class="form-control border-base-300 col-span-1 rounded-lg border p-4 md:col-span-2">
+    <div class="form-control col-span-1 rounded-lg border border-base-300 p-4 md:col-span-2">
       <label class="label"><span class="label-text">Artifact Collection (Optional)</span></label>
       <div class="flex gap-4">
         <label class="label cursor-pointer gap-2">

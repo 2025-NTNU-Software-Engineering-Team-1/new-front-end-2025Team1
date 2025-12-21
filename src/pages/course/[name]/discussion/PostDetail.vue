@@ -341,7 +341,7 @@ onMounted(() => {
           </div>
 
           <!-- Post content -->
-          <div class="bg-base-200 mb-4 rounded-lg p-4">
+          <div class="mb-4 rounded-lg bg-base-200 p-4">
             <MarkdownRenderer :md="post.Content" />
           </div>
 
@@ -402,7 +402,7 @@ onMounted(() => {
           </div>
 
           <!-- Reply form -->
-          <div v-else-if="showReplyForm" class="bg-base-200 mb-6 rounded-lg p-4">
+          <div v-else-if="showReplyForm" class="mb-6 rounded-lg bg-base-200 p-4">
             <div class="mb-2">
               <label class="text-sm font-medium">
                 {{

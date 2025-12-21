@@ -31,6 +31,9 @@
     "src/**/*.tsx",
     "src/**/*.vue"
   ],
+  "exclude": [
+    "src/live2d/**/*"
+  ],
   "references": [
     {
       "path": "./tsconfig.node.json"

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { defineProps } from "vue";
 import { PROBLEM_STATUS } from "@/constants";
 
 interface Props {
@@ -16,7 +15,7 @@ defineProps<Props>();
 </script>
 
 <template>
-  <div class="collapse-arrow rounded-box bg-base-200 collapse">
+  <div class="collapse-arrow rounded-box collapse bg-base-200">
     <input type="checkbox" class="peer" />
     <div class="collapse-title bg-base-200 text-base">
       <div class="flex flex-col">
@@ -24,7 +23,7 @@ defineProps<Props>();
         <span class="text-sm font-light"> ID: {{ id }}</span>
       </div>
     </div>
-    <div class="collapse-content bg-base-300 flex flex-col gap-2">
+    <div class="collapse-content flex flex-col gap-2 bg-base-300">
       <div class="mt-3 flex flex-col">
         <div class="flex gap-1">
           <div v-for="tag in tags" :key="tag" class="badge badge-info">

@@ -44,7 +44,7 @@ useTitle("Forgot Password");
 <template>
   <div class="mx-4 flex max-w-4xl flex-col items-center justify-center gap-4 p-4 md:mx-auto">
     <h1 class="my-12 text-center text-4xl font-bold">{{ t("password_reset.forgot-password") }}</h1>
-    <div class="card bg-base-200 w-96 max-w-full shadow-xl">
+    <div class="card w-96 max-w-full bg-base-200 shadow-xl">
       <div v-if="!success" class="card-body">
         <div class="card-title flex-col">
           <div v-if="showError" class="alert alert-error text-base">

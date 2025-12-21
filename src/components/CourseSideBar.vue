@@ -43,7 +43,7 @@ const navs = [
 </script>
 
 <template>
-  <ul v-if="displayType === 'side'" class="menu menu-compact bg-base-100 lg:menu-normal w-40 p-2">
+  <ul v-if="displayType === 'side'" class="menu menu-compact lg:menu-normal w-40 bg-base-100 p-2">
     <li
       v-for="{ name, path } in navs"
       :class="[

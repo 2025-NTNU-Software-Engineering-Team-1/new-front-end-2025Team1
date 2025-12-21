@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // ==========================================
 // Imports
 // ==========================================
@@ -51,7 +52,6 @@ const logger = {
 // Injection & Setup
 // ==========================================
 const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const v$ = inject<any>("v$"); // Inject validation object
 const route = useRoute();
 
@@ -70,12 +70,8 @@ if (!problem || !problem.value) {
 function ensurePipeline() {
   if (!problem.value.pipeline) {
     problem.value.pipeline = {
-      allowRead: Boolean(
-        problem.value.config?.allowRead ?? (problem.value.config as unknown)?.fopen ?? false,
-      ),
-      allowWrite: Boolean(
-        problem.value.config?.allowWrite ?? (problem.value.config as unknown)?.fwrite ?? false,
-      ),
+      allowRead: Boolean(problem.value.config?.allowRead ?? (problem.value.config as any)?.fopen ?? false),
+      allowWrite: Boolean(problem.value.config?.allowWrite ?? (problem.value.config as any)?.fwrite ?? false),
       executionMode: "general",
       customChecker: false,
       teacherFirst: false,
@@ -92,12 +88,12 @@ function ensurePipeline() {
     // Backfill missing file permission settings
     if (problem.value.pipeline.allowRead === undefined || problem.value.pipeline.allowRead === null) {
       problem.value.pipeline.allowRead = Boolean(
-        problem.value.config?.allowRead ?? (problem.value.config as unknown)?.fopen ?? false,
+        problem.value.config?.allowRead ?? (problem.value.config as any)?.fopen ?? false,
       );
     }
     if (problem.value.pipeline.allowWrite === undefined || problem.value.pipeline.allowWrite === null) {
       problem.value.pipeline.allowWrite = Boolean(
-        problem.value.config?.allowWrite ?? (problem.value.config as unknown)?.fwrite ?? false,
+        problem.value.config?.allowWrite ?? (problem.value.config as any)?.fwrite ?? false,
       );
     }
 
@@ -114,9 +110,9 @@ function ensurePipeline() {
     } else {
       // Ensure deep structure for whitelist/blacklist
       ["whitelist", "blacklist"].forEach((key) => {
-        if (!(libs as unknown)[key]) (libs as unknown)[key] = {};
+        if (!(libs as any)[key]) (libs as any)[key] = {};
         ["syntax", "imports", "headers", "functions"].forEach((f) => {
-          if (!(libs as unknown)[key][f]) (libs as unknown)[key][f] = [];
+          if (!(libs as any)[key][f]) (libs as any)[key][f] = [];
         });
       });
     }
@@ -130,7 +126,7 @@ function ensurePipeline() {
 function initPipelineValues() {
   ensurePipeline();
   const pipe = problem.value.pipeline!;
-  const cfg = (problem.value.config as unknown) || {};
+  const cfg = (problem.value.config as any) || {};
 
   // Prioritize existing pipeline values, fallback to config (legacy keys: fopen, fwrite)
   const backendAllowRead = pipe.allowRead ?? cfg.allowRead ?? cfg.allow_read ?? cfg.fopen ?? false;
@@ -222,7 +218,7 @@ async function fetchStaticAnalysisOptions() {
     const resp = await api.Problem.getStaticAnalysisOptions();
     // logger.log("Raw Response", resp);
 
-    const libs = (resp && resp.data && (resp.data as unknown).librarySymbols) || {};
+    const libs = (resp && resp.data && (resp.data as any).librarySymbols) || {};
     imports = Array.isArray(libs.imports) ? libs.imports : [];
     headers = Array.isArray(libs.headers) ? libs.headers : [];
     functions = Array.isArray(libs.functions) ? libs.functions : [];
@@ -340,7 +336,7 @@ function isTeacherFileAllowed(file: File | null): boolean {
 
 // Asset Helper
 const assetPaths = computed<Record<string, string>>(
-  () => ((problem.value.config as unknown)?.assetPaths as Record<string, string>) || {},
+  () => ((problem.value.config as any)?.assetPaths as Record<string, string>) || {},
 );
 
 const hasAsset = (key: string) => Boolean(assetPaths.value && assetPaths.value[key]);
@@ -348,7 +344,7 @@ const assetDownloadUrl = (key: string) =>
   assetPaths.value && assetPaths.value[key] ? `/api/problem/${route.params.id}/asset/${key}/download` : null;
 
 // Ensure pipeline object exists at script end (safety check)
-problem.value.pipeline = problem.value.pipeline || ({} as unknown);
+problem.value.pipeline = problem.value.pipeline || ({} as any);
 
 // ==========================================
 // Lifecycle Hooks
@@ -684,7 +680,7 @@ onMounted(async () => {
               type="radio"
               class="radio"
               value="general"
-              v-model="problem.pipeline!.executionMode as unknown"
+              v-model="problem.pipeline!.executionMode as any"
             />
             <span class="label-text">General</span>
           </label>
@@ -693,7 +689,7 @@ onMounted(async () => {
               type="radio"
               class="radio"
               value="functionOnly"
-              v-model="problem.pipeline!.executionMode as unknown"
+              v-model="problem.pipeline!.executionMode as any"
             />
             <span class="label-text">Function Only</span>
           </label>
@@ -702,7 +698,7 @@ onMounted(async () => {
               type="radio"
               class="radio"
               value="interactive"
-              v-model="problem.pipeline!.executionMode as unknown"
+              v-model="problem.pipeline!.executionMode as any"
             />
             <span class="label-text">Interactive</span>
           </label>
@@ -745,13 +741,13 @@ onMounted(async () => {
                 class="file-input file-input-bordered file-input-sm w-56"
                 :class="{ 'input-error': v$?.assets?.makefileZip?.$error }"
                 @change="
-                  (e: unknown) => {
-                    const file = e.target.files?.[0] || null;
+                  (e: Event) => {
+                    const file = (e.target as HTMLInputElement).files?.[0] || null;
                     problem.assets!.makefileZip = file;
                     v$?.assets?.makefileZip?.$touch();
                     if (!file || !assertFileSizeOK(file, 'makefileZip')) {
                       problem.assets!.makefileZip = null;
-                      e.target.value = '';
+                      (e.target as HTMLInputElement).value = '';
                     }
                   }
                 "
@@ -804,8 +800,8 @@ onMounted(async () => {
                   class="file-input file-input-bordered file-input-sm w-56"
                   :class="{ 'input-error': v$?.assets?.teacherFile?.$error }"
                   @change="
-                    (e: unknown) => {
-                      const file = (e.target.files as FileList)?.[0] || null;
+                    (e: Event) => {
+                      const file = ((e.target as HTMLInputElement).files as FileList)?.[0] || null;
                       problem.assets!.teacherFile = file;
                       v$?.assets?.teacherFile?.$touch();
                       if (!file || !assertFileSizeOK(file, 'teacherFile')) {
@@ -878,13 +874,13 @@ onMounted(async () => {
               :class="{ 'input-error': v$?.assets?.customCheckerPy?.$error }"
               :disabled="problem.pipeline!.executionMode === 'interactive'"
               @change="
-                (e: unknown) => {
-                  const file = e.target.files?.[0] || null;
+                (e: Event) => {
+                  const file = (e.target as HTMLInputElement).files?.[0] || null;
                   problem.assets!.customCheckerPy = file;
                   v$?.assets?.customCheckerPy?.$touch();
                   if (!file || !assertFileSizeOK(file, 'custom_checker.py')) {
                     problem.assets!.customCheckerPy = null;
-                    e.target.value = '';
+                    (e.target as HTMLInputElement).value = '';
                   }
                 }
               "
@@ -912,11 +908,7 @@ onMounted(async () => {
         <div class="flex items-center gap-4">
           <label class="label cursor-pointer justify-start gap-x-4">
             <span class="label-text">Custom Scoring Script</span>
-            <input
-              type="checkbox"
-              class="toggle"
-              v-model="(problem as unknown).pipeline.scoringScript.custom"
-            />
+            <input type="checkbox" class="toggle" v-model="(problem as any).pipeline.scoringScript.custom" />
           </label>
           <div class="flex items-center gap-2">
             <div v-if="hasAsset('scoring_script') || problem.assets?.scorePy" class="flex items-center gap-2">
@@ -935,7 +927,7 @@ onMounted(async () => {
           </div>
         </div>
 
-        <div v-if="(problem as unknown).pipeline.scoringScript?.custom" class="flex flex-col gap-x-2">
+        <div v-if="(problem as any).pipeline.scoringScript?.custom" class="flex flex-col gap-x-2">
           <div class="flex items-center gap-x-2">
             <span class="pl-1 text-sm opacity-80">Upload Custom_Scorer.py</span>
             <input
@@ -944,13 +936,13 @@ onMounted(async () => {
               class="file-input file-input-bordered file-input-sm w-56"
               :class="{ 'input-error': v$?.assets?.scorePy?.$error }"
               @change="
-                (e: unknown) => {
-                  const file = e.target.files?.[0] || null;
+                (e: Event) => {
+                  const file = (e.target as HTMLInputElement).files?.[0] || null;
                   problem.assets!.scorePy = file;
                   v$?.assets?.scorePy?.$touch();
                   if (!file || !assertFileSizeOK(file, 'scorePy')) {
                     problem.assets!.scorePy = null;
-                    e.target.value = '';
+                    (e.target as HTMLInputElement).value = '';
                   }
                 }
               "

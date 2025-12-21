@@ -156,7 +156,7 @@ const handleDelete = async () => {
       <div v-else class="loading-spinner loading-xs loading"></div>
     </label>
 
-    <ul tabindex="0" class="dropdown-content menu rounded-box bg-base-100 z-50 w-52 p-2 shadow">
+    <ul tabindex="0" class="dropdown-content menu rounded-box z-50 w-52 bg-base-100 p-2 shadow">
       <!-- 置� �/取消置� � -->
       <li v-if="canPin">
         <a @click="handlePin" class="flex items-center gap-2">

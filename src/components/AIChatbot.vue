@@ -89,7 +89,7 @@ const currentExpression = ref<string | null>(null);
 
 const chatScale = ref(1.15);
 
-// 聊天紀錄：一開始不要� �設訊息，等 history 載入
+// 聊天紀錄：一開始不要� �設訊息，等 history 載入
 let nextId = 1;
 const messages = ref<ChatMessage[]>([]);
 const chatBodyEl = ref<HTMLElement | null>(null);
@@ -118,7 +118,7 @@ const changeExpression = (expId: string) => {
   }
 };
 
-// � �設表情：F01
+// � �設表情：F01
 const setDefaultExpression = () => {
   try {
     const app = LAppDelegate.getInstance();
@@ -166,7 +166,7 @@ const setLive2DTalking = (isTalking: boolean) => {
   }
 };
 
-// ====== � �設訊息 & 歷史紀錄 ======
+// ====== � �設訊息 & 歷史紀錄 ======
 
 // const isLoadingHistory = ref(false);
 
@@ -190,7 +190,8 @@ const loadHistory = async () => {
         const obj = JSON.parse(text);
         if (Array.isArray(obj?.data)) {
           text = obj.data
-            .map((x: unknown) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .map((x: any) => {
               if (x?.text) {
                 emotion ||= x.emotion;
                 return x.text;
@@ -238,7 +239,7 @@ const typeAiMessage = (fullText: string, emotion?: string) => {
 
   scrollToBottom();
 
-  const thinkingDelay = 400; // 開始打字前的停� �
+  const thinkingDelay = 400; // 開始打字前的停� �
   const thinkingTimer = window.setTimeout(() => {
     const msgIndex = messages.value.findIndex((m) => m.id === id);
     if (msgIndex === -1) return;
@@ -279,7 +280,7 @@ const typeAiMessage = (fullText: string, emotion?: string) => {
         clearInterval(timer);
         typingTimers.delete(id);
 
-        // 打完：嘴巴停＋表情切回原本（� �設 F01）
+        // 打完：嘴巴停＋表情切回原本（� �設 F01）
         setLive2DTalking(false);
         const prev = msg.prevExpressionId ?? "F01";
         changeExpression(prev);
@@ -321,8 +322,8 @@ const requestAiReply = async (userText: string) => {
     phase: "thinking",
   });
   scrollToBottom();
-
-  const extractPayload = (res: unknown) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const extractPayload = (res: any) => {
     const a = res?.data;
     const b = res?.data?.data;
     const c = res?.data?.data?.data;
@@ -427,7 +428,7 @@ const initLive2D = () => {
   live2dInited.value = true;
   console.log("[Live2D] 初始化完成");
 
-  // 初始化完套上� �設表情 F01
+  // 初始化完套上� �設表情 F01
   setDefaultExpression();
 };
 
@@ -476,7 +477,7 @@ onBeforeUnmount(() => {
   />
 
   <!-- 右下角聊天區（整個一起 scale） -->
-  <div class="fixed right-6 bottom-6 z-50 origin-bottom-right" :style="{ transform: `scale(${chatScale})` }">
+  <div class="fixed bottom-6 right-6 z-50 origin-bottom-right" :style="{ transform: `scale(${chatScale})` }">
     <!-- 開啟按鈕 -->
     <button
       v-if="showTrigger && !isOpen"
@@ -549,7 +550,7 @@ onBeforeUnmount(() => {
           <!-- 訊息區 -->
           <main
             ref="chatBodyEl"
-            class="flex-1 space-y-3 overflow-y-auto bg-gradient-to-b from-indigo-50/30 to-purple-50/30 px-5 pt-3 pb-6"
+            class="flex-1 space-y-3 overflow-y-auto bg-gradient-to-b from-indigo-50/30 to-purple-50/30 px-5 pb-6 pt-3"
           >
             <div
               v-for="msg in messages"
@@ -567,7 +568,7 @@ onBeforeUnmount(() => {
                     <div v-if="msg.phase === 'thinking'" class="typing-dots">
                       <span></span><span></span><span></span>
                     </div>
-                    <div v-else class="leading-relaxed whitespace-pre-wrap">
+                    <div v-else class="whitespace-pre-wrap leading-relaxed">
                       {{ msg.displayText ?? msg.text }}
                     </div>
                   </div>
@@ -628,7 +629,7 @@ onBeforeUnmount(() => {
             </button>
             <input
               v-model="draft"
-              class="flex-1 rounded-2xl border border-white/40 bg-white/50 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-300 focus:outline-none"
+              class="flex-1 rounded-2xl border border-white/40 bg-white/50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
               placeholder="輸入訊息..."
               @keydown.enter.prevent="send"
             />

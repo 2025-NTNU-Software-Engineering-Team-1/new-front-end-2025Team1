@@ -210,7 +210,7 @@ async function saveTestcaseSettings() {
 
             <div class="rounded border p-4">
               <h4 class="mb-2 font-semibold">{{ t("course.problem.test.testcaseModal.preview") }}</h4>
-              <div class="bg-base-200 h-64 max-w-full overflow-auto rounded border p-2 whitespace-pre-wrap">
+              <div class="h-64 max-w-full overflow-auto whitespace-pre-wrap rounded border bg-base-200 p-2">
                 <template v-if="selectedTestcaseContent.includes('blob:')">
                   <div v-for="(line, idx) in selectedTestcaseContent.split('\n')" :key="idx">
                     <template v-if="line.startsWith('blob:')">

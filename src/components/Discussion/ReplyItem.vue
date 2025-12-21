@@ -22,7 +22,7 @@ const emit = defineEmits<{
 
 // const session = useSession();
 
-// 生成� �像首字母
+// 生成� �像首字母
 const authorInitials = computed(() => {
   return props.reply.Author?.[0]?.toUpperCase() || "?";
 });
@@ -52,7 +52,7 @@ const handleReply = () => {
 </script>
 
 <template>
-  <div class="bg-base-100 flex gap-3 rounded-lg p-4">
+  <div class="flex gap-3 rounded-lg bg-base-100 p-4">
     <!-- Avatar -->
     <div class="flex-shrink-0">
       <div
@@ -119,7 +119,7 @@ const handleReply = () => {
       <!-- Nested replies (子回覆) -->
       <div
         v-if="reply.children && reply.children.length > 0"
-        class="border-base-300 mt-4 space-y-3 border-l-2 pl-4"
+        class="mt-4 space-y-3 border-l-2 border-base-300 pl-4"
       >
         <ReplyItem
           v-for="childReply in reply.children"

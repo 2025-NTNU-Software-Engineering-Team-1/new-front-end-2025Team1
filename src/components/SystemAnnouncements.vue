@@ -3,6 +3,7 @@ import { useSession } from "@/stores/session";
 import { formatTime } from "@/utils/formatTime";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import { fetcher } from "@/models/api";
+import { AxiosError } from "axios";
 
 import useInteractions from "@/composables/useInteractions";
 
@@ -20,7 +21,7 @@ const { data: announcements, error, isLoading } = useAxios<AnnouncementList>("/a
         <div class="card-title mb-3">{{ $t("components.systemAnn.ann") }}</div>
         <div class="my-2" />
 
-        <data-status-wrapper :error="error" :is-loading="isLoading">
+        <data-status-wrapper :error="error as AxiosError" :is-loading="isLoading">
           <template #loading>
             <skeleton-table :col="3" :row="5" />
           </template>
@@ -60,7 +61,7 @@ const { data: announcements, error, isLoading } = useAxios<AnnouncementList>("/a
     </div>
     <div v-else class="card min-w-full">
       <div class="card-body">
-        <data-status-wrapper :error="error" :is-loading="isLoading">
+        <data-status-wrapper :error="error as AxiosError | undefined" :is-loading="isLoading">
           <template #loading>
             <skeleton-table :col="1" :row="5" />
           </template>
@@ -74,7 +75,7 @@ const { data: announcements, error, isLoading } = useAxios<AnnouncementList>("/a
               </thead>
               <tbody>
                 <tr v-for="{ title, createTime, annId } in announcements" :key="annId" class="hover">
-                  <td class="max-w-[12rem] min-w-[10rem] truncate">
+                  <td class="min-w-[10rem] max-w-[12rem] truncate">
                     <router-link :to="`/announcements/${annId}`" class="link link-hover max-w-full text-lg">
                       {{ title }}
                     </router-link>

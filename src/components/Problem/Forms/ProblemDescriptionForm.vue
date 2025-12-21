@@ -1,9 +1,9 @@
 <script setup lang="ts">
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { inject, Ref } from "vue";
-
 defineProps<{
   // TODO: hard to type validator, does vuelidate have child component validation?
-  v$: unknown;
+  v$: any;
 }>();
 defineEmits<{
   (e: "update", key: keyof ProblemForm, value: ProblemForm[typeof key]): void;

@@ -1,7 +1,8 @@
 <script setup lang="ts">
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { inject, Ref } from "vue";
 
-defineProps<{ v$: unknown }>();
+defineProps<{ v$: any }>();
 defineEmits<{
   (e: "update", key: keyof ProblemForm, value: ProblemForm[typeof key]): void;
 }>();

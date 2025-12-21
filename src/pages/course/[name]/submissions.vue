@@ -10,6 +10,7 @@ import { formatTime } from "@/utils/formatTime";
 import { timeFromNow } from "@/utils/timeFromNow";
 import { useTitle, useClipboard } from "@vueuse/core";
 import { useProblemSelection } from "@/composables/useProblemSelection";
+import { AxiosError } from "axios";
 
 const route = useRoute();
 const router = useRouter();

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // ==========================================
 // Imports
 // ==========================================
@@ -10,7 +11,7 @@ import { assertFileSizeOK } from "@/utils/checkFileSize";
 // ==========================================
 // Props & Injection
 // ==========================================
-defineProps<{ v$: unknown }>();
+defineProps<{ v$: any }>();
 
 const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
 const route = useRoute();
@@ -67,7 +68,7 @@ const downloadUrl = computed(() => {
   return `/api/problem/${id}/testcase`;
 });
 
-const hasRemoteTestcase = computed(() => Boolean((problem.value.config as unknown)?.assetPaths?.case));
+const hasRemoteTestcase = computed(() => Boolean((problem.value.config as any)?.assetPaths?.case));
 const hasExistingTasks = computed(() => (problem.value.testCaseInfo?.tasks?.length ?? 0) > 0);
 const hasBackendTestcase = computed(() => hasExistingTasks.value || hasRemoteTestcase.value);
 
@@ -189,17 +190,17 @@ watch(
     <div class="mt-2 overflow-hidden rounded-lg">
       <div class="grid grid-cols-5">
         <!-- 左側灰底區 -->
-        <div class="bg-base-300 col-span-1 flex items-center justify-center text-sm">zip file</div>
+        <div class="col-span-1 flex items-center justify-center bg-base-300 text-sm">zip file</div>
 
         <!-- 右側白底上傳區 -->
         <div
-          class="textarea-bordered bg-base-100 col-span-4 flex flex-col p-4"
+          class="textarea-bordered col-span-4 flex flex-col bg-base-100 p-4"
           :class="[isDrag && 'border-accent border']"
           @drop.prevent="problem.assets!.testdataZip = $event.dataTransfer!.files![0]"
           @dragover.prevent="isDrag = true"
           @dragleave="isDrag = false"
         >
-          <!-- 永� 在上方顯示 -->
+          <!-- 永� 在上方顯示 -->
           <div class="mb-2 text-sm opacity-70">Drop a zip file here</div>
 
           <!-- 選擇或顯示檔案 -->
@@ -209,10 +210,10 @@ watch(
               accept=".zip"
               class="file-input file-input-bordered file-input-sm w-full"
               @change="
-                (e: unknown) => {
-                  const file = e.target.files?.[0];
+                (e: Event) => {
+                  const file = (e.target as HTMLInputElement).files?.[0];
                   if (file && !assertFileSizeOK(file, 'testdataZip')) {
-                    e.target.value = '';
+                    (e.target as HTMLInputElement).value = '';
                     return;
                   }
                   problem.assets!.testdataZip = file || null;
@@ -239,7 +240,7 @@ watch(
       v-text="v$.testCaseInfo.tasks.$errors[0]?.$message"
     />
 
-    <!-- Tasks 表� � -->
+    <!-- Tasks 表� � -->
     <template v-for="(t, i) in problem.testCaseInfo.tasks" :key="i">
       <div class="mt-2 grid grid-cols-1 gap-3 md:grid-cols-4">
         <div class="form-control">

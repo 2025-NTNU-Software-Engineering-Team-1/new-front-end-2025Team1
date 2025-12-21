@@ -13,6 +13,10 @@ useTitle(`Edit Problem - ${route.params.id} - ${route.params.name} | Normal OJ`)
 
 const formElement = ref<InstanceType<typeof AdminProblemForm>>();
 
+type LegacyProblemConfigExtra = ProblemConfigExtra & {
+  artifact_collection?: ProblemConfigExtra["artifactCollection"];
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalizeTestCases(raw: any): ProblemTestCase[] {
   if (Array.isArray(raw)) return raw.slice();
@@ -20,7 +24,7 @@ function normalizeTestCases(raw: any): ProblemTestCase[] {
   return [];
 }
 
-function normalizeConfig(config?: ProblemConfigExtra): ProblemConfigExtra {
+function normalizeConfig(config?: LegacyProblemConfigExtra): ProblemConfigExtra {
   const base: ProblemConfigExtra = {
     trialMode: false,
     maxNumberOfTrial: -1,
@@ -53,8 +57,7 @@ function normalizeConfig(config?: ProblemConfigExtra): ProblemConfigExtra {
     aiVTuberApiKeys: Array.isArray(config?.aiVTuberApiKeys) ? config!.aiVTuberApiKeys : base.aiVTuberApiKeys,
     acceptedFormat: config?.acceptedFormat ?? base.acceptedFormat,
     maxStudentZipSizeMB: config?.maxStudentZipSizeMB ?? base.maxStudentZipSizeMB,
-    artifactCollection:
-      config?.artifactCollection ?? (config as unknown)?.artifact_collection ?? base.artifactCollection,
+    artifactCollection: config?.artifactCollection ?? config?.artifact_collection ?? base.artifactCollection,
     resourceDataTeacher: config?.resourceDataTeacher ?? base.resourceDataTeacher,
     networkAccessRestriction: {
       ...base.networkAccessRestriction!,
@@ -75,7 +78,8 @@ function normalizeConfig(config?: ProblemConfigExtra): ProblemConfigExtra {
   return merged;
 }
 
-function normalizePipeline(raw: unknown): ProblemPipeline {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function normalizePipeline(raw?: any): ProblemPipeline {
   if (!raw) raw = {};
   const base: ProblemPipeline = {
     allowRead: false,
@@ -363,7 +367,7 @@ async function delete_() {
                 <input v-model="openJSON" type="checkbox" class="toggle" />
               </div>
 
-              <pre v-if="openJSON" class="bg-base-200 rounded p-2 whitespace-pre-wrap"
+              <pre v-if="openJSON" class="whitespace-pre-wrap rounded bg-base-200 p-2"
                 >{{ JSON.stringify(edittingProblem, null, 2) }}
               </pre>
 

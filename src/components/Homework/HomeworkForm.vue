@@ -35,10 +35,12 @@ const emit = defineEmits<{
 
 const startDateTime = computed(() => dayjs(props.form.start * 1000).format("YYYY-MM-DDTHH:mm"));
 const endDateTime = computed(() => dayjs(props.form.end * 1000).format("YYYY-MM-DDTHH:mm"));
-function handleStartDateTimeInput(event: unknown) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function handleStartDateTimeInput(event: any) {
   updateForm("start", dayjs(event.target.value).valueOf() / 1000);
 }
-function handleEndDateTimeInput(event: unknown) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function handleEndDateTimeInput(event: any) {
   updateForm("end", dayjs(event.target.value).valueOf() / 1000);
 }
 

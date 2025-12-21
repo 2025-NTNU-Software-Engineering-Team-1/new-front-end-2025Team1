@@ -7,7 +7,7 @@ test.beforeEach(async ({ page, baseURL }) => {
 });
 
 //001
-test.skip("Teacher can set problem", async ({ page }) => {
+test("Teacher can set problem", async ({ page }) => {
   // Get in New prob setting pages
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
@@ -46,5 +46,69 @@ test.skip("Teacher can set problem", async ({ page }) => {
   await expect(page).toHaveURL(`http://localhost:8080/course/meow/problem/${PID}`);
 });
 
+//009 TODO
+test.skip("Teacher set TEST", async ({ page }) => {
+  //Get into the problems page
+  await page.getByRole("link", { name: "Course" }).click();
+  await page.getByRole("link", { name: "meow" }).click();
+  await page.getByRole("link", { name: "Problems" }).click();
+  
+  //Find all visible problems
+  const tds = page.locator("tr.hover td");
+  await page.waitForTimeout(1000);
+  const count = await tds.count();
+  
+  //Find Prob1
+  let PID = "";
+  for (let i = 0; i < count / 5; ++i){
+    const td = tds.nth(i * 5 + 1);
+    const name = await td.textContent();
+    if (name == "Prob1")
+    {
+      const pid_td = tds.nth(i * 5);
+      PID = await pid_td.innerText();
+      
+      const link = await pid_td.locator("a");
+      await link.click();
+      break;
+    }
+  }
+  await page.waitForTimeout(1000);
+  
+  //Get into setting
+  await page.getByRole("link", { name: "Test" }).click();
+  await page.waitForTimeout(1000);
+  await page.getByRole("link", { name: "Test" }).click();
+  await page.waitForTimeout(1000);
+  
+  //TODO: Upload testcase
+});
 
+//013
+test("Teacher can see submission list", async ({ page }) => {
+  await page.getByRole("link", { name: "Course" }).click();
+  await page.getByRole("link", { name: "meow" }).click();
+  await page.getByRole("link", { name: "Submissions" }).click();
+
+  await expect(page.locator(".card-title").first()).toHaveText("Submissions");
+
+  const table = await page.locator(".card table").first();
+  await expect(table.locator("th")).toHaveCount(10);
+  await expect(table.locator("th")).toHaveText(
+    ["ID", "PID", "User", "Result", "Score", "Run Time", "Memory", "Lang", "Time", "IP ADDRESS"],
+    { ignoreCase: true },
+  );
+});
+
+//015
+test("Teacher can download submission list", async ({ page }) => {
+  await page.getByRole("link", { name: "Course" }).click();
+  await page.getByRole("link", { name: "meow" }).click();
+  await page.getByRole("link", { name: "Submissions" }).click();
+  
+  const [ download ] = await Promise.all([page.waitForEvent("download"), page.locator("xpath=//*[@id=\"app\"]/div/div[1]/div[2]/div[2]/div/div/div/div/div[1]/div/div/div").click()]);
+
+  await download.saveAs("submissions.json");
+  console.log("Download saved!");
+});
 

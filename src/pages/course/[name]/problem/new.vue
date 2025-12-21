@@ -81,6 +81,8 @@ const newProblem = ref<ProblemForm>({
   config: {
     trialMode: false,
     maxNumberOfTrial: -1,
+    trialResultVisible: false,
+    trialResultDownloadable: false,
     aiVTuber: false,
     aiVTuberApiKeys: [],
     aiVTuberMode: "gemini-2.5-flash-lite",

@@ -169,7 +169,7 @@ const handleDelete = async () => {
               d="M5 4a1 1 0 000 2h10a1 1 0 100-2H5zM4 8a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zm0 4a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1z"
             />
           </svg>
-          {{ post.Is_Pinned ? t("discussion.component.is_pined") : t("discussion.component.not_pined") }}
+          {{ post.Is_Pinned ? t("discussion.components.pin.action_Is_Pinned") : t("discussion.components.pin.action_Not_Pinned") }}
         </a>
       </li>
 
@@ -192,8 +192,8 @@ const handleDelete = async () => {
           </svg>
           {{
             post.Is_Solved
-              ? t("discussion.components.solved.action_Is_Solved")
-              : t("discussion.components.solved.action_Not_Solved")
+              ? t("discussion.components.solve.action_Is_Solved")
+              : t("discussion.components.solve.action_Not_Solved")
           }}
         </a>
       </li>
@@ -208,7 +208,7 @@ const handleDelete = async () => {
               clip-rule="evenodd"
             />
           </svg>
-          {{ t("discussion.details.close") }}
+          {{ t("discussion.components.close") }}
         </a>
       </li>
 

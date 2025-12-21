@@ -15,7 +15,6 @@ const { t } = useI18n();
 const problemId = ref("");
 const title = ref("");
 const content = ref("");
-const category = ref("");
 const language = ref("");
 const containsCode = ref(false);
 
@@ -37,15 +36,6 @@ const languageOptions = [
   { value: "c", label: "C" },
   { value: "cpp", label: "C++" },
   { value: "python", label: "Python" },
-];
-
-// Category options
-const categoryOptions = [
-  { value: "", label: t("discussion.create.generalDiscussion") },
-  { value: "question", label: t("discussion.create.question") },
-  { value: "solution", label: t("discussion.create.solutionSharing") },
-  { value: "bug", label: t("discussion.create.bugReport") },
-  { value: "suggestion", label: t("discussion.create.suggestions") },
 ];
 
 // Load problems list
@@ -184,7 +174,6 @@ const submitPost = async () => {
       Title: title.value.trim(),
       Content: content.value.trim(),
       Problem_id: problemId.value,
-      Category: category.value || undefined,
       Language: language.value || undefined,
       Contains_Code: containsCode.value,
     };
@@ -258,16 +247,6 @@ onMounted(() => {
             <option value="">{{ t("discussion.create.problemPlaceholder") }}</option>
             <option v-for="problem in problems" :key="problem.Problem_Id" :value="problem.Problem_Id">
               {{ problem.Problem_Name }}
-            </option>
-          </select>
-        </div>
-
-        <!-- Category selection -->
-        <div class="mb-4">
-          <label class="mb-1 block text-sm font-medium">{{ t("discussion.create.category") }}</label>
-          <select v-model="category" class="select select-bordered w-full">
-            <option v-for="option in categoryOptions" :key="option.value" :value="option.value">
-              {{ option.label }}
             </option>
           </select>
         </div>

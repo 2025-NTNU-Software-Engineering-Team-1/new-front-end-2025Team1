@@ -10,6 +10,24 @@ import api, { fetcher } from "@/models/api";
 import { useTitle, useStorage } from "@vueuse/core";
 import { LANGUAGE_OPTIONS, LOCAL_STORAGE_KEY } from "@/constants";
 import { useI18n } from "vue-i18n";
+import MarkdownIt from 'markdown-it';
+import texmath from 'markdown-it-texmath';
+import katex from 'katex';
+import 'katex/dist/katex.min.css';
+
+const md = new MarkdownIt({
+  html: true,
+  breaks: true,
+}).use(texmath, {
+  engine: katex,
+  delimiters: 'dollars', 
+  katexOptions: { macros: { "\\RR": "\\mathbb{R}" } }
+});
+
+const renderMarkdown = (content: any): string => {
+  if (typeof content !== 'string') return '';
+  return md.render(content);
+};
 
 const route = useRoute();
 const { t } = useI18n();
@@ -84,16 +102,18 @@ async function test() {
 
     // API 2: Create trial submission request
     const requestResponse = await api.TrialSubmission.createTrialRequest({
-      Problem_Id: Number(route.params.id),
-      Language_Type: Number(form.lang), // 0: Python, 1: C++, 2: C
-      Use_Default_Test_Cases: useDefaultTestcases.value,
-    });
+      problem_id: Number(route.params.id),
+      language_type: Number(form.lang), // 0: Python, 1: C++, 2: C
+      use_default_test_cases: useDefaultTestcases.value,
+    }) as any;
 
-    if (requestResponse.data.status === "ERR" || !requestResponse.data.Trial_Submission_Id) {
-      throw new Error(requestResponse.data.message || "Failed to create trial submission");
+    if (requestResponse.status === "err" || !requestResponse.trial_submission_id) {
+      throw new Error(requestResponse.message || "Failed to create trial submission");
     }
 
-    const trialSubmissionId = requestResponse.data.Trial_Submission_Id;
+    const trialSubmissionId = requestResponse.trial_submission_id;
+    console.log("requestResponse =", requestResponse);
+    console.log("trialSubmissionId =", trialSubmissionId);
 
     // Prepare code zip file
     const codeWriter = new ZipWriter(new BlobWriter("application/zip"));
@@ -110,10 +130,10 @@ async function test() {
       console.log("Uploading custom testcases");
     }
 
-    const uploadResponse = await api.TrialSubmission.uploadTrialFiles(trialSubmissionId, formData);
-
-    if (uploadResponse.data.status === "ERR") {
-      throw new Error(uploadResponse.data.message || "Failed to upload trial submission files");
+    const uploadResponse = await api.TrialSubmission.uploadTrialFiles(trialSubmissionId, formData)as any;
+    console.log("uploadResponse =", uploadResponse);
+    if (uploadResponse.status === "err") {
+      throw new Error(uploadResponse.message || "Failed to upload trial submission files");
     }
 
     // Navigate to test history
@@ -188,12 +208,12 @@ async function submitCode() {
               <div class="transition-all duration-300" :class="{ 'max-h-96 overflow-hidden': !isExpanded }">
                 <h2 class="mb-2 text-xl font-bold">{{ problem?.problemName }}</h2>
                 <div class="prose max-w-none leading-relaxed">
-                  <h3 class="mt-4 text-lg font-semibold">{{ t("course.problem.test.topic.dec") }}</h3>
-                  <p v-html="problem?.description.description" class="whitespace-pre-line"></p>
-                  <h3 class="mt-4 text-lg font-semibold">{{ t("course.problem.test.topic.input") }}</h3>
-                  <p v-html="problem?.description.input" class="whitespace-pre-line"></p>
-                  <h3 class="mt-4 text-lg font-semibold">{{ t("course.problem.test.topic.output") }}</h3>
-                  <p v-html="problem?.description.output" class="whitespace-pre-line"></p>
+                  <h2 class="mt-4 text-lg font-semibold">{{ t("course.problem.test.topic.dec") }}</h2>
+                  <div v-html="renderMarkdown(problem?.description.description)" class="whitespace-normal"></div>
+                  <h2 class="mt-4 text-lg font-semibold">{{ t("course.problem.test.topic.input") }}</h2>
+                  <div v-html="renderMarkdown(problem?.description.input)" class="whitespace-normal"></div>
+                  <h2 class="mt-4 text-lg font-semibold">{{ t("course.problem.test.topic.output") }}</h2>
+                  <div v-html="renderMarkdown(problem?.description.output)" class="whitespace-normal"></div>
                   <div
                     class="overflow-hidden overflow-x-auto rounded-lg border border-base-300 bg-base-100 p-0"
                   >
@@ -230,8 +250,8 @@ async function submitCode() {
                       </tbody>
                     </table>
                   </div>
-                  <h3 class="mt-4 text-lg font-semibold">{{ t("course.problem.test.topic.hint") }}</h3>
-                  <p v-html="problem?.description.hint" class="whitespace-pre-line"></p>
+                  <h2 class="mt-4 text-lg font-semibold">{{ t("course.problem.test.topic.hint") }}</h2>
+                  <div v-html="renderMarkdown(problem?.description.hint)" class="whitespace-normal"></div>
                 </div>
               </div>
             </div>

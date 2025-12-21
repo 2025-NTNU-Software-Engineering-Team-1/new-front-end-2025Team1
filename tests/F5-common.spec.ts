@@ -45,8 +45,8 @@ test.skip("See the posts", async ({ page }) => {
 
 });
 
-//003 manual fail
-test.skip("Code", async ({ page }) => {
+//003
+test("Code", async ({ page }) => {
   //Get into the discussion page
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
@@ -58,7 +58,7 @@ test.skip("Code", async ({ page }) => {
   await page.locator("select.select-bordered").nth(0).selectOption({ label: "Prob1" });
   await page.locator("select.select-bordered").nth(2).selectOption({ label: "C++" });
   await page.locator("input.input-bordered").nth(0).type("First Code");
-  await page.locator("textarea.textarea-bordered").nth(0).type("```\n");
+  await page.locator("textarea.textarea-bordered").nth(0).type("```c++\n");
   const code = fs.readFileSync('./tests/add.cpp', 'utf-8');
   await page.locator("textarea.textarea-bordered").nth(0).type(code);
   await page.waitForTimeout(500);
@@ -71,7 +71,16 @@ test.skip("Code", async ({ page }) => {
   const text = await page.getByText(/Post \d+/).innerText();
   const PID = text.match(/\d+/)[0];
   await expect(page).toHaveURL(`http://localhost:8080/course/meow/discussion/${PID}`);
-
+  //background
+  await expect(page.locator("div.prose")).toHaveClass(/prose-pre:bg-zinc-800/);
+  //color
+  const keyword = page.locator("pre code .hljs-keyword").first();
+  await expect(keyword).toBeVisible();
+  const keywordColor = await keyword.evaluate(el => getComputedStyle(el).color);
+  const normalText = page.locator("pre code").first();
+  const normalColor = await normalText.evaluate(el => getComputedStyle(el).color);
+  expect(keywordColor).not.toBe(normalColor);
+  
 });
 
 //004
@@ -153,6 +162,5 @@ test.skip("Show the posts by Problem", async ({ page }) => {
   
 });
 
-//008 Can't press button by code
-
-//009 Can't press button by code
+//008 Can't be auto but success
+//009 Can't be auto but success

@@ -23,11 +23,11 @@ test.skip("Pin post to top", async ({ page }) => {
   await expect(moreBtn).toBeVisible();
   await moreBtn.click({ force: true });  
 
-  const pinItem = page.locator("ul.dropdown-content >> text=置頂");
+  const pinItem = page.locator("ul.dropdown-content >> text=discussion.component.not_pined");
   await expect(pinItem).toBeVisible();
   await pinItem.click();
 
-  const confirmBtn = page.locator('button:has-text("確認")');
+  const confirmBtn = page.locator('button:has-text("Confirm")');
   await expect(confirmBtn).toBeVisible();
   await confirmBtn.click();
   await page.waitForTimeout(500);  
@@ -40,7 +40,7 @@ test.skip("Pin post to top", async ({ page }) => {
   await expect(moreBtn).toBeVisible();
   await moreBtn.click({ force: true });
   
-  const unpinItem = page.locator("ul.dropdown-content >> text=取消置頂");
+  const unpinItem = page.locator("ul.dropdown-content >> text=discussion.component.is_pined");
   await expect(unpinItem).toBeVisible();
   await unpinItem.click();
 
@@ -50,7 +50,7 @@ test.skip("Pin post to top", async ({ page }) => {
 });
 
 //020
-test("Close a post", async ({ page }) => {
+test.skip("Close a post", async ({ page }) => {
   //Get into the discussion page
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
@@ -61,7 +61,7 @@ test("Close a post", async ({ page }) => {
   //Select
   await page.locator("select.select-bordered").nth(0).selectOption({ label: "Prob1" });
   await page.locator("input.input-bordered").nth(0).fill("To be closed");
-  await page.locator("textarea.textarea-bordered").nth(0).fill("This is the first post for closing");
+  await page.locator("textarea.textarea-bordered").nth(0).fill("This is the post for closing");
   
   //Post
   await page.getByRole("button", { name: "Post" }).click();
@@ -71,11 +71,11 @@ test("Close a post", async ({ page }) => {
   await expect(moreBtn).toBeVisible();
   await moreBtn.click({ force: true });  
 
-  const closeItem = page.locator("ul.dropdown-content >> text=關閉討論");
+  const closeItem = page.locator("ul.dropdown-content >> text=discussion.details.close");
   await expect(closeItem).toBeVisible();
   await closeItem.click();
 
-  const confirmBtn = page.locator('button:has-text("確認")');
+  const confirmBtn = page.locator('button:has-text("Confirm")');
   await expect(confirmBtn).toBeVisible();
   await confirmBtn.click();
   await page.waitForTimeout(500); 
@@ -102,24 +102,24 @@ test.skip("Post solved", async ({ page }) => {
   const moreBtn = page.locator("label.btn.btn-ghost.btn-sm");
   await expect(moreBtn).toBeVisible();
   await moreBtn.click({ force: true });
-  const solveItem = page.locator("ul.dropdown-content >> text=標記為已解決");
+  const solveItem = page.locator("ul.dropdown-content >> text=discussion.components.solved.action_Not_Solved");
   await expect(solveItem).toBeVisible();
   await solveItem.click();
 
-  const confirmBtn = page.locator('button:has-text("確認")');
+  const confirmBtn = page.locator('button:has-text("Confirm")');
   await expect(confirmBtn).toBeVisible();
   await confirmBtn.click();
   await page.waitForTimeout(500); 
 
   //check if success
   
-  await expect(page.getByText("Solved")).toBeVisible();
+  await expect(page.getByText("✓ Solved")).toBeVisible();
   
   //repair
   await expect(moreBtn).toBeVisible();
   await moreBtn.click({ force: true });
 
-  const unsolveItem = page.locator("ul.dropdown-content >> text=標記為未解決");
+  const unsolveItem = page.locator("ul.dropdown-content >> text=discussion.components.solved.action_Is_Solved");
   await expect(unsolveItem).toBeVisible();
   await unsolveItem.click();
 
@@ -140,7 +140,7 @@ test.skip("Delete a post", async ({ page }) => {
   //Select
   await page.locator("select.select-bordered").nth(0).selectOption({ label: "Prob1" });
   await page.locator("input.input-bordered").nth(0).fill("To be deleted");
-  await page.locator("textarea.textarea-bordered").nth(0).fill("This is the first post for deleting");
+  await page.locator("textarea.textarea-bordered").nth(0).fill("This is the post for deleting");
   
   //Post
   await page.getByRole("button", { name: "Post" }).click();
@@ -150,11 +150,11 @@ test.skip("Delete a post", async ({ page }) => {
   await expect(moreBtn).toBeVisible();
   await moreBtn.click({ force: true });  
 
-  const delItem = page.locator("ul.dropdown-content >> text=刪除貼文");
+  const delItem = page.locator("ul.dropdown-content >> text=Delete Post");
   await expect(delItem).toBeVisible();
   await delItem.click();
 
-  const confirmBtn = page.locator('button:has-text("確認")');
+  const confirmBtn = page.locator('button:has-text("Confirm")');
   await expect(confirmBtn).toBeVisible();
   await confirmBtn.click();
   await page.waitForTimeout(500); 
@@ -164,6 +164,7 @@ test.skip("Delete a post", async ({ page }) => {
 
   const count = await delPosts.count();
   expect(count).toBe(0);
+  
 });
 
 

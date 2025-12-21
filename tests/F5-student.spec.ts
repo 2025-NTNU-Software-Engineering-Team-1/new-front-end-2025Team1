@@ -18,9 +18,8 @@ test.skip("Can't make a post with code bf deadline", async ({ page }) => {
   //Select
   await page.locator("select.select-bordered").nth(0).selectOption({ label: "Prob2" });
   await page.locator("select.select-bordered").nth(1).selectOption({ label: "solution sharing" });
-  await page.locator("select.select-bordered").nth(2).selectOption({ label: "C++" });
   await page.locator("input.input-bordered").nth(0).type("Code for Prob2");
-  await page.locator("textarea.textarea-bordered").nth(0).type("```\n");
+  await page.locator("textarea.textarea-bordered").nth(0).type("```c++\n");
   const code = fs.readFileSync('./tests/add.cpp', 'utf-8');
   await page.locator("textarea.textarea-bordered").nth(0).type(code);
   await page.waitForTimeout(500);
@@ -31,6 +30,4 @@ test.skip("Can't make a post with code bf deadline", async ({ page }) => {
   
   //check if success
 });
-
-
 

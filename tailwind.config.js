@@ -1,30 +1,21 @@
-const {
-  "[data-theme=light]": lightTheme,
-  "[data-theme=dark]": darkTheme,
-} = require("daisyui/src/colors/themes");
-
 module.exports = {
   darkMode: ["class", "[data-theme=dark]"],
-  // Make sure you require daisyui AFTER @tailwindcss/typography in tailwind.config.js
-  plugins: [require("@tailwindcss/typography"), require("daisyui")],
+  plugins: [require("daisyui"), require("@tailwindcss/typography")],
   content: ["./index.html", "./src/**/*.{vue,js,ts,jsx,tsx}"],
+  theme: {
+    extend: {
+      colors: {
+        "primary": "hsl(var(--p) / <alpha-value>)",
+        "primary-focus": "hsl(var(--pf) / <alpha-value>)",
+        "primary-content": "hsl(var(--pc) / <alpha-value>)",
+        "base-100": "hsl(var(--b1) / <alpha-value>)",
+        "base-200": "hsl(var(--b2) / <alpha-value>)",
+        "base-300": "hsl(var(--b3) / <alpha-value>)",
+        "base-content": "hsl(var(--bc) / <alpha-value>)",
+      },
+    },
+  },
   daisyui: {
-    themes: [
-      {
-        light: {
-          ...lightTheme,
-          primary: "#003865",
-          "primary-focus": "#1e5d8f",
-          "primary-content": "#fff",
-        },
-      },
-      {
-        dark: {
-          ...darkTheme,
-          primary: "#003865",
-          "primary-focus": "#1e5d8f",
-        },
-      },
-    ],
+    themes: ["light", "dark"],
   },
 };

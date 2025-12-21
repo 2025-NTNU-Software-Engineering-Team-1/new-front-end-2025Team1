@@ -89,7 +89,7 @@ const handleReply = () => {
 
       <!-- Actions -->
       <div class="flex items-center gap-4 text-xs">
-        <button class="hover:text-primary flex items-center gap-1 text-gray-500" @click="handleReply">
+        <button class="flex items-center gap-1 text-gray-500 hover:text-primary" @click="handleReply">
           <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
             <path
               fill-rule="evenodd"

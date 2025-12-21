@@ -302,12 +302,12 @@ async function handleDeactivate() {
   <!-- 創建 Token 彈窗 -->
   <ui-dialog v-model="isCreateModalOpen">
     <template #title>
-      <div class="rounded-t-box bg-primary text-primary-content -m-6 p-6">
+      <div class="rounded-t-box -m-6 bg-primary p-6 text-primary-content">
         {{ t("profile.apiToken.create_modal.title") }}
       </div>
     </template>
     <template #content>
-      <div class="bg-primary text-primary-content -m-6 p-6 pt-0">
+      <div class="-m-6 bg-primary p-6 pt-0 text-primary-content">
         <div class="space-y-4">
           <div class="form-control w-full">
             <label class="label"
@@ -367,7 +367,7 @@ async function handleDeactivate() {
           <button class="btn btn-link text-primary-content" @click="isCreateModalOpen = false">
             {{ t("profile.apiToken.create_modal.cancel") }}
           </button>
-          <button class="btn btn-link text-primary-content font-bold" @click="handleCreate">
+          <button class="btn btn-link font-bold text-primary-content" @click="handleCreate">
             {{ t("profile.apiToken.create_modal.create") }}
           </button>
         </div>
@@ -378,12 +378,12 @@ async function handleDeactivate() {
   <!-- 編輯 Token 的彈窗 -->
   <ui-dialog v-model="isEditModalOpen">
     <template #title>
-      <div class="rounded-t-box bg-primary text-primary-content -m-6 p-6">
+      <div class="rounded-t-box -m-6 bg-primary p-6 text-primary-content">
         {{ t("profile.apiToken.edit_modal.title") }}
       </div>
     </template>
     <template #content>
-      <div class="bg-primary text-primary-content -m-6 p-6 pt-0">
+      <div class="-m-6 bg-primary p-6 pt-0 text-primary-content">
         <div class="space-y-4">
           <div class="form-control w-full">
             <label class="label"
@@ -448,7 +448,7 @@ async function handleDeactivate() {
           <button class="btn btn-link text-primary-content" @click="isEditModalOpen = false">
             {{ t("profile.apiToken.create_modal.cancel") }}
           </button>
-          <button class="btn btn-link text-primary-content font-bold" @click="handleUpdate">
+          <button class="btn btn-link font-bold text-primary-content" @click="handleUpdate">
             {{ t("profile.apiToken.edit_modal.update") }}
           </button>
         </div>
@@ -486,12 +486,12 @@ async function handleDeactivate() {
   <!-- 查看 Scope 的彈出視窗 -->
   <ui-dialog v-model="isViewScopeModalOpen">
     <template #title>
-      <div class="rounded-t-box bg-primary text-primary-content -m-6 p-6">
+      <div class="rounded-t-box -m-6 bg-primary p-6 text-primary-content">
         {{ t("profile.apiToken.view_scope_modal.title") }}
       </div>
     </template>
     <template #content>
-      <div class="bg-primary text-primary-content -m-6 p-6 pt-0">
+      <div class="-m-6 bg-primary p-6 pt-0 text-primary-content">
         <div class="space-y-2">
           <label class="label"
             ><span class="label-text text-primary-content">{{
@@ -503,7 +503,7 @@ async function handleDeactivate() {
           </div>
         </div>
         <div class="modal-action">
-          <button class="btn btn-link text-primary-content font-bold" @click="isViewScopeModalOpen = false">
+          <button class="btn btn-link font-bold text-primary-content" @click="isViewScopeModalOpen = false">
             {{ t("profile.apiToken.success_modal.ok") }}
           </button>
         </div>
@@ -514,12 +514,12 @@ async function handleDeactivate() {
   <!-- 停用 Token 的確認彈窗 -->
   <ui-dialog v-model="isDeactivateModalOpen">
     <template #title>
-      <div class="rounded-t-box bg-primary text-primary-content -m-6 p-6">
+      <div class="rounded-t-box -m-6 bg-primary p-6 text-primary-content">
         {{ t("profile.apiToken.deactivate_modal.title") }}
       </div>
     </template>
     <template #content>
-      <div class="bg-primary text-primary-content -m-6 p-6 pt-0">
+      <div class="-m-6 bg-primary p-6 pt-0 text-primary-content">
         <div class="form-control w-full">
           <label class="label"
             ><span class="label-text text-primary-content/70">{{

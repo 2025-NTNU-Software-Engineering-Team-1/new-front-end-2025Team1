@@ -326,7 +326,7 @@ const networkItemsCount = computed(() => {
                     :class="isLibraryExpanded ? 'p-6' : 'p-4'"
                   >
                     <div
-                      class="from-primary/5 to-secondary/5 absolute inset-0 bg-gradient-to-br opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                      class="to-secondary/5 absolute inset-0 bg-gradient-to-br from-primary/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
                     ></div>
                     <div class="relative">
                       <div
@@ -335,12 +335,12 @@ const networkItemsCount = computed(() => {
                       >
                         <div class="flex flex-1 items-center gap-3">
                           <div
-                            class="from-primary to-secondary bg-gradient-to-r bg-clip-text text-xl font-bold text-transparent"
+                            class="to-secondary bg-gradient-to-r from-primary bg-clip-text text-xl font-bold text-transparent"
                           >
                             Library Restrictions
                           </div>
                           <div
-                            class="from-primary/30 to-secondary/30 h-1 flex-1 rounded-full bg-gradient-to-r"
+                            class="to-secondary/30 h-1 flex-1 rounded-full bg-gradient-to-r from-primary/30"
                           ></div>
                         </div>
                         <span

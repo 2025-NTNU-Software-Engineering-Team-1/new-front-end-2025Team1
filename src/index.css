@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+:root[data-theme="light"],
+:root {
+  --p: 207 100% 20%; /* #003865 in HSL */
+  --pf: 205 89% 30%; /* #1e5d8f in HSL */
+  --pc: 0 0% 100%; /* white */
+}
+
+:root[data-theme="dark"] {
+  --p: 207 100% 20%; /* #003865 in HSL */
+  --pf: 205 89% 30%; /* #1e5d8f in HSL */
+  --pc: 0 0% 100%; /* white */
+}
+
 .card-container {
   @apply flex w-full justify-center;
 }

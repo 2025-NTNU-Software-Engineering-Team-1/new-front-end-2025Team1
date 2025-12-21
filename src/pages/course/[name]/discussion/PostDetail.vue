@@ -43,6 +43,7 @@ const loadPostDetail = async () => {
     loading.value = true;
     error.value = "";
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response: any = await API.Discussion.getPostDetail(postId);
 
     console.log("Post detail response:", response);
@@ -73,6 +74,7 @@ const loadPostDetail = async () => {
       console.error("Invalid response - status:", status, "postArray:", postArray);
       error.value = t("discussion.detail.err_failed_find");
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     console.error("Error loading post detail:", err);
     error.value = t("discussion.err_failed_load") + (err?.message || t("discussion.err_failed_load"));
@@ -93,6 +95,7 @@ const toggleLike = async () => {
 
     console.log("Toggling like:", { currentLikeStatus, newAction, postId });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response: any = await API.Discussion.likePost(postId, {
       ID: post.value.Post_Id,
       Action: newAction,
@@ -112,6 +115,7 @@ const toggleLike = async () => {
     } else {
       console.error("Like failed:", response);
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     console.error("Error toggling like:", err);
     const errorMsg = err.response?.data?.Message || err.message;
@@ -135,6 +139,7 @@ const submitReply = async () => {
     };
 
     console.log("Submitting reply:", replyData);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response: any = await API.Discussion.createReply(postId, replyData);
     console.log("Reply response:", response);
 
@@ -155,6 +160,7 @@ const submitReply = async () => {
       const errorMsg = response.Message || response.data?.Message || t("discussion.err_failed_reply");
       alert(t("discussion.err_failed_reply") + errorMsg);
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     console.error("Error submitting reply:", err);
     const errorMsg = err.response?.data?.Message || err.message || t("discussion.err_network");

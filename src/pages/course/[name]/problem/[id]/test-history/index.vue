@@ -32,12 +32,14 @@ const isLoading = ref(false);
 onMounted(async () => {
   try {
     isLoading.value = true;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response: any = await api.TrialSubmission.getTrialHistory(Number(route.params.id));
 
     if (response.status === "ok") {
       error.value = undefined;
       // Convert backend response to frontend format
       testHistory.value =
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         response.data?.history?.map((item: any) => ({
           id: item.trial_submission_id,
           pid: item.problem_Id,

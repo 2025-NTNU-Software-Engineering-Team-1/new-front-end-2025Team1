@@ -104,6 +104,7 @@ async function test() {
       problem_id: Number(route.params.id),
       language_type: Number(form.lang), // 0: Python, 1: C++, 2: C
       use_default_test_cases: useDefaultTestcases.value,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     })) as any;
 
     if (requestResponse.status === "err" || !requestResponse.trial_submission_id) {
@@ -132,6 +133,7 @@ async function test() {
     const uploadResponse = (await api.TrialSubmission.uploadTrialFiles(
       trialSubmissionId,
       formData,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     )) as any;
     console.log("uploadResponse =", uploadResponse);
     if (uploadResponse.status === "err") {

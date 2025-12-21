@@ -52,7 +52,10 @@ const homeworks = computed(() => {
             <i-uil-plus-circle class="mr-1 lg:h-5 lg:w-5" /> {{ $t("course.hw.index.new") }}
           </router-link>
         </div>
-        <data-status-wrapper :error="(error || fetchProblemError) as AxiosError" :is-loading="isLoading || isFetchingProblem">
+        <data-status-wrapper
+          :error="(error || fetchProblemError) as AxiosError"
+          :is-loading="isLoading || isFetchingProblem"
+        >
           <template #loading>
             <skeleton-card />
           </template>

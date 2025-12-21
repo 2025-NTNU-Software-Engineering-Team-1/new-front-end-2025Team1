@@ -78,9 +78,12 @@ interface CourseUsageData {
 const data = ref<CourseUsageData | null>(null);
 
 function parseApiResponse(res: unknown) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data = (res as any)?.data;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rawStatus = data?.status || (res as any)?.status;
   const statusStr = String(rawStatus || "").toLowerCase();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const message = data?.message || (res as any)?.message || "Unknown response";
   const isSuccess = statusStr === "ok" || statusStr === "success" || rawStatus === 200;
   return { isSuccess, message, data, rawStatus };
@@ -169,6 +172,7 @@ async function fetchUsage() {
 
     data.value = { totalToken, keys };
     expandedKeys.value = Object.fromEntries(keys.map((k) => [String(k.id), false]));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     const errMsg = err?.response?.data?.message || err?.message || "Failed to load API usage data";
     logger.error("Fetch Usage Error", err);

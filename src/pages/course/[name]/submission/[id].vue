@@ -158,7 +158,10 @@ function downloadTaskZip(taskIndex: number) {
             <div class="card-title md:text-xl lg:text-2xl">{{ $t("course.submission.general.title") }}</div>
             <div class="my-1" />
 
-            <data-status-wrapper :error="(error || problemError) as AxiosError" :is-loading="isLoading || isProblemLoading">
+            <data-status-wrapper
+              :error="(error || problemError) as AxiosError"
+              :is-loading="isLoading || isProblemLoading"
+            >
               <template #loading>
                 <skeleton-table :col="8" :row="1" />
               </template>

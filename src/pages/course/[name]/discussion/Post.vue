@@ -76,6 +76,7 @@ const loadProblemMeta = async (problemIdValue: string) => {
 
   try {
     metaLoading.value = true;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response: any = await API.Discussion.getProblemMeta(problemIdValue);
     console.log("[Post.vue] getProblemMeta response:", response);
 
@@ -178,6 +179,7 @@ const submitPost = async () => {
     };
 
     console.log("Submitting post:", postData);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response: any = await API.Discussion.createPost(postData);
     console.log("Submit response:", response);
 
@@ -191,6 +193,7 @@ const submitPost = async () => {
       const errorMsg = response.Message || response.data?.Message || t("discussion.err_unknown");
       error.value = t("discussion.err_failed_create") + errorMsg;
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     console.error("Error submitting post:", err);
     const errorMsg = err.response?.data?.Message || err.message || t("discussion.err_network");

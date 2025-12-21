@@ -65,9 +65,12 @@ const newKey = ref({
 });
 
 function parseApiResponse(res: unknown) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data = (res as any)?.data;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rawStatus = data?.status || (res as any)?.status;
   const statusStr = String(rawStatus || "").toLowerCase();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const message = data?.message || (res as any)?.message || "Unknown response from server";
   const isSuccess = statusStr === "ok" || statusStr === "success" || rawStatus === 200;
   return { isSuccess, message, data, rawStatus };
@@ -85,6 +88,7 @@ async function fetchKeys() {
     logger.log(`Found ${rawKeys.length} keys`);
 
     // clean
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     apiKeys.value = rawKeys.map((k: any, index: number) => {
       const missing: string[] = [];
       if (!k.id) missing.push("id");
@@ -104,6 +108,7 @@ async function fetchKeys() {
         created_by: k.created_by || "Unknown",
       };
     });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     logger.error("Fetch Failed", err);
     errorMsg.value = err?.response?.data?.message ?? "Failed to load keys.";
@@ -156,6 +161,7 @@ async function addKey() {
       logger.error("Add Failed", message);
       errorMsg.value = message;
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     logger.error("Add Exception", err);
     errorMsg.value = err?.response?.data?.message ?? "Failed to add key.";
@@ -192,6 +198,7 @@ async function updateKey(key: ApiKey) {
       errorMsg.value = message || "Failed to update key.";
       await fetchKeys();
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     logger.error("Update Exception", err);
     errorMsg.value = err?.response?.data?.message ?? "Failed to update key.";
@@ -230,6 +237,7 @@ async function deleteKey(keyId: string) {
       logger.error("Delete Failed", message);
       errorMsg.value = message || "Failed to delete key.";
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     logger.error("Delete Exception", err);
     errorMsg.value = err?.response?.data?.message ?? "Failed to delete key.";

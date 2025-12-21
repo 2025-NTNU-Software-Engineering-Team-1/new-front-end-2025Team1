@@ -26,6 +26,7 @@ async function generateReport() {
   if (!course.value) return;
   isReportGenerationFailed.value = false;
   const studentNicknames = Object.fromEntries(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     course.value.students.map((student: any) => [student.username, student.displayedName]),
   );
   const body = {

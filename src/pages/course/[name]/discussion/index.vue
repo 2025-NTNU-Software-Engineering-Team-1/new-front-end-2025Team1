@@ -40,6 +40,7 @@ const loadPosts = async () => {
       Page: pagination.value.page,
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response: any = await API.Discussion.getPosts(params);
 
     // axios interceptor 將 response.data 展開到 response 層級
@@ -77,6 +78,7 @@ const searchPosts = async () => {
     };
 
     console.log("Searching posts with params:", params);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response: any = await API.Discussion.getPosts(params);
     console.log("Search response:", response);
 
@@ -88,6 +90,7 @@ const searchPosts = async () => {
       // 在前端進行關鍵字過濾
       const allPosts = postsData || [];
       const searchTerm = query.value.trim().toLowerCase();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       posts.value = allPosts.filter((post: any) => post.Title?.toLowerCase().includes(searchTerm));
       console.log("Found", posts.value.length, "posts matching search term out of", allPosts.length, "total");
       // 搜尋結果為空不是錯誤
@@ -96,6 +99,7 @@ const searchPosts = async () => {
       const errorMsg = response.Message || response.data?.Message || t("discussion.err.err_unknown");
       error.value = t("discussion.err.err_failed_search") + errorMsg;
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     console.error("Error searching posts:", err);
     error.value = t("discussion.err.err_network") + t("discussion.err.err");

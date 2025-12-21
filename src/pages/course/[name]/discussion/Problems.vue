@@ -33,6 +33,7 @@ const loadProblems = async () => {
     };
 
     console.log("Loading problems with params:", params);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response: any = await API.Discussion.getProblems(params);
     console.log("Problems response:", response);
 
@@ -48,6 +49,7 @@ const loadProblems = async () => {
       const errorMsg = response.Message || response.data?.Message || t("discussion.err.err_unknown");
       error.value = t("discussion.err.err_failed_load") + errorMsg;
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     console.error("Error loading problems:", err);
     const errorMsg = err.response?.data?.Message || err.message || t("discussion.err.err_network");
@@ -64,6 +66,7 @@ const allPosts = ref<any[]>([]);
 // 載入所有討論貼文
 const loadAllPosts = async () => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response: any = await API.Discussion.getPosts({ Limit: 1000 });
     const status = response.Status || response.data?.Status;
     const postsData = response.Posts || response.data?.Posts;

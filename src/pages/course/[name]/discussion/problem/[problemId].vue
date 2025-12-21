@@ -48,6 +48,7 @@ const loadProblemPosts = async () => {
     };
 
     console.log("Loading posts for problem:", problemId, "with params:", params);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response: any = await API.Discussion.getPosts(params);
     console.log("Problem posts response:", response);
 
@@ -75,6 +76,7 @@ const loadProblemPosts = async () => {
 const loadProblemMeta = async () => {
   try {
     console.log("Loading problem meta for:", problemId);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response: any = await API.Discussion.getProblemMeta(problemId);
     console.log("Problem meta response:", response);
 
@@ -117,6 +119,7 @@ const searchProblemPosts = async () => {
     };
 
     console.log("Searching problem posts with params:", params);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response: any = await API.Discussion.getPosts(params);
     console.log("Search response:", response);
 
@@ -128,6 +131,7 @@ const searchProblemPosts = async () => {
       // 在前端進行關鍵字過濾
       const allPosts = postsData || [];
       const searchTerm = query.value.trim().toLowerCase();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       posts.value = allPosts.filter((post: any) => post.Title?.toLowerCase().includes(searchTerm));
       console.log("Found", posts.value.length, "posts matching search term out of", allPosts.length, "total");
     } else {

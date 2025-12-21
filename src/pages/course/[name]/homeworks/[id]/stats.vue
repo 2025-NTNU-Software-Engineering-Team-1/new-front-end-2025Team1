@@ -13,6 +13,7 @@ import { CanvasRenderer } from "echarts/renderers";
 import { fetcher } from "@/models/api";
 import { useTheme } from "@/stores/theme";
 import dayjs from "dayjs";
+import type { AxiosError } from "axios";
 
 const route = useRoute();
 useTitle(`Homework Stats - ${route.params.id} - ${route.params.name} | Normal OJ`);
@@ -211,7 +212,7 @@ function exportCSV() {
           <button class="btn" @click="() => exportCSV()">Export</button>
         </div>
         <data-status-wrapper
-          :error="hwError || scoreboardError"
+          :error="(hwError || scoreboardError) as AxiosError"
           :is-loading="isHWFetching || isScoreboardFetching"
         >
           <template #loading>

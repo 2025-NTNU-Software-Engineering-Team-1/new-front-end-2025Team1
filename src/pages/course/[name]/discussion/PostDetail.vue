@@ -43,7 +43,7 @@ const loadPostDetail = async () => {
     loading.value = true;
     error.value = "";
 
-    const response: unknown = await API.Discussion.getPostDetail(postId);
+    const response: any = await API.Discussion.getPostDetail(postId);
 
     console.log("Post detail response:", response);
     console.log("response.data:", response.data);
@@ -59,7 +59,7 @@ const loadPostDetail = async () => {
       const postData = postArray[0];
       console.log("Post data:", postData);
 
-      // 確保必要欄位有� �設值
+      // 確保必要欄位有� �設值
       post.value = {
         ...postData,
         Is_Pinned: postData.Is_Pinned ?? false,
@@ -73,7 +73,7 @@ const loadPostDetail = async () => {
       console.error("Invalid response - status:", status, "postArray:", postArray);
       error.value = t("discussion.detail.err_failed_find");
     }
-  } catch (err: unknown) {
+  } catch (err: any) {
     console.error("Error loading post detail:", err);
     error.value = t("discussion.err_failed_load") + (err?.message || t("discussion.err_failed_load"));
   } finally {
@@ -93,7 +93,7 @@ const toggleLike = async () => {
 
     console.log("Toggling like:", { currentLikeStatus, newAction, postId });
 
-    const response: unknown = await API.Discussion.likePost(postId, {
+    const response: any = await API.Discussion.likePost(postId, {
       ID: post.value.Post_Id,
       Action: newAction,
     });
@@ -112,7 +112,7 @@ const toggleLike = async () => {
     } else {
       console.error("Like failed:", response);
     }
-  } catch (err: unknown) {
+  } catch (err: any) {
     console.error("Error toggling like:", err);
     const errorMsg = err.response?.data?.Message || err.message;
     console.error("Like error details:", errorMsg);
@@ -135,7 +135,7 @@ const submitReply = async () => {
     };
 
     console.log("Submitting reply:", replyData);
-    const response: unknown = await API.Discussion.createReply(postId, replyData);
+    const response: any = await API.Discussion.createReply(postId, replyData);
     console.log("Reply response:", response);
 
     const status = response.Status || response.data?.Status;
@@ -155,7 +155,7 @@ const submitReply = async () => {
       const errorMsg = response.Message || response.data?.Message || t("discussion.err_failed_reply");
       alert(t("discussion.err_failed_reply") + errorMsg);
     }
-  } catch (err: unknown) {
+  } catch (err: any) {
     console.error("Error submitting reply:", err);
     const errorMsg = err.response?.data?.Message || err.message || t("discussion.err_network");
     alert(t("discussion.detail.err_failed_reply") + errorMsg);
@@ -196,12 +196,12 @@ const nestedReplies = computed(() => {
     console.log(`Reply ${r.Reply_ID}: Reply_To=${r.Reply_To}, Author=${r.Author}`);
   });
 
-  // 初始化所有回覆，添�  children 陣列
+  // 初始化所有回覆，添�  children 陣列
   replies.value.forEach((reply) => {
     replyMap.set(reply.Reply_ID, { ...reply, children: [] });
   });
 
-  // 檢測循環引用並標記為� �回覆
+  // 檢測循環引用並標記為� �回覆
   const visited = new Set<number>();
   const inPath = new Set<number>();
   const cycleNodes = new Set<number>();
@@ -237,12 +237,12 @@ const nestedReplies = computed(() => {
 
   console.log("Cycle nodes detected:", Array.from(cycleNodes));
 
-  // 第一遍：找出所有� �回覆
+  // 第一遍：找出所有� �回覆
   replies.value.forEach((reply) => {
     const replyWithChildren = replyMap.get(reply.Reply_ID);
     if (!replyWithChildren) return;
 
-    // 如果沒有 Reply_To、Reply_To 不存在、或在循環中，視為� �回覆
+    // 如果沒有 Reply_To、Reply_To 不存在、或在循環中，視為� �回覆
     if (!reply.Reply_To || !replyMap.has(reply.Reply_To) || cycleNodes.has(reply.Reply_ID)) {
       rootReplies.push(replyWithChildren);
       console.log(
@@ -258,7 +258,7 @@ const nestedReplies = computed(() => {
     const replyWithChildren = replyMap.get(reply.Reply_ID);
     if (!replyWithChildren) return;
 
-    // 如果有有效的父回覆且不在循環中，添� 到父回覆的 children 中
+    // 如果有有效的父回覆且不在循環中，添� 到父回覆的 children 中
     if (reply.Reply_To && replyMap.has(reply.Reply_To) && !cycleNodes.has(reply.Reply_ID)) {
       const parent = replyMap.get(reply.Reply_To);
       if (parent) {

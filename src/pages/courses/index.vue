@@ -4,6 +4,7 @@ import { useTitle } from "@vueuse/core";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import { fetcher } from "@/models/api";
 import { useSession, UserRole } from "@/stores/session";
+import type { AxiosError } from "axios";
 
 import useInteractions from "@/composables/useInteractions";
 
@@ -34,7 +35,7 @@ const rolesCanCreateCourse = [UserRole.Admin, UserRole.Teacher];
 
       <div class="my-2" />
 
-      <data-status-wrapper :error="error" :is-loading="isLoading">
+      <data-status-wrapper :error="error as AxiosError" :is-loading="isLoading">
         <template #loading>
           <skeleton-table :col="2" :row="5" />
         </template>

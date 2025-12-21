@@ -3,7 +3,7 @@ import api, { fetcher } from "@/models/api";
 import useVuelidate from "@vuelidate/core";
 import { required, maxLength, between, integer, minLength } from "@vuelidate/validators";
 import { useAxios } from "@vueuse/integrations/useAxios";
-import axios from "axios";
+import axios, { type AxiosError } from "axios";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
 import { ROLE } from "@/constants";
@@ -93,7 +93,7 @@ async function submit() {
     <span>{{ $t("admin.user.row-count", { n: filteredUsers?.length }) }}</span>
   </div>
 
-  <data-status-wrapper :error="fetchError" :is-loading="fetchLoading">
+  <data-status-wrapper :error="fetchError as AxiosError" :is-loading="fetchLoading">
     <template #loading>
       <skeleton-table :col="3" :row="5" />
     </template>

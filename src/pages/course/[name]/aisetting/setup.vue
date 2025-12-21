@@ -65,10 +65,10 @@ const newKey = ref({
 });
 
 function parseApiResponse(res: unknown) {
-  const data = res?.data;
-  const rawStatus = data?.status || res?.status;
+  const data = (res as any)?.data;
+  const rawStatus = data?.status || (res as any)?.status;
   const statusStr = String(rawStatus || "").toLowerCase();
-  const message = data?.message || res?.message || "Unknown response from server";
+  const message = data?.message || (res as any)?.message || "Unknown response from server";
   const isSuccess = statusStr === "ok" || statusStr === "success" || rawStatus === 200;
   return { isSuccess, message, data, rawStatus };
 }
@@ -85,7 +85,7 @@ async function fetchKeys() {
     logger.log(`Found ${rawKeys.length} keys`);
 
     // clean
-    apiKeys.value = rawKeys.map((k: unknown, index: number) => {
+    apiKeys.value = rawKeys.map((k: any, index: number) => {
       const missing: string[] = [];
       if (!k.id) missing.push("id");
       if (!k.key_name) missing.push("key_name");
@@ -104,7 +104,7 @@ async function fetchKeys() {
         created_by: k.created_by || "Unknown",
       };
     });
-  } catch (err: unknown) {
+  } catch (err: any) {
     logger.error("Fetch Failed", err);
     errorMsg.value = err?.response?.data?.message ?? "Failed to load keys.";
   } finally {
@@ -156,7 +156,7 @@ async function addKey() {
       logger.error("Add Failed", message);
       errorMsg.value = message;
     }
-  } catch (err: unknown) {
+  } catch (err: any) {
     logger.error("Add Exception", err);
     errorMsg.value = err?.response?.data?.message ?? "Failed to add key.";
   } finally {
@@ -192,7 +192,7 @@ async function updateKey(key: ApiKey) {
       errorMsg.value = message || "Failed to update key.";
       await fetchKeys();
     }
-  } catch (err: unknown) {
+  } catch (err: any) {
     logger.error("Update Exception", err);
     errorMsg.value = err?.response?.data?.message ?? "Failed to update key.";
     await fetchKeys();
@@ -230,7 +230,7 @@ async function deleteKey(keyId: string) {
       logger.error("Delete Failed", message);
       errorMsg.value = message || "Failed to delete key.";
     }
-  } catch (err: unknown) {
+  } catch (err: any) {
     logger.error("Delete Exception", err);
     errorMsg.value = err?.response?.data?.message ?? "Failed to delete key.";
   } finally {

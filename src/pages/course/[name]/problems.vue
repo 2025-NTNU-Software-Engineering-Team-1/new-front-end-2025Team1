@@ -7,6 +7,7 @@ import { UserRole, useSession } from "@/stores/session";
 import { useTitle } from "@vueuse/core";
 import { isQuotaUnlimited } from "@/constants";
 import useInteractions from "@/composables/useInteractions";
+import type { AxiosError } from "axios";
 
 const session = useSession();
 const rolesCanReadProblemStatus = [UserRole.Admin, UserRole.Teacher, UserRole.TA];
@@ -67,7 +68,7 @@ const maxPage = computed(() => {
         </div>
 
         <div class="my-2" />
-        <data-status-wrapper :error="error" :is-loading="isLoading">
+        <data-status-wrapper :error="error as AxiosError" :is-loading="isLoading">
           <template #loading>
             <skeleton-table v-if="isDesktop" :col="5" :row="5" />
             <div v-else class="flex items-center justify-center">

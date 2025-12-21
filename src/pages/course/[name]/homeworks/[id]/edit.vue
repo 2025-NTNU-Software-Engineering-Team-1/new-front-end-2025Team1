@@ -4,7 +4,7 @@ import { useTitle } from "@vueuse/core";
 import { useRoute, useRouter } from "vue-router";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import api, { fetcher } from "@/models/api";
-import axios from "axios";
+import axios, { type AxiosError } from "axios";
 import { useProblemSelection } from "@/composables/useProblemSelection";
 import HomeworkForm from "@/components/Homework/HomeworkForm.vue";
 
@@ -110,7 +110,7 @@ function discard() {
         </div>
 
         <data-status-wrapper
-          :error="fetchError || fetchProblemError"
+          :error="(fetchError || fetchProblemError) as AxiosError"
           :is-loading="isFetching || isFetchingProblem"
         >
           <template #loading>

@@ -33,7 +33,7 @@ const loadProblems = async () => {
     };
 
     console.log("Loading problems with params:", params);
-    const response: unknown = await API.Discussion.getProblems(params);
+    const response: any = await API.Discussion.getProblems(params);
     console.log("Problems response:", response);
 
     // axios interceptor 將 response.data 展開到 response 層級
@@ -48,7 +48,7 @@ const loadProblems = async () => {
       const errorMsg = response.Message || response.data?.Message || t("discussion.err.err_unknown");
       error.value = t("discussion.err.err_failed_load") + errorMsg;
     }
-  } catch (err: unknown) {
+  } catch (err: any) {
     console.error("Error loading problems:", err);
     const errorMsg = err.response?.data?.Message || err.message || t("discussion.err.err_network");
     error.value = t("discussion.err.err_failed_load") + errorMsg;
@@ -64,7 +64,7 @@ const allPosts = ref<any[]>([]);
 // 載入所有討論貼文
 const loadAllPosts = async () => {
   try {
-    const response: unknown = await API.Discussion.getPosts({ Limit: 1000 });
+    const response: any = await API.Discussion.getPosts({ Limit: 1000 });
     const status = response.Status || response.data?.Status;
     const postsData = response.Posts || response.data?.Posts;
 

@@ -32,13 +32,13 @@ const isLoading = ref(false);
 onMounted(async () => {
   try {
     isLoading.value = true;
-    const response: unknown = await api.TrialSubmission.getTrialHistory(Number(route.params.id));
+    const response: any = await api.TrialSubmission.getTrialHistory(Number(route.params.id));
 
     if (response.status === "ok") {
       error.value = undefined;
       // Convert backend response to frontend format
       testHistory.value =
-        response.data?.history?.map((item: unknown) => ({
+        response.data?.history?.map((item: any) => ({
           id: item.trial_submission_id,
           pid: item.problem_Id,
           result: mapStatusToCode(item.status),

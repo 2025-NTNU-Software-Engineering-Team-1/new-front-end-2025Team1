@@ -5,7 +5,7 @@ import { useTitle } from "@vueuse/core";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import { useRoute, useRouter } from "vue-router";
 import api, { fetcher } from "@/models/api";
-import axios from "axios";
+import axios, { type AxiosError } from "axios";
 import AnnouncementForm from "@/components/Announcement/AnnouncementForm.vue";
 
 const route = useRoute();
@@ -108,7 +108,7 @@ function discard() {
           </div>
         </div>
 
-        <data-status-wrapper :error="fetchError" :is-loading="isFetching">
+        <data-status-wrapper :error="fetchError as AxiosError" :is-loading="isFetching">
           <template #loading>
             <skeleton-card />
           </template>

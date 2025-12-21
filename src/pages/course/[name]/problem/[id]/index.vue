@@ -5,6 +5,7 @@ import { fetcher } from "@/models/api";
 import { useTitle } from "@vueuse/core";
 import { useSession } from "@/stores/session";
 import AIChatbot from "@/components/AIChatbot.vue";
+import type { AxiosError } from "axios";
 
 const route = useRoute();
 const session = useSession();
@@ -15,7 +16,7 @@ const { data: problem, error, isLoading } = useAxios<Problem>(`/problem/view/${r
 
 <template>
   <div class="card-container pb-40">
-    <data-status-wrapper :error="error" :is-loading="isLoading">
+    <data-status-wrapper :error="error as AxiosError" :is-loading="isLoading">
       <template #loading>
         <skeleton-card />
       </template>

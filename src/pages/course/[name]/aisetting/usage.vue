@@ -78,10 +78,10 @@ interface CourseUsageData {
 const data = ref<CourseUsageData | null>(null);
 
 function parseApiResponse(res: unknown) {
-  const data = res?.data;
-  const rawStatus = data?.status || res?.status;
+  const data = (res as any)?.data;
+  const rawStatus = data?.status || (res as any)?.status;
   const statusStr = String(rawStatus || "").toLowerCase();
-  const message = data?.message || res?.message || "Unknown response";
+  const message = data?.message || (res as any)?.message || "Unknown response";
   const isSuccess = statusStr === "ok" || statusStr === "success" || rawStatus === 200;
   return { isSuccess, message, data, rawStatus };
 }
@@ -169,7 +169,7 @@ async function fetchUsage() {
 
     data.value = { totalToken, keys };
     expandedKeys.value = Object.fromEntries(keys.map((k) => [String(k.id), false]));
-  } catch (err: unknown) {
+  } catch (err: any) {
     const errMsg = err?.response?.data?.message || err?.message || "Failed to load API usage data";
     logger.error("Fetch Usage Error", err);
     error.value = errMsg;

@@ -48,7 +48,7 @@ const loadProblemPosts = async () => {
     };
 
     console.log("Loading posts for problem:", problemId, "with params:", params);
-    const response: unknown = await API.Discussion.getPosts(params);
+    const response: any = await API.Discussion.getPosts(params);
     console.log("Problem posts response:", response);
 
     // axios interceptor 將 response.data 展開到 response 層級
@@ -75,7 +75,7 @@ const loadProblemPosts = async () => {
 const loadProblemMeta = async () => {
   try {
     console.log("Loading problem meta for:", problemId);
-    const response: unknown = await API.Discussion.getProblemMeta(problemId);
+    const response: any = await API.Discussion.getProblemMeta(problemId);
     console.log("Problem meta response:", response);
 
     // axios interceptor 將 response.data 展開到 response 層級
@@ -117,7 +117,7 @@ const searchProblemPosts = async () => {
     };
 
     console.log("Searching problem posts with params:", params);
-    const response: unknown = await API.Discussion.getPosts(params);
+    const response: any = await API.Discussion.getPosts(params);
     console.log("Search response:", response);
 
     // axios interceptor 將 response.data 展開到 response 層級
@@ -128,7 +128,7 @@ const searchProblemPosts = async () => {
       // 在前端進行關鍵字過濾
       const allPosts = postsData || [];
       const searchTerm = query.value.trim().toLowerCase();
-      posts.value = allPosts.filter((post: unknown) => post.Title?.toLowerCase().includes(searchTerm));
+      posts.value = allPosts.filter((post: any) => post.Title?.toLowerCase().includes(searchTerm));
       console.log("Found", posts.value.length, "posts matching search term out of", allPosts.length, "total");
     } else {
       console.error("Search failed, response:", response);

@@ -76,10 +76,10 @@ const loadProblemMeta = async (problemIdValue: string) => {
 
   try {
     metaLoading.value = true;
-    const response: unknown = await API.Discussion.getProblemMeta(problemIdValue);
+    const response: any = await API.Discussion.getProblemMeta(problemIdValue);
     console.log("[Post.vue] getProblemMeta response:", response);
 
-    // 檢查兩種可能的� �式：直接在 response 或在 response.data 中
+    // 檢查兩種可能的� �式：直接在 response 或在 response.data 中
     const apiStatus = response.Status || response.data?.Status;
     const codeAllowedValue = response.Code_Allowed ?? response.data?.Code_Allowed;
     const roleValue = response.Role || response.data?.Role;
@@ -178,7 +178,7 @@ const submitPost = async () => {
     };
 
     console.log("Submitting post:", postData);
-    const response: unknown = await API.Discussion.createPost(postData);
+    const response: any = await API.Discussion.createPost(postData);
     console.log("Submit response:", response);
 
     const status = response.Status || response.data?.Status;
@@ -191,7 +191,7 @@ const submitPost = async () => {
       const errorMsg = response.Message || response.data?.Message || t("discussion.err_unknown");
       error.value = t("discussion.err_failed_create") + errorMsg;
     }
-  } catch (err: unknown) {
+  } catch (err: any) {
     console.error("Error submitting post:", err);
     const errorMsg = err.response?.data?.Message || err.message || t("discussion.err_network");
     error.value = t("discussion.err_failed_create") + errorMsg;

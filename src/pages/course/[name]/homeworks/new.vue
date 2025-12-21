@@ -3,7 +3,7 @@ import dayjs from "dayjs";
 import { ref, reactive } from "vue";
 import { useTitle } from "@vueuse/core";
 import { useRoute, useRouter } from "vue-router";
-import axios from "axios";
+import axios, { type AxiosError } from "axios";
 import api from "@/models/api";
 import { useProblemSelection } from "@/composables/useProblemSelection";
 import HomeworkForm from "@/components/Homework/HomeworkForm.vue";
@@ -69,7 +69,7 @@ async function submit() {
       <div class="card-body">
         <div class="card-title mb-3 justify-between">{{ $t("course.hw.new.title") }}</div>
 
-        <data-status-wrapper :error="fetchError" :is-loading="isFetching">
+        <data-status-wrapper :error="fetchError as AxiosError" :is-loading="isFetching">
           <template #loading>
             <skeleton-card />
           </template>

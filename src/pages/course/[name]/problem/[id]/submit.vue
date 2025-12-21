@@ -18,7 +18,7 @@ useTitle(`Submit - ${route.params.id} - ${route.params.name} | Normal OJ`);
 const router = useRouter();
 const { data: problem, error, isLoading } = useAxios<Problem>(`/problem/view/${route.params.id}`, fetcher);
 
-// 依題目 meta 判斷允許的提交� �式；� �設為 "code"
+// 依題目 meta 判斷允許的提交� �式；� �設為 "code"
 const acceptedFormat = computed<AcceptedFormat>(() => {
   const fmt = (problem.value as unknown)?.config?.acceptedFormat;
   return fmt === "zip" ? "zip" : "code";
@@ -156,9 +156,9 @@ async function submit() {
           </div>
           <code-editor v-model="form.code" class="mt-4" />
           <span
-            v-show="(v$ as unknown).code?.$error"
+            v-show="(v$ as any).code?.$error"
             class="text-error"
-            v-text="(v$ as unknown).code?.$errors[0]?.$message"
+            v-text="(v$ as any).code?.$errors[0]?.$message"
           />
         </template>
 
@@ -178,8 +178,8 @@ async function submit() {
                 <i-uil-times />
               </button>
             </div>
-            <label class="label" v-show="(v$ as unknown).zip?.$error">
-              <span class="label-text-alt text-error" v-text="(v$ as unknown).zip?.$errors[0]?.$message" />
+            <label class="label" v-show="(v$ as any).zip?.$error">
+              <span class="label-text-alt text-error" v-text="(v$ as any).zip?.$errors[0]?.$message" />
             </label>
           </div>
         </template>
@@ -198,14 +198,14 @@ async function submit() {
               <ui-spinner v-if="isLoading" class="h-6 w-6" />
             </label>
             <select
-              v-model="(v$ as unknown).lang.$model"
-              :class="['select select-bordered', (v$ as unknown).lang.$error && 'input-error']"
+              v-model="(v$ as any).lang.$model"
+              :class="['select select-bordered', (v$ as any).lang.$error && 'input-error']"
             >
               <option disabled :value="-1">{{ t("course.problem.submit.lang.select") }}</option>
               <option v-for="{ text, value } in langOptions" :key="value" :value="value">{{ text }}</option>
             </select>
-            <label class="label" v-show="(v$ as unknown).lang.$error">
-              <span class="label-text-alt text-error" v-text="(v$ as unknown).lang.$errors[0]?.$message" />
+            <label class="label" v-show="(v$ as any).lang.$error">
+              <span class="label-text-alt text-error" v-text="(v$ as any).lang.$errors[0]?.$message" />
             </label>
           </div>
 

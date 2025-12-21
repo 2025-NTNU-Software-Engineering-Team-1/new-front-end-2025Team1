@@ -14,6 +14,7 @@ import MarkdownIt from "markdown-it";
 import texmath from "markdown-it-texmath";
 import katex from "katex";
 import "katex/dist/katex.min.css";
+import type { AxiosError } from "axios";
 
 const md = new MarkdownIt({
   html: true,
@@ -103,7 +104,7 @@ async function test() {
       problem_id: Number(route.params.id),
       language_type: Number(form.lang), // 0: Python, 1: C++, 2: C
       use_default_test_cases: useDefaultTestcases.value,
-    })) as unknown;
+    })) as any;
 
     if (requestResponse.status === "err" || !requestResponse.trial_submission_id) {
       throw new Error(requestResponse.message || "Failed to create trial submission");
@@ -131,7 +132,7 @@ async function test() {
     const uploadResponse = (await api.TrialSubmission.uploadTrialFiles(
       trialSubmissionId,
       formData,
-    )) as unknown;
+    )) as any;
     console.log("uploadResponse =", uploadResponse);
     if (uploadResponse.status === "err") {
       throw new Error(uploadResponse.message || "Failed to upload trial submission files");
@@ -179,7 +180,7 @@ async function submitCode() {
 
 <template>
   <div class="card-container">
-    <data-status-wrapper :error="error" :is-loading="isLoading">
+    <data-status-wrapper :error="error as AxiosError" :is-loading="isLoading">
       <template #loading>
         <skeleton-card />
       </template>

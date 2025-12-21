@@ -6,6 +6,7 @@ import { useSession } from "@/stores/session";
 import { useTitle } from "@vueuse/core";
 import { computed } from "vue";
 import { useProblemSelection } from "@/composables/useProblemSelection";
+import type { AxiosError } from "axios";
 
 const session = useSession();
 const route = useRoute();
@@ -51,7 +52,7 @@ const homeworks = computed(() => {
             <i-uil-plus-circle class="mr-1 lg:h-5 lg:w-5" /> {{ $t("course.hw.index.new") }}
           </router-link>
         </div>
-        <data-status-wrapper :error="error || fetchProblemError" :is-loading="isLoading || isFetchingProblem">
+        <data-status-wrapper :error="(error || fetchProblemError) as AxiosError" :is-loading="isLoading || isFetchingProblem">
           <template #loading>
             <skeleton-card />
           </template>

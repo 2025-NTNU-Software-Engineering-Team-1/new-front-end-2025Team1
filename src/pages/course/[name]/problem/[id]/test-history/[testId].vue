@@ -429,8 +429,8 @@ function downloadModalJson() {
                 <tr>
                   <td>Overall</td>
                   <td><judge-status :status="task.status" /></td>
-                  <td>{{ task.execTime }} ms</td>
-                  <td>{{ task.memoryUsage }} KB</td>
+                  <td>{{ task.exec_time }} ms</td>
+                  <td>{{ task.memory_usage }} KB</td>
                   <td>{{ task.score }}</td>
                   <td>
                     <div class="flex gap-1">
@@ -466,8 +466,8 @@ function downloadModalJson() {
                 <tr v-show="expandTasks[taskIndex]" v-for="(_case, caseIndex) in task.cases" :key="caseIndex">
                   <td>{{ taskIndex }}-{{ caseIndex }}</td>
                   <td><judge-status :status="_case.status" /></td>
-                  <td>{{ _case.execTime }} ms</td>
-                  <td>{{ _case.memoryUsage }} KB</td>
+                  <td>{{ _case.exec_time }} ms</td>
+                  <td>{{ _case.memory_usage }} KB</td>
                   <td>-</td>
                   <td>
                     <div class="flex gap-1">

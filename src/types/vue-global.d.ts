@@ -3,8 +3,8 @@ export {};
 declare global {
 	var __VLS_PROPS_FALLBACK: Record<string, unknown>;
 
-	const __VLS_directiveBindingRestFields: { instance: null, oldValue: null, modifiers: unknown, dir: unknown };
-	const __VLS_placeholder: unknown;
+	const __VLS_directiveBindingRestFields: { instance: null, oldValue: null, modifiers: any, dir: any };
+	const __VLS_placeholder: any;
 	const __VLS_intrinsics: import('vue/jsx-runtime').JSX.IntrinsicElements;
 
 	type __VLS_Elements = __VLS_SpreadMerge<SVGElementTagNameMap, HTMLElementTagNameMap>;
@@ -23,16 +23,16 @@ declare global {
 		N3 extends keyof __VLS_GlobalComponents ? { [K in N0]: __VLS_GlobalComponents[N3] } :
 		{};
 	type __VLS_FunctionalComponentCtx<T, K> = __VLS_PickNotAny<'__ctx' extends keyof __VLS_PickNotAny<K, {}>
-		? K extends { __ctx?: infer Ctx } ? NonNullable<Ctx> : never : unknown
-		, T extends (props: unknown, ctx: infer Ctx) => any ? Ctx : unknown
+		? K extends { __ctx?: infer Ctx } ? NonNullable<Ctx> : never : any
+		, T extends (props: any, ctx: infer Ctx) => any ? Ctx : any
 	>;
 	type __VLS_FunctionalComponentProps<T, K> = '__ctx' extends keyof __VLS_PickNotAny<K, {}>
 		? K extends { __ctx?: { props?: infer P } } ? NonNullable<P> : never
-		: T extends (props: infer P, ...args: unknown) => any ? P
+		: T extends (props: infer P, ...args: any) => any ? P
 		: {};
-	type __VLS_FunctionalComponent<T> = (props: (T extends { $props: infer Props } ? Props : {}) & Record<string, unknown>, ctx?: unknown) => import('vue/jsx-runtime').JSX.Element & {
+	type __VLS_FunctionalComponent<T> = (props: (T extends { $props: infer Props } ? Props : {}) & Record<string, unknown>, ctx?: any) => import('vue/jsx-runtime').JSX.Element & {
 		__ctx?: {
-			attrs?: unknown;
+			attrs?: any;
 			slots?: T extends { $slots: infer Slots } ? Slots : Record<string, any>;
 			emit?: T extends { $emit: infer Emit } ? Emit : {};
 			props?: typeof props;
@@ -104,7 +104,7 @@ declare global {
 			: T extends string ? string
 			: T extends any[] ? T[number]
 			: T extends Iterable<infer T1> ? T1
-			: unknown,
+			: any,
 		index: number,
 	][];
 	function __VLS_getVForSourceType<T>(source: T): [
@@ -113,18 +113,18 @@ declare global {
 		index: number,
 	][];
 	function __VLS_getSlotParameters<S, D extends S>(slot: S, decl?: D):
-		D extends (...args: infer P) => any ? P : unknown[];
+		D extends (...args: infer P) => any ? P : any[];
 	function __VLS_asFunctionalDirective<T>(dir: T): T extends import('vue').ObjectDirective
 		? NonNullable<T['created' | 'beforeMount' | 'mounted' | 'beforeUpdate' | 'updated' | 'beforeUnmount' | 'unmounted']>
-		: T extends (...args: unknown) => any
+		: T extends (...args: any) => any
 			? T
 			: (arg1: unknown, arg2: unknown, arg3: unknown, arg4: unknown) => void;
-	function __VLS_asFunctionalComponent<T, K = T extends new (...args: unknown) => any ? InstanceType<T> : unknown>(t: T, instance?: K):
-		T extends new (...args: unknown) => any ? __VLS_FunctionalComponent<K>
-		: T extends () => any ? (props: {}, ctx?: unknown) => ReturnType<T>
-		: T extends (...args: unknown) => any ? T
+	function __VLS_asFunctionalComponent<T, K = T extends new (...args: any) => any ? InstanceType<T> : unknown>(t: T, instance?: K):
+		T extends new (...args: any) => any ? __VLS_FunctionalComponent<K>
+		: T extends () => any ? (props: {}, ctx?: any) => ReturnType<T>
+		: T extends (...args: any) => any ? T
 		: __VLS_FunctionalComponent<{}>;
-	function __VLS_functionalComponentArgsRest<T extends (...args: unknown) => any>(t: T): 2 extends Parameters<T>['length'] ? [any] : [];
+	function __VLS_functionalComponentArgsRest<T extends (...args: any) => any>(t: T): 2 extends Parameters<T>['length'] ? [any] : [];
 	function __VLS_asFunctionalElement<T>(tag: T, endTag?: T): (attrs: T & Record<string, unknown>) => void;
 	function __VLS_asFunctionalSlot<S>(slot: S): S extends () => infer R ? (props: {}) => R : NonNullable<S>;
 	function __VLS_tryAsConstant<const T>(t: T): T;

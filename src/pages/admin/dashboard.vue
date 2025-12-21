@@ -4,6 +4,7 @@ import { useAxios } from "@vueuse/integrations/useAxios";
 import { useI18n } from "vue-i18n";
 import { useTitle } from "@vueuse/core";
 import { computed } from "vue";
+import type { AxiosError } from "axios";
 
 useTitle("Admin - Dashboard | Normal OJ");
 const { t } = useI18n();
@@ -33,7 +34,7 @@ const courseSummaryTotal = computed(() => {
     <h1 class="text-xl font-bold">
       {{ t("admin.dashboard.usercount.title") + ` (${userSummary?.userCount || "-"})` }}
     </h1>
-    <data-status-wrapper :error="userError" :is-loading="userLoading">
+    <data-status-wrapper :error="userError as AxiosError" :is-loading="userLoading">
       <template #loading>
         <skeleton-table :col="2" :row="5" />
       </template>
@@ -66,7 +67,7 @@ const courseSummaryTotal = computed(() => {
     <h1 class="text-xl font-bold">
       {{ t("admin.dashboard.coursecount.title") + ` (${courseSummary?.courseCount || "-"})` }}
     </h1>
-    <data-status-wrapper :error="courseError" :is-loading="courseLoading">
+    <data-status-wrapper :error="courseError as AxiosError" :is-loading="courseLoading">
       <template #loading>
         <skeleton-table :col="5" :row="15" />
       </template>

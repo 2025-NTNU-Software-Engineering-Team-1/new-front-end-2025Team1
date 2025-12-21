@@ -20,7 +20,7 @@ const posts = ref<DiscussionPost[]>([]);
 const loading = ref(false);
 const error = ref<string>("");
 
-// 分� �相關
+// 分� �相關
 const pagination = ref<PaginationInfo>({
   page: 1,
   limit: 20,
@@ -40,7 +40,7 @@ const loadPosts = async () => {
       Page: pagination.value.page,
     };
 
-    const response: unknown = await API.Discussion.getPosts(params);
+    const response: any = await API.Discussion.getPosts(params);
 
     // axios interceptor 將 response.data 展開到 response 層級
     const status = response.Status || response.data?.Status;
@@ -77,7 +77,7 @@ const searchPosts = async () => {
     };
 
     console.log("Searching posts with params:", params);
-    const response: unknown = await API.Discussion.getPosts(params);
+    const response: any = await API.Discussion.getPosts(params);
     console.log("Search response:", response);
 
     // axios interceptor 將 response.data 展開到 response 層級
@@ -88,7 +88,7 @@ const searchPosts = async () => {
       // 在前端進行關鍵字過濾
       const allPosts = postsData || [];
       const searchTerm = query.value.trim().toLowerCase();
-      posts.value = allPosts.filter((post: unknown) => post.Title?.toLowerCase().includes(searchTerm));
+      posts.value = allPosts.filter((post: any) => post.Title?.toLowerCase().includes(searchTerm));
       console.log("Found", posts.value.length, "posts matching search term out of", allPosts.length, "total");
       // 搜尋結果為空不是錯誤
     } else {
@@ -96,7 +96,7 @@ const searchPosts = async () => {
       const errorMsg = response.Message || response.data?.Message || t("discussion.err.err_unknown");
       error.value = t("discussion.err.err_failed_search") + errorMsg;
     }
-  } catch {
+  } catch (err: any) {
     console.error("Error searching posts:", err);
     error.value = t("discussion.err.err_network") + t("discussion.err.err");
   } finally {
@@ -104,7 +104,7 @@ const searchPosts = async () => {
   }
 };
 
-// 轉換貼文資料� �式為 PostCard 組件需要的� �式
+// 轉換貼文資料� �式為 PostCard 組件需要的� �式
 const transformedPosts = computed(() => {
   return posts.value.map((post) => ({
     id: post.Post_Id.toString(),

@@ -37,7 +37,7 @@ onMounted(async () => {
     isLoadingPublicCases.value = true;
     const response = await api.TrialSubmission.getPublicTestCases(Number(route.params.id));
     if (response.data.status === "OK") {
-      publicTestCases.value = response.data.Trial_Cases;
+      publicTestCases.value = response.data.trial_cases;
       console.log("Loaded public test cases:", publicTestCases.value);
     } else {
       console.error("Failed to load public test cases");

@@ -5,6 +5,7 @@ import { fetcher } from "@/models/api";
 import { formatTime } from "@/utils/formatTime";
 import { useSession } from "@/stores/session";
 import { useTitle } from "@vueuse/core";
+import type { AxiosError } from "axios";
 
 const session = useSession();
 const route = useRoute();
@@ -48,7 +49,7 @@ const {
 
         <div class="my-2" />
 
-        <data-status-wrapper :error="error" :is-loading="isLoading">
+        <data-status-wrapper :error="error as AxiosError" :is-loading="isLoading">
           <template #loading>
             <skeleton-table :col="3" :row="5" />
           </template>

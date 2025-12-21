@@ -6,7 +6,7 @@ import api, { fetcher } from "@/models/api";
 import { ROLE } from "@/constants";
 import { useTitle } from "@vueuse/core";
 import { useSession, UserRole } from "@/stores/session";
-import axios from "axios";
+import axios, { type AxiosError } from "axios";
 
 const route = useRoute();
 const router = useRouter();
@@ -135,7 +135,7 @@ async function submit() {
             </select>
           </div>
         </div>
-        <data-status-wrapper :error="error" :is-loading="isLoading">
+        <data-status-wrapper :error="error as AxiosError" :is-loading="isLoading">
           <template #loading>
             <skeleton-table :col="3" :row="5" />
           </template>

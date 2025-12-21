@@ -24,7 +24,7 @@ test("Pin post to top", async ({ page }) => {
   await expect(moreBtn).toBeVisible();
   await moreBtn.click({ force: true });  
 
-  const pinItem = page.locator("ul.dropdown-content >> text=discussion.component.not_pined");
+  const pinItem = page.locator("ul.dropdown-content >> text=Pin Post");
   await expect(pinItem).toBeVisible();
   await pinItem.click();
 
@@ -41,7 +41,7 @@ test("Pin post to top", async ({ page }) => {
   await expect(moreBtn).toBeVisible();
   await moreBtn.click({ force: true });
   
-  const unpinItem = page.locator("ul.dropdown-content >> text=discussion.component.is_pined");
+  const unpinItem = page.locator("ul.dropdown-content >> text=Unpin");
   await expect(unpinItem).toBeVisible();
   await unpinItem.click();
 
@@ -72,7 +72,7 @@ test("Close a post", async ({ page }) => {
   await expect(moreBtn).toBeVisible();
   await moreBtn.click({ force: true });  
 
-  const closeItem = page.locator("ul.dropdown-content >> text=discussion.details.close");
+  const closeItem = page.locator("ul.dropdown-content >> text=Close Discussion");
   await expect(closeItem).toBeVisible();
   await closeItem.click();
 
@@ -84,6 +84,7 @@ test("Close a post", async ({ page }) => {
   //check if success
   const lock = "\u{1F512}";
   await expect(page.getByText(lock)).toBeVisible({ timeout: 10000 });
+  
 });
 
 //017
@@ -103,7 +104,7 @@ test("Post solved", async ({ page }) => {
   const moreBtn = page.locator("label.btn.btn-ghost.btn-sm");
   await expect(moreBtn).toBeVisible();
   await moreBtn.click({ force: true });
-  const solveItem = page.locator("ul.dropdown-content >> text=discussion.components.solved.action_Not_Solved");
+  const solveItem = page.locator("ul.dropdown-content >> text=Mark as Solved");
   await expect(solveItem).toBeVisible();
   await solveItem.click();
 
@@ -114,13 +115,13 @@ test("Post solved", async ({ page }) => {
 
   //check if success
   
-  await expect(page.getByText("Solved")).toBeVisible();
+  await expect(page.getByText("✓ Solved")).toBeVisible();
   
   //repair
   await expect(moreBtn).toBeVisible();
   await moreBtn.click({ force: true });
 
-  const unsolveItem = page.locator("ul.dropdown-content >> text=discussion.components.solved.action_Is_Solved");
+  const unsolveItem = page.locator("ul.dropdown-content >> text=Mark as Unsolved");
   await expect(unsolveItem).toBeVisible();
   await unsolveItem.click();
 

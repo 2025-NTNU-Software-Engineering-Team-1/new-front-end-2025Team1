@@ -56,7 +56,7 @@ test("Code", async ({ page }) => {
   await page.getByRole("link", { name: "Post" , exact: true}).click();
   //Select
   await page.locator("select.select-bordered").nth(0).selectOption({ label: "Prob1" });
-  await page.locator("select.select-bordered").nth(2).selectOption({ label: "C++" });
+  await page.locator("select.select-bordered").nth(1).selectOption({ label: "C++" });
   await page.locator("input.input-bordered").nth(0).type("First Code");
   await page.locator("textarea.textarea-bordered").nth(0).type("```c++\n");
   const code = fs.readFileSync('./tests/add.cpp', 'utf-8');

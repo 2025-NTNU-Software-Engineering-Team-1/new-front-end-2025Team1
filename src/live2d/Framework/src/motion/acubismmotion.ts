@@ -25,7 +25,7 @@ export type FinishedMotionCallback = (self: ACubismMotion) => void;
  */
 export abstract class ACubismMotion {
   /**
-   * インスタンスの破棄
+   * インスタンスの� �棄
    */
   public static delete(motion: ACubismMotion): void {
     motion.release();
@@ -104,7 +104,7 @@ export abstract class ACubismMotion {
     motionQueueEntry.setFadeInStartTime(userTimeSeconds); // フェードインの開始時刻
 
     if (motionQueueEntry.getEndTime() < 0.0) {
-      // 開始していないうちに終了設定している場合がある
+      // 開始していないうちに終了設定している� �合がある
       this.adjustEndTime(motionQueueEntry);
     }
 
@@ -205,7 +205,7 @@ export abstract class ACubismMotion {
    * @return モーションの長さ[秒]
    *
    * @note ループの時は「-1」。
-   *       ループでない場合は、オーバーライドする。
+   *       ループでない� �合は、オーバーライドする。
    *       正の値の時は取得される時間で終了する。
    *       「-1」の時は外部から停止命令がない限り終わらない処理となる。
    */
@@ -217,8 +217,8 @@ export abstract class ACubismMotion {
    * モーションのループ1回分の長さの取得
    * @return モーションのループ一回分の長さ[秒]
    *
-   * @note ループしない場合は、getDuration()と同じ値を返す
-   *       ループ一回分の長さが定義できない場合(プログラム的に動き続けるサブクラスなど)の場合は「-1」を返す
+   * @note ループしない� �合は、getDuration()と同じ値を返す
+   *       ループ一回分の長さが定義できない� �合(プログラ� 的に動き続けるサブクラスなど)の� �合は「-1」を返す
    */
   public getLoopDuration(): number {
     return -1.0;
@@ -233,15 +233,15 @@ export abstract class ACubismMotion {
   }
 
   /**
-   * ループ情報の設定
-   * @param loop ループ情報
+   * ループ情� �の設定
+   * @param loop ループ情� �
    */
   public setLoop(loop: boolean): void {
     this._isLoop = loop;
   }
 
   /**
-   * ループ情報の取得
+   * ループ情� �の取得
    * @return true ループする
    * @return false ループしない
    */
@@ -250,15 +250,15 @@ export abstract class ACubismMotion {
   }
 
   /**
-   * ループ時のフェードイン情報の設定
-   * @param loopFadeIn  ループ時のフェードイン情報
+   * ループ時のフェードイン情� �の設定
+   * @param loopFadeIn  ループ時のフェードイン情� �
    */
   public setLoopFadeIn(loopFadeIn: boolean) {
     this._isLoopFadeIn = loopFadeIn;
   }
 
   /**
-   * ループ時のフェードイン情報の取得
+   * ループ時のフェードイン情� �の取得
    *
    * @return  true    する
    * @return  false   しない
@@ -281,13 +281,13 @@ export abstract class ACubismMotion {
   }
 
   /**
-   * モーションを更新して、モデルにパラメータ値を反映する
+   * モーションを更新して、モデルにパラメータ値を反� する
    * @param model 対象のモデル
    * @param userTimeSeconds デルタ時間の積算値[秒]
    * @param weight モーションの重み
    * @param motionQueueEntry CubismMotionQueueManagerで管理されているモーション
-   * @return true モデルへパラメータ値の反映あり
-   * @return false モデルへのパラメータ値の反映なし（モーションの変化なし）
+   * @return true モデルへパラメータ値の反� あり
+   * @return false モデルへのパラメータ値の反� なし（モーションの変化なし）
    */
   public abstract doUpdateParameters(
     model: CubismModel,
@@ -388,7 +388,7 @@ export abstract class ACubismMotion {
   protected adjustEndTime(motionQueueEntry: CubismMotionQueueEntry) {
     const duration = this.getDuration();
 
-    // duration == -1 の場合はループする
+    // duration == -1 の� �合はループする
     const endTime = duration <= 0.0 ? -1 : motionQueueEntry.getStartTime() + duration;
 
     motionQueueEntry.setEndTime(endTime);

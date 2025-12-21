@@ -11,10 +11,10 @@ export let s_instance: LAppWavFileHandler = null;
 export class LAppWavFileHandler {
   /**
    * クラスのインスタンス（シングルトン）を返す。
-   * インスタンスが生成されていない場合は内部でインスタンスを生成する。
+   * インスタンスが生成されていない� �合は内部でインスタンスを生成する。
    *
    * @return クラスのインスタンス
-   * @deprecated このクラスでのシングルトンパターンの使用は非推奨となりました。代わりに new LAppWavFileHandler() を使用してください。
+   * @deprecated このクラスでのシングルトンパターンの使用は非推奨となりました。代わりに new LAppWavFileHandler() を使用してく� さい。
    */
   public static getInstance(): LAppWavFileHandler {
     if (s_instance == null) {
@@ -41,7 +41,7 @@ export class LAppWavFileHandler {
     let goalOffset: number;
     let rms: number;
 
-    // データロード前/ファイル末尾に達した場合は更新しない
+    // データロード前/ファイル末尾に達した� �合は更新しない
     if (this._pcmData == null || this._sampleOffset >= this._wavFileInfo._samplesPerChannel) {
       this._lastRms = 0.0;
       return false;
@@ -105,7 +105,7 @@ export class LAppWavFileHandler {
         this._byteReader._fileSize = this._byteReader._fileByte.byteLength;
         this._byteReader._readOffset = 0;
 
-        // ファイルロードに失敗しているか、先頭のシグネチャ"RIFF"を入れるサイズもない場合は失敗
+        // ファイルロードに失敗しているか、先� �のシグネチャ"RIFF"を入れるサイズもない� �合は失敗
         if (this._byteReader._fileByte == null || this._byteReader._fileSize < 4) {
           resolveValue(false);
           return;
@@ -171,7 +171,7 @@ export class LAppWavFileHandler {
             this._wavFileInfo._samplesPerChannel =
               (dataChunkSize * 8) / (this._wavFileInfo._bitsPerSample * this._wavFileInfo._numberOfChannels);
           }
-          // 領域確保
+          // � �域確保
           this._pcmData = new Array(this._wavFileInfo._numberOfChannels);
           for (let channelCount = 0; channelCount < this._wavFileInfo._numberOfChannels; channelCount++) {
             this._pcmData[channelCount] = new Float32Array(this._wavFileInfo._samplesPerChannel);

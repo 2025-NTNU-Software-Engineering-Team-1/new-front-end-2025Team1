@@ -3,7 +3,7 @@ import { inject, Ref } from "vue";
 
 defineProps<{
   // TODO: hard to type validator, does vuelidate have child component validation?
-  v$: any;
+  v$: unknown;
 }>();
 defineEmits<{
   (e: "update", key: keyof ProblemForm, value: ProblemForm[typeof key]): void;
@@ -92,11 +92,11 @@ const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
   </div>
 
   <div class="col-span-2 flex w-full">
-    <div class="rounded border border-error p-4" v-show="v$.description.sampleInput.$invalid">
+    <div class="border-error rounded border p-4" v-show="v$.description.sampleInput.$invalid">
       {{ $t("components.problem.forms.probDescForm.err.input")
       }}{{ v$.description.sampleInput.$silentErrors[0]?.$message }}
     </div>
-    <div class="rounded border border-error p-4" v-show="v$.description.sampleOutput.$invalid">
+    <div class="border-error rounded border p-4" v-show="v$.description.sampleOutput.$invalid">
       {{ $t("components.problem.forms.probDescForm.err.output")
       }}{{ v$.description.sampleOutput.$silentErrors[0]?.$message }}
     </div>

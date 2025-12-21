@@ -2,7 +2,7 @@
 import { onMounted, onBeforeUnmount, ref } from "vue";
 import { LAppDelegate } from "@/live2d/Framework/src/lappdelegate";
 
-// 定義妳剛剛加入的表情列表
+// 定義妳剛剛� 入的表情列表
 const expressions = [
   { id: "F01", name: "F01 (微笑)" },
   { id: "F02", name: "F02 (認真)" },
@@ -22,9 +22,9 @@ const changeExpression = (expId: string) => {
   const app = LAppDelegate.getInstance();
 
   // 呼叫剛剛在 LAppDelegate 新增的方法
-  // @ts-ignore
+  // @ts-expect-error - Dynamic method from LAppDelegate
   if (app.setExpression) {
-    // @ts-ignore
+    // @ts-expect-error - Dynamic method from LAppDelegate
     app.setExpression(expId);
   } else {
     console.warn("還沒在 LAppDelegate 裡實作 setExpression 喔！");

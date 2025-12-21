@@ -26,7 +26,7 @@ async function generateReport() {
   if (!course.value) return;
   isReportGenerationFailed.value = false;
   const studentNicknames = Object.fromEntries(
-    course.value.students.map((student: any) => [student.username, student.displayedName]),
+    course.value.students.map((student: unknown) => [student.username, student.displayedName]),
   );
   const body = {
     course: route.params.name as string,

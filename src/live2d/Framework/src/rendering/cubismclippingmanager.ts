@@ -13,9 +13,9 @@ import { CubismModel } from "../model/cubismmodel";
 import { CubismClippingContext, CubismTextureColor } from "./cubismrenderer";
 import { CubismLogError, CubismLogWarning } from "../utils/cubismdebug";
 
-const ColorChannelCount = 4; // 実験時に1チャンネルの場合は1、RGBだけの場合は3、アルファも含める場合は4
-const ClippingMaskMaxCountOnDefault = 36; // 通常のフレームバッファ一枚あたりのマスク最大数
-const ClippingMaskMaxCountOnMultiRenderTexture = 32; // フレームバッファが2枚以上ある場合のフレームバッファ一枚あたりのマスク最大数
+const ColorChannelCount = 4; // 実験時に1チャンネルの� �合は1、RGB� けの� �合は3、アルファも含める� �合は4
+const ClippingMaskMaxCountOnDefault = 36; // 通常のフレー� バッファ一枚あたりのマスク最大数
+const ClippingMaskMaxCountOnMultiRenderTexture = 32; // フレー� バッファが2枚以上ある� �合のフレー� バッファ一枚あたりのマスク最大数
 
 export type ClippingContextConstructor<T_ClippingContext extends CubismClippingContext> = new (
   manager: CubismClippingManager<T_ClippingContext>,
@@ -27,9 +27,9 @@ export interface ICubismClippingManager {
   getClippingMaskBufferSize(): number;
 }
 
-export abstract class CubismClippingManager<T_ClippingContext extends CubismClippingContext>
-  implements ICubismClippingManager
-{
+export abstract class CubismClippingManager<
+  T_ClippingContext extends CubismClippingContext,
+> implements ICubismClippingManager {
   /**
    * コンストラクタ
    */
@@ -88,7 +88,7 @@ export abstract class CubismClippingManager<T_ClippingContext extends CubismClip
     }
     this._clippingContextListForMask = null;
 
-    // _clippingContextListForDrawは_clippingContextListForMaskにあるインスタンスを指している。上記の処理により要素ごとのDELETEは不要。
+    // _clippingContextListForDrawは_clippingContextListForMaskにあるインスタンスを指している。上記の処理により要� ごとのDELETEは不要。
     for (let i = 0; i < this._clippingContextListForDraw.getSize(); i++) {
       this._clippingContextListForDraw.set(i, null);
     }
@@ -114,7 +114,7 @@ export abstract class CubismClippingManager<T_ClippingContext extends CubismClip
    */
   public initialize(model: CubismModel, renderTextureCount: number): void {
     // レンダーテクスチャの合計枚数の設定
-    // 1以上の整数でない場合はそれぞれ警告を出す
+    // 1以上の整数でない� �合はそれぞれ警告を出す
     if (renderTextureCount % 1 != 0) {
       CubismLogWarning(
         "The number of render textures must be specified as an integer. The decimal point is rounded down and corrected to an integer.",
@@ -127,7 +127,7 @@ export abstract class CubismClippingManager<T_ClippingContext extends CubismClip
         "The number of render textures must be an integer greater than or equal to 1. Set the number of render textures to 1.",
       );
     }
-    // 負の値が使われている場合は強制的に1枚と設定する
+    // � の値が使われている� �合は強制的に1枚と設定する
     this._renderTextureCount = renderTextureCount < 1 ? 1 : renderTextureCount;
 
     this._clearedFrameBufferFlags = new csmVector<boolean>(this._renderTextureCount);
@@ -136,7 +136,7 @@ export abstract class CubismClippingManager<T_ClippingContext extends CubismClip
     // クリッピングマスクは、通常数個程度に限定して使うものとする
     for (let i = 0; i < model.getDrawableCount(); i++) {
       if (model.getDrawableMaskCounts()[i] <= 0) {
-        // クリッピングマスクが使用されていないアートメッシュ（多くの場合使用しない）
+        // クリッピングマスクが使用されていないアートメッシュ（多くの� �合使用しない）
         this._clippingContextListForDraw.pushBack(null);
         continue;
       }
@@ -147,7 +147,7 @@ export abstract class CubismClippingManager<T_ClippingContext extends CubismClip
         model.getDrawableMaskCounts()[i],
       );
       if (clippingContext == null) {
-        // 同一のマスクが存在していない場合は生成する
+        // 同一のマスクが存在していない� �合は生成する
 
         clippingContext = new this._clippingContexttConstructor(
           this,
@@ -177,7 +177,7 @@ export abstract class CubismClippingManager<T_ClippingContext extends CubismClip
       const clippingContext: T_ClippingContext = this._clippingContextListForMask.at(i);
       const count: number = clippingContext._clippingIdCount;
 
-      // 個数が違う場合は別物
+      // 個数が違う� �合は別物
       if (count != drawableMaskCounts) {
         continue;
       }
@@ -211,7 +211,7 @@ export abstract class CubismClippingManager<T_ClippingContext extends CubismClip
    */
   public setupMatrixForHighPrecision(model: CubismModel, isRightHanded: boolean): void {
     // 全てのクリッピングを用意する
-    // 同じクリップ（複数の場合はまとめて一つのクリップ）を使う場合は1度だけ設定する
+    // 同じクリップ（複数の� �合はまとめて一つのクリップ）を使う� �合は1度� け設定する
     let usingClipCount = 0;
     for (let clipIndex = 0; clipIndex < this._clippingContextListForMask.getSize(); clipIndex++) {
       // １つのクリッピングマスクに関して
@@ -229,14 +229,14 @@ export abstract class CubismClippingManager<T_ClippingContext extends CubismClip
     if (usingClipCount > 0) {
       this.setupLayoutBounds(0);
 
-      // サイズがレンダーテクスチャの枚数と合わない場合は合わせる
+      // サイズがレンダーテクスチャの枚数と合わない� �合は合わせる
       if (this._clearedFrameBufferFlags.getSize() != this._renderTextureCount) {
         this._clearedFrameBufferFlags.clear();
         for (let i = 0; i < this._renderTextureCount; i++) {
           this._clearedFrameBufferFlags.pushBack(false);
         }
       } else {
-        // マスクのクリアフラグを毎フレーム開始時に初期化
+        // マスクのクリアフラグを毎フレー� 開始時に初期化
         for (let i = 0; i < this._renderTextureCount; i++) {
           this._clearedFrameBufferFlags.set(i, false);
         }
@@ -284,7 +284,7 @@ export abstract class CubismClippingManager<T_ClippingContext extends CubismClip
   /**
    * マスク作成・描画用の行列を作成する。
    * @param isRightHanded 座標を右手系として扱うかを指定
-   * @param layoutBoundsOnTex01 マスクを収める領域
+   * @param layoutBoundsOnTex01 マスクを収める� �域
    * @param scaleX 描画オブジェクトの伸縮率
    * @param scaleY 描画オブジェクトの伸縮率
    */
@@ -345,7 +345,7 @@ export abstract class CubismClippingManager<T_ClippingContext extends CubismClip
           usingClipCount,
         );
       }
-      // この場合は一つのマスクターゲットを毎回クリアして使用する
+      // この� �合は一つのマスクターゲットを毎回クリアして使用する
       for (let index = 0; index < this._clippingContextListForMask.getSize(); index++) {
         const clipContext: T_ClippingContext = this._clippingContextListForMask.at(index);
         clipContext._layoutChannelIndex = 0; // どうせ毎回消すので固定
@@ -364,12 +364,12 @@ export abstract class CubismClippingManager<T_ClippingContext extends CubismClip
     // 指定された数のレンダーテクスチャを極力いっぱいに使ってマスクをレイアウトする（デフォルトなら1）。
     // マスクグループの数が4以下ならRGBA各チャンネルに1つずつマスクを配置し、5以上6以下ならRGBAを2,2,1,1と配置する。
     let countPerSheetDiv: number = usingClipCount / this._renderTextureCount; // レンダーテクスチャ1枚あたり何枚割り当てるか。
-    const reduceLayoutTextureCount: number = usingClipCount % this._renderTextureCount; // レイアウトの数を1枚減らすレンダーテクスチャの数（この数だけのレンダーテクスチャが対象）。
+    const reduceLayoutTextureCount: number = usingClipCount % this._renderTextureCount; // レイアウトの数を1枚減らすレンダーテクスチャの数（この数� けのレンダーテクスチャが対象）。
 
     // 1枚に割り当てるマスクの分割数を取りたいため、小数点は切り上げる
     countPerSheetDiv = Math.ceil(countPerSheetDiv);
 
-    // RGBAを順番に使っていく
+    // RGBAを� �番に使っていく
     let divCount: number = countPerSheetDiv / ColorChannelCount; // 1チャンネルに配置する基本のマスク
     const modCount: number = countPerSheetDiv % ColorChannelCount; // 余り、この番号のチャンネルまでに一つずつ配分する（インデックスではない）
 
@@ -377,19 +377,19 @@ export abstract class CubismClippingManager<T_ClippingContext extends CubismClip
     divCount = ~~divCount;
 
     // RGBAそれぞれのチャンネルを用意していく（0:R, 1:G, 2:B, 3:A）
-    let curClipIndex = 0; // 順番に設定していく
+    let curClipIndex = 0; // � �番に設定していく
 
     for (let renderTextureIndex = 0; renderTextureIndex < this._renderTextureCount; renderTextureIndex++) {
       for (let channelIndex = 0; channelIndex < ColorChannelCount; channelIndex++) {
         // このチャンネルにレイアウトする数
-        // NOTE: レイアウト数 = 1チャンネルに配置する基本のマスク + 余りのマスクを置くチャンネルなら1つ追加
+        // NOTE: レイアウト数 = 1チャンネルに配置する基本のマスク + 余りのマスクを置くチャンネルなら1つ追�
         let layoutCount: number = divCount + (channelIndex < modCount ? 1 : 0);
 
-        // レイアウトの数を1枚減らす場合にそれを行うチャンネルを決定
+        // レイアウトの数を1枚減らす� �合にそれを行うチャンネルを決定
         // divが0の時は正常なインデックスの範囲内になるように調整
         const checkChannelIndex = modCount + (divCount < 1 ? -1 : 0);
 
-        // 今回が対象のチャンネルかつ、レイアウトの数を1枚減らすレンダーテクスチャが存在する場合
+        // 今回が対象のチャンネルかつ、レイアウトの数を1枚減らすレンダーテクスチャが存在する� �合
         if (channelIndex == checkChannelIndex && reduceLayoutTextureCount > 0) {
           // 現在のレンダーテクスチャが、対象のレンダーテクスチャであればレイアウトの数を1枚減らす。
           layoutCount -= !(renderTextureIndex < reduceLayoutTextureCount) ? 1 : 0;
@@ -463,7 +463,7 @@ export abstract class CubismClippingManager<T_ClippingContext extends CubismClip
             cc._bufferIndex = renderTextureIndex;
           }
         } else {
-          // マスクの制限枚数を超えた場合の処理
+          // マスクの制限枚数を超えた� �合の処理
           CubismLogError(
             "not supported mask count : {0}\n[Details] render texture count : {1}, mask count : {2}",
             usingClipCount - useClippingMaskMaxCount,
@@ -541,7 +541,7 @@ export abstract class CubismClippingManager<T_ClippingContext extends CubismClip
         continue;
       }
 
-      // 全体の矩形に反映
+      // 全体の矩形に反�
       if (minX < clippedDrawTotalMinX) {
         clippedDrawTotalMinX = minX;
       }

@@ -34,10 +34,10 @@ watchEffect(() => {
   scoreboardEnd.value = hw.value.end;
 });
 const startDateTime = computed(
-  () => scoreboardBegin.value && dayjs(scoreboardBegin.value * 1000).format("YYYY-MM-DD\THH:mm"),
+  () => scoreboardBegin.value && dayjs(scoreboardBegin.value * 1000).format("YYYY-MM-DDTHH:mm"),
 );
 const endDateTime = computed(
-  () => scoreboardEnd.value && dayjs(scoreboardEnd.value * 1000).format("YYYY-MM-DD\THH:mm"),
+  () => scoreboardEnd.value && dayjs(scoreboardEnd.value * 1000).format("YYYY-MM-DDTHH:mm"),
 );
 function setScoreboardBegin(event: Event) {
   scoreboardBegin.value = dayjs((event.target as HTMLInputElement).value).valueOf() / 1000;

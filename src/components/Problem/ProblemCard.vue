@@ -21,10 +21,10 @@ const props = withDefaults(defineProps<Props>(), {
 const session = useSession();
 
 // 高分、提交次數、子任務
-const submitCount = computed(() => (props.problem as any).submitCount ?? 0);
-const highScore = computed(() => (props.problem as any).highScore ?? 0);
+const submitCount = computed(() => (props.problem as unknown).submitCount ?? 0);
+const highScore = computed(() => (props.problem as unknown).highScore ?? 0);
 const subtasks = computed(() => {
-  const p: any = props.problem;
+  const p: unknown = props.problem;
   return p.testCase ?? p.testCaseInfo?.tasks ?? [];
 });
 
@@ -43,9 +43,9 @@ const hasPython = computed(() => !!(props.problem.allowedLanguage & 4));
 const hasCOrCpp = computed(() => !!(props.problem.allowedLanguage & 3));
 
 /* ====== Library Restriction ====== */
-const lib = computed(() => (props.problem as any).pipeline?.staticAnalysis?.libraryRestrictions);
+const lib = computed(() => (props.problem as unknown).pipeline?.staticAnalysis?.libraryRestrictions);
 
-function pickSectionMode(sectionSet: any) {
+function pickSectionMode(sectionSet: unknown) {
   if (!sectionSet) return { mode: "none", items: [] };
   const wl = (sectionSet.whitelist ?? []).length ?? 0;
   const bl = (sectionSet.blacklist ?? []).length ?? 0;
@@ -94,8 +94,8 @@ const libraryEntries = computed(() => {
 });
 
 /* ====== Network Restriction ====== */
-const net = computed(() => (props.problem as any).config?.networkAccessRestriction);
-function pickNetMode(obj?: any) {
+const net = computed(() => (props.problem as unknown).config?.networkAccessRestriction);
+function pickNetMode(obj?: unknown) {
   if (!obj) return { mode: "none", items: [] };
   const wl = obj.whitelist?.length ?? 0;
   const bl = obj.blacklist?.length ?? 0;
@@ -250,7 +250,7 @@ const networkItemsCount = computed(() => {
             <!-- 💭 Thought bubble -->
             <div
               v-if="!areRestrictionsVisible"
-              class="flex cursor-pointer select-none items-center justify-center"
+              class="flex cursor-pointer items-center justify-center select-none"
               @click="areRestrictionsVisible = true"
             >
               <div class="bubble">
@@ -264,7 +264,7 @@ const networkItemsCount = computed(() => {
               <div v-if="areRestrictionsVisible" class="space-y-10">
                 <!-- 💭 Back button styled exactly like the bubble -->
                 <div
-                  class="flex cursor-pointer select-none items-center justify-center"
+                  class="flex cursor-pointer items-center justify-center select-none"
                   @click="areRestrictionsVisible = false"
                 >
                   <div class="bubble">
@@ -275,16 +275,16 @@ const networkItemsCount = computed(() => {
 
                 <!-- ===== Allowed Languages ===== -->
                 <div
-                  class="relative mb-8 overflow-hidden rounded-2xl border border-base-300 bg-gradient-to-br from-base-200 to-base-300 transition-all duration-300"
+                  class="border-base-300 from-base-200 to-base-300 relative mb-8 overflow-hidden rounded-2xl border bg-gradient-to-br transition-all duration-300"
                   :class="isLanguagesExpanded ? 'px-6 py-6' : 'px-4 py-2'"
                 >
                   <div
-                    class="flex cursor-pointer select-none items-center justify-between"
+                    class="flex cursor-pointer items-center justify-between select-none"
                     @click="isLanguagesExpanded = !isLanguagesExpanded"
                   >
                     <span class="text-xl font-semibold">Allowed Languages</span>
                     <span
-                      class="text-base-content/50 transition-transform duration-300 hover:text-base-content"
+                      class="text-base-content/50 hover:text-base-content transition-transform duration-300"
                       :class="{ 'rotate-180': isLanguagesExpanded }"
                     >
                       ▼
@@ -299,7 +299,7 @@ const networkItemsCount = computed(() => {
                       <span
                         v-for="(lang, idx) in allowedLangTexts"
                         :key="lang"
-                        class="group relative overflow-hidden rounded-xl bg-gradient-to-br from-info/20 to-info/30 px-5 py-3 font-mono text-base font-bold text-info-content transition-all duration-300 hover:scale-105 hover:from-info/30 hover:to-info/40"
+                        class="group from-info/20 to-info/30 text-info-content hover:from-info/30 hover:to-info/40 relative overflow-hidden rounded-xl bg-gradient-to-br px-5 py-3 font-mono text-base font-bold transition-all duration-300 hover:scale-105"
                         :style="{ animationDelay: `${idx * 0.1}s` }"
                       >
                         <span class="relative">{{ lang }}</span>
@@ -309,7 +309,7 @@ const networkItemsCount = computed(() => {
 
                   <div
                     v-show="!isLanguagesExpanded"
-                    class="mt-1 text-center text-sm leading-tight text-base-content/70"
+                    class="text-base-content/70 mt-1 text-center text-sm leading-tight"
                   >
                     <span class="font-semibold">{{ allowedLangTexts.length }}</span>
                     <span class="ml-1"
@@ -322,29 +322,29 @@ const networkItemsCount = computed(() => {
                 <div class="mb-10 grid grid-cols-1 gap-6 lg:grid-cols-2">
                   <!-- Library Restrictions -->
                   <div
-                    class="group relative overflow-hidden rounded-2xl border border-base-300 bg-gradient-to-br from-base-200 via-base-200 to-base-300 transition-all duration-300"
+                    class="group border-base-300 from-base-200 via-base-200 to-base-300 relative overflow-hidden rounded-2xl border bg-gradient-to-br transition-all duration-300"
                     :class="isLibraryExpanded ? 'p-6' : 'p-4'"
                   >
                     <div
-                      class="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                      class="from-primary/5 to-secondary/5 absolute inset-0 bg-gradient-to-br opacity-0 transition-opacity duration-300 group-hover:opacity-100"
                     ></div>
                     <div class="relative">
                       <div
-                        class="mb-4 flex cursor-pointer select-none items-center justify-between"
+                        class="mb-4 flex cursor-pointer items-center justify-between select-none"
                         @click="isLibraryExpanded = !isLibraryExpanded"
                       >
                         <div class="flex flex-1 items-center gap-3">
                           <div
-                            class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-xl font-bold text-transparent"
+                            class="from-primary to-secondary bg-gradient-to-r bg-clip-text text-xl font-bold text-transparent"
                           >
                             Library Restrictions
                           </div>
                           <div
-                            class="h-1 flex-1 rounded-full bg-gradient-to-r from-primary/30 to-secondary/30"
+                            class="from-primary/30 to-secondary/30 h-1 flex-1 rounded-full bg-gradient-to-r"
                           ></div>
                         </div>
                         <span
-                          class="ml-3 text-base-content/50 transition-transform duration-300 hover:text-base-content"
+                          class="text-base-content/50 hover:text-base-content ml-3 transition-transform duration-300"
                           :class="{ 'rotate-180': isLibraryExpanded }"
                         >
                           ▼
@@ -357,20 +357,20 @@ const networkItemsCount = computed(() => {
                             <div
                               v-for="(s, idx) in libraryEntries"
                               :key="s.label"
-                              class="relative overflow-hidden rounded-xl border border-base-300 bg-base-100/80 p-4 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-base-100 hover:shadow-md"
+                              class="border-base-300 bg-base-100/80 hover:bg-base-100 relative overflow-hidden rounded-xl border p-4 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
                               :class="s.disabled && 'opacity-50'"
                               :style="{ animationDelay: `${idx * 0.15}s` }"
                             >
                               <div class="mb-3 flex items-center justify-between">
-                                <span class="text-lg font-bold text-base-content">{{ s.label }}</span>
+                                <span class="text-base-content text-lg font-bold">{{ s.label }}</span>
                                 <span
-                                  class="rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide"
+                                  class="rounded-full px-3 py-1 text-xs font-semibold tracking-wide uppercase"
                                   :class="
                                     s.mode === 'whitelist'
                                       ? 'bg-accent/20 text-accent-content'
                                       : s.mode === 'blacklist'
-                                      ? 'bg-error/20 text-error-content'
-                                      : 'bg-base-300 text-base-content'
+                                        ? 'bg-error/20 text-error-content'
+                                        : 'bg-base-300 text-base-content'
                                   "
                                 >
                                   {{ s.mode }}
@@ -385,8 +385,8 @@ const networkItemsCount = computed(() => {
                                     class="relative overflow-hidden rounded-lg px-3 py-1.5 font-mono text-sm font-semibold transition-all duration-200 hover:scale-105 hover:shadow-md"
                                     :class="
                                       s.mode === 'whitelist'
-                                        ? 'bg-gradient-to-br from-accent/80 to-accent text-accent-content'
-                                        : 'bg-gradient-to-br from-error/80 to-error text-error-content'
+                                        ? 'from-accent/80 to-accent text-accent-content bg-gradient-to-br'
+                                        : 'from-error/80 to-error text-error-content bg-gradient-to-br'
                                     "
                                     :style="{ animationDelay: `${idx * 0.15 + symIdx * 0.05}s` }"
                                   >
@@ -396,20 +396,20 @@ const networkItemsCount = computed(() => {
                                     ></div>
                                   </span>
                                 </template>
-                                <span class="text-sm italic text-base-content/60" v-else>No restriction</span>
+                                <span class="text-base-content/60 text-sm italic" v-else>No restriction</span>
                               </div>
                             </div>
                           </div>
                         </template>
-                        <div v-else class="py-8 text-center italic text-base-content/60">
+                        <div v-else class="text-base-content/60 py-8 text-center italic">
                           <div class="mb-2 text-lg">No restrictions</div>
                           <div
-                            class="mx-auto h-1 w-20 rounded-full bg-gradient-to-r from-transparent via-base-content/20 to-transparent"
+                            class="via-base-content/20 mx-auto h-1 w-20 rounded-full bg-gradient-to-r from-transparent to-transparent"
                           ></div>
                         </div>
                       </template>
 
-                      <div v-if="!isLibraryExpanded" class="text-center text-base-content/70">
+                      <div v-if="!isLibraryExpanded" class="text-base-content/70 text-center">
                         <template v-if="lib?.enabled">
                           <span class="font-semibold">{{ libraryItemsCount }}</span>
                           <span class="text-sm"
@@ -423,29 +423,29 @@ const networkItemsCount = computed(() => {
 
                   <!-- Network Access Restriction -->
                   <div
-                    class="group relative overflow-hidden rounded-2xl border border-base-300 bg-gradient-to-br from-base-200 via-base-200 to-base-300 transition-all duration-300"
+                    class="group border-base-300 from-base-200 via-base-200 to-base-300 relative overflow-hidden rounded-2xl border bg-gradient-to-br transition-all duration-300"
                     :class="isNetworkExpanded ? 'p-6' : 'p-4'"
                   >
                     <div
-                      class="absolute inset-0 bg-gradient-to-br from-info/5 to-warning/5 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                      class="from-info/5 to-warning/5 absolute inset-0 bg-gradient-to-br opacity-0 transition-opacity duration-300 group-hover:opacity-100"
                     ></div>
                     <div class="relative">
                       <div
-                        class="mb-4 flex cursor-pointer select-none items-center justify-between"
+                        class="mb-4 flex cursor-pointer items-center justify-between select-none"
                         @click="isNetworkExpanded = !isNetworkExpanded"
                       >
                         <div class="flex flex-1 items-center gap-3">
                           <div
-                            class="bg-gradient-to-r from-info to-warning bg-clip-text text-xl font-bold text-transparent"
+                            class="from-info to-warning bg-gradient-to-r bg-clip-text text-xl font-bold text-transparent"
                           >
                             Network Access Restriction
                           </div>
                           <div
-                            class="h-1 flex-1 rounded-full bg-gradient-to-r from-info/30 to-warning/30"
+                            class="from-info/30 to-warning/30 h-1 flex-1 rounded-full bg-gradient-to-r"
                           ></div>
                         </div>
                         <span
-                          class="ml-3 text-base-content/50 transition-transform duration-300 hover:text-base-content"
+                          class="text-base-content/50 hover:text-base-content ml-3 transition-transform duration-300"
                           :class="{ 'rotate-180': isNetworkExpanded }"
                         >
                           ▼
@@ -458,19 +458,19 @@ const networkItemsCount = computed(() => {
                             <div
                               v-for="(s, idx) in networkSections"
                               :key="s.label"
-                              class="relative overflow-hidden rounded-xl border border-base-300 bg-base-100/80 p-4 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-base-100 hover:shadow-md"
+                              class="border-base-300 bg-base-100/80 hover:bg-base-100 relative overflow-hidden rounded-xl border p-4 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
                               :style="{ animationDelay: `${idx * 0.15}s` }"
                             >
                               <div class="mb-3 flex items-center justify-between">
-                                <span class="text-lg font-bold text-base-content">{{ s.label }}</span>
+                                <span class="text-base-content text-lg font-bold">{{ s.label }}</span>
                                 <span
-                                  class="rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide"
+                                  class="rounded-full px-3 py-1 text-xs font-semibold tracking-wide uppercase"
                                   :class="
                                     s.mode === 'whitelist'
                                       ? 'bg-accent/20 text-accent-content'
                                       : s.mode === 'blacklist'
-                                      ? 'bg-error/20 text-error-content'
-                                      : 'bg-base-300 text-base-content'
+                                        ? 'bg-error/20 text-error-content'
+                                        : 'bg-base-300 text-base-content'
                                   "
                                 >
                                   {{ s.mode }}
@@ -485,8 +485,8 @@ const networkItemsCount = computed(() => {
                                     class="relative overflow-hidden rounded-lg px-3 py-1.5 font-mono text-sm font-semibold transition-all duration-200 hover:scale-105 hover:shadow-md"
                                     :class="
                                       s.mode === 'whitelist'
-                                        ? 'bg-gradient-to-br from-accent/80 to-accent text-accent-content'
-                                        : 'bg-gradient-to-br from-error/80 to-error text-error-content'
+                                        ? 'from-accent/80 to-accent text-accent-content bg-gradient-to-br'
+                                        : 'from-error/80 to-error text-error-content bg-gradient-to-br'
                                     "
                                     :style="{ animationDelay: `${idx * 0.15 + symIdx * 0.05}s` }"
                                   >
@@ -496,20 +496,20 @@ const networkItemsCount = computed(() => {
                                     ></div>
                                   </span>
                                 </template>
-                                <span v-else class="text-sm italic text-base-content/60">No restriction</span>
+                                <span v-else class="text-base-content/60 text-sm italic">No restriction</span>
                               </div>
                             </div>
                           </div>
                         </template>
-                        <div v-else class="py-8 text-center italic text-base-content/60">
+                        <div v-else class="text-base-content/60 py-8 text-center italic">
                           <div class="mb-2 text-lg">No restrictions</div>
                           <div
-                            class="mx-auto h-1 w-20 rounded-full bg-gradient-to-r from-transparent via-base-content/20 to-transparent"
+                            class="via-base-content/20 mx-auto h-1 w-20 rounded-full bg-gradient-to-r from-transparent to-transparent"
                           ></div>
                         </div>
                       </template>
 
-                      <div v-if="!isNetworkExpanded" class="text-center text-base-content/70">
+                      <div v-if="!isNetworkExpanded" class="text-base-content/70 text-center">
                         <template v-if="net?.enabled">
                           <span class="font-semibold">{{ networkItemsCount }}</span>
                           <span class="text-sm"

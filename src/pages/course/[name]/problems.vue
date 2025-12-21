@@ -9,7 +9,7 @@ import { isQuotaUnlimited } from "@/constants";
 import useInteractions from "@/composables/useInteractions";
 
 const session = useSession();
-const rolesCanReadProblemStatus = [UserRole.Admin, UserRole.Teacher];
+const rolesCanReadProblemStatus = [UserRole.Admin, UserRole.Teacher, UserRole.TA];
 const route = useRoute();
 const router = useRouter();
 
@@ -52,6 +52,13 @@ const maxPage = computed(() => {
           </router-link>
           <router-link
             v-if="session.isTeacher"
+            class="btn btn-success"
+            :to="`/course/${$route.params.name}/problem/new`"
+          >
+            <i-uil-plus-circle class="mr-1 lg:h-5 lg:w-5" /> {{ $t("course.problems.new") }}
+          </router-link>
+          <router-link
+            v-if="session.isTA"
             class="btn btn-success"
             :to="`/course/${$route.params.name}/problem/new`"
           >
@@ -126,6 +133,20 @@ const maxPage = computed(() => {
                       >
                         <i-uil-file-exclamation-alt class="lg:h-5 lg:w-5" />
                       </router-link>
+                      <router-link
+                        v-if="session.isTeacher"
+                        class="btn btn-circle btn-ghost btn-sm mr-1"
+                        :to="`/course/${$route.params.name}/problem/${problemId}/copycat`"
+                      >
+                        <i-uil-file-exclamation-alt class="lg:h-5 lg:w-5" />
+                      </router-link>
+                      <router-link
+                        v-if="session.isTA"
+                        class="btn btn-circle btn-ghost btn-sm mr-1"
+                        :to="`/course/${$route.params.name}/problem/${problemId}/copycat`"
+                      >
+                        <i-uil-file-exclamation-alt class="lg:h-5 lg:w-5" />
+                      </router-link>
                     </div>
                     <div class="tooltip" data-tip="Copycat">
                       <router-link
@@ -139,6 +160,20 @@ const maxPage = computed(() => {
                     <div class="tooltip" data-tip="Edit">
                       <router-link
                         v-if="session.isAdmin"
+                        class="btn btn-circle btn-ghost btn-sm"
+                        :to="`/course/${$route.params.name}/problem/${problemId}/edit`"
+                      >
+                        <i-uil-edit class="lg:h-5 lg:w-5" />
+                      </router-link>
+                      <router-link
+                        v-if="session.isTeacher"
+                        class="btn btn-circle btn-ghost btn-sm"
+                        :to="`/course/${$route.params.name}/problem/${problemId}/edit`"
+                      >
+                        <i-uil-edit class="lg:h-5 lg:w-5" />
+                      </router-link>
+                      <router-link
+                        v-if="session.isTA"
                         class="btn btn-circle btn-ghost btn-sm"
                         :to="`/course/${$route.params.name}/problem/${problemId}/edit`"
                       >
@@ -174,6 +209,8 @@ const maxPage = computed(() => {
                 :tags="tags"
                 :visible="status"
                 :is-admin="session.isAdmin"
+                :is-teacher="session.isTeacher"
+                :is-ta="session.isTA"
               />
               <problem-info
                 :id="problemId"

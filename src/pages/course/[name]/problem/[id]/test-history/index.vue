@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { useAxios } from "@vueuse/integrations/useAxios";
 import { useRoute, useRouter } from "vue-router";
 import { useTitle } from "@vueuse/core";
-import api, { fetcher } from "@/models/api";
+import api from "@/models/api";
 import { useI18n } from "vue-i18n";
 import dayjs from "dayjs";
 import type { AxiosError } from "axios";
@@ -33,13 +32,13 @@ const isLoading = ref(false);
 onMounted(async () => {
   try {
     isLoading.value = true;
-    const response: any = await api.TrialSubmission.getTrialHistory(Number(route.params.id));
+    const response: unknown = await api.TrialSubmission.getTrialHistory(Number(route.params.id));
 
     if (response.status === "ok") {
       error.value = undefined;
       // Convert backend response to frontend format
       testHistory.value =
-        response.data?.history?.map((item: any) => ({
+        response.data?.history?.map((item: unknown) => ({
           id: item.trial_submission_id,
           pid: item.problem_Id,
           result: mapStatusToCode(item.status),
@@ -126,7 +125,7 @@ function viewTestDetail(testId: string | number) {
                   <tr
                     v-for="item in testHistory"
                     :key="item.id"
-                    class="cursor-pointer hover:bg-base-200"
+                    class="hover:bg-base-200 cursor-pointer"
                     @click="viewTestDetail(item.id)"
                   >
                     <td>

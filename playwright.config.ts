@@ -1,3 +1,4 @@
+
 import { defineConfig, devices } from "@playwright/test";
 
 /**
@@ -76,3 +77,4 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
   },
 });
+

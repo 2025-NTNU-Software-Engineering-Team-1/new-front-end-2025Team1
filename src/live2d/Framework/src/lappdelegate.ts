@@ -21,7 +21,7 @@ export let s_instance: LAppDelegate = null;
 export class LAppDelegate {
   /**
    * クラスのインスタンス（シングルトン）を返す。
-   * インスタンスが生成されていない場合は内部でインスタンスを生成する。
+   * インスタンスが生成されていない� �合は内部でインスタンスを生成する。
    *
    * @return クラスのインスタンス
    */
@@ -57,11 +57,11 @@ export class LAppDelegate {
     for (let ite = this._subdelegates.begin(); ite.notEqual(this._subdelegates.end()); ite.preIncrement()) {
       const sub = ite.ptr();
 
-      if (!sub || typeof (sub as any).onPointBegan !== "function") {
+      if (!sub || typeof (sub as unknown).onPointBegan !== "function") {
         continue;
       }
 
-      (sub as any).onPointBegan(e.pageX, e.pageY);
+      (sub as unknown).onPointBegan(e.pageX, e.pageY);
     }
   }
 
@@ -76,11 +76,11 @@ export class LAppDelegate {
     for (let ite = this._subdelegates.begin(); ite.notEqual(this._subdelegates.end()); ite.preIncrement()) {
       const sub = ite.ptr();
 
-      if (!sub || typeof (sub as any).onPointMoved !== "function") {
+      if (!sub || typeof (sub as unknown).onPointMoved !== "function") {
         continue;
       }
 
-      (sub as any).onPointMoved(e.pageX, e.pageY);
+      (sub as unknown).onPointMoved(e.pageX, e.pageY);
     }
   }
 
@@ -95,11 +95,11 @@ export class LAppDelegate {
     for (let ite = this._subdelegates.begin(); ite.notEqual(this._subdelegates.end()); ite.preIncrement()) {
       const sub = ite.ptr();
 
-      if (!sub || typeof (sub as any).onPointEnded !== "function") {
+      if (!sub || typeof (sub as unknown).onPointEnded !== "function") {
         continue;
       }
 
-      (sub as any).onPointEnded(e.pageX, e.pageY);
+      (sub as unknown).onPointEnded(e.pageX, e.pageY);
     }
   }
 
@@ -114,11 +114,11 @@ export class LAppDelegate {
     for (let ite = this._subdelegates.begin(); ite.notEqual(this._subdelegates.end()); ite.preIncrement()) {
       const sub = ite.ptr();
 
-      if (!sub || typeof (sub as any).onTouchCancel !== "function") {
+      if (!sub || typeof (sub as unknown).onTouchCancel !== "function") {
         continue;
       }
 
-      (sub as any).onTouchCancel(e.pageX, e.pageY);
+      (sub as unknown).onTouchCancel(e.pageX, e.pageY);
     }
   }
 
@@ -233,8 +233,8 @@ export class LAppDelegate {
       }
     }
 
-    this._subdelegates = null as any;
-    this._canvases = null as any;
+    this._subdelegates = null as unknown;
+    this._canvases = null as unknown;
   }
 
   /**
@@ -334,7 +334,7 @@ export class LAppDelegate {
   private _cubismOption: Option;
 
   /**
-   * 操作対象のcanvas要素
+   * 操作対象のcanvas要�
    */
   private _canvases: csmVector<HTMLCanvasElement>;
 

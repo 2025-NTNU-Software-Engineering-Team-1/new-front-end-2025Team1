@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import { ref, watchEffect } from "vue";
+import { watchEffect } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useTitle } from "@vueuse/core";
-import { useI18n } from "vue-i18n";
 
 const route = useRoute();
 const router = useRouter();
-const { t } = useI18n();
+// const { t } = useI18n();
 useTitle(`AI Setting - ${route.params.name} | Normal OJ`);
 
-// 預設 redirect 到 setup
+// � �設 redirect 到 setup
 watchEffect(() => {
   // 僅當路徑剛好在 /apisetting 結尾時才 redirect
   if (route.path.endsWith("/aisetting") || route.path.endsWith("/aisetting/")) {
@@ -26,7 +25,7 @@ watchEffect(() => {
           <router-link
             :to="`/course/${route.params.name}/aisetting/setup`"
             :class="['tab tab-bordered', route.path.endsWith('/setup') && 'tab-active']"
-            >Set Up</router-link
+            >Set Up</router-link
           >
           <router-link
             :to="`/course/${route.params.name}/aisetting/usage`"

@@ -56,7 +56,7 @@ const speakText = (msgId: number, text: string) => {
   const voice = pickVoice("zh-TW");
   if (voice) utter.voice = voice;
 
-  utter.rate = 1.0;  // 語速 0.1 ~ 10
+  utter.rate = 1.0; // 語速 0.1 ~ 10
   utter.pitch = 1.0; // 音高 0 ~ 2
   utter.volume = 1.0;
 
@@ -89,7 +89,7 @@ const currentExpression = ref<string | null>(null);
 
 const chatScale = ref(1.15);
 
-// 聊天紀錄：一開始不要預設訊息，等 history 載入
+// 聊天紀錄：一開始不要� �設訊息，等 history 載入
 let nextId = 1;
 const messages = ref<ChatMessage[]>([]);
 const chatBodyEl = ref<HTMLElement | null>(null);
@@ -118,7 +118,7 @@ const changeExpression = (expId: string) => {
   }
 };
 
-// 預設表情：F01
+// � �設表情：F01
 const setDefaultExpression = () => {
   try {
     const app = LAppDelegate.getInstance();
@@ -166,9 +166,9 @@ const setLive2DTalking = (isTalking: boolean) => {
   }
 };
 
-// ====== 預設訊息 & 歷史紀錄 ======
+// ====== � �設訊息 & 歷史紀錄 ======
 
-const isLoadingHistory = ref(false);
+// const isLoadingHistory = ref(false);
 
 const loadHistory = async () => {
   try {
@@ -190,7 +190,7 @@ const loadHistory = async () => {
         const obj = JSON.parse(text);
         if (Array.isArray(obj?.data)) {
           text = obj.data
-            .map((x: any) => {
+            .map((x: unknown) => {
               if (x?.text) {
                 emotion ||= x.emotion;
                 return x.text;
@@ -238,7 +238,7 @@ const typeAiMessage = (fullText: string, emotion?: string) => {
 
   scrollToBottom();
 
-  const thinkingDelay = 400; // 開始打字前的停頓
+  const thinkingDelay = 400; // 開始打字前的停� �
   const thinkingTimer = window.setTimeout(() => {
     const msgIndex = messages.value.findIndex((m) => m.id === id);
     if (msgIndex === -1) return;
@@ -279,7 +279,7 @@ const typeAiMessage = (fullText: string, emotion?: string) => {
         clearInterval(timer);
         typingTimers.delete(id);
 
-        // 打完：嘴巴停＋表情切回原本（預設 F01）
+        // 打完：嘴巴停＋表情切回原本（� �設 F01）
         setLive2DTalking(false);
         const prev = msg.prevExpressionId ?? "F01";
         changeExpression(prev);
@@ -295,7 +295,7 @@ const typeAiMessage = (fullText: string, emotion?: string) => {
 
 // 測試用
 
-const simulateAiReply = () => {
+/* const simulateAiReply = () => {
   const replies = [
     // { text: "gugvvvjvhjbhkbkbjhvgchfchgchgcfch", emotion: "smile" },
     {
@@ -309,7 +309,7 @@ const simulateAiReply = () => {
   for (const r of replies) {
     typeAiMessage(r.text, r.emotion);
   }
-};
+}; */
 
 const requestAiReply = async (userText: string) => {
   const thinkingId = nextId++;
@@ -322,7 +322,7 @@ const requestAiReply = async (userText: string) => {
   });
   scrollToBottom();
 
-  const extractPayload = (res: any) => {
+  const extractPayload = (res: unknown) => {
     const a = res?.data;
     const b = res?.data?.data;
     const c = res?.data?.data?.data;
@@ -407,7 +407,6 @@ const sendExplain = () => {
   pushUserMessage("解釋這題");
 };
 
-
 // ====== Live2D 初始化 ======
 
 const initLive2D = () => {
@@ -428,7 +427,7 @@ const initLive2D = () => {
   live2dInited.value = true;
   console.log("[Live2D] 初始化完成");
 
-  // 初始化完套上預設表情 F01
+  // 初始化完套上� �設表情 F01
   setDefaultExpression();
 };
 
@@ -477,10 +476,7 @@ onBeforeUnmount(() => {
   />
 
   <!-- 右下角聊天區（整個一起 scale） -->
-  <div
-    class="fixed bottom-6 right-6 z-50 origin-bottom-right"
-    :style="{ transform: `scale(${chatScale})` }"
-  >
+  <div class="fixed right-6 bottom-6 z-50 origin-bottom-right" :style="{ transform: `scale(${chatScale})` }">
     <!-- 開啟按鈕 -->
     <button
       v-if="showTrigger && !isOpen"
@@ -508,12 +504,7 @@ onBeforeUnmount(() => {
       <div
         v-show="isOpen"
         class="chat-panel flex overflow-hidden rounded-3xl border border-white/30 bg-white/20 shadow-[0_0_40px_rgba(150,120,255,0.25)] backdrop-blur-lg"
-        style="
-          width: 900px;
-          height: 520px;
-          max-width: calc(100vw - 48px);
-          max-height: calc(100vh - 48px);
-        "
+        style="width: 900px; height: 520px; max-width: calc(100vw - 48px); max-height: calc(100vh - 48px)"
         @click.stop
       >
         <!-- Live2D -->
@@ -571,12 +562,12 @@ onBeforeUnmount(() => {
                 <div class="flex items-start gap-1">
                   <div
                     class="rounded-2xl rounded-tl-sm border border-white/40 bg-white/40 px-3 py-2 text-sm text-slate-800 shadow-md backdrop-blur-sm"
-                    style="box-shadow: 0 0 15px rgba(180,140,255,0.2)"
+                    style="box-shadow: 0 0 15px rgba(180, 140, 255, 0.2)"
                   >
                     <div v-if="msg.phase === 'thinking'" class="typing-dots">
                       <span></span><span></span><span></span>
                     </div>
-                    <div v-else class="whitespace-pre-wrap leading-relaxed">
+                    <div v-else class="leading-relaxed whitespace-pre-wrap">
                       {{ msg.displayText ?? msg.text }}
                     </div>
                   </div>
@@ -637,7 +628,7 @@ onBeforeUnmount(() => {
             </button>
             <input
               v-model="draft"
-              class="flex-1 rounded-2xl border border-white/40 bg-white/50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
+              class="flex-1 rounded-2xl border border-white/40 bg-white/50 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-300 focus:outline-none"
               placeholder="輸入訊息..."
               @keydown.enter.prevent="send"
             />
@@ -665,13 +656,13 @@ onBeforeUnmount(() => {
   </div>
 </template>
 
-
-
 <style scoped>
 /* 開啟 / 關閉聊天框動畫 */
 .chat-pop-enter-active,
 .chat-pop-leave-active {
-  transition: opacity 0.25s ease-out, transform 0.25s ease-out;
+  transition:
+    opacity 0.25s ease-out,
+    transform 0.25s ease-out;
   transform-origin: bottom right;
 }
 .chat-pop-enter-from,
@@ -681,7 +672,10 @@ onBeforeUnmount(() => {
 }
 
 .chat-icon-btn {
-  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out, background-color 0.15s ease-out,
+  transition:
+    transform 0.15s ease-out,
+    box-shadow 0.15s ease-out,
+    background-color 0.15s ease-out,
     opacity 0.15s ease-out;
 }
 .chat-icon-btn:hover:not(:disabled) {
@@ -768,7 +762,10 @@ onBeforeUnmount(() => {
   animation-delay: 0.3s;
 }
 .tts-btn {
-  transition: transform 0.12s ease-out, box-shadow 0.12s ease-out, background-color 0.12s ease-out;
+  transition:
+    transform 0.12s ease-out,
+    box-shadow 0.12s ease-out,
+    background-color 0.12s ease-out;
 }
 .tts-btn:hover {
   transform: translateY(-1px);

@@ -2,9 +2,8 @@
 import { ref, watchEffect, onMounted } from "vue";
 import { useClipboard, useIntervalFn } from "@vueuse/core";
 import { useAxios } from "@vueuse/integrations/useAxios";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute } from "vue-router";
 import { SUBMISSION_STATUS_CODE, LANG } from "@/constants";
-import { formatTime } from "@/utils/formatTime";
 import api, { fetcher } from "@/models/api";
 import { useSession } from "@/stores/session";
 import { useTitle } from "@vueuse/core";
@@ -13,7 +12,7 @@ import dayjs from "dayjs";
 const session = useSession();
 const route = useRoute();
 useTitle(`Test History - ${route.params.testId} - ${route.params.name} | Normal OJ`);
-const router = useRouter();
+// const router = useRouter();
 
 // Define test result type
 type TestCase = {
@@ -54,6 +53,7 @@ type TestResult = {
 };
 
 const testResult = ref<TestResult | null>(null);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const error = ref<any>(undefined);
 const isLoading = ref(false);
 
@@ -380,7 +380,7 @@ function downloadModalJson() {
 
             <div v-if="testResult?.status === SUBMISSION_STATUS_CODE.COMPILE_ERROR">
               <div class="card-title md:text-xl lg:text-2xl">
-                <i-uil-exclamation-circle class="mr-2 text-error" />
+                <i-uil-exclamation-circle class="text-error mr-2" />
                 Compilation Error
               </div>
               <div class="my-4" />
@@ -411,7 +411,7 @@ function downloadModalJson() {
             </div>
             <table
               v-else
-              class="table table-compact w-full"
+              class="table-compact table w-full"
               v-for="(task, taskIndex) in testResult.tasks"
               :key="taskIndex"
             >
@@ -519,20 +519,20 @@ function downloadModalJson() {
   <!-- Detail Modal -->
   <ui-dialog v-model="isDetailModalOpen">
     <template #title>
-      <div class="rounded-t-box -m-6 bg-primary p-6 text-primary-content">
+      <div class="rounded-t-box bg-primary text-primary-content -m-6 p-6">
         {{ currentDetailData?.title }}
       </div>
     </template>
     <template #content>
-      <div v-if="currentDetailData" class="-m-6 bg-primary p-6 pt-0 text-primary-content">
+      <div v-if="currentDetailData" class="bg-primary text-primary-content -m-6 p-6 pt-0">
         <div class="space-y-4">
           <!-- JSON Display -->
           <div class="form-control w-full">
             <label class="label">
-              <span class="label-text font-semibold text-primary-content">JSON Data</span>
+              <span class="label-text text-primary-content font-semibold">JSON Data</span>
             </label>
-            <div class="rounded bg-base-200 p-4 text-base-content">
-              <pre class="whitespace-pre-wrap font-mono text-sm">{{ currentDetailData.jsonData }}</pre>
+            <div class="bg-base-200 text-base-content rounded p-4">
+              <pre class="font-mono text-sm whitespace-pre-wrap">{{ currentDetailData.jsonData }}</pre>
             </div>
           </div>
         </div>

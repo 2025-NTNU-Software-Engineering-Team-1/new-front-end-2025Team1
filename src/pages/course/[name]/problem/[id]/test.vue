@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { reactive, watchEffect, computed, ref, onMounted } from "vue";
+import { reactive, watchEffect, computed, ref } from "vue";
 import hljs from "highlight.js";
-import { BlobWriter, ZipWriter, TextReader, ZipReader, BlobReader, TextWriter } from "@zip.js/zip.js";
+import { BlobWriter, ZipWriter, TextReader } from "@zip.js/zip.js";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import { useRoute, useRouter } from "vue-router";
 import useVuelidate from "@vuelidate/core";
@@ -10,22 +10,22 @@ import api, { fetcher } from "@/models/api";
 import { useTitle, useStorage } from "@vueuse/core";
 import { LANGUAGE_OPTIONS, LOCAL_STORAGE_KEY } from "@/constants";
 import { useI18n } from "vue-i18n";
-import MarkdownIt from 'markdown-it';
-import texmath from 'markdown-it-texmath';
-import katex from 'katex';
-import 'katex/dist/katex.min.css';
+import MarkdownIt from "markdown-it";
+import texmath from "markdown-it-texmath";
+import katex from "katex";
+import "katex/dist/katex.min.css";
 
 const md = new MarkdownIt({
   html: true,
   breaks: true,
 }).use(texmath, {
   engine: katex,
-  delimiters: 'dollars', 
-  katexOptions: { macros: { "\\RR": "\\mathbb{R}" } }
+  delimiters: "dollars",
+  katexOptions: { macros: { "\\RR": "\\mathbb{R}" } },
 });
 
-const renderMarkdown = (content: any): string => {
-  if (typeof content !== 'string') return '';
+const renderMarkdown = (content: unknown): string => {
+  if (typeof content !== "string") return "";
   return md.render(content);
 };
 
@@ -40,9 +40,9 @@ const isExpanded = ref(true);
 
 const lang = useStorage(LOCAL_STORAGE_KEY.LAST_USED_LANG, -1);
 const showSubmitModal = ref(false);
-const showTestcaseModal = ref(false);
-const testcaseFiles = ref<Array<{ name: string; content: string }>>([]);
-const selectedTestcases = ref<string[]>([]);
+// const showTestcaseModal = ref(false);
+// const testcaseFiles = ref<Array<{ name: string; content: string }>>([]);
+// const selectedTestcases = ref<string[]>([]);
 
 // Test settings from test-cases page
 const useDefaultTestcases = ref(true);
@@ -87,7 +87,7 @@ watchEffect(() => {
   }
 });
 
-const selectedTestcaseContent = ref("");
+// const selectedTestcaseContent = ref("");
 
 async function test() {
   const isFormCorrect = await v$.value.$validate();
@@ -99,11 +99,11 @@ async function test() {
     // NEW IMPLEMENTATION - Trial Submission APIs
 
     // API 2: Create trial submission request
-    const requestResponse = await api.TrialSubmission.createTrialRequest({
+    const requestResponse = (await api.TrialSubmission.createTrialRequest({
       problem_id: Number(route.params.id),
       language_type: Number(form.lang), // 0: Python, 1: C++, 2: C
       use_default_test_cases: useDefaultTestcases.value,
-    }) as any;
+    })) as unknown;
 
     if (requestResponse.status === "err" || !requestResponse.trial_submission_id) {
       throw new Error(requestResponse.message || "Failed to create trial submission");
@@ -128,7 +128,10 @@ async function test() {
       console.log("Uploading custom testcases");
     }
 
-    const uploadResponse = await api.TrialSubmission.uploadTrialFiles(trialSubmissionId, formData)as any;
+    const uploadResponse = (await api.TrialSubmission.uploadTrialFiles(
+      trialSubmissionId,
+      formData,
+    )) as unknown;
     console.log("uploadResponse =", uploadResponse);
     if (uploadResponse.status === "err") {
       throw new Error(uploadResponse.message || "Failed to upload trial submission files");
@@ -190,9 +193,9 @@ async function submitCode() {
             </div>
 
             <div class="divider" />
-            <div class="relative mt-4 rounded-lg bg-base-200 p-4 transition-all duration-300">
+            <div class="bg-base-200 relative mt-4 rounded-lg p-4 transition-all duration-300">
               <button
-                class="absolute bottom-3 right-4 z-10 text-gray-500 hover:text-gray-700"
+                class="absolute right-4 bottom-3 z-10 text-gray-500 hover:text-gray-700"
                 @click="isExpanded = !isExpanded"
               >
                 <img
@@ -207,16 +210,19 @@ async function submitCode() {
                 <h2 class="mb-2 text-xl font-bold">{{ problem?.problemName }}</h2>
                 <div class="prose max-w-none leading-relaxed">
                   <h2 class="mt-4 text-lg font-semibold">{{ t("course.problem.test.topic.dec") }}</h2>
-                  <div v-html="renderMarkdown(problem?.description.description)" class="whitespace-normal"></div>
+                  <div
+                    v-html="renderMarkdown(problem?.description.description)"
+                    class="whitespace-normal"
+                  ></div>
                   <h2 class="mt-4 text-lg font-semibold">{{ t("course.problem.test.topic.input") }}</h2>
                   <div v-html="renderMarkdown(problem?.description.input)" class="whitespace-normal"></div>
                   <h2 class="mt-4 text-lg font-semibold">{{ t("course.problem.test.topic.output") }}</h2>
                   <div v-html="renderMarkdown(problem?.description.output)" class="whitespace-normal"></div>
                   <div
-                    class="overflow-hidden overflow-x-auto rounded-lg border border-base-300 bg-base-100 p-0"
+                    class="border-base-300 bg-base-100 overflow-hidden overflow-x-auto rounded-lg border p-0"
                   >
-                    <table class="table !m-0 w-full border-collapse !border-spacing-0 border-0">
-                      <thead class="rounded-none bg-base-300">
+                    <table class="!m-0 table w-full border-collapse !border-spacing-0 border-0">
+                      <thead class="bg-base-300 rounded-none">
                         <tr>
                           <th>{{ t("course.problem.test.topic.sample.id") }}</th>
                           <th>{{ t("course.problem.test.topic.sample.input") }}</th>

@@ -402,7 +402,7 @@ export class LAppModel extends CubismUserModel {
         this.preLoadMotionGroup(group[i]);
       }
 
-      // モーションがない場合
+      // モーションがない� �合
       if (motionGroupCount == 0) {
         this._state = LoadStep.LoadTexture;
 
@@ -434,7 +434,7 @@ export class LAppModel extends CubismUserModel {
       const gl = this._subdelegate.getGlManager().getGl();
 
       for (let modelTextureNumber = 0; modelTextureNumber < textureCount; modelTextureNumber++) {
-        // テクスチャ名が空文字だった場合はロード・バインド処理をスキップ
+        // テクスチャ名が空文字� った� �合はロード・バインド処理をスキップ
         if (this._modelSetting.getTextureFileName(modelTextureNumber) == "") {
           console.log("getTextureFileName null");
           continue;
@@ -500,7 +500,7 @@ export class LAppModel extends CubismUserModel {
     //--------------------------------------------------------------------------
     this._model.loadParameters(); // 前回セーブされた状態をロード
     if (this._motionManager.isFinished()) {
-      // モーションの再生がない場合、待機モーションの中からランダムで再生する
+      // モーションの再生がない� �合、待機モーションの中からランダ� で再生する
       //this.startRandomMotion(LAppDefine.MotionGroupIdle, LAppDefine.PriorityIdle);
     } else {
       motionUpdated = this._motionManager.updateMotion(this._model, deltaTimeSeconds); // モーションを更新
@@ -522,15 +522,15 @@ export class LAppModel extends CubismUserModel {
 
     // ドラッグによる変化
     // ドラッグによる顔の向きの調整
-    this._model.addParameterValueById(this._idParamAngleX, this._dragX * 30); // -30から30の値を加える
+    this._model.addParameterValueById(this._idParamAngleX, this._dragX * 30); // -30から30の値を� える
     this._model.addParameterValueById(this._idParamAngleY, this._dragY * 30);
     this._model.addParameterValueById(this._idParamAngleZ, this._dragX * this._dragY * -30);
 
     // ドラッグによる体の向きの調整
-    this._model.addParameterValueById(this._idParamBodyAngleX, this._dragX * 10); // -10から10の値を加える
+    this._model.addParameterValueById(this._idParamBodyAngleX, this._dragX * 10); // -10から10の値を� える
 
     // ドラッグによる目の向きの調整
-    this._model.addParameterValueById(this._idParamEyeBallX, this._dragX); // -1から1の値を加える
+    this._model.addParameterValueById(this._idParamEyeBallX, this._dragX); // -1から1の値を� える
     this._model.addParameterValueById(this._idParamEyeBallY, this._dragY);
 
     // 呼吸など
@@ -655,7 +655,7 @@ export class LAppModel extends CubismUserModel {
   }
 
   /**
-   * ランダムに選ばれたモーションの再生を開始する。
+   * ランダ� に選ばれたモーションの再生を開始する。
    * @param group モーショングループ名
    * @param priority 優先度
    * @param onFinishedMotionHandler モーション再生終了時に呼び出されるコールバック関数
@@ -703,7 +703,7 @@ export class LAppModel extends CubismUserModel {
   }
 
   /**
-   * ランダムに選ばれた表情モーションをセットする
+   * ランダ� に選ばれた表情モーションをセットする
    */
   public setRandomExpression(): void {
     if (this._expressions.getSize() == 0) {
@@ -730,7 +730,7 @@ export class LAppModel extends CubismUserModel {
 
   /**
    * 当たり判定テスト
-   * 指定ＩＤの頂点リストから矩形を計算し、座標をが矩形範囲内か判定する。
+   * 指定ＩＤの� �点リストから矩形を計算し、座標をが矩形範囲内か判定する。
    *
    * @param hitArenaName  当たり判定をテストする対象のID
    * @param x             判定を行うX座標
@@ -807,7 +807,7 @@ export class LAppModel extends CubismUserModel {
 
             this._motionCount++;
           } else {
-            // loadMotionできなかった場合はモーションの総数がずれるので1つ減らす
+            // loadMotionできなかった� �合はモーションの総数がずれるので1つ減らす
             this._allMotionCount--;
           }
 
@@ -917,7 +917,7 @@ export class LAppModel extends CubismUserModel {
     this._eyeBlinkIds = new csmVector<CubismIdHandle>();
     this._lipSyncIds = new csmVector<CubismIdHandle>();
 
-    (this as any)._lipsync = false;
+    (this as unknown)._lipsync = false;
 
     this._motions = new csmMap<string, ACubismMotion>();
     this._expressions = new csmMap<string, ACubismMotion>();
@@ -951,7 +951,7 @@ export class LAppModel extends CubismUserModel {
 
   private _subdelegate: LAppSubdelegate;
 
-  _modelSetting: ICubismModelSetting; // モデルセッティング情報
+  _modelSetting: ICubismModelSetting; // モデルセッティング情� �
   _modelHomeDir: string; // モデルセッティングが置かれたディレクトリ
   _userTimeSeconds: number; // デルタ時間の積算値[秒]
 

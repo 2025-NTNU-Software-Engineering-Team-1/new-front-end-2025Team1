@@ -12,7 +12,7 @@ export class csmVector<T> {
   /**
    * 引数付きコンストラクタ
    * @param iniitalCapacity 初期化後のキャパシティ。データサイズは_capacity * sizeof(T)
-   * @param zeroClear trueなら初期化時に確保した領域を0で埋める
+   * @param zeroClear trueなら初期化時に確保した� �域を0で埋める
    */
   constructor(initialCapacity = 0) {
     if (initialCapacity < 1) {
@@ -27,16 +27,16 @@ export class csmVector<T> {
   }
 
   /**
-   * インデックスで指定した要素を返す
+   * インデックスで指定した要� を返す
    */
   public at(index: number): T {
     return this._ptr[index];
   }
 
   /**
-   * 要素をセット
-   * @param index 要素をセットするインデックス
-   * @param value セットする要素
+   * 要� をセット
+   * @param index 要� をセットするインデックス
+   * @param value セットする要�
    */
   public set(index: number, value: T): void {
     this._ptr[index] = value;
@@ -54,8 +54,8 @@ export class csmVector<T> {
   }
 
   /**
-   * pushBack処理、コンテナに新たな要素を追加する
-   * @param value PushBack処理で追加する値
+   * pushBack処理、コンテナに新たな要� を追� する
+   * @param value PushBack処理で追� する値
    */
   public pushBack(value: T): void {
     if (this._size >= this._capacity) {
@@ -66,7 +66,7 @@ export class csmVector<T> {
   }
 
   /**
-   * コンテナの全要素を解放する
+   * コンテナの全要� を解放する
    */
   public clear(): void {
     this._ptr.length = 0;
@@ -74,17 +74,17 @@ export class csmVector<T> {
   }
 
   /**
-   * コンテナの要素数を返す
-   * @return コンテナの要素数
+   * コンテナの要� 数を返す
+   * @return コンテナの要� 数
    */
   public getSize(): number {
     return this._size;
   }
 
   /**
-   * コンテナの全要素に対して代入処理を行う
+   * コンテナの全要� に対して代入処理を行う
    * @param newSize 代入処理後のサイズ
-   * @param value 要素に代入する値
+   * @param value 要� に代入する値
    */
   public assign(newSize: number, value: T): void {
     const curSize = this._size;
@@ -110,7 +110,7 @@ export class csmVector<T> {
   /**
    * サイズ変更
    */
-  public updateSize(newSize: number, value: any = null, callPlacementNew = true): void {
+  public updateSize(newSize: number, value: unknown = null, callPlacementNew = true): void {
     const curSize: number = this._size;
 
     if (curSize < newSize) {
@@ -135,13 +135,13 @@ export class csmVector<T> {
       // newSize <= this._size
       //---
       const sub = this._size - newSize;
-      this._ptr.splice(this._size - sub, sub); // 不要なので破棄する
+      this._ptr.splice(this._size - sub, sub); // 不要なので� �棄する
     }
     this._size = newSize;
   }
 
   /**
-   * コンテナにコンテナ要素を挿入する
+   * コンテナにコンテナ要� を挿入する
    * @param position 挿入する位置
    * @param begin 挿入するコンテナの開始位置
    * @param end 挿入するコンテナの終端位置
@@ -171,7 +171,7 @@ export class csmVector<T> {
   }
 
   /**
-   * コンテナからインデックスで指定した要素を削除する
+   * コンテナからインデックスで指定した要� を削除する
    * @param index インデックス値
    * @return true 削除実行
    * @return false 削除範囲外
@@ -188,8 +188,8 @@ export class csmVector<T> {
   }
 
   /**
-   * コンテナから要素を削除して他の要素をシフトする
-   * @param ite 削除する要素
+   * コンテナから要� を削除して他の要� をシフトする
+   * @param ite 削除する要�
    */
   public erase(ite: iterator<T>): iterator<T> {
     const index: number = ite._index;
@@ -207,7 +207,7 @@ export class csmVector<T> {
 
   /**
    * コンテナのキャパシティを確保する
-   * @param newSize 新たなキャパシティ。引数の値が現在のサイズ未満の場合は何もしない.
+   * @param newSize 新たなキャパシティ。引数の値が現在のサイズ未満の� �合は何もしない.
    */
   public prepareCapacity(newSize: number): void {
     if (newSize > this._capacity) {
@@ -222,7 +222,7 @@ export class csmVector<T> {
   }
 
   /**
-   * コンテナの先頭要素を返す
+   * コンテナの先� �要� を返す
    */
   public begin(): iterator<T> {
     const ite: iterator<T> = this._size == 0 ? this.end() : new iterator<T>(this, 0);
@@ -230,7 +230,7 @@ export class csmVector<T> {
   }
 
   /**
-   * コンテナの終端要素を返す
+   * コンテナの終端要� を返す
    */
   public end(): iterator<T> {
     const ite: iterator<T> = new iterator<T>(this, this._size);
@@ -246,8 +246,8 @@ export class csmVector<T> {
     return newVector;
   }
 
-  _ptr: T[]; // コンテナの先頭アドレス
-  _size: number; // コンテナの要素数
+  _ptr: T[]; // コンテナの先� �アドレス
+  _size: number; // コンテナの要� 数
   _capacity: number; // コンテナのキャパシティ
 
   static readonly DefaultSize = 10; // コンテナ初期化のデフォルトサイズ

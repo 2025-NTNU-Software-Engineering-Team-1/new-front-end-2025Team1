@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, inject, Ref } from "vue";
 import useVuelidate from "@vuelidate/core";
-import { required, maxLength, minValue, between, helpers } from "@vuelidate/validators";
+import { required, maxLength, between, helpers } from "@vuelidate/validators";
 import { ZipReader, BlobReader } from "@zip.js/zip.js";
 
 // TODO: handling error when `problem` or `problem.value` is undefined
@@ -231,7 +231,7 @@ watch(
           @dragleave="isDrag = false"
         >
           <template v-if="!testdata">
-            <span class="mb-6 mr-6 text-sm">{{ $t("components.problem.forms.dropFile") }}</span>
+            <span class="mr-6 mb-6 text-sm">{{ $t("components.problem.forms.dropFile") }}</span>
             <input
               type="file"
               id="file-uploader"
@@ -249,7 +249,7 @@ watch(
           </template>
         </div>
       </div>
-      <!-- @vue-ignore -->
+      <!-- @vue-expect-error -->
       <template v-if="v$ && v$.testCaseInfo && v$.testCaseInfo.tasks">
         <label
           class="label text-error"

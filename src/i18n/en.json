@@ -259,6 +259,134 @@
       "back": "Back"
     }
   },
+  "discussion": {
+    "placeholder": "Search discussions...",
+    "post": "Post",
+    "hot": "Hot",
+    "new": "New",
+    "solved": "Solved",
+    "closed": "Closed",
+    "noPosts": "No posts yet",
+    "noSearchResults": "No posts found matching your search",
+    "create": {
+      "title": "Create Post",
+      "problem": "Problem",
+      "problemPlaceholder": "Select a problem",
+      "category": "Category",
+      "generalDiscussion": "general discussion",
+      "question": "question/help",
+      "solutionSharing": "solution sharing",
+      "bugReport": "bug report",
+      "suggestions": "suggestions",
+      "language": "Language",
+      "none": "none",
+      "titleLabel": "Title",
+      "titlePlaceholder": "Enter title",
+      "contentLabel": "Content",
+      "contentPlaceholder": "Write your post content here...",
+      "contentHint": "Support Markdown syntax ",
+      "contentIncluded": "Code included",
+      "submit": "Post",
+      "cancel": "Cancel",
+      "submit_post_err": {
+        "title_required": "Title cannot be empty.",
+        "content_required": "Content cannot be empty.",
+        "problem_required": "Please select a problem.",
+        "contentallowed": "This problem does not allow sharing code, please remove the code content before posting.",
+        "submit_processing": "Posting, please wait..."
+      }
+    },
+    "contentallowed": {
+      "role": "Role: {userRole} | Students cannot share code before the deadline",
+      "allowed": "This problem allows sharing code",
+      "not_allowed": "This problem does not allow sharing code",
+      "deadline": "Deadline: {deadline}"
+    },
+    "err": {
+      "err": "Retry loading the post.",
+      "err_unknown": "An unknown error occurred. Please try again later.",
+      "err_failed_load": "Failed to load the post.",
+      "err_failed_find": "Failed to find the post.",
+      "err_failed_reply": "Failed to reply to the post.",
+      "err_network": "Network error. ",
+      "err_problems_list": "Failed to load problems list.",
+      "err_failed_create": "Failed to create post",
+      "err_failed_search": "Failed to search posts"
+    },
+    "detail": {
+      "by": "By",
+      "comments": "Comments",
+      "noComments": "(No real comments — this is mock data.)",
+      "notFound": "Post not found.",
+      "mockContent": "This is mock content for post {id}. Replace with real API data later.",
+      "solved": "Solved",
+      "closed": "Closed",
+      "closed_msg": "This post is closed. You cannot add new comments.",
+      "reply": {
+        "title": "Add a Comment",
+        "placeholder": "Write a comment...",
+        "submit": "Submit",
+        "cancel": "Cancel",
+        "no_comments": "This post has no comments yet. Be the first to comment!",
+        "replyto_comment": "Replying to comment",
+        "post_reply": "Post Comment",
+        "start": "Start Discussion"
+      }
+    },
+    "card": {
+      "likes": "{count} likes",
+      "comments": "{count} comments",
+      "views": "{count} views"
+    },
+    "problems": {
+      "title": "Problems",
+      "selectProblem": "Select a problem to view discussions",
+      "discussionCount": "{count} discussions",
+      "noDiscussions": "No discussions yet",
+      "backToProblems": "Back to Problems",
+      "backToDiscussion": "Back to Discussion"
+    },
+    "components": {
+      "pin": {
+        "action_Is_Pinned": "Unpin",
+        "action_Not_Pinned": "Pin Post",
+        "status_Is_Pinned": "Post unpinned",
+        "status_Not_Pinned": "Post pinned",
+        "info_Is_Pinned": "Are you sure you want to unpin this post?",
+        "info_Not_Pinned": "Are you sure you want to pin this post?"
+      },
+      "solve": {
+        "action_Is_Solved": "Mark as Unsolved",
+        "status_Is_Solved": "Marked as Unsolved",
+        "info_Is_Solved": "Are you sure you want to mark this post as unsolved?",
+        "action_Not_Solved": "Mark as Solved",
+        "status_Not_Solved": "Marked as Solved",
+        "info_Not_Solved": "Are you sure you want to mark this post as solved?"
+      },
+      "post_actions": {
+        "close_title": "Close Post",
+        "close_info": "After closing, you will no longer be able to reply to this post. Are you sure you want to close it?",
+        "close_status": "Post closed",
+        "delete_title": "Delete Post",
+        "delete_info": "After deletion, the post cannot be recovered. Are you sure you want to delete it?",
+        "delete_status": "Post deleted"
+      },
+      "is_pinned": "Pin",
+      "not_pinned": "Unpin",
+      "close": "Close Discussion",
+      "delete": "Delete Post",
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "reply": {
+        "reply": "Reply",
+        "edit": "Edit",
+        "delete": "Delete",
+        "delete_reply": "Delete Reply",
+        "delete_reply_info": "Are you sure you want to delete this reply? This action cannot be undone.",
+        "delete_confirm": "Confirm Delete"
+      }
+    }
+  },
   "components": {
     "ann": {
       "form": {
@@ -389,6 +517,7 @@
       "hw": "Homeworks",
       "problems": "Problems",
       "submissions": "Submissions",
+      "discussion": "Discussion",
       "members": "Members"
     },
     "systemAnn": {
@@ -442,6 +571,7 @@
       "student": "Student",
       "teacher": "Teacher",
       "admin": "Admin",
+      "ta": "TA",
       "select-role": "Select Role",
       "row-count": "Row Count: {n}",
       "search-name": "Search Name"

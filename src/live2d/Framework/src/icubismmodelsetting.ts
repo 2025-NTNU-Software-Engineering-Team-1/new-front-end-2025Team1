@@ -9,9 +9,9 @@ import { CubismIdHandle } from "./id/cubismid";
 import { csmMap } from "./type/csmmap";
 
 /**
- * モデル設定情報を取り扱う関数を宣言した純粋仮想クラス。
+ * モデル設定情� �を取り扱う関数を宣言した純粋仮想クラス。
  *
- * このクラスを継承することで、モデル設定情報を取り扱うクラスになる。
+ * このクラスを継承することで、モデル設定情� �を取り扱うクラスになる。
  */
 export abstract class ICubismModelSetting {
   /**
@@ -151,10 +151,10 @@ export abstract class ICubismModelSetting {
   public abstract getUserDataFile(): string;
 
   /**
-   * レイアウト情報を取得する
+   * レイアウト情� �を取得する
    * @param outLayoutMap csmMapクラスのインスタンス
-   * @return true レイアウト情報が存在する
-   * @return false レイアウト情報が存在しない
+   * @return true レイアウト情� �が存在する
+   * @return false レイアウト情� �が存在しない
    */
   public abstract getLayoutMap(outLayoutMap: csmMap<string, number>): boolean;
 

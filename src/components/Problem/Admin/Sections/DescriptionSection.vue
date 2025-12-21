@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { inject, Ref } from "vue";
 
-defineProps<{ v$: any }>();
+defineProps<{ v$: unknown }>();
 defineEmits<{
   (e: "update", key: keyof ProblemForm, value: ProblemForm[typeof key]): void;
 }>();
@@ -62,10 +62,10 @@ const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
   </div>
 
   <div class="col-span-2 mt-2 flex w-full">
-    <div class="mr-2 rounded border border-error p-2" v-show="v$.description.sampleInput.$invalid">
+    <div class="border-error mr-2 rounded border p-2" v-show="v$.description.sampleInput.$invalid">
       Input {{ v$.description.sampleInput.$silentErrors[0]?.$message }}
     </div>
-    <div class="rounded border border-error p-2" v-show="v$.description.sampleOutput.$invalid">
+    <div class="border-error rounded border p-2" v-show="v$.description.sampleOutput.$invalid">
       Output {{ v$.description.sampleOutput.$silentErrors[0]?.$message }}
     </div>
   </div>

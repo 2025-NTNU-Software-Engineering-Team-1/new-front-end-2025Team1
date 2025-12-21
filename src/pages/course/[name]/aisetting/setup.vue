@@ -3,7 +3,6 @@ import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { useTitle } from "@vueuse/core";
 import api from "@/models/api";
-import { useI18n } from "vue-i18n";
 import { useSession } from "@/stores/session";
 
 // ==========================================
@@ -14,15 +13,15 @@ const DEBUG_MODE = 1;
 
 // --- Logger Utility ---
 const logger = {
-  log: (label: string, data?: any) => {
+  log: (label: string, data?: unknown) => {
     if (!DEBUG_MODE) return;
     console.log(`%c[Log] ${label}`, "color: #3b82f6; font-weight: bold;", data || "");
   },
-  success: (label: string, data?: any) => {
+  success: (label: string, data?: unknown) => {
     if (!DEBUG_MODE) return;
     console.log(`%c[Success] ${label}`, "color: #10b981; font-weight: bold;", data || "");
   },
-  error: (label: string, error?: any) => {
+  error: (label: string, error?: unknown) => {
     if (!DEBUG_MODE) return;
     console.log(`%c[Error] ${label}`, "color: #ef4444; font-weight: bold;", error || "");
   },
@@ -41,7 +40,7 @@ const logger = {
 };
 
 const route = useRoute();
-const { t } = useI18n();
+// const { t } = useI18n();
 useTitle(`AI Setting - ${route.params.name} | Normal OJ`);
 
 const isLoading = ref(false);
@@ -65,7 +64,7 @@ const newKey = ref({
   maskedDisplay: "",
 });
 
-function parseApiResponse(res: any) {
+function parseApiResponse(res: unknown) {
   const data = res?.data;
   const rawStatus = data?.status || res?.status;
   const statusStr = String(rawStatus || "").toLowerCase();
@@ -86,7 +85,7 @@ async function fetchKeys() {
     logger.log(`Found ${rawKeys.length} keys`);
 
     // clean
-    apiKeys.value = rawKeys.map((k: any, index: number) => {
+    apiKeys.value = rawKeys.map((k: unknown, index: number) => {
       const missing: string[] = [];
       if (!k.id) missing.push("id");
       if (!k.key_name) missing.push("key_name");
@@ -105,7 +104,7 @@ async function fetchKeys() {
         created_by: k.created_by || "Unknown",
       };
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     logger.error("Fetch Failed", err);
     errorMsg.value = err?.response?.data?.message ?? "Failed to load keys.";
   } finally {
@@ -157,7 +156,7 @@ async function addKey() {
       logger.error("Add Failed", message);
       errorMsg.value = message;
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     logger.error("Add Exception", err);
     errorMsg.value = err?.response?.data?.message ?? "Failed to add key.";
   } finally {
@@ -193,7 +192,7 @@ async function updateKey(key: ApiKey) {
       errorMsg.value = message || "Failed to update key.";
       await fetchKeys();
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     logger.error("Update Exception", err);
     errorMsg.value = err?.response?.data?.message ?? "Failed to update key.";
     await fetchKeys();
@@ -231,7 +230,7 @@ async function deleteKey(keyId: string) {
       logger.error("Delete Failed", message);
       errorMsg.value = message || "Failed to delete key.";
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     logger.error("Delete Exception", err);
     errorMsg.value = err?.response?.data?.message ?? "Failed to delete key.";
   } finally {
@@ -260,7 +259,7 @@ onMounted(fetchKeys);
           </div>
         </div>
 
-        <div class="mb-8 rounded-lg border border-base-300 p-4">
+        <div class="border-base-300 mb-8 rounded-lg border p-4">
           <h3 class="mb-2 text-lg font-semibold">Add New API Key</h3>
 
           <div class="grid gap-3 md:grid-cols-3">
@@ -290,12 +289,12 @@ onMounted(fetchKeys);
             </button>
           </div>
 
-          <div v-if="newKey.maskedDisplay" class="mt-3 font-mono text-sm text-success">
+          <div v-if="newKey.maskedDisplay" class="text-success mt-3 font-mono text-sm">
             Masked ID: {{ newKey.maskedDisplay }}
           </div>
         </div>
 
-        <div class="rounded-lg border border-base-300 p-4">
+        <div class="border-base-300 rounded-lg border p-4">
           <h3 class="mb-4 text-lg font-semibold">Existing Keys</h3>
 
           <div v-if="isLoading && apiKeys.length === 0" class="py-4 text-center opacity-60">
@@ -308,7 +307,7 @@ onMounted(fetchKeys);
             <div
               v-for="k in apiKeys"
               :key="k.id"
-              class="grid grid-cols-1 gap-2 rounded-lg border border-base-200 bg-base-100 p-3 md:grid-cols-7 md:items-center"
+              class="border-base-200 bg-base-100 grid grid-cols-1 gap-2 rounded-lg border p-3 md:grid-cols-7 md:items-center"
             >
               <div class="col-span-2">
                 <label class="text-xs opacity-70">Name</label>

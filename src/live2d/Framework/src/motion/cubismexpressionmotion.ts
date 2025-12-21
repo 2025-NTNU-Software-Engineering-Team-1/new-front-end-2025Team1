@@ -31,7 +31,7 @@ const DefaultFadeTime = 1.0;
  * 表情のモーションクラス。
  */
 export class CubismExpressionMotion extends ACubismMotion {
-  static readonly DefaultAdditiveValue = 0.0; // 加算適用の初期値
+  static readonly DefaultAdditiveValue = 0.0; // � 算適用の初期値
   static readonly DefaultMultiplyValue = 1.0; // 乗算適用の初期値
 
   /**
@@ -76,7 +76,7 @@ export class CubismExpressionMotion extends ACubismMotion {
           break;
         }
         default:
-          // 仕様にない値を設定した時はすでに加算モードになっている
+          // 仕様にない値を設定した時はすでに� 算モードになっている
           break;
       }
     }
@@ -224,7 +224,7 @@ export class CubismExpressionMotion extends ACubismMotion {
    * @returns 表情のフェードのウェイト値
    *
    * @deprecated CubismExpressionMotion.fadeWeightが削除予定のため非推奨。
-   * CubismExpressionMotionManager.getFadeWeight(index: number): number を使用してください。
+   * CubismExpressionMotionManager.getFadeWeight(index: number): number を使用してく� さい。
    * @see CubismExpressionMotionManager#getFadeWeight(index: number)
    */
   public getFadeWeight() {
@@ -267,11 +267,11 @@ export class CubismExpressionMotion extends ACubismMotion {
       } else if (param.getValueByString(ExpressionKeyBlend).getString() == BlendValueOverwrite) {
         blendType = ExpressionBlendType.Overwrite;
       } else {
-        // その他 仕様にない値を設定した時は加算モードにすることで復旧
+        // その他 仕様にない値を設定した時は� 算モードにすることで復旧
         blendType = ExpressionBlendType.Additive;
       }
 
-      // 設定オブジェクトを作成してリストに追加する
+      // 設定オブジェクトを作成してリストに追� する
       const item: ExpressionParameter = new ExpressionParameter();
 
       item.parameterId = parameterId;
@@ -307,12 +307,12 @@ export class CubismExpressionMotion extends ACubismMotion {
     this._fadeWeight = 0.0;
   }
 
-  private _parameters: csmVector<ExpressionParameter>; // 表情のパラメータ情報リスト
+  private _parameters: csmVector<ExpressionParameter>; // 表情のパラメータ情� �リスト
 
   /**
    * 表情の現在のウェイト
    *
-   * @deprecated 不具合を引き起こす要因となるため非推奨。
+   * @deprecated 不具合を引き起こす要� となるため非推奨。
    */
   private _fadeWeight: number;
 }
@@ -321,13 +321,13 @@ export class CubismExpressionMotion extends ACubismMotion {
  * 表情パラメータ値の計算方式
  */
 export enum ExpressionBlendType {
-  Additive = 0, // 加算
+  Additive = 0, // � 算
   Multiply = 1, // 乗算
   Overwrite = 2, // 上書き
 }
 
 /**
- * 表情のパラメータ情報
+ * 表情のパラメータ情� �
  */
 export class ExpressionParameter {
   parameterId: CubismIdHandle; // パラメータID

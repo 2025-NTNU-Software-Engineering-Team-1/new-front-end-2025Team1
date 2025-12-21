@@ -233,6 +233,162 @@
       "unknown-error-occurred": "發生未知錯誤 :("
     }
   },
+  "profile": {
+    "title": "個人資料",
+    "rules": {
+      "confirmPassword": {
+        "sameAsRef": "密碼不符合。"
+      }
+    },
+    "username": "帳號",
+    "dispname": "顯示名稱",
+    "email": "電子郵件",
+    "role": "角色",
+    "signOut": "登出",
+    "pw": {
+      "change": "變更密碼",
+      "success": "密碼已成功變更",
+      "new": "新密碼",
+      "confirm": "確認新密碼",
+      "current": "舊密碼",
+      "placeholder": {
+        "new": "新密碼",
+        "again": "再輸入一次新密碼",
+        "current": "舊密碼"
+      },
+      "submit": "送出"
+    },
+    "wrongPassword": "密碼錯誤",
+    "operationFailed": "操作失敗，請稍後再重試"
+  },
+  "discussion": {
+    "placeholder": "搜尋討論...",
+    "post": "發文",
+    "hot": "熱門",
+    "new": "最新",
+    "solved": "已解決",
+    "closed": "已關閉",
+    "noPosts": "尚無貼文",
+    "noSearchResults": "找不到符合搜尋條件的貼文",
+    "create": {
+      "title": "建立貼文",
+      "problem": "題目",
+      "problemPlaceholder": "選擇題目",
+      "category": "分類",
+      "generalDiscussion": "一般討論",
+      "question": "問題/求助",
+      "solutionSharing": "解題分享",
+      "bugReport": "錯誤回報",
+      "suggestions": "建議",
+      "language": "Language",
+      "none": "none",
+      "titleLabel": "標題",
+      "titlePlaceholder": "輸入標題",
+      "contentLabel": "內容",
+      "contentPlaceholder": "在此輸入貼文內容...",
+      "contentHint": "支援 Markdown 語法",
+      "contentIncluded": "包含程式碼",
+      "submit": "發表",
+      "cancel": "取消",
+      "submit_post_err": {
+        "title_required": "標題不能為空。",
+        "content_required": "內容不能為空。",
+        "problem_required": "請選擇題目。",
+        "contentallowed": "此題目不允許分享程式碼，請刪除程式碼內容後再發布",
+        "submit_processing": "正在發布貼文，請稍後..."
+      }
+    },
+    "contentallowed": {
+      "role": "角色：{userRole} | 截止時間前學生無法分享程式碼",
+      "allowed": "此題目允許分享程式碼",
+      "not_allowed": "此題目不允許分享程式碼",
+      "deadline": "截止時間：{deadline}"
+    },
+    "err": {
+      "err": "請嘗試重新載入",
+      "err_unknown": "未知錯誤",
+      "err_failed_load": "載入失敗",
+      "err_failed_find": "無法找到該貼文。",
+      "err_failed_reply": "回覆失敗",
+      "err_network": "網路錯誤。 ",
+      "err_problems_list": "無法載入題目列表。",
+      "err_failed_create": "發布失敗",
+      "err_failed_search": "搜尋失敗"
+    },
+    "detail": {
+      "by": "由",
+      "comments": "留言",
+      "noComments": "（無真實留言 — 這是模擬資料）",
+      "notFound": "找不到貼文。",
+      "mockContent": "這是貼文 {id} 的模擬內容。稍後將替換為真實 API 資料。",
+      "solved": "已解決",
+      "closed": "已關閉",
+      "closed_msg": "此貼文已關閉，無法新增留言。",
+      "reply": {
+        "title": "新增留言",
+        "placeholder": "輸入你的留言...",
+        "submit": "送出",
+        "cancel": "取消",
+        "no_comments": "此貼文尚無留言，成為第一個留言的人吧！",
+        "replyto_comment": "回覆留言",
+        "post_reply": "發表回覆",
+        "start": "開始討論"
+      }
+    },
+    "card": {
+      "likes": "{count} 個讚",
+      "comments": "{count} 則留言",
+      "views": "{count} 次觀看"
+    },
+    "problems": {
+      "title": "題目",
+      "selectProblem": "選擇題目以查看討論",
+      "discussionCount": "{count} 則討論",
+      "noDiscussions": "尚無討論",
+      "backToProblems": "返回題目列表",
+      "backToDiscussion": "返回討論區"
+    },
+    "components": {
+      "pin": {
+        "action_Is_Pinned": "取消置頂",
+        "status_Is_Pinned": "已取消置頂",
+        "info_Is_Pinned": "確定要取消置頂此貼文嗎？",
+        "action_Not_Pinned": "置頂貼文",
+        "status_Not_Pinned": "已置頂",
+        "info_Not_Pinned": "確定要置頂此貼文嗎？"
+      },
+      "solve": {
+        "action_Is_Solved": "標記為未解決",
+        "status_Is_Solved": "已標記為未解決",
+        "info_Is_Solved": "確定要將此貼文標記為未解決嗎？",
+        "action_Not_Solved": "標記為已解決",
+        "status_Not_Solved": "已標記為已解決",
+        "info_Not_Solved": "確定要將此貼文標記為已解決嗎？"
+      },
+      "post_actions": {
+        "close_title": "關閉貼文",
+        "close_info": "關閉後將無法繼續回覆此貼文，確定要關閉嗎？",
+        "close_status": "貼文已關閉",
+        "delete_title": "刪除貼文",
+        "delete_info": "刪除後無法復原，確定要刪除此貼文嗎？",
+        "delete_status": "貼文已刪除"
+      },
+      "is_pinned": "置頂",
+      "not_pinned": "取消置頂",
+      "close": "關閉討論",
+      "delete": "刪除貼文",
+      "confirm": "確認",
+      "cancel": "取消",
+      "reply": {
+        "reply": "回覆",
+        "edit": "編輯",
+        "delete": "刪除",
+        "delete_reply": "刪除回覆",
+        "delete_reply_info": "刪除後無法復原，確定要刪除此回覆嗎？",
+        "delete_confirm": "確認刪除"
+      }
+    }
+  },
   "ann": {
     "id": {
       "back": "返回"
@@ -367,6 +523,7 @@
       "hw": "作業",
       "problems": "題目",
       "submissions": "繳交狀態",
+      "discussion": "討論區",
       "members": "成員"
     },
     "systemAnn": {
@@ -420,6 +577,7 @@
       "student": "學生",
       "teacher": "教師",
       "admin": "管理員",
+      "ta": "助教",
       "select-role": "選擇角色",
       "row-count": "資料筆數：{n}",
       "search-name": "搜尋名稱"

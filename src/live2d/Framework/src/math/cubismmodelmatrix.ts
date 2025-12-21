@@ -154,9 +154,9 @@ export class CubismModelMatrix extends CubismMatrix44 {
   }
 
   /**
-   * レイアウト情報から位置を設定
+   * レイアウト情� �から位置を設定
    *
-   * @param layout レイアウト情報
+   * @param layout レイアウト情� �
    */
   public setupFromLayout(layout: csmMap<string, number>): void {
     const keyWidth = "width";

@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { watchEffect, computed } from "vue"; // 1. 匯入 computed
-import { useRoute } from "vue-router"; // 2. 匯入 useRoute
+import { watchEffect } from "vue"; // 1. 匯入 computed
+//import { useRoute } from "vue-router"; // 2. 匯入 useRoute
 import { useGlobal } from "@/stores/global";
 import { TransitionRoot } from "@headlessui/vue";
 import { useI18n } from "vue-i18n";
 import dayjs from "dayjs";
 
 const global = useGlobal();
-const route = useRoute(); // 4. 取得當前路由
+//const route = useRoute(); // 4. 取得當前路由
 
 const { locale } = useI18n();
 watchEffect(() => {
@@ -46,7 +46,7 @@ watchEffect(() => {
       leave-from="opacity-100"
       leave-to="opacity-0"
     >
-      <div class="absolute bottom-8 right-4">
+      <div class="absolute right-4 bottom-8">
         <div class="alert alert-error shadow-lg">
           <div>
             <i-uil-times-circle />

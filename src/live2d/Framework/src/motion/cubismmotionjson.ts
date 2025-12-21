@@ -62,7 +62,7 @@ export class CubismMotionJson {
   }
 
   /**
-   * モーションのループ情報の取得
+   * モーションのループ情� �の取得
    * @return true ループする
    * @return false ループしない
    */
@@ -73,7 +73,7 @@ export class CubismMotionJson {
   /**
    *  motion3.jsonファイルの整合性チェック
    *
-   * @return 正常なファイルの場合はtrueを返す。
+   * @return 正常なファイルの� �合はtrueを返す。
    */
   hasConsistency(): boolean {
     let result = true;
@@ -156,8 +156,8 @@ export class CubismMotionJson {
   }
 
   /**
-   * モーションのフレームレートの取得
-   * @return フレームレート[FPS]
+   * モーションのフレー� レートの取得
+   * @return フレー� レート[FPS]
    */
   public getMotionFps(): number {
     return this._json.getRoot().getValueByString(Meta).getValueByString(Fps).toFloat();

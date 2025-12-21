@@ -18,19 +18,19 @@ const DEBUG_MODE = 1;
 // Logger Utility
 // ==========================================
 const logger = {
-  log: (label: string, data?: any) => {
+  log: (label: string, data?: unknown) => {
     if (!DEBUG_MODE) return;
     console.log(`%c[Log] ${label}`, "color: #3b82f6; font-weight: bold;", data || "");
   },
-  success: (label: string, data?: any) => {
+  success: (label: string, data?: unknown) => {
     if (!DEBUG_MODE) return;
     console.log(`%c[Success] ${label}`, "color: #10b981; font-weight: bold;", data || "");
   },
-  error: (label: string, error?: any) => {
+  error: (label: string, error?: unknown) => {
     if (!DEBUG_MODE) return;
     console.log(`%c[Error] ${label}`, "color: #ef4444; font-weight: bold;", error || "");
   },
-  warn: (label: string, data?: any) => {
+  warn: (label: string, data?: unknown) => {
     if (!DEBUG_MODE) return;
     console.log(`%c[Warn] ${label}`, "color: #f59e0b; font-weight: bold;", data || "");
   },

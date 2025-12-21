@@ -73,8 +73,8 @@ export class LAppSprite {
 
   /**
    * 描画する。
-   * @param programId シェーダープログラム
-   * @param canvas 描画するキャンパス情報
+   * @param programId シェーダープログラ�
+   * @param canvas 描画するキャンパス情� �
    */
   public render(programId: WebGLProgram): void {
     if (this._texture == null) {
@@ -107,12 +107,12 @@ export class LAppSprite {
         this._uvBuffer = gl.createBuffer();
       }
 
-      // 頂点バッファ、座標初期化
+      // � �点バッファ、座標初期化
       {
         const maxWidth = this._subdelegate.getCanvas().width;
         const maxHeight = this._subdelegate.getCanvas().height;
 
-        // 頂点データ
+        // � �点データ
         this._positionArray = new Float32Array([
           (this._rect.right - maxWidth * 0.5) / (maxWidth * 0.5),
           (this._rect.up - maxHeight * 0.5) / (maxHeight * 0.5),
@@ -124,11 +124,11 @@ export class LAppSprite {
           (this._rect.down - maxHeight * 0.5) / (maxHeight * 0.5),
         ]);
 
-        // 頂点バッファを作成
+        // � �点バッファを作成
         this._vertexBuffer = gl.createBuffer();
       }
 
-      // 頂点インデックスバッファ、初期化
+      // � �点インデックスバッファ、初期化
       {
         // インデックスデータ
         this._indexArray = new Uint16Array([0, 1, 2, 3, 2, 0]);
@@ -147,14 +147,14 @@ export class LAppSprite {
     // attribute属性を登録
     gl.vertexAttribPointer(this._uvLocation, 2, gl.FLOAT, false, 0, 0);
 
-    // 頂点座標を登録
+    // � �点座標を登録
     gl.bindBuffer(gl.ARRAY_BUFFER, this._vertexBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, this._positionArray, gl.STATIC_DRAW);
 
     // attribute属性を登録
     gl.vertexAttribPointer(this._positionLocation, 2, gl.FLOAT, false, 0, 0);
 
-    // 頂点インデックスを作成
+    // � �点インデックスを作成
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._indexBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this._indexArray, gl.DYNAMIC_DRAW);
 
@@ -189,9 +189,9 @@ export class LAppSprite {
   }
 
   _texture: WebGLTexture; // テクスチャ
-  _vertexBuffer: WebGLBuffer; // 頂点バッファ
-  _uvBuffer: WebGLBuffer; // uv頂点バッファ
-  _indexBuffer: WebGLBuffer; // 頂点インデックスバッファ
+  _vertexBuffer: WebGLBuffer; // � �点バッファ
+  _uvBuffer: WebGLBuffer; // uv� �点バッファ
+  _indexBuffer: WebGLBuffer; // � �点インデックスバッファ
   _rect: Rect; // 矩形
 
   _positionLocation: number;

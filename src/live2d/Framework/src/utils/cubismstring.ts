@@ -12,7 +12,7 @@ export class CubismString {
    * @param ...args   書式指定文字列に渡す文字列
    * @return 書式を適用した文字列
    */
-  public static getFormatedString(format: string, ...args: any[]): string {
+  public static getFormatedString(format: string, ...args: unknown[]): string {
     const ret: string = format;
     return ret.replace(
       /\{(\d+)\}/g,
@@ -49,7 +49,7 @@ export class CubismString {
    * @param string 文字列
    * @param length 文字列の長さ
    * @param position 解析したい文字の位置
-   * @param outEndPos 一文字も読み込まなかった場合はエラー値(-1)が入る
+   * @param outEndPos 一文字も読み込まなかった� �合はエラー値(-1)が入る
    * @return 解析結果の数値
    */
   public static stringToFloat(string: string, length: number, position: number, outEndPos: number[]): number {
@@ -58,7 +58,7 @@ export class CubismString {
     let period = false;
     let v1 = 0;
 
-    //負号の確認
+    //� 号の確認
     let c: number = parseInt(string[i]);
     if (c < 0) {
       minus = true;
@@ -95,7 +95,7 @@ export class CubismString {
     }
 
     if (i == position) {
-      //一文字も読み込まなかった場合
+      //一文字も読み込まなかった� �合
       outEndPos[0] = -1; //エラー値が入るので呼び出し元で適切な処理を行う
       return 0;
     }

@@ -16,7 +16,7 @@ const session = useSession();
 </script>
 
 <template>
-  <table class="table table-compact mt-2 w-full">
+  <table class="table-compact mt-2 table w-full">
     <thead>
       <tr>
         <th>{{ t("components.hw.card.problems.id") }}</th>

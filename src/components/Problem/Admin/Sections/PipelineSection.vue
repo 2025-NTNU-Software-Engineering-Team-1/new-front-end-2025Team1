@@ -21,19 +21,19 @@ const DEBUG_MODE = 1;
 // Logger Utility
 // ==========================================
 const logger = {
-  log: (label: string, data?: any) => {
+  log: (label: string, data?: unknown) => {
     if (!DEBUG_MODE) return;
     console.log(`%c[Log] ${label}`, "color: #3b82f6; font-weight: bold;", data || "");
   },
-  success: (label: string, data?: any) => {
+  success: (label: string, data?: unknown) => {
     if (!DEBUG_MODE) return;
     console.log(`%c[Success] ${label}`, "color: #10b981; font-weight: bold;", data || "");
   },
-  error: (label: string, error?: any) => {
+  error: (label: string, error?: unknown) => {
     if (!DEBUG_MODE) return;
     console.log(`%c[Error] ${label}`, "color: #ef4444; font-weight: bold;", error || "");
   },
-  warn: (label: string, data?: any) => {
+  warn: (label: string, data?: unknown) => {
     if (!DEBUG_MODE) return;
     console.log(`%c[Warn] ${label}`, "color: #f59e0b; font-weight: bold;", data || "");
   },
@@ -51,6 +51,7 @@ const logger = {
 // Injection & Setup
 // ==========================================
 const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const v$ = inject<any>("v$"); // Inject validation object
 const route = useRoute();
 
@@ -69,8 +70,12 @@ if (!problem || !problem.value) {
 function ensurePipeline() {
   if (!problem.value.pipeline) {
     problem.value.pipeline = {
-      allowRead: Boolean(problem.value.config?.allowRead ?? (problem.value.config as any)?.fopen ?? false),
-      allowWrite: Boolean(problem.value.config?.allowWrite ?? (problem.value.config as any)?.fwrite ?? false),
+      allowRead: Boolean(
+        problem.value.config?.allowRead ?? (problem.value.config as unknown)?.fopen ?? false,
+      ),
+      allowWrite: Boolean(
+        problem.value.config?.allowWrite ?? (problem.value.config as unknown)?.fwrite ?? false,
+      ),
       executionMode: "general",
       customChecker: false,
       teacherFirst: false,
@@ -87,12 +92,12 @@ function ensurePipeline() {
     // Backfill missing file permission settings
     if (problem.value.pipeline.allowRead === undefined || problem.value.pipeline.allowRead === null) {
       problem.value.pipeline.allowRead = Boolean(
-        problem.value.config?.allowRead ?? (problem.value.config as any)?.fopen ?? false,
+        problem.value.config?.allowRead ?? (problem.value.config as unknown)?.fopen ?? false,
       );
     }
     if (problem.value.pipeline.allowWrite === undefined || problem.value.pipeline.allowWrite === null) {
       problem.value.pipeline.allowWrite = Boolean(
-        problem.value.config?.allowWrite ?? (problem.value.config as any)?.fwrite ?? false,
+        problem.value.config?.allowWrite ?? (problem.value.config as unknown)?.fwrite ?? false,
       );
     }
 
@@ -109,9 +114,9 @@ function ensurePipeline() {
     } else {
       // Ensure deep structure for whitelist/blacklist
       ["whitelist", "blacklist"].forEach((key) => {
-        if (!(libs as any)[key]) (libs as any)[key] = {};
+        if (!(libs as unknown)[key]) (libs as unknown)[key] = {};
         ["syntax", "imports", "headers", "functions"].forEach((f) => {
-          if (!(libs as any)[key][f]) (libs as any)[key][f] = [];
+          if (!(libs as unknown)[key][f]) (libs as unknown)[key][f] = [];
         });
       });
     }
@@ -125,7 +130,7 @@ function ensurePipeline() {
 function initPipelineValues() {
   ensurePipeline();
   const pipe = problem.value.pipeline!;
-  const cfg = (problem.value.config as any) || {};
+  const cfg = (problem.value.config as unknown) || {};
 
   // Prioritize existing pipeline values, fallback to config (legacy keys: fopen, fwrite)
   const backendAllowRead = pipe.allowRead ?? cfg.allowRead ?? cfg.allow_read ?? cfg.fopen ?? false;
@@ -184,15 +189,15 @@ const allowWriteToggle = computed({
   },
 });
 
-const resourceDataEnabled = computed({
-  get: () => problem.value.config.resourceData,
-  set: (val: boolean) => {
-    problem.value.config.resourceData = val;
-  },
-});
+// const resourceDataEnabled = computed({
+//   get: () => problem.value.config.resourceData,
+//   set: (val: boolean) => {
+//     problem.value.config.resourceData = val;
+//   },
+// });
 
 // Computed properties for UI warnings
-const allowWriteDisabled = computed(() => !allowReadToggle.value);
+// const allowWriteDisabled = computed(() => !allowReadToggle.value);
 const allowWriteWarning = computed(() => (!allowReadToggle.value ? "Allow Write requires Allow Read." : ""));
 // Show red if forcibly closed, otherwise gray
 const allowWriteWarningError = computed(() => allowWriteForceClosed.value);
@@ -217,7 +222,7 @@ async function fetchStaticAnalysisOptions() {
     const resp = await api.Problem.getStaticAnalysisOptions();
     // logger.log("Raw Response", resp);
 
-    const libs = (resp && resp.data && (resp.data as any).librarySymbols) || {};
+    const libs = (resp && resp.data && (resp.data as unknown).librarySymbols) || {};
     imports = Array.isArray(libs.imports) ? libs.imports : [];
     headers = Array.isArray(libs.headers) ? libs.headers : [];
     functions = Array.isArray(libs.functions) ? libs.functions : [];
@@ -325,6 +330,7 @@ function teacherAllowedExtensions(): string[] {
   return getAllowedFileExtensions();
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function isTeacherFileAllowed(file: File | null): boolean {
   if (!file) return false;
   const allowed = teacherAllowedExtensions().map((ext) => ext.toLowerCase());
@@ -334,7 +340,7 @@ function isTeacherFileAllowed(file: File | null): boolean {
 
 // Asset Helper
 const assetPaths = computed<Record<string, string>>(
-  () => ((problem.value.config as any)?.assetPaths as Record<string, string>) || {},
+  () => ((problem.value.config as unknown)?.assetPaths as Record<string, string>) || {},
 );
 
 const hasAsset = (key: string) => Boolean(assetPaths.value && assetPaths.value[key]);
@@ -342,7 +348,7 @@ const assetDownloadUrl = (key: string) =>
   assetPaths.value && assetPaths.value[key] ? `/api/problem/${route.params.id}/asset/${key}/download` : null;
 
 // Ensure pipeline object exists at script end (safety check)
-problem.value.pipeline = problem.value.pipeline || ({} as any);
+problem.value.pipeline = problem.value.pipeline || ({} as unknown);
 
 // ==========================================
 // Lifecycle Hooks
@@ -435,7 +441,9 @@ onMounted(async () => {
               class="btn btn-xs"
               :class="
                 problem.pipeline!.staticAnalysis!.libraryRestrictions![syntaxMode]!.syntax.includes(opt)
-                  ? (syntaxMode === 'whitelist' ? 'btn-info' : 'btn-error')
+                  ? syntaxMode === 'whitelist'
+                    ? 'btn-info'
+                    : 'btn-error'
                   : ''
               "
               @click="
@@ -463,7 +471,7 @@ onMounted(async () => {
             class="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-gray-900/80 backdrop-blur-sm"
           >
             <div class="px-4 text-center">
-              <i-uil-lock-alt class="mb-2 text-4xl text-warning" />
+              <i-uil-lock-alt class="text-warning mb-2 text-4xl" />
               <p class="text-sm font-medium text-gray-300">Imports Restrictions Disabled</p>
               <p class="mt-1 text-xs text-gray-400">Python language must be enabled to use this feature</p>
             </div>
@@ -505,7 +513,9 @@ onMounted(async () => {
               class="btn btn-xs"
               :class="
                 problem.pipeline!.staticAnalysis!.libraryRestrictions![importMode]!.imports.includes(opt)
-                  ? (importMode === 'whitelist' ? 'btn-info' : 'btn-error')
+                  ? importMode === 'whitelist'
+                    ? 'btn-info'
+                    : 'btn-error'
                   : ''
               "
               @click="
@@ -533,7 +543,7 @@ onMounted(async () => {
             class="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-gray-900/80 backdrop-blur-sm"
           >
             <div class="px-4 text-center">
-              <i-uil-lock-alt class="mb-2 text-4xl text-warning" />
+              <i-uil-lock-alt class="text-warning mb-2 text-4xl" />
               <p class="text-sm font-medium text-gray-300">Headers Restrictions Disabled</p>
               <p class="mt-1 text-xs text-gray-400">C or C++ language must be enabled to use this feature</p>
             </div>
@@ -575,7 +585,9 @@ onMounted(async () => {
               class="btn btn-xs"
               :class="
                 problem.pipeline!.staticAnalysis!.libraryRestrictions![headerMode]!.headers.includes(opt)
-                  ? (headerMode === 'whitelist' ? 'btn-info' : 'btn-error')
+                  ? headerMode === 'whitelist'
+                    ? 'btn-info'
+                    : 'btn-error'
                   : ''
               "
               @click="
@@ -631,7 +643,9 @@ onMounted(async () => {
               class="btn btn-xs"
               :class="
                 problem.pipeline!.staticAnalysis!.libraryRestrictions![functionMode]!.functions.includes(opt)
-                  ? (functionMode === 'whitelist' ? 'btn-info' : 'btn-error')
+                  ? functionMode === 'whitelist'
+                    ? 'btn-info'
+                    : 'btn-error'
                   : ''
               "
               @click="
@@ -670,7 +684,7 @@ onMounted(async () => {
               type="radio"
               class="radio"
               value="general"
-              v-model="(problem.pipeline!.executionMode as any)"
+              v-model="problem.pipeline!.executionMode as unknown"
             />
             <span class="label-text">General</span>
           </label>
@@ -679,7 +693,7 @@ onMounted(async () => {
               type="radio"
               class="radio"
               value="functionOnly"
-              v-model="(problem.pipeline!.executionMode as any)"
+              v-model="problem.pipeline!.executionMode as unknown"
             />
             <span class="label-text">Function Only</span>
           </label>
@@ -688,7 +702,7 @@ onMounted(async () => {
               type="radio"
               class="radio"
               value="interactive"
-              v-model="(problem.pipeline!.executionMode as any)"
+              v-model="problem.pipeline!.executionMode as unknown"
             />
             <span class="label-text">Interactive</span>
           </label>
@@ -731,7 +745,7 @@ onMounted(async () => {
                 class="file-input file-input-bordered file-input-sm w-56"
                 :class="{ 'input-error': v$?.assets?.makefileZip?.$error }"
                 @change="
-                  (e: any) => {
+                  (e: unknown) => {
                     const file = e.target.files?.[0] || null;
                     problem.assets!.makefileZip = file;
                     v$?.assets?.makefileZip?.$touch();
@@ -790,7 +804,7 @@ onMounted(async () => {
                   class="file-input file-input-bordered file-input-sm w-56"
                   :class="{ 'input-error': v$?.assets?.teacherFile?.$error }"
                   @change="
-                    (e: any) => {
+                    (e: unknown) => {
                       const file = (e.target.files as FileList)?.[0] || null;
                       problem.assets!.teacherFile = file;
                       v$?.assets?.teacherFile?.$touch();
@@ -864,7 +878,7 @@ onMounted(async () => {
               :class="{ 'input-error': v$?.assets?.customCheckerPy?.$error }"
               :disabled="problem.pipeline!.executionMode === 'interactive'"
               @change="
-                (e: any) => {
+                (e: unknown) => {
                   const file = e.target.files?.[0] || null;
                   problem.assets!.customCheckerPy = file;
                   v$?.assets?.customCheckerPy?.$touch();
@@ -898,7 +912,11 @@ onMounted(async () => {
         <div class="flex items-center gap-4">
           <label class="label cursor-pointer justify-start gap-x-4">
             <span class="label-text">Custom Scoring Script</span>
-            <input type="checkbox" class="toggle" v-model="(problem as any).pipeline.scoringScript.custom" />
+            <input
+              type="checkbox"
+              class="toggle"
+              v-model="(problem as unknown).pipeline.scoringScript.custom"
+            />
           </label>
           <div class="flex items-center gap-2">
             <div v-if="hasAsset('scoring_script') || problem.assets?.scorePy" class="flex items-center gap-2">
@@ -917,7 +935,7 @@ onMounted(async () => {
           </div>
         </div>
 
-        <div v-if="(problem as any).pipeline.scoringScript?.custom" class="flex flex-col gap-x-2">
+        <div v-if="(problem as unknown).pipeline.scoringScript?.custom" class="flex flex-col gap-x-2">
           <div class="flex items-center gap-x-2">
             <span class="pl-1 text-sm opacity-80">Upload Custom_Scorer.py</span>
             <input
@@ -926,7 +944,7 @@ onMounted(async () => {
               class="file-input file-input-bordered file-input-sm w-56"
               :class="{ 'input-error': v$?.assets?.scorePy?.$error }"
               @change="
-                (e: any) => {
+                (e: unknown) => {
                   const file = e.target.files?.[0] || null;
                   problem.assets!.scorePy = file;
                   v$?.assets?.scorePy?.$touch();
@@ -961,7 +979,9 @@ onMounted(async () => {
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   border-radius: 12px;
   padding: 3px;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(255, 255, 255, 0.05);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.3),
+    0 1px 2px rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -974,14 +994,18 @@ onMounted(async () => {
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   border-radius: 9px;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4), 0 0 20px rgba(59, 130, 246, 0.2);
+  box-shadow:
+    0 2px 8px rgba(59, 130, 246, 0.4),
+    0 0 20px rgba(59, 130, 246, 0.2);
   z-index: 1;
 }
 
 .mode-switcher-slider.slider-blacklist {
   transform: translateX(calc(100% + 3px));
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4), 0 0 20px rgba(239, 68, 68, 0.2);
+  box-shadow:
+    0 2px 8px rgba(239, 68, 68, 0.4),
+    0 0 20px rgba(239, 68, 68, 0.2);
 }
 
 .mode-switcher-option {

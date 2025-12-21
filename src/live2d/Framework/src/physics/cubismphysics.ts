@@ -58,8 +58,8 @@ export class CubismPhysics {
   }
 
   /**
-   * インスタンスを破棄する
-   * @param physics 破棄するインスタンス
+   * インスタンスを� �棄する
+   * @param physics � �棄するインスタンス
    */
   public static delete(physics: CubismPhysics): void {
     if (physics != null) {
@@ -334,7 +334,7 @@ export class CubismPhysics {
           currentOutputs[i],
         );
 
-        // 値を反映
+        // 値を反�
         for (
           let offset: number = destinationParameterIndex, outParamIndex = 0;
           offset < this._parameterCaches.length;
@@ -368,10 +368,10 @@ export class CubismPhysics {
    * 解釈として振り子計算のタイミングと重み計算のタイミングがズレる。
    * As an interpretation, the pendulum calculation and weights are misaligned.
    *
-   * physics3.jsonにFPS情報が存在しない場合は常に前の振り子状態で設定される。
+   * physics3.jsonにFPS情� �が存在しない� �合は常に前の振り子状態で設定される。
    * If there is no FPS information in physics3.json, it is always set in the previous pendulum state.
    *
-   * この仕様は補間範囲を逸脱したことが原因の震えたような見た目を回避を目的にしている。
+   * この仕様は補間範囲を逸脱したことが原� の震えたような見た目を回避を目的にしている。
    * The purpose of this specification is to avoid the quivering appearance caused by deviations from the interpolation range.
    *
    * ------------ time -------------->
@@ -547,7 +547,7 @@ export class CubismPhysics {
             currentOutputs[i],
           );
 
-          // 値を反映
+          // 値を反�
           for (
             let offset: number = destinationParameterIndex, outParamIndex = 0;
             offset < this._parameterCaches.length;
@@ -602,7 +602,7 @@ export class CubismPhysics {
           currentOutputs[i],
         );
 
-        // 値を反映
+        // 値を反�
         for (
           let offset: number = destinationParameterIndex, outParamIndex = 0;
           offset < parameterValues.length;

@@ -14,17 +14,20 @@ export class CubismVector2 {
   /**
    * コンストラクタ
    */
-  public constructor(public x?: number, public y?: number) {
+  public constructor(
+    public x?: number,
+    public y?: number,
+  ) {
     this.x = x == undefined ? 0.0 : x;
 
     this.y = y == undefined ? 0.0 : y;
   }
 
   /**
-   * ベクトルの加算
+   * ベクトルの� 算
    *
-   * @param vector2 加算するベクトル値
-   * @return 加算結果 ベクトル値
+   * @param vector2 � 算するベクトル値
+   * @return � 算結果 ベクトル値
    */
   public add(vector2: CubismVector2): CubismVector2 {
     const ret: CubismVector2 = new CubismVector2(0.0, 0.0);

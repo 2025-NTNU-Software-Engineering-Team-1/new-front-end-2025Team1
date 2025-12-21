@@ -18,19 +18,19 @@ const DEBUG_MODE = 1;
 // Logger Utility
 // ==========================================
 const logger = {
-  log: (label: string, data?: any) => {
+  log: (label: string, data?: unknown) => {
     if (!DEBUG_MODE) return;
     console.log(`%c[Log] ${label}`, "color: #3b82f6; font-weight: bold;", data || "");
   },
-  success: (label: string, data?: any) => {
+  success: (label: string, data?: unknown) => {
     if (!DEBUG_MODE) return;
     console.log(`%c[Success] ${label}`, "color: #10b981; font-weight: bold;", data || "");
   },
-  error: (label: string, error?: any) => {
+  error: (label: string, error?: unknown) => {
     if (!DEBUG_MODE) return;
     console.log(`%c[Error] ${label}`, "color: #ef4444; font-weight: bold;", error || "");
   },
-  warn: (label: string, data?: any) => {
+  warn: (label: string, data?: unknown) => {
     if (!DEBUG_MODE) return;
     console.log(`%c[Warn] ${label}`, "color: #f59e0b; font-weight: bold;", data || "");
   },
@@ -83,7 +83,7 @@ defineExpose({ isLoading, errorMsg });
  * Dual-version compatible normalize function for library restrictions.
  * Handles both legacy array format and new object format.
  */
-function normalizeLibraryRestrictions(raw: any) {
+function normalizeLibraryRestrictions(raw: unknown) {
   const base = {
     enabled: false,
     whitelist: { syntax: [], imports: [], headers: [], functions: [] },
@@ -119,7 +119,7 @@ function normalizeLibraryRestrictions(raw: any) {
 
   // Legacy format: whitelist/blacklist are direct arrays (usually syntax)
   logger.warn("Legacy LibraryRestrictions format detected, normalizing...");
-  const asArr = (v: any) => (Array.isArray(v) ? v : []);
+  const asArr = (v: unknown) => (Array.isArray(v) ? v : []);
   return {
     enabled: !!raw.enabled,
     whitelist: {
@@ -150,10 +150,10 @@ function initFormStructure() {
   }
 
   // Ensure pipeline and staticAnalysis exist
-  if (!problem.value.pipeline) problem.value.pipeline = {} as any;
-  if (!problem.value.pipeline.staticAnalysis) problem.value.pipeline.staticAnalysis = {} as any;
+  if (!problem.value.pipeline) problem.value.pipeline = {} as unknown;
+  if (!problem.value.pipeline.staticAnalysis) problem.value.pipeline.staticAnalysis = {} as unknown;
 
-  const staticAnalysis = (problem.value.pipeline.staticAnalysis ??= {} as any);
+  const staticAnalysis = (problem.value.pipeline.staticAnalysis ??= {} as unknown);
   const libs = staticAnalysis.libraryRestrictions;
 
   // Normalize Library Restrictions
@@ -280,7 +280,7 @@ const rules = {
 
     teacherFile: {
       validExtension: helpers.withMessage(
-        (ctx) => {
+        () => {
           const exts = getAllowedFileExtensions(problem.value.allowedLanguage);
           return `Teacher file must have one of the following extensions: ${exts.join(", ")}`;
         },
@@ -343,7 +343,7 @@ provide("v$", v$);
 function update<K extends keyof ProblemForm>(key: K, value: ProblemForm[K]) {
   // logger.log(`Update Field: ${String(key)}`, value); // Optional: verbose logging
   emits("update", key, value);
-  if ((v$.value as any)[key]) (v$.value as any)[key].$touch?.();
+  if ((v$.value as unknown)[key]) (v$.value as unknown)[key].$touch?.();
 }
 
 async function submit() {
@@ -360,7 +360,7 @@ async function submit() {
       const errors = v$.value.$errors;
       logger.warn(
         "Invalid Fields:",
-        errors.map((e: any) => e.$property),
+        errors.map((e: unknown) => e.$property),
       );
     }
   }
@@ -380,7 +380,7 @@ async function submit() {
   <div class="grid grid-cols-2 gap-y-4">
     <div class="form-control w-full max-w-xs">
       <label class="label">
-        <span class="label-text">Problem name</span>
+        <span class="label-text">Problem name</span>
       </label>
 
       <input
@@ -410,41 +410,41 @@ async function submit() {
 
   <!-- Section fold panels -->
   <div class="mt-4 flex flex-col gap-3">
-    <div class="collapse collapse-arrow rounded-box bg-base-200">
+    <div class="collapse-arrow rounded-box bg-base-200 collapse">
       <input type="checkbox" class="peer" />
-      <div class="collapse-title font-semibold">Set Description</div>
+      <div class="collapse-title font-semibold">Set Description</div>
       <div class="collapse-content">
         <DescriptionSection :v$="v$" @update="update" />
       </div>
     </div>
 
-    <div class="collapse collapse-arrow rounded-box bg-base-200">
+    <div class="collapse-arrow rounded-box bg-base-200 collapse">
       <input type="checkbox" class="peer" />
-      <div class="collapse-title font-semibold">Set Configuration</div>
+      <div class="collapse-title font-semibold">Set Configuration</div>
       <div class="collapse-content">
         <ConfigurationSection />
       </div>
     </div>
 
-    <div class="collapse collapse-arrow rounded-box bg-base-200">
+    <div class="collapse-arrow rounded-box bg-base-200 collapse">
       <input type="checkbox" class="peer" />
-      <div class="collapse-title font-semibold">Set Pipeline</div>
+      <div class="collapse-title font-semibold">Set Pipeline</div>
       <div class="collapse-content">
         <PipelineSection />
       </div>
     </div>
 
-    <div class="collapse collapse-arrow rounded-box bg-base-200">
+    <div class="collapse-arrow rounded-box bg-base-200 collapse">
       <input type="checkbox" class="peer" />
-      <div class="collapse-title font-semibold">Set Test Data</div>
+      <div class="collapse-title font-semibold">Set Test Data</div>
       <div class="collapse-content">
         <TestDataSection :v$="v$" />
       </div>
     </div>
 
-    <div class="collapse collapse-arrow rounded-box bg-base-200">
+    <div class="collapse-arrow rounded-box bg-base-200 collapse">
       <input type="checkbox" class="peer" />
-      <div class="collapse-title font-semibold">Set Resource Data</div>
+      <div class="collapse-title font-semibold">Set Resource Data</div>
       <div class="collapse-content">
         <div class="flex flex-col gap-4">
           <ResourceDataSection variant="student" />

@@ -6,7 +6,7 @@ export const LANGUAGE_OPTIONS: LangOption[] = [
   { value: 2, text: "py", mask: 4 },
 ];
 
-export const ROLE = ["Admin", "Teacher", "Student"];
+export const ROLE = ["Admin", "Teacher", "Student", "TA"];
 
 export const MAX_UPLOAD_SIZE_MB = 1024; // 1 GB
 export const MAX_UPLOAD_SIZE_BYTES = MAX_UPLOAD_SIZE_MB * 1024 * 1024;

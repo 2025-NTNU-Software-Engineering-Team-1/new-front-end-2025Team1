@@ -159,7 +159,7 @@ export class LAppTextureManager {
 }
 
 /**
- * 画像情報構造体
+ * 画像情� �構� 体
  */
 export class TextureInfo {
   img: HTMLImageElement; // 画像

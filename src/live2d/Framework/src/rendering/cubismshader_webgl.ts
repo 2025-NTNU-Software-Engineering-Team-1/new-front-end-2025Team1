@@ -15,10 +15,10 @@ import { CubismBlendMode, CubismTextureColor } from "./cubismrenderer";
 import { CubismRenderer_WebGL } from "./cubismrenderer_webgl";
 
 let s_instance: CubismShaderManager_WebGL; // インスタンス（シングルトン）
-const ShaderCount = 10; // シェーダーの数 = マスク生成用 + (通常用 + 加算 + 乗算) * (マスク無の乗算済アルファ対応版 + マスク有の乗算済アルファ対応版 + マスク有反転の乗算済アルファ対応版)
+const ShaderCount = 10; // シェーダーの数 = マスク生成用 + (通常用 + � 算 + 乗算) * (マスク無の乗算済アルファ対応版 + マスク有の乗算済アルファ対応版 + マスク有反転の乗算済アルファ対応版)
 
 /**
- * WebGL用のシェーダープログラムを生成・破棄するクラス
+ * WebGL用のシェーダープログラ� を生成・� �棄するクラス
  */
 export class CubismShader_WebGL {
   /**
@@ -36,7 +36,7 @@ export class CubismShader_WebGL {
   }
 
   /**
-   * 描画用のシェーダプログラムの一連のセットアップを実行する
+   * 描画用のシェーダプログラ� の一連のセットアップを実行する
    * @param renderer レンダラー
    * @param model 描画対象のモデル
    * @param index 描画対象のメッシュのインデックス
@@ -95,19 +95,19 @@ export class CubismShader_WebGL {
 
     this.gl.useProgram(shaderSet.shaderProgram);
 
-    // 頂点配列の設定
+    // � �点配列の設定
     if (renderer._bufferData.vertex == null) {
       renderer._bufferData.vertex = this.gl.createBuffer();
     }
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, renderer._bufferData.vertex);
 
-    // 頂点配列の設定
+    // � �点配列の設定
     const vertexArray: Float32Array = model.getDrawableVertices(index);
     this.gl.bufferData(this.gl.ARRAY_BUFFER, vertexArray, this.gl.DYNAMIC_DRAW);
     this.gl.enableVertexAttribArray(shaderSet.attributePositionLocation);
     this.gl.vertexAttribPointer(shaderSet.attributePositionLocation, 2, this.gl.FLOAT, false, 0, 0);
 
-    // テクスチャ頂点の設定
+    // テクスチャ� �点の設定
     if (renderer._bufferData.uv == null) {
       renderer._bufferData.uv = this.gl.createBuffer();
     }
@@ -198,7 +198,7 @@ export class CubismShader_WebGL {
   }
 
   /**
-   * マスク用のシェーダプログラムの一連のセットアップを実行する
+   * マスク用のシェーダプログラ� の一連のセットアップを実行する
    * @param renderer レンダラー
    * @param model 描画対象のモデル
    * @param index 描画対象のメッシュのインデックス
@@ -219,7 +219,7 @@ export class CubismShader_WebGL {
     const shaderSet: CubismShaderSet = this._shaderSets.at(ShaderNames.ShaderNames_SetupMask);
     this.gl.useProgram(shaderSet.shaderProgram);
 
-    // 頂点配列の設定
+    // � �点配列の設定
     if (renderer._bufferData.vertex == null) {
       renderer._bufferData.vertex = this.gl.createBuffer();
     }
@@ -240,7 +240,7 @@ export class CubismShader_WebGL {
     this.gl.bindTexture(this.gl.TEXTURE_2D, textureId);
     this.gl.uniform1i(shaderSet.samplerTexture0Location, 0);
 
-    // テクスチャ頂点の設定
+    // テクスチャ� �点の設定
     if (renderer._bufferData.uv == null) {
       renderer._bufferData.uv = this.gl.createBuffer();
     }
@@ -319,7 +319,7 @@ export class CubismShader_WebGL {
   }
 
   /**
-   * シェーダープログラムを解放する
+   * シェーダープログラ� を解放する
    */
   public releaseShaderProgram(): void {
     for (let i = 0; i < this._shaderSets.getSize(); i++) {
@@ -331,8 +331,8 @@ export class CubismShader_WebGL {
   }
 
   /**
-   * シェーダープログラムを初期化する
-   * @param vertShaderSrc 頂点シェーダのソース
+   * シェーダープログラ� を初期化する
+   * @param vertShaderSrc � �点シェーダのソース
    * @param fragShaderSrc フラグメントシェーダのソース
    */
   public generateShaders(): void {
@@ -358,7 +358,7 @@ export class CubismShader_WebGL {
       fragmentShaderSrcMaskInvertedPremultipliedAlpha,
     );
 
-    // 加算も通常と同じシェーダーを利用する
+    // � 算も通常と同じシェーダーを利用する
     this._shaderSets.at(4).shaderProgram = this._shaderSets.at(1).shaderProgram;
     this._shaderSets.at(5).shaderProgram = this._shaderSets.at(2).shaderProgram;
     this._shaderSets.at(6).shaderProgram = this._shaderSets.at(3).shaderProgram;
@@ -516,7 +516,7 @@ export class CubismShader_WebGL {
       "u_screenColor",
     );
 
-    // 加算（PremultipliedAlpha）
+    // � 算（PremultipliedAlpha）
     this._shaderSets.at(4).attributePositionLocation = this.gl.getAttribLocation(
       this._shaderSets.at(4).shaderProgram,
       "a_position",
@@ -546,7 +546,7 @@ export class CubismShader_WebGL {
       "u_screenColor",
     );
 
-    // 加算（クリッピング、PremultipliedAlpha）
+    // � 算（クリッピング、PremultipliedAlpha）
     this._shaderSets.at(5).attributePositionLocation = this.gl.getAttribLocation(
       this._shaderSets.at(5).shaderProgram,
       "a_position",
@@ -588,7 +588,7 @@ export class CubismShader_WebGL {
       "u_screenColor",
     );
 
-    // 加算（クリッピング・反転、PremultipliedAlpha）
+    // � 算（クリッピング・反転、PremultipliedAlpha）
     this._shaderSets.at(6).attributePositionLocation = this.gl.getAttribLocation(
       this._shaderSets.at(6).shaderProgram,
       "a_position",
@@ -746,10 +746,10 @@ export class CubismShader_WebGL {
   }
 
   /**
-   * シェーダプログラムをロードしてアドレスを返す
-   * @param vertexShaderSource    頂点シェーダのソース
+   * シェーダプログラ� をロードしてアドレスを返す
+   * @param vertexShaderSource    � �点シェーダのソース
    * @param fragmentShaderSource  フラグメントシェーダのソース
-   * @return シェーダプログラムのアドレス
+   * @return シェーダプログラ� のアドレス
    */
   public loadShaderProgram(vertexShaderSource: string, fragmentShaderSource: string): WebGLProgram {
     // Create Shader Program
@@ -804,11 +804,11 @@ export class CubismShader_WebGL {
   }
 
   /**
-   * シェーダープログラムをコンパイルする
+   * シェーダープログラ� をコンパイルする
    * @param shaderType シェーダタイプ(Vertex/Fragment)
    * @param shaderSource シェーダソースコード
    *
-   * @return コンパイルされたシェーダープログラム
+   * @return コンパイルされたシェーダープログラ�
    */
   public compileShaderSource(shaderType: GLenum, shaderSource: string): WebGLProgram {
     const source: string = shaderSource;
@@ -822,7 +822,7 @@ export class CubismShader_WebGL {
       CubismLogError("Shader compile log: {0} ", log);
     }
 
-    const status: any = this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS);
+    const status: unknown = this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS);
     if (!status) {
       this.gl.deleteShader(shader);
       return null;
@@ -835,7 +835,7 @@ export class CubismShader_WebGL {
     this.gl = gl;
   }
 
-  _shaderSets: csmVector<CubismShaderSet>; // ロードしたシェーダープログラムを保持する変数
+  _shaderSets: csmVector<CubismShaderSet>; // ロードしたシェーダープログラ� を保持する変数
   gl: WebGLRenderingContext; // webglコンテキスト
 }
 
@@ -917,17 +917,17 @@ export class CubismShaderManager_WebGL {
  * CubismShader_WebGLのインナークラス
  */
 export class CubismShaderSet {
-  shaderProgram: WebGLProgram; // シェーダープログラムのアドレス
-  attributePositionLocation: GLuint; // シェーダープログラムに渡す変数のアドレス（Position）
-  attributeTexCoordLocation: GLuint; // シェーダープログラムに渡す変数のアドレス（TexCoord）
-  uniformMatrixLocation: WebGLUniformLocation; // シェーダープログラムに渡す変数のアドレス（Matrix）
-  uniformClipMatrixLocation: WebGLUniformLocation; // シェーダープログラムに渡す変数のアドレス（ClipMatrix）
-  samplerTexture0Location: WebGLUniformLocation; // シェーダープログラムに渡す変数のアドレス（Texture0）
-  samplerTexture1Location: WebGLUniformLocation; // シェーダープログラムに渡す変数のアドレス（Texture1）
-  uniformBaseColorLocation: WebGLUniformLocation; // シェーダープログラムに渡す変数のアドレス（BaseColor）
-  uniformChannelFlagLocation: WebGLUniformLocation; // シェーダープログラムに渡す変数のアドレス（ChannelFlag）
-  uniformMultiplyColorLocation: WebGLUniformLocation; // シェーダープログラムに渡す変数のアドレス（MultiplyColor）
-  uniformScreenColorLocation: WebGLUniformLocation; // シェーダープログラムに渡す変数のアドレス（ScreenColor）
+  shaderProgram: WebGLProgram; // シェーダープログラ� のアドレス
+  attributePositionLocation: GLuint; // シェーダープログラ� に渡す変数のアドレス（Position）
+  attributeTexCoordLocation: GLuint; // シェーダープログラ� に渡す変数のアドレス（TexCoord）
+  uniformMatrixLocation: WebGLUniformLocation; // シェーダープログラ� に渡す変数のアドレス（Matrix）
+  uniformClipMatrixLocation: WebGLUniformLocation; // シェーダープログラ� に渡す変数のアドレス（ClipMatrix）
+  samplerTexture0Location: WebGLUniformLocation; // シェーダープログラ� に渡す変数のアドレス（Texture0）
+  samplerTexture1Location: WebGLUniformLocation; // シェーダープログラ� に渡す変数のアドレス（Texture1）
+  uniformBaseColorLocation: WebGLUniformLocation; // シェーダープログラ� に渡す変数のアドレス（BaseColor）
+  uniformChannelFlagLocation: WebGLUniformLocation; // シェーダープログラ� に渡す変数のアドレス（ChannelFlag）
+  uniformMultiplyColorLocation: WebGLUniformLocation; // シェーダープログラ� に渡す変数のアドレス（MultiplyColor）
+  uniformScreenColorLocation: WebGLUniformLocation; // シェーダープログラ� に渡す変数のアドレス（ScreenColor）
 }
 
 export enum ShaderNames {
@@ -981,7 +981,7 @@ export const fragmentShaderSrcsetupMask =
   "   gl_FragColor = u_channelFlag * texture2D(s_texture0, v_texCoord).a * isInside;" +
   "}";
 
-//----- バーテックスシェーダプログラム -----
+//----- バーテックスシェーダプログラ�  -----
 // Normal & Add & Mult 共通
 export const vertexShaderSrc =
   "attribute vec4     a_position;" + //v.vertex
@@ -1011,7 +1011,7 @@ export const vertexShaderSrcMasked =
   "   v_texCoord.y = 1.0 - v_texCoord.y;" +
   "}";
 
-//----- フラグメントシェーダプログラム -----
+//----- フラグメントシェーダプログラ�  -----
 // Normal & Add & Mult 共通 （PremultipliedAlpha）
 export const fragmentShaderSrcPremultipliedAlpha =
   "precision mediump float;" +
@@ -1052,7 +1052,7 @@ export const fragmentShaderSrcMaskPremultipliedAlpha =
   "   gl_FragColor = col_formask;" +
   "}";
 
-// Normal & Add & Mult 共通（クリッピングされて反転使用の描画用、PremultipliedAlphaの場合）
+// Normal & Add & Mult 共通（クリッピングされて反転使用の描画用、PremultipliedAlphaの� �合）
 export const fragmentShaderSrcMaskInvertedPremultipliedAlpha =
   "precision mediump float;" +
   "varying vec2      v_texCoord;" +

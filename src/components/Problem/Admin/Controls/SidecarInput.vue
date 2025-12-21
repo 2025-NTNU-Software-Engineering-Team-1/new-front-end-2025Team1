@@ -43,6 +43,7 @@ function remove(index: number) {
   emit("update:modelValue", newList);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function updateItem() {
   emit("update:modelValue", props.modelValue);
 }
@@ -50,7 +51,7 @@ function updateItem() {
 
 <template>
   <div>
-    <div class="mb-4 rounded-lg border border-base-300 bg-base-200 p-3">
+    <div class="border-base-300 bg-base-200 mb-4 rounded-lg border p-3">
       <div class="flex items-end gap-2">
         <div class="form-control flex-1">
           <label class="label py-1"><span class="label-text-alt">Name</span></label>
@@ -76,7 +77,7 @@ function updateItem() {
       </div>
     </div>
 
-    <div class="overflow-x-auto rounded-lg border border-base-content/20">
+    <div class="border-base-content/20 overflow-x-auto rounded-lg border">
       <table class="table-sm table w-full">
         <thead class="bg-base-200">
           <tr>
@@ -98,7 +99,7 @@ function updateItem() {
           </tr>
 
           <tr v-if="modelValue.length === 0">
-            <td colspan="3" class="opacity-400 py-2 text-center text-sm">No sidecars configured.</td>
+            <td colspan="3" class="py-2 text-center text-sm opacity-400">No sidecars configured.</td>
           </tr>
         </tbody>
       </table>

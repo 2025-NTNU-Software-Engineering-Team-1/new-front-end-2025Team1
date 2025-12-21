@@ -16,9 +16,9 @@ import { csmString } from "../type/csmstring";
  *
  * モーション再生の管理用クラス。CubismMotionモーションなどACubismMotionのサブクラスを再生するために使用する。
  *
- * @note 再生中に別のモーションが StartMotion()された場合は、新しいモーションに滑らかに変化し旧モーションは中断する。
- *       表情用モーション、体用モーションなどを分けてモーション化した場合など、
- *       複数のモーションを同時に再生させる場合は、複数のCubismMotionQueueManagerインスタンスを使用する。
+ * @note 再生中に別のモーションが StartMotion()された� �合は、新しいモーションに滑らかに変化し旧モーションは中断する。
+ *       表情用モーション、体用モーションなどを分けてモーション化した� �合など、
+ *       複数のモーションを同時に再生させる� �合は、複数のCubismMotionQueueManagerインスタンスを使用する。
  */
 export class CubismMotionQueueManager {
   /**
@@ -48,7 +48,7 @@ export class CubismMotionQueueManager {
   /**
    * 指定したモーションの開始
    *
-   * 指定したモーションを開始する。同じタイプのモーションが既にある場合は、既存のモーションに終了フラグを立て、フェードアウトを開始させる。
+   * 指定したモーションを開始する。同じタイプのモーションが既にある� �合は、既存のモーションに終了フラグを立て、フェードアウトを開始させる。
    *
    * @param   motion          開始するモーション
    * @param   autoDelete      再生が終了したモーションのインスタンスを削除するなら true
@@ -76,7 +76,7 @@ export class CubismMotionQueueManager {
       motionQueueEntry.setFadeOut(motionQueueEntry._motion.getFadeOutTime()); // フェードアウト設定
     }
 
-    motionQueueEntry = new CubismMotionQueueEntry(); // 終了時に破棄する
+    motionQueueEntry = new CubismMotionQueueEntry(); // 終了時に� �棄する
     motionQueueEntry._autoDelete = autoDelete;
     motionQueueEntry._motion = motion;
 
@@ -97,7 +97,6 @@ export class CubismMotionQueueManager {
     for (
       let ite: iterator<CubismMotionQueueEntry> = this._motions.begin();
       ite.notEqual(this._motions.end());
-
     ) {
       let motionQueueEntry: CubismMotionQueueEntry = ite.ptr();
 
@@ -164,7 +163,6 @@ export class CubismMotionQueueManager {
     for (
       let ite: iterator<CubismMotionQueueEntry> = this._motions.begin();
       ite.notEqual(this._motions.end());
-
     ) {
       let motionQueueEntry: CubismMotionQueueEntry = ite.ptr();
 
@@ -200,7 +198,7 @@ export class CubismMotionQueueManager {
    * @return  指定したCubismMotionQueueEntry
    * @return  null   見つからなかった
    */
-  public getCubismMotionQueueEntry(motionQueueEntryNumber: any): CubismMotionQueueEntry {
+  public getCubismMotionQueueEntry(motionQueueEntryNumber: unknown): CubismMotionQueueEntry {
     //------- 処理を行う -------
     for (
       let ite: iterator<CubismMotionQueueEntry> = this._motions.begin();
@@ -227,18 +225,18 @@ export class CubismMotionQueueManager {
    * @param callback コールバック関数
    * @param customData コールバックに返されるデータ
    */
-  public setEventCallback(callback: CubismMotionEventFunction, customData: any = null): void {
+  public setEventCallback(callback: CubismMotionEventFunction, customData: unknown = null): void {
     this._eventCallBack = callback;
     this._eventCustomData = customData;
   }
 
   /**
-   * モーションを更新して、モデルにパラメータ値を反映する。
+   * モーションを更新して、モデルにパラメータ値を反� する。
    *
    * @param   model   対象のモデル
    * @param   userTimeSeconds   デルタ時間の積算値[秒]
-   * @return  true    モデルへパラメータ値の反映あり
-   * @return  false   モデルへパラメータ値の反映なし(モーションの変化なし)
+   * @return  true    モデルへパラメータ値の反� あり
+   * @return  false   モデルへパラメータ値の反� なし(モーションの変化なし)
    */
   public doUpdateMotion(model: CubismModel, userTimeSeconds: number): boolean {
     let updated = false;
@@ -249,7 +247,6 @@ export class CubismMotionQueueManager {
     for (
       let ite: iterator<CubismMotionQueueEntry> = this._motions.begin();
       ite.notEqual(this._motions.end());
-
     ) {
       let motionQueueEntry: CubismMotionQueueEntry = ite.ptr();
 
@@ -268,7 +265,7 @@ export class CubismMotionQueueManager {
         continue;
       }
 
-      // ------ 値を反映する ------
+      // ------ 値を反� する ------
       motion.updateParameters(model, motionQueueEntry, userTimeSeconds);
       updated = true;
 
@@ -303,19 +300,19 @@ export class CubismMotionQueueManager {
 
   _motions: csmVector<CubismMotionQueueEntry>; // モーション
   _eventCallBack: CubismMotionEventFunction; // コールバック関数
-  _eventCustomData: any; // コールバックに戻されるデータ
+  _eventCustomData: unknown; // コールバックに戻されるデータ
 }
 
 /**
  * イベントのコールバック関数を定義
  *
- * イベントのコールバックに登録できる関数の型情報
+ * イベントのコールバックに登録できる関数の型情� �
  * @param caller        発火したイベントを再生させたCubismMotionQueueManager
  * @param eventValue    発火したイベントの文字列データ
  * @param customData   コールバックに返される登録時に指定されたデータ
  */
 export interface CubismMotionEventFunction {
-  (caller: CubismMotionQueueManager, eventValue: csmString, customData: any): void;
+  (caller: CubismMotionQueueManager, eventValue: csmString, customData: unknown): void;
 }
 
 /**

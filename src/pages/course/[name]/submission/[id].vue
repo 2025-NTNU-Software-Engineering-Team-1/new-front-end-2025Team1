@@ -53,7 +53,7 @@ watchEffect(() => {
   }
 
   const hasStaticAnalysis =
-    (problem.value as any)?.pipeline?.staticAnalysis?.libraryRestrictions?.enabled === true;
+    (problem.value as unknown)?.pipeline?.staticAnalysis?.libraryRestrictions?.enabled === true;
 
   if (hasStaticAnalysis && submission.value) {
     fetchSAReport(`/submission/${submission.value.submissionId}/static-analysis`);
@@ -61,10 +61,10 @@ watchEffect(() => {
 });
 
 const enableCompiledBinary = computed(
-  () => !!(problem.value as any)?.config?.artifactCollection?.includes("compiledBinary"),
+  () => !!(problem.value as unknown)?.config?.artifactCollection?.includes("compiledBinary"),
 );
 const enableZipArtifact = computed(
-  () => !!(problem.value as any)?.config?.artifactCollection?.includes("zip"),
+  () => !!(problem.value as unknown)?.config?.artifactCollection?.includes("zip"),
 );
 const saStatusBadge = computed(() => {
   if (!submission.value || submission.value.status === SUBMISSION_STATUS_CODE.PENDING) return null;
@@ -74,6 +74,7 @@ const saStatusBadge = computed(() => {
   if (status === null) return { label: "SA Skipped", className: "badge-ghost" };
   return null;
 });
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const saMessage = computed(() => submission.value?.saMessage || "");
 
 const { copy, copied, isSupported } = useClipboard();
@@ -203,7 +204,7 @@ function downloadTaskZip(taskIndex: number) {
 
             <div v-if="submission?.status === SUBMISSION_STATUS_CODE.COMPILE_ERROR">
               <div class="card-title md:text-xl lg:text-2xl">
-                <i-uil-exclamation-circle class="mr-2 text-error" />
+                <i-uil-exclamation-circle class="text-error mr-2" />
                 {{ $t("course.submission.compile_error.title") }}
               </div>
               <div class="my-4" />
@@ -223,10 +224,10 @@ function downloadTaskZip(taskIndex: number) {
               <ui-spinner class="mr-3 h-6 w-6" /> {{ $t("course.submission.detail.desc") }}
             </div>
 
-            <!-- 詳細結果表格：若題目設定 zip artifact，新增 Artifact 欄位，於每個子任務提供 zip 下載 -->
+            <!-- 詳細結果表� �：若題目設定 zip artifact，新增 Artifact 欄位，於每個子任務提供 zip 下載 -->
             <table
               v-else
-              class="table table-compact w-full"
+              class="table-compact table w-full"
               v-for="(task, taskIndex) in submission.tasks"
               :key="`task-${taskIndex}`"
             >

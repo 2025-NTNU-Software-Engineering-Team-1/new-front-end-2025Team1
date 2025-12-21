@@ -7,7 +7,7 @@ import { required } from "@vuelidate/validators";
 import api from "@/models/api";
 import axios from "axios";
 import { useI18n } from "vue-i18n";
-// @ts-ignore
+// @ts-expect-error - No type definitions available
 import cowsay from "cowsay2";
 
 const envMode = import.meta.env.MODE;

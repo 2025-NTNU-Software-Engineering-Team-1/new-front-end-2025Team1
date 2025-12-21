@@ -16,7 +16,7 @@ import { LAppSubdelegate } from "./lappsubdelegate";
 
 /**
  * サンプルアプリケーションにおいてCubismModelを管理するクラス
- * モデル生成と破棄、タップイベントの処理、モデル切り替えを行う。
+ * モデル生成と� �棄、タップイベントの処理、モデル切り替えを行う。
  */
 export class LAppLive2DManager {
   /**
@@ -42,7 +42,7 @@ export class LAppLive2DManager {
       return;
     }
 
-    const anyModel = model as any;
+    const anyModel = model as unknown;
 
     // Cubism 不同範例版本命名不一樣，有的叫 onDrag，有的叫 setDragging
     if (typeof anyModel.onDrag === "function") {
@@ -67,7 +67,7 @@ export class LAppLive2DManager {
       return;
     }
 
-    // 取出第一個模型，加上 null 檢查
+    // 取出第一個模型，� 上 null 檢查
     const model: LAppModel | null = this._models.at(0);
     if (!model) {
       return;
@@ -77,7 +77,7 @@ export class LAppLive2DManager {
       LAppPal.printMessage(`[APP]tap point: {x: ${x.toFixed(2)} y: ${y.toFixed(2)}}`);
     }
 
-    // 頭部判定
+    // � �部判定
     if (model.hitTest(LAppDefine.HitAreaNameHead, x, y)) {
       if (LAppDefine.DebugLogEnable) {
         LAppPal.printMessage(`[APP]hit area: [${LAppDefine.HitAreaNameHead}]`);
@@ -109,7 +109,7 @@ export class LAppLive2DManager {
       return;
     }
 
-    // ① 先拿 canvas 尺寸
+    // �  先拿 canvas 尺寸
     const canvas = subdelegate.getCanvas();
     const width = canvas.width;
     const height = canvas.height;
@@ -128,7 +128,7 @@ export class LAppLive2DManager {
 
     // ④ 原本就有的投影與模型邏輯
     const projection: CubismMatrix44 = new CubismMatrix44();
-    const model: any = this._models.at(0);
+    const model: unknown = this._models.at(0);
 
     if (!model) {
       return;
@@ -214,7 +214,7 @@ export class LAppLive2DManager {
   }
 
   /**
-   * モデルの追加
+   * モデルの追�
    */
   public addModel(sceneIndex: number = 0): void {
     this._sceneIndex = sceneIndex;
@@ -243,7 +243,7 @@ export class LAppLive2DManager {
   public initialize(): void {
     LAppPal.printMessage("[APP] LAppLive2DManager.initialize 被呼叫");
 
-    // 一開始就切到第 0 個場景（其實就是載我們的 hiyori）
+    // 一開始就切到第 0 個� �景（其實就是載我們的 hiyori）
     this.changeScene(0);
   }
 

@@ -9,11 +9,11 @@ import { CubismMotionQueueEntryHandle, CubismMotionQueueManager } from "./cubism
 import { CubismLogInfo } from "../utils/cubismdebug";
 
 /**
- * @brief パラメータに適用する表情の値を持たせる構造体
+ * @brief パラメータに適用する表情の値を持たせる構� 体
  */
 export class ExpressionParameterValue {
   parameterId: CubismIdHandle; // パラメーターID
-  additiveValue: number; // 加算値
+  additiveValue: number; // � 算値
   multiplyValue: number; // 乗算値
   overwriteValue: number; // 上書き値
 }
@@ -134,7 +134,7 @@ export class CubismExpressionMotionManager extends CubismMotionQueueManager {
   /**
    * @deprecated
    * ExpressionではPriorityを使用していないため、この関数は非推奨となりました。
-   * CubismExpressionMotionManager.startMotion() を使用してください。
+   * CubismExpressionMotionManager.startMotion() を使用してく� さい。
    *
    * @brief 優先度を設定してモーションの開始
    *
@@ -164,7 +164,7 @@ export class CubismExpressionMotionManager extends CubismMotionQueueManager {
   /**
    * @brief モーションの更新
    *
-   * モーションを更新して、モデルにパラメータ値を反映する。
+   * モーションを更新して、モデルにパラメータ値を反� する。
    *
    * @param[in]   model   対象のモデル
    * @param[in]   deltaTimeSeconds    デルタ時間[秒]
@@ -191,7 +191,6 @@ export class CubismExpressionMotionManager extends CubismMotionQueueManager {
     for (
       let ite: iterator<CubismMotionQueueEntry> = this._motions.begin();
       ite.notEqual(this._motions.end());
-
     ) {
       const motionQueueEntry = ite.ptr();
 
@@ -232,7 +231,7 @@ export class CubismExpressionMotionManager extends CubismMotionQueueManager {
             continue;
           }
 
-          // パラメータがリストに存在しないなら新規追加
+          // パラメータがリストに存在しないなら新規追�
           const item: ExpressionParameterValue = new ExpressionParameterValue();
           item.parameterId = expressionParameters.at(i).parameterId;
           item.additiveValue = CubismExpressionMotion.DefaultAdditiveValue;
@@ -280,7 +279,7 @@ export class CubismExpressionMotionManager extends CubismMotionQueueManager {
     if (motions.getSize() > 1) {
       const latestFadeWeight: number = this.getFadeWeight(this._fadeWeights.getSize() - 1);
       if (latestFadeWeight >= 1.0) {
-        // 配列の最後の要素は削除しない
+        // 配列の最後の要� は削除しない
         for (let i = motions.getSize() - 2; i >= 0; --i) {
           const motionQueueEntry = motions.at(i);
           csmDelete(motionQueueEntry);

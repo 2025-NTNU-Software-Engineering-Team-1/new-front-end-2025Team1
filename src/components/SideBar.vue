@@ -40,7 +40,7 @@ const session = useSession();
 <template>
   <label for="noj-drawer" class="drawer-overlay"></label>
   <ul
-    :class="['menu w-40 flex-col overflow-y-auto bg-primary py-4 text-white', isMini ? 'lg:w-14' : 'lg:w-28']"
+    :class="['menu bg-primary w-40 flex-col overflow-y-auto py-4 text-white', isMini ? 'lg:w-14' : 'lg:w-28']"
   >
     <router-link class="my-2 flex cursor-pointer justify-center" to="/">
       <img src="../assets/logo.svg" alt="NOJ Logo" :class="['mb-2', isMini ? 'w-10' : 'w-14']" />
@@ -84,7 +84,7 @@ const session = useSession();
       </side-bar-link>
     </li>
     <li>
-      <label class="btn btn-primary rounded-none p-2" @click="() => toggleDark()">
+      <label class="btn btn-primary rounded-none p-2" @click="toggleDark()">
         <i-uil-sun v-if="isDark" class="swap-on h-6 w-6" />
         <i-uil-moon v-else class="swap-off h-6 w-6" />
       </label>

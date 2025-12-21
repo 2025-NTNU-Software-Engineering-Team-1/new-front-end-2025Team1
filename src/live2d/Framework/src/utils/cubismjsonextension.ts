@@ -10,7 +10,7 @@ import { JsonArray, JsonBoolean, JsonFloat, JsonMap, JsonNullvalue, JsonString, 
 /**
  * CubismJsonで実装されているJsonパーサを使用せず、
  * TypeScript標準のJsonパーサなどを使用し出力された結果を
- * Cubism SDKで定義されているJSONエレメントの要素に
+ * Cubism SDKで定義されているJSONエレメントの要� に
  * 置き換える処理をするクラス。
  */
 export class CubismJsonExtension {
@@ -33,7 +33,7 @@ export class CubismJsonExtension {
       } else if (obj[key] == null) {
         map.put(key, new JsonNullvalue());
       } else {
-        // どれにも当てはまらない場合でも処理する
+        // どれにも当てはまらない� �合でも処理する
         map.put(key, obj[key]);
       }
     });
@@ -62,7 +62,7 @@ export class CubismJsonExtension {
         } else if (obj[key] == null) {
           arr.add(new JsonNullvalue());
         } else {
-          // どれにも当てはまらない場合でも処理する
+          // どれにも当てはまらない� �合でも処理する
           arr.add(obj[key]);
         }
       } else if (obj[key] instanceof Array) {
@@ -74,7 +74,7 @@ export class CubismJsonExtension {
         arr.add(new JsonNullvalue());
       } else {
         const convValue = Array(obj[key]);
-        // 配列ともObjectとも判定できなかった場合でも処理する
+        // 配列ともObjectとも判定できなかった� �合でも処理する
         for (let i = 0; i < convValue.length; i++) {
           arr.add(convValue[i]);
         }

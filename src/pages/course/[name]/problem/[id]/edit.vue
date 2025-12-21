@@ -13,7 +13,7 @@ useTitle(`Edit Problem - ${route.params.id} - ${route.params.name} | Normal OJ`)
 
 const formElement = ref<InstanceType<typeof AdminProblemForm>>();
 
-function normalizeTestCases(raw: any): ProblemTestCase[] {
+function normalizeTestCases(raw: unknown): ProblemTestCase[] {
   if (Array.isArray(raw)) return raw.slice();
   if (Array.isArray(raw?.tasks)) return raw.tasks.slice();
   return [];
@@ -53,7 +53,7 @@ function normalizeConfig(config?: ProblemConfigExtra): ProblemConfigExtra {
     acceptedFormat: config?.acceptedFormat ?? base.acceptedFormat,
     maxStudentZipSizeMB: config?.maxStudentZipSizeMB ?? base.maxStudentZipSizeMB,
     artifactCollection:
-      config?.artifactCollection ?? (config as any)?.artifact_collection ?? base.artifactCollection,
+      config?.artifactCollection ?? (config as unknown)?.artifact_collection ?? base.artifactCollection,
     resourceDataTeacher: config?.resourceDataTeacher ?? base.resourceDataTeacher,
     networkAccessRestriction: {
       ...base.networkAccessRestriction!,
@@ -74,7 +74,7 @@ function normalizeConfig(config?: ProblemConfigExtra): ProblemConfigExtra {
   return merged;
 }
 
-function normalizePipeline(raw: any): ProblemPipeline {
+function normalizePipeline(raw: unknown): ProblemPipeline {
   if (!raw) raw = {};
   const base: ProblemPipeline = {
     allowRead: false,
@@ -134,15 +134,15 @@ function normalizePipeline(raw: any): ProblemPipeline {
   pipeline.staticAnalysis!.libraryRestrictions!.enabled ??= false;
   const libs = pipeline.staticAnalysis!.libraryRestrictions!;
   ["whitelist", "blacklist"].forEach((key) => {
-    if (!(libs as any)[key]) (libs as any)[key] = {};
+    if (!(libs as unknown)[key]) (libs as unknown)[key] = {};
     ["syntax", "imports", "headers", "functions"].forEach((f) => {
-      if (!Array.isArray((libs as any)[key][f])) (libs as any)[key][f] = [];
+      if (!Array.isArray((libs as unknown)[key][f])) (libs as unknown)[key][f] = [];
     });
   });
   return pipeline;
 }
 
-function normalizeAssets(raw: any): ProblemAssets {
+function normalizeAssets(raw: unknown): ProblemAssets {
   const base: ProblemAssets = {
     trialModePublicTestDataZip: raw?.trialModePublicTestDataZip ?? null,
     trialModeACFiles: raw?.trialModeACFiles ?? null,
@@ -169,13 +169,15 @@ const {
 
 const edittingProblem = ref<ProblemForm>();
 
-// 只在後端資料加載完成時初始化一次 edittingProblem（使用 watch + once: true 避免用戶修改被重置）
+// 只在後端資料� 載完成時初始化一次 edittingProblem（使用 watch + once: true 避免用戶修改被重置）
 watch(
   () => problem.value,
   (newProblem) => {
     if (!newProblem || edittingProblem.value) return; // 已初始化則跳過
 
-    const testCases = normalizeTestCases((newProblem as any).testCase ?? (newProblem as any).testCaseInfo);
+    const testCases = normalizeTestCases(
+      (newProblem as unknown).testCase ?? (newProblem as unknown).testCaseInfo,
+    );
 
     edittingProblem.value = {
       ...newProblem,
@@ -188,19 +190,19 @@ watch(
       pipeline: normalizePipeline(
         (() => {
           const basePipe =
-            (newProblem as any).pipeline ||
-            (newProblem as any).pipelineConf ||
-            (newProblem as any).pipeline_conf ||
-            (newProblem as any).config?.pipeline;
+            (newProblem as unknown).pipeline ||
+            (newProblem as unknown).pipelineConf ||
+            (newProblem as unknown).pipeline_conf ||
+            (newProblem as unknown).config?.pipeline;
           // 將 config 併入原始 payload，讓 normalizePipeline 可以讀到 allowRead/allowWrite/fopen/fwrite
-          const cfg = (newProblem as any).config;
+          const cfg = (newProblem as unknown).config;
           if (basePipe && cfg) return { ...basePipe, config: cfg };
           if (basePipe) return basePipe;
           if (cfg) return { config: cfg };
           return {};
         })(),
       ),
-      assets: normalizeAssets((newProblem as any).assets),
+      assets: normalizeAssets((newProblem as unknown).assets),
     } as ProblemForm;
 
     // 確保 allowRead/allowWrite 有值（部分回傳可能只在 config 上）
@@ -208,10 +210,10 @@ watch(
     const pipe = edittingProblem.value.pipeline;
     if (pipe) {
       if (pipe.allowRead === undefined || pipe.allowRead === null) {
-        pipe.allowRead = Boolean((cfg as any)?.allowRead ?? false);
+        pipe.allowRead = Boolean((cfg as unknown)?.allowRead ?? false);
       }
       if (pipe.allowWrite === undefined || pipe.allowWrite === null) {
-        pipe.allowWrite = Boolean((cfg as any)?.allowWrite ?? false);
+        pipe.allowWrite = Boolean((cfg as unknown)?.allowWrite ?? false);
       }
     }
   },
@@ -362,7 +364,7 @@ async function delete_() {
                 <input v-model="openJSON" type="checkbox" class="toggle" />
               </div>
 
-              <pre v-if="openJSON" class="whitespace-pre-wrap rounded bg-base-200 p-2"
+              <pre v-if="openJSON" class="bg-base-200 rounded p-2 whitespace-pre-wrap"
                 >{{ JSON.stringify(edittingProblem, null, 2) }}
               </pre>
 

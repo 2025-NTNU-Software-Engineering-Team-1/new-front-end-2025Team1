@@ -10,7 +10,7 @@ import { assertFileSizeOK } from "@/utils/checkFileSize";
 // ==========================================
 // Props & Injection
 // ==========================================
-defineProps<{ v$: any }>();
+defineProps<{ v$: unknown }>();
 
 const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
 const route = useRoute();
@@ -25,19 +25,19 @@ const DEBUG_MODE = 1;
 // Logger Utility
 // ==========================================
 const logger = {
-  log: (label: string, data?: any) => {
+  log: (label: string, data?: unknown) => {
     if (!DEBUG_MODE) return;
     console.log(`%c[Log] ${label}`, "color: #3b82f6; font-weight: bold;", data || "");
   },
-  success: (label: string, data?: any) => {
+  success: (label: string, data?: unknown) => {
     if (!DEBUG_MODE) return;
     console.log(`%c[Success] ${label}`, "color: #10b981; font-weight: bold;", data || "");
   },
-  error: (label: string, error?: any) => {
+  error: (label: string, error?: unknown) => {
     if (!DEBUG_MODE) return;
     console.log(`%c[Error] ${label}`, "color: #ef4444; font-weight: bold;", error || "");
   },
-  warn: (label: string, data?: any) => {
+  warn: (label: string, data?: unknown) => {
     if (!DEBUG_MODE) return;
     console.log(`%c[Warn] ${label}`, "color: #f59e0b; font-weight: bold;", data || "");
   },
@@ -67,7 +67,7 @@ const downloadUrl = computed(() => {
   return `/api/problem/${id}/testcase`;
 });
 
-const hasRemoteTestcase = computed(() => Boolean((problem.value.config as any)?.assetPaths?.case));
+const hasRemoteTestcase = computed(() => Boolean((problem.value.config as unknown)?.assetPaths?.case));
 const hasExistingTasks = computed(() => (problem.value.testCaseInfo?.tasks?.length ?? 0) > 0);
 const hasBackendTestcase = computed(() => hasExistingTasks.value || hasRemoteTestcase.value);
 
@@ -167,7 +167,7 @@ watch(
 <template>
   <div class="form-control col-span-2">
     <label class="label">
-      <span class="label-text">Test Data Zip</span>
+      <span class="label-text">Test Data Zip</span>
       <div class="flex items-center gap-2">
         <span v-if="hasBackendTestcase" class="badge badge-success badge-outline text-xs">
           Current: {{ currentTaskLabel }}
@@ -189,18 +189,18 @@ watch(
     <div class="mt-2 overflow-hidden rounded-lg">
       <div class="grid grid-cols-5">
         <!-- 左側灰底區 -->
-        <div class="col-span-1 flex items-center justify-center bg-base-300 text-sm">zip file</div>
+        <div class="bg-base-300 col-span-1 flex items-center justify-center text-sm">zip file</div>
 
         <!-- 右側白底上傳區 -->
         <div
-          class="textarea-bordered col-span-4 flex flex-col bg-base-100 p-4"
-          :class="[isDrag && 'border border-accent']"
+          class="textarea-bordered bg-base-100 col-span-4 flex flex-col p-4"
+          :class="[isDrag && 'border-accent border']"
           @drop.prevent="problem.assets!.testdataZip = $event.dataTransfer!.files![0]"
           @dragover.prevent="isDrag = true"
           @dragleave="isDrag = false"
         >
-          <!-- 永遠在上方顯示 -->
-          <div class="mb-2 text-sm opacity-70">Drop a zip file here</div>
+          <!-- 永� 在上方顯示 -->
+          <div class="mb-2 text-sm opacity-70">Drop a zip file here</div>
 
           <!-- 選擇或顯示檔案 -->
           <template v-if="!problem.assets!.testdataZip">
@@ -209,7 +209,7 @@ watch(
               accept=".zip"
               class="file-input file-input-bordered file-input-sm w-full"
               @change="
-                (e: any) => {
+                (e: unknown) => {
                   const file = e.target.files?.[0];
                   if (file && !assertFileSizeOK(file, 'testdataZip')) {
                     e.target.value = '';
@@ -239,7 +239,7 @@ watch(
       v-text="v$.testCaseInfo.tasks.$errors[0]?.$message"
     />
 
-    <!-- Tasks 表格 -->
+    <!-- Tasks 表� � -->
     <template v-for="(t, i) in problem.testCaseInfo.tasks" :key="i">
       <div class="mt-2 grid grid-cols-1 gap-3 md:grid-cols-4">
         <div class="form-control">

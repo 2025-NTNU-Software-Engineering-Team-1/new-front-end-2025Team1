@@ -10,11 +10,27 @@ const { t } = useI18n();
 
 const session = useSession();
 const navs = [
-  { name: t("components.courseSideBar.ann"), path: "/announcements" },
-  { name: t("components.courseSideBar.hw"), path: "/homeworks" },
-  { name: t("components.courseSideBar.problems"), path: "/problems" },
-  { name: t("components.courseSideBar.submissions"), path: "/submissions" },
-  ...(session.isAdmin
+  {
+    name: t("components.courseSideBar.ann"),
+    path: "/announcements",
+  },
+  {
+    name: t("components.courseSideBar.hw"),
+    path: "/homeworks",
+  },
+  {
+    name: t("components.courseSideBar.problems"),
+    path: "/problems",
+  },
+  {
+    name: t("components.courseSideBar.submissions"),
+    path: "/submissions",
+  },
+  {
+    name: t("components.courseSideBar.discussion"),
+    path: "/discussion",
+  },
+  ...(session.isAdmin || session.isTeacher || session.isTA
     ? [
         {
           name: t("components.courseSideBar.members"),
@@ -27,7 +43,7 @@ const navs = [
 </script>
 
 <template>
-  <ul v-if="displayType === 'side'" class="menu menu-compact w-40 bg-base-100 p-2 lg:menu-normal">
+  <ul v-if="displayType === 'side'" class="menu menu-compact bg-base-100 lg:menu-normal w-40 p-2">
     <li
       v-for="{ name, path } in navs"
       :class="[

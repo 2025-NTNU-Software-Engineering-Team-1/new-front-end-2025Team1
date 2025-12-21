@@ -16,7 +16,7 @@ const CSM_JSON_ERROR_TYPE_MISMATCH = "Error: type mismatch";
 const CSM_JSON_ERROR_INDEX_OF_BOUNDS = "Error: index out of bounds";
 
 /**
- * パースしたJSONエレメントの要素の基底クラス。
+ * パースしたJSONエレメントの要� の基底クラス。
  */
 export abstract class Value {
   /**
@@ -25,33 +25,33 @@ export abstract class Value {
   public constructor() {}
 
   /**
-   * 要素を文字列型で返す(csmString型)
+   * 要� を文字列型で返す(csmString型)
    */
   public abstract getString(defaultValue?: string, indent?: string): string;
 
   /**
-   * 要素を文字列型で返す(string)
+   * 要� を文字列型で返す(string)
    */
   public getRawString(defaultValue?: string, indent?: string): string {
     return this.getString(defaultValue, indent);
   }
 
   /**
-   * 要素を数値型で返す(number)
+   * 要� を数値型で返す(number)
    */
   public toInt(defaultValue = 0): number {
     return defaultValue;
   }
 
   /**
-   * 要素を数値型で返す(number)
+   * 要� を数値型で返す(number)
    */
   public toFloat(defaultValue = 0): number {
     return defaultValue;
   }
 
   /**
-   * 要素を真偽値で返す(boolean)
+   * 要� を真偽値で返す(boolean)
    */
   public toBoolean(defaultValue = false): boolean {
     return defaultValue;
@@ -65,21 +65,21 @@ export abstract class Value {
   }
 
   /**
-   * 要素を配列で返す(Value[])
+   * 要� を配列で返す(Value[])
    */
   public getArray(defaultValue: Value[] = null): Value[] {
     return defaultValue;
   }
 
   /**
-   * 要素をコンテナで返す(array)
+   * 要� をコンテナで返す(array)
    */
   public getVector(defaultValue = new csmVector<Value>()): csmVector<Value> {
     return defaultValue;
   }
 
   /**
-   * 要素をマップで返す(csmMap<csmString, Value>)
+   * 要� をマップで返す(csmMap<csmString, Value>)
    */
   public getMap(defaultValue?: csmMap<string, Value>): csmMap<string, Value> {
     return defaultValue;
@@ -164,7 +164,7 @@ export abstract class Value {
   public equals(value: string): boolean;
   public equals(value: number): boolean;
   public equals(value: boolean): boolean;
-  public equals(value: any): boolean {
+  public equals(value: unknown): boolean {
     return false;
   }
 
@@ -211,7 +211,7 @@ export abstract class Value {
   public static errorValue: Value; // 一時的な返り値として返すエラー。 CubismFramework::Disposeするまではdeleteしない
   public static nullValue: Value; // 一時的な返り値として返すNULL。   CubismFramework::Disposeするまではdeleteしない
 
-  [key: string]: any; // 明示的に連想配列をany型で指定
+  [key: string]: unknown; // 明示的に連想配列をany型で指定
 }
 
 /**
@@ -219,7 +219,7 @@ export abstract class Value {
  * 仕様はJSONのサブセットとなる。
  * 設定ファイル(model3.json)などのロード用
  *
- * [未対応項目]
+ * [未対応� �目]
  * ・日本語などの非ASCII文字
  * ・eによる指数表現
  */
@@ -266,7 +266,7 @@ export class CubismJson {
   }
 
   /**
-   * パースしたJSONのルート要素を返す
+   * パースしたJSONのルート要� を返す
    */
   public getRoot(): Value {
     return this._root;
@@ -337,7 +337,7 @@ export class CubismJson {
   }
 
   /**
-   * ルート要素の次の要素がファイルの終端だったらtrueを返す
+   * ルート要� の次の要� がファイルの終端� ったらtrueを返す
    */
   public checkEndOfFile(): boolean {
     return this._root.getArray()[1].equals("EOF");
@@ -415,7 +415,7 @@ export class CubismJson {
         case ",": // Array separator
           this._error = "illegal ',' position";
           return null;
-        case "]": // 不正な｝だがスキップする。配列の最後に不要な , があると思われる
+        case "]": // 不正な｝� がスキップする。配列の最後に不要な , があると思われる
           outEndPos[0] = i; // 同じ文字を再処理
           return null;
         case "\n":
@@ -441,7 +441,7 @@ export class CubismJson {
    * @param   length  ->  パースする長さ
    * @param   begin   ->  パースを開始する位置
    * @param  outEndPos   ->  パース終了時の位置
-   * @return      パースした文F字列要素
+   * @return      パースした文F字列要�
    */
   protected parseString(string: string, length: number, begin: number, outEndPos: number[]): string {
     if (this._error) {
@@ -470,7 +470,7 @@ export class CubismJson {
         }
         // falls through
         case "//": {
-          // エスケープの場合
+          // エスケープの� �合
           i++; // ２文字をセットで扱う
 
           if (i - 1 > bufStart) {
@@ -720,8 +720,8 @@ export class CubismJson {
   _parseCallback: parseJsonObject = CubismJsonExtension.parseJsonObject; // パース時に使う処理のコールバック関数
 
   _error: string; // パース時のエラー
-  _lineCount: number; // エラー報告に用いる行数カウント
-  _root: Value; // パースされたルート要素
+  _lineCount: number; // エラー� �告に用いる行数カウント
+  _root: Value; // パースされたルート要�
 }
 
 interface parseJsonObject {
@@ -729,7 +729,7 @@ interface parseJsonObject {
 }
 
 /**
- * パースしたJSONの要素をfloat値として扱う
+ * パースしたJSONの要� をfloat値として扱う
  */
 export class JsonFloat extends Value {
   /**
@@ -749,7 +749,7 @@ export class JsonFloat extends Value {
   }
 
   /**
-   * 要素を文字列で返す(csmString型)
+   * 要� を文字列で返す(csmString型)
    */
   public getString(defaultValue: string, indent: string): string {
     const strbuf = "\0";
@@ -760,14 +760,14 @@ export class JsonFloat extends Value {
   }
 
   /**
-   * 要素を数値型で返す(number)
+   * 要� を数値型で返す(number)
    */
   public toInt(defaultValue = 0): number {
     return parseInt(this._value.toString());
   }
 
   /**
-   * 要素を数値型で返す(number)
+   * 要� を数値型で返す(number)
    */
   public toFloat(defaultValue = 0.0): number {
     return this._value;
@@ -780,7 +780,7 @@ export class JsonFloat extends Value {
   public equals(value: string): boolean;
   public equals(value: number): boolean;
   public equals(value: boolean): boolean;
-  public equals(value: any): boolean {
+  public equals(value: unknown): boolean {
     if ("number" === typeof value) {
       // int
       if (Math.round(value)) {
@@ -794,11 +794,11 @@ export class JsonFloat extends Value {
     return false;
   }
 
-  private _value: number; // JSON要素の値
+  private _value: number; // JSON要� の値
 }
 
 /**
- * パースしたJSONの要素を真偽値として扱う
+ * パースしたJSONの要� を真偽値として扱う
  */
 export class JsonBoolean extends Value {
   /**
@@ -809,14 +809,14 @@ export class JsonBoolean extends Value {
   }
 
   /**
-   * 要素を真偽値で返す(boolean)
+   * 要� を真偽値で返す(boolean)
    */
   public toBoolean(defaultValue = false): boolean {
     return this._boolValue;
   }
 
   /**
-   * 要素を文字列で返す(csmString型)
+   * 要� を文字列で返す(csmString型)
    */
   public getString(defaultValue: string, indent: string): string {
     this._stringBuffer = this._boolValue ? "true" : "false";
@@ -831,7 +831,7 @@ export class JsonBoolean extends Value {
   public equals(value: string): boolean;
   public equals(value: number): boolean;
   public equals(value: boolean): boolean;
-  public equals(value: any): boolean {
+  public equals(value: unknown): boolean {
     if ("boolean" === typeof value) {
       return value == this._boolValue;
     }
@@ -857,11 +857,11 @@ export class JsonBoolean extends Value {
   static trueValue: JsonBoolean; // true
   static falseValue: JsonBoolean; // false
 
-  private _boolValue: boolean; // JSON要素の値
+  private _boolValue: boolean; // JSON要� の値
 }
 
 /**
- * パースしたJSONの要素を文字列として扱う
+ * パースしたJSONの要� を文字列として扱う
  */
 export class JsonString extends Value {
   /**
@@ -869,7 +869,7 @@ export class JsonString extends Value {
    */
   public constructor(s: string);
   public constructor(s: csmString);
-  public constructor(s: any) {
+  public constructor(s: unknown) {
     super();
 
     if ("string" === typeof s) {
@@ -889,7 +889,7 @@ export class JsonString extends Value {
   }
 
   /**
-   * 要素を文字列で返す(csmString型)
+   * 要� を文字列で返す(csmString型)
    */
   public getString(defaultValue: string, indent: string): string {
     return this._stringBuffer;
@@ -902,7 +902,7 @@ export class JsonString extends Value {
   public equals(value: string): boolean;
   public equals(value: number): boolean;
   public equals(value: boolean): boolean;
-  public equals(value: any): boolean {
+  public equals(value: unknown): boolean {
     if ("string" === typeof value) {
       return this._stringBuffer == value;
     }
@@ -927,7 +927,7 @@ export class JsonError extends JsonString {
   }
 
   /**
-   * エラー情報をセットする
+   * エラー情� �をセットする
    */
   public setErrorNotForClientCall(s: string): Value {
     this._stringBuffer = s;
@@ -957,7 +957,7 @@ export class JsonError extends JsonString {
 }
 
 /**
- * パースしたJSONの要素をNULL値として持つ
+ * パースしたJSONの要� をNULL値として持つ
  */
 export class JsonNullvalue extends Value {
   /**
@@ -968,7 +968,7 @@ export class JsonNullvalue extends Value {
   }
 
   /**
-   * 要素を文字列で返す(csmString型)
+   * 要� を文字列で返す(csmString型)
    */
   public getString(defaultValue: string, indent: string): string {
     return this._stringBuffer;
@@ -1000,7 +1000,7 @@ export class JsonNullvalue extends Value {
 }
 
 /**
- * パースしたJSONの要素を配列として持つ
+ * パースしたJSONの要� を配列として持つ
  */
 export class JsonArray extends Value {
   /**
@@ -1061,7 +1061,7 @@ export class JsonArray extends Value {
   }
 
   /**
-   * 要素を文字列で返す(csmString型)
+   * 要� を文字列で返す(csmString型)
    */
   public getString(defaultValue: string, indent: string): string {
     const stringBuffer: string = indent + "[\n";
@@ -1081,32 +1081,32 @@ export class JsonArray extends Value {
   }
 
   /**
-   * 配列要素を追加する
-   * @param v 追加する要素
+   * 配列要� を追� する
+   * @param v 追� する要�
    */
   public add(v: Value): void {
     this._array.pushBack(v);
   }
 
   /**
-   * 要素をコンテナで返す(csmVector<Value>)
+   * 要� をコンテナで返す(csmVector<Value>)
    */
   public getVector(defaultValue: csmVector<Value> = null): csmVector<Value> {
     return this._array;
   }
 
   /**
-   * 要素の数を返す
+   * 要� の数を返す
    */
   public getSize(): number {
     return this._array.getSize();
   }
 
-  private _array: csmVector<Value>; // JSON要素の値
+  private _array: csmVector<Value>; // JSON要� の値
 }
 
 /**
- * パースしたJSONの要素をマップとして持つ
+ * パースしたJSONの要� をマップとして持つ
  */
 export class JsonMap extends Value {
   /**
@@ -1178,7 +1178,7 @@ export class JsonMap extends Value {
   }
 
   /**
-   * 要素を文字列で返す(csmString型)
+   * 要� を文字列で返す(csmString型)
    */
   public getString(defaultValue: string, indent: string) {
     this._stringBuffer = indent + "{\n";
@@ -1198,14 +1198,14 @@ export class JsonMap extends Value {
   }
 
   /**
-   * 要素をMap型で返す
+   * 要� をMap型で返す
    */
   public getMap(defaultValue?: csmMap<string, Value>): csmMap<string, Value> {
     return this._map;
   }
 
   /**
-   * Mapに要素を追加する
+   * Mapに要� を追� する
    */
   public put(key: string, v: Value): void {
     this._map.setValue(key, v);
@@ -1230,14 +1230,14 @@ export class JsonMap extends Value {
   }
 
   /**
-   * Mapの要素数を取得する
+   * Mapの要� 数を取得する
    */
   public getSize(): number {
     return this._keys.getSize();
   }
 
-  private _map: csmMap<string, Value>; // JSON要素の値
-  private _keys: csmVector<string>; // JSON要素の値
+  private _map: csmMap<string, Value>; // JSON要� の値
+  private _keys: csmVector<string>; // JSON要� の値
 }
 
 // Namespace definition for compatibility.

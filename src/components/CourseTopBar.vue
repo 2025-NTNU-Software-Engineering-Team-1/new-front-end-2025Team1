@@ -8,7 +8,10 @@ const announcementsPage = { path: `/course/${route.params.name}/announcements`, 
 const homeworksPage = { path: `/course/${route.params.name}/homeworks`, text: "Homeworks" };
 const problemsPage = { path: `/course/${route.params.name}/problems`, text: "Problems" };
 const submissionsPage = { path: `/course/${route.params.name}/submissions`, text: "Submissions" };
-const membersPage = { path: `/course/${route.params.name}/members`, text: "Members" };
+
+//const membersPage = { path: `/course/${route.params.name}/members`, text: "Members" };
+
+const discussionPage = { path: `/course/${route.params.name}/discussion`, text: "Discussion" };
 const items: ComputedRef<{ [k: string | symbol]: { path: null | string; text: string }[] }> = computed(
   () => ({
     "course-name-announcements": [{ path: null, text: "Announcements" }],
@@ -90,6 +93,15 @@ const items: ComputedRef<{ [k: string | symbol]: { path: null | string; text: st
     "course-name-submissions": [{ path: null, text: "Submissions" }],
     "course-name-submission-id": [submissionsPage, { path: null, text: `${route.params.id}` }],
     "course-name-members": [{ path: null, text: "Members" }],
+    "course-name-discussion": [{ path: null, text: "Discussion" }],
+    "course-name-discussion-Post": [discussionPage, { path: null, text: "New Post" }],
+    "course-name-discussion-Problems": [discussionPage, { path: null, text: "Problems" }],
+    "course-name-discussion-problem-problemId": [
+      discussionPage,
+      { path: `/course/${route.params.name}/discussion/Problems`, text: "Problems" },
+      { path: null, text: `Problem ${route.params.problemId}` },
+    ],
+    "course-name-discussion-id": [discussionPage, { path: null, text: `Post ${route.params.id}` }],
   }),
 );
 </script>

@@ -8,8 +8,8 @@
 /**
  * メモリアロケーションを抽象化したクラス
  *
- * メモリ確保・解放処理をプラットフォーム側で実装して
- * フレームワークから呼び出すためのインターフェース
+ * メモリ確保・解放処理をプラットフォー� 側で実装して
+ * フレー� ワークから呼び出すためのインターフェース
  */
 export abstract class ICubismAllocator {
   /**
@@ -18,14 +18,14 @@ export abstract class ICubismAllocator {
    * @param size 確保するバイト数
    * @return 成功すると割り当てられたメモリのアドレス。そうでなければ'0'を返す
    */
-  public abstract allocate(size: number): any;
+  public abstract allocate(size: number): unknown;
 
   /**
    * アラインメント制約なしのヒープ・メモリーを解放します。
    *
    * @param memory 解放するメモリのアドレス
    */
-  public abstract deallocate(memory: any): void;
+  public abstract deallocate(memory: unknown): void;
 
   /**
    * アラインメント制約有のヒープ・メモリーを確保します。
@@ -33,13 +33,13 @@ export abstract class ICubismAllocator {
    * @param alignment メモリーブロックのアラインメント幅
    * @return 成功すると割り当てられたメモリのアドレス。そうでなければ'0'を返す
    */
-  public abstract allocateAligned(size: number, alignment: number): any;
+  public abstract allocateAligned(size: number, alignment: number): unknown;
 
   /**
    * アラインメント制約ありのヒープ・メモリーを解放します。
    * @param alignedMemory 解放するメモリのアドレス
    */
-  public abstract deallocateAligned(alignedMemory: any): void;
+  public abstract deallocateAligned(alignedMemory: unknown): void;
 }
 
 // Namespace definition for compatibility.

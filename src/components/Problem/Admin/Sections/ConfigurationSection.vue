@@ -25,19 +25,19 @@ const DEBUG_MODE = 1;
 // Logger Utility
 // ==========================================
 const logger = {
-  log: (label: string, data?: any) => {
+  log: (label: string, data?: unknown) => {
     if (!DEBUG_MODE) return;
     console.log(`%c[Log] ${label}`, "color: #3b82f6; font-weight: bold;", data || "");
   },
-  success: (label: string, data?: any) => {
+  success: (label: string, data?: unknown) => {
     if (!DEBUG_MODE) return;
     console.log(`%c[Success] ${label}`, "color: #10b981; font-weight: bold;", data || "");
   },
-  error: (label: string, error?: any) => {
+  error: (label: string, error?: unknown) => {
     if (!DEBUG_MODE) return;
     console.log(`%c[Error] ${label}`, "color: #ef4444; font-weight: bold;", error || "");
   },
-  warn: (label: string, data?: any) => {
+  warn: (label: string, data?: unknown) => {
     if (!DEBUG_MODE) return;
     console.log(`%c[Warn] ${label}`, "color: #f59e0b; font-weight: bold;", data || "");
   },
@@ -54,7 +54,7 @@ const logger = {
 // ==========================================
 // Helper: API Response Parser
 // ==========================================
-function parseApiResponse(res: any) {
+function parseApiResponse(res: unknown) {
   const data = res?.data;
   const rawStatus = data?.status || res?.status;
   const statusStr = String(rawStatus || "").toLowerCase();
@@ -74,6 +74,7 @@ if (!rawProblem || !rawProblem.value) {
 }
 
 const problem = rawProblem as Ref<ProblemForm>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const v$ = inject<any>("v$");
 const route = useRoute();
 
@@ -143,7 +144,7 @@ function onQuotaInput(e: Event) {
 // ==========================================
 const trialQuotaError = ref("");
 const localTrialLimit = ref<number | "">(problem.value?.config?.maxNumberOfTrial ?? "");
-const trialPublicZipError = ref<string>("");
+// const trialPublicZipError = ref<string>("");
 
 function onTrialLimitInput(e: Event) {
   const inputEl = e.target as HTMLInputElement;
@@ -246,7 +247,7 @@ function ensureConfig() {
 // Initialize artifactCollection
 function initArtifactCollection() {
   ensureConfig();
-  const cfg = problem.value.config as any;
+  const cfg = problem.value.config as unknown;
   // Backward compatibility check
   if (cfg && !Array.isArray(cfg.artifactCollection)) {
     cfg.artifactCollection = Array.isArray(cfg.artifact_collection) ? cfg.artifact_collection : [];
@@ -259,7 +260,7 @@ function initArtifactCollection() {
 
 // Synchronous initialization check (to ensure value exists before mount if possible)
 if (!Array.isArray(problem.value.config.artifactCollection)) {
-  const cfgAny = problem.value.config as any;
+  const cfgAny = problem.value.config as unknown;
   problem.value.config.artifactCollection = Array.isArray(cfgAny?.artifact_collection)
     ? cfgAny.artifact_collection
     : [];
@@ -271,6 +272,7 @@ const artifactCompiledBinary = computed({
   set: (val: boolean) => {
     const list = problem.value.config!.artifactCollection;
     const next = new Set(list);
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     val ? next.add("compiledBinary") : next.delete("compiledBinary");
     problem.value.config!.artifactCollection = Array.from(next);
   },
@@ -281,6 +283,7 @@ const artifactZip = computed({
   set: (val: boolean) => {
     const list = problem.value.config!.artifactCollection;
     const next = new Set(list);
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     val ? next.add("zip") : next.delete("zip");
     problem.value.config!.artifactCollection = Array.from(next);
   },
@@ -290,7 +293,7 @@ const artifactZip = computed({
 // Section: Assets Helper
 // ==========================================
 const assetPaths = computed<Record<string, string>>(
-  () => ((problem.value.config as any)?.assetPaths as Record<string, string>) || {},
+  () => ((problem.value.config as unknown)?.assetPaths as Record<string, string>) || {},
 );
 
 const hasAsset = (key: string) => !!(assetPaths.value && assetPaths.value[key]);
@@ -305,7 +308,7 @@ const dockerZipError = ref("");
 
 // Helper: Read saved env list from config
 function loadSavedDockerEnvs() {
-  const nar = problem.value.config?.networkAccessRestriction as any;
+  const nar = problem.value.config?.networkAccessRestriction as unknown;
   if (nar?.custom_env?.env_list && Array.isArray(nar.custom_env.env_list)) {
     detectedDockerEnvs.value = nar.custom_env.env_list;
   }
@@ -361,7 +364,7 @@ async function inspectDockerZip(file: File) {
     detectedDockerEnvs.value = sortedEnvs;
 
     // Save to config
-    const nar = problem.value.config!.networkAccessRestriction as any;
+    const nar = problem.value.config!.networkAccessRestriction as unknown;
     if (!nar.custom_env) {
       nar.custom_env = {};
     }
@@ -380,7 +383,7 @@ async function inspectDockerZip(file: File) {
 
 function removeDockerEnv(index: number) {
   detectedDockerEnvs.value.splice(index, 1);
-  const nar = problem.value.config?.networkAccessRestriction as any;
+  const nar = problem.value.config?.networkAccessRestriction as unknown;
   if (nar?.custom_env) {
     nar.custom_env.env_list = detectedDockerEnvs.value;
   }
@@ -401,7 +404,7 @@ function getAIFileExtensions() {
 // ==========================================
 // Section: API Keys Management
 // ==========================================
-const apiKeys = reactive<{ active: any[]; inactive: any[] }>({
+const apiKeys = reactive<{ active: unknown[]; inactive: unknown[] }>({
   active: [],
   inactive: [],
 });
@@ -439,7 +442,7 @@ async function fetchKeys() {
     logger.log(`Found ${rawKeys.length} keys`);
 
     // Data Sanitization and Classification
-    const safeKeys = rawKeys.map((k: any, index: number) => {
+    const safeKeys = rawKeys.map((k: unknown, index: number) => {
       // Integrity Check
       const missing: string[] = [];
       if (!k.id) missing.push("id");
@@ -458,11 +461,11 @@ async function fetchKeys() {
       };
     });
 
-    apiKeys.active = safeKeys.filter((k: any) => k.is_active);
-    apiKeys.inactive = safeKeys.filter((k: any) => !k.is_active);
+    apiKeys.active = safeKeys.filter((k: unknown) => k.is_active);
+    apiKeys.inactive = safeKeys.filter((k: unknown) => !k.is_active);
 
     logger.success("Keys Loaded", { active: apiKeys.active.length, inactive: apiKeys.inactive.length });
-  } catch (err: any) {
+  } catch (err: unknown) {
     logger.error("Fetch Keys Error", err);
     fetchError.value = err?.message || "Failed to load keys.";
   } finally {
@@ -540,7 +543,7 @@ async function fetchKeySuggestion() {
     } else {
       throw new Error(message || "API returned failed status");
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     logger.error("Suggestion Error", err);
     suggestionError.value = err?.response?.data?.detail || err?.message || "Failed to fetch suggestion.";
     keySuggestion.value = null;
@@ -663,11 +666,16 @@ onBeforeUnmount(() => {
       <label class="label"><span class="label-text">Accepted Format</span></label>
       <div class="flex flex-wrap items-center gap-6">
         <label class="label cursor-pointer gap-2">
-          <input type="radio" class="radio" value="code" v-model="(problem.config!.acceptedFormat as any)" />
+          <input
+            type="radio"
+            class="radio"
+            value="code"
+            v-model="problem.config!.acceptedFormat as unknown"
+          />
           <span class="label-text">Code</span>
         </label>
         <label class="label cursor-pointer gap-2">
-          <input type="radio" class="radio" value="zip" v-model="(problem.config!.acceptedFormat as any)" />
+          <input type="radio" class="radio" value="zip" v-model="problem.config!.acceptedFormat as unknown" />
           <span class="label-text">Zip</span>
         </label>
       </div>
@@ -690,7 +698,7 @@ onBeforeUnmount(() => {
             )
           "
         />
-        <span class="whitespace-nowrap text-xs opacity-70">(default 50 MB)</span>
+        <span class="text-xs whitespace-nowrap opacity-70">(default 50 MB)</span>
       </div>
     </div>
 
@@ -712,7 +720,7 @@ onBeforeUnmount(() => {
             <div class="flex flex-wrap items-center gap-x-8 gap-y-4">
               <div class="flex min-w-[260px] flex-1 items-center gap-3">
                 <label class="label mb-0 w-28">
-                  <span class="label-text">AI Model</span>
+                  <span class="label-text">AI Model</span>
                 </label>
                 <select
                   class="select select-bordered select-sm flex-1"
@@ -725,7 +733,7 @@ onBeforeUnmount(() => {
               </div>
               <div class="flex min-w-[300px] flex-1 items-center gap-3">
                 <label class="label mb-0 w-32">
-                  <span class="label-text">Upload AC files</span>
+                  <span class="label-text">Upload AC files</span>
                 </label>
                 <div class="w-full">
                   <input
@@ -734,7 +742,7 @@ onBeforeUnmount(() => {
                     :accept="getAIFileExtensions().join(',')"
                     class="file-input file-input-bordered file-input-sm w-full"
                     @change="
-                      (e: any) => {
+                      (e: unknown) => {
                         const files = Array.from(e.target.files || []) as File[];
                         const valid = validateFilesForAIAC(files, getAIFileExtensions());
                         problem.assets!.aiVTuberACFiles = valid;
@@ -773,12 +781,12 @@ onBeforeUnmount(() => {
                   <transition name="fade">
                     <div
                       v-if="showSuggestionTooltip"
-                      class="key-suggestion-tooltip absolute left-6 top-full z-50 mt-2 w-72 rounded-md border border-gray-400 bg-base-100 p-3 shadow-xl"
+                      class="key-suggestion-tooltip bg-base-100 absolute top-full left-6 z-50 mt-2 w-72 rounded-md border border-gray-400 p-3 shadow-xl"
                     >
                       <div v-if="isFetchingSuggestion" class="flex items-center text-sm">
                         <ui-spinner class="mr-2" /> Fetching suggestion...
                       </div>
-                      <div v-else-if="suggestionError" class="text-sm text-error">
+                      <div v-else-if="suggestionError" class="text-error text-sm">
                         {{ suggestionError }}
                       </div>
                       <div v-else-if="keySuggestion" class="space-y-1 text-sm">
@@ -814,7 +822,7 @@ onBeforeUnmount(() => {
                 <button
                   type="button"
                   @click="showActiveKeys = !showActiveKeys"
-                  class="flex w-full items-center justify-between px-4 py-2 transition-colors hover:bg-base-200"
+                  class="hover:bg-base-200 flex w-full items-center justify-between px-4 py-2 transition-colors"
                 >
                   <div class="flex items-center gap-2">
                     <svg
@@ -839,7 +847,7 @@ onBeforeUnmount(() => {
                     v-for="key in apiKeys.active"
                     :key="key.id"
                     :ref="(el) => (activeKeyRefs[key.id] = el as HTMLElement)"
-                    class="flex cursor-pointer items-start gap-3 rounded-lg border border-transparent p-3 transition hover:border-info/30 hover:bg-base-200"
+                    class="hover:border-info/30 hover:bg-base-200 flex cursor-pointer items-start gap-3 rounded-lg border border-transparent p-3 transition"
                   >
                     <input
                       type="checkbox"
@@ -868,7 +876,7 @@ onBeforeUnmount(() => {
                 <button
                   type="button"
                   @click="showInactiveKeys = !showInactiveKeys"
-                  class="flex w-full items-center justify-between px-4 py-2 transition-colors hover:bg-base-200"
+                  class="hover:bg-base-200 flex w-full items-center justify-between px-4 py-2 transition-colors"
                 >
                   <div class="flex items-center gap-2">
                     <svg
@@ -893,7 +901,7 @@ onBeforeUnmount(() => {
                     v-for="key in apiKeys.inactive"
                     :key="key.id"
                     :ref="(el) => (inactiveKeyRefs[key.id] = el as HTMLElement)"
-                    class="flex cursor-pointer items-start gap-3 rounded-lg border border-transparent p-3 transition hover:border-error/30 hover:bg-base-200"
+                    class="hover:border-error/30 hover:bg-base-200 flex cursor-pointer items-start gap-3 rounded-lg border border-transparent p-3 transition"
                   >
                     <input
                       type="checkbox"
@@ -952,7 +960,7 @@ onBeforeUnmount(() => {
           </label>
         </div>
 
-        <div class="flex flex-wrap gap-x-8 gap-y-4 rounded border border-gray-300 bg-base-100 p-3">
+        <div class="bg-base-100 flex flex-wrap gap-x-8 gap-y-4 rounded border border-gray-300 p-3">
           <div class="form-control">
             <label class="label cursor-pointer gap-3">
               <span class="label-text font-semibold">Result Visible</span>
@@ -987,7 +995,7 @@ onBeforeUnmount(() => {
             accept=".zip"
             class="file-input file-input-bordered file-input-sm w-full"
             @change="
-              async (e: any) => {
+              async (e: unknown) => {
                 const inputEl = e.target as HTMLInputElement;
                 const file = inputEl.files?.[0] || null;
                 problem.assets!.trialModePublicTestDataZip = null;
@@ -1002,13 +1010,13 @@ onBeforeUnmount(() => {
             "
           />
           <label class="label">
-            <span class="label-text-alt opacity-70"> Only <code>.in</code> files inside ZIP; ≤ 1 GB </span>
+            <span class="label-text-alt opacity-70"> Only <code>.in</code> files inside ZIP; ≤ 1 GB </span>
           </label>
         </div>
 
         <div class="form-control w-full max-w-xs">
           <label class="label">
-            <span class="label-text">Upload AC files</span>
+            <span class="label-text">Upload AC files</span>
           </label>
           <input
             type="file"
@@ -1016,13 +1024,13 @@ onBeforeUnmount(() => {
             :accept="getAIFileExtensions().join(',')"
             class="file-input file-input-bordered file-input-sm w-full"
             @change="
-                  (e: any) => {
-                  const files = Array.from(e.target.files || []) as File[];
-                    const valid = validateFilesForAIAC(files, getAIFileExtensions());
-                    problem.assets!.trialModeACFiles = valid;
-                    if (valid.length === 0) (e.target as HTMLInputElement).value = '';
-                  }
-                "
+              (e: unknown) => {
+                const files = Array.from(e.target.files || []) as File[];
+                const valid = validateFilesForAIAC(files, getAIFileExtensions());
+                problem.assets!.trialModeACFiles = valid;
+                if (valid.length === 0) (e.target as HTMLInputElement).value = '';
+              }
+            "
           />
           <label class="label mt-1">
             <span class="label-text-alt text-sm opacity-70">
@@ -1058,18 +1066,25 @@ onBeforeUnmount(() => {
                   <div class="mode-switcher-container">
                     <div
                       class="mode-switcher-slider"
-                      :class="{ 'slider-blacklist': problem.config!.networkAccessRestriction!.external!.model === 'Black' }"
+                      :class="{
+                        'slider-blacklist':
+                          problem.config!.networkAccessRestriction!.external!.model === 'Black',
+                      }"
                     ></div>
                     <button
                       class="mode-switcher-option"
-                      :class="{ active: problem.config!.networkAccessRestriction!.external!.model === 'White' }"
+                      :class="{
+                        active: problem.config!.networkAccessRestriction!.external!.model === 'White',
+                      }"
                       @click="problem.config!.networkAccessRestriction!.external!.model = 'White'"
                     >
                       <span>Whitelist</span>
                     </button>
                     <button
                       class="mode-switcher-option"
-                      :class="{ active: problem.config!.networkAccessRestriction!.external!.model === 'Black' }"
+                      :class="{
+                        active: problem.config!.networkAccessRestriction!.external!.model === 'Black',
+                      }"
                       @click="problem.config!.networkAccessRestriction!.external!.model = 'Black'"
                     >
                       <span>Blacklist</span>
@@ -1089,7 +1104,11 @@ onBeforeUnmount(() => {
                 <MultiStringInput
                   v-model="problem.config!.networkAccessRestriction!.external!.ip"
                   placeholder="e.g. 8.8.8.8"
-                  :badge-class="problem.config!.networkAccessRestriction!.external!.model === 'White' ? 'badge-info' : 'badge-error'"
+                  :badge-class="
+                    problem.config!.networkAccessRestriction!.external!.model === 'White'
+                      ? 'badge-info'
+                      : 'badge-error'
+                  "
                 />
               </div>
 
@@ -1098,7 +1117,11 @@ onBeforeUnmount(() => {
                 <MultiStringInput
                   v-model="problem.config!.networkAccessRestriction!.external!.url"
                   placeholder="e.g. google.com"
-                  :badge-class="problem.config!.networkAccessRestriction!.external!.model === 'White' ? 'badge-info' : 'badge-error'"
+                  :badge-class="
+                    problem.config!.networkAccessRestriction!.external!.model === 'White'
+                      ? 'badge-info'
+                      : 'badge-error'
+                  "
                 />
               </div>
             </div>
@@ -1140,14 +1163,14 @@ onBeforeUnmount(() => {
                   class="file-input file-input-bordered w-full max-w-xs"
                   :class="{ 'input-error': v$?.assets?.dockerfilesZip?.$error || dockerZipError }"
                   @change="
-                    async (e: any) => {
+                    async (e: unknown) => {
                       const file = e.target.files?.[0] || null;
 
                       // Reset previous
                       detectedDockerEnvs = [];
                       dockerZipError = '';
 
-                      const nar = problem.config!.networkAccessRestriction as any;
+                      const nar = problem.config!.networkAccessRestriction as unknown;
                       if (nar?.custom_env) nar.custom_env.env_list = [];
 
                       if (file) {
@@ -1174,16 +1197,16 @@ onBeforeUnmount(() => {
                   "
                 />
                 <label v-if="v$?.assets?.dockerfilesZip?.$error || dockerZipError" class="label">
-                  <span class="label-text-alt whitespace-pre-line text-error">
+                  <span class="label-text-alt text-error whitespace-pre-line">
                     {{ v$?.assets?.dockerfilesZip?.$errors[0]?.$message || dockerZipError }}
                   </span>
                 </label>
 
                 <div
                   v-if="detectedDockerEnvs.length > 0"
-                  class="mt-2 w-full max-w-xs rounded border border-success/30 bg-base-200 p-3 text-xs"
+                  class="border-success/30 bg-base-200 mt-2 w-full max-w-xs rounded border p-3 text-xs"
                 >
-                  <div class="mb-2 flex items-center gap-1 font-bold text-success">
+                  <div class="text-success mb-2 flex items-center gap-1 font-bold">
                     <i-uil-check-circle />
                     {{
                       problem.assets?.dockerfilesZip
@@ -1195,7 +1218,7 @@ onBeforeUnmount(() => {
                     <li
                       v-for="(env, index) in detectedDockerEnvs"
                       :key="env"
-                      class="flex items-center justify-between rounded px-1 transition-colors hover:bg-base-300"
+                      class="hover:bg-base-300 flex items-center justify-between rounded px-1 transition-colors"
                     >
                       <div>
                         <span class="font-mono font-bold">{{ env }}</span>
@@ -1203,7 +1226,7 @@ onBeforeUnmount(() => {
 
                       <button
                         type="button"
-                        class="btn btn-ghost btn-xs h-6 min-h-0 w-6 p-0 text-error"
+                        class="btn btn-ghost btn-xs text-error h-6 min-h-0 w-6 p-0"
                         @click="removeDockerEnv(index)"
                         title="Remove this environment"
                       >
@@ -1220,7 +1243,7 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- Artifact Collection -->
-    <div class="form-control col-span-1 rounded-lg border border-base-300 p-4 md:col-span-2">
+    <div class="form-control border-base-300 col-span-1 rounded-lg border p-4 md:col-span-2">
       <label class="label"><span class="label-text">Artifact Collection (Optional)</span></label>
       <div class="flex gap-4">
         <label class="label cursor-pointer gap-2">
@@ -1250,7 +1273,9 @@ onBeforeUnmount(() => {
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
   border-radius: 12px;
   padding: 3px;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(255, 255, 255, 0.05);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.3),
+    0 1px 2px rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -1263,14 +1288,18 @@ onBeforeUnmount(() => {
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   border-radius: 9px;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4), 0 0 20px rgba(59, 130, 246, 0.2);
+  box-shadow:
+    0 2px 8px rgba(59, 130, 246, 0.4),
+    0 0 20px rgba(59, 130, 246, 0.2);
   z-index: 1;
 }
 
 .mode-switcher-slider.slider-blacklist {
   transform: translateX(calc(100% + 3px));
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4), 0 0 20px rgba(239, 68, 68, 0.2);
+  box-shadow:
+    0 2px 8px rgba(239, 68, 68, 0.4),
+    0 0 20px rgba(239, 68, 68, 0.2);
 }
 
 .mode-switcher-option {

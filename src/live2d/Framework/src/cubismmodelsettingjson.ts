@@ -32,7 +32,7 @@ export class CubismModelSettingJson extends ICubismModelSetting {
   /**
    * 引数付きコンストラクタ
    *
-   * @param buffer    Model3Jsonをバイト配列として読み込んだデータバッファ
+   * @param buffer    Model3Jsonをバイト配列として読み込ん� データバッファ
    * @param size      Model3Jsonのデータサイズ
    */
   public constructor(buffer: ArrayBuffer, size: number) {
@@ -42,7 +42,7 @@ export class CubismModelSettingJson extends ICubismModelSetting {
     if (this.getJson()) {
       this._jsonValue = new csmVector<Value>();
 
-      // 順番はenum FrequestNodeと一致させる
+      // � �番はenum FrequestNodeと一致させる
       this._jsonValue.pushBack(this.getJson().getRoot().getValueByString(this.groups));
       this._jsonValue.pushBack(
         this.getJson().getRoot().getValueByString(this.fileReferences).getValueByString(this.moc),
@@ -118,7 +118,7 @@ export class CubismModelSettingJson extends ICubismModelSetting {
       .getRawString();
 
     const pathArray = texturePath.split("/");
-    // 最後の要素はテクスチャ名なので不要
+    // 最後の要� はテクスチャ名なので不要
     const arrayLength = pathArray.length - 1;
     let textureDirectoryStr = "";
 
@@ -376,13 +376,13 @@ export class CubismModelSettingJson extends ICubismModelSetting {
   }
 
   /**
-   * レイアウト情報を取得する
+   * レイアウト情� �を取得する
    * @param outLayoutMap csmMapクラスのインスタンス
-   * @return true レイアウト情報が存在する
-   * @return false レイアウト情報が存在しない
+   * @return true レイアウト情� �が存在する
+   * @return false レイアウト情� �が存在しない
    */
   public getLayoutMap(outLayoutMap: csmMap<string, number>): boolean {
-    // 存在しない要素にアクセスするとエラーになるためValueがnullの場合はnullを代入する
+    // 存在しない要� にアクセスするとエラーになるためValueがnullの� �合はnullを代入する
     const map: csmMap<string, Value> = this.getJson().getRoot().getValueByString(this.layout).getMap();
 
     if (map == null) {

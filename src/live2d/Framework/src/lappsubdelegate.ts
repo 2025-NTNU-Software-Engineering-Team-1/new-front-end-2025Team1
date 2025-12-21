@@ -34,7 +34,7 @@ export class LAppSubdelegate {
    */
   public release(): void {
     // 🟣 1. 安全關掉 ResizeObserver（有才關，避免 undefined.unobserve）
-    const ro = (this as any)._resizeObserver as ResizeObserver | null | undefined;
+    const ro = (this as unknown)._resizeObserver as ResizeObserver | null | undefined;
 
     if (ro) {
       if (this._canvas) {
@@ -49,7 +49,7 @@ export class LAppSubdelegate {
       } catch (e) {
         console.warn("[Live2D] ResizeObserver disconnect 時發生例外：", e);
       }
-      (this as any)._resizeObserver = null;
+      (this as unknown)._resizeObserver = null;
     }
 
     // 🟣 2. 釋放 View
@@ -60,10 +60,10 @@ export class LAppSubdelegate {
 
     // 🟣 3. 釋放 Live2D Manager
     if (this._live2DManager) {
-      if ((this._live2DManager as any).release) {
-        (this._live2DManager as any).release();
-      } else if ((this._live2DManager as any).releaseAllModel) {
-        (this._live2DManager as any).releaseAllModel();
+      if ((this._live2DManager as unknown).release) {
+        (this._live2DManager as unknown).release();
+      } else if ((this._live2DManager as unknown).releaseAllModel) {
+        (this._live2DManager as unknown).releaseAllModel();
       }
       this._live2DManager = null;
     }
@@ -80,8 +80,8 @@ export class LAppSubdelegate {
         console.warn("[Live2D] 在 release 中釋放 GL context 時發生例外：", e);
       }
 
-      if ((this._glManager as any).release) {
-        (this._glManager as any).release();
+      if ((this._glManager as unknown).release) {
+        (this._glManager as unknown).release();
       }
       this._glManager = null;
     }
@@ -115,7 +115,7 @@ export class LAppSubdelegate {
 
     console.log("[APP] LAppSubdelegate.initialize 完成，gl =", this._gl);
 
-    // 建立 View，交給它負責畫畫
+    // 建立 View，交給它� 責畫畫
     this._view = new LAppView();
     this._view.initialize(this); // 把自己傳進去
 
@@ -153,7 +153,7 @@ export class LAppSubdelegate {
       return;
     }
 
-    // キャンバスのサイズが変わっている場合はリサイズに必要な処理をする。
+    // キャンバスのサイズが変わっている� �合はリサイズに必要な処理をする。
     if (this._needResize) {
       this.onResize();
       this._needResize = false;
@@ -167,7 +167,7 @@ export class LAppSubdelegate {
     // 深度テストを有効化
     gl.enable(gl.DEPTH_TEST);
 
-    // 近くにある物体は、遠くにある物体を覆い隠す
+    // 近くにある物体は、� くにある物体を覆い� す
     gl.depthFunc(gl.LEQUAL);
 
     // カラーバッファや深度バッファをクリアする
@@ -230,7 +230,7 @@ export class LAppSubdelegate {
     gl.shaderSource(fragmentShaderId, fragmentShader);
     gl.compileShader(fragmentShaderId);
 
-    // プログラムオブジェクトの作成
+    // プログラ� オブジェクトの作成
     const programId = gl.createProgram();
     gl.attachShader(programId, vertexShaderId);
     gl.attachShader(programId, fragmentShaderId);
@@ -344,7 +344,7 @@ export class LAppSubdelegate {
   private _canvas: HTMLCanvasElement;
 
   /**
-   * View情報
+   * View情� �
    */
   private _view: LAppView;
 

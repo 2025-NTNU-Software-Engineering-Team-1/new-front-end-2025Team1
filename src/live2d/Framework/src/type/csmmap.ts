@@ -60,8 +60,8 @@ export class csmMap<_KeyT, _ValT> {
   }
 
   /**
-   * キーを追加する
-   * @param key 新たに追加するキー
+   * キーを追� する
+   * @param key 新たに追� するキー
    */
   public appendKey(key: _KeyT): void {
     let findIndex = -1;
@@ -72,7 +72,7 @@ export class csmMap<_KeyT, _ValT> {
       }
     }
 
-    // 同じkeyが既に作られている場合は何もしない
+    // 同じkeyが既に作られている� �合は何もしない
     if (findIndex != -1) {
       CubismLogWarning("The key `{0}` is already append.", key);
       return;
@@ -103,7 +103,7 @@ export class csmMap<_KeyT, _ValT> {
     if (found >= 0) {
       return this._keyValues[found].second;
     } else {
-      this.appendKey(key); // 新規キーを追加
+      this.appendKey(key); // 新規キーを追�
       return this._keyValues[this._size - 1].second;
     }
   }
@@ -126,16 +126,16 @@ export class csmMap<_KeyT, _ValT> {
     if (found >= 0) {
       this._keyValues[found].second = value;
     } else {
-      this.appendKey(key); // 新規キーを追加
+      this.appendKey(key); // 新規キーを追�
       this._keyValues[this._size - 1].second = value;
     }
   }
 
   /**
-   * 引数で渡したKeyを持つ要素が存在するか
+   * 引数で渡したKeyを持つ要� が存在するか
    * @param key 存在を確認するkey
-   * @return true 引数で渡したkeyを持つ要素が存在する
-   * @return false 引数で渡したkeyを持つ要素が存在しない
+   * @return true 引数で渡したkeyを持つ要� が存在する
+   * @return false 引数で渡したkeyを持つ要� が存在しない
    */
   public isExist(key: _KeyT): boolean {
     for (let i = 0; i < this._size; i++) {
@@ -168,7 +168,7 @@ export class csmMap<_KeyT, _ValT> {
 
   /**
    * コンテナのキャパシティを確保する
-   * @param newSize 新たなキャパシティ。引数の値が現在のサイズ未満の場合は何もしない。
+   * @param newSize 新たなキャパシティ。引数の値が現在のサイズ未満の� �合は何もしない。
    * @param fitToSize trueなら指定したサイズに合わせる。falseならサイズを2倍確保しておく。
    */
   public prepareCapacity(newSize: number, fitToSize: boolean): void {
@@ -184,7 +184,7 @@ export class csmMap<_KeyT, _ValT> {
   }
 
   /**
-   * コンテナの先頭要素を返す
+   * コンテナの先� �要� を返す
    */
   public begin(): iterator<_KeyT, _ValT> {
     const ite: iterator<_KeyT, _ValT> = new iterator<_KeyT, _ValT>(this, 0);
@@ -192,7 +192,7 @@ export class csmMap<_KeyT, _ValT> {
   }
 
   /**
-   * コンテナの終端要素を返す
+   * コンテナの終端要� を返す
    */
   public end(): iterator<_KeyT, _ValT> {
     const ite: iterator<_KeyT, _ValT> = new iterator<_KeyT, _ValT>(this, this._size); // 終了
@@ -200,9 +200,9 @@ export class csmMap<_KeyT, _ValT> {
   }
 
   /**
-   * コンテナから要素を削除する
+   * コンテナから要� を削除する
    *
-   * @param ite 削除する要素
+   * @param ite 削除する要�
    */
   public erase(ite: iterator<_KeyT, _ValT>): iterator<_KeyT, _ValT> {
     const index: number = ite._index;
@@ -231,7 +231,7 @@ export class csmMap<_KeyT, _ValT> {
   public static readonly DefaultSize = 10; // コンテナの初期化のデフォルトサイズ
   public _keyValues: csmPair<_KeyT, _ValT>[]; // key-valueペアの配列
   public _dummyValue: _ValT; // 空の値を返す為のダミー
-  public _size: number; // コンテナの要素数
+  public _size: number; // コンテナの要� 数
 }
 
 /**

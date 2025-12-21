@@ -26,7 +26,7 @@ function closeModal() {
           leave-from="opacity-100"
           leave-to="opacity-0"
         >
-          <div class="fixed inset-0 bg-black bg-opacity-25" />
+          <div class="bg-opacity-25 fixed inset-0 bg-black" />
         </TransitionChild>
 
         <TransitionChild
@@ -39,10 +39,10 @@ function closeModal() {
           leave-to="opacity-0 scale-95"
         >
           <div class="modal-box">
-            <DialogTitle as="h3" class="text-xl font-medium text-base-content">
+            <DialogTitle as="h3" class="text-base-content text-xl font-medium">
               <slot name="title"></slot>
             </DialogTitle>
-            <div class="mt-2 text-base-content">
+            <div class="text-base-content mt-2">
               <slot name="content"></slot>
             </div>
           </div>

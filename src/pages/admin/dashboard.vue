@@ -2,7 +2,6 @@
 import { fetcher } from "@/models/api";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import { useI18n } from "vue-i18n";
-import { ROLE } from "@/constants";
 import { useTitle } from "@vueuse/core";
 import { computed } from "vue";
 
@@ -39,7 +38,7 @@ const courseSummaryTotal = computed(() => {
         <skeleton-table :col="2" :row="5" />
       </template>
       <template #data>
-        <table class="table table-compact w-full">
+        <table class="table-compact table w-full">
           <thead>
             <tr>
               <th>#</th>
@@ -72,7 +71,7 @@ const courseSummaryTotal = computed(() => {
         <skeleton-table :col="5" :row="15" />
       </template>
       <template #data>
-        <table class="table table-compact w-full">
+        <table class="table-compact table w-full">
           <thead>
             <tr>
               <th>{{ t("admin.dashboard.coursecount.coursename") }}</th>

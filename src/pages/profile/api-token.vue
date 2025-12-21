@@ -49,13 +49,13 @@ const getStatusClass = (status: string) => {
 };
 
 const scopeOptions = ref<string[]>([]);
-// 後端串接點 (2/5) - 取得可用的 Scope 選項
+// 後端串接點 (2/5) - 取得可用的 Scope 選� �
 async function getScopeOptions() {
   try {
     const response = await api.APIToken.getScopes();
     scopeOptions.value = response.data.Scope;
   } catch (error) {
-    console.error("無法取得 Scope 選項:", error);
+    console.error("無法取得 Scope 選� �:", error);
     scopeOptions.value = ["Read-only", "Read/Write", "Admin", "None"];
   }
 }
@@ -145,7 +145,7 @@ async function handleUpdate() {
   }
 }
 
-// Scope 加減
+// Scope � 減
 function addScope(form: "create" | "edit") {
   const targetForm = form === "create" ? newApiTokenForm : editApiTokenForm;
   targetForm.scopes.push("Read-only");
@@ -207,7 +207,7 @@ async function handleDeactivate() {
             {{ t("profile.apiToken.create_new_key") }}
           </button>
         </div>
-        <p class="mt-4 text-sm text-base-content/70">
+        <p class="text-base-content/70 mt-4 text-sm">
           {{ t("profile.apiToken.description") }}
         </p>
         <div class="form-control mt-4">
@@ -302,12 +302,12 @@ async function handleDeactivate() {
   <!-- 創建 Token 彈窗 -->
   <ui-dialog v-model="isCreateModalOpen">
     <template #title>
-      <div class="rounded-t-box -m-6 bg-primary p-6 text-primary-content">
+      <div class="rounded-t-box bg-primary text-primary-content -m-6 p-6">
         {{ t("profile.apiToken.create_modal.title") }}
       </div>
     </template>
     <template #content>
-      <div class="-m-6 bg-primary p-6 pt-0 text-primary-content">
+      <div class="bg-primary text-primary-content -m-6 p-6 pt-0">
         <div class="space-y-4">
           <div class="form-control w-full">
             <label class="label"
@@ -330,7 +330,7 @@ async function handleDeactivate() {
             >
             <div class="flex items-center gap-2">
               <select
-                class="select flex-grow bg-base-200 text-base-content"
+                class="select bg-base-200 text-base-content flex-grow"
                 v-model="newApiTokenForm.scopes[index]"
               >
                 <option v-for="option in scopeOptions" :key="option" :value="option">{{ option }}</option>
@@ -367,7 +367,7 @@ async function handleDeactivate() {
           <button class="btn btn-link text-primary-content" @click="isCreateModalOpen = false">
             {{ t("profile.apiToken.create_modal.cancel") }}
           </button>
-          <button class="btn btn-link font-bold text-primary-content" @click="handleCreate">
+          <button class="btn btn-link text-primary-content font-bold" @click="handleCreate">
             {{ t("profile.apiToken.create_modal.create") }}
           </button>
         </div>
@@ -378,12 +378,12 @@ async function handleDeactivate() {
   <!-- 編輯 Token 的彈窗 -->
   <ui-dialog v-model="isEditModalOpen">
     <template #title>
-      <div class="rounded-t-box -m-6 bg-primary p-6 text-primary-content">
+      <div class="rounded-t-box bg-primary text-primary-content -m-6 p-6">
         {{ t("profile.apiToken.edit_modal.title") }}
       </div>
     </template>
     <template #content>
-      <div class="-m-6 bg-primary p-6 pt-0 text-primary-content">
+      <div class="bg-primary text-primary-content -m-6 p-6 pt-0">
         <div class="space-y-4">
           <div class="form-control w-full">
             <label class="label"
@@ -391,7 +391,7 @@ async function handleDeactivate() {
                 t("profile.apiToken.edit_modal.original_info")
               }}</span></label
             >
-            <div class="rounded bg-base-300/20 p-2 font-mono text-sm">
+            <div class="bg-base-300/20 rounded p-2 font-mono text-sm">
               {Name: "{{ editingToken?.Name }}"; Scope: {{ editingToken?.Scope.join(", ") }}}
             </div>
           </div>
@@ -411,7 +411,7 @@ async function handleDeactivate() {
             >
             <div class="flex items-center gap-2">
               <select
-                class="select flex-grow bg-base-200 text-base-content"
+                class="select bg-base-200 text-base-content flex-grow"
                 v-model="editApiTokenForm.scopes[index]"
               >
                 <option v-for="option in scopeOptions" :key="option" :value="option">{{ option }}</option>
@@ -448,7 +448,7 @@ async function handleDeactivate() {
           <button class="btn btn-link text-primary-content" @click="isEditModalOpen = false">
             {{ t("profile.apiToken.create_modal.cancel") }}
           </button>
-          <button class="btn btn-link font-bold text-primary-content" @click="handleUpdate">
+          <button class="btn btn-link text-primary-content font-bold" @click="handleUpdate">
             {{ t("profile.apiToken.edit_modal.update") }}
           </button>
         </div>
@@ -465,7 +465,7 @@ async function handleDeactivate() {
           {{ t("profile.apiToken.success_modal.warning") }}
           <i-uil-exclamation-triangle class="text-warning" />
         </h3>
-        <p class="text-sm font-semibold text-warning">
+        <p class="text-warning text-sm font-semibold">
           {{ t("profile.apiToken.success_modal.message") }}
         </p>
         <div class="input-group w-full max-w-xs">
@@ -486,24 +486,24 @@ async function handleDeactivate() {
   <!-- 查看 Scope 的彈出視窗 -->
   <ui-dialog v-model="isViewScopeModalOpen">
     <template #title>
-      <div class="rounded-t-box -m-6 bg-primary p-6 text-primary-content">
+      <div class="rounded-t-box bg-primary text-primary-content -m-6 p-6">
         {{ t("profile.apiToken.view_scope_modal.title") }}
       </div>
     </template>
     <template #content>
-      <div class="-m-6 bg-primary p-6 pt-0 text-primary-content">
+      <div class="bg-primary text-primary-content -m-6 p-6 pt-0">
         <div class="space-y-2">
           <label class="label"
             ><span class="label-text text-primary-content">{{
               t("profile.apiToken.create_modal.scope_label")
             }}</span></label
           >
-          <div v-for="scope in viewingScopes" :key="scope" class="rounded bg-base-200 p-3 text-base-content">
+          <div v-for="scope in viewingScopes" :key="scope" class="bg-base-200 text-base-content rounded p-3">
             {{ scope }}
           </div>
         </div>
         <div class="modal-action">
-          <button class="btn btn-link font-bold text-primary-content" @click="isViewScopeModalOpen = false">
+          <button class="btn btn-link text-primary-content font-bold" @click="isViewScopeModalOpen = false">
             {{ t("profile.apiToken.success_modal.ok") }}
           </button>
         </div>
@@ -514,19 +514,19 @@ async function handleDeactivate() {
   <!-- 停用 Token 的確認彈窗 -->
   <ui-dialog v-model="isDeactivateModalOpen">
     <template #title>
-      <div class="rounded-t-box -m-6 bg-primary p-6 text-primary-content">
+      <div class="rounded-t-box bg-primary text-primary-content -m-6 p-6">
         {{ t("profile.apiToken.deactivate_modal.title") }}
       </div>
     </template>
     <template #content>
-      <div class="-m-6 bg-primary p-6 pt-0 text-primary-content">
+      <div class="bg-primary text-primary-content -m-6 p-6 pt-0">
         <div class="form-control w-full">
           <label class="label"
             ><span class="label-text text-primary-content/70">{{
               t("profile.apiToken.deactivate_modal.token_info")
             }}</span></label
           >
-          <div class="rounded bg-base-300/20 p-2 text-left font-mono text-sm">
+          <div class="bg-base-300/20 rounded p-2 text-left font-mono text-sm">
             {Name: "{{ editingToken?.Name }}"; Scope: {{ editingToken?.Scope.join(", ") }}}
           </div>
         </div>
@@ -534,7 +534,7 @@ async function handleDeactivate() {
           <button class="btn btn-link text-primary-content" @click="isDeactivateModalOpen = false">
             {{ t("profile.apiToken.create_modal.cancel") }}
           </button>
-          <button class="btn btn-link font-bold text-error" @click="handleDeactivate">
+          <button class="btn btn-link text-error font-bold" @click="handleDeactivate">
             {{ t("profile.apiToken.deactivate_modal.deactivate") }}
           </button>
         </div>

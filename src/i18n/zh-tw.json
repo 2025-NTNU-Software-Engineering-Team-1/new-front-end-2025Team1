@@ -233,34 +233,6 @@
       "unknown-error-occurred": "發生未知錯誤 :("
     }
   },
-  "profile": {
-    "title": "個人資料",
-    "rules": {
-      "confirmPassword": {
-        "sameAsRef": "密碼不符合。"
-      }
-    },
-    "username": "帳號",
-    "dispname": "顯示名稱",
-    "email": "電子郵件",
-    "role": "角色",
-    "signOut": "登出",
-    "pw": {
-      "change": "變更密碼",
-      "success": "密碼已成功變更",
-      "new": "新密碼",
-      "confirm": "確認新密碼",
-      "current": "舊密碼",
-      "placeholder": {
-        "new": "新密碼",
-        "again": "再輸入一次新密碼",
-        "current": "舊密碼"
-      },
-      "submit": "送出"
-    },
-    "wrongPassword": "密碼錯誤",
-    "operationFailed": "操作失敗，請稍後再重試"
-  },
   "discussion": {
     "placeholder": "搜尋討論...",
     "post": "發文",
@@ -281,7 +253,7 @@
       "bugReport": "錯誤回報",
       "suggestions": "建議",
       "language": "Language",
-      "none": "none",
+      "none": "無",
       "titleLabel": "標題",
       "titlePlaceholder": "輸入標題",
       "contentLabel": "內容",
@@ -348,7 +320,7 @@
       "backToProblems": "返回題目列表",
       "backToDiscussion": "返回討論區"
     },
-    "components": {
+    "component": {
       "pin": {
         "action_Is_Pinned": "取消置頂",
         "status_Is_Pinned": "已取消置頂",
@@ -365,7 +337,7 @@
         "status_Not_Solved": "已標記為已解決",
         "info_Not_Solved": "確定要將此貼文標記為已解決嗎？"
       },
-      "post_actions": {
+      "post_action": {
         "close_title": "關閉貼文",
         "close_info": "關閉後將無法繼續回覆此貼文，確定要關閉嗎？",
         "close_status": "貼文已關閉",
@@ -386,6 +358,14 @@
         "delete_reply": "刪除回覆",
         "delete_reply_info": "刪除後無法復原，確定要刪除此回覆嗎？",
         "delete_confirm": "確認刪除"
+      },
+      "time": {
+        "just_now": "剛剛",
+        "minute_ago": "分鐘前",
+        "hour_ago": "小時前",
+        "day_ago": "天前",
+        "today":"今天",
+        "yesterday":"昨天"
       }
     }
   },

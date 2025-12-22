@@ -293,8 +293,8 @@ onMounted(() => {
                 clip-rule="evenodd"
               />
             </svg>
-            <p class="text-lg">{{ t("discussion.problem.noDiscussions") }}</p>
-            <p class="mt-2 text-sm">{{ t("discussin.reply.no_comments") }}</p>
+            <p class="text-lg">{{ t("discussion.problems.noDiscussions") }}</p>
+            <p class="mt-2 text-sm">{{ t("discussion.detail.reply.no_comments") }}</p>
           </div>
           <router-link
             class="btn btn-primary mt-4"
@@ -307,7 +307,7 @@ onMounted(() => {
                 clip-rule="evenodd"
               />
             </svg>
-            {{ t("discussion.reply.start") }}
+            {{ t("discussion.detail.reply.start") }}
           </router-link>
         </div>
       </div>

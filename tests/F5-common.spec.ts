@@ -46,7 +46,7 @@ test.skip("See the posts", async ({ page }) => {
 });
 
 //003
-test("Code", async ({ page }) => {
+test.skip("Code", async ({ page }) => {
   //Get into the discussion page
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();

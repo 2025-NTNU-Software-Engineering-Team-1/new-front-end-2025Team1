@@ -192,13 +192,13 @@ const submitPost = async () => {
       // Navigate to the new post
       router.push(`/course/${route.params.name}/discussion/${postId}`);
     } else {
-      const errorMsg = response.Message || response.data?.Message || t("discussion.err_unknown");
-      error.value = t("discussion.err_failed_create") + errorMsg;
+      const errorMsg = response.Message || response.data?.Message || t("discussion.err.err_unknown");
+      error.value = t("discussion.err.err_failed_create") + errorMsg;
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     console.error("Error submitting post:", err);
-    const errorMsg = err.response?.data?.Message || err.message || t("discussion.err_network");
+    const errorMsg = err.response?.data?.Message || err.message || t("discussion.err.err_network");
     error.value = t("discussion.err_failed_create") + errorMsg;
   } finally {
     submitting.value = false;
@@ -248,7 +248,7 @@ onMounted(() => {
         <div class="mb-4">
           <label class="mb-1 block text-sm font-medium">{{ t("discussion.create.problem") }}</label>
           <select v-model="problemId" class="select select-bordered w-full" @change="onProblemChange">
-            <option value="">{{ t("discussion.create.problemPlaceholder") }}</option>
+            <option value="" disabled selected hidden>{{ t("discussion.create.problemPlaceholder") }}</option>
             <option v-for="problem in problems" :key="problem.Problem_Id" :value="problem.Problem_Id">
               {{ problem.Problem_Name }}
             </option>

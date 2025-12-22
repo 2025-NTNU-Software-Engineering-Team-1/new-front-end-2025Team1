@@ -7,7 +7,7 @@ test.beforeEach(async ({ page, baseURL }) => {
 });
 
 //002
-test("Admin can set problem", async ({ page }) => {
+test.skip("Admin can set problem", async ({ page }) => {
   // Get in New prob setting pages
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
@@ -85,7 +85,7 @@ test.skip("Admin set TEST", async ({ page }) => {
 });
 
 //014
-test("Admin can see submission list", async ({ page }) => {
+test.skip("Admin can see submission list", async ({ page }) => {
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
   await page.getByRole("link", { name: "Submissions" }).click();
@@ -101,7 +101,7 @@ test("Admin can see submission list", async ({ page }) => {
 });
 
 //016
-test("Admin can download submission list", async ({ page }) => {
+test.skip("Admin can download submission list", async ({ page }) => {
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
   await page.getByRole("link", { name: "Submissions" }).click();

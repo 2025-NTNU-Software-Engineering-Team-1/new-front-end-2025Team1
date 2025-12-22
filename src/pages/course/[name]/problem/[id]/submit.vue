@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { reactive, watchEffect, computed } from "vue";
 import hljs from "highlight.js";
-import { BlobWriter, ZipWriter, TextReader } from "@zip.js/zip.js";
+import { BlobWriter, ZipWriter, TextReader, ZipReader, BlobReader } from "@zip.js/zip.js";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import { useRoute, useRouter } from "vue-router";
 import useVuelidate from "@vuelidate/core";
@@ -192,6 +192,68 @@ async function submit() {
         logger.groupEnd(); // Early return cleanup
         return;
       }
+
+      // Deep Inspection of Zip Contents (Makefile & Language Consistency
+      logger.log("Step 2.1: Inspecting Zip Content Integrity...");
+
+      const zipReader = new ZipReader(new BlobReader(form.zip));
+      const entries = await zipReader.getEntries();
+      await zipReader.close();
+
+      const fileNames = entries.map((entry) => entry.filename);
+
+      const hasMakefile = fileNames.some((name) => {
+        const baseName = name.split("/").pop();
+        return baseName === "makefile";
+      });
+
+      const hasCFile = fileNames.some((n) => n.endsWith(".c"));
+      const hasCppFile = fileNames.some((n) => n.endsWith(".cpp"));
+      const hasPyFile = fileNames.some((n) => n.endsWith(".py"));
+
+      const selectedLang = form.lang;
+
+      let errorMsg = "";
+
+      if (selectedLang === 0) {
+        // User chose C
+        if (!hasMakefile) {
+          errorMsg =
+            "Missing 'makefile'. C submissions must include a file strictly named 'makefile' (case-sensitive).";
+        } else if (hasCppFile) {
+          errorMsg = "Language mismatch: You selected C, but the Zip contains C++ files (.cpp).";
+        } else if (hasPyFile) {
+          errorMsg = "Language mismatch: You selected C, but the Zip contains Python files (.py).";
+        }
+      } else if (selectedLang === 1) {
+        // User chose C++
+        if (!hasMakefile) {
+          errorMsg =
+            "Missing 'makefile'. C++ submissions must include a file strictly named 'makefile' (case-sensitive).";
+        } else if (hasCFile) {
+          errorMsg = "Language mismatch: You selected C++, but the Zip contains C files (.c).";
+        } else if (hasPyFile) {
+          errorMsg = "Language mismatch: You selected C++, but the Zip contains Python files (.py).";
+        }
+      } else if (selectedLang === 2) {
+        // User chose Python
+        if (hasCFile) {
+          errorMsg = "Language mismatch: You selected Python, but the Zip contains C files (.c).";
+        } else if (hasCppFile) {
+          errorMsg = "Language mismatch: You selected Python, but the Zip contains C++ files (.cpp).";
+        }
+      }
+
+      if (errorMsg) {
+        logger.warn("Validation Failed", errorMsg);
+        form.errorMessage = errorMsg;
+        form.isLoading = false;
+        logger.groupEnd();
+        return;
+      }
+
+      logger.success("Zip Content Validated");
+
       formData.append("code", form.zip);
     }
 

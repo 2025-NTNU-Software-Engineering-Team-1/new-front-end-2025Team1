@@ -36,6 +36,7 @@ const userRole = computed(() => {
   if (session.role === 0) return "Admin";
   if (session.role === 1) return "Teacher";
   if (session.role === 2) return "Student";
+  if (session.role === 3) return "TA";
   return "Guest";
 });
 const isAuthor = computed(() => {
@@ -86,17 +87,17 @@ const closeConfirmDialog = () => {
 const handlePin = () => {
   if (props.post.Is_Pinned) {
     showConfirm(
-      t("discussion.components.pin.action_Is_Pinned"),
-      t("discussion.components.pin.info_Is_Pinned"),
+      t("discussion.component.pin.action_Is_Pinned"),
+      t("discussion.component.pin.info_Is_Pinned"),
       () =>
-        executeAction(() => unpinPost(props.post.Post_Id), t("discussion.components.pin.status_Is_Pinned")),
+        executeAction(() => unpinPost(props.post.Post_Id), t("discussion.component.pin.status_Is_Pinned")),
     );
   } else {
     showConfirm(
-      t("discussion.components.pin.action_Not_Pinned"),
-      t("discussion.components.pin.info_Not_Pinned"),
+      t("discussion.component.pin.action_Not_Pinned"),
+      t("discussion.component.pin.info_Not_Pinned"),
       () =>
-        executeAction(() => pinPost(props.post.Post_Id), t("discussion.components.pin.status_Not_Pinned")),
+        executeAction(() => pinPost(props.post.Post_Id), t("discussion.component.pin.status_Not_Pinned")),
     );
   }
 };
@@ -104,38 +105,38 @@ const handlePin = () => {
 const handleSolved = () => {
   if (props.post.Is_Solved) {
     showConfirm(
-      t("discussion.components.pin.action_Is_Solved"),
-      t("discussion.components.pin.info_Is_Solved"),
+      t("discussion.component.solve.action_Is_Solved"),
+      t("discussion.component.solve.info_Is_Solved"),
       () =>
         executeAction(
           () => markUnsolved(props.post.Post_Id),
-          t("discussion.components.pin.status_Is_Solved"),
+          t("discussion.component.solve.status_Is_Solved"),
         ),
     );
   } else {
     showConfirm(
-      t("discussion.components.pin.action_Not_Solved"),
-      t("discussion.components.pin.info_Not_Solved"),
+      t("discussion.component.solve.action_Not_Solved"),
+      t("discussion.component.solve.info_Not_Solved"),
       () =>
-        executeAction(() => markSolved(props.post.Post_Id), t("discussion.components.pin.status_Not_Solved")),
+        executeAction(() => markSolved(props.post.Post_Id), t("discussion.component.solve.status_Not_Solved")),
     );
   }
 };
 
 const handleClose = () => {
-  showConfirm(t("discussion.components.pin.close_title"), t("discussion.components.pin.close_info"), () =>
-    executeAction(() => closePost(props.post.Post_Id), t("discussion.components.pin.close_status")),
+  showConfirm(t("discussion.component.post_action.close_title"), t("discussion.component.post_action.close_info"), () =>
+    executeAction(() => closePost(props.post.Post_Id), t("discussion.component.post_action.close_status")),
   );
 };
 
 const handleDelete = async () => {
   showConfirm(
-    t("discussion.components.pin.delete_title"),
-    t("discussion.components.pin.delete_info"),
+    t("discussion.component.post_action.delete_title"),
+    t("discussion.component.post_action.delete_info"),
     async () => {
       const result = await deletePost(props.post.Post_Id);
       if (result.success) {
-        console.log(t("discussion.components.pin.delete_status"));
+        console.log(t("discussion.component.post_action.delete_status"));
         // 刪除成功後導航回討論區首� �
         emit("deleted");
         closeConfirmDialog();
@@ -172,8 +173,8 @@ const handleDelete = async () => {
           </svg>
           {{
             post.Is_Pinned
-              ? t("discussion.components.pin.action_Is_Pinned")
-              : t("discussion.components.pin.action_Not_Pinned")
+              ? t("discussion.component.pin.action_Is_Pinned")
+              : t("discussion.component.pin.action_Not_Pinned")
           }}
         </a>
       </li>
@@ -197,8 +198,8 @@ const handleDelete = async () => {
           </svg>
           {{
             post.Is_Solved
-              ? t("discussion.components.solve.action_Is_Solved")
-              : t("discussion.components.solve.action_Not_Solved")
+              ? t("discussion.component.solve.action_Is_Solved")
+              : t("discussion.component.solve.action_Not_Solved")
           }}
         </a>
       </li>
@@ -213,7 +214,7 @@ const handleDelete = async () => {
               clip-rule="evenodd"
             />
           </svg>
-          {{ t("discussion.components.close") }}
+          {{ t("discussion.component.close") }}
         </a>
       </li>
 
@@ -230,7 +231,7 @@ const handleDelete = async () => {
               clip-rule="evenodd"
             />
           </svg>
-          {{ t("discussion.components.delete") }}
+          {{ t("discussion.component.delete") }}
         </a>
       </li>
     </ul>
@@ -246,10 +247,10 @@ const handleDelete = async () => {
         <div class="modal-action">
           <button class="btn btn-error" @click="confirmAction" :disabled="loading">
             <span v-if="loading" class="loading-spinner loading-sm loading"></span>
-            {{ t("discussion.components.confirm") }}
+            {{ t("discussion.component.confirm") }}
           </button>
           <button class="btn btn-ghost" @click="closeConfirmDialog" :disabled="loading">
-            {{ t("discussion.components.cancel") }}
+            {{ t("discussion.component.cancel") }}
           </button>
         </div>
       </div>

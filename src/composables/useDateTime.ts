@@ -1,3 +1,5 @@
+import i18n from "@/i18n";
+const t = (key: string) => i18n.global.t(key);
 /**
  * 日期時間� �式化工具
  */
@@ -15,6 +17,10 @@ export function formatDateTime(
   if (!isoString) return "";
 
   try {
+    let normalizedSource = isoString;
+    if (!isoString.endsWith("Z") && !isoString.includes("+")) {
+      normalizedSource = isoString + "Z";
+    }
     const date = new Date(isoString);
 
     // 檢查是否為有效日期
@@ -31,10 +37,10 @@ export function formatDateTime(
 
     // 相對時間� �式
     if (format === "relative") {
-      if (diffSeconds < 60) return "剛剛";
-      if (diffMinutes < 60) return `${diffMinutes} 分鐘前`;
-      if (diffHours < 24) return `${diffHours} 小時前`;
-      if (diffDays < 7) return `${diffDays} 天前`;
+      if (diffSeconds < 60) return t("discussion.time.just_now");
+      if (diffMinutes < 60) return `${diffMinutes} ${t("discussion.component.time.minute_ago")}`;
+      if (diffHours < 24) return `${diffHours} t("discussion.component.time.hour_ago")}`;
+      if (diffDays < 7) return `${diffDays} t("discussion.component.time.day_ago")}`;
       // 超過一週顯示完整日期
       format = "full";
     }
@@ -87,7 +93,7 @@ export function formatFriendlyTime(isoString: string): string {
       // 今天只顯示時間
       const hours = String(date.getHours()).padStart(2, "0");
       const minutes = String(date.getMinutes()).padStart(2, "0");
-      return `今天 ${hours}:${minutes}`;
+      return `${t("discussion.component.time.today")} ${hours}:${minutes}`;
     }
 
     const yesterday = new Date(now);
@@ -97,7 +103,7 @@ export function formatFriendlyTime(isoString: string): string {
     if (isYesterday) {
       const hours = String(date.getHours()).padStart(2, "0");
       const minutes = String(date.getMinutes()).padStart(2, "0");
-      return `昨天 ${hours}:${minutes}`;
+      return `${t("discussion.component.time.yesterday")} ${hours}:${minutes}`;
     }
 
     // 其他日期顯示完整� �式

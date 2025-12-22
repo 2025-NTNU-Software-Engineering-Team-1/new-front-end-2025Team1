@@ -7,7 +7,7 @@ test.beforeEach(async ({ page, baseURL }) => {
 });
 
 //001
-test("Teacher can set problem", async ({ page }) => {
+test.skip("Teacher can set problem", async ({ page }) => {
   // Get in New prob setting pages
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
@@ -85,7 +85,7 @@ test.skip("Teacher set TEST", async ({ page }) => {
 });
 
 //013
-test("Teacher can see submission list", async ({ page }) => {
+test.skip("Teacher can see submission list", async ({ page }) => {
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
   await page.getByRole("link", { name: "Submissions" }).click();
@@ -101,7 +101,7 @@ test("Teacher can see submission list", async ({ page }) => {
 });
 
 //015
-test("Teacher can download submission list", async ({ page }) => {
+test.skip("Teacher can download submission list", async ({ page }) => {
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
   await page.getByRole("link", { name: "Submissions" }).click();

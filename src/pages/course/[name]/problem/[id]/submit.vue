@@ -69,6 +69,7 @@ const form = reactive({
   lang,
   isLoading: false,
   isSubmitError: false,
+  errorMessage: "", // Added state for UI error notification
 });
 
 // Verification rules switch according to acceptedFormat
@@ -106,12 +107,12 @@ const langOptions = computed<LangOption[]>(() => {
   return availables;
 });
 
-// 只在 code 模式下進行簡易語言偵測（python）
+// Simple language detection (Python) only in code mode.
 watchEffect(() => {
   if (acceptedFormat.value !== "code") return;
   const detectedLang = hljs.highlightAuto(form.code, ["c", "cpp", "python"]).language;
   if (detectedLang === "python" && langOptions.value.some((option) => option.value === 2)) {
-    logger.log("Auto-detected Language", "Python"); // Added Log
+    logger.log("Auto-detected Language", "Python");
     form.lang = 2;
   }
 });
@@ -121,6 +122,7 @@ watchEffect(() => {
 // ==========================================
 async function submit() {
   logger.group("Submit Solution Process");
+  form.errorMessage = ""; // Reset error message on new submission
 
   const isFormCorrect = await v$.value.$validate();
   if (!isFormCorrect) {
@@ -145,7 +147,8 @@ async function submit() {
         const codeSizeMB = (codeBytes / 1024 / 1024).toFixed(2);
         const msg = `Your code is too large (${codeSizeMB} MB). Maximum allowed is ${maxGB} GB.`;
         logger.warn("Size Limit Exceeded (Code)", { size: codeSizeMB, limit: maxGB });
-        window.alert(msg);
+
+        form.errorMessage = msg; // Update UI state instead of alert
         form.isLoading = false;
         logger.groupEnd(); // Early return cleanup
         return;
@@ -183,7 +186,8 @@ async function submit() {
         const currentMB = (form.zip.size / 1024 / 1024).toFixed(2);
         const msg = `The uploaded file is too large (${currentMB} MB). Max allowed: ${limitMB} MB.`;
         logger.warn("Size Limit Exceeded (Zip)", { size: currentMB, limit: limitMB });
-        window.alert(msg);
+
+        form.errorMessage = msg; // Update UI state instead of alert
         form.isLoading = false;
         logger.groupEnd(); // Early return cleanup
         return;
@@ -210,6 +214,7 @@ async function submit() {
   } catch (error) {
     logger.error("Submission Failed", error);
     form.isSubmitError = true;
+    form.errorMessage = t("course.problem.submit.err.msg"); // Set generic error on catch
     throw error;
   } finally {
     form.isLoading = false;
@@ -226,7 +231,6 @@ async function submit() {
           {{ t("course.problem.submit.card.title") }}{{ $route.params.id }}
         </div>
 
-        <!-- code -->
         <template v-if="acceptedFormat === 'code'">
           <div class="card-title mt-10 md:text-lg lg:text-xl">
             {{ t("course.problem.submit.card.placeholder") }}
@@ -239,7 +243,6 @@ async function submit() {
           />
         </template>
 
-        <!-- zip -->
         <template v-else>
           <div class="card-title mt-10 md:text-lg lg:text-xl">Upload your solution (.zip)</div>
           <div class="mt-4">
@@ -261,10 +264,17 @@ async function submit() {
           </div>
         </template>
 
-        <div v-if="error" class="alert alert-error shadow-lg">
+        <div v-if="error" class="alert alert-error mt-4 shadow-lg">
           <div>
             <i-uil-times-circle />
             <span>{{ t("course.problem.submit.err.msg") }}</span>
+          </div>
+        </div>
+
+        <div v-if="form.errorMessage" class="alert alert-warning mt-4 shadow-lg">
+          <div>
+            <i-uil-exclamation-circle />
+            <span>{{ form.errorMessage }}</span>
           </div>
         </div>
 

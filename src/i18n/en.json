@@ -346,7 +346,7 @@
       "backToProblems": "Back to Problems",
       "backToDiscussion": "Back to Discussion"
     },
-    "components": {
+    "component": {
       "pin": {
         "action_Is_Pinned": "Unpin",
         "action_Not_Pinned": "Pin Post",
@@ -384,6 +384,14 @@
         "delete_reply": "Delete Reply",
         "delete_reply_info": "Are you sure you want to delete this reply? This action cannot be undone.",
         "delete_confirm": "Confirm Delete"
+      },
+      "time": {
+        "just_now": "just now",
+        "minute_ago": "minutes ago",
+        "hour_ago": "hours ago",
+        "day_ago": "days ago",
+        "today":"today",
+        "yesterday":"yesterday"
       }
     }
   },

@@ -32,6 +32,7 @@ declare module '@vue/runtime-core' {
     IUilCheckCircle: typeof import('~icons/uil/check-circle')['default']
     IUilConstructor: typeof import('~icons/uil/constructor')['default']
     IUilEdit: typeof import('~icons/uil/edit')['default']
+    IUilExclamationCircle: typeof import('~icons/uil/exclamation-circle')['default']
     IUilEye: typeof import('~icons/uil/eye')['default']
     IUilFileDownload: typeof import('~icons/uil/file-download')['default']
     IUilFileExclamationAlt: typeof import('~icons/uil/file-exclamation-alt')['default']

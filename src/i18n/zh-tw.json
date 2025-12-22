@@ -253,7 +253,7 @@
       "bugReport": "錯誤回報",
       "suggestions": "建議",
       "language": "Language",
-      "none": "none",
+      "none": "無",
       "titleLabel": "標題",
       "titlePlaceholder": "輸入標題",
       "contentLabel": "內容",
@@ -320,7 +320,7 @@
       "backToProblems": "返回題目列表",
       "backToDiscussion": "返回討論區"
     },
-    "components": {
+    "component": {
       "pin": {
         "action_Is_Pinned": "取消置頂",
         "status_Is_Pinned": "已取消置頂",

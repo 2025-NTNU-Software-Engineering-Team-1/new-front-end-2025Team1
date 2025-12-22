@@ -363,7 +363,7 @@
         "status_Not_Solved": "Marked as Solved",
         "info_Not_Solved": "Are you sure you want to mark this post as solved?"
       },
-      "post_actions": {
+      "post_action": {
         "close_title": "Close Post",
         "close_info": "After closing, you will no longer be able to reply to this post. Are you sure you want to close it?",
         "close_status": "Post closed",

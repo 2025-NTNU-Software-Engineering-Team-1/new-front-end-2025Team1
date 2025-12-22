@@ -700,7 +700,7 @@ onBeforeUnmount(() => {
     <div class="col-span-2 rounded-lg border border-gray-400 p-4">
       <div class="flex items-center gap-4">
         <label class="label cursor-pointer justify-start gap-x-4">
-          <span class="label-text">AI VTuber</span>
+          <span class="label-text">AI TA</span>
           <input type="checkbox" class="toggle" v-model="problem.config!.aiVTuber" />
         </label>
       </div>
@@ -758,7 +758,7 @@ onBeforeUnmount(() => {
             <div class="mb-2 flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <label class="label-text">Select API Keys</label>
-                <!-- 問號 -->
+                <!-- Question mark -->
                 <div class="relative">
                   <button
                     type="button"
@@ -771,7 +771,7 @@ onBeforeUnmount(() => {
                     <i-uil-question-circle class="text-info" />
                   </button>
 
-                  <!-- 懸浮視窗 -->
+                  <!-- Floating window -->
                   <transition name="fade">
                     <div
                       v-if="showSuggestionTooltip"
@@ -794,7 +794,7 @@ onBeforeUnmount(() => {
               </div>
             </div>
 
-            <!-- 搜尋欄 -->
+            <!-- Search bar -->
             <div class="mb-2 flex items-center gap-2">
               <input
                 v-model="searchQuery"
@@ -835,7 +835,7 @@ onBeforeUnmount(() => {
                   </div>
                 </button>
 
-                <!-- 限高可捲動區域 -->
+                <!-- Scrollable area -->
                 <div v-show="showActiveKeys" class="h-64 overflow-y-auto p-3">
                   <label
                     v-for="key in apiKeys.active as any[]"
@@ -889,7 +889,7 @@ onBeforeUnmount(() => {
                   </div>
                 </button>
 
-                <!-- 限高可捲動區域 -->
+                <!-- Scrollable area -->
                 <div v-show="showInactiveKeys" class="h-64 overflow-y-auto p-3">
                   <label
                     v-for="key in apiKeys.inactive as any[]"
@@ -1236,7 +1236,7 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- Artifact Collection -->
-    <div class="form-control col-span-1 rounded-lg border border-base-300 p-4 md:col-span-2">
+    <div class="form-control col-span-1 rounded-lg border border-gray-400 p-4 md:col-span-2">
       <label class="label"><span class="label-text">Artifact Collection (Optional)</span></label>
       <div class="flex gap-4">
         <label class="label cursor-pointer gap-2">
@@ -1254,7 +1254,7 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-/* 黑白名單切換器 */
+/* Blacklist/whitelist switcher */
 .mode-switcher {
   display: flex;
   align-items: center;
@@ -1324,7 +1324,7 @@ onBeforeUnmount(() => {
   opacity: 0.4;
 }
 
-/* 響應式設計 */
+/* Responsive design */
 @media (max-width: 640px) {
   .mode-switcher-option {
     padding: 5px 12px;

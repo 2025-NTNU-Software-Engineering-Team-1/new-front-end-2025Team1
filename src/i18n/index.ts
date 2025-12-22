@@ -12,7 +12,6 @@ export const config = {
     english,
     taiwanese,
   },
-  
 };
 const i18n = createI18n(config);
 export default i18n;

@@ -96,8 +96,7 @@ const handlePin = () => {
     showConfirm(
       t("discussion.component.pin.action_Not_Pinned"),
       t("discussion.component.pin.info_Not_Pinned"),
-      () =>
-        executeAction(() => pinPost(props.post.Post_Id), t("discussion.component.pin.status_Not_Pinned")),
+      () => executeAction(() => pinPost(props.post.Post_Id), t("discussion.component.pin.status_Not_Pinned")),
     );
   }
 };
@@ -118,14 +117,20 @@ const handleSolved = () => {
       t("discussion.component.solve.action_Not_Solved"),
       t("discussion.component.solve.info_Not_Solved"),
       () =>
-        executeAction(() => markSolved(props.post.Post_Id), t("discussion.component.solve.status_Not_Solved")),
+        executeAction(
+          () => markSolved(props.post.Post_Id),
+          t("discussion.component.solve.status_Not_Solved"),
+        ),
     );
   }
 };
 
 const handleClose = () => {
-  showConfirm(t("discussion.component.post_action.close_title"), t("discussion.component.post_action.close_info"), () =>
-    executeAction(() => closePost(props.post.Post_Id), t("discussion.component.post_action.close_status")),
+  showConfirm(
+    t("discussion.component.post_action.close_title"),
+    t("discussion.component.post_action.close_info"),
+    () =>
+      executeAction(() => closePost(props.post.Post_Id), t("discussion.component.post_action.close_status")),
   );
 };
 

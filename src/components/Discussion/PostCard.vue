@@ -89,7 +89,8 @@ const formattedTime = computed(() => formatFriendlyTime(post.time));
                   stroke-width="1"
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                /></svg>
+                />
+              </svg>
               >{{ post.likes }}
             </div>
             <div class="flex items-center gap-1">
@@ -100,7 +101,8 @@ const formattedTime = computed(() => formatFriendlyTime(post.time));
                   stroke-width="1"
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                /></svg>
+                />
+              </svg>
               >{{ post.comments }}
             </div>
             <div v-if="post.views" class="flex items-center gap-1">
@@ -111,7 +113,8 @@ const formattedTime = computed(() => formatFriendlyTime(post.time));
                   stroke-width="1"
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                /></svg>
+                />
+              </svg>
               >{{ post.views }}
             </div>
           </div>

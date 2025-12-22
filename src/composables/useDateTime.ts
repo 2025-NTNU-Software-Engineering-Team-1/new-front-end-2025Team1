@@ -17,9 +17,10 @@ export function formatDateTime(
   if (!isoString) return "";
 
   try {
-    let normalizedSource = isoString;
+    // Useless variables?
+    // let normalizedSource = isoString;
     if (!isoString.endsWith("Z") && !isoString.includes("+")) {
-      normalizedSource = isoString + "Z";
+      // normalizedSource = isoString + "Z";
     }
     const date = new Date(isoString);
 

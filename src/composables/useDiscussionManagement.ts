@@ -143,11 +143,11 @@ export function useDiscussionPermissions() {
   const isTA = (userRole: string) => userRole === "TA";
 
   const canManagePost = (userRole: string, isAuthor: boolean = false) => {
-    return isAdmin(userRole) || isTeacher(userRole) || isAuthor  || isTA(userRole);
+    return isAdmin(userRole) || isTeacher(userRole) || isAuthor || isTA(userRole);
   };
 
   const canDeleteAnyPost = (userRole: string) => {
-    return isAdmin(userRole) || isTeacher(userRole)  || isTA(userRole);
+    return isAdmin(userRole) || isTeacher(userRole) || isTA(userRole);
   };
 
   const canPinPost = (userRole: string) => {
@@ -155,11 +155,11 @@ export function useDiscussionPermissions() {
   };
 
   const canMarkSolved = (userRole: string) => {
-    return isAdmin(userRole) || isTeacher(userRole)  || isTA(userRole);
+    return isAdmin(userRole) || isTeacher(userRole) || isTA(userRole);
   };
 
   const canClosePost = (userRole: string) => {
-    return isAdmin(userRole) || isTeacher(userRole)  || isTA(userRole);
+    return isAdmin(userRole) || isTeacher(userRole) || isTA(userRole);
   };
 
   return {

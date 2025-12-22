@@ -364,8 +364,8 @@
         "minute_ago": "分鐘前",
         "hour_ago": "小時前",
         "day_ago": "天前",
-        "today":"今天",
-        "yesterday":"昨天"
+        "today": "今天",
+        "yesterday": "昨天"
       }
     }
   },

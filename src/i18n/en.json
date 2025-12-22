@@ -390,8 +390,8 @@
         "minute_ago": "minutes ago",
         "hour_ago": "hours ago",
         "day_ago": "days ago",
-        "today":"today",
-        "yesterday":"yesterday"
+        "today": "today",
+        "yesterday": "yesterday"
       }
     }
   },

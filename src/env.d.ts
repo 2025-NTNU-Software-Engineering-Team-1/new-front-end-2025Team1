@@ -12,7 +12,7 @@ declare module "*.vue" {
 
 declare namespace Live2DCubismCore {
   // 這兩個是來自官方 Core 的物件，型別先維持 any，
-  // 但用 eslint 註解關掉 no-explicit-any 規則，避免 lint � �錯。
+  // 但用 eslint 註解關掉 no-explicit-any 規則，避免 lint � �錯。
   const Moc: unknown;
   const Model: unknown;
 

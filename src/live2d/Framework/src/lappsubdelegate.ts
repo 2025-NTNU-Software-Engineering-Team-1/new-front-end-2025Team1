@@ -116,7 +116,7 @@ export class LAppSubdelegate {
 
     console.log("[APP] LAppSubdelegate.initialize 完成，gl =", this._gl);
 
-    // 建立 View，交給它� 責畫畫
+    // 建立 View，交給它� 責畫畫
     this._view = new LAppView();
     this._view.initialize(this); // 把自己傳進去
 
@@ -154,7 +154,7 @@ export class LAppSubdelegate {
       return;
     }
 
-    // キャンバスのサイズが変わっている� �合はリサイズに必要な処理をする。
+    // キャンバスのサイズが変わっている� �合はリサイズに必要な処理をする。
     if (this._needResize) {
       this.onResize();
       this._needResize = false;
@@ -168,7 +168,7 @@ export class LAppSubdelegate {
     // 深度テストを有効化
     gl.enable(gl.DEPTH_TEST);
 
-    // 近くにある物体は、� くにある物体を覆い� す
+    // 近くにある物体は、� くにある物体を覆い� す
     gl.depthFunc(gl.LEQUAL);
 
     // カラーバッファや深度バッファをクリアする
@@ -231,7 +231,7 @@ export class LAppSubdelegate {
     gl.shaderSource(fragmentShaderId, fragmentShader);
     gl.compileShader(fragmentShaderId);
 
-    // プログラ� オブジェクトの作成
+    // プログラ� オブジェクトの作成
     const programId = gl.createProgram();
     gl.attachShader(programId, vertexShaderId);
     gl.attachShader(programId, fragmentShaderId);
@@ -345,7 +345,7 @@ export class LAppSubdelegate {
   private _canvas: HTMLCanvasElement;
 
   /**
-   * View情� �
+   * View情� �
    */
   private _view: LAppView;
 

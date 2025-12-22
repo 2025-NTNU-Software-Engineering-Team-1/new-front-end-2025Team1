@@ -11,6 +11,44 @@ import { useTitle, useStorage } from "@vueuse/core";
 import { LANGUAGE_OPTIONS, LOCAL_STORAGE_KEY } from "@/constants";
 import { useI18n } from "vue-i18n";
 
+// ==========================================
+// [CONFIG] Console Debug Mode
+// ==========================================
+const DEBUG_MODE = 1; // Setting it to 0 will disable all logs.
+
+// ==========================================
+// Logger Utility
+// ==========================================
+const logger = {
+  log: (label: string, data?: unknown) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Log] ${label}`, "color: #3b82f6; font-weight: bold;", data || "");
+  },
+  success: (label: string, data?: unknown) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Success] ${label}`, "color: #10b981; font-weight: bold;", data || "");
+  },
+  error: (label: string, error?: unknown) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Error] ${label}`, "color: #ef4444; font-weight: bold;", error || "");
+  },
+  warn: (label: string, data?: unknown) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Warn] ${label}`, "color: #f59e0b; font-weight: bold;", data || "");
+  },
+  group: (label: string) => {
+    if (!DEBUG_MODE) return;
+    console.group(`%c[Group] ${label}`, "color: #8b5cf6; font-weight: bold;");
+  },
+  groupEnd: () => {
+    if (!DEBUG_MODE) return;
+    console.groupEnd();
+  },
+};
+
+// ==========================================
+// Setup & State
+// ==========================================
 const route = useRoute();
 const { t } = useI18n();
 
@@ -18,7 +56,6 @@ useTitle(`Submit - ${route.params.id} - ${route.params.name} | Normal OJ`);
 const router = useRouter();
 const { data: problem, error, isLoading } = useAxios<Problem>(`/problem/view/${route.params.id}`, fetcher);
 
-// 依題目 meta 判斷允許的提交� �式；� �設為 "code"
 const acceptedFormat = computed<AcceptedFormat>(() => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const fmt = (problem.value as any)?.config?.acceptedFormat;
@@ -34,7 +71,7 @@ const form = reactive({
   isSubmitError: false,
 });
 
-// 驗證規則依 acceptedFormat 切換
+// Verification rules switch according to acceptedFormat
 const rules = computed(() => ({
   code:
     acceptedFormat.value === "code"
@@ -74,17 +111,31 @@ watchEffect(() => {
   if (acceptedFormat.value !== "code") return;
   const detectedLang = hljs.highlightAuto(form.code, ["c", "cpp", "python"]).language;
   if (detectedLang === "python" && langOptions.value.some((option) => option.value === 2)) {
+    logger.log("Auto-detected Language", "Python"); // Added Log
     form.lang = 2;
   }
 });
 
+// ==========================================
+// Submit Logic
+// ==========================================
 async function submit() {
+  logger.group("Submit Solution Process");
+
   const isFormCorrect = await v$.value.$validate();
-  if (!isFormCorrect) return;
+  if (!isFormCorrect) {
+    logger.warn("Validation Failed", v$.value.$errors);
+    logger.groupEnd(); // Early return cleanup
+    return;
+  }
+
   form.isLoading = true;
   form.isSubmitError = false;
 
   try {
+    logger.log("Step 1: Check Constraints", { format: acceptedFormat.value, lang: form.lang });
+
+    // [Constraint Check] Code Mode
     if (acceptedFormat.value === "code") {
       const maxGB = 1;
       const codeBytes = new Blob([form.code], { type: "text/plain" }).size;
@@ -92,53 +143,77 @@ async function submit() {
 
       if (codeBytes > maxBytes) {
         const codeSizeMB = (codeBytes / 1024 / 1024).toFixed(2);
-        window.alert(`Your code is too large (${codeSizeMB} MB). Maximum allowed is ${maxGB} GB.`);
+        const msg = `Your code is too large (${codeSizeMB} MB). Maximum allowed is ${maxGB} GB.`;
+        logger.warn("Size Limit Exceeded (Code)", { size: codeSizeMB, limit: maxGB });
+        window.alert(msg);
         form.isLoading = false;
+        logger.groupEnd(); // Early return cleanup
         return;
       }
     }
 
     const formData = new FormData();
 
+    // [Payload Prep] Code Mode
     if (acceptedFormat.value === "code") {
+      logger.log("Step 2: Compressing Code to Zip...");
       const blobWriter = new BlobWriter("application/zip");
       const writer = new ZipWriter(blobWriter);
-      await writer.add(`main${LANGUAGE_EXTENSION[form.lang]}`, new TextReader(form.code));
+      const fileName = `main${LANGUAGE_EXTENSION[form.lang]}`;
+
+      await writer.add(fileName, new TextReader(form.code));
       await writer.close();
       const blob = await blobWriter.getData();
+
       formData.append("code", blob);
-    } else {
+      logger.log("Compression Complete", { fileName, blobSize: blob.size });
+    }
+    // [Payload Prep] Zip Mode
+    else {
       if (!form.zip) throw new Error("No zip file selected");
 
-      // 教師給的 ZIP 限制
+      // limitation of zip from teacher
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const limitMB = (problem.value as any)?.config?.maxStudentZipSizeMB ?? 50;
       const maxSizeBytes = limitMB * 1024 * 1024;
+
+      logger.log("Step 2: Checking Zip Size", { current: form.zip.size, limit: maxSizeBytes });
+
       if (form.zip.size > maxSizeBytes) {
-        window.alert(
-          `The uploaded file is too large (${(form.zip.size / 1024 / 1024).toFixed(
-            2,
-          )} MB). Max allowed: ${limitMB} MB.`,
-        );
+        const currentMB = (form.zip.size / 1024 / 1024).toFixed(2);
+        const msg = `The uploaded file is too large (${currentMB} MB). Max allowed: ${limitMB} MB.`;
+        logger.warn("Size Limit Exceeded (Zip)", { size: currentMB, limit: limitMB });
+        window.alert(msg);
         form.isLoading = false;
+        logger.groupEnd(); // Early return cleanup
         return;
       }
       formData.append("code", form.zip);
     }
 
+    // [API Calls]
+    logger.log("Step 3: Creating Submission Record...");
     const { submissionId } = (
       await api.Submission.create({
         problemId: Number(route.params.id),
         languageType: Number(form.lang),
       })
     ).data;
+
+    logger.success("Submission Record Created", submissionId);
+    logger.log("Step 4: Uploading Payload...");
+
     await api.Submission.modify(submissionId, formData);
+
+    logger.success("Upload Complete. Redirecting...");
     router.push(`/course/${route.params.name}/submission/${submissionId}`);
   } catch (error) {
+    logger.error("Submission Failed", error);
     form.isSubmitError = true;
     throw error;
   } finally {
     form.isLoading = false;
+    logger.groupEnd();
   }
 }
 </script>
@@ -151,7 +226,7 @@ async function submit() {
           {{ t("course.problem.submit.card.title") }}{{ $route.params.id }}
         </div>
 
-        <!-- code 模式 -->
+        <!-- code -->
         <template v-if="acceptedFormat === 'code'">
           <div class="card-title mt-10 md:text-lg lg:text-xl">
             {{ t("course.problem.submit.card.placeholder") }}
@@ -164,7 +239,7 @@ async function submit() {
           />
         </template>
 
-        <!-- zip 模式 -->
+        <!-- zip -->
         <template v-else>
           <div class="card-title mt-10 md:text-lg lg:text-xl">Upload your solution (.zip)</div>
           <div class="mt-4">

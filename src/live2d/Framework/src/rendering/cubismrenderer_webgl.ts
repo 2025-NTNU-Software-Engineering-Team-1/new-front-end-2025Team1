@@ -23,7 +23,7 @@ let s_fbo: WebGLFramebuffer;
 export class CubismClippingManager_WebGL extends CubismClippingManager<CubismClippingContext_WebGL> {
   /**
    * テンポラリのレンダーテクスチャのアドレスを取得する
-   * FrameBufferObjectが存在しない� �合、新しく生成する
+   * FrameBufferObjectが存在しない� �合、新しく生成する
    *
    * @return レンダーテクスチャの配列
    */
@@ -33,13 +33,13 @@ export class CubismClippingManager_WebGL extends CubismClippingManager<CubismCli
       // 前回使ったものを返す
       this._maskTexture.frameNo = this._currentFrameNo;
     } else {
-      // FrameBufferObjectが存在しない� �合、新しく生成する
+      // FrameBufferObjectが存在しない� �合、新しく生成する
       if (this._maskRenderTextures != null) {
         this._maskRenderTextures.clear();
       }
       this._maskRenderTextures = new csmVector<WebGLFramebuffer>();
 
-      // ColorBufferObjectが存在しない� �合、新しく生成する
+      // ColorBufferObjectが存在しない� �合、新しく生成する
       if (this._maskColorBuffers != null) {
         this._maskColorBuffers.clear();
       }
@@ -110,7 +110,7 @@ export class CubismClippingManager_WebGL extends CubismClippingManager<CubismCli
     this._currentFrameNo++;
 
     // 全てのクリッピングを用意する
-    // 同じクリップ（複数の� �合はまとめて一つのクリップ）を使う� �合は1度� け設定する
+    // 同じクリップ（複数の� �合はまとめて一つのクリップ）を使う� �合は1度� け設定する
     let usingClipCount = 0;
     for (let clipIndex = 0; clipIndex < this._clippingContextListForMask.getSize(); clipIndex++) {
       // 1つのクリッピングマスクに関して
@@ -140,13 +140,13 @@ export class CubismClippingManager_WebGL extends CubismClippingManager<CubismCli
       // マスク用RenderTextureをactiveにセット
       this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this._currentMaskRenderTexture);
 
-      // サイズがレンダーテクスチャの枚数と合わない� �合は合わせる
+      // サイズがレンダーテクスチャの枚数と合わない� �合は合わせる
       if (this._clearedFrameBufferFlags.getSize() != this._renderTextureCount) {
         this._clearedFrameBufferFlags.clear();
         this._clearedFrameBufferFlags = new csmVector<boolean>(this._renderTextureCount);
       }
 
-      // マスクのクリアフラグを毎フレー� 開始時に初期化
+      // マスクのクリアフラグを毎フレー� 開始時に初期化
       for (let index = 0; index < this._clearedFrameBufferFlags.getSize(); index++) {
         this._clearedFrameBufferFlags.set(index, false);
       }
@@ -165,7 +165,7 @@ export class CubismClippingManager_WebGL extends CubismClippingManager<CubismCli
         // clipContextに設定したレンダーテクスチャをインデックスで取得
         const clipContextRenderTexture = this.getMaskRenderTexture().at(clipContext._bufferIndex);
 
-        // 現在のレンダーテクスチャがclipContextのものと異なる� �合
+        // 現在のレンダーテクスチャがclipContextのものと異なる� �合
         if (this._currentMaskRenderTexture != clipContextRenderTexture) {
           this._currentMaskRenderTexture = clipContextRenderTexture;
           renderer.preDraw(); // バッファをクリアする
@@ -175,16 +175,16 @@ export class CubismClippingManager_WebGL extends CubismClippingManager<CubismCli
 
         this._tmpBoundsOnModel.setRect(allClipedDrawRect);
         this._tmpBoundsOnModel.expand(allClipedDrawRect.width * margin, allClipedDrawRect.height * margin);
-        //########## 本来は割り当てられた� �域の全体を使わず必要最低限のサイズがよい
+        //########## 本来は割り当てられた� �域の全体を使わず必要最低限のサイズがよい
 
-        // シェーダ用の計算式を求める。回転を考慮しない� �合は以下のとおり
+        // シェーダ用の計算式を求める。回転を考慮しない� �合は以下のとおり
         // movePeriod' = movePeriod * scaleX + offX		  [[ movePeriod' = (movePeriod - tmpBoundsOnModel.movePeriod)*scale + layoutBoundsOnTex01.movePeriod ]]
         scaleX = layoutBoundsOnTex01.width / this._tmpBoundsOnModel.width;
         scaleY = layoutBoundsOnTex01.height / this._tmpBoundsOnModel.height;
 
         // マスク生成時に使う行列を求める
         {
-          // シェーダに渡す行列を求める <<<<<<<<<<<<<<<<<<<<<<<< 要最適化（逆� �に計算すればシンプルにできる）
+          // シェーダに渡す行列を求める <<<<<<<<<<<<<<<<<<<<<<<< 要最適化（逆� �に計算すればシンプルにできる）
           this._tmpMatrix.loadIdentity();
           {
             // layout0..1 を -1..1に変換
@@ -204,7 +204,7 @@ export class CubismClippingManager_WebGL extends CubismClippingManager<CubismCli
 
         //--------- draw時の mask 参照用行列を計算
         {
-          // シェーダに渡す行列を求める <<<<<<<<<<<<<<<<<<<<<<<< 要最適化（逆� �に計算すればシンプルにできる）
+          // シェーダに渡す行列を求める <<<<<<<<<<<<<<<<<<<<<<<< 要最適化（逆� �に計算すればシンプルにできる）
           this._tmpMatrix.loadIdentity();
           {
             this._tmpMatrix.translateRelative(layoutBoundsOnTex01.x, layoutBoundsOnTex01.y);
@@ -221,7 +221,7 @@ export class CubismClippingManager_WebGL extends CubismClippingManager<CubismCli
         for (let i = 0; i < clipDrawCount; i++) {
           const clipDrawIndex: number = clipContext._clippingIdList[i];
 
-          // � �点情� �が更新されておらず、信� �性がない� �合は描画をパスする
+          // � �点情� �が更新されておらず、信� �性がない� �合は描画をパスする
           if (!model.getDrawableDynamicFlagVertexPositionsDidChange(clipDrawIndex)) {
             continue;
           }
@@ -231,7 +231,7 @@ export class CubismClippingManager_WebGL extends CubismClippingManager<CubismCli
           // マスクがクリアされていないなら処理する
           if (!this._clearedFrameBufferFlags.at(clipContext._bufferIndex)) {
             // マスクをクリアする
-            // (仮仕様) 1が無効（描かれない）� �域、0が有効（描かれる）� �域。（シェーダーCd*Csで0に近い値をかけてマスクを作る。1をかけると何も起こらない）
+            // (仮仕様) 1が無効（描かれない）� �域、0が有効（描かれる）� �域。（シェーダーCd*Csで0に近い値をかけてマスクを作る。1をかけると何も起こらない）
             this.gl.clearColor(1.0, 1.0, 1.0, 1.0);
             this.gl.clear(this.gl.COLOR_BUFFER_BIT);
             this._clearedFrameBufferFlags.set(clipContext._bufferIndex, true);
@@ -272,7 +272,7 @@ export class CubismClippingManager_WebGL extends CubismClippingManager<CubismCli
   public _currentMaskRenderTexture: WebGLFramebuffer; // マスク用レンダーテクスチャのアドレス
   public _maskRenderTextures: csmVector<WebGLFramebuffer>; // レンダーテクスチャのリスト
   public _maskColorBuffers: csmVector<WebGLTexture>; // マスク用カラーバッファーのアドレスのリスト
-  public _currentFrameNo: number; // マスクテクスチャに与えるフレー� 番号
+  public _currentFrameNo: number; // マスクテクスチャに与えるフレー� 番号
 
   public _maskTexture: CubismRenderTextureResource; // マスク用のテクスチャリソースのリスト
 
@@ -280,13 +280,13 @@ export class CubismClippingManager_WebGL extends CubismClippingManager<CubismCli
 }
 
 /**
- * レンダーテクスチャのリソースを定義する構� 体
+ * レンダーテクスチャのリソースを定義する構� 体
  * クリッピングマスクで使用する
  */
 export class CubismRenderTextureResource {
   /**
    * 引数付きコンストラクタ
-   * @param frameNo レンダラーのフレー� 番号
+   * @param frameNo レンダラーのフレー� 番号
    * @param texture テクスチャのアドレス
    */
   public constructor(frameNo: number, texture: csmVector<WebGLFramebuffer>) {
@@ -294,7 +294,7 @@ export class CubismRenderTextureResource {
     this.textures = texture;
   }
 
-  public frameNo: number; // レンダラのフレー� 番号
+  public frameNo: number; // レンダラのフレー� 番号
   public textures: csmVector<WebGLFramebuffer>; // テクスチャのアドレス
 }
 
@@ -414,7 +414,7 @@ export class CubismRendererProfile_WebGL {
       this._lastColorMask[3],
     );
 
-    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this._lastArrayBufferBinding); //前にバッファがバインドされていたら� �棄する必要がある
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this._lastArrayBufferBinding); //前にバッファがバインドされていたら� �棄する必要がある
     this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this._lastElementArrayBufferBinding);
 
     this.gl.activeTexture(this.gl.TEXTURE1); //テクスチャユニット1を復元
@@ -444,9 +444,9 @@ export class CubismRendererProfile_WebGL {
     this._lastViewport = new Array<GLint>(4);
   }
 
-  private _lastArrayBufferBinding: GLint; ///< モデル描画直前の� �点バッファ
+  private _lastArrayBufferBinding: GLint; ///< モデル描画直前の� �点バッファ
   private _lastElementArrayBufferBinding: GLint; ///< モデル描画直前のElementバッファ
-  private _lastProgram: GLint; ///< モデル描画直前のシェーダプログラ� バッファ
+  private _lastProgram: GLint; ///< モデル描画直前のシェーダプログラ� バッファ
   private _lastActiveTexture: GLint; ///< モデル描画直前のアクティブなテクスチャ
   private _lastTexture0Binding2D: GLint; ///< モデル描画直前のテクスチャユニット0
   private _lastTexture1Binding2D: GLint; ///< モデル描画直前のテクスチャユニット1
@@ -459,7 +459,7 @@ export class CubismRendererProfile_WebGL {
   private _lastFrontFace: GLint; ///< モデル描画直前のGL_CULL_FACEパラメータ
   private _lastColorMask: GLboolean[]; ///< モデル描画直前のGL_COLOR_WRITEMASKパラメータ
   private _lastBlending: GLint[]; ///< モデル描画直前のカラーブレンディングパラメータ
-  private _lastFBO: GLint; ///< モデル描画直前のフレー� バッファ
+  private _lastFBO: GLint; ///< モデル描画直前のフレー� バッファ
   private _lastViewport: GLint[]; ///< モデル描画直前のビューポート
 
   gl: WebGLRenderingContext;
@@ -471,7 +471,7 @@ export class CubismRendererProfile_WebGL {
 export class CubismRenderer_WebGL extends CubismRenderer {
   /**
    * レンダラの初期化処理を実行する
-   * 引数に渡したモデルからレンダラの初期化処理に必要な情� �を取り出すことができる
+   * 引数に渡したモデルからレンダラの初期化処理に必要な情� �を取り出すことができる
    *
    * @param model モデルのインスタンス
    * @param maskBufferCount バッファの生成数
@@ -507,19 +507,19 @@ export class CubismRenderer_WebGL extends CubismRenderer {
 
   /**
    * クリッピングマスクバッファのサイズを設定する
-   * マスク用のFrameBufferを� �棄、再作成する為処理コストは高い
+   * マスク用のFrameBufferを� �棄、再作成する為処理コストは高い
    * @param size クリッピングマスクバッファのサイズ
    */
   public setClippingMaskBufferSize(size: number) {
-    // クリッピングマスクを利用しない� �合は早期リターン
+    // クリッピングマスクを利用しない� �合は早期リターン
     if (!this._model.isUsingMasking()) {
       return;
     }
 
-    // インスタンス� �棄前にレンダーテクスチャの数を保存
+    // インスタンス� �棄前にレンダーテクスチャの数を保存
     const renderTextureCount: number = this._clippingManager.getRenderTextureCount();
 
-    // FrameBufferのサイズを変更するためにインスタンスを� �棄・再作成する
+    // FrameBufferのサイズを変更するためにインスタンスを� �棄・再作成する
     this._clippingManager.release();
     this._clippingManager = void 0;
     this._clippingManager = null;
@@ -530,7 +530,7 @@ export class CubismRenderer_WebGL extends CubismRenderer {
 
     this._clippingManager.initialize(
       this.getModel(),
-      renderTextureCount, // インスタンス� �棄前に保存したレンダーテクスチャの数
+      renderTextureCount, // インスタンス� �棄前に保存したレンダーテクスチャの数
     );
   }
 
@@ -606,7 +606,7 @@ export class CubismRenderer_WebGL extends CubismRenderer {
       return;
     }
 
-    //------------ クリッピングマスク・バッファ前処理方式の� �合 ------------
+    //------------ クリッピングマスク・バッファ前処理方式の� �合 ------------
     if (this._clippingManager != null) {
       this.preDraw();
 
@@ -623,7 +623,7 @@ export class CubismRenderer_WebGL extends CubismRenderer {
     const drawableCount: number = this.getModel().getDrawableCount();
     const renderOrder: Int32Array = this.getModel().getDrawableRenderOrders();
 
-    // インデックスを描画� �でソート
+    // インデックスを描画� �でソート
     for (let i = 0; i < drawableCount; ++i) {
       const order: number = renderOrder[i];
       this._sortedDrawableIndexList.set(order, i);
@@ -664,7 +664,7 @@ export class CubismRenderer_WebGL extends CubismRenderer {
           );
 
           // マスクをクリアする
-          // (仮仕様) 1が無効（描かれない）� �域、0が有効（描かれる）� �域。（シェーダーCd*Csで0に近い値をかけてマスクを作る。1をかけると何も起こらない）
+          // (仮仕様) 1が無効（描かれない）� �域、0が有効（描かれる）� �域。（シェーダーCd*Csで0に近い値をかけてマスクを作る。1をかけると何も起こらない）
           this.gl.clearColor(1.0, 1.0, 1.0, 1.0);
           this.gl.clear(this.gl.COLOR_BUFFER_BIT);
         }
@@ -675,7 +675,7 @@ export class CubismRenderer_WebGL extends CubismRenderer {
           for (let index = 0; index < clipDrawCount; index++) {
             const clipDrawIndex: number = clipContext._clippingIdList[index];
 
-            // � �点情� �が更新されておらず、信� �性がない� �合は描画をパスする
+            // � �点情� �が更新されておらず、信� �性がない� �合は描画をパスする
             if (!this._model.getDrawableDynamicFlagVertexPositionsDidChange(clipDrawIndex)) {
               continue;
             }
@@ -756,7 +756,7 @@ export class CubismRenderer_WebGL extends CubismRenderer {
 
   /**
    * レンダラが保持する静的なリソースを解放する
-   * WebGLの静的なシェーダープログラ� を解放する
+   * WebGLの静的なシェーダープログラ� を解放する
    */
   public static doStaticRelease(): void {
     CubismShaderManager_WebGL.deleteInstance();
@@ -764,7 +764,7 @@ export class CubismRenderer_WebGL extends CubismRenderer {
 
   /**
    * レンダーステートを設定する
-   * @param fbo アプリケーション側で指定しているフレー� バッファ
+   * @param fbo アプリケーション側で指定しているフレー� バッファ
    * @param viewport ビューポート
    */
   public setRenderState(fbo: WebGLFramebuffer, viewport: number[]): void {
@@ -773,7 +773,7 @@ export class CubismRenderer_WebGL extends CubismRenderer {
   }
 
   /**
-   * 描画開始時の追� 処理
+   * 描画開始時の追� 処理
    * モデルを描画する前にクリッピングマスクに必要な処理を実装している
    */
   public preDraw(): void {
@@ -791,7 +791,7 @@ export class CubismRenderer_WebGL extends CubismRenderer {
     this.gl.enable(this.gl.BLEND);
     this.gl.colorMask(true, true, true, true);
 
-    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null); // 前にバッファがバインドされていたら� �棄する必要がある
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null); // 前にバッファがバインドされていたら� �棄する必要がある
     this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, null);
 
     // 異方性フィルタリングを適用する
@@ -866,7 +866,7 @@ export class CubismRenderer_WebGL extends CubismRenderer {
   }
 
   _textures: csmMap<number, WebGLTexture>; // モデルが参照するテクスチャとレンダラでバインドしているテクスチャとのマップ
-  _sortedDrawableIndexList: csmVector<number>; // 描画オブジェクトのインデックスを描画� �に並べたリスト
+  _sortedDrawableIndexList: csmVector<number>; // 描画オブジェクトのインデックスを描画� �に並べたリスト
   _clippingManager: CubismClippingManager_WebGL; // クリッピングマスク管理オブジェクト
   _clippingContextBufferForMask: CubismClippingContext_WebGL; // マスクテクスチャに描画するためのクリッピングコンテキスト
   _clippingContextBufferForDraw: CubismClippingContext_WebGL; // 画面上描画するためのクリッピングコンテキスト
@@ -876,7 +876,7 @@ export class CubismRenderer_WebGL extends CubismRenderer {
     vertex: WebGLBuffer;
     uv: WebGLBuffer;
     index: WebGLBuffer;
-  }; // � �点バッファデータ
+  }; // � �点バッファデータ
   _extension: unknown; // 拡張機能
   gl: WebGLRenderingContext; // webglコンテキスト
 }

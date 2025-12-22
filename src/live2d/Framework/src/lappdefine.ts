@@ -52,7 +52,7 @@ export const PowerImageName = "";
 // ディレクトリ名とmodel3.jsonの名前を一致させておくこと
 
 export const ModelJsonName: string = "hiyori_pro_t11.model3.json";
-export const ModelDir: string[] = ["."]; // 其實沒用，但防止程式� �錯
+export const ModelDir: string[] = ["."]; // 其實沒用，但防止程式� �錯
 export const ModelDirSize: number = ModelDir.length;
 
 // 外部定義ファイル（json）と合わせる

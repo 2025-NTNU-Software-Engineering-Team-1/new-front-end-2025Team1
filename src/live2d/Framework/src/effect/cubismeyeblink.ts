@@ -18,16 +18,16 @@ import { csmVector } from "../type/csmvector";
 export class CubismEyeBlink {
   /**
    * インスタンスを作成する
-   * @param modelSetting モデルの設定情� �
+   * @param modelSetting モデルの設定情� �
    * @return 作成されたインスタンス
-   * @note 引数がNULLの� �合、パラメータIDが設定されていない空のインスタンスを作成する。
+   * @note 引数がNULLの� �合、パラメータIDが設定されていない空のインスタンスを作成する。
    */
   public static create(modelSetting: ICubismModelSetting = null): CubismEyeBlink {
     return new CubismEyeBlink(modelSetting);
   }
 
   /**
-   * インスタンスの� �棄
+   * インスタンスの� �棄
    * @param eyeBlink 対象のCubismEyeBlink
    */
   public static delete(eyeBlink: CubismEyeBlink): void {
@@ -148,7 +148,7 @@ export class CubismEyeBlink {
 
   /**
    * コンストラクタ
-   * @param modelSetting モデルの設定情� �
+   * @param modelSetting モデルの設定情� �
    */
   public constructor(modelSetting: ICubismModelSetting) {
     this._blinkingState = EyeState.EyeState_First;

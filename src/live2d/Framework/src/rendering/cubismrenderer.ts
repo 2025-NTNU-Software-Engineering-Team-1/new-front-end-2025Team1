@@ -34,7 +34,7 @@ export abstract class CubismRenderer {
 
   /**
    * レンダラの初期化処理を実行する
-   * 引数に渡したモデルからレンダラの初期化処理に必要な情� �を取り出すことができる
+   * 引数に渡したモデルからレンダラの初期化処理に必要な情� �を取り出すことができる
    * @param model モデルのインスタンス
    */
   public initialize(model: CubismModel): void {
@@ -56,7 +56,7 @@ export abstract class CubismRenderer {
 
   /**
    * Model-View-Projection 行列をセットする
-   * 配列は複製されるので、元の配列は外で� �棄して良い
+   * 配列は複製されるので、元の配列は外で� �棄して良い
    * @param matrix44 Model-View-Projection 行列
    */
   public setMvpMatrix(matrix44: CubismMatrix44): void {
@@ -114,7 +114,7 @@ export abstract class CubismRenderer {
    * モデルの色を取得する
    * 各色0.0~1.0の間で指定する(1.0が標準の状態)
    *
-   * @return RGBAのカラー情� �
+   * @return RGBAのカラー情� �
    */
   public getModelColor(): CubismTextureColor {
     return JSON.parse(JSON.stringify(this._modelColor));
@@ -125,7 +125,7 @@ export abstract class CubismRenderer {
    *
    * @param opacity 透明度
    *
-   * @return RGBAのカラー情� �
+   * @return RGBAのカラー情� �
    */
   getModelColorWithOpacity(opacity: number): CubismTextureColor {
     const modelColorRGBA: CubismTextureColor = this.getModelColor();
@@ -199,10 +199,10 @@ export abstract class CubismRenderer {
 
   /**
    * マスク描画の方式を変更する。
-   * falseの� �合、マスクを1枚のテクスチャに分割してレンダリングする（デフォルト）
-   * 高速� が、マスク個数の上限が36に限定され、質も荒くなる
-   * trueの� �合、パーツ描画の前にその都度必要なマスクを描き直す
-   * レンダリング品質は高いが描画処理� 荷は増す
+   * falseの� �合、マスクを1枚のテクスチャに分割してレンダリングする（デフォルト）
+   * 高速� が、マスク個数の上限が36に限定され、質も荒くなる
+   * trueの� �合、パーツ描画の前にその都度必要なマスクを描き直す
+   * レンダリング品質は高いが描画処理� 荷は増す
    * @param high 高精細マスクに切り替えるか？
    */
   public useHighPrecisionMask(high: boolean): void {
@@ -260,12 +260,12 @@ export abstract class CubismRenderer {
   protected _isPremultipliedAlpha: boolean; // 乗算済みαならtrue
   protected _anisotropy: unknown; // テクスチャの異方性フィルタリングのパラメータ
   protected _model: CubismModel; // レンダリング対象のモデル
-  protected _useHighPrecisionMask: boolean; // falseの� �合、マスクを纏めて描画する trueの� �合、マスクはパーツ描画ごとに書き直す
+  protected _useHighPrecisionMask: boolean; // falseの� �合、マスクを纏めて描画する trueの� �合、マスクはパーツ描画ごとに書き直す
 }
 
 export enum CubismBlendMode {
   CubismBlendMode_Normal = 0, // 通常
-  CubismBlendMode_Additive = 1, // � 算
+  CubismBlendMode_Additive = 1, // � 算
   CubismBlendMode_Multiplicative = 2, // 乗算
 }
 
@@ -338,9 +338,9 @@ export abstract class CubismClippingContext {
   }
 
   /**
-   * このマスクにクリップされる描画オブジェクトを追� する
+   * このマスクにクリップされる描画オブジェクトを追� する
    *
-   * @param drawableIndex クリッピング対象に追� する描画オブジェクトのインデックス
+   * @param drawableIndex クリッピング対象に追� する描画オブジェクトのインデックス
    */
   public addClippedDrawable(drawableIndex: number) {
     this._clippedDrawableIndexList.push(drawableIndex);
@@ -350,12 +350,12 @@ export abstract class CubismClippingContext {
   public readonly _clippingIdList: Int32Array; // クリッピングマスクのIDリスト
   public _clippingIdCount: number; // クリッピングマスクの数
   public _layoutChannelIndex: number; // RGBAのいずれのチャンネルにこのクリップを配置するか（0:R, 1:G, 2:B, 3:A）
-  public _layoutBounds: csmRect; // マスク用チャンネルのどの� �域にマスクを入れるか（View座標-1~1, UVは0~1に直す）
+  public _layoutBounds: csmRect; // マスク用チャンネルのどの� �域にマスクを入れるか（View座標-1~1, UVは0~1に直す）
   public _allClippedDrawRect: csmRect; // このクリッピングで、クリッピングされるすべての描画オブジェクトの囲み矩形（毎回更新）
   public _matrixForMask: CubismMatrix44; // マスクの位置計算結果を保持する行列
   public _matrixForDraw: CubismMatrix44; // 描画オブジェクトの位置計算結果を保持する行列
   public _clippedDrawableIndexList: number[]; // このマスクにクリップされる描画オブジェクトのリスト
-  public _bufferIndex: number; // このマスクが割り当てられるレンダーテクスチャ（フレー� バッファ）やカラーバッファのインデックス
+  public _bufferIndex: number; // このマスクが割り当てられるレンダーテクスチャ（フレー� バッファ）やカラーバッファのインデックス
 }
 
 // Namespace definition for compatibility.

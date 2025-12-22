@@ -10,9 +10,9 @@
  */
 export class csmString {
   /**
-   * 文字列を後方に追� する
+   * 文字列を後方に追� する
    *
-   * @param c 追� する文字列
+   * @param c 追� する文字列
    * @return 更新された文字列
    */
   public append(c: string, length?: number): csmString {

@@ -16,7 +16,7 @@ const ArtMesh = "ArtMesh";
 /**
  * ユーザーデータインターフェース
  *
- * Jsonから読み込ん� ユーザーデータを記録しておくための構� 体
+ * Jsonから読み込ん� ユーザーデータを記録しておくための構� 体
  */
 export class CubismModelUserDataNode {
   targetType: CubismIdHandle; // ユーザーデータターゲットタイプ
@@ -46,9 +46,9 @@ export class CubismModelUserData {
   }
 
   /**
-   * インスタンスを� �棄する
+   * インスタンスを� �棄する
    *
-   * @param modelUserData � �棄するインスタンス
+   * @param modelUserData � �棄するインスタンス
    */
   public static delete(modelUserData: CubismModelUserData): void {
     if (modelUserData != null) {
@@ -111,7 +111,7 @@ export class CubismModelUserData {
   /**
    * デストラクタ相当の処理
    *
-   * ユーザーデータ構� 体配列を解放する
+   * ユーザーデータ構� 体配列を解放する
    */
   public release(): void {
     for (let i = 0; i < this._userDataNodes.getSize(); ++i) {
@@ -121,7 +121,7 @@ export class CubismModelUserData {
     this._userDataNodes = null;
   }
 
-  private _userDataNodes: csmVector<CubismModelUserDataNode>; // ユーザーデータ構� 体配列
+  private _userDataNodes: csmVector<CubismModelUserDataNode>; // ユーザーデータ構� 体配列
   private _artMeshUserDataNode: csmVector<CubismModelUserDataNode>; // 閲覧リストの保持
 }
 

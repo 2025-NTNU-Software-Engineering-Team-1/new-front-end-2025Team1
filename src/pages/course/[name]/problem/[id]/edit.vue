@@ -7,6 +7,44 @@ import api, { fetcher } from "@/models/api";
 import axios, { type AxiosError } from "axios";
 import AdminProblemForm from "@/components/Problem/Admin/AdminProblemForm.vue";
 
+// ==========================================
+// [CONFIG] Console Debug Mode
+// ==========================================
+const DEBUG_MODE = 1;
+
+// ==========================================
+// Logger Utility
+// ==========================================
+const logger = {
+  log: (label: string, data?: unknown) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Log] ${label}`, "color: #3b82f6; font-weight: bold;", data || "");
+  },
+  success: (label: string, data?: unknown) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Success] ${label}`, "color: #10b981; font-weight: bold;", data || "");
+  },
+  error: (label: string, error?: unknown) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Error] ${label}`, "color: #ef4444; font-weight: bold;", error || "");
+  },
+  warn: (label: string, data?: unknown) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Warn] ${label}`, "color: #f59e0b; font-weight: bold;", data || "");
+  },
+  group: (label: string) => {
+    if (!DEBUG_MODE) return;
+    console.group(`%c[Group] ${label}`, "color: #8b5cf6; font-weight: bold;");
+  },
+  groupEnd: () => {
+    if (!DEBUG_MODE) return;
+    console.groupEnd();
+  },
+};
+
+// ==========================================
+// Setup & Utils
+// ==========================================
 const route = useRoute();
 const router = useRouter();
 useTitle(`Edit Problem - ${route.params.id} - ${route.params.name} | Normal OJ`);
@@ -52,6 +90,8 @@ function normalizeConfig(config?: LegacyProblemConfigExtra): ProblemConfigExtra 
     ...(config || {}),
     trialMode: config?.trialMode ?? base.trialMode,
     maxNumberOfTrial: config?.maxNumberOfTrial ?? -1,
+    trialResultVisible: config?.trialResultVisible ?? base.trialResultVisible,
+    trialResultDownloadable: config?.trialResultDownloadable ?? base.trialResultDownloadable,
     aiVTuber: config?.aiVTuber ?? base.aiVTuber,
     aiVTuberMode: config?.aiVTuberMode ?? base.aiVTuberMode,
     aiVTuberApiKeys: Array.isArray(config?.aiVTuberApiKeys) ? config!.aiVTuberApiKeys : base.aiVTuberApiKeys,
@@ -168,6 +208,9 @@ function normalizeAssets(raw: any): ProblemAssets {
   return { ...base, ...(raw || {}) };
 }
 
+// ==========================================
+// Data Fetching & Initialization
+// ==========================================
 const {
   data: problem,
   error: fetchError,
@@ -176,11 +219,15 @@ const {
 
 const edittingProblem = ref<ProblemForm>();
 
-// 只在後端資料� 載完成時初始化一次 edittingProblem（使用 watch + once: true 避免用戶修改被重置）
+// Initialize with logging
 watch(
   () => problem.value,
   (newProblem) => {
-    if (!newProblem || edittingProblem.value) return; // 已初始化則跳過
+    if (!newProblem || edittingProblem.value) return;
+
+    logger.group("Initialize Problem Data");
+    logger.log("Raw Response", newProblem);
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const np = newProblem as any;
     const testCases = normalizeTestCases(np.testCase ?? np.testCaseInfo);
@@ -196,7 +243,6 @@ watch(
       pipeline: normalizePipeline(
         (() => {
           const basePipe = np.pipeline || np.pipelineConf || np.pipeline_conf || np.config?.pipeline;
-          // 將 config 併入原始 payload，讓 normalizePipeline 可以讀到 allowRead/allowWrite/fopen/fwrite
           const cfg = np.config;
           if (basePipe && cfg) return { ...basePipe, config: cfg };
           if (basePipe) return basePipe;
@@ -207,7 +253,7 @@ watch(
       assets: normalizeAssets(np.assets),
     } as ProblemForm;
 
-    // 確保 allowRead/allowWrite 有值（部分回傳可能只在 config 上）
+    // Ensure allowRead/allowWrite has a value
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const cfg = edittingProblem.value.config as any;
     const pipe = edittingProblem.value.pipeline;
@@ -219,6 +265,9 @@ watch(
         pipe.allowWrite = Boolean(cfg?.allowWrite ?? false);
       }
     }
+
+    logger.success("Normalization Complete", edittingProblem.value);
+    logger.groupEnd();
   },
   { immediate: true },
 );
@@ -230,23 +279,19 @@ function update<K extends keyof ProblemForm>(key: K, value: ProblemForm[K]) {
 
 provide<Ref<ProblemForm | undefined>>("problem", edittingProblem);
 
-const openPreview = ref(false);
-const openJSON = ref(false);
-
-const mockProblemMeta = {
-  owner: "",
-  highScore: 0,
-  submitCount: 0,
-  ACUser: 0,
-  submitter: 0,
-};
-
+// ==========================================
+// Actions: Submit / Discard / Delete
+// ==========================================
 async function submit() {
   if (!edittingProblem.value || !formElement.value) return;
+
+  logger.group("Submit Edit Problem");
   formElement.value.isLoading = true;
+
   try {
     const pid = Number(route.params.id);
 
+    // Step 1: Meta
     const cfg = {
       ...edittingProblem.value.config,
       aiVTuber: edittingProblem.value.config.aiVTuber,
@@ -254,6 +299,8 @@ async function submit() {
       aiVTuberMode: edittingProblem.value.config.aiVTuberMode,
     };
     const pipe = { ...edittingProblem.value.pipeline };
+
+    logger.log("Step 1: Preparing Metadata", { config: cfg, pipeline: pipe });
 
     const fd = new FormData();
     fd.append(
@@ -264,23 +311,64 @@ async function submit() {
       }),
     );
 
+    // Step 2: Assets
     const assets = edittingProblem.value.assets;
-    if (assets?.aiVTuberACFiles) assets.aiVTuberACFiles.forEach((f) => fd.append("aiVTuberACFiles", f));
-    if (assets?.testdataZip) fd.append("case", assets.testdataZip);
-    if (assets?.customCheckerPy) fd.append("custom_checker.py", assets.customCheckerPy);
-    if (assets?.makefileZip) fd.append("makefile.zip", assets.makefileZip);
-    if (assets?.teacherFile) fd.append("Teacher_file", assets.teacherFile);
-    if (assets?.scorePy) fd.append("score.py", assets.scorePy);
-    if (assets?.dockerfilesZip) fd.append("dockerfiles.zip", assets.dockerfilesZip);
-    if (assets?.localServiceZip) fd.append("local_service.zip", assets.localServiceZip);
-    if (assets?.resourceDataZip) fd.append("resource_data.zip", assets.resourceDataZip);
-    if (assets?.resourceDataTeacherZip) fd.append("resource_data_teacher.zip", assets.resourceDataTeacherZip);
+    const attachedFiles: string[] = [];
 
+    if (assets?.aiVTuberACFiles) {
+      assets.aiVTuberACFiles.forEach((f) => fd.append("aiVTuberACFiles", f));
+      attachedFiles.push(`aiVTuberACFiles (${assets.aiVTuberACFiles.length})`);
+    }
+    if (assets?.testdataZip) {
+      fd.append("case", assets.testdataZip);
+      attachedFiles.push("case");
+    }
+    if (assets?.customCheckerPy) {
+      fd.append("custom_checker.py", assets.customCheckerPy);
+      attachedFiles.push("custom_checker.py");
+    }
+    if (assets?.makefileZip) {
+      fd.append("makefile.zip", assets.makefileZip);
+      attachedFiles.push("makefile.zip");
+    }
+    if (assets?.teacherFile) {
+      fd.append("Teacher_file", assets.teacherFile);
+      attachedFiles.push("Teacher_file");
+    }
+    if (assets?.scorePy) {
+      fd.append("score.py", assets.scorePy);
+      attachedFiles.push("score.py");
+    }
+    if (assets?.dockerfilesZip) {
+      fd.append("dockerfiles.zip", assets.dockerfilesZip);
+      attachedFiles.push("dockerfiles.zip");
+    }
+    if (assets?.localServiceZip) {
+      fd.append("local_service.zip", assets.localServiceZip);
+      attachedFiles.push("local_service.zip");
+    }
+    if (assets?.resourceDataZip) {
+      fd.append("resource_data.zip", assets.resourceDataZip);
+      attachedFiles.push("resource_data.zip");
+    }
+    if (assets?.resourceDataTeacherZip) {
+      fd.append("resource_data_teacher.zip", assets.resourceDataTeacherZip);
+      attachedFiles.push("resource_data_teacher.zip");
+    }
+
+    logger.log("Step 2: Attaching Assets", attachedFiles);
+
+    // Step 3: API Calls
+    logger.log("Step 3: Sending Update Request...");
     await api.Problem.modify(pid, edittingProblem.value);
+
+    logger.log("Step 4: Sending Assets Upload...");
     await api.Problem.uploadAssetsV2(pid, fd);
 
+    logger.success("Update Successful. Redirecting...");
     router.push(`/course/${route.params.name}/problem/${route.params.id}`);
   } catch (error) {
+    logger.error("Submit Failed", error);
     formElement.value.errorMsg =
       axios.isAxiosError(error) && error.response?.data?.message
         ? error.response.data.message
@@ -288,22 +376,30 @@ async function submit() {
     throw error;
   } finally {
     formElement.value.isLoading = false;
+    logger.groupEnd();
   }
 }
 
 async function discard() {
   if (!confirm("Are u sure?")) return;
+  logger.log("User Discarded Changes");
   router.push(`/course/${route.params.name}/problems`);
 }
 
 async function delete_() {
   if (!formElement.value) return;
-  formElement.value.isLoading = true;
+
   if (!confirm("Are u sure?")) return;
+
+  logger.warn("Deleting Problem...", route.params.id);
+  formElement.value.isLoading = true;
+
   try {
     await api.Problem.delete(route.params.id as string);
+    logger.success("Problem Deleted");
     router.push(`/course/${route.params.name}/problems`);
   } catch (error) {
+    logger.error("Deletion Failed", error);
     formElement.value.errorMsg =
       axios.isAxiosError(error) && error.response?.data?.message
         ? error.response.data.message
@@ -313,6 +409,20 @@ async function delete_() {
     formElement.value.isLoading = false;
   }
 }
+
+// ==========================================
+// Misc
+// ==========================================
+const openPreview = ref(false);
+const openJSON = ref(false);
+
+const mockProblemMeta = {
+  owner: "",
+  highScore: 0,
+  submitCount: 0,
+  ACUser: 0,
+  submitter: 0,
+};
 </script>
 
 <template>

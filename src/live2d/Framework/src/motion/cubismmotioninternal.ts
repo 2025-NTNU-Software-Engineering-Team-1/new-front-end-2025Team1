@@ -127,7 +127,7 @@ export class CubismMotionData {
   loop: boolean; // ループするかどうか
   curveCount: number; // カーブの個数
   eventCount: number; // UserDataの個数
-  fps: number; // フレー� レート
+  fps: number; // フレー� レート
   curves: csmVector<CubismMotionCurve>; // カーブのリスト
   segments: csmVector<CubismMotionSegment>; // セグメントのリスト
   points: csmVector<CubismMotionPoint>; // ポイントのリスト

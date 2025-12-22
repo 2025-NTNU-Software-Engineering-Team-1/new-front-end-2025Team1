@@ -80,7 +80,7 @@ export class CubismUserModel {
   }
 
   /**
-   * マウスドラッグ情� �の設定
+   * マウスドラッグ情� �の設定
    * @param ドラッグしているカーソルのX位置
    * @param ドラッグしているカーソルのY位置
    */
@@ -89,10 +89,10 @@ export class CubismUserModel {
   }
 
   /**
-   * � 速度の情� �を設定する
-   * @param x X軸方向の� 速度
-   * @param y Y軸方向の� 速度
-   * @param z Z軸方向の� 速度
+   * � 速度の情� �を設定する
+   * @param x X軸方向の� 速度
+   * @param y Y軸方向の� 速度
+   * @param z Z軸方向の� 速度
    */
   public setAcceleration(x: number, y: number, z: number): void {
     this._accelerationX = x;
@@ -271,7 +271,7 @@ export class CubismUserModel {
     const drawIndex: number = this._model.getDrawableIndex(drawableId);
 
     if (drawIndex < 0) {
-      return false; // 存在しない� �合はfalse
+      return false; // 存在しない� �合はfalse
     }
 
     const count: number = this._model.getDrawableVertexCount(drawIndex);
@@ -351,9 +351,9 @@ export class CubismUserModel {
   /**
    * イベント発火時の標準処理
    *
-   * Eventが再生処理時にあった� �合の処理をする。
+   * Eventが再生処理時にあった� �合の処理をする。
    * 継承で上書きすることを想定している。
-   * 上書きしない� �合はログ出力をする。
+   * 上書きしない� �合はログ出力をする。
    *
    * @param eventValue 発火したイベントの文字列データ
    */
@@ -478,9 +478,9 @@ export class CubismUserModel {
   protected _lastLipSyncValue: number; // 最後のリップシンクの制御地
   protected _dragX: number; // マウスドラッグのX位置
   protected _dragY: number; // マウスドラッグのY位置
-  protected _accelerationX: number; // X軸方向の� 速度
-  protected _accelerationY: number; // Y軸方向の� 速度
-  protected _accelerationZ: number; // Z軸方向の� 速度
+  protected _accelerationX: number; // X軸方向の� 速度
+  protected _accelerationY: number; // Y軸方向の� 速度
+  protected _accelerationZ: number; // Z軸方向の� 速度
   protected _mocConsistency: boolean; // MOC3整合性検証するかどうか
   protected _motionConsistency: boolean; // motion3.json整合性検証するかどうか
   protected _debugMode: boolean; // デバッグモードかどうか

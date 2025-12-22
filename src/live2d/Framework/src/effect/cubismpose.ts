@@ -99,7 +99,7 @@ export class CubismPose {
   }
 
   /**
-   * インスタンスを� �棄する
+   * インスタンスを� �棄する
    * @param pose 対象のCubismPose
    */
   public static delete(pose: CubismPose): void {
@@ -114,7 +114,7 @@ export class CubismPose {
    * @param deltaTimeSeconds デルタ時間[秒]
    */
   public updateParameters(model: CubismModel, deltaTimeSeconds: number): void {
-    // 前回のモデルと同じでない� �合は初期化が必要
+    // 前回のモデルと同じでない� �合は初期化が必要
     if (model != this._lastModel) {
       // パラメータインデックスの初期化
       this.reset(model);
@@ -206,7 +206,7 @@ export class CubismPose {
    * パーツのフェード操作を行う。
    * @param model 対象のモデル
    * @param deltaTimeSeconds デルタ時間[秒]
-   * @param beginIndex フェード操作を行うパーツグループの先� �インデックス
+   * @param beginIndex フェード操作を行うパーツグループの先� �インデックス
    * @param partGroupCount フェード操作を行うパーツグループの個数
    */
   public doFade(
@@ -273,7 +273,7 @@ export class CubismPose {
           a1 = ((1 - newOpacity) * phi) / (1.0 - phi); // (1,0),(phi,phi)を通る直線式
         }
 
-        // 背景の見える割合を制限する� �合
+        // 背景の見える割合を制限する� �合
         const backOpacity: number = (1.0 - a1) * (1.0 - newOpacity);
 
         if (backOpacity > backOpacityThreshold) {

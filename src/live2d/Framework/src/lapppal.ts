@@ -7,9 +7,9 @@
  */
 
 /**
- * プラットフォー� 依存機能を抽象化する Cubism Platform Abstraction Layer.
+ * プラットフォー� 依存機能を抽象化する Cubism Platform Abstraction Layer.
  *
- * ファイル読み込みや時刻取得等のプラットフォー� に依存する関数をまとめる。
+ * ファイル読み込みや時刻取得等のプラットフォー� に依存する関数をまとめる。
  */
 export class LAppPal {
   /**
@@ -18,7 +18,7 @@ export class LAppPal {
    * @param filePath 読み込み対象ファイルのパス
    * @return
    * {
-   *      buffer,   読み込ん� バイトデータ
+   *      buffer,   読み込ん� バイトデータ
    *      size        ファイルサイズ
    * }
    */
@@ -32,7 +32,7 @@ export class LAppPal {
   }
 
   /**
-   * デルタ時間（前回フレー� との差分）を取得する
+   * デルタ時間（前回フレー� との差分）を取得する
    * @return デルタ時間[ms]
    */
   public static getDeltaTime(): number {

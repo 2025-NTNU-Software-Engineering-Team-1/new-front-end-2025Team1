@@ -23,7 +23,7 @@ export class CubismBreath {
   }
 
   /**
-   * インスタンスの� �棄
+   * インスタンスの� �棄
    * @param instance 対象のCubismBreath
    */
   public static delete(instance: CubismBreath): void {
@@ -81,7 +81,7 @@ export class CubismBreath {
 }
 
 /**
- * 呼吸のパラメータ情� �
+ * 呼吸のパラメータ情� �
  */
 export class BreathParameterData {
   /**

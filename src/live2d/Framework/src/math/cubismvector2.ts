@@ -24,10 +24,10 @@ export class CubismVector2 {
   }
 
   /**
-   * ベクトルの� 算
+   * ベクトルの� 算
    *
-   * @param vector2 � 算するベクトル値
-   * @return � 算結果 ベクトル値
+   * @param vector2 � 算するベクトル値
+   * @return � 算結果 ベクトル値
    */
   public add(vector2: CubismVector2): CubismVector2 {
     const ret: CubismVector2 = new CubismVector2(0.0, 0.0);

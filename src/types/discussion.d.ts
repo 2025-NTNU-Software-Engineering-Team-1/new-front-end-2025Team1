@@ -157,7 +157,7 @@ export interface PostLanguage {
   label: string;
 }
 
-// 分� �相關
+// 分� �相關
 export interface PaginationInfo {
   page: number;
   limit: number;

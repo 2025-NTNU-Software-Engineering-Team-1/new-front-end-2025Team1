@@ -13,7 +13,7 @@ import { csmString } from "../type/csmstring";
  * パラメータ名・パーツ名・Drawable名を保持するクラス。
  *
  * @note 指定したID文字列からCubismIdを取得する際はこのクラスの生成メソッドを呼ばず、
- *       CubismIdManager().getId(id)を使用してく� さい
+ *       CubismIdManager().getId(id)を使用してく� さい
  */
 export class CubismId {
   /**
@@ -22,7 +22,7 @@ export class CubismId {
    * @param id ID文字列
    * @returns CubismId
    * @note 指定したID文字列からCubismIdを取得する際は
-   *       CubismIdManager().getId(id)を使用してく� さい
+   *       CubismIdManager().getId(id)を使用してく� さい
    */
   public static createIdInternal(id: string | csmString) {
     return new CubismId(id);

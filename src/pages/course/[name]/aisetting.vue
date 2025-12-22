@@ -8,7 +8,7 @@ const router = useRouter();
 // const { t } = useI18n();
 useTitle(`AI Setting - ${route.params.name} | Normal OJ`);
 
-// � �設 redirect 到 setup
+// � �設 redirect 到 setup
 watchEffect(() => {
   // 僅當路徑剛好在 /apisetting 結尾時才 redirect
   if (route.path.endsWith("/aisetting") || route.path.endsWith("/aisetting/")) {

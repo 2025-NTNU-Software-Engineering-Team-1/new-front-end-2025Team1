@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watchEffect, computed } from "vue";
+import { ref, watchEffect, computed, watch } from "vue";
 import { useClipboard, useIntervalFn } from "@vueuse/core";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import { useRoute, useRouter } from "vue-router";
@@ -10,11 +10,50 @@ import { useSession } from "@/stores/session";
 import { useTitle } from "@vueuse/core";
 import type { AxiosError } from "axios";
 
+// ==========================================
+// [CONFIG] Console Debug Mode
+// ==========================================
+const DEBUG_MODE = 1;
+
+// ==========================================
+// Logger Utility
+// ==========================================
+const logger = {
+  log: (label: string, data?: unknown) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Log] ${label}`, "color: #3b82f6; font-weight: bold;", data || "");
+  },
+  success: (label: string, data?: unknown) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Success] ${label}`, "color: #10b981; font-weight: bold;", data || "");
+  },
+  error: (label: string, error?: unknown) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Error] ${label}`, "color: #ef4444; font-weight: bold;", error || "");
+  },
+  warn: (label: string, data?: unknown) => {
+    if (!DEBUG_MODE) return;
+    console.log(`%c[Warn] ${label}`, "color: #f59e0b; font-weight: bold;", data || "");
+  },
+  group: (label: string) => {
+    if (!DEBUG_MODE) return;
+    console.group(`%c[Group] ${label}`, "color: #8b5cf6; font-weight: bold;");
+  },
+  groupEnd: () => {
+    if (!DEBUG_MODE) return;
+    console.groupEnd();
+  },
+};
+
+// ==========================================
+// Setup & State
+// ==========================================
 const session = useSession();
 const route = useRoute();
 useTitle(`Submission - ${route.params.id} - ${route.params.name} | Normal OJ`);
 const router = useRouter();
 
+// Main Submission Data
 const {
   data: submission,
   error,
@@ -22,6 +61,7 @@ const {
   execute,
 } = useAxios<Submission>(`/submission/${route.params.id}`, fetcher);
 
+// Compile Error Output
 const {
   data: CEOutput,
   error: CEError,
@@ -40,7 +80,7 @@ const {
   execute: fetchSAReport,
 } = useAxios<{ report: string; reportUrl?: string }>("", fetcher, { immediate: false });
 
-// 題目資料，用來判斷 artifactCollection
+// Problem data, used to determine artifactCollection
 const {
   data: problem,
   error: problemError,
@@ -48,16 +88,31 @@ const {
   execute: fetchProblem,
 } = useAxios<Problem>("", fetcher, { immediate: false });
 
+// ==========================================
+// Logic & Watchers
+// ==========================================
+
+// Log initial submission load
+watch(submission, (val) => {
+  if (val) logger.log("Submission Data Loaded", { id: val.submissionId, status: val.status });
+});
+
 watchEffect(() => {
   if (submission.value && !problem.value) {
+    logger.log("Fetching linked Problem Config...", submission.value.problemId);
     fetchProblem(`/problem/view/${submission.value.problemId}`);
   }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const prob = problem.value as any;
   const hasStaticAnalysis = prob?.pipeline?.staticAnalysis?.libraryRestrictions?.enabled === true;
 
   if (hasStaticAnalysis && submission.value) {
-    fetchSAReport(`/submission/${submission.value.submissionId}/static-analysis`);
+    // Prevent duplicate logs if already loading
+    if (!SALoading.value && !SAReport.value) {
+      logger.log("Static Analysis Enabled. Fetching Report...");
+      fetchSAReport(`/submission/${submission.value.submissionId}/static-analysis`);
+    }
   }
 });
 
@@ -82,21 +137,30 @@ const saMessage = computed(() => submission.value?.saMessage || "");
 
 const { copy, copied, isSupported } = useClipboard();
 
+// Polling Logic
 const { pause, isActive } = useIntervalFn(() => {
   if (submission.value != null) {
+    // Optional: Log polling tick (can be noisy)
+    // logger.log("Polling submission status...");
     execute();
   }
 }, 2000);
 
 const expandTasks = ref<boolean[]>([]);
+
 watchEffect(() => {
   if (submission.value != null) {
     if (submission.value.tasks) {
       expandTasks.value = submission.value.tasks.map(() => false);
     }
     if (submission.value.status !== SUBMISSION_STATUS_CODE.PENDING) {
-      pause();
+      if (isActive.value) {
+        logger.success("Judging Finished. Polling Stopped.", { finalStatus: submission.value.status });
+        pause();
+      }
+
       if (submission.value.status === SUBMISSION_STATUS_CODE.COMPILE_ERROR) {
+        logger.warn("Compile Error Detected. Fetching Output...");
         fetchCEOutput();
       }
     }
@@ -105,24 +169,32 @@ watchEffect(() => {
 
 const isRejudgeLoading = ref(false);
 async function rejudge() {
+  logger.group("Rejudge Process");
   isRejudgeLoading.value = true;
   try {
+    logger.log("Sending Rejudge Request...", route.params.id);
     await api.Submission.rejudge(route.params.id as string);
+    logger.success("Rejudge request sent. Reloading page...");
     router.go(0);
   } catch (error) {
+    logger.error("Rejudge Failed", error);
     alert("Request to rejudge failed.");
     throw error;
   } finally {
     isRejudgeLoading.value = false;
+    logger.groupEnd();
   }
 }
 
-// 下載 artifact（由後端供應檔案）
+// Download artifact (files provided by backend)
 function downloadCompiledBinary() {
+  logger.log("Action: Download Compiled Binary");
   const url = api.Submission.getArtifactUrl(route.params.id as string, "compiledBinary");
   window.open(url, "_blank");
 }
+
 function downloadTaskZip(taskIndex: number) {
+  logger.log(`Action: Download Task Zip (Index: ${taskIndex})`);
   const url = api.Submission.getArtifactUrl(route.params.id as string, "zip", taskIndex);
   window.open(url, "_blank");
 }
@@ -230,7 +302,6 @@ function downloadTaskZip(taskIndex: number) {
               <ui-spinner class="mr-3 h-6 w-6" /> {{ $t("course.submission.detail.desc") }}
             </div>
 
-            <!-- 詳細結果表� �：若題目設定 zip artifact，新增 Artifact 欄位，於每個子任務提供 zip 下載 -->
             <table
               v-else
               class="table-compact table w-full"
@@ -313,7 +384,6 @@ function downloadTaskZip(taskIndex: number) {
           </div>
         </div>
 
-        <!-- === Static Analysis Report === -->
         <div class="my-6" />
 
         <div class="card min-w-full rounded-none">

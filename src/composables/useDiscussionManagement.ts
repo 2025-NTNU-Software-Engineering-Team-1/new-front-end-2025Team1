@@ -17,7 +17,7 @@ export function useDiscussionManagement() {
   const loading = ref(false);
   const error = ref<string>("");
 
-  // 管理貼文狀態（置� �/關帖/標已解決）
+  // 管理貼文狀態（置� �/關帖/標已解決）
   const managePostStatus = async (postId: string | number, action: string) => {
     try {
       loading.value = true;
@@ -54,10 +54,10 @@ export function useDiscussionManagement() {
     }
   };
 
-  // 置� �貼文
+  // 置� �貼文
   const pinPost = (postId: string | number) => managePostStatus(postId, "pin");
 
-  // 取消置� �
+  // 取消置� �
   const unpinPost = (postId: string | number) => managePostStatus(postId, "unpin");
 
   // 關閉貼文

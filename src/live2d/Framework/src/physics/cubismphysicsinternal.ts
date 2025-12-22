@@ -40,7 +40,7 @@ export class PhysicsJsonEffectiveForces {
 }
 
 /**
- * 物理演算のパラメータ情� �
+ * 物理演算のパラメータ情� �
  */
 export class CubismPhysicsParameter {
   id: CubismIdHandle; // パラメータ
@@ -48,7 +48,7 @@ export class CubismPhysicsParameter {
 }
 
 /**
- * 物理演算の正規化情� �
+ * 物理演算の正規化情� �
  */
 export class CubismPhysicsNormalization {
   minimum: number; // 最大値
@@ -57,7 +57,7 @@ export class CubismPhysicsNormalization {
 }
 
 /**
- * 物理演算の演算委使用する物理点の情� �
+ * 物理演算の演算委使用する物理点の情� �
  */
 export class CubismPhysicsParticle {
   constructor() {
@@ -72,7 +72,7 @@ export class CubismPhysicsParticle {
   initialPosition: CubismVector2; // 初期位置
   mobility: number; // 動きやすさ
   delay: number; // 遅れ
-  acceleration: number; // � 速度
+  acceleration: number; // � 速度
   radius: number; // 距離
   position: CubismVector2; // 現在の位置
   lastPosition: CubismVector2; // 最後の位置
@@ -131,7 +131,7 @@ export interface normalizedPhysicsParameterValueGetter {
  * 物理演算の値の取得関数の宣言
  * @param translation 移動値
  * @param particles 物理点のリスト
- * @param isInverted 値が反� されているか
+ * @param isInverted 値が反� されているか
  * @param parentGravity 重力
  * @return 値
  */
@@ -156,7 +156,7 @@ export interface physicsScaleGetter {
 }
 
 /**
- * 物理演算の入力情� �
+ * 物理演算の入力情� �
  */
 export class CubismPhysicsInput {
   constructor() {
@@ -171,9 +171,9 @@ export class CubismPhysicsInput {
 }
 
 /**
- * @brief 物理演算の出力情� �
+ * @brief 物理演算の出力情� �
  *
- * 物理演算の出力情� �。
+ * 物理演算の出力情� �。
  */
 export class CubismPhysicsOutput {
   constructor() {

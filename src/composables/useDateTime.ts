@@ -1,12 +1,12 @@
 /**
- * 日期時間� �式化工具
+ * 日期時間� �式化工具
  */
 
 /**
- * 將 ISO 時間字串轉換為本地時間� �式
- * @param isoString ISO 8601 � �式的時間字串
- * @param format � �式選� �：'full' | 'date' | 'time' | 'relative'
- * @returns � �式化後的時間字串
+ * 將 ISO 時間字串轉換為本地時間� �式
+ * @param isoString ISO 8601 � �式的時間字串
+ * @param format � �式選� �：'full' | 'date' | 'time' | 'relative'
+ * @returns � �式化後的時間字串
  */
 export function formatDateTime(
   isoString: string,
@@ -29,7 +29,7 @@ export function formatDateTime(
     const diffHours = Math.floor(diffMinutes / 60);
     const diffDays = Math.floor(diffHours / 24);
 
-    // 相對時間� �式
+    // 相對時間� �式
     if (format === "relative") {
       if (diffSeconds < 60) return "剛剛";
       if (diffMinutes < 60) return `${diffMinutes} 分鐘前`;
@@ -62,7 +62,7 @@ export function formatDateTime(
 
 /**
  * 將 ISO 時間字串轉換為相對時間描述
- * @param isoString ISO 8601 � �式的時間字串
+ * @param isoString ISO 8601 � �式的時間字串
  * @returns 相對時間描述（如「5 分鐘前」）
  */
 export function formatRelativeTime(isoString: string): string {
@@ -70,9 +70,9 @@ export function formatRelativeTime(isoString: string): string {
 }
 
 /**
- * 將 ISO 時間字串轉換為友好的顯示� �式
- * @param isoString ISO 8601 � �式的時間字串
- * @returns 友好的時間� �式（當天顯示時間，非當天顯示日期+時間）
+ * 將 ISO 時間字串轉換為友好的顯示� �式
+ * @param isoString ISO 8601 � �式的時間字串
+ * @returns 友好的時間� �式（當天顯示時間，非當天顯示日期+時間）
  */
 export function formatFriendlyTime(isoString: string): string {
   if (!isoString) return "";
@@ -100,7 +100,7 @@ export function formatFriendlyTime(isoString: string): string {
       return `昨天 ${hours}:${minutes}`;
     }
 
-    // 其他日期顯示完整� �式
+    // 其他日期顯示完整� �式
     return formatDateTime(isoString, "full");
   } catch (error) {
     console.error("Error formatting friendly time:", error);

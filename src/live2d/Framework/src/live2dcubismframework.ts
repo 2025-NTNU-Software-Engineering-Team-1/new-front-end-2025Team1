@@ -26,7 +26,7 @@ export function strtod(s: string, endPtr: string[]): number {
     if (isNaN(number)) {
       // 数値として認識できなくなったので終了
       break;
-    } // 最後に数値としてできたindexを� �納しておく
+    } // 最後に数値としてできたindexを� �納しておく
 
     index = i;
   }
@@ -52,8 +52,8 @@ let s_cubismIdManager: CubismIdManager = null;
  * Framework内で使う定数の宣言
  */
 export const Constant = Object.freeze<Record<string, number>>({
-  vertexOffset: 0, // メッシュ� �点のオフセット値
-  vertexStep: 2, // メッシュ� �点のステップ値
+  vertexOffset: 0, // メッシュ� �点のオフセット値
+  vertexStep: 2, // メッシュ� �点のステップ値
 });
 
 export function csmDelete<T>(address: T): void {
@@ -92,7 +92,7 @@ export class CubismFramework {
 
     s_isStarted = true;
 
-    // Live2D Cubism Coreバージョン情� �を表示
+    // Live2D Cubism Coreバージョン情� �を表示
     if (s_isStarted) {
       const version: number = Live2DCubismCore.Version.csmGetVersion();
       const major: number = (version & 0xff000000) >> 24;
@@ -116,7 +116,7 @@ export class CubismFramework {
 
   /**
    * StartUp()で初期化したCubismFrameworkの各パラメータをクリアします。
-   * Dispose()したCubismFrameworkを再利用する際に利用してく� さい。
+   * Dispose()したCubismFrameworkを再利用する際に利用してく� さい。
    */
   public static cleanUp(): void {
     s_isStarted = false;
@@ -130,8 +130,8 @@ export class CubismFramework {
    *     再度Initialize()するには先にDispose()を実行する必要があります。
    *
    * @param memorySize 初期化時メモリ量 [byte(s)]
-   *    複数モデル表示時などにモデルが更新されない際に使用してく� さい。
-   *    指定する際は必ず1024*1024*16 byte(16MB)以上の値を指定してく� さい。
+   *    複数モデル表示時などにモデルが更新されない際に使用してく� さい。
+   *    指定する際は必ず1024*1024*16 byte(16MB)以上の値を指定してく� さい。
    *    それ以外はすべて1024*1024*16 byteに丸めます。
    */
   public static initialize(memorySize = 0): void {
@@ -155,8 +155,8 @@ export class CubismFramework {
     s_cubismIdManager = new CubismIdManager();
 
     // --- HACK: 初期化時メモリ量の拡張(単位byte) ---
-    // 複数モデル表示時などにモデルが更新されない際に使用してく� さい。
-    // 指定する際は必ず1024*1024*16 byte(16MB)以上の値を指定してく� さい。
+    // 複数モデル表示時などにモデルが更新されない際に使用してく� さい。
+    // 指定する際は必ず1024*1024*16 byte(16MB)以上の値を指定してく� さい。
     // それ以外はすべて1024*1024*16 byteに丸めます。
     Live2DCubismCore.Memory.initializeAmountOfMemory(memorySize);
 
@@ -167,8 +167,8 @@ export class CubismFramework {
 
   /**
    * Cubism Framework内の全てのリソースを解放します。
-   *      た� し、外部で確保されたリソースについては解放しません。
-   *      外部で適切に� �棄する必要があります。
+   *      た� し、外部で確保されたリソースについては解放しません。
+   *      外部で適切に� �棄する必要があります。
    */
   public static dispose(): void {
     CSM_ASSERT(s_isStarted);
@@ -180,7 +180,7 @@ export class CubismFramework {
     // --- s_isInitializedによる未初期化解放ガード ---
     // dispose()するには先にinitialize()を実行する必要がある。
     if (!s_isInitialized) {
-      // false...リソース未確保の� �合
+      // false...リソース未確保の� �合
       CubismLogWarning("CubismFramework.dispose() skipped, not initialized.");
       return;
     }
@@ -190,7 +190,7 @@ export class CubismFramework {
     s_cubismIdManager.release();
     s_cubismIdManager = null;
 
-    // レンダラの静的リソース（シェーダプログラ� 他）を解放する
+    // レンダラの静的リソース（シェーダプログラ� 他）を解放する
     CubismRenderer.staticRelease();
 
     s_isInitialized = false;

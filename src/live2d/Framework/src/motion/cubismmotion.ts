@@ -367,7 +367,7 @@ export class CubismMotion extends ACubismMotion {
     let lipSyncFlags = 0;
     let eyeBlinkFlags = 0;
 
-    //瞬き、リップシンクのターゲット数が上限を超えている� �合
+    //瞬き、リップシンクのターゲット数が上限を超えている� �合
     if (this._eyeBlinkParameterIds.getSize() > maxTargetSize) {
       CubismLogDebug("too many eye blink targets : {0}", this._eyeBlinkParameterIds.getSize());
     }
@@ -480,7 +480,7 @@ export class CubismMotion extends ACubismMotion {
         // モーションのフェードを適用
         v = sourceValue + (value - sourceValue) * fadeWeight;
       } else {
-        // パラメータに対してフェードインかフェードアウトが設定してある� �合はそちらを適用
+        // パラメータに対してフェードインかフェードアウトが設定してある� �合はそちらを適用
         let fin: number;
         let fout: number;
 
@@ -582,8 +582,8 @@ export class CubismMotion extends ACubismMotion {
   }
 
   /**
-   * ループ情� �の設定
-   * @param loop ループ情� �
+   * ループ情� �の設定
+   * @param loop ループ情� �
    */
   public setIsLoop(loop: boolean): void {
     CubismLogWarning("setIsLoop() is a deprecated function. Please use setLoop().");
@@ -591,7 +591,7 @@ export class CubismMotion extends ACubismMotion {
   }
 
   /**
-   * ループ情� �の取得
+   * ループ情� �の取得
    * @return true ループする
    * @return false ループしない
    */
@@ -601,8 +601,8 @@ export class CubismMotion extends ACubismMotion {
   }
 
   /**
-   * ループ時のフェードイン情� �の設定
-   * @param loopFadeIn  ループ時のフェードイン情� �
+   * ループ時のフェードイン情� �の設定
+   * @param loopFadeIn  ループ時のフェードイン情� �
    */
   public setIsLoopFadeIn(loopFadeIn: boolean): void {
     CubismLogWarning("setIsLoopFadeIn() is a deprecated function. Please use setLoopFadeIn().");
@@ -610,7 +610,7 @@ export class CubismMotion extends ACubismMotion {
   }
 
   /**
-   * ループ時のフェードイン情� �の取得
+   * ループ時のフェードイン情� �の取得
    *
    * @return  true    する
    * @return  false   しない

@@ -110,7 +110,7 @@ export class CubismMoc {
   }
 
   /**
-   * 読み込ん� モデルの.moc3 Versionを取得
+   * 読み込ん� モデルの.moc3 Versionを取得
    */
   public getMocVersion(): number {
     return this._mocVersion;
@@ -126,7 +126,7 @@ export class CubismMoc {
 
   _moc: Live2DCubismCore.Moc; // Mocデータ
   _modelCount: number; // Mocデータから作られたモデルの個数
-  _mocVersion: number; // 読み込ん� モデルの.moc3 Version
+  _mocVersion: number; // 読み込ん� モデルの.moc3 Version
 }
 
 // Namespace definition for compatibility.

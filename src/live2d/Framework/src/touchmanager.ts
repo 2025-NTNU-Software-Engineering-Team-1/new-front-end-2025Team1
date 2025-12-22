@@ -140,7 +140,7 @@ export class TouchManager {
 
   /**
    * ２つ目の値から、移動量を求める。
-   * 違う方向の� �合は移動量０。同じ方向の� �合は、絶対値が小さい方の値を参照する。
+   * 違う方向の� �合は移動量０。同じ方向の� �合は、絶対値が小さい方の値を参照する。
    *
    * @param v1 １つ目の移動量
    * @param v2 ２つ目の移動量
@@ -169,7 +169,7 @@ export class TouchManager {
   _lastTouchDistance: number; // 2本以上でタッチしたときの指の距離
   _deltaX: number; // 前回の値から今回の値へのxの移動距離。
   _deltaY: number; // 前回の値から今回の値へのyの移動距離。
-  _scale: number; // このフレー� で掛け合わせる拡大率。拡大操作中以外は1。
+  _scale: number; // このフレー� で掛け合わせる拡大率。拡大操作中以外は1。
   _touchSingle: boolean; // シングルタッチ時はtrue
   _flipAvailable: boolean; // フリップが有効かどうか
 }

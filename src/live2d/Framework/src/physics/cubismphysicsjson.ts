@@ -513,10 +513,10 @@ export class CubismPhysicsJson {
   }
 
   /**
-   * 物理点の� 速度の取得
+   * 物理点の� 速度の取得
    * @param physicsSettingIndex 物理演算の設定
    * @param vertexIndex 物理点のインデックス
-   * @return 物理点の� 速度
+   * @return 物理点の� 速度
    */
   public getParticleAcceleration(physicsSettingIndex: number, vertexIndex: number): number {
     return this._json

@@ -49,7 +49,7 @@ export class CubismString {
    * @param string 文字列
    * @param length 文字列の長さ
    * @param position 解析したい文字の位置
-   * @param outEndPos 一文字も読み込まなかった� �合はエラー値(-1)が入る
+   * @param outEndPos 一文字も読み込まなかった� �合はエラー値(-1)が入る
    * @return 解析結果の数値
    */
   public static stringToFloat(string: string, length: number, position: number, outEndPos: number[]): number {
@@ -58,7 +58,7 @@ export class CubismString {
     let period = false;
     let v1 = 0;
 
-    //� 号の確認
+    //� 号の確認
     let c: number = parseInt(string[i]);
     if (c < 0) {
       minus = true;
@@ -95,7 +95,7 @@ export class CubismString {
     }
 
     if (i == position) {
-      //一文字も読み込まなかった� �合
+      //一文字も読み込まなかった� �合
       outEndPos[0] = -1; //エラー値が入るので呼び出し元で適切な処理を行う
       return 0;
     }

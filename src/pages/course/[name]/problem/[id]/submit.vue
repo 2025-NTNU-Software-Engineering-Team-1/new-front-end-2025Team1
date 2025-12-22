@@ -193,7 +193,9 @@ async function submit() {
         return;
       }
 
-      // Deep Inspection of Zip Contents (Makefile & Language Consistency
+      // -----------------------------------------------------------------------
+      // Deep Inspection: Structure, Logging & Validation
+      // -----------------------------------------------------------------------
       logger.log("Step 2.1: Inspecting Zip Structure & Integrity...");
 
       const zipReader = new ZipReader(new BlobReader(form.zip));
@@ -202,13 +204,76 @@ async function submit() {
 
       const fileNames = entries.map((entry) => entry.filename);
 
-      const hasRootMakefile = fileNames.includes("makefile");
+      // ==========================================
+      // Debug Console: Tree View
+      // ==========================================
+      if (DEBUG_MODE) {
+        logger.group("Inspect Zip Content Structure");
+
+        // Helper: Convert paths to nested object
+        const buildTree = (paths: string[]) => {
+          const tree: Record<string, any> = {};
+          paths.forEach((path) => {
+            const cleanPath = path.endsWith("/") ? path.slice(0, -1) : path;
+            if (!cleanPath) return;
+
+            const parts = cleanPath.split("/");
+            let current = tree;
+            parts.forEach((part, index) => {
+              if (!current[part]) {
+                // If last part, it's a file (null), else folder ({})
+                current[part] = index === parts.length - 1 ? null : current[part] || {};
+              }
+              current = current[part];
+            });
+          });
+          return tree;
+        };
+
+        // Helper: Recursive print
+        const printTree = (node: any) => {
+          const keys = Object.keys(node).sort();
+          for (const key of keys) {
+            if (node[key] === null) {
+              // File: Green
+              console.log(`%c📄 ${key}`, "color: #10b981; margin-left: 2px;");
+            } else {
+              // Folder: Yellow
+              console.groupCollapsed(`%c📁 ${key}/`, "color: #f59e0b; font-weight: bold;");
+              printTree(node[key]);
+              console.groupEnd();
+            }
+          }
+        };
+
+        // Execute print
+        if (fileNames.length === 0) {
+          console.log("%c[Empty Zip]", "color: #ef4444");
+        } else {
+          printTree(buildTree(fileNames));
+        }
+        logger.groupEnd();
+      }
+
+      // ==========================================
+      // 2. Validation Logic
+      // ==========================================
+
+      // Check for makefile in ROOT with ANY extension (e.g., makefile, makefile.txt)
+      const hasRootMakefile = fileNames.some((name) => {
+        // Must be in root (no '/')
+        if (name.includes("/")) return false;
+        // Strict "makefile" prefix check
+        return name === "makefile" || name.startsWith("makefile.");
+      });
 
       const cFiles = fileNames.filter((n) => n.endsWith(".c"));
       const cppFiles = fileNames.filter((n) => n.endsWith(".cpp"));
       const pyFiles = fileNames.filter((n) => n.endsWith(".py"));
 
       const allSourceFiles = [...cFiles, ...cppFiles, ...pyFiles];
+
+      // Check if any source code is hidden inside folders
       const hasNestedFiles = allSourceFiles.some((n) => n.includes("/"));
 
       const selectedLang = form.lang;
@@ -221,7 +286,7 @@ async function submit() {
         // User chose C
         if (!hasRootMakefile) {
           errorMsg =
-            "Missing 'makefile' at root level. File must be named exactly 'makefile' (case-sensitive).";
+            "Missing 'makefile' at root level. File must be named 'makefile' (extensions like .txt are allowed).";
         } else if (cppFiles.length > 0) {
           errorMsg = "Language mismatch: You selected C, but the Zip contains C++ files (.cpp).";
         } else if (pyFiles.length > 0) {
@@ -231,7 +296,7 @@ async function submit() {
         // User chose C++
         if (!hasRootMakefile) {
           errorMsg =
-            "Missing 'makefile' at root level. File must be named exactly 'makefile' (case-sensitive).";
+            "Missing 'makefile' at root level. File must be named 'makefile' (extensions like .txt are allowed).";
         } else if (cFiles.length > 0) {
           errorMsg = "Language mismatch: You selected C++, but the Zip contains C files (.c).";
         } else if (pyFiles.length > 0) {
@@ -246,6 +311,7 @@ async function submit() {
         }
       }
 
+      // Stop if error found
       if (errorMsg) {
         logger.warn("Validation Failed", errorMsg);
         form.errorMessage = errorMsg;

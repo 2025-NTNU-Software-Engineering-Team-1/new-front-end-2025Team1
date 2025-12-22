@@ -573,6 +573,20 @@ const hasExistingNetworkConfig = computed(() => {
 });
 const showNetworkSection = ref(false);
 
+// ==========================================
+// Helper: Selected Keys Statistics
+// ==========================================
+const selectedKeyStats = computed(() => {
+  const selectedSet = new Set(selectedKeys.value);
+  const activeCount = apiKeys.active.filter((k: any) => selectedSet.has(k.id)).length;
+  const inactiveCount = apiKeys.inactive.filter((k: any) => selectedSet.has(k.id)).length;
+  return {
+    total: selectedSet.size,
+    active: activeCount,
+    inactive: inactiveCount,
+  };
+});
+
 watch(
   hasExistingNetworkConfig,
   (val) => {
@@ -758,7 +772,16 @@ onBeforeUnmount(() => {
             <div class="mb-2 flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <label class="label-text">Select API Keys</label>
-                <!-- Question mark -->
+
+                <div v-if="selectedKeyStats.total > 0" class="ml-2 flex items-center gap-2">
+                  <div class="badge badge-neutral badge-sm">Total: {{ selectedKeyStats.total }}</div>
+                  <div v-if="selectedKeyStats.active > 0" class="badge badge-info badge-sm">
+                    Active: {{ selectedKeyStats.active }}
+                  </div>
+                  <div v-if="selectedKeyStats.inactive > 0" class="badge badge-error badge-sm">
+                    Inactive: {{ selectedKeyStats.inactive }}
+                  </div>
+                </div>
                 <div class="relative">
                   <button
                     type="button"
@@ -771,7 +794,6 @@ onBeforeUnmount(() => {
                     <i-uil-question-circle class="text-info" />
                   </button>
 
-                  <!-- Floating window -->
                   <transition name="fade">
                     <div
                       v-if="showSuggestionTooltip"
@@ -794,7 +816,6 @@ onBeforeUnmount(() => {
               </div>
             </div>
 
-            <!-- Search bar -->
             <div class="mb-2 flex items-center gap-2">
               <input
                 v-model="searchQuery"
@@ -811,7 +832,6 @@ onBeforeUnmount(() => {
             </div>
 
             <div v-else class="grid grid-cols-1 gap-3 md:grid-cols-2">
-              <!-- Active Keys -->
               <div class="overflow-hidden rounded-lg border border-gray-400">
                 <button
                   type="button"
@@ -835,7 +855,6 @@ onBeforeUnmount(() => {
                   </div>
                 </button>
 
-                <!-- Scrollable area -->
                 <div v-show="showActiveKeys" class="h-64 overflow-y-auto p-3">
                   <label
                     v-for="key in apiKeys.active as any[]"
@@ -865,7 +884,6 @@ onBeforeUnmount(() => {
                 </div>
               </div>
 
-              <!-- Inactive Keys -->
               <div class="overflow-hidden rounded-lg border border-gray-400">
                 <button
                   type="button"
@@ -889,7 +907,6 @@ onBeforeUnmount(() => {
                   </div>
                 </button>
 
-                <!-- Scrollable area -->
                 <div v-show="showInactiveKeys" class="h-64 overflow-y-auto p-3">
                   <label
                     v-for="key in apiKeys.inactive as any[]"

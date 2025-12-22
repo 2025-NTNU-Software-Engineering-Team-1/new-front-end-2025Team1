@@ -140,25 +140,26 @@ export function useDiscussionPermissions() {
   const isAdmin = (userRole: string) => userRole === "Admin";
   const isTeacher = (userRole: string) => userRole === "Teacher";
   const isStudent = (userRole: string) => userRole === "Student";
+  const isTA = (userRole: string) => userRole === "TA";
 
   const canManagePost = (userRole: string, isAuthor: boolean = false) => {
-    return isAdmin(userRole) || isTeacher(userRole) || isAuthor;
+    return isAdmin(userRole) || isTeacher(userRole) || isAuthor  || isTA(userRole);
   };
 
   const canDeleteAnyPost = (userRole: string) => {
-    return isAdmin(userRole) || isTeacher(userRole);
+    return isAdmin(userRole) || isTeacher(userRole)  || isTA(userRole);
   };
 
   const canPinPost = (userRole: string) => {
-    return isAdmin(userRole) || isTeacher(userRole);
+    return isAdmin(userRole) || isTeacher(userRole) || isTA(userRole);
   };
 
   const canMarkSolved = (userRole: string) => {
-    return isAdmin(userRole) || isTeacher(userRole);
+    return isAdmin(userRole) || isTeacher(userRole)  || isTA(userRole);
   };
 
   const canClosePost = (userRole: string) => {
-    return isAdmin(userRole) || isTeacher(userRole);
+    return isAdmin(userRole) || isTeacher(userRole)  || isTA(userRole);
   };
 
   return {

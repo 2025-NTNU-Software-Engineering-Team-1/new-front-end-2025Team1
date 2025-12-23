@@ -5,7 +5,7 @@ test.beforeEach(async ({ page, baseURL }) => {
   await login_ta(page, baseURL!);
 });
 
-/* TA don't have the scope
+// TA don't have the scope
 //015
 test("Pin post to top", async ({ page }) => {
   //Get into the discussion page
@@ -24,7 +24,7 @@ test("Pin post to top", async ({ page }) => {
   await expect(moreBtn).toBeVisible();
   await moreBtn.click({ force: true });  
 
-  const pinItem = page.locator("ul.dropdown-content >> text=discussion.component.not_pined");
+  const pinItem = page.locator("ul.dropdown-content >> text=Pin Post");
   await expect(pinItem).toBeVisible();
   await pinItem.click();
 
@@ -41,7 +41,7 @@ test("Pin post to top", async ({ page }) => {
   await expect(moreBtn).toBeVisible();
   await moreBtn.click({ force: true });
   
-  const unpinItem = page.locator("ul.dropdown-content >> text=discussion.component.is_pined");
+  const unpinItem = page.locator("ul.dropdown-content >> text=Unpin");
   await expect(unpinItem).toBeVisible();
   await unpinItem.click();
 
@@ -72,7 +72,7 @@ test("Close a post", async ({ page }) => {
   await expect(moreBtn).toBeVisible();
   await moreBtn.click({ force: true });  
 
-  const closeItem = page.locator("ul.dropdown-content >> text=discussion.details.close");
+  const closeItem = page.locator("ul.dropdown-content >> text=Close Discussion");
   await expect(closeItem).toBeVisible();
   await closeItem.click();
 
@@ -103,7 +103,7 @@ test("Post solved", async ({ page }) => {
   const moreBtn = page.locator("label.btn.btn-ghost.btn-sm");
   await expect(moreBtn).toBeVisible();
   await moreBtn.click({ force: true });
-  const solveItem = page.locator("ul.dropdown-content >> text=discussion.components.solved.action_Not_Solved");
+  const solveItem = page.locator("ul.dropdown-content >> text=Mark as Solved");
   await expect(solveItem).toBeVisible();
   await solveItem.click();
 
@@ -114,13 +114,13 @@ test("Post solved", async ({ page }) => {
 
   //check if success
   
-  await expect(page.getByText("Solved")).toBeVisible();
+  await expect(page.getByText("✓ Solved")).toBeVisible();
   
   //repair
   await expect(moreBtn).toBeVisible();
   await moreBtn.click({ force: true });
 
-  const unsolveItem = page.locator("ul.dropdown-content >> text=discussion.components.solved.action_Is_Solved");
+  const unsolveItem = page.locator("ul.dropdown-content >> text=Mark as Unsolved");
   await expect(unsolveItem).toBeVisible();
   await unsolveItem.click();
 
@@ -128,29 +128,28 @@ test("Post solved", async ({ page }) => {
   await confirmBtn.click();
   
 });
-*/
 
 //018
-test.skip("Delete a post", async ({ page }) => {
+test("Delete a post", async ({ page }) => {
   //Get into the discussion page
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
   await page.getByRole("link", { name: "Discussion" }).click();
-
+  
   //New post
-  await page.getByRole("link", { name: "Post", exact: true }).click();
+  await page.getByRole("link", { name: "Post" , exact: true}).click();
   //Select
   await page.locator("select.select-bordered").nth(0).selectOption({ label: "Prob1" });
   await page.locator("input.input-bordered").nth(0).fill("To be deleted");
   await page.locator("textarea.textarea-bordered").nth(0).fill("This is the post for deleting");
-
+  
   //Post
   await page.getByRole("button", { name: "Post" }).click();
-
+  
   //Delete
   const moreBtn = page.locator("label.btn.btn-ghost.btn-sm");
   await expect(moreBtn).toBeVisible();
-  await moreBtn.click({ force: true });
+  await moreBtn.click({ force: true });  
 
   const delItem = page.locator("ul.dropdown-content >> text=Delete Post");
   await expect(delItem).toBeVisible();
@@ -159,11 +158,15 @@ test.skip("Delete a post", async ({ page }) => {
   const confirmBtn = page.locator('button:has-text("Confirm")');
   await expect(confirmBtn).toBeVisible();
   await confirmBtn.click();
-  await page.waitForTimeout(500);
-
+  await page.waitForTimeout(500); 
+  
   //check if success
   const delPosts = page.getByText("To be deleted");
 
   const count = await delPosts.count();
   expect(count).toBe(0);
+  
 });
+
+
+

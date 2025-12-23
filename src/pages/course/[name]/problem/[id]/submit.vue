@@ -212,6 +212,7 @@ async function submit() {
 
         // Helper: Convert paths to nested object
         const buildTree = (paths: string[]) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const tree: Record<string, any> = {};
           paths.forEach((path) => {
             const cleanPath = path.endsWith("/") ? path.slice(0, -1) : path;
@@ -231,6 +232,7 @@ async function submit() {
         };
 
         // Helper: Recursive print
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const printTree = (node: any) => {
           const keys = Object.keys(node).sort();
           for (const key of keys) {

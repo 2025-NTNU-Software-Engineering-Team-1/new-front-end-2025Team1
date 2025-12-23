@@ -270,7 +270,7 @@ onMounted(fetchKeys);
           </div>
         </div>
 
-        <div class="mb-8 rounded-lg border border-base-300 p-4">
+        <div class="border-base-300 mb-8 rounded-lg border p-4">
           <h3 class="mb-2 text-lg font-semibold">{{ t("course.aisetting.setup.subtitleNewKey") }}</h3>
 
           <div class="grid gap-3 md:grid-cols-3">
@@ -305,7 +305,7 @@ onMounted(fetchKeys);
           </div>
         </div>
 
-        <div class="rounded-lg border border-base-300 p-4">
+        <div class="border-base-300 rounded-lg border p-4">
           <h3 class="mb-4 text-lg font-semibold">{{ t("course.aisetting.setup.subtitleExistingKey") }}</h3>
 
           <div v-if="isLoading && apiKeys.length === 0" class="py-4 text-center opacity-60">
@@ -320,7 +320,7 @@ onMounted(fetchKeys);
             <div
               v-for="k in apiKeys"
               :key="k.id"
-              class="grid grid-cols-1 gap-2 rounded-lg border border-base-200 bg-base-100 p-3 md:grid-cols-7 md:items-center"
+              class="border-base-200 bg-base-100 grid grid-cols-1 gap-2 rounded-lg border p-3 md:grid-cols-7 md:items-center"
             >
               <div class="col-span-2">
                 <label class="text-xs opacity-70">{{ t("course.aisetting.setup.display.keyName") }}</label>

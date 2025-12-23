@@ -93,7 +93,7 @@ const problemLink = computed(() => {
               <router-link
                 v-if="problemLink"
                 :to="problemLink"
-                class="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary transition-colors hover:bg-primary/20"
+                class="bg-primary/10 text-primary hover:bg-primary/20 inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-medium transition-colors"
                 @click.stop
               >
                 <span class="text-primary">#</span>

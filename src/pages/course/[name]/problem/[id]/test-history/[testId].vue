@@ -519,20 +519,20 @@ function downloadModalJson() {
   <!-- Detail Modal -->
   <ui-dialog v-model="isDetailModalOpen">
     <template #title>
-      <div class="rounded-t-box -m-6 bg-primary p-6 text-primary-content">
+      <div class="rounded-t-box bg-primary text-primary-content -m-6 p-6">
         {{ currentDetailData?.title }}
       </div>
     </template>
     <template #content>
-      <div v-if="currentDetailData" class="-m-6 bg-primary p-6 pt-0 text-primary-content">
+      <div v-if="currentDetailData" class="bg-primary text-primary-content -m-6 p-6 pt-0">
         <div class="space-y-4">
           <!-- JSON Display -->
           <div class="form-control w-full">
             <label class="label">
-              <span class="label-text font-semibold text-primary-content">JSON Data</span>
+              <span class="label-text text-primary-content font-semibold">JSON Data</span>
             </label>
-            <div class="rounded bg-base-200 p-4 text-base-content">
-              <pre class="whitespace-pre-wrap font-mono text-sm">{{ currentDetailData.jsonData }}</pre>
+            <div class="bg-base-200 text-base-content rounded p-4">
+              <pre class="font-mono text-sm whitespace-pre-wrap">{{ currentDetailData.jsonData }}</pre>
             </div>
           </div>
         </div>

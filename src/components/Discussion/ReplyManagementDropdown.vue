@@ -77,7 +77,7 @@ const closeConfirmDialog = () => {
       <div v-else class="loading loading-spinner loading-xs"></div>
     </label>
 
-    <ul tabindex="0" class="dropdown-content menu rounded-box z-50 w-32 bg-base-100 p-2 shadow">
+    <ul tabindex="0" class="dropdown-content menu rounded-box bg-base-100 z-50 w-32 p-2 shadow">
       <!-- 編輯回覆 -->
       <li v-if="isAuthor">
         <a class="text-xs">

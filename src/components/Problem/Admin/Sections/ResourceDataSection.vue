@@ -282,7 +282,7 @@ watch(
         />
       </label>
       <i-uil-lock-alt v-if="enableDisabledReason" class="text-error" />
-      <span v-if="showDisabledText" class="text-error whitespace-nowrap text-sm">
+      <span v-if="showDisabledText" class="text-error text-sm whitespace-nowrap">
         {{ resourceDataWarning || enableDisabledReason }}
       </span>
       <div class="ml-auto flex items-center gap-2">
@@ -308,9 +308,9 @@ watch(
 
     <div class="mt-2 overflow-hidden rounded-lg">
       <div class="grid grid-cols-5">
-        <div class="col-span-1 flex items-center justify-center bg-base-300 text-sm">zip file</div>
+        <div class="bg-base-300 col-span-1 flex items-center justify-center text-sm">zip file</div>
         <div
-          class="textarea-bordered col-span-4 flex flex-col bg-base-100 p-4"
+          class="textarea-bordered bg-base-100 col-span-4 flex flex-col p-4"
           :class="[isDrag && 'border-accent border']"
           @drop.prevent="fileRef = enableRef && !enableDisabledReason ? $event.dataTransfer!.files![0] : null"
           @dragover.prevent="isDrag = enableRef && !enableDisabledReason"

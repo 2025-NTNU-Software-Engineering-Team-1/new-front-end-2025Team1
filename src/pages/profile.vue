@@ -11,7 +11,7 @@ const { t } = useI18n();
 <template>
   <div class="flex flex-col lg:flex-row">
     <aside class="w-full shrink-0 lg:w-56">
-      <ul class="menu bg-base-100 p-2 text-base-content lg:sticky lg:top-4">
+      <ul class="menu bg-base-100 text-base-content p-2 lg:sticky lg:top-4">
         <li class="menu-title">
           <span>{{ t("profile.menu.accountInfo") }}</span>
         </li>
@@ -37,7 +37,7 @@ const { t } = useI18n();
     </aside>
 
     <div class="flex-1">
-      <div class="breadcrumbs border-b border-base-300 p-4 text-sm">
+      <div class="breadcrumbs border-base-300 border-b p-4 text-sm">
         <ul>
           <li>
             <router-link to="/profile">{{ t("profile.breadcrumb.profile") }}</router-link>

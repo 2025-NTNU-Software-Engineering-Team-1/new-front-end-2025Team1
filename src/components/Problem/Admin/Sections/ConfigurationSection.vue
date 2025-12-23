@@ -724,7 +724,7 @@ onBeforeUnmount(() => {
             )
           "
         />
-        <span class="whitespace-nowrap text-xs opacity-70">{{ t("course.problems.maxZipSizeDefault") }}</span>
+        <span class="text-xs whitespace-nowrap opacity-70">{{ t("course.problems.maxZipSizeDefault") }}</span>
       </div>
     </div>
 
@@ -817,7 +817,7 @@ onBeforeUnmount(() => {
                   <transition name="fade">
                     <div
                       v-if="showSuggestionTooltip"
-                      class="key-suggestion-tooltip absolute left-6 top-full z-50 mt-2 w-72 rounded-md border border-gray-400 bg-base-100 p-3 shadow-xl"
+                      class="key-suggestion-tooltip bg-base-100 absolute top-full left-6 z-50 mt-2 w-72 rounded-md border border-gray-400 p-3 shadow-xl"
                     >
                       <div v-if="isFetchingSuggestion" class="flex items-center text-sm">
                         <ui-spinner class="mr-2" /> {{ t("course.problems.aiKeyFetchingSuggestion") }}
@@ -865,7 +865,7 @@ onBeforeUnmount(() => {
                 <button
                   type="button"
                   @click="showActiveKeys = !showActiveKeys"
-                  class="flex w-full items-center justify-between px-4 py-2 transition-colors hover:bg-base-200"
+                  class="hover:bg-base-200 flex w-full items-center justify-between px-4 py-2 transition-colors"
                 >
                   <div class="flex items-center gap-2">
                     <svg
@@ -889,7 +889,7 @@ onBeforeUnmount(() => {
                     v-for="key in apiKeys.active as any[]"
                     :key="(key as any).id"
                     :ref="(el) => (activeKeyRefs[(key as any).id] = el as HTMLElement)"
-                    class="hover:border-info/30 flex cursor-pointer items-start gap-3 rounded-lg border border-transparent p-3 transition hover:bg-base-200"
+                    class="hover:border-info/30 hover:bg-base-200 flex cursor-pointer items-start gap-3 rounded-lg border border-transparent p-3 transition"
                   >
                     <input
                       type="checkbox"
@@ -917,7 +917,7 @@ onBeforeUnmount(() => {
                 <button
                   type="button"
                   @click="showInactiveKeys = !showInactiveKeys"
-                  class="flex w-full items-center justify-between px-4 py-2 transition-colors hover:bg-base-200"
+                  class="hover:bg-base-200 flex w-full items-center justify-between px-4 py-2 transition-colors"
                 >
                   <div class="flex items-center gap-2">
                     <svg
@@ -941,7 +941,7 @@ onBeforeUnmount(() => {
                     v-for="key in apiKeys.inactive as any[]"
                     :key="(key as any).id"
                     :ref="(el) => (inactiveKeyRefs[(key as any).id] = el as HTMLElement)"
-                    class="hover:border-error/30 flex cursor-pointer items-start gap-3 rounded-lg border border-transparent p-3 transition hover:bg-base-200"
+                    class="hover:border-error/30 hover:bg-base-200 flex cursor-pointer items-start gap-3 rounded-lg border border-transparent p-3 transition"
                   >
                     <input
                       type="checkbox"
@@ -1000,7 +1000,7 @@ onBeforeUnmount(() => {
           </label>
         </div>
 
-        <div class="flex flex-wrap gap-x-8 gap-y-4 rounded border border-gray-300 bg-base-100 p-3">
+        <div class="bg-base-100 flex flex-wrap gap-x-8 gap-y-4 rounded border border-gray-300 p-3">
           <div class="form-control">
             <label class="label cursor-pointer gap-3">
               <span class="label-text font-semibold">{{ t("course.problems.resultVisible") }}</span>
@@ -1259,7 +1259,7 @@ onBeforeUnmount(() => {
 
                 <div
                   v-if="detectedDockerEnvs.length > 0"
-                  class="border-success/30 mt-2 w-full max-w-xs rounded border bg-base-200 p-3 text-xs"
+                  class="border-success/30 bg-base-200 mt-2 w-full max-w-xs rounded border p-3 text-xs"
                 >
                   <div class="text-success mb-2 flex items-center gap-1 font-bold">
                     <i-uil-check-circle />
@@ -1273,7 +1273,7 @@ onBeforeUnmount(() => {
                     <li
                       v-for="(env, index) in detectedDockerEnvs"
                       :key="env"
-                      class="flex items-center justify-between rounded px-1 transition-colors hover:bg-base-300"
+                      class="hover:bg-base-300 flex items-center justify-between rounded px-1 transition-colors"
                     >
                       <div>
                         <span class="font-mono font-bold">{{ env }}</span>

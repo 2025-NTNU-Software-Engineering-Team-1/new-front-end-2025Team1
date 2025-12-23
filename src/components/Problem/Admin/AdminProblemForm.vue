@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { inject, ref, Ref, onMounted, provide } from "vue";
-import { nextTick, reactive, computed } from "vue";
 import useVuelidate from "@vuelidate/core";
 import { required, maxLength, between, helpers } from "@vuelidate/validators";
 
@@ -10,82 +9,10 @@ import PipelineSection from "./Sections/PipelineSection.vue";
 import TestDataSection from "./Sections/TestDataSection.vue";
 import ResourceDataSection from "./Sections/ResourceDataSection.vue";
 
-interface VuelidateError {
-  $propertyPath?: string;
-  $property?: string;
-  $message: string | import("vue").Ref<string>;
-}
-
-type PanelKey = "desc" | "config" | "pipeline" | "testdata" | "resdata";
-
 // ==========================================
 // [CONFIG] Console Debug Mode
 // ==========================================
 const DEBUG_MODE = 1;
-
-//
-const openPanels = reactive({
-  desc: false,
-  config: false,
-  pipeline: false,
-  testdata: false,
-  resdata: false,
-});
-
-const sectionRefs: Record<PanelKey, ReturnType<typeof ref<HTMLElement | null>>> = {
-  desc: ref(null),
-  config: ref(null),
-  pipeline: ref(null),
-  testdata: ref(null),
-  resdata: ref(null),
-};
-
-function getPanelByErrorPath(path: string): PanelKey {
-  if (path.startsWith("description.")) return "desc";
-
-  if (path === "quota" || path === "allowedLanguage" || path === "problemName" || path.startsWith("config."))
-    return "config";
-
-  if (path.startsWith("pipeline.")) return "pipeline";
-  if (path.startsWith("testCaseInfo.")) return "testdata";
-
-  if (path.startsWith("assets.")) {
-    if (path.startsWith("assets.testdataZip")) return "testdata";
-
-    if (
-      path.startsWith("assets.makefileZip") ||
-      path.startsWith("assets.teacherFile") ||
-      path.startsWith("assets.customCheckerPy") ||
-      path.startsWith("assets.scorePy")
-    )
-      return "pipeline";
-
-    if (path.startsWith("assets.dockerfilesZip")) return "config";
-
-    if (
-      path.startsWith("assets.aiVTuberACFiles") ||
-      path.startsWith("assets.trialModeACFiles") ||
-      path.startsWith("assets.trialModePublicTestDataZip")
-    )
-      return "config";
-
-    return "config";
-  }
-
-  return "config";
-}
-
-const errorSummary = computed(() => {
-  const errs = v$.value.$errors || [];
-  return errs.map((e: VuelidateError) => {
-    const path = e.$propertyPath || e.$property || "(unknown)";
-    return {
-      path,
-      message: e.$message || "Invalid field",
-      panel: getPanelByErrorPath(path), // PanelKey
-    };
-  });
-});
 
 // ==========================================
 // Logger Utility
@@ -249,13 +176,6 @@ onMounted(() => {
   initFormStructure();
 });
 
-//
-
-function hasRemoteAsset(key: string): boolean {
-  const paths = (problem.value.config as { assetPaths?: Record<string, unknown> })?.assetPaths;
-  return Boolean(paths && paths[key]);
-}
-
 // ==========================================
 // Section: Validation Rules
 // ==========================================
@@ -362,10 +282,6 @@ const rules = {
     },
 
     teacherFile: {
-      requiredWhenInteractive: helpers.withMessage("Interactive mode requires uploading Teacher Code", () => {
-        if (problem.value.pipeline?.executionMode !== "interactive") return true;
-        return !!problem.value.assets?.teacherFile || hasRemoteAsset("teacher_file");
-      }),
       validExtension: helpers.withMessage(
         () => {
           const exts = getAllowedFileExtensions(problem.value.allowedLanguage);
@@ -383,13 +299,6 @@ const rules = {
     },
 
     makefileZip: {
-      requiredWhenFunctionOnly: helpers.withMessage(
-        "Function Only mode requires uploading Makefile.zip",
-        () => {
-          if (problem.value.pipeline?.executionMode !== "functionOnly") return true;
-          return !!problem.value.assets?.makefileZip || hasRemoteAsset("makefile");
-        },
-      ),
       validExtension: helpers.withMessage("Makefile must be a .zip file", () => {
         const file = problem.value.assets?.makefileZip;
         if (!file) return true;
@@ -399,13 +308,6 @@ const rules = {
     },
 
     customCheckerPy: {
-      requiredWhenCustomChecker: helpers.withMessage(
-        "Custom Checker is enabled: please upload Custom_Checker.py",
-        () => {
-          if (!problem.value.pipeline?.customChecker) return true;
-          return !!problem.value.assets?.customCheckerPy || hasRemoteAsset("checker");
-        },
-      ),
       validExtension: helpers.withMessage("Custom checker must be a .py file", () => {
         const file = problem.value.assets?.customCheckerPy;
         if (!file) return true;
@@ -415,13 +317,6 @@ const rules = {
     },
 
     scorePy: {
-      requiredWhenCustomScoring: helpers.withMessage(
-        "Custom Scoring Script is enabled: please upload Custom_Scorer.py",
-        () => {
-          if (!problem.value.pipeline?.scoringScript?.custom) return true;
-          return !!problem.value.assets?.scorePy || hasRemoteAsset("scoring_script");
-        },
-      ),
       validExtension: helpers.withMessage("Scoring script must be a .py file", () => {
         const file = problem.value.assets?.scorePy;
         if (!file) return true;
@@ -431,18 +326,6 @@ const rules = {
     },
 
     dockerfilesZip: {
-      requiredWhenNetworkEnabled: helpers.withMessage(
-        "Network & Sidecars is enabled: please upload dockerfiles.zip",
-        () => {
-          const cfg = problem.value.config as { networkAccessEnabled?: boolean };
-          if (!cfg?.networkAccessEnabled) return true;
-          return (
-            !!problem.value.assets?.dockerfilesZip ||
-            hasRemoteAsset("network_dockerfile") ||
-            hasRemoteAsset("dockerfiles")
-          );
-        },
-      ),
       validExtension: helpers.withMessage("Dockerfiles must be a .zip file", () => {
         const file = problem.value.assets?.dockerfilesZip;
         if (!file) return true;
@@ -467,13 +350,6 @@ function update<K extends keyof ProblemForm>(key: K, value: ProblemForm[K]) {
   if ((v$.value as any)[key]) (v$.value as any)[key].$touch?.();
 }
 
-//
-async function openAndScroll(panel: PanelKey) {
-  openPanels[panel] = true;
-  await nextTick();
-  sectionRefs[panel].value?.scrollIntoView({ behavior: "smooth", block: "start" });
-}
-
 async function submit() {
   logger.group("Form Submission");
   const ok = await v$.value.$validate();
@@ -483,37 +359,15 @@ async function submit() {
     emits("submit");
   } else {
     logger.error("Validation Failed");
-
-    const errs = v$.value.$errors as VuelidateError[];
-    const panelsToOpen = new Set<string>();
-    errs.forEach((e) => {
-      const path = e.$propertyPath || e.$property || "";
-      panelsToOpen.add(getPanelByErrorPath(path));
-    });
-
-    panelsToOpen.forEach((p) => {
-      if (p in openPanels) {
-        openPanels[p as PanelKey] = true;
-      }
-    });
-    await nextTick();
-    const first = errs[0];
-    const firstPath = first?.$propertyPath || first?.$property || "";
-    const firstPanel = getPanelByErrorPath(firstPath);
-    sectionRefs[firstPanel as keyof typeof sectionRefs].value?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-
     // Debug: Log invalid fields
     if (DEBUG_MODE) {
+      const errors = v$.value.$errors as Array<{ $property: string }>;
       logger.warn(
         "Invalid Fields:",
-        errs.map((e) => e.$propertyPath || e.$property),
+        errors.map((e) => e.$property),
       );
     }
   }
-
   logger.groupEnd();
 }
 </script>
@@ -526,6 +380,7 @@ async function submit() {
     </div>
   </div>
 
+  <!-- 第一層：題名與隱藏開關 -->
   <div class="grid grid-cols-2 gap-y-4">
     <div class="form-control w-full max-w-xs">
       <label class="label">
@@ -558,41 +413,41 @@ async function submit() {
   </div>
 
   <!-- Section fold panels -->
-  <div ref="sectionRefs.desc" class="mt-4 flex flex-col gap-3">
-    <div class="collapse-arrow rounded-box collapse bg-base-200">
-      <input type="checkbox" class="peer" v-model="openPanels.desc" />
+  <div class="mt-4 flex flex-col gap-3">
+    <div class="collapse-arrow rounded-box bg-base-200 collapse">
+      <input type="checkbox" class="peer" />
       <div class="collapse-title font-semibold">Set Description</div>
       <div class="collapse-content">
-        <DescriptionSection :v$="v$" @update="update" />
+        <DescriptionSection :v$="v$ as any" @update="update" />
       </div>
     </div>
 
-    <div ref="sectionRefs.config" class="collapse-arrow rounded-box collapse bg-base-200">
-      <input type="checkbox" class="peer" v-model="openPanels.config" />
+    <div class="collapse-arrow rounded-box bg-base-200 collapse">
+      <input type="checkbox" class="peer" />
       <div class="collapse-title font-semibold">Set Configuration</div>
       <div class="collapse-content">
         <ConfigurationSection />
       </div>
     </div>
 
-    <div ref="sectionRefs.pipeline" class="collapse-arrow rounded-box collapse bg-base-200">
-      <input type="checkbox" class="peer" v-model="openPanels.pipeline" />
+    <div class="collapse-arrow rounded-box bg-base-200 collapse">
+      <input type="checkbox" class="peer" />
       <div class="collapse-title font-semibold">Set Pipeline</div>
       <div class="collapse-content">
         <PipelineSection />
       </div>
     </div>
 
-    <div ref="sectionRefs.testdata" class="collapse-arrow rounded-box collapse bg-base-200">
-      <input type="checkbox" class="peer" v-model="openPanels.testdata" />
+    <div class="collapse-arrow rounded-box bg-base-200 collapse">
+      <input type="checkbox" class="peer" />
       <div class="collapse-title font-semibold">Set Test Data</div>
       <div class="collapse-content">
         <TestDataSection :v$="v$ as any" />
       </div>
     </div>
 
-    <div ref="sectionRefs.resdata" class="collapse-arrow rounded-box collapse bg-base-200">
-      <input type="checkbox" class="peer" v-model="openPanels.resdata" />
+    <div class="collapse-arrow rounded-box bg-base-200 collapse">
+      <input type="checkbox" class="peer" />
       <div class="collapse-title font-semibold">Set Resource Data</div>
       <div class="collapse-content">
         <div class="flex flex-col gap-4">
@@ -603,22 +458,7 @@ async function submit() {
     </div>
   </div>
 
-  <div v-if="v$.$error" class="alert alert-error mt-3">
-    <div class="flex flex-col gap-2">
-      <div class="font-semibold">Submission blocked. Please fix the following:</div>
-
-      <ul class="list-disc pl-5 text-sm">
-        <li v-for="(e, idx) in errorSummary" :key="idx">
-          <button type="button" class="link link-hover" @click="openAndScroll(e.panel)">
-            {{ e.message }}
-          </button>
-          <span class="opacity-70"> ({{ e.path }})</span>
-        </li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- Submit -->
+  <!-- 提交按鈕 -->
   <div class="mt-6 flex justify-end">
     <button :class="['btn btn-success', isLoading && 'loading']" @click="submit">
       <i-uil-file-upload-alt class="mr-1 lg:h-5 lg:w-5" /> Submit

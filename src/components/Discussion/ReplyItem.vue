@@ -58,7 +58,7 @@ const handleReply = () => {
 </script>
 
 <template>
-  <div class="flex gap-3 rounded-lg bg-base-100 p-4" :data-reply-id="reply.Reply_ID">
+  <div class="bg-base-100 flex gap-3 rounded-lg p-4" :data-reply-id="reply.Reply_ID">
     <!-- Avatar -->
     <div class="flex-shrink-0">
       <div
@@ -95,7 +95,7 @@ const handleReply = () => {
 
       <!-- Actions -->
       <div class="flex items-center gap-4 text-xs">
-        <button class="flex items-center gap-1 text-gray-500 hover:text-primary" @click="handleReply">
+        <button class="hover:text-primary flex items-center gap-1 text-gray-500" @click="handleReply">
           <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
             <path
               fill-rule="evenodd"
@@ -123,7 +123,7 @@ const handleReply = () => {
       </div>
 
       <!-- Inline reply form -->
-      <div v-if="replyingToId === reply.Reply_ID" class="mt-4 rounded-lg bg-base-200 p-3">
+      <div v-if="replyingToId === reply.Reply_ID" class="bg-base-200 mt-4 rounded-lg p-3">
         <div class="mb-2">
           <label class="text-xs font-medium"> 回覆給 {{ reply.Author }} </label>
         </div>
@@ -150,7 +150,7 @@ const handleReply = () => {
       <!-- Nested replies (子回覆) -->
       <div
         v-if="reply.children && reply.children.length > 0"
-        class="mt-4 space-y-3 border-l-2 border-base-300 pl-4"
+        class="border-base-300 mt-4 space-y-3 border-l-2 pl-4"
       >
         <ReplyItem
           v-for="childReply in reply.children"

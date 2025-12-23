@@ -127,7 +127,7 @@ function viewTestDetail(testId: string | number) {
                   <tr
                     v-for="item in testHistory"
                     :key="item.id"
-                    class="cursor-pointer hover:bg-base-200"
+                    class="hover:bg-base-200 cursor-pointer"
                     @click="viewTestDetail(item.id)"
                   >
                     <td>

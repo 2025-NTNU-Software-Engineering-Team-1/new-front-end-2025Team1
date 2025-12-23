@@ -399,7 +399,7 @@ onMounted(async () => {
                   <router-link
                     v-if="problemLink"
                     :to="problemLink"
-                    class="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary transition-colors hover:bg-primary/20"
+                    class="bg-primary/10 text-primary hover:bg-primary/20 inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-medium transition-colors"
                   >
                     <span class="text-primary">#</span>
                     <span>{{ postProblemName || `Problem ${postProblemId}` }}</span>
@@ -423,7 +423,7 @@ onMounted(async () => {
           </div>
 
           <!-- Post content -->
-          <div class="mb-4 rounded-lg bg-base-200 p-4">
+          <div class="bg-base-200 mb-4 rounded-lg p-4">
             <MarkdownRenderer :md="post.Content" />
           </div>
 
@@ -484,7 +484,7 @@ onMounted(async () => {
           </div>
 
           <!-- Reply form (只在非回覆特定留言時顯示) -->
-          <div v-else-if="showReplyForm && !replyToId" class="mb-6 rounded-lg bg-base-200 p-4">
+          <div v-else-if="showReplyForm && !replyToId" class="bg-base-200 mb-6 rounded-lg p-4">
             <div class="mb-2">
               <label class="text-sm font-medium">
                 {{ t("discussion.detail.reply.post_reply") }}

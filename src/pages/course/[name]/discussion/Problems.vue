@@ -138,7 +138,7 @@ onMounted(async () => {
             v-for="problem in problems"
             :key="problem.Problem_Id"
             :to="`/course/${route.params.name}/discussion/problem/${problem.Problem_Id}`"
-            class="card cursor-pointer bg-base-200 transition-colors hover:bg-base-300"
+            class="card bg-base-200 hover:bg-base-300 cursor-pointer transition-colors"
           >
             <div class="card-body p-4">
               <h3 class="card-title text-lg">{{ problem.Problem_Name }}</h3>

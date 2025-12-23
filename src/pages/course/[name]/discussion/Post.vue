@@ -199,7 +199,7 @@ const submitPost = async () => {
   } catch (err: any) {
     console.error("Error submitting post:", err);
     const errorMsg = err.response?.data?.Message || err.message || t("discussion.err.err_network");
-    error.value = t("discussion.err_failed_create") + errorMsg;
+    error.value = t("discussion.err.err_failed_create") + errorMsg;
   } finally {
     submitting.value = false;
   }

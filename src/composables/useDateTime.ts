@@ -19,8 +19,9 @@ export function formatDateTime(
   try {
     // Useless variables?
     // let normalizedSource = isoString;
+    let normalized = isoString;
     if (!isoString.endsWith("Z") && !isoString.includes("+")) {
-      // normalizedSource = isoString + "Z";
+      normalized = isoString.replace(" ", "T") + "Z";
     }
     const date = new Date(isoString);
 
@@ -38,10 +39,10 @@ export function formatDateTime(
 
     // 相對時間� �式
     if (format === "relative") {
-      if (diffSeconds < 60) return t("discussion.time.just_now");
+      if (diffSeconds < 60) return `${t("discussion.component.time.just_now")}`;
       if (diffMinutes < 60) return `${diffMinutes} ${t("discussion.component.time.minute_ago")}`;
-      if (diffHours < 24) return `${diffHours} t("discussion.component.time.hour_ago")}`;
-      if (diffDays < 7) return `${diffDays} t("discussion.component.time.day_ago")}`;
+      if (diffHours < 24) return `${diffHours} ${t("discussion.component.time.hour_ago")}`;
+      if (diffDays < 7) return `${diffDays} ${t("discussion.component.time.day_ago")}`;
       // 超過一週顯示完整日期
       format = "full";
     }
@@ -85,7 +86,11 @@ export function formatFriendlyTime(isoString: string): string {
   if (!isoString) return "";
 
   try {
-    const date = new Date(isoString);
+    let normalized = isoString;
+    if (!isoString.endsWith("Z") && !isoString.includes("+")) {
+      normalized = isoString.replace(" ", "T") + "Z";
+    }
+    const date = new Date(normalized);
     const now = new Date();
 
     const isToday = date.toDateString() === now.toDateString();

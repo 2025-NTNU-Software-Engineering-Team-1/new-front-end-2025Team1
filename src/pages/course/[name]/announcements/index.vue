@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import { useRoute } from "vue-router";
 import { fetcher } from "@/models/api";
@@ -16,6 +17,18 @@ const {
   error,
   isLoading,
 } = useAxios<AnnouncementList>(`/course/${route.params.name}/ann`, fetcher);
+
+// 將置頂公告排在前面
+const sortedAnnouncements = computed(() => {
+  if (!announcements.value) return [];
+  return [...announcements.value].sort((a, b) => {
+    // 置頂的排在前面
+    if (a.pinned && !b.pinned) return -1;
+    if (!a.pinned && b.pinned) return 1;
+    // 同樣狀態的按時間排序（新的在前）
+    return b.createTime - a.createTime;
+  });
+});
 </script>
 
 <template>
@@ -66,14 +79,17 @@ const {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="{ title, creator, createTime, annId } in announcements" :key="annId" class="hover">
+                <tr v-for="{ title, creator, createTime, annId, pinned } in sortedAnnouncements" :key="annId" class="hover">
                   <td>
-                    <router-link
-                      :to="`/course/${$route.params.name}/announcements/${annId}`"
-                      class="link link-hover"
-                    >
-                      {{ title }}
-                    </router-link>
+                    <div class="flex items-center gap-2">
+                      <span v-if="pinned" class="text-lg" title="置頂">📌</span>
+                      <router-link
+                        :to="`/course/${$route.params.name}/announcements/${annId}`"
+                        class="link link-hover"
+                      >
+                        {{ title }}
+                      </router-link>
+                    </div>
                   </td>
                   <td>{{ creator.displayedName }}</td>
                   <td>{{ formatTime(createTime) }}</td>

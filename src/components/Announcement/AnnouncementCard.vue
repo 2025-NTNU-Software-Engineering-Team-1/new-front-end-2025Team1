@@ -11,7 +11,10 @@ defineProps<Props>();
   <div class="card-container">
     <div class="card min-w-full">
       <div class="card-body">
-        <div class="card-title mb-8">{{ announcement.title }}</div>
+        <div class="card-title mb-8 flex items-center gap-2">
+          <span v-if="announcement.pinned" class="text-xl" title="置頂">📌</span>
+          {{ announcement.title }}
+        </div>
         <markdown-renderer :md="announcement.markdown" />
 
         <div class="mt-4 flex items-center gap-2 text-sm">

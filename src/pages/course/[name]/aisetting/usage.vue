@@ -3,6 +3,9 @@ import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { useTitle } from "@vueuse/core";
 import api from "@/models/api";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 // ==========================================
 // [CONFIG] Console  1=open, 0=close
@@ -195,13 +198,15 @@ onMounted(fetchUsage);
   <div class="card-container pb-20">
     <div class="card min-w-full">
       <div class="card-body">
-        <div class="card-title mb-4">API Usage ({{ route.params.name }})</div>
+        <div class="card-title mb-4">
+          {{ t("course.aisetting.usage.title", { name: route.params.name }) }}
+        </div>
 
         <div
           v-if="data?.totalToken != null"
           class="mb-8 rounded-lg border border-base-300 bg-base-200 p-4 text-center text-lg font-semibold"
         >
-          Total Token Usage：
+          {{ t("course.aisetting.usage.totalUsage") }}
           <span>{{ data.totalToken.toLocaleString() }}</span>
         </div>
 
@@ -234,8 +239,9 @@ onMounted(fetchUsage);
                   {{ keyItem.key_name }}
                 </div>
                 <div class="text-sm">
-                  Used by {{ keyItem.problem_usages.length }} problems • Token
-                  {{ keyItem.all_total_token.toLocaleString() }} • Created by {{ keyItem.created_by }}
+                  {{ t("course.aisetting.usage.used_by_summary", { count: keyItem.problem_usages.length }) }}
+                  {{ keyItem.all_total_token.toLocaleString() }}
+                  {{ t("course.aisetting.usage.created_by_summary", { name: keyItem.created_by }) }}
                 </div>
               </div>
 
@@ -251,9 +257,9 @@ onMounted(fetchUsage);
                   <table class="table-compact table w-full">
                     <thead>
                       <tr>
-                        <th class="w-16">Rank</th>
-                        <th>Problem Name</th>
-                        <th class="text-right">Token Used</th>
+                        <th class="w-16">{{ t("course.aisetting.usage.rank") }}</th>
+                        <th>{{ t("course.aisetting.usage.problemName") }}</th>
+                        <th class="text-right">{{ t("course.aisetting.usage.tokenUsed") }}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -299,7 +305,7 @@ onMounted(fetchUsage);
             </div>
           </div>
 
-          <p v-else class="italic text-base-content/70">No API key usage data.</p>
+          <p v-else class="italic text-base-content/70">{{ t("course.aisetting.usage.noData") }}</p>
         </template>
       </div>
     </div>

@@ -4,6 +4,9 @@ import { useRoute } from "vue-router";
 import { useTitle } from "@vueuse/core";
 import api from "@/models/api";
 import { useSession } from "@/stores/session";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 // ==========================================
 // [CONFIG] Console Debug Mode
@@ -254,7 +257,7 @@ onMounted(fetchKeys);
   <div class="card-container pb-20">
     <div class="card min-w-full">
       <div class="card-body">
-        <div class="card-title mb-4">AI Setting – Set Up</div>
+        <div class="card-title mb-4">{{ t("course.aisetting.setup.title") }}</div>
 
         <div v-if="errorMsg" class="alert alert-error shadow-lg">
           <div>
@@ -268,19 +271,19 @@ onMounted(fetchKeys);
         </div>
 
         <div class="mb-8 rounded-lg border border-base-300 p-4">
-          <h3 class="mb-2 text-lg font-semibold">Add New API Key</h3>
+          <h3 class="mb-2 text-lg font-semibold">{{ t("course.aisetting.setup.subtitleNewKey") }}</h3>
 
           <div class="grid gap-3 md:grid-cols-3">
             <input
               type="text"
               v-model="newKey.name"
-              placeholder="Key Name *"
+              :placeholder="t('course.aisetting.setup.input.name')"
               class="input input-bordered w-full"
             />
             <input
               type="text"
               v-model="newKey.value"
-              placeholder="API Key Value *"
+              :placeholder="t('course.aisetting.setup.input.value')"
               class="input input-bordered w-full"
             />
             <input
@@ -293,7 +296,7 @@ onMounted(fetchKeys);
 
           <div class="mt-4 flex justify-end">
             <button class="btn btn-success" :class="{ loading: isLoading }" @click="addKey">
-              <i-uil-plus class="mr-1" /> Add Key
+              <i-uil-plus class="mr-1" /> {{ t("course.aisetting.setup.input.addKey") }}
             </button>
           </div>
 
@@ -303,13 +306,15 @@ onMounted(fetchKeys);
         </div>
 
         <div class="rounded-lg border border-base-300 p-4">
-          <h3 class="mb-4 text-lg font-semibold">Existing Keys</h3>
+          <h3 class="mb-4 text-lg font-semibold">{{ t("course.aisetting.setup.subtitleExistingKey") }}</h3>
 
           <div v-if="isLoading && apiKeys.length === 0" class="py-4 text-center opacity-60">
             <ui-spinner />
           </div>
 
-          <div v-else-if="apiKeys.length === 0" class="py-2 italic opacity-70">No keys yet.</div>
+          <div v-else-if="apiKeys.length === 0" class="py-2 italic opacity-70">
+            {{ t("course.aisetting.setup.display.noKey") }}
+          </div>
 
           <div v-else class="space-y-3">
             <div
@@ -318,15 +323,15 @@ onMounted(fetchKeys);
               class="grid grid-cols-1 gap-2 rounded-lg border border-base-200 bg-base-100 p-3 md:grid-cols-7 md:items-center"
             >
               <div class="col-span-2">
-                <label class="text-xs opacity-70">Name</label>
+                <label class="text-xs opacity-70">{{ t("course.aisetting.setup.display.keyName") }}</label>
                 <input type="text" v-model="k.key_name" class="input input-bordered input-sm w-full" />
               </div>
               <div class="col-span-2 text-sm">
-                <label class="text-xs opacity-70">Masked</label>
+                <label class="text-xs opacity-70">{{ t("course.aisetting.setup.display.masked") }}</label>
                 <div class="font-mono">{{ k.masked_value }}</div>
               </div>
               <div class="col-span-1">
-                <label class="text-xs opacity-70">Created By</label>
+                <label class="text-xs opacity-70">{{ t("course.aisetting.setup.display.createdBy") }}</label>
                 <input
                   type="text"
                   v-model="k.created_by"
@@ -335,7 +340,9 @@ onMounted(fetchKeys);
                 />
               </div>
               <div class="flex items-center gap-2">
-                <label class="label-text mr-2 text-xs opacity-70">Active</label>
+                <label class="label-text mr-2 text-xs opacity-70">{{
+                  t("course.aisetting.setup.display.active")
+                }}</label>
                 <input
                   type="checkbox"
                   class="toggle toggle-success toggle-sm"
@@ -344,8 +351,12 @@ onMounted(fetchKeys);
                 />
               </div>
               <div class="flex justify-end gap-2">
-                <button class="btn btn-success btn-xs" @click="updateKey(k)">Save</button>
-                <button class="btn btn-error btn-xs" @click="deleteKey(k.id)">Delete</button>
+                <button class="btn btn-success btn-xs" @click="updateKey(k)">
+                  {{ t("course.aisetting.setup.display.save") }}
+                </button>
+                <button class="btn btn-error btn-xs" @click="deleteKey(k.id)">
+                  {{ t("course.aisetting.setup.display.delete") }}
+                </button>
               </div>
             </div>
           </div>

@@ -37,6 +37,39 @@
         "preview": "預覽"
       }
     },
+    "aisetting": {
+      "setupPage": "設置",
+      "usagePage": "用量",
+      "setup": {
+        "title": "AI 管理 - 設定",
+        "subtitleNewKey": "新增金鑰資訊",
+        "subtitleExistingKey": "既有金鑰",
+        "input": {
+          "name": "金鑰名稱 *",
+          "value": "API 金鑰值",
+          "addKey": "新增金鑰"
+        },
+        "display": {
+          "noKey": "暫無金鑰",
+          "keyName": "金鑰名稱",
+          "masked": "遮罩值",
+          "createdBy": "建立者",
+          "active": "啟用",
+          "save": "儲存",
+          "delete": "刪除"
+        }
+      },
+      "usage": {
+        "title": "API 用量 ({name})",
+        "totalUsage": "Token 總使用量:",
+        "used_by_summary": "被 {count} 個題目使用 • Token",
+        "created_by_summary": "• 由 {name} 所建立",
+        "rank": "排名",
+        "problemName": "題目名稱",
+        "tokenUsed": "Token 已用量",
+        "noData": "尚無 API 金鑰使用資料"
+      }
+    },
     "problem": {
       "new": {
         "title": "新增題目",
@@ -504,7 +537,8 @@
       "problems": "題目",
       "submissions": "繳交狀態",
       "discussion": "討論區",
-      "members": "成員"
+      "members": "成員",
+      "aisetting": "AI 管理"
     },
     "systemAnn": {
       "ann": "公告",

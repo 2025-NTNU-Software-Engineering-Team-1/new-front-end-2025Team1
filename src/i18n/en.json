@@ -37,6 +37,39 @@
         "preview": "Preview"
       }
     },
+    "aisetting": {
+      "setupPage": "Set Up",
+      "usagePage": "Usage",
+      "setup": {
+        "title": "AI Management – Set Up",
+        "subtitleNewKey": "Add New API Key",
+        "subtitleExistingKey": "Existing Key",
+        "input": {
+          "name": "Key Name *",
+          "value": "API Key Value *",
+          "addKey": "Add Key"
+        },
+        "display": {
+          "noKey": "No keys yet.",
+          "keyName": "Key Name",
+          "masked": "Masked",
+          "createdBy": "Created By",
+          "active": "Active",
+          "save": "Save",
+          "delete": "Delete"
+        }
+      },
+      "usage": {
+        "title": "API Usage ({name})",
+        "totalUsage": "Total Token Usage：",
+        "used_by_summary": "Used by {count} problems • Token",
+        "created_by_summary": "• Created by {name}",
+        "rank": "Rank",
+        "problemName": "Problem Name",
+        "tokenUsed": "Token Used",
+        "noData": "No API key usage data."
+      }
+    },
     "problem": {
       "new": {
         "title": "New Problem",
@@ -526,7 +559,8 @@
       "problems": "Problems",
       "submissions": "Submissions",
       "discussion": "Discussion",
-      "members": "Members"
+      "members": "Members",
+      "aisetting": "AI Management"
     },
     "systemAnn": {
       "ann": "Announcements",

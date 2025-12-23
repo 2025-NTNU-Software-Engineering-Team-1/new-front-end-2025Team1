@@ -1,6 +1,5 @@
 <script setup lang="ts">
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 // ==========================================
 // Imports
 // ==========================================

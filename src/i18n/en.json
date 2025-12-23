@@ -343,7 +343,7 @@
       "err_failed_reply": "Failed to reply to the post.",
       "err_network": "Network error. ",
       "err_problems_list": "Failed to load problems list.",
-      "err_failed_create": "Failed to create post",
+      "err_failed_create": "Failed to create post, please check if it contains code.",
       "err_failed_search": "Failed to search posts"
     },
     "detail": {

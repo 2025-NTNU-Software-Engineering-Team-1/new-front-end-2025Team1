@@ -26,11 +26,8 @@ test("Can't make a post with code bf deadline", async ({ page }) => {
 
   //Post
   await page.getByRole("button", { name: "Post" }).click();
-  await page.screenshot({ path: "scr.png" });
 
   //check if success
   await expect(page.getByText("This problem does not allow sharing code")).toBeVisible({ timeout: 10000 });
-  await expect(page.getByText("discussion.err_failed_createRequest failed with status code 403")).toBeVisible(
-    { timeout: 10000 },
-  );
+  await expect(page.getByText("Failed to create post, please check if it contains code.")).toBeVisible({ timeout: 10000 });
 });

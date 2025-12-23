@@ -75,6 +75,7 @@ function normalizeConfig(config?: LegacyProblemConfigExtra): ProblemConfigExtra 
     resourceData: false,
     resourceDataTeacher: false,
     maxStudentZipSizeMB: 50,
+    networkAccessEnabled: false,
     networkAccessRestriction: {
       sidecars: [],
       external: {

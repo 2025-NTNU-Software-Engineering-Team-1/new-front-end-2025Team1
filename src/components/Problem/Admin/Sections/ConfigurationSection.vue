@@ -574,7 +574,14 @@ const hasExistingNetworkConfig = computed(() => {
   const hasDocker = !!problem.value.assets?.dockerfilesZip || hasAsset("dockerfiles");
   return hasExternal || hasSidecars || hasDocker;
 });
-const showNetworkSection = ref(false);
+
+const showNetworkSection = computed({
+  get: () => !!problem.value.config?.networkAccessEnabled,
+  set: (v: boolean) => {
+    ensureConfig();
+    problem.value.config!.networkAccessEnabled = v;
+  },
+});
 
 // ==========================================
 // Helper: Selected Keys Statistics
@@ -695,7 +702,7 @@ onBeforeUnmount(() => {
         </label>
         <label class="label cursor-pointer gap-2">
           <input type="radio" class="radio" value="zip" v-model="problem.config!.acceptedFormat as any" />
-          <span class="label-text">{{ t("course.problems.Zip") }}</span>
+          <span class="label-text">{{ t("course.problems.zip") }}</span>
         </label>
       </div>
       <div
@@ -1083,7 +1090,7 @@ onBeforeUnmount(() => {
       <div class="flex items-center gap-4">
         <label class="label ml-1 cursor-pointer justify-start gap-x-4">
           <span class="label-text">Network & Sidecars</span>
-          <input type="checkbox" class="toggle" v-model="showNetworkSection" />
+          <input type="checkbox" class="toggle" v-model="problem.config!.networkAccessEnabled" />
         </label>
       </div>
 

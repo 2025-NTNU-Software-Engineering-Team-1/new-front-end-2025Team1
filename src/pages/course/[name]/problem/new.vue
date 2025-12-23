@@ -90,6 +90,7 @@ const newProblem = ref<ProblemForm>({
     resourceData: false,
     resourceDataTeacher: false,
     maxStudentZipSizeMB: 50,
+    networkAccessEnabled: false,
     networkAccessRestriction: {
       sidecars: [],
       external: {

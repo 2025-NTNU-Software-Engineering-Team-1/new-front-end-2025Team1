@@ -151,6 +151,7 @@ interface ProblemConfigExtra {
   aiVTuberApiKeys?: string[];
 
   // Network Access Restriction
+  networkAccessEnabled?: boolean;
   networkAccessRestriction?: {
     sidecars: {
       image: string;

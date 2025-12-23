@@ -77,7 +77,7 @@ const closeConfirmDialog = () => {
       <div v-else class="loading loading-spinner loading-xs"></div>
     </label>
 
-    <ul tabindex="0" class="dropdown-content menu z-50 w-32 rounded-box bg-base-100 p-2 shadow">
+    <ul tabindex="0" class="dropdown-content menu rounded-box z-50 w-32 bg-base-100 p-2 shadow">
       <!-- 編輯回覆 -->
       <li v-if="isAuthor">
         <a class="text-xs">
@@ -92,7 +92,7 @@ const closeConfirmDialog = () => {
 
       <!-- 刪除回覆 -->
       <li v-if="canDelete">
-        <a @click="handleDelete" class="text-xs text-error">
+        <a @click="handleDelete" class="text-error text-xs">
           <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" clip-rule="evenodd" />
             <path

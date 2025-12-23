@@ -299,7 +299,7 @@ const networkItemsCount = computed(() => {
                       <span
                         v-for="(lang, idx) in allowedLangTexts"
                         :key="lang"
-                        class="from-info/20 to-info/30 hover:from-info/30 hover:to-info/40 group relative overflow-hidden rounded-xl bg-gradient-to-br px-5 py-3 font-mono text-base font-bold text-info-content transition-all duration-300 hover:scale-105"
+                        class="from-info/20 to-info/30 hover:from-info/30 hover:to-info/40 text-info-content group relative overflow-hidden rounded-xl bg-gradient-to-br px-5 py-3 font-mono text-base font-bold transition-all duration-300 hover:scale-105"
                         :style="{ animationDelay: `${idx * 0.1}s` }"
                       >
                         <span class="relative">{{ lang }}</span>
@@ -335,7 +335,7 @@ const networkItemsCount = computed(() => {
                       >
                         <div class="flex flex-1 items-center gap-3">
                           <div
-                            class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-xl font-bold text-transparent"
+                            class="to-secondary bg-gradient-to-r from-primary bg-clip-text text-xl font-bold text-transparent"
                           >
                             Library Restrictions
                           </div>
@@ -385,8 +385,8 @@ const networkItemsCount = computed(() => {
                                     class="relative overflow-hidden rounded-lg px-3 py-1.5 font-mono text-sm font-semibold transition-all duration-200 hover:scale-105 hover:shadow-md"
                                     :class="
                                       s.mode === 'whitelist'
-                                        ? 'from-accent/80 bg-gradient-to-br to-accent text-accent-content'
-                                        : 'from-error/80 bg-gradient-to-br to-error text-error-content'
+                                        ? 'from-accent/80 to-accent text-accent-content bg-gradient-to-br'
+                                        : 'from-error/80 to-error text-error-content bg-gradient-to-br'
                                     "
                                     :style="{ animationDelay: `${idx * 0.15 + symIdx * 0.05}s` }"
                                   >
@@ -436,7 +436,7 @@ const networkItemsCount = computed(() => {
                       >
                         <div class="flex flex-1 items-center gap-3">
                           <div
-                            class="bg-gradient-to-r from-info to-warning bg-clip-text text-xl font-bold text-transparent"
+                            class="from-info to-warning bg-gradient-to-r bg-clip-text text-xl font-bold text-transparent"
                           >
                             Network Access Restriction
                           </div>
@@ -485,8 +485,8 @@ const networkItemsCount = computed(() => {
                                     class="relative overflow-hidden rounded-lg px-3 py-1.5 font-mono text-sm font-semibold transition-all duration-200 hover:scale-105 hover:shadow-md"
                                     :class="
                                       s.mode === 'whitelist'
-                                        ? 'from-accent/80 bg-gradient-to-br to-accent text-accent-content'
-                                        : 'from-error/80 bg-gradient-to-br to-error text-error-content'
+                                        ? 'from-accent/80 to-accent text-accent-content bg-gradient-to-br'
+                                        : 'from-error/80 to-error text-error-content bg-gradient-to-br'
                                     "
                                     :style="{ animationDelay: `${idx * 0.15 + symIdx * 0.05}s` }"
                                   >

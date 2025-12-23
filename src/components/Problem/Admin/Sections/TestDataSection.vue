@@ -195,7 +195,7 @@ watch(
         <!-- 右側白底上傳區 -->
         <div
           class="textarea-bordered col-span-4 flex flex-col bg-base-100 p-4"
-          :class="[isDrag && 'border border-accent']"
+          :class="[isDrag && 'border-accent border']"
           @drop.prevent="problem.assets!.testdataZip = $event.dataTransfer!.files![0]"
           @dragover.prevent="isDrag = true"
           @dragleave="isDrag = false"

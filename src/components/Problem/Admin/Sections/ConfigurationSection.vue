@@ -802,7 +802,7 @@ onBeforeUnmount(() => {
                       <div v-if="isFetchingSuggestion" class="flex items-center text-sm">
                         <ui-spinner class="mr-2" /> Fetching suggestion...
                       </div>
-                      <div v-else-if="suggestionError" class="text-sm text-error">
+                      <div v-else-if="suggestionError" class="text-error text-sm">
                         {{ suggestionError }}
                       </div>
                       <div v-else-if="keySuggestion" class="space-y-1 text-sm">
@@ -1207,7 +1207,7 @@ onBeforeUnmount(() => {
                   "
                 />
                 <label v-if="v$?.assets?.dockerfilesZip?.$error || dockerZipError" class="label">
-                  <span class="label-text-alt whitespace-pre-line text-error">
+                  <span class="label-text-alt text-error whitespace-pre-line">
                     {{ v$?.assets?.dockerfilesZip?.$errors[0]?.$message || dockerZipError }}
                   </span>
                 </label>
@@ -1216,7 +1216,7 @@ onBeforeUnmount(() => {
                   v-if="detectedDockerEnvs.length > 0"
                   class="border-success/30 mt-2 w-full max-w-xs rounded border bg-base-200 p-3 text-xs"
                 >
-                  <div class="mb-2 flex items-center gap-1 font-bold text-success">
+                  <div class="text-success mb-2 flex items-center gap-1 font-bold">
                     <i-uil-check-circle />
                     {{
                       problem.assets?.dockerfilesZip
@@ -1236,7 +1236,7 @@ onBeforeUnmount(() => {
 
                       <button
                         type="button"
-                        class="btn btn-ghost btn-xs h-6 min-h-0 w-6 p-0 text-error"
+                        class="btn btn-ghost btn-xs text-error h-6 min-h-0 w-6 p-0"
                         @click="removeDockerEnv(index)"
                         title="Remove this environment"
                       >

@@ -467,7 +467,7 @@ onMounted(async () => {
             class="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-gray-900/80 backdrop-blur-sm"
           >
             <div class="px-4 text-center">
-              <i-uil-lock-alt class="mb-2 text-4xl text-warning" />
+              <i-uil-lock-alt class="text-warning mb-2 text-4xl" />
               <p class="text-sm font-medium text-gray-300">Imports Restrictions Disabled</p>
               <p class="mt-1 text-xs text-gray-400">Python language must be enabled to use this feature</p>
             </div>
@@ -539,7 +539,7 @@ onMounted(async () => {
             class="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-gray-900/80 backdrop-blur-sm"
           >
             <div class="px-4 text-center">
-              <i-uil-lock-alt class="mb-2 text-4xl text-warning" />
+              <i-uil-lock-alt class="text-warning mb-2 text-4xl" />
               <p class="text-sm font-medium text-gray-300">Headers Restrictions Disabled</p>
               <p class="mt-1 text-xs text-gray-400">C or C++ language must be enabled to use this feature</p>
             </div>

@@ -15,7 +15,7 @@ defineProps<Props>();
 </script>
 
 <template>
-  <div class="collapse collapse-arrow rounded-box bg-base-200">
+  <div class="collapse-arrow rounded-box collapse bg-base-200">
     <input type="checkbox" class="peer" />
     <div class="collapse-title bg-base-200 text-base">
       <div class="flex flex-col">

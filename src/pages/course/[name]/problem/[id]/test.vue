@@ -224,7 +224,7 @@ async function submitCode() {
                   <div
                     class="overflow-hidden overflow-x-auto rounded-lg border border-base-300 bg-base-100 p-0"
                   >
-                    <table class="table !m-0 w-full border-collapse !border-spacing-0 border-0">
+                    <table class="!m-0 table w-full border-collapse !border-spacing-0 border-0">
                       <thead class="rounded-none bg-base-300">
                         <tr>
                           <th>{{ t("course.problem.test.topic.sample.id") }}</th>

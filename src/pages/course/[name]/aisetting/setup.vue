@@ -300,7 +300,7 @@ onMounted(fetchKeys);
             </button>
           </div>
 
-          <div v-if="newKey.maskedDisplay" class="mt-3 font-mono text-sm text-success">
+          <div v-if="newKey.maskedDisplay" class="text-success mt-3 font-mono text-sm">
             Masked ID: {{ newKey.maskedDisplay }}
           </div>
         </div>

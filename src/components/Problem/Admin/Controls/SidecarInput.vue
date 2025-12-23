@@ -78,7 +78,7 @@ function updateItem() {
     </div>
 
     <div class="overflow-x-auto rounded-lg border border-base-content/20">
-      <table class="table table-sm w-full">
+      <table class="table-sm table w-full">
         <thead class="bg-base-200">
           <tr>
             <th class="w-1/3 py-3">Name</th>

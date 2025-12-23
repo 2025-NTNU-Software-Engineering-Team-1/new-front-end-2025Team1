@@ -10,6 +10,7 @@ import { formatFriendlyTime } from "@/composables/useDateTime";
 import type {
   DiscussionPostDetail,
   DiscussionReply,
+  DiscussionProblem,
   // GetPostDetailResponse,
   // CreateReplyResponse,
   // LikeActionResponse,
@@ -27,6 +28,9 @@ const replies = ref<DiscussionReply[]>([]);
 const loading = ref(true);
 const error = ref<string>("");
 
+// 題目相關
+const problems = ref<DiscussionProblem[]>([]);
+
 // 回覆相關
 const showReplyForm = ref(false);
 const replyContent = ref("");
@@ -36,6 +40,47 @@ const submittingReply = ref(false);
 // 按讚相關
 const likingPost = ref(false);
 const userLikeStatus = ref<boolean | null>(null);
+
+// 載入題目列表
+const loadProblems = async () => {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const response: any = await API.Discussion.getProblems({ Limit: 100 });
+    const status = response.data?.Status;
+    const problemsData = response.data?.Problems;
+
+    if (status === "OK") {
+      problems.value = problemsData || [];
+    }
+  } catch (err) {
+    console.error("Error loading problems:", err);
+  }
+};
+
+// 根據 Problem_Id 獲取題目名稱
+const getProblemName = (problemId?: string): string | undefined => {
+  if (!problemId) return undefined;
+  const problem = problems.value.find((p) => p.Problem_Id.toString() === problemId.toString());
+  return problem?.Problem_Name;
+};
+
+// 計算當前貼文的題目資訊
+const postProblemId = computed(() => {
+  if (!post.value) return null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (post.value as any).Problem_Id || post.value.Problem_id || null;
+});
+
+const postProblemName = computed(() => {
+  return getProblemName(postProblemId.value || undefined);
+});
+
+const problemLink = computed(() => {
+  if (postProblemId.value) {
+    return `/course/${route.params.name}/problem/${postProblemId.value}`;
+  }
+  return null;
+});
 
 // 載入貼文詳情
 const loadPostDetail = async () => {
@@ -59,14 +104,19 @@ const loadPostDetail = async () => {
     if (status === "OK" && postArray && Array.isArray(postArray) && postArray.length > 0) {
       const postData = postArray[0];
       console.log("Post data:", postData);
+      console.log("Post Problem_Id:", postData.Problem_Id);
+      console.log("Post Problem_id:", postData.Problem_id);
+      console.log("Post problemId:", postData.problemId);
 
-      // 確保必要欄位有� �設值
+      // 確保必要欄位有預設值
       post.value = {
         ...postData,
         Is_Pinned: postData.Is_Pinned ?? false,
         Is_Solved: postData.Is_Solved ?? false,
         Is_Closed: postData.Is_Closed ?? false,
         Category: postData.Category || "",
+        // 確保 Problem_Id 被保留
+        Problem_Id: postData.Problem_Id || postData.Problem_id || postData.problemId || "",
       };
 
       // 正規化回覆數據，處理欄位名稱不一致的問題
@@ -301,7 +351,8 @@ const nestedReplies = computed(() => {
   return rootReplies;
 });
 
-onMounted(() => {
+onMounted(async () => {
+  await loadProblems();
   loadPostDetail();
 });
 </script>
@@ -343,8 +394,16 @@ onMounted(() => {
                   {{ t("discussion.detail.by") }} {{ post.Author }} ·
                   {{ formatFriendlyTime(post.Created_Time) }}
                 </div>
-                <div v-if="post.Category" class="mt-1">
-                  <span class="badge badge-outline">{{ post.Category }}</span>
+                <!-- Problem hashtag with link -->
+                <div v-if="postProblemId" class="mt-2">
+                  <router-link
+                    v-if="problemLink"
+                    :to="problemLink"
+                    class="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary hover:bg-primary/20 transition-colors"
+                  >
+                    <span class="text-primary">#</span>
+                    <span>{{ postProblemName || `Problem ${postProblemId}` }}</span>
+                  </router-link>
                 </div>
               </div>
 

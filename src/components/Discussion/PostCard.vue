@@ -18,14 +18,25 @@ const props = defineProps<{
     isPinned?: boolean;
     isSolved?: boolean;
     isClosed?: boolean;
+    problemId?: string;
+    problemName?: string;
   };
+  courseName?: string;
 }>();
 
-const { post } = props;
+const { post, courseName } = props;
 const { t } = useI18n();
 
 const initials = computed(() => post.author?.[0] ?? "?");
 const formattedTime = computed(() => formatFriendlyTime(post.time));
+
+// 生成題目連結
+const problemLink = computed(() => {
+  if (post.problemId && courseName) {
+    return `/course/${courseName}/problem/${post.problemId}`;
+  }
+  return null;
+});
 </script>
 
 <template>
@@ -77,6 +88,25 @@ const formattedTime = computed(() => formatFriendlyTime(post.time));
                 {{ t("discussion.closed") }}
               </span>
             </div>
+            <!-- Problem hashtag with link -->
+            <div v-if="post.problemId" class="mt-2">
+              <router-link
+                v-if="problemLink"
+                :to="problemLink"
+                class="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary hover:bg-primary/20 transition-colors"
+                @click.stop
+              >
+                <span class="text-primary">#</span>
+                <span>{{ post.problemName || `Problem ${post.problemId}` }}</span>
+              </router-link>
+              <span
+                v-else
+                class="inline-flex items-center gap-1 rounded-full bg-gray-100 dark:bg-gray-700 px-3 py-1 text-sm font-medium text-gray-600 dark:text-gray-300"
+              >
+                <span>#</span>
+                <span>{{ post.problemName || `Problem ${post.problemId}` }}</span>
+              </span>
+            </div>
             <div class="mt-2 text-sm text-gray-600 dark:text-gray-300">{{ post.excerpt }}</div>
           </div>
 
@@ -104,18 +134,6 @@ const formattedTime = computed(() => formatFriendlyTime(post.time));
                 />
               </svg>
               {{ post.comments }}
-            </div>
-            <div v-if="post.views" class="flex items-center gap-1">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M12 5c7 0 11 7 11 7s-4 7-11 7S1 12 1 12s4-7 11-7z"
-                  stroke="currentColor"
-                  stroke-width="1"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-              {{ post.views }}
             </div>
           </div>
         </div>

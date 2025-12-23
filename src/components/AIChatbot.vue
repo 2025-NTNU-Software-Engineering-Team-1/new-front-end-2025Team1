@@ -402,7 +402,6 @@ const requestAiReply = async (userText: string) => {
   }
 };
 
-
 const pushUserMessage = (text: string) => {
   messages.value.push({
     id: nextId++,

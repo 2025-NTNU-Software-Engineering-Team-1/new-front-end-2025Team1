@@ -136,21 +136,21 @@ test.skip("Delete a post", async ({ page }) => {
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
   await page.getByRole("link", { name: "Discussion" }).click();
-  
+
   //New post
-  await page.getByRole("link", { name: "Post" , exact: true}).click();
+  await page.getByRole("link", { name: "Post", exact: true }).click();
   //Select
   await page.locator("select.select-bordered").nth(0).selectOption({ label: "Prob1" });
   await page.locator("input.input-bordered").nth(0).fill("To be deleted");
   await page.locator("textarea.textarea-bordered").nth(0).fill("This is the post for deleting");
-  
+
   //Post
   await page.getByRole("button", { name: "Post" }).click();
-  
+
   //Delete
   const moreBtn = page.locator("label.btn.btn-ghost.btn-sm");
   await expect(moreBtn).toBeVisible();
-  await moreBtn.click({ force: true });  
+  await moreBtn.click({ force: true });
 
   const delItem = page.locator("ul.dropdown-content >> text=Delete Post");
   await expect(delItem).toBeVisible();
@@ -159,15 +159,11 @@ test.skip("Delete a post", async ({ page }) => {
   const confirmBtn = page.locator('button:has-text("Confirm")');
   await expect(confirmBtn).toBeVisible();
   await confirmBtn.click();
-  await page.waitForTimeout(500); 
-  
+  await page.waitForTimeout(500);
+
   //check if success
   const delPosts = page.getByText("To be deleted");
 
   const count = await delPosts.count();
   expect(count).toBe(0);
-  
 });
-
-
-

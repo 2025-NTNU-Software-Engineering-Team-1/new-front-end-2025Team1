@@ -211,14 +211,14 @@
       "networkAccessBlacklist": "黑名單",
       "networkAccessIPList": "IP List",
       "networkAccessURLList": "URL List",
-      "SandboxEnvironment": "沙河環境 (Sidecars & Dockerfiles)",
+      "SandboxEnvironment": "沙盒環境 (Sidecars & Dockerfiles)",
       "dockerFiles": "Dockerfiles",
       "uploaded": "已上傳",
       "notUploaded": "未上傳",
       "download": "下載",
       "uploadDockerFilesZip": "上傳 dockerfiles.zip",
       "ArtifactCollection": "產物收集 (可選)",
-      "CompiledBinary": "已編譯二進位檔",
+      "CompiledBinary": "編譯後之二進位檔",
       "StudentArtifact": "學生產物 (Zip)"
     },
     "submissions": {

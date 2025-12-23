@@ -2,7 +2,7 @@
 
 export interface DiscussionPost {
   Post_Id: number;
-  Author: string;
+  Author: string | { displayedName?: string; username?: string; md5?: string; role?: number };
   Title: string;
   Created_Time: string;
   Like_Count: number;
@@ -13,6 +13,7 @@ export interface DiscussionPost {
   Category?: string;
   Is_Solved?: boolean;
   Problem_id?: string;
+  Problem_Id?: string; // 後端返回的格式
   Language?: string;
   Contains_Code?: boolean;
 }

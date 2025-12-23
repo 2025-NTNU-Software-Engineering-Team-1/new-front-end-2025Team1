@@ -49,7 +49,7 @@ const formattedTime = computed(() => formatFriendlyTime(post.time));
           </div>
 
           <div class="mt-3">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-wrap">
               <span v-if="post.isPinned" class="text-lg">📌</span>
               <div class="text-lg font-bold">{{ post.title }}</div>
               <span v-if="post.isSolved" class="badge badge-success gap-1">
@@ -91,7 +91,7 @@ const formattedTime = computed(() => formatFriendlyTime(post.time));
                   stroke-linejoin="round"
                 />
               </svg>
-              >{{ post.likes }}
+              {{ post.likes }}
             </div>
             <div class="flex items-center gap-1">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -103,7 +103,7 @@ const formattedTime = computed(() => formatFriendlyTime(post.time));
                   stroke-linejoin="round"
                 />
               </svg>
-              >{{ post.comments }}
+              {{ post.comments }}
             </div>
             <div v-if="post.views" class="flex items-center gap-1">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
@@ -115,7 +115,7 @@ const formattedTime = computed(() => formatFriendlyTime(post.time));
                   stroke-linejoin="round"
                 />
               </svg>
-              >{{ post.views }}
+              {{ post.views }}
             </div>
           </div>
         </div>

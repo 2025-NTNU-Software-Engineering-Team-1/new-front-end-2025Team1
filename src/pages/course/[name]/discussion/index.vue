@@ -6,6 +6,7 @@ import PostCard from "@/components/Discussion/PostCard.vue";
 import API from "@/models/api";
 import type {
   DiscussionPost,
+  DiscussionProblem,
   // GetPostsResponse,
   // SearchPostsResponse,
   PaginationInfo,
@@ -17,6 +18,7 @@ const route = useRoute();
 const query = ref("");
 const activeTab = ref<"Hot" | "New">("Hot");
 const posts = ref<DiscussionPost[]>([]);
+const problems = ref<DiscussionProblem[]>([]);
 const loading = ref(false);
 const error = ref<string>("");
 
@@ -27,6 +29,32 @@ const pagination = ref<PaginationInfo>({
   total: 0,
   totalPages: 0,
 });
+
+// 載入題目列表
+const loadProblems = async () => {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const response: any = await API.Discussion.getProblems({ Limit: 100 });
+    const status = response.data?.Status;
+    const problemsData = response.data?.Problems;
+
+    if (status === "OK") {
+      problems.value = problemsData || [];
+      console.log("[loadProblems] Loaded problems:", problems.value.length, problems.value);
+    }
+  } catch (err) {
+    console.error("Error loading problems:", err);
+  }
+};
+
+// 根據 Problem_Id 獲取題目名稱
+const getProblemName = (problemId?: string): string | undefined => {
+  if (!problemId) return undefined;
+  console.log("[getProblemName] Looking for problemId:", problemId, "in", problems.value.length, "problems");
+  const problem = problems.value.find((p) => p.Problem_Id.toString() === problemId.toString());
+  console.log("[getProblemName] Found:", problem);
+  return problem?.Problem_Name;
+};
 
 // 載入貼文列表
 const loadPosts = async () => {
@@ -44,8 +72,8 @@ const loadPosts = async () => {
     const response: any = await API.Discussion.getPosts(params);
 
     // axios interceptor 將 response.data 展開到 response 層級
-    const status = response.Status || response.data?.Status;
-    const postsData = response.Posts || response.data?.Posts;
+    const status = response.data?.Status;
+    const postsData = response.data?.Posts;
 
     if (status === "OK") {
       posts.value = postsData || [];
@@ -108,20 +136,38 @@ const searchPosts = async () => {
   }
 };
 
-// 轉換貼文資料� �式為 PostCard 組件需要的� �式
+// 轉換貼文資料以符合 PostCard 需求
 const transformedPosts = computed(() => {
-  return posts.value.map((post) => ({
-    id: post.Post_Id.toString(),
-    author: post.Author,
-    time: post.Created_Time,
-    title: post.Title,
-    excerpt: "", // API 沒有提供摘要，可以從內容截取
-    likes: post.Like_Count,
-    comments: post.Reply_Count,
-    isPinned: post.Is_Pinned,
-    isSolved: post.Is_Solved ?? false,
-    isClosed: post.Is_Closed ?? false,
-  }));
+  return posts.value.map((post) => {
+    // 處理 Author 欄位：可能是字串或物件
+    let authorName: string;
+    if (typeof post.Author === "object" && post.Author !== null) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      authorName = (post.Author as any).displayedName || (post.Author as any).username || "Unknown";
+    } else {
+      authorName = typeof post.Author === "string" ? post.Author : "Unknown";
+    }
+
+    // 處理 Problem_Id 欄位：後端可能返回 Problem_Id 或 Problem_id
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const problemId = (post as any).Problem_Id || post.Problem_id;
+    console.log("[transformedPosts] Post:", post.Post_Id, "problemId:", problemId);
+
+    return {
+      id: post.Post_Id.toString(),
+      author: authorName,
+      time: post.Created_Time,
+      title: post.Title,
+      excerpt: "", // API 沒有提供摘要，可以從內容截取
+      likes: post.Like_Count,
+      comments: post.Reply_Count,
+      isPinned: post.Is_Pinned,
+      isSolved: post.Is_Solved ?? false,
+      isClosed: post.Is_Closed ?? false,
+      problemId: problemId,
+      problemName: getProblemName(problemId),
+    };
+  });
 });
 
 // 處理搜尋輸入
@@ -149,7 +195,8 @@ watch(
   },
 );
 
-onMounted(() => {
+onMounted(async () => {
+  await loadProblems();
   loadPosts();
 });
 </script>
@@ -245,7 +292,7 @@ onMounted(() => {
               </div>
               <template v-for="post in transformedPosts" :key="post.id">
                 <router-link :to="`/course/${route.params.name}/discussion/${post.id}`" class="block">
-                  <PostCard :post="post" />
+                  <PostCard :post="post" :course-name="route.params.name as string" />
                 </router-link>
               </template>
             </div>

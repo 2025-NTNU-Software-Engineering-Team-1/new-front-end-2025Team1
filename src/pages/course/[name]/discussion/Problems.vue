@@ -12,7 +12,7 @@ const problems = ref<DiscussionProblem[]>([]);
 const loading = ref(true);
 const error = ref<string>("");
 
-// 分� �相關
+// 分頁相關
 const pagination = ref<PaginationInfo>({
   page: 1,
   limit: 50,
@@ -85,7 +85,9 @@ const problemDiscussionCounts = computed(() => {
   const counts: Record<number, number> = {};
 
   allPosts.value.forEach((post) => {
-    const problemId = post.Problem_id;
+    // 處理 Problem_Id 欄位：後端可能返回 Problem_Id 或 Problem_id
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const problemId = (post as any).Problem_Id || post.Problem_id;
     if (problemId) {
       counts[problemId] = (counts[problemId] || 0) + 1;
     }

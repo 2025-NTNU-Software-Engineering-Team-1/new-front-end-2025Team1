@@ -6,6 +6,7 @@ import PostCard from "@/components/Discussion/PostCard.vue";
 import API from "@/models/api";
 import type {
   DiscussionPost,
+  DiscussionProblem,
   // GetPostsResponse,
   // SearchPostsResponse,
   // GetProblemMetaResponse,
@@ -18,6 +19,7 @@ const problemId = route.params.problemId as string;
 
 const query = ref("");
 const posts = ref<DiscussionPost[]>([]);
+const problems = ref<DiscussionProblem[]>([]);
 const loading = ref(true);
 const error = ref<string>("");
 const problemName = ref<string>("");
@@ -27,13 +29,39 @@ const problemMeta = ref<{
   Code_Allowed: boolean;
 } | null>(null);
 
-// 分� �相關
+// 分頁相關
 const pagination = ref<PaginationInfo>({
   page: 1,
   limit: 20,
   total: 0,
   totalPages: 0,
 });
+
+// 載入題目列表
+const loadProblems = async () => {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const response: any = await API.Discussion.getProblems({ Limit: 100 });
+    const status = response.data?.Status;
+    const problemsData = response.data?.Problems;
+
+    if (status === "OK") {
+      problems.value = problemsData || [];
+      console.log("[loadProblems] Loaded problems:", problems.value.length, problems.value);
+    }
+  } catch (err) {
+    console.error("Error loading problems:", err);
+  }
+};
+
+// 根據 Problem_Id 獲取題目名稱
+const getProblemName = (problemId?: string): string | undefined => {
+  if (!problemId) return undefined;
+  console.log("[getProblemName] Looking for problemId:", problemId, "in", problems.value.length, "problems");
+  const problem = problems.value.find((p) => p.Problem_Id.toString() === problemId.toString());
+  console.log("[getProblemName] Found:", problem);
+  return problem?.Problem_Name;
+};
 
 // 載入題目相關貼文
 const loadProblemPosts = async () => {
@@ -147,20 +175,38 @@ const searchProblemPosts = async () => {
   }
 };
 
-// 轉換貼文資料� �式
+// 轉換貼文資料以符合 PostCard 需求
 const transformedPosts = computed(() => {
-  return posts.value.map((post) => ({
-    id: post.Post_Id.toString(),
-    author: post.Author,
-    time: post.Created_Time,
-    title: post.Title,
-    excerpt: "", // API 沒有提供摘要
-    likes: post.Like_Count,
-    comments: post.Reply_Count,
-    isPinned: post.Is_Pinned,
-    isSolved: post.Is_Solved ?? false,
-    isClosed: post.Is_Closed ?? false,
-  }));
+  return posts.value.map((post) => {
+    // 處理 Author 欄位：可能是字串或物件
+    let authorName: string;
+    if (typeof post.Author === "object" && post.Author !== null) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      authorName = (post.Author as any).displayedName || (post.Author as any).username || "Unknown";
+    } else {
+      authorName = typeof post.Author === "string" ? post.Author : "Unknown";
+    }
+
+    // 處理 Problem_Id 欄位：後端可能返回 Problem_Id 或 Problem_id
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const postProblemId = (post as any).Problem_Id || post.Problem_id;
+    console.log("[transformedPosts] Post:", post.Post_Id, "problemId:", postProblemId);
+
+    return {
+      id: post.Post_Id.toString(),
+      author: authorName,
+      time: post.Created_Time,
+      title: post.Title,
+      excerpt: "", // API 沒有提供摘要
+      likes: post.Like_Count,
+      comments: post.Reply_Count,
+      isPinned: post.Is_Pinned,
+      isSolved: post.Is_Solved ?? false,
+      isClosed: post.Is_Closed ?? false,
+      problemId: postProblemId,
+      problemName: getProblemName(postProblemId),
+    };
+  });
 });
 
 // 處理搜尋
@@ -180,7 +226,8 @@ watch(
   },
 );
 
-onMounted(() => {
+onMounted(async () => {
+  await loadProblems();
   loadProblemPosts();
   loadProblemMeta();
 });
@@ -206,32 +253,6 @@ onMounted(() => {
             <router-link class="btn btn-primary" :to="`/course/${route.params.name}/discussion/Post`">
               <i-uil-plus /> {{ t("discussion.post") }}
             </router-link>
-          </div>
-
-          <div class="flex items-start justify-between">
-            <div>
-              <h1 class="mb-2 text-2xl font-bold">{{ problemName }}</h1>
-              <div class="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
-                <span>ID: {{ problemId }}</span>
-                <span>{{ posts.length }}{{ t("discussion.problems.discussionCount") }}</span>
-              </div>
-              <div class="mt-2 flex items-center gap-2">
-                <span v-if="problemMeta?.Code_Allowed" class="badge badge-success badge-sm">
-                  ✓ {{ t("discussion.contentallowed.allowed") }}
-                </span>
-                <span v-else class="badge badge-warning badge-sm">
-                  � {{ t("discussion.contentallowed.not_allowed") }}
-                </span>
-              </div>
-              <div v-if="problemMeta?.Deadline" class="mt-2 text-sm text-gray-500">
-                📅
-                {{
-                  t("discussion.contentallowed.deadline", {
-                    deadline: new Date(problemMeta.Deadline).toLocaleString("zh-TW"),
-                  })
-                }}
-              </div>
-            </div>
           </div>
         </div>
 
@@ -278,7 +299,7 @@ onMounted(() => {
         <div v-else-if="transformedPosts.length > 0" class="space-y-4">
           <template v-for="post in transformedPosts" :key="post.id">
             <router-link :to="`/course/${route.params.name}/discussion/${post.id}`" class="block">
-              <PostCard :post="post" />
+              <PostCard :post="post" :course-name="route.params.name as string" />
             </router-link>
           </template>
         </div>

@@ -12,6 +12,7 @@ const submissionsPage = { path: `/course/${route.params.name}/submissions`, text
 //const membersPage = { path: `/course/${route.params.name}/members`, text: "Members" };
 
 const discussionPage = { path: `/course/${route.params.name}/discussion`, text: "Discussion" };
+const aiSettingPage = { path: `/course/${route.params.name}/aisetting`, text: "AI Setting" };
 const items: ComputedRef<{ [k: string | symbol]: { path: null | string; text: string }[] }> = computed(
   () => ({
     "course-name-announcements": [{ path: null, text: "Announcements" }],
@@ -23,7 +24,7 @@ const items: ComputedRef<{ [k: string | symbol]: { path: null | string; text: st
     "course-name-homeworks-id-edit": [homeworksPage, { path: null, text: `Edit ${route.params.id}` }],
     "course-name-homeworks-id-stats": [homeworksPage, { path: null, text: `Stats of ${route.params.id}` }],
     "course-name-problems": [{ path: null, text: "Problems" }],
-    "course-name-problems-new": [problemsPage, { path: null, text: "New Problem" }],
+    "course-name-problems-new": [problemsPage, { path: null, text: "New" }],
     "course-name-problem-id": [problemsPage, { path: null, text: `${route.params.id}` }],
     "course-name-problem-id-edit": [problemsPage, { path: null, text: `Edit ${route.params.id}` }],
     "course-name-problem-id-stats": [
@@ -102,6 +103,10 @@ const items: ComputedRef<{ [k: string | symbol]: { path: null | string; text: st
       { path: null, text: `Problem ${route.params.problemId}` },
     ],
     "course-name-discussion-id": [discussionPage, { path: null, text: `Post ${route.params.id}` }],
+    "course-name-aisetting": [{ path: null, text: "AI Setting" }],
+    "course-name-aisetting-setup": [aiSettingPage, { path: null, text: "Setup" }],
+    "course-name-aisetting-usage": [aiSettingPage, { path: null, text: "Usage" }],
+    "course-name-problem-new": [problemsPage, { path: null, text: "New" }],
   }),
 );
 </script>

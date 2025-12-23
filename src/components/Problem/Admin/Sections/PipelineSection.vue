@@ -334,6 +334,44 @@ function isTeacherFileAllowed(file: File | null): boolean {
   return allowed.some((ext) => name.endsWith(ext));
 }
 
+//
+
+type LibSection = "syntax" | "imports" | "headers" | "functions";
+type LibMode = "whitelist" | "blacklist";
+
+function getLibList(section: LibSection, mode: LibMode): string[] {
+  ensurePipeline();
+  return problem.value.pipeline!.staticAnalysis!.libraryRestrictions![mode]![section] || [];
+}
+
+function setLibList(section: LibSection, mode: LibMode, next: string[]) {
+  ensurePipeline();
+  const cleaned = Array.from(new Set((next || []).map((s) => String(s).trim()).filter(Boolean)));
+  problem.value.pipeline!.staticAnalysis!.libraryRestrictions![mode]![section] = cleaned;
+}
+
+function getBackendOptions(section: LibSection): string[] {
+  if (section === "syntax") return defaultSyntaxOptions;
+  if (section === "imports") return libraryOptions.value.imports || [];
+  if (section === "headers") return libraryOptions.value.headers || [];
+  return libraryOptions.value.functions || [];
+}
+
+function selectAllBackend(section: LibSection, mode: LibMode) {
+  const current = getLibList(section, mode);
+  const backend = getBackendOptions(section);
+  setLibList(section, mode, [...current, ...backend]);
+}
+
+function clearSection(section: LibSection, mode: LibMode) {
+  setLibList(section, mode, []);
+}
+
+function getCandidates(section: LibSection, mode: LibMode) {
+  const selected = new Set(getLibList(section, mode));
+  return getBackendOptions(section).filter((x) => !selected.has(x));
+}
+
 // Asset Helper
 const assetPaths = computed<Record<string, string>>(
   () => ((problem.value.config as any)?.assetPaths as Record<string, string>) || {},
@@ -401,47 +439,78 @@ onMounted(async () => {
         v-if="problem.pipeline!.staticAnalysis!.libraryRestrictions!.enabled"
         class="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2"
       >
-        <!-- ===== 上排左邊：syntax ===== -->
+        <!-- ===== Syntax Restrictions ===== -->
         <div class="rounded-lg border border-gray-400 p-3">
           <div class="mb-3 flex items-center justify-between">
             <h4 class="text font-medium">Syntax Restrictions</h4>
-            <!-- 滑動開關 -->
-            <div class="mode-switcher">
-              <div class="mode-switcher-container">
-                <div
-                  class="mode-switcher-slider"
-                  :class="{ 'slider-blacklist': syntaxMode === 'blacklist' }"
-                ></div>
-                <button
-                  class="mode-switcher-option"
-                  :class="{ active: syntaxMode === 'whitelist' }"
-                  @click="syntaxMode = 'whitelist'"
-                >
-                  <span>Whitelist</span>
-                </button>
-                <button
-                  class="mode-switcher-option"
-                  :class="{ active: syntaxMode === 'blacklist' }"
-                  @click="syntaxMode = 'blacklist'"
-                >
-                  <span>Blacklist</span>
-                </button>
+
+            <div class="flex items-center gap-2">
+              <!-- Select all / Clear -->
+              <button
+                type="button"
+                class="btn btn-xs"
+                @click="selectAllBackend('syntax', syntaxMode)"
+                :disabled="getBackendOptions('syntax').length === 0"
+              >
+                Select all
+              </button>
+              <button type="button" class="btn btn-xs btn-ghost" @click="clearSection('syntax', syntaxMode)">
+                Clear
+              </button>
+
+              <!-- mode switcher -->
+              <div class="mode-switcher">
+                <div class="mode-switcher-container">
+                  <div
+                    class="mode-switcher-slider"
+                    :class="{ 'slider-blacklist': syntaxMode === 'blacklist' }"
+                  ></div>
+                  <button
+                    class="mode-switcher-option"
+                    :class="{ active: syntaxMode === 'whitelist' }"
+                    @click="syntaxMode = 'whitelist'"
+                  >
+                    <span>Whitelist</span>
+                  </button>
+                  <button
+                    class="mode-switcher-option"
+                    :class="{ active: syntaxMode === 'blacklist' }"
+                    @click="syntaxMode = 'blacklist'"
+                  >
+                    <span>Blacklist</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
 
+          <div class="mb-2 flex flex-wrap gap-2">
+            <template v-for="opt in getLibList('syntax', syntaxMode)" :key="`syntax-selected-${opt}`">
+              <button
+                class="btn btn-xs"
+                :class="syntaxMode === 'whitelist' ? 'btn-info' : 'btn-error'"
+                @click="
+                  toggleItem(problem.pipeline!.staticAnalysis!.libraryRestrictions![syntaxMode]!.syntax, opt)
+                "
+              >
+                {{ opt }}
+              </button>
+            </template>
+          </div>
+
+          <div class="my-2">
+            <MultiStringInput
+              v-model="problem.pipeline!.staticAnalysis!.libraryRestrictions![syntaxMode]!.syntax"
+              placeholder="Add syntax keyword"
+              :badge-class="syntaxMode === 'whitelist' ? 'badge-info' : 'badge-error'"
+            />
+          </div>
+
           <div class="mt-2 flex flex-wrap gap-2">
             <button
-              v-for="opt in defaultSyntaxOptions"
-              :key="`syntax-${opt}`"
+              v-for="opt in getCandidates('syntax', syntaxMode)"
+              :key="`syntax-candidate-${opt}`"
               class="btn btn-xs"
-              :class="
-                problem.pipeline!.staticAnalysis!.libraryRestrictions![syntaxMode]!.syntax.includes(opt)
-                  ? syntaxMode === 'whitelist'
-                    ? 'btn-info'
-                    : 'btn-error'
-                  : ''
-              "
               @click="
                 toggleItem(problem.pipeline!.staticAnalysis!.libraryRestrictions![syntaxMode]!.syntax, opt)
               "
@@ -449,19 +518,11 @@ onMounted(async () => {
               {{ opt }}
             </button>
           </div>
-
-          <div class="mt-2">
-            <MultiStringInput
-              v-model="problem.pipeline!.staticAnalysis!.libraryRestrictions![syntaxMode]!.syntax"
-              placeholder="Add syntax keyword"
-              :badge-class="syntaxMode === 'whitelist' ? 'badge-info' : 'badge-error'"
-            />
-          </div>
         </div>
 
-        <!-- ===== 上排右邊：imports ===== -->
+        <!-- ===== Imports Restrictions ===== -->
         <div class="relative rounded-lg border border-gray-400 p-3">
-          <!-- 禁用遮罩提示 -->
+          <!-- disable overlay -->
           <div
             v-if="!allowImports"
             class="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-gray-900/80 backdrop-blur-sm"
@@ -475,65 +536,96 @@ onMounted(async () => {
 
           <div class="mb-3 flex items-center justify-between">
             <h4 class="text font-medium">Imports Restrictions</h4>
-            <!-- 滑動開關 -->
-            <div class="mode-switcher">
-              <div class="mode-switcher-container">
-                <div
-                  class="mode-switcher-slider"
-                  :class="{ 'slider-blacklist': importMode === 'blacklist' }"
-                ></div>
-                <button
-                  class="mode-switcher-option"
-                  :class="{ active: importMode === 'whitelist' }"
-                  @click="importMode = 'whitelist'"
-                  :disabled="!allowImports"
-                >
-                  <span>Whitelist</span>
-                </button>
-                <button
-                  class="mode-switcher-option"
-                  :class="{ active: importMode === 'blacklist' }"
-                  @click="importMode = 'blacklist'"
-                  :disabled="!allowImports"
-                >
-                  <span>Blacklist</span>
-                </button>
+
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                class="btn btn-xs"
+                @click="selectAllBackend('imports', importMode)"
+                :disabled="!allowImports || getBackendOptions('imports').length === 0"
+              >
+                Select all
+              </button>
+              <button
+                type="button"
+                class="btn btn-xs btn-ghost"
+                @click="clearSection('imports', importMode)"
+                :disabled="!allowImports"
+              >
+                Clear
+              </button>
+
+              <!-- mode switcher -->
+              <div class="mode-switcher">
+                <div class="mode-switcher-container">
+                  <div
+                    class="mode-switcher-slider"
+                    :class="{ 'slider-blacklist': importMode === 'blacklist' }"
+                  ></div>
+                  <button
+                    class="mode-switcher-option"
+                    :class="{ active: importMode === 'whitelist' }"
+                    @click="importMode = 'whitelist'"
+                    :disabled="!allowImports"
+                  >
+                    <span>Whitelist</span>
+                  </button>
+                  <button
+                    class="mode-switcher-option"
+                    :class="{ active: importMode === 'blacklist' }"
+                    @click="importMode = 'blacklist'"
+                    :disabled="!allowImports"
+                  >
+                    <span>Blacklist</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
 
-          <div v-if="allowImports" class="mt-2 flex flex-wrap gap-2">
-            <button
-              v-for="opt in libraryOptions.imports"
-              :key="`import-${opt}`"
-              class="btn btn-xs"
-              :class="
-                problem.pipeline!.staticAnalysis!.libraryRestrictions![importMode]!.imports.includes(opt)
-                  ? importMode === 'whitelist'
-                    ? 'btn-info'
-                    : 'btn-error'
-                  : ''
-              "
-              @click="
-                toggleItem(problem.pipeline!.staticAnalysis!.libraryRestrictions![importMode]!.imports, opt)
-              "
-            >
-              {{ opt }}
-            </button>
-          </div>
+          <template v-if="allowImports">
+            <div class="mb-2 flex flex-wrap gap-2">
+              <template v-for="opt in getLibList('imports', importMode)" :key="`import-selected-${opt}`">
+                <button
+                  class="btn btn-xs"
+                  :class="importMode === 'whitelist' ? 'btn-info' : 'btn-error'"
+                  @click="
+                    toggleItem(
+                      problem.pipeline!.staticAnalysis!.libraryRestrictions![importMode]!.imports,
+                      opt,
+                    )
+                  "
+                >
+                  {{ opt }}
+                </button>
+              </template>
+            </div>
 
-          <div v-if="allowImports" class="mt-2">
-            <MultiStringInput
-              v-model="problem.pipeline!.staticAnalysis!.libraryRestrictions![importMode]!.imports"
-              placeholder="Add import"
-              :badge-class="importMode === 'whitelist' ? 'badge-info' : 'badge-error'"
-            />
-          </div>
+            <div class="my-2">
+              <MultiStringInput
+                v-model="problem.pipeline!.staticAnalysis!.libraryRestrictions![importMode]!.imports"
+                placeholder="Add import"
+                :badge-class="importMode === 'whitelist' ? 'badge-info' : 'badge-error'"
+              />
+            </div>
+
+            <div class="mt-2 flex flex-wrap gap-2">
+              <button
+                v-for="opt in getCandidates('imports', importMode)"
+                :key="`import-candidate-${opt}`"
+                class="btn btn-xs"
+                @click="
+                  toggleItem(problem.pipeline!.staticAnalysis!.libraryRestrictions![importMode]!.imports, opt)
+                "
+              >
+                {{ opt }}
+              </button>
+            </div>
+          </template>
         </div>
 
-        <!-- ===== 下排左邊：headers ===== -->
+        <!-- ===== Headers Restrictions ===== -->
         <div class="relative rounded-lg border border-gray-400 p-3">
-          <!-- 禁用遮罩提示 -->
           <div
             v-if="!allowHeaders"
             class="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-gray-900/80 backdrop-blur-sm"
@@ -547,103 +639,171 @@ onMounted(async () => {
 
           <div class="mb-3 flex items-center justify-between">
             <h4 class="text font-medium">Headers Restrictions</h4>
-            <!-- 滑動開關 -->
-            <div class="mode-switcher">
-              <div class="mode-switcher-container">
-                <div
-                  class="mode-switcher-slider"
-                  :class="{ 'slider-blacklist': headerMode === 'blacklist' }"
-                ></div>
-                <button
-                  class="mode-switcher-option"
-                  :class="{ active: headerMode === 'whitelist' }"
-                  @click="headerMode = 'whitelist'"
-                  :disabled="!allowHeaders"
-                >
-                  <span>Whitelist</span>
-                </button>
-                <button
-                  class="mode-switcher-option"
-                  :class="{ active: headerMode === 'blacklist' }"
-                  @click="headerMode = 'blacklist'"
-                  :disabled="!allowHeaders"
-                >
-                  <span>Blacklist</span>
-                </button>
+
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                class="btn btn-xs"
+                @click="selectAllBackend('headers', headerMode)"
+                :disabled="!allowHeaders || getBackendOptions('headers').length === 0"
+              >
+                Select all
+              </button>
+              <button
+                type="button"
+                class="btn btn-xs btn-ghost"
+                @click="clearSection('headers', headerMode)"
+                :disabled="!allowHeaders"
+              >
+                Clear
+              </button>
+
+              <div class="mode-switcher">
+                <div class="mode-switcher-container">
+                  <div
+                    class="mode-switcher-slider"
+                    :class="{ 'slider-blacklist': headerMode === 'blacklist' }"
+                  ></div>
+                  <button
+                    class="mode-switcher-option"
+                    :class="{ active: headerMode === 'whitelist' }"
+                    @click="headerMode = 'whitelist'"
+                    :disabled="!allowHeaders"
+                  >
+                    <span>Whitelist</span>
+                  </button>
+                  <button
+                    class="mode-switcher-option"
+                    :class="{ active: headerMode === 'blacklist' }"
+                    @click="headerMode = 'blacklist'"
+                    :disabled="!allowHeaders"
+                  >
+                    <span>Blacklist</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
 
-          <div v-if="allowHeaders" class="mt-2 flex flex-wrap gap-2">
-            <button
-              v-for="opt in libraryOptions.headers"
-              :key="`header-${opt}`"
-              class="btn btn-xs"
-              :class="
-                problem.pipeline!.staticAnalysis!.libraryRestrictions![headerMode]!.headers.includes(opt)
-                  ? headerMode === 'whitelist'
-                    ? 'btn-info'
-                    : 'btn-error'
-                  : ''
-              "
-              @click="
-                toggleItem(problem.pipeline!.staticAnalysis!.libraryRestrictions![headerMode]!.headers, opt)
-              "
-            >
-              {{ opt }}
-            </button>
-          </div>
+          <template v-if="allowHeaders">
+            <div class="mb-2 flex flex-wrap gap-2">
+              <template v-for="opt in getLibList('headers', headerMode)" :key="`header-selected-${opt}`">
+                <button
+                  class="btn btn-xs"
+                  :class="headerMode === 'whitelist' ? 'btn-info' : 'btn-error'"
+                  @click="
+                    toggleItem(
+                      problem.pipeline!.staticAnalysis!.libraryRestrictions![headerMode]!.headers,
+                      opt,
+                    )
+                  "
+                >
+                  {{ opt }}
+                </button>
+              </template>
+            </div>
 
-          <div v-if="allowHeaders" class="mt-2">
-            <MultiStringInput
-              v-model="problem.pipeline!.staticAnalysis!.libraryRestrictions![headerMode]!.headers"
-              placeholder="Add header"
-              :badge-class="headerMode === 'whitelist' ? 'badge-info' : 'badge-error'"
-            />
-          </div>
+            <div class="my-2">
+              <MultiStringInput
+                v-model="problem.pipeline!.staticAnalysis!.libraryRestrictions![headerMode]!.headers"
+                placeholder="Add header"
+                :badge-class="headerMode === 'whitelist' ? 'badge-info' : 'badge-error'"
+              />
+            </div>
+
+            <div class="mt-2 flex flex-wrap gap-2">
+              <button
+                v-for="opt in getCandidates('headers', headerMode)"
+                :key="`header-candidate-${opt}`"
+                class="btn btn-xs"
+                @click="
+                  toggleItem(problem.pipeline!.staticAnalysis!.libraryRestrictions![headerMode]!.headers, opt)
+                "
+              >
+                {{ opt }}
+              </button>
+            </div>
+          </template>
         </div>
 
-        <!-- ===== 下排右邊：functions ===== -->
+        <!-- ===== Functions Restrictions ===== -->
         <div class="rounded-lg border border-gray-400 p-3">
           <div class="mb-3 flex items-center justify-between">
             <h4 class="text font-medium">Functions Restrictions</h4>
-            <!-- 滑動開關 -->
-            <div class="mode-switcher">
-              <div class="mode-switcher-container">
-                <div
-                  class="mode-switcher-slider"
-                  :class="{ 'slider-blacklist': functionMode === 'blacklist' }"
-                ></div>
-                <button
-                  class="mode-switcher-option"
-                  :class="{ active: functionMode === 'whitelist' }"
-                  @click="functionMode = 'whitelist'"
-                >
-                  <span>Whitelist</span>
-                </button>
-                <button
-                  class="mode-switcher-option"
-                  :class="{ active: functionMode === 'blacklist' }"
-                  @click="functionMode = 'blacklist'"
-                >
-                  <span>Blacklist</span>
-                </button>
+
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                class="btn btn-xs"
+                @click="selectAllBackend('functions', functionMode)"
+                :disabled="getBackendOptions('functions').length === 0"
+              >
+                Select all
+              </button>
+              <button
+                type="button"
+                class="btn btn-xs btn-ghost"
+                @click="clearSection('functions', functionMode)"
+              >
+                Clear
+              </button>
+
+              <!-- mode switcher -->
+              <div class="mode-switcher">
+                <div class="mode-switcher-container">
+                  <div
+                    class="mode-switcher-slider"
+                    :class="{ 'slider-blacklist': functionMode === 'blacklist' }"
+                  ></div>
+                  <button
+                    class="mode-switcher-option"
+                    :class="{ active: functionMode === 'whitelist' }"
+                    @click="functionMode = 'whitelist'"
+                  >
+                    <span>Whitelist</span>
+                  </button>
+                  <button
+                    class="mode-switcher-option"
+                    :class="{ active: functionMode === 'blacklist' }"
+                    @click="functionMode = 'blacklist'"
+                  >
+                    <span>Blacklist</span>
+                  </button>
+                </div>
               </div>
             </div>
+          </div>
+
+          <div class="mb-2 flex flex-wrap gap-2">
+            <template v-for="opt in getLibList('functions', functionMode)" :key="`fn-selected-${opt}`">
+              <button
+                class="btn btn-xs"
+                :class="functionMode === 'whitelist' ? 'btn-info' : 'btn-error'"
+                @click="
+                  toggleItem(
+                    problem.pipeline!.staticAnalysis!.libraryRestrictions![functionMode]!.functions,
+                    opt,
+                  )
+                "
+              >
+                {{ opt }}
+              </button>
+            </template>
+          </div>
+
+          <div class="my-2">
+            <MultiStringInput
+              v-model="problem.pipeline!.staticAnalysis!.libraryRestrictions![functionMode]!.functions"
+              placeholder="Add function"
+              :badge-class="functionMode === 'whitelist' ? 'badge-info' : 'badge-error'"
+            />
           </div>
 
           <div class="mt-2 flex flex-wrap gap-2">
             <button
-              v-for="opt in libraryOptions.functions"
-              :key="`func-${opt}`"
+              v-for="opt in getCandidates('functions', functionMode)"
+              :key="`fn-candidate-${opt}`"
               class="btn btn-xs"
-              :class="
-                problem.pipeline!.staticAnalysis!.libraryRestrictions![functionMode]!.functions.includes(opt)
-                  ? functionMode === 'whitelist'
-                    ? 'btn-info'
-                    : 'btn-error'
-                  : ''
-              "
               @click="
                 toggleItem(
                   problem.pipeline!.staticAnalysis!.libraryRestrictions![functionMode]!.functions,
@@ -653,14 +813,6 @@ onMounted(async () => {
             >
               {{ opt }}
             </button>
-          </div>
-
-          <div class="mt-2">
-            <MultiStringInput
-              v-model="problem.pipeline!.staticAnalysis!.libraryRestrictions![functionMode]!.functions"
-              placeholder="Add function"
-              :badge-class="functionMode === 'whitelist' ? 'badge-info' : 'badge-error'"
-            />
           </div>
         </div>
       </div>

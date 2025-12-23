@@ -2,6 +2,7 @@
 import { ref, nextTick, onBeforeUnmount } from "vue";
 import { LAppDelegate } from "@/live2d/Framework/src/lappdelegate";
 import api from "@/models/api";
+import MarkdownRenderer from "./MarkdownRenderer.vue";
 
 // ------- Props：從外層傳進來課程 / 題目 / 使用者資訊 -------
 const props = defineProps<{
@@ -251,7 +252,7 @@ const typeAiMessage = (fullText: string, emotion?: string) => {
 
     scrollToBottom();
 
-    const thinkingDelay = 400; // ????????
+    const thinkingDelay = 400;
     const thinkingTimer = window.setTimeout(() => {
       const msgIndex = messages.value.findIndex((m) => m.id === id);
       if (msgIndex === -1) {
@@ -259,10 +260,9 @@ const typeAiMessage = (fullText: string, emotion?: string) => {
         return;
       }
 
-      const speed = 80; // ????
+      const speed = 90;
       let index = 0;
 
-      // ??????
       messages.value[msgIndex].phase = "typing";
 
       applyEmotion(emotion);
@@ -401,7 +401,6 @@ const requestAiReply = async (userText: string) => {
     isAwaitingReply.value = false;
   }
 };
-
 
 const pushUserMessage = (text: string) => {
   messages.value.push({
@@ -590,8 +589,8 @@ onBeforeUnmount(() => {
                     <div v-if="msg.phase === 'thinking'" class="typing-dots">
                       <span></span><span></span><span></span>
                     </div>
-                    <div v-else class="whitespace-pre-wrap leading-relaxed">
-                      {{ msg.displayText ?? msg.text }}
+                    <div v-else class="markdown-body leading-relaxed">
+                      <MarkdownRenderer :md="String(msg.displayText ?? msg.text)" />
                     </div>
                   </div>
 
@@ -633,7 +632,9 @@ onBeforeUnmount(() => {
                 <div
                   class="rounded-2xl rounded-tr-sm bg-gradient-to-r from-indigo-400 to-purple-500 px-3 py-2 text-sm text-white shadow-md"
                 >
-                  {{ msg.displayText ?? msg.text }}
+                  <div class="markdown-body text-white/95">
+                    <MarkdownRenderer :md="String(msg.displayText ?? msg.text)" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -784,6 +785,15 @@ onBeforeUnmount(() => {
 }
 .typing-dots span:nth-child(3) {
   animation-delay: 0.3s;
+}
+.markdown-body :deep(*) {
+  color: inherit;
+}
+.markdown-body :deep(p),
+.markdown-body :deep(ul),
+.markdown-body :deep(ol),
+.markdown-body :deep(pre) {
+  margin: 0.25rem 0;
 }
 .tts-btn {
   transition:

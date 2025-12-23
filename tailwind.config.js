@@ -5,7 +5,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        "primary": "hsl(var(--p) / <alpha-value>)",
+        primary: "hsl(var(--p) / <alpha-value>)",
         "primary-focus": "hsl(var(--pf) / <alpha-value>)",
         "primary-content": "hsl(var(--pc) / <alpha-value>)",
         "base-100": "hsl(var(--b1) / <alpha-value>)",

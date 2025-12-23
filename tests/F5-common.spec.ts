@@ -8,7 +8,7 @@ test.beforeEach(async ({ page, baseURL }) => {
 
 
 //001
-test.skip("Make a post", async ({ page }) => {
+test("Make a post", async ({ page }) => {
   //Get into the discussion page
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
@@ -31,7 +31,7 @@ test.skip("Make a post", async ({ page }) => {
 });
 
 //002
-test.skip("See the posts", async ({ page }) => {
+test("See the posts", async ({ page }) => {
   //Get into the discussion page
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
@@ -46,7 +46,7 @@ test.skip("See the posts", async ({ page }) => {
 });
 
 //003
-test.skip("Code", async ({ page }) => {
+test("Code", async ({ page }) => {
   //Get into the discussion page
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
@@ -56,7 +56,7 @@ test.skip("Code", async ({ page }) => {
   await page.getByRole("link", { name: "Post" , exact: true}).click();
   //Select
   await page.locator("select.select-bordered").nth(0).selectOption({ label: "Prob1" });
-  await page.locator("select.select-bordered").nth(2).selectOption({ label: "C++" });
+  await page.locator("select.select-bordered").nth(1).selectOption({ label: "C++" });
   await page.locator("input.input-bordered").nth(0).type("First Code");
   await page.locator("textarea.textarea-bordered").nth(0).type("```c++\n");
   const code = fs.readFileSync('./tests/add.cpp', 'utf-8');
@@ -84,7 +84,7 @@ test.skip("Code", async ({ page }) => {
 });
 
 //004
-test.skip("Search the posts", async ({ page }) => {
+test("Search the posts", async ({ page }) => {
   //Get into the discussion page
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
@@ -102,7 +102,7 @@ test.skip("Search the posts", async ({ page }) => {
 });
 
 //005
-test.skip("Sort the posts by Hot", async ({ page }) => {
+test("Sort the posts by Hot", async ({ page }) => {
   //Get into the discussion page
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
@@ -127,7 +127,7 @@ test.skip("Sort the posts by Hot", async ({ page }) => {
 });
 
 //006
-test.skip("Sort the posts by New", async ({ page }) => {
+test("Sort the posts by New", async ({ page }) => {
   //Get into the discussion page
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();
@@ -144,7 +144,7 @@ test.skip("Sort the posts by New", async ({ page }) => {
 });
 
 //007
-test.skip("Show the posts by Problem", async ({ page }) => {
+test("Show the posts by Problem", async ({ page }) => {
   //Get into the discussion page
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();

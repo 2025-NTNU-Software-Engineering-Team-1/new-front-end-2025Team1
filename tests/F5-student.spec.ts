@@ -7,7 +7,7 @@ test.beforeEach(async ({ page, baseURL }) => {
 });
 
 //010
-test.skip("Can't make a post with code bf deadline", async ({ page }) => {
+test("Can't make a post with code bf deadline", async ({ page }) => {
   //Get into the discussion page
   await page.getByRole("link", { name: "Course" }).click();
   await page.getByRole("link", { name: "meow" }).click();

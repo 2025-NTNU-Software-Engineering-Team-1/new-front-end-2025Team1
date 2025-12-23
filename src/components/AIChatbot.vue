@@ -84,6 +84,7 @@ const isOpen = ref(false);
 const showTrigger = ref(true);
 const draft = ref("");
 const live2dInited = ref(false);
+const isAwaitingReply = ref(false);
 
 const currentExpression = ref<string | null>(null);
 
@@ -223,75 +224,80 @@ const loadHistory = async () => {
 };
 
 const typeAiMessage = (fullText: string, emotion?: string) => {
-  const id = nextId++;
+  return new Promise<void>((resolve) => {
+    const id = nextId++;
+    const prevExpressionId = currentExpression.value ?? "F01";
+    let completed = false;
 
-  const prevExpressionId = currentExpression.value ?? "F01";
+    const finish = () => {
+      if (completed) return;
+      completed = true;
+      typingTimers.delete(id);
+      thinkingTimers.delete(id);
+      setLive2DTalking(false);
+      changeExpression(prevExpressionId ?? "F01");
+      resolve();
+    };
 
-  messages.value.push({
-    id,
-    from: "ai",
-    text: fullText,
-    displayText: "",
-    phase: "thinking",
-    emotion,
-    prevExpressionId,
-  });
+    messages.value.push({
+      id,
+      from: "ai",
+      text: fullText,
+      displayText: "",
+      phase: "thinking",
+      emotion,
+      prevExpressionId,
+    });
 
-  scrollToBottom();
+    scrollToBottom();
 
-  const thinkingDelay = 400; // 開始打字前的停� �
-  const thinkingTimer = window.setTimeout(() => {
-    const msgIndex = messages.value.findIndex((m) => m.id === id);
-    if (msgIndex === -1) return;
-
-    const speed = 80; // 打字速度
-    let index = 0;
-
-    // 進入打字階段
-    messages.value[msgIndex].phase = "typing";
-
-    applyEmotion(emotion);
-    setLive2DTalking(true);
-
-    const timer = window.setInterval(() => {
-      const idx = messages.value.findIndex((m) => m.id === id);
-      if (idx === -1) {
-        clearInterval(timer);
-        typingTimers.delete(id);
-
-        setLive2DTalking(false);
-        const brokenMsg = messages.value.find((m) => m.id === id);
-        const prev = brokenMsg?.prevExpressionId ?? "F01";
-        changeExpression(prev);
+    const thinkingDelay = 400; // ????????
+    const thinkingTimer = window.setTimeout(() => {
+      const msgIndex = messages.value.findIndex((m) => m.id === id);
+      if (msgIndex === -1) {
+        finish();
         return;
       }
 
-      index++;
-      const msg = messages.value[idx];
+      const speed = 80; // ????
+      let index = 0;
 
-      if (index <= fullText.length) {
-        msg.displayText = fullText.slice(0, index);
-      }
+      // ??????
+      messages.value[msgIndex].phase = "typing";
 
-      scrollToBottom();
+      applyEmotion(emotion);
+      setLive2DTalking(true);
 
-      if (index >= fullText.length) {
-        msg.phase = "done";
-        clearInterval(timer);
-        typingTimers.delete(id);
+      const timer = window.setInterval(() => {
+        const idx = messages.value.findIndex((m) => m.id === id);
+        if (idx === -1) {
+          clearInterval(timer);
+          finish();
+          return;
+        }
 
-        // 打完：嘴巴停＋表情切回原本（� �設 F01）
-        setLive2DTalking(false);
-        const prev = msg.prevExpressionId ?? "F01";
-        changeExpression(prev);
-      }
-    }, speed);
+        index++;
+        const msg = messages.value[idx];
 
-    typingTimers.set(id, timer);
-    thinkingTimers.delete(id);
-  }, thinkingDelay);
+        if (index <= fullText.length) {
+          msg.displayText = fullText.slice(0, index);
+        }
 
-  thinkingTimers.set(id, thinkingTimer);
+        scrollToBottom();
+
+        if (index >= fullText.length) {
+          msg.phase = "done";
+          clearInterval(timer);
+          finish();
+        }
+      }, speed);
+
+      typingTimers.set(id, timer);
+      thinkingTimers.delete(id);
+    }, thinkingDelay);
+
+    thinkingTimers.set(id, thinkingTimer);
+  });
 };
 
 // 測試用
@@ -313,6 +319,7 @@ const typeAiMessage = (fullText: string, emotion?: string) => {
 }; */
 
 const requestAiReply = async (userText: string) => {
+  isAwaitingReply.value = true;
   const thinkingId = nextId++;
   messages.value.push({
     id: thinkingId,
@@ -322,6 +329,7 @@ const requestAiReply = async (userText: string) => {
     phase: "thinking",
   });
   scrollToBottom();
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const extractPayload = (res: any) => {
     const a = res?.data;
@@ -347,15 +355,24 @@ const requestAiReply = async (userText: string) => {
     messages.value = messages.value.filter((m) => m.id !== thinkingId);
 
     if (!data.length) {
-      typeAiMessage("AI 沒有回傳內容，請稍後再試");
+      await typeAiMessage("AI 沒有回傳內容，請稍後再試");
       setLive2DTalking(false);
       setDefaultExpression();
       return;
     }
 
+    let emotion: string | undefined = undefined;
+    const parts: string[] = [];
+
     for (const item of data) {
-      typeAiMessage(item?.text ?? "", item?.emotion);
+      const t = String(item?.text ?? "").trim();
+      if (t) parts.push(t);
+      if (!emotion && item?.emotion) emotion = item.emotion;
     }
+
+    const mergedText = parts.join("\n\n").trim();
+
+    await typeAiMessage(mergedText || "AI 沒有回傳內容，請稍後再試", emotion);
 
     setLive2DTalking(false);
     setDefaultExpression();
@@ -380,8 +397,11 @@ const requestAiReply = async (userText: string) => {
 
     setLive2DTalking(false);
     setDefaultExpression();
+  } finally {
+    isAwaitingReply.value = false;
   }
 };
+
 
 const pushUserMessage = (text: string) => {
   messages.value.push({
@@ -397,6 +417,7 @@ const pushUserMessage = (text: string) => {
 };
 
 const send = () => {
+  if (isAwaitingReply.value) return;
   const text = draft.value.trim();
   if (!text) return;
 
@@ -405,6 +426,7 @@ const send = () => {
 };
 
 const sendExplain = () => {
+  if (isAwaitingReply.value) return;
   pushUserMessage("解釋這題");
 };
 
@@ -623,6 +645,7 @@ onBeforeUnmount(() => {
           >
             <button
               class="chat-icon-btn no-shift-btn absolute -top-8 right-6 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 px-3 py-1 text-xs font-semibold text-white shadow-md"
+              :disabled="isAwaitingReply"
               @click="sendExplain"
             >
               解釋這題
@@ -635,7 +658,7 @@ onBeforeUnmount(() => {
             />
             <button
               class="chat-icon-btn flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-r from-purple-400 to-indigo-400 text-white shadow-md"
-              :disabled="!draft.trim()"
+              :disabled="!draft.trim() || isAwaitingReply"
               @click="send"
             >
               <svg

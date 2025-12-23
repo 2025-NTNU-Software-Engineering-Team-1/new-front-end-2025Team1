@@ -467,7 +467,7 @@ onMounted(async () => {
             class="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-gray-900/80 backdrop-blur-sm"
           >
             <div class="px-4 text-center">
-              <i-uil-lock-alt class="text-warning mb-2 text-4xl" />
+              <i-uil-lock-alt class="mb-2 text-4xl text-warning" />
               <p class="text-sm font-medium text-gray-300">Imports Restrictions Disabled</p>
               <p class="mt-1 text-xs text-gray-400">Python language must be enabled to use this feature</p>
             </div>
@@ -539,7 +539,7 @@ onMounted(async () => {
             class="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-gray-900/80 backdrop-blur-sm"
           >
             <div class="px-4 text-center">
-              <i-uil-lock-alt class="text-warning mb-2 text-4xl" />
+              <i-uil-lock-alt class="mb-2 text-4xl text-warning" />
               <p class="text-sm font-medium text-gray-300">Headers Restrictions Disabled</p>
               <p class="mt-1 text-xs text-gray-400">C or C++ language must be enabled to use this feature</p>
             </div>
@@ -722,7 +722,7 @@ onMounted(async () => {
                   v-if="hasAsset('makefile') || problem.assets?.makefileZip"
                   class="flex items-center gap-2"
                 >
-                  <span class="badge badge-success badge-outline text-xs">Uploaded</span>
+                  <span class="badge badge-outline badge-success text-xs">Uploaded</span>
                   <a
                     v-if="hasAsset('makefile')"
                     :href="assetDownloadUrl('makefile') || '#'"
@@ -738,7 +738,7 @@ onMounted(async () => {
               <input
                 type="file"
                 accept=".zip"
-                class="file-input file-input-bordered file-input-sm w-56"
+                class="file-input-bordered file-input file-input-sm w-56"
                 :class="{ 'input-error': v$?.assets?.makefileZip?.$error }"
                 @change="
                   (e: Event) => {
@@ -781,7 +781,7 @@ onMounted(async () => {
                     v-if="hasAsset('teacher_file') || problem.assets?.teacherFile"
                     class="flex items-center gap-2"
                   >
-                    <span class="badge badge-success badge-outline text-xs">Uploaded</span>
+                    <span class="badge badge-outline badge-success text-xs">Uploaded</span>
                     <a
                       v-if="hasAsset('teacher_file')"
                       :href="assetDownloadUrl('teacher_file') || '#'"
@@ -797,7 +797,7 @@ onMounted(async () => {
                 <input
                   type="file"
                   :accept="teacherAllowedExtensions().join(',')"
-                  class="file-input file-input-bordered file-input-sm w-56"
+                  class="file-input-bordered file-input file-input-sm w-56"
                   :class="{ 'input-error': v$?.assets?.teacherFile?.$error }"
                   @change="
                     (e: Event) => {
@@ -849,7 +849,7 @@ onMounted(async () => {
               v-if="hasAsset('checker') || problem.assets?.customCheckerPy"
               class="flex items-center gap-2"
             >
-              <span class="badge badge-success badge-outline text-xs">Uploaded</span>
+              <span class="badge badge-outline badge-success text-xs">Uploaded</span>
               <a
                 v-if="hasAsset('checker')"
                 :href="assetDownloadUrl('checker') || '#'"
@@ -870,7 +870,7 @@ onMounted(async () => {
             <input
               type="file"
               accept=".py"
-              class="file-input file-input-bordered file-input-sm w-56"
+              class="file-input-bordered file-input file-input-sm w-56"
               :class="{ 'input-error': v$?.assets?.customCheckerPy?.$error }"
               :disabled="problem.pipeline!.executionMode === 'interactive'"
               @change="
@@ -912,7 +912,7 @@ onMounted(async () => {
           </label>
           <div class="flex items-center gap-2">
             <div v-if="hasAsset('scoring_script') || problem.assets?.scorePy" class="flex items-center gap-2">
-              <span class="badge badge-success badge-outline text-xs">Uploaded</span>
+              <span class="badge badge-outline badge-success text-xs">Uploaded</span>
               <a
                 v-if="hasAsset('scoring_script')"
                 :href="assetDownloadUrl('scoring_script') || '#'"
@@ -933,7 +933,7 @@ onMounted(async () => {
             <input
               type="file"
               accept=".py"
-              class="file-input file-input-bordered file-input-sm w-56"
+              class="file-input-bordered file-input file-input-sm w-56"
               :class="{ 'input-error': v$?.assets?.scorePy?.$error }"
               @change="
                 (e: Event) => {

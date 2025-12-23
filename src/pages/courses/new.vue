@@ -65,7 +65,7 @@ async function submit() {
           <input
             v-model="v$.course.$model"
             type="text"
-            :class="['input input-bordered w-full max-w-xs', v$.course.$error && 'input-error']"
+            :class="['input-bordered input w-full max-w-xs', v$.course.$error && 'input-error']"
           />
           <label class="label" v-show="v$.course.$error">
             <span class="label-text-alt text-error" v-text="v$.course.$errors[0]?.$message" />
@@ -79,7 +79,7 @@ async function submit() {
           <input
             v-model="v$.teacher.$model"
             type="text"
-            :class="['input input-bordered w-full max-w-xs', v$.teacher.$error && 'input-error']"
+            :class="['input-bordered input w-full max-w-xs', v$.teacher.$error && 'input-error']"
           />
           <label class="label" v-show="v$.teacher.$error">
             <span class="label-text-alt text-error" v-text="v$.teacher.$errors[0]?.$message" />

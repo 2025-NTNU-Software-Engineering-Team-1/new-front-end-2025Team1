@@ -170,7 +170,7 @@ watch(
     <label class="label">
       <span class="label-text">Test Data Zip</span>
       <div class="flex items-center gap-2">
-        <span v-if="hasBackendTestcase" class="badge badge-success badge-outline text-xs">
+        <span v-if="hasBackendTestcase" class="badge badge-outline badge-success text-xs">
           Current: {{ currentTaskLabel }}
         </span>
         <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
@@ -195,7 +195,7 @@ watch(
         <!-- 右側白底上傳區 -->
         <div
           class="textarea-bordered col-span-4 flex flex-col bg-base-100 p-4"
-          :class="[isDrag && 'border-accent border']"
+          :class="[isDrag && 'border border-accent']"
           @drop.prevent="problem.assets!.testdataZip = $event.dataTransfer!.files![0]"
           @dragover.prevent="isDrag = true"
           @dragleave="isDrag = false"
@@ -208,7 +208,7 @@ watch(
             <input
               type="file"
               accept=".zip"
-              class="file-input file-input-bordered file-input-sm w-full"
+              class="file-input-bordered file-input file-input-sm w-full"
               @change="
                 (e: Event) => {
                   const file = (e.target as HTMLInputElement).files?.[0];
@@ -245,14 +245,14 @@ watch(
       <div class="mt-2 grid grid-cols-1 gap-3 md:grid-cols-4">
         <div class="form-control">
           <label class="label"><span class="label-text">#Cases</span></label>
-          <input type="text" class="input input-bordered" :value="t.caseCount" readonly />
+          <input type="text" class="input-bordered input" :value="t.caseCount" readonly />
         </div>
 
         <div class="form-control">
           <label class="label"><span class="label-text">Score</span></label>
           <input
             type="number"
-            class="input input-bordered"
+            class="input-bordered input"
             :value="t.taskScore"
             @input="
               problem.testCaseInfo.tasks[i].taskScore = Number(($event.target as HTMLInputElement).value)
@@ -264,7 +264,7 @@ watch(
           <label class="label"><span class="label-text">Memory limit (KB)</span></label>
           <input
             type="number"
-            class="input input-bordered"
+            class="input-bordered input"
             :value="t.memoryLimit"
             @input="
               problem.testCaseInfo.tasks[i].memoryLimit = Number(($event.target as HTMLInputElement).value)
@@ -276,7 +276,7 @@ watch(
           <label class="label"><span class="label-text">Time limit (ms)</span></label>
           <input
             type="number"
-            class="input input-bordered"
+            class="input-bordered input"
             :value="t.timeLimit"
             @input="
               problem.testCaseInfo.tasks[i].timeLimit = Number(($event.target as HTMLInputElement).value)

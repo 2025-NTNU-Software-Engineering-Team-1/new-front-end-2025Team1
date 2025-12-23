@@ -74,10 +74,10 @@ const closeConfirmDialog = () => {
           d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"
         />
       </svg>
-      <div v-else class="loading-spinner loading-xs loading"></div>
+      <div v-else class="loading loading-spinner loading-xs"></div>
     </label>
 
-    <ul tabindex="0" class="dropdown-content menu rounded-box z-50 w-32 bg-base-100 p-2 shadow">
+    <ul tabindex="0" class="dropdown-content menu z-50 w-32 rounded-box bg-base-100 p-2 shadow">
       <!-- 編輯回覆 -->
       <li v-if="isAuthor">
         <a class="text-xs">
@@ -92,7 +92,7 @@ const closeConfirmDialog = () => {
 
       <!-- 刪除回覆 -->
       <li v-if="canDelete">
-        <a @click="handleDelete" class="text-error text-xs">
+        <a @click="handleDelete" class="text-xs text-error">
           <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" clip-rule="evenodd" />
             <path
@@ -116,7 +116,7 @@ const closeConfirmDialog = () => {
         </div>
         <div class="modal-action">
           <button class="btn btn-error" @click="confirmDelete" :disabled="loading">
-            <span v-if="loading" class="loading-spinner loading-sm loading"></span>
+            <span v-if="loading" class="loading loading-spinner loading-sm"></span>
             {{ $t("discussion.component.reply.delete_confirm") }}
           </button>
           <button class="btn btn-ghost" @click="closeConfirmDialog" :disabled="loading">

@@ -14,7 +14,7 @@ const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
   <div class="form-control w-full">
     <label class="label"><span class="label-text">Description of problem</span></label>
     <textarea
-      :class="['textarea textarea-bordered h-24', v$.description.description.$error && 'textarea-error']"
+      :class="['textarea-bordered textarea h-24', v$.description.description.$error && 'textarea-error']"
       :value="problem.description.description"
       @input="
         $emit('update', 'description', {
@@ -31,7 +31,7 @@ const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
   <div class="form-control mt-2 w-full">
     <label class="label"><span class="label-text">Description of Input</span></label>
     <textarea
-      :class="['textarea textarea-bordered h-24', v$.description.input.$error && 'textarea-error']"
+      :class="['textarea-bordered textarea h-24', v$.description.input.$error && 'textarea-error']"
       :value="problem.description.input"
       @input="
         $emit('update', 'description', {
@@ -48,7 +48,7 @@ const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
   <div class="form-control mt-2 w-full">
     <label class="label"><span class="label-text">Description of Output</span></label>
     <textarea
-      :class="['textarea textarea-bordered h-24', v$.description.output.$error && 'textarea-error']"
+      :class="['textarea-bordered textarea h-24', v$.description.output.$error && 'textarea-error']"
       :value="problem.description.output"
       @input="
         $emit('update', 'description', {
@@ -63,10 +63,10 @@ const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
   </div>
 
   <div class="col-span-2 mt-2 flex w-full">
-    <div class="border-error mr-2 rounded border p-2" v-show="v$.description.sampleInput.$invalid">
+    <div class="mr-2 rounded border border-error p-2" v-show="v$.description.sampleInput.$invalid">
       Input {{ v$.description.sampleInput.$silentErrors[0]?.$message }}
     </div>
-    <div class="border-error rounded border p-2" v-show="v$.description.sampleOutput.$invalid">
+    <div class="rounded border border-error p-2" v-show="v$.description.sampleOutput.$invalid">
       Output {{ v$.description.sampleOutput.$silentErrors[0]?.$message }}
     </div>
   </div>
@@ -79,7 +79,7 @@ const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
           <span class="label-text">Examples - Input {{ no }}</span>
         </label>
         <textarea
-          class="textarea textarea-bordered h-24"
+          class="textarea-bordered textarea h-24"
           :value="problem.description.sampleInput[i]"
           @input="
             $emit('update', 'description', {
@@ -100,7 +100,7 @@ const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
           <span class="label-text">Examples - Output {{ no }}</span>
         </label>
         <textarea
-          class="textarea textarea-bordered h-24"
+          class="textarea-bordered textarea h-24"
           :value="problem.description.sampleOutput[i]"
           @input="
             $emit('update', 'description', {
@@ -151,7 +151,7 @@ const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
   <div class="form-control mt-2 w-full">
     <label class="label"><span class="label-text">Hint</span></label>
     <textarea
-      :class="['textarea textarea-bordered h-24', v$.description.hint.$error && 'textarea-error']"
+      :class="['textarea-bordered textarea h-24', v$.description.hint.$error && 'textarea-error']"
       :value="problem.description.hint"
       @input="
         $emit('update', 'description', {

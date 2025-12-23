@@ -382,7 +382,7 @@ async function submit() {
               type="file"
               accept=".zip"
               @change="form.zip = ($event.target as HTMLInputElement).files?.[0] || null"
-              class="file-input file-input-bordered"
+              class="file-input-bordered file-input"
             />
             <div class="mt-2" v-if="form.zip">
               <span class="mr-2">{{ form.zip.name }}</span>
@@ -418,7 +418,7 @@ async function submit() {
             </label>
             <select
               v-model="(v$ as any).lang.$model"
-              :class="['select select-bordered', (v$ as any).lang.$error && 'input-error']"
+              :class="['select-bordered select', (v$ as any).lang.$error && 'input-error']"
             >
               <option disabled :value="-1">{{ t("course.problem.submit.lang.select") }}</option>
               <option v-for="{ text, value } in langOptions" :key="value" :value="value">{{ text }}</option>

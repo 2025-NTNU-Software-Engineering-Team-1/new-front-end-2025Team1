@@ -15,7 +15,7 @@ defineProps<Props>();
 </script>
 
 <template>
-  <div class="collapse-arrow rounded-box collapse bg-base-200">
+  <div class="collapse collapse-arrow rounded-box bg-base-200">
     <input type="checkbox" class="peer" />
     <div class="collapse-title bg-base-200 text-base">
       <div class="flex flex-col">
@@ -61,7 +61,7 @@ defineProps<Props>();
           <div class="stat-value text-lg">
             <div class="tooltip" data-tip="Stats">
               <router-link
-                class="btn btn-circle btn-ghost btn-sm mr-1"
+                class="btn btn-ghost btn-sm btn-circle mr-1"
                 :to="`/course/${$route.params.name}/problem/${id}/stats`"
               >
                 <i-uil-chart-line class="lg:h-5 lg:w-5" />
@@ -69,7 +69,7 @@ defineProps<Props>();
             </div>
             <div class="tooltip" data-tip="Copycat">
               <router-link
-                class="btn btn-circle btn-ghost btn-sm mr-1"
+                class="btn btn-ghost btn-sm btn-circle mr-1"
                 :to="`/course/${$route.params.name}/problem/${id}/copycat`"
               >
                 <i-uil-file-exclamation-alt class="lg:h-5 lg:w-5" />
@@ -77,7 +77,7 @@ defineProps<Props>();
             </div>
             <div class="tooltip" data-tip="Edit">
               <router-link
-                class="btn btn-circle btn-ghost btn-sm"
+                class="btn btn-ghost btn-sm btn-circle"
                 :to="`/course/${$route.params.name}/problem/${id}/edit`"
               >
                 <i-uil-edit class="lg:h-5 lg:w-5" />

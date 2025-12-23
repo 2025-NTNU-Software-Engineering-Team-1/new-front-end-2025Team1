@@ -128,7 +128,7 @@ async function submit() {
             <label class="label">
               <span class="label-text">{{ $t("course.members.sortBy") }}</span>
             </label>
-            <select v-model="sortBy" class="select select-bordered w-full max-w-xs">
+            <select v-model="sortBy" class="select-bordered select w-full max-w-xs">
               <option :value="MemberTableColumn.USERNAME">Username</option>
               <option :value="MemberTableColumn.DISPLAYED_NAME">Display Name</option>
               <option :value="MemberTableColumn.ROLE">Role</option>

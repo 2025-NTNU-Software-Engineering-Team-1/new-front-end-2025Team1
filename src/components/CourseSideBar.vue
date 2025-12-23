@@ -45,7 +45,7 @@ const navs = [
 </script>
 
 <template>
-  <ul v-if="displayType === 'side'" class="menu menu-compact lg:menu-normal w-40 bg-base-100 p-2">
+  <ul v-if="displayType === 'side'" class="menu-compact lg:menu-normal menu w-40 bg-base-100 p-2">
     <li
       v-for="{ name, path } in navs"
       :class="[
@@ -59,7 +59,7 @@ const navs = [
     <div class="tabs mx-auto w-max">
       <template v-for="{ name, path } in navs">
         <a
-          class="tab tab-bordered h-10 w-32"
+          class="tab-bordered tab h-10 w-32"
           :class="{
             'tab-active': $route.path === `/course/${$route.params.name}${path}`,
           }"

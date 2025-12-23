@@ -96,7 +96,7 @@ async function login() {
               type="text"
               name="username"
               :placeholder="$t('components.loginSection.placeholder.username')"
-              :class="['input input-bordered', v$.username.$error && 'input-error']"
+              :class="['input-bordered input', v$.username.$error && 'input-error']"
             />
             <label class="label" v-show="v$.username.$error">
               <span class="label-text-alt text-error" v-text="v$.username.$errors[0]?.$message" />
@@ -111,11 +111,11 @@ async function login() {
               type="password"
               name="password"
               :placeholder="$t('components.loginSection.placeholder.pw')"
-              :class="['input input-bordered', v$.password.$error && 'input-error']"
+              :class="['input-bordered input', v$.password.$error && 'input-error']"
               @keydown.enter="login"
             />
             <label class="label flex-row-reverse">
-              <a href="/password_reset" class="link link-hover label-text-alt">{{
+              <a href="/password_reset" class="label-text-alt link link-hover">{{
                 $t("components.loginSection.forgot")
               }}</a>
               <span

@@ -380,7 +380,7 @@ function downloadModalJson() {
 
             <div v-if="testResult?.status === SUBMISSION_STATUS_CODE.COMPILE_ERROR">
               <div class="card-title md:text-xl lg:text-2xl">
-                <i-uil-exclamation-circle class="text-error mr-2" />
+                <i-uil-exclamation-circle class="mr-2 text-error" />
                 Compilation Error
               </div>
               <div class="my-4" />
@@ -519,7 +519,7 @@ function downloadModalJson() {
   <!-- Detail Modal -->
   <ui-dialog v-model="isDetailModalOpen">
     <template #title>
-      <div class="rounded-t-box -m-6 bg-primary p-6 text-primary-content">
+      <div class="-m-6 rounded-t-box bg-primary p-6 text-primary-content">
         {{ currentDetailData?.title }}
       </div>
     </template>

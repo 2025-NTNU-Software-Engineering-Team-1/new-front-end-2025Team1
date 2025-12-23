@@ -120,7 +120,7 @@ const maxPage = computed(() => {
                   <td>
                     <div class="tooltip" data-tip="Stats">
                       <router-link
-                        class="btn btn-circle btn-ghost btn-sm mr-1"
+                        class="btn btn-ghost btn-sm btn-circle mr-1"
                         :to="`/course/${$route.params.name}/problem/${problemId}/stats`"
                       >
                         <i-uil-chart-line class="lg:h-5 lg:w-5" />
@@ -129,21 +129,21 @@ const maxPage = computed(() => {
                     <div class="tooltip" data-tip="Copycat">
                       <router-link
                         v-if="session.isAdmin"
-                        class="btn btn-circle btn-ghost btn-sm mr-1"
+                        class="btn btn-ghost btn-sm btn-circle mr-1"
                         :to="`/course/${$route.params.name}/problem/${problemId}/copycat`"
                       >
                         <i-uil-file-exclamation-alt class="lg:h-5 lg:w-5" />
                       </router-link>
                       <router-link
                         v-if="session.isTeacher"
-                        class="btn btn-circle btn-ghost btn-sm mr-1"
+                        class="btn btn-ghost btn-sm btn-circle mr-1"
                         :to="`/course/${$route.params.name}/problem/${problemId}/copycat`"
                       >
                         <i-uil-file-exclamation-alt class="lg:h-5 lg:w-5" />
                       </router-link>
                       <router-link
                         v-if="session.isTA"
-                        class="btn btn-circle btn-ghost btn-sm mr-1"
+                        class="btn btn-ghost btn-sm btn-circle mr-1"
                         :to="`/course/${$route.params.name}/problem/${problemId}/copycat`"
                       >
                         <i-uil-file-exclamation-alt class="lg:h-5 lg:w-5" />
@@ -152,7 +152,7 @@ const maxPage = computed(() => {
                     <div class="tooltip" data-tip="Copycat">
                       <router-link
                         v-if="session.isTeacher"
-                        class="btn btn-circle btn-ghost btn-sm mr-1"
+                        class="btn btn-ghost btn-sm btn-circle mr-1"
                         :to="`/course/${$route.params.name}/problem/${problemId}/copycat`"
                       >
                         <i-uil-file-exclamation-alt class="lg:h-5 lg:w-5" />
@@ -161,21 +161,21 @@ const maxPage = computed(() => {
                     <div class="tooltip" data-tip="Edit">
                       <router-link
                         v-if="session.isAdmin"
-                        class="btn btn-circle btn-ghost btn-sm"
+                        class="btn btn-ghost btn-sm btn-circle"
                         :to="`/course/${$route.params.name}/problem/${problemId}/edit`"
                       >
                         <i-uil-edit class="lg:h-5 lg:w-5" />
                       </router-link>
                       <router-link
                         v-if="session.isTeacher"
-                        class="btn btn-circle btn-ghost btn-sm"
+                        class="btn btn-ghost btn-sm btn-circle"
                         :to="`/course/${$route.params.name}/problem/${problemId}/edit`"
                       >
                         <i-uil-edit class="lg:h-5 lg:w-5" />
                       </router-link>
                       <router-link
                         v-if="session.isTA"
-                        class="btn btn-circle btn-ghost btn-sm"
+                        class="btn btn-ghost btn-sm btn-circle"
                         :to="`/course/${$route.params.name}/problem/${problemId}/edit`"
                       >
                         <i-uil-edit class="lg:h-5 lg:w-5" />
@@ -184,7 +184,7 @@ const maxPage = computed(() => {
                     <div class="tooltip" data-tip="Edit">
                       <router-link
                         v-if="session.isTeacher"
-                        class="btn btn-circle btn-ghost btn-sm"
+                        class="btn btn-ghost btn-sm btn-circle"
                         :to="`/course/${$route.params.name}/problem/${problemId}/edit`"
                       >
                         <i-uil-edit class="lg:h-5 lg:w-5" />

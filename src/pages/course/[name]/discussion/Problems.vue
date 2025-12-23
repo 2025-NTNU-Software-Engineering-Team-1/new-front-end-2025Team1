@@ -123,7 +123,7 @@ onMounted(async () => {
 
         <!-- Loading state -->
         <div v-if="loading" class="flex justify-center py-8">
-          <div class="loading-spinner loading-lg loading"></div>
+          <div class="loading loading-spinner loading-lg"></div>
         </div>
 
         <!-- Error state -->

@@ -101,7 +101,7 @@ function clearForm() {
           </tbody>
         </table>
         <div class="card-actions justify-start">
-          <button class="btn btn-outline btn-error mt-4" @click="logout">{{ t("profile.signOut") }}</button>
+          <button class="btn btn-error btn-outline mt-4" @click="logout">{{ t("profile.signOut") }}</button>
         </div>
       </div>
 
@@ -131,7 +131,7 @@ function clearForm() {
             type="password"
             name="password"
             :placeholder="t('profile.pw.placeholder.new')"
-            :class="['input input-bordered', v$.newPassword.$error && 'input-error']"
+            :class="['input-bordered input', v$.newPassword.$error && 'input-error']"
           />
           <label class="label" v-show="v$.newPassword.$error">
             <span class="label-text-alt text-error" v-text="v$.newPassword.$errors[0]?.$message" />
@@ -146,7 +146,7 @@ function clearForm() {
             type="password"
             name="password"
             :placeholder="t('profile.pw.placeholder.again')"
-            :class="['input input-bordered', v$.confirmPassword.$error && 'input-error']"
+            :class="['input-bordered input', v$.confirmPassword.$error && 'input-error']"
           />
           <label class="label" v-show="v$.confirmPassword.$error">
             <span class="label-text-alt text-error" v-text="v$.confirmPassword.$errors[0]?.$message" />
@@ -161,7 +161,7 @@ function clearForm() {
             type="password"
             name="password"
             :placeholder="t('profile.pw.placeholder.current')"
-            :class="['input input-bordered', v$.oldPassword.$error && 'input-error']"
+            :class="['input-bordered input', v$.oldPassword.$error && 'input-error']"
             @keydown.enter="changePassword"
           />
           <label class="label" v-show="v$.oldPassword.$error">

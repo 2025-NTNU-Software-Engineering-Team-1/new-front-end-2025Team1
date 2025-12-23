@@ -49,7 +49,7 @@ async function submit() {
       </label>
       <input
         type="text"
-        :class="['input input-bordered w-full max-w-xs', v$.title.$error && 'input-error']"
+        :class="['input-bordered input w-full max-w-xs', v$.title.$error && 'input-error']"
         :value="value.title"
         @input="updateForm('title', ($event.target as HTMLInputElement).value)"
       />
@@ -75,7 +75,7 @@ async function submit() {
         <span class="label-text">{{ $t("components.ann.form.descField") }}</span>
       </label>
       <textarea
-        :class="['textarea textarea-bordered h-24', v$.markdown.$error && 'textarea-error']"
+        :class="['textarea-bordered textarea h-24', v$.markdown.$error && 'textarea-error']"
         :value="value.markdown"
         @input="updateForm('markdown', ($event.target as HTMLTextAreaElement).value)"
       />

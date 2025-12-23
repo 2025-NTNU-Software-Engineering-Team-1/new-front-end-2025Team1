@@ -389,7 +389,7 @@ async function submit() {
 
       <input
         type="text"
-        :class="['input input-bordered w-full max-w-xs', v$.problemName.$error && 'input-error']"
+        :class="['input-bordered input w-full max-w-xs', v$.problemName.$error && 'input-error']"
         :value="problem.problemName"
         @input="update('problemName', ($event.target as HTMLInputElement).value)"
       />
@@ -414,7 +414,7 @@ async function submit() {
 
   <!-- Section fold panels -->
   <div class="mt-4 flex flex-col gap-3">
-    <div class="collapse-arrow rounded-box collapse bg-base-200">
+    <div class="collapse collapse-arrow rounded-box bg-base-200">
       <input type="checkbox" class="peer" />
       <div class="collapse-title font-semibold">Set Description</div>
       <div class="collapse-content">
@@ -422,7 +422,7 @@ async function submit() {
       </div>
     </div>
 
-    <div class="collapse-arrow rounded-box collapse bg-base-200">
+    <div class="collapse collapse-arrow rounded-box bg-base-200">
       <input type="checkbox" class="peer" />
       <div class="collapse-title font-semibold">Set Configuration</div>
       <div class="collapse-content">
@@ -430,7 +430,7 @@ async function submit() {
       </div>
     </div>
 
-    <div class="collapse-arrow rounded-box collapse bg-base-200">
+    <div class="collapse collapse-arrow rounded-box bg-base-200">
       <input type="checkbox" class="peer" />
       <div class="collapse-title font-semibold">Set Pipeline</div>
       <div class="collapse-content">
@@ -438,7 +438,7 @@ async function submit() {
       </div>
     </div>
 
-    <div class="collapse-arrow rounded-box collapse bg-base-200">
+    <div class="collapse collapse-arrow rounded-box bg-base-200">
       <input type="checkbox" class="peer" />
       <div class="collapse-title font-semibold">Set Test Data</div>
       <div class="collapse-content">
@@ -446,7 +446,7 @@ async function submit() {
       </div>
     </div>
 
-    <div class="collapse-arrow rounded-box collapse bg-base-200">
+    <div class="collapse collapse-arrow rounded-box bg-base-200">
       <input type="checkbox" class="peer" />
       <div class="collapse-title font-semibold">Set Resource Data</div>
       <div class="collapse-content">

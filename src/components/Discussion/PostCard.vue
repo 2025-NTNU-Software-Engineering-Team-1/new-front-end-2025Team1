@@ -49,7 +49,7 @@ const formattedTime = computed(() => formatFriendlyTime(post.time));
           </div>
 
           <div class="mt-3">
-            <div class="flex items-center gap-2 flex-wrap">
+            <div class="flex flex-wrap items-center gap-2">
               <span v-if="post.isPinned" class="text-lg">📌</span>
               <div class="text-lg font-bold">{{ post.title }}</div>
               <span v-if="post.isSolved" class="badge badge-success gap-1">

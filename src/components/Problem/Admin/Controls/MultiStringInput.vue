@@ -30,7 +30,7 @@ function remove(i: number) {
     <div class="flex gap-2">
       <input
         :placeholder="placeholder || 'Add item'"
-        class="input input-bordered input-sm w-full"
+        class="input-bordered input input-sm w-full"
         :value="buf"
         @input="buf = ($event.target as HTMLInputElement).value"
         @keydown.enter.prevent="add"

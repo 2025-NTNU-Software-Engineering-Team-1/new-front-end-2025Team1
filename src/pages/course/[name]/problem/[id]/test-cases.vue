@@ -185,7 +185,7 @@ async function saveTestcaseSettings() {
             </span>
             <input
               type="file"
-              class="file-input file-input-bordered w-full max-w-xs"
+              class="file-input-bordered file-input w-full max-w-xs"
               accept=".zip"
               @change="handleTestcaseUpload"
             />

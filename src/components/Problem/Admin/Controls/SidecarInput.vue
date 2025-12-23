@@ -57,7 +57,7 @@ function updateItem() {
           <label class="label py-1"><span class="label-text-alt">Name</span></label>
           <input
             placeholder="Name (e.g. mysql)"
-            class="input input-bordered input-sm flex-1"
+            class="input-bordered input input-sm flex-1"
             v-model="newName"
             @keydown.enter.prevent="add"
           />
@@ -67,7 +67,7 @@ function updateItem() {
           <label class="label py-1"><span class="label-text-alt">Image</span></label>
           <input
             placeholder="Image (e.g. mysql:8.0)"
-            class="input input-bordered input-sm flex-[2]"
+            class="input-bordered input input-sm flex-[2]"
             v-model="newImage"
             @keydown.enter.prevent="add"
           />
@@ -78,7 +78,7 @@ function updateItem() {
     </div>
 
     <div class="overflow-x-auto rounded-lg border border-base-content/20">
-      <table class="table-sm table w-full">
+      <table class="table table-sm w-full">
         <thead class="bg-base-200">
           <tr>
             <th class="w-1/3 py-3">Name</th>

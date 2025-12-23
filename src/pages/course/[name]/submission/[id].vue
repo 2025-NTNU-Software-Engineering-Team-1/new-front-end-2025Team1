@@ -282,7 +282,7 @@ function downloadTaskZip(taskIndex: number) {
 
             <div v-if="submission?.status === SUBMISSION_STATUS_CODE.COMPILE_ERROR">
               <div class="card-title md:text-xl lg:text-2xl">
-                <i-uil-exclamation-circle class="text-error mr-2" />
+                <i-uil-exclamation-circle class="mr-2 text-error" />
                 {{ $t("course.submission.compile_error.title") }}
               </div>
               <div class="my-4" />

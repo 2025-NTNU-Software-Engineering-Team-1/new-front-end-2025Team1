@@ -68,7 +68,23 @@ const loadPostDetail = async () => {
         Is_Closed: postData.Is_Closed ?? false,
         Category: postData.Category || "",
       };
-      replies.value = postData.Replies || [];
+
+      // 正規化回覆數據，處理欄位名稱不一致的問題
+      const rawReplies = postData.Replies || [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      replies.value = rawReplies.map((reply: any) => ({
+        Reply_ID: reply.Reply_ID || reply.Reply_Id || reply.reply_id,
+        Post_Id: reply.Post_Id || reply.Post_ID || reply.post_id,
+        Author: reply.Author || reply.author || "Unknown",
+        Content: reply.Content || reply.content || "",
+        Created_Time: reply.Created_Time || reply.created_time || new Date().toISOString(),
+        Reply_To: reply.Reply_To || reply.Reply_to || reply.reply_to,
+        Contains_Code: reply.Contains_Code ?? reply.contains_code ?? false,
+        Like_Count: reply.Like_Count ?? reply.like_count ?? 0,
+        Is_Liked: reply.Is_Liked ?? reply.is_liked ?? false,
+      }));
+
+      console.log("Normalized replies:", replies.value);
       console.log("Post loaded successfully:", post.value?.Title || "Untitled");
     } else {
       console.error("Invalid response - status:", status, "postArray:", postArray);
@@ -174,7 +190,14 @@ const submitReply = async () => {
 const replyToComment = (replyId: number) => {
   replyToId.value = replyId;
   showReplyForm.value = true;
-  // 不再使用 @ 功能
+
+  // 滾動到該回覆項目
+  setTimeout(() => {
+    const replyElement = document.querySelector(`[data-reply-id="${replyId}"]`);
+    if (replyElement) {
+      replyElement.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, 100);
 };
 
 // 取消回覆
@@ -289,7 +312,7 @@ onMounted(() => {
       <div class="card-body">
         <!-- Loading state -->
         <div v-if="loading" class="flex justify-center py-8">
-          <div class="loading-spinner loading-lg loading"></div>
+          <div class="loading loading-spinner loading-lg"></div>
         </div>
 
         <!-- Error state -->
@@ -401,20 +424,16 @@ onMounted(() => {
             <span>{{ t("discussion.detail.closed_msg") }}</span>
           </div>
 
-          <!-- Reply form -->
-          <div v-else-if="showReplyForm" class="mb-6 rounded-lg bg-base-200 p-4">
+          <!-- Reply form (只在非回覆特定留言時顯示) -->
+          <div v-else-if="showReplyForm && !replyToId" class="mb-6 rounded-lg bg-base-200 p-4">
             <div class="mb-2">
               <label class="text-sm font-medium">
-                {{
-                  replyToId
-                    ? t("discussion.detail.reply.replyto_comment")
-                    : t("discussion.detail.reply.post_reply")
-                }}
+                {{ t("discussion.detail.reply.post_reply") }}
               </label>
             </div>
             <textarea
               v-model="replyContent"
-              class="textarea textarea-bordered mb-3 w-full"
+              class="textarea-bordered textarea mb-3 w-full"
               rows="4"
               :placeholder="t('discussion.detail.reply.placeholder')"
             ></textarea>
@@ -424,7 +443,7 @@ onMounted(() => {
                 @click="submitReply"
                 :disabled="!replyContent.trim() || submittingReply"
               >
-                <span v-if="submittingReply" class="loading-spinner loading-xs loading"></span>
+                <span v-if="submittingReply" class="loading loading-spinner loading-xs"></span>
                 {{ t("discussion.detail.reply.submit") }}
               </button>
               <button class="btn btn-ghost btn-sm" @click="cancelReply">
@@ -449,8 +468,14 @@ onMounted(() => {
                 :key="reply.Reply_ID"
                 :reply="reply"
                 :post-id="postId"
+                :replying-to-id="replyToId"
+                :reply-content="replyContent"
+                :submitting-reply="submittingReply"
                 @reply="replyToComment"
                 @refresh="loadPostDetail"
+                @update-reply-content="(content) => (replyContent = content)"
+                @submit-reply="submitReply"
+                @cancel-reply="cancelReply"
               />
             </div>
           </div>

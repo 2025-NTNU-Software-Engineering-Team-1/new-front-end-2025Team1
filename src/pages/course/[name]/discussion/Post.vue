@@ -247,7 +247,7 @@ onMounted(() => {
         <!-- Problem selection -->
         <div class="mb-4">
           <label class="mb-1 block text-sm font-medium">{{ t("discussion.create.problem") }}</label>
-          <select v-model="problemId" class="select select-bordered w-full" @change="onProblemChange">
+          <select v-model="problemId" class="select-bordered select w-full" @change="onProblemChange">
             <option value="" disabled selected hidden>{{ t("discussion.create.problemPlaceholder") }}</option>
             <option v-for="problem in problems" :key="problem.Problem_Id" :value="problem.Problem_Id">
               {{ problem.Problem_Name }}
@@ -258,7 +258,7 @@ onMounted(() => {
         <!-- Language selection (if code allowed) -->
         <div v-if="codeAllowed" class="mb-4">
           <label class="mb-1 block text-sm font-medium">{{ t("discussion.create.language") }}</label>
-          <select v-model="language" class="select select-bordered w-full">
+          <select v-model="language" class="select-bordered select w-full">
             <option v-for="option in languageOptions" :key="option.value" :value="option.value">
               {{ option.label }}
             </option>
@@ -270,7 +270,7 @@ onMounted(() => {
           <label class="mb-1 block text-sm font-medium">{{ t("discussion.create.titleLabel") }}</label>
           <input
             v-model="title"
-            class="input input-bordered w-full"
+            class="input-bordered input w-full"
             :placeholder="t('discussion.create.titlePlaceholder')"
             maxlength="200"
           />
@@ -283,7 +283,7 @@ onMounted(() => {
           <textarea
             v-model="content"
             rows="12"
-            class="textarea textarea-bordered w-full"
+            class="textarea-bordered textarea w-full"
             :placeholder="t('discussion.create.contentPlaceholder')"
             @input="detectCodeContent"
           ></textarea>
@@ -352,7 +352,7 @@ onMounted(() => {
             @click="submitPost"
             :disabled="submitting || !title.trim() || !content.trim()"
           >
-            <span v-if="submitting" class="loading-spinner loading-sm loading"></span>
+            <span v-if="submitting" class="loading loading-spinner loading-sm"></span>
             {{ submitting ? t("discussion.create.submit_processing") : t("discussion.create.submit") }}
           </button>
           <button class="btn btn-ghost" @click="cancel" :disabled="submitting">

@@ -20,7 +20,7 @@ withDefaults(defineProps<Props>(), {
 });
 </script>
 <template>
-  <div class="card card-compact max-w-full bg-base-200/50 shadow-xl">
+  <div class="card-compact card max-w-full bg-base-200/50 shadow-xl">
     <div class="card-body">
       <router-link :to="`/course/${$route.params.name}/problem/${id}`">
         <h2

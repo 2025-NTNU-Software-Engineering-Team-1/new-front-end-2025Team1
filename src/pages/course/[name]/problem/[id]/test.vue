@@ -224,7 +224,7 @@ async function submitCode() {
                   <div
                     class="overflow-hidden overflow-x-auto rounded-lg border border-base-300 bg-base-100 p-0"
                   >
-                    <table class="!m-0 table w-full border-collapse !border-spacing-0 border-0">
+                    <table class="table !m-0 w-full border-collapse !border-spacing-0 border-0">
                       <thead class="rounded-none bg-base-300">
                         <tr>
                           <th>{{ t("course.problem.test.topic.sample.id") }}</th>
@@ -273,7 +273,7 @@ async function submitCode() {
                   </div>
                   <select
                     v-model="v$.lang.$model"
-                    :class="['select select-bordered w-60', v$.lang.$error && 'input-error']"
+                    :class="['select-bordered select w-60', v$.lang.$error && 'input-error']"
                   >
                     <option :value="-1">{{ t("course.problem.test.lang.select") }}</option>
                     <option v-for="lang in langOptions" :key="lang.value" :value="lang.value">

@@ -175,7 +175,7 @@ function exportCSV() {
             <label class="label">
               <span class="label-text">Sort By</span>
             </label>
-            <select v-model="sortBy" class="select select-bordered w-full max-w-xs">
+            <select v-model="sortBy" class="select-bordered select w-full max-w-xs">
               <option :value="Columns.USERNAME">Username</option>
               <option :value="Columns.SUM_DESC">Sum in descending</option>
               <option :value="Columns.SUM_ASC">Sum in ascending</option>
@@ -187,7 +187,7 @@ function exportCSV() {
             </label>
             <input
               type="datetime-local"
-              class="input input-bordered w-full max-w-xs"
+              class="input-bordered input w-full max-w-xs"
               :value="startDateTime"
               @change="setScoreboardBegin"
             />
@@ -198,7 +198,7 @@ function exportCSV() {
             </label>
             <input
               type="datetime-local"
-              class="input input-bordered w-full max-w-xs"
+              class="input-bordered input w-full max-w-xs"
               :value="endDateTime"
               @change="setScoreboardEnd"
             />

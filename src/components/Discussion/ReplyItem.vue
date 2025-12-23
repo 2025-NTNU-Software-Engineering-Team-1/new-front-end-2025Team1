@@ -13,11 +13,17 @@ interface ReplyWithChildren extends DiscussionReply {
 const props = defineProps<{
   reply: ReplyWithChildren;
   postId?: string | number;
+  replyingToId?: number;
+  replyContent?: string;
+  submittingReply?: boolean;
 }>();
 
 const emit = defineEmits<{
   reply: [replyId: number, authorName: string];
   refresh: [];
+  updateReplyContent: [content: string];
+  submitReply: [];
+  cancelReply: [];
 }>();
 
 // const session = useSession();
@@ -52,7 +58,7 @@ const handleReply = () => {
 </script>
 
 <template>
-  <div class="flex gap-3 rounded-lg bg-base-100 p-4">
+  <div class="flex gap-3 rounded-lg bg-base-100 p-4" :data-reply-id="reply.Reply_ID">
     <!-- Avatar -->
     <div class="flex-shrink-0">
       <div
@@ -116,6 +122,31 @@ const handleReply = () => {
         </button>
       </div>
 
+      <!-- Inline reply form -->
+      <div v-if="replyingToId === reply.Reply_ID" class="mt-4 rounded-lg bg-base-200 p-3">
+        <div class="mb-2">
+          <label class="text-xs font-medium"> 回覆給 {{ reply.Author }} </label>
+        </div>
+        <textarea
+          :value="replyContent"
+          @input="emit('updateReplyContent', ($event.target as HTMLTextAreaElement).value)"
+          class="textarea-bordered textarea textarea-sm mb-2 w-full"
+          rows="3"
+          placeholder="輸入回覆內容..."
+        ></textarea>
+        <div class="flex gap-2">
+          <button
+            class="btn btn-primary btn-xs"
+            @click="emit('submitReply')"
+            :disabled="!replyContent?.trim() || submittingReply"
+          >
+            <span v-if="submittingReply" class="loading loading-spinner loading-xs"></span>
+            提交
+          </button>
+          <button class="btn btn-ghost btn-xs" @click="emit('cancelReply')">取消</button>
+        </div>
+      </div>
+
       <!-- Nested replies (子回覆) -->
       <div
         v-if="reply.children && reply.children.length > 0"
@@ -126,8 +157,14 @@ const handleReply = () => {
           :key="childReply.Reply_ID"
           :reply="childReply"
           :post-id="postId"
+          :replying-to-id="replyingToId"
+          :reply-content="replyContent"
+          :submitting-reply="submittingReply"
           @reply="(id, author) => emit('reply', id, author)"
           @refresh="() => emit('refresh')"
+          @update-reply-content="(content) => emit('updateReplyContent', content)"
+          @submit-reply="() => emit('submitReply')"
+          @cancel-reply="() => emit('cancelReply')"
         />
       </div>
     </div>

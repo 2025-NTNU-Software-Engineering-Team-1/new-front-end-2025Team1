@@ -23,12 +23,12 @@ watchEffect(() => {
         <div class="tabs mb-4">
           <router-link
             :to="`/course/${route.params.name}/aisetting/setup`"
-            :class="['tab tab-bordered', route.path.endsWith('/setup') && 'tab-active']"
+            :class="['tab-bordered tab', route.path.endsWith('/setup') && 'tab-active']"
             >{{ t("course.aisetting.setupPage") }}</router-link
           >
           <router-link
             :to="`/course/${route.params.name}/aisetting/usage`"
-            :class="['tab tab-bordered', route.path.endsWith('/usage') && 'tab-active']"
+            :class="['tab-bordered tab', route.path.endsWith('/usage') && 'tab-active']"
             >{{ t("course.aisetting.usagePage") }}</router-link
           >
         </div>

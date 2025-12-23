@@ -642,7 +642,7 @@ onBeforeUnmount(() => {
       <label class="label"><span class="label-text">Tags</span></label>
       <input
         type="text"
-        class="input input-bordered"
+        class="input-bordered input"
         :value="problem.tags.join(',')"
         @input="
           problem.tags = ($event.target as HTMLInputElement).value
@@ -662,7 +662,7 @@ onBeforeUnmount(() => {
         :min="-1"
         :max="500"
         step="1"
-        :class="['input input-bordered w-full', quotaError && 'input-error']"
+        :class="['input-bordered input w-full', quotaError && 'input-error']"
         :value="localQuota"
         @input="onQuotaInput"
         placeholder="-1 (unlimited) or 1–500"
@@ -694,7 +694,7 @@ onBeforeUnmount(() => {
         <span class="label-text">Max ZIP Size (MB)</span>
         <input
           type="number"
-          class="input input-bordered input-sm w-28 text-center"
+          class="input-bordered input input-sm w-28 text-center"
           min="1"
           max="1000"
           step="1"
@@ -731,7 +731,7 @@ onBeforeUnmount(() => {
                   <span class="label-text">AI Model</span>
                 </label>
                 <select
-                  class="select select-bordered select-sm flex-1"
+                  class="select-bordered select select-sm flex-1"
                   v-model="problem.config!.aiVTuberMode"
                 >
                   <option value="gemini-2.5-flash-lite">gemini 2.5 flash lite</option>
@@ -748,7 +748,7 @@ onBeforeUnmount(() => {
                     type="file"
                     multiple
                     :accept="getAIFileExtensions().join(',')"
-                    class="file-input file-input-bordered file-input-sm w-full"
+                    class="file-input-bordered file-input file-input-sm w-full"
                     @change="
                       (e: Event) => {
                         const files = Array.from((e.target as HTMLInputElement).files || []) as File[];
@@ -785,7 +785,7 @@ onBeforeUnmount(() => {
                 <div class="relative">
                   <button
                     type="button"
-                    class="btn-key-suggestion btn btn-circle btn-ghost btn-xs"
+                    class="btn-key-suggestion btn btn-ghost btn-xs btn-circle"
                     @click="
                       showSuggestionTooltip = !showSuggestionTooltip;
                       if (showSuggestionTooltip && !keySuggestion) fetchKeySuggestion();
@@ -802,7 +802,7 @@ onBeforeUnmount(() => {
                       <div v-if="isFetchingSuggestion" class="flex items-center text-sm">
                         <ui-spinner class="mr-2" /> Fetching suggestion...
                       </div>
-                      <div v-else-if="suggestionError" class="text-error text-sm">
+                      <div v-else-if="suggestionError" class="text-sm text-error">
                         {{ suggestionError }}
                       </div>
                       <div v-else-if="keySuggestion" class="space-y-1 text-sm">
@@ -820,7 +820,7 @@ onBeforeUnmount(() => {
               <input
                 v-model="searchQuery"
                 type="text"
-                class="input input-bordered input-sm flex-1"
+                class="input-bordered input input-sm flex-1"
                 placeholder="Search by Key Name"
                 @keyup.enter="scrollToKey"
               />
@@ -828,7 +828,7 @@ onBeforeUnmount(() => {
             </div>
 
             <div v-if="isFetchingKeys" class="flex items-center gap-2 py-4 text-sm opacity-70">
-              <span class="loading-spinner loading-sm loading"></span> Loading keys...
+              <span class="loading loading-spinner loading-sm"></span> Loading keys...
             </div>
 
             <div v-else class="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -959,7 +959,7 @@ onBeforeUnmount(() => {
             :min="-1"
             :max="500"
             step="1"
-            :class="['input input-bordered w-full', trialQuotaError && 'input-error']"
+            :class="['input-bordered input w-full', trialQuotaError && 'input-error']"
             :value="localTrialLimit"
             @input="onTrialLimitInput"
             placeholder="-1 (unlimited) or 1–500"
@@ -1004,7 +1004,7 @@ onBeforeUnmount(() => {
           <input
             type="file"
             accept=".zip"
-            class="file-input file-input-bordered file-input-sm w-full"
+            class="file-input-bordered file-input file-input-sm w-full"
             @change="
               async (e: Event) => {
                 const inputEl = e.target as HTMLInputElement;
@@ -1033,7 +1033,7 @@ onBeforeUnmount(() => {
             type="file"
             multiple
             :accept="getAIFileExtensions().join(',')"
-            class="file-input file-input-bordered file-input-sm w-full"
+            class="file-input-bordered file-input file-input-sm w-full"
             @change="
               (e: Event) => {
                 const files = Array.from((e.target as HTMLInputElement).files || []) as File[];
@@ -1153,7 +1153,7 @@ onBeforeUnmount(() => {
                 <span class="label-text font-semibold">Dockerfiles</span>
                 <div class="flex items-center gap-2">
                   <div v-if="hasAsset('network_dockerfile')" class="flex items-center gap-2">
-                    <span class="badge badge-success badge-outline text-xs">Uploaded</span>
+                    <span class="badge badge-outline badge-success text-xs">Uploaded</span>
                     <a
                       :href="assetDownloadUrl('network_dockerfile') || '#'"
                       class="btn btn-xs"
@@ -1171,7 +1171,7 @@ onBeforeUnmount(() => {
                 <input
                   type="file"
                   accept=".zip"
-                  class="file-input file-input-bordered w-full max-w-xs"
+                  class="file-input-bordered file-input w-full max-w-xs"
                   :class="{ 'input-error': v$?.assets?.dockerfilesZip?.$error || dockerZipError }"
                   @change="
                     async (e: Event) => {
@@ -1207,7 +1207,7 @@ onBeforeUnmount(() => {
                   "
                 />
                 <label v-if="v$?.assets?.dockerfilesZip?.$error || dockerZipError" class="label">
-                  <span class="label-text-alt text-error whitespace-pre-line">
+                  <span class="label-text-alt whitespace-pre-line text-error">
                     {{ v$?.assets?.dockerfilesZip?.$errors[0]?.$message || dockerZipError }}
                   </span>
                 </label>
@@ -1216,7 +1216,7 @@ onBeforeUnmount(() => {
                   v-if="detectedDockerEnvs.length > 0"
                   class="border-success/30 mt-2 w-full max-w-xs rounded border bg-base-200 p-3 text-xs"
                 >
-                  <div class="text-success mb-2 flex items-center gap-1 font-bold">
+                  <div class="mb-2 flex items-center gap-1 font-bold text-success">
                     <i-uil-check-circle />
                     {{
                       problem.assets?.dockerfilesZip
@@ -1236,7 +1236,7 @@ onBeforeUnmount(() => {
 
                       <button
                         type="button"
-                        class="btn btn-ghost btn-xs text-error h-6 min-h-0 w-6 p-0"
+                        class="btn btn-ghost btn-xs h-6 min-h-0 w-6 p-0 text-error"
                         @click="removeDockerEnv(index)"
                         title="Remove this environment"
                       >

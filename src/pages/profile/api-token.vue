@@ -216,7 +216,7 @@ async function handleDeactivate() {
               type="text"
               v-model="searchQuery"
               :placeholder="t('profile.apiToken.search_placeholder')"
-              class="input input-bordered w-full"
+              class="input-bordered input w-full"
             />
             <button class="btn btn-square" aria-label="Search">
               <svg
@@ -302,7 +302,7 @@ async function handleDeactivate() {
   <!-- 創建 Token 彈窗 -->
   <ui-dialog v-model="isCreateModalOpen">
     <template #title>
-      <div class="rounded-t-box -m-6 bg-primary p-6 text-primary-content">
+      <div class="-m-6 rounded-t-box bg-primary p-6 text-primary-content">
         {{ t("profile.apiToken.create_modal.title") }}
       </div>
     </template>
@@ -378,7 +378,7 @@ async function handleDeactivate() {
   <!-- 編輯 Token 的彈窗 -->
   <ui-dialog v-model="isEditModalOpen">
     <template #title>
-      <div class="rounded-t-box -m-6 bg-primary p-6 text-primary-content">
+      <div class="-m-6 rounded-t-box bg-primary p-6 text-primary-content">
         {{ t("profile.apiToken.edit_modal.title") }}
       </div>
     </template>
@@ -465,11 +465,11 @@ async function handleDeactivate() {
           {{ t("profile.apiToken.success_modal.warning") }}
           <i-uil-exclamation-triangle class="text-warning" />
         </h3>
-        <p class="text-warning text-sm font-semibold">
+        <p class="text-sm font-semibold text-warning">
           {{ t("profile.apiToken.success_modal.message") }}
         </p>
         <div class="input-group w-full max-w-xs">
-          <input type="text" :value="newSecretKey" readonly class="input input-bordered w-full" />
+          <input type="text" :value="newSecretKey" readonly class="input-bordered input w-full" />
           <button v-if="isSupported" class="btn" @click="copy()">
             {{
               copied ? t("profile.apiToken.success_modal.copied") : t("profile.apiToken.success_modal.copy")
@@ -486,7 +486,7 @@ async function handleDeactivate() {
   <!-- 查看 Scope 的彈出視窗 -->
   <ui-dialog v-model="isViewScopeModalOpen">
     <template #title>
-      <div class="rounded-t-box -m-6 bg-primary p-6 text-primary-content">
+      <div class="-m-6 rounded-t-box bg-primary p-6 text-primary-content">
         {{ t("profile.apiToken.view_scope_modal.title") }}
       </div>
     </template>
@@ -514,7 +514,7 @@ async function handleDeactivate() {
   <!-- 停用 Token 的確認彈窗 -->
   <ui-dialog v-model="isDeactivateModalOpen">
     <template #title>
-      <div class="rounded-t-box -m-6 bg-primary p-6 text-primary-content">
+      <div class="-m-6 rounded-t-box bg-primary p-6 text-primary-content">
         {{ t("profile.apiToken.deactivate_modal.title") }}
       </div>
     </template>
@@ -534,7 +534,7 @@ async function handleDeactivate() {
           <button class="btn btn-link text-primary-content" @click="isDeactivateModalOpen = false">
             {{ t("profile.apiToken.create_modal.cancel") }}
           </button>
-          <button class="btn btn-link text-error font-bold" @click="handleDeactivate">
+          <button class="btn btn-link font-bold text-error" @click="handleDeactivate">
             {{ t("profile.apiToken.deactivate_modal.deactivate") }}
           </button>
         </div>

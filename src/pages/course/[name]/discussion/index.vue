@@ -213,7 +213,7 @@ onMounted(async () => {
                 <input
                   v-model="query"
                   :placeholder="t('discussion.placeholder')"
-                  class="input input-bordered w-full pr-10"
+                  class="input-bordered input w-full pr-10"
                   @keyup.enter="handleSearch"
                 />
                 <button
@@ -276,7 +276,7 @@ onMounted(async () => {
 
             <!-- Loading state -->
             <div v-if="loading" class="mt-4 flex justify-center">
-              <div class="loading-spinner loading-lg loading"></div>
+              <div class="loading loading-spinner loading-lg"></div>
             </div>
 
             <!-- Error state -->

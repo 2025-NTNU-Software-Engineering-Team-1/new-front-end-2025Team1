@@ -37,7 +37,7 @@ watchEffect(() => {
           <router-link
             v-for="tab in tabs"
             :key="tab.value"
-            :class="['tab tab-bordered', $route.path === tab.value && 'tab-active']"
+            :class="['tab-bordered tab', $route.path === tab.value && 'tab-active']"
             :to="tab.value"
             >{{ tab.text }}</router-link
           >

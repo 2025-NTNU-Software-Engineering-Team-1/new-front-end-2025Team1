@@ -45,7 +45,7 @@ const { data: announcements, error, isLoading } = useAxios<AnnouncementList>("/a
                   <td v-if="session.isAdmin">
                     <div class="tooltip" data-tip="Edit">
                       <router-link
-                        class="btn btn-circle btn-ghost btn-sm"
+                        class="btn btn-ghost btn-sm btn-circle"
                         :to="`/course/Public/announcements/${annId}/edit`"
                       >
                         <i-uil-edit class="lg:h-5 lg:w-5" />
@@ -86,7 +86,7 @@ const { data: announcements, error, isLoading } = useAxios<AnnouncementList>("/a
                   <td v-if="session.isAdmin">
                     <div class="tooltip" data-tip="Edit">
                       <router-link
-                        class="btn btn-circle btn-ghost btn-sm"
+                        class="btn btn-ghost btn-sm btn-circle"
                         :to="`/course/Public/announcements/${annId}/edit`"
                       >
                         <i-uil-edit class="lg:h-5 lg:w-5" />

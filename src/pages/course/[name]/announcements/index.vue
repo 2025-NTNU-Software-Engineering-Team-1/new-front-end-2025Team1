@@ -80,7 +80,7 @@ const {
                   <td v-if="session.isAdmin">
                     <div class="tooltip" data-tip="Edit">
                       <router-link
-                        class="btn btn-circle btn-ghost btn-sm"
+                        class="btn btn-ghost btn-sm btn-circle"
                         :to="`/course/${$route.params.name}/announcements/${annId}/edit`"
                       >
                         <i-uil-edit class="lg:h-5 lg:w-5" />
@@ -90,7 +90,7 @@ const {
                   <td v-if="session.isTeacher">
                     <div class="tooltip" data-tip="Edit">
                       <router-link
-                        class="btn btn-circle btn-ghost btn-sm"
+                        class="btn btn-ghost btn-sm btn-circle"
                         :to="`/course/${$route.params.name}/announcements/${annId}/edit`"
                       >
                         <i-uil-edit class="lg:h-5 lg:w-5" />
@@ -100,7 +100,7 @@ const {
                   <td v-if="session.isTA">
                     <div class="tooltip" data-tip="Edit">
                       <router-link
-                        class="btn btn-circle btn-ghost btn-sm"
+                        class="btn btn-ghost btn-sm btn-circle"
                         :to="`/course/${$route.params.name}/announcements/${annId}/edit`"
                       >
                         <i-uil-edit class="lg:h-5 lg:w-5" />

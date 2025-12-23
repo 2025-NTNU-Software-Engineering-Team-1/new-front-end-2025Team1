@@ -433,7 +433,7 @@ const mockProblemMeta = {
           Edit Problem: {{ $route.params.id }} - {{ edittingProblem?.problemName }}
           <div class="flex gap-x-3">
             <button
-              :class="['btn btn-outline btn-error btn-sm lg:btn-md', formElement?.isLoading && 'loading']"
+              :class="['btn btn-error btn-outline btn-sm lg:btn-md', formElement?.isLoading && 'loading']"
               @click="delete_"
             >
               <i-uil-trash-alt class="mr-1 lg:h-5 lg:w-5" /> Delete

@@ -278,18 +278,18 @@ onMounted(fetchKeys);
               type="text"
               v-model="newKey.name"
               :placeholder="t('course.aisetting.setup.input.name')"
-              class="input input-bordered w-full"
+              class="input-bordered input w-full"
             />
             <input
               type="text"
               v-model="newKey.value"
               :placeholder="t('course.aisetting.setup.input.value')"
-              class="input input-bordered w-full"
+              class="input-bordered input w-full"
             />
             <input
               type="text"
               :value="session.displayedName || session.username"
-              class="input input-bordered w-full text-gray-500"
+              class="input-bordered input w-full text-gray-500"
               disabled
             />
           </div>
@@ -300,7 +300,7 @@ onMounted(fetchKeys);
             </button>
           </div>
 
-          <div v-if="newKey.maskedDisplay" class="text-success mt-3 font-mono text-sm">
+          <div v-if="newKey.maskedDisplay" class="mt-3 font-mono text-sm text-success">
             Masked ID: {{ newKey.maskedDisplay }}
           </div>
         </div>
@@ -324,7 +324,7 @@ onMounted(fetchKeys);
             >
               <div class="col-span-2">
                 <label class="text-xs opacity-70">{{ t("course.aisetting.setup.display.keyName") }}</label>
-                <input type="text" v-model="k.key_name" class="input input-bordered input-sm w-full" />
+                <input type="text" v-model="k.key_name" class="input-bordered input input-sm w-full" />
               </div>
               <div class="col-span-2 text-sm">
                 <label class="text-xs opacity-70">{{ t("course.aisetting.setup.display.masked") }}</label>
@@ -335,7 +335,7 @@ onMounted(fetchKeys);
                 <input
                   type="text"
                   v-model="k.created_by"
-                  class="input input-bordered input-sm w-full"
+                  class="input-bordered input input-sm w-full"
                   disabled
                 />
               </div>

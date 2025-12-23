@@ -282,17 +282,17 @@ watch(
         />
       </label>
       <i-uil-lock-alt v-if="enableDisabledReason" class="text-error" />
-      <span v-if="showDisabledText" class="text-error whitespace-nowrap text-sm">
+      <span v-if="showDisabledText" class="whitespace-nowrap text-sm text-error">
         {{ resourceDataWarning || enableDisabledReason }}
       </span>
       <div class="ml-auto flex items-center gap-2">
         <span
           v-if="resourceCaseCount !== null || hasRemoteAsset"
-          class="badge badge-success badge-outline text-xs"
+          class="badge badge-outline badge-success text-xs"
         >
           Current: {{ resourceCaseCount ?? remoteTaskCount ?? "remote" }} task(s)
         </span>
-        <span v-else-if="fileRef" class="badge badge-success badge-outline text-xs"> Uploaded </span>
+        <span v-else-if="fileRef" class="badge badge-outline badge-success text-xs"> Uploaded </span>
         <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
         <a
           v-if="downloadUrl && hasRemoteAsset"
@@ -311,7 +311,7 @@ watch(
         <div class="col-span-1 flex items-center justify-center bg-base-300 text-sm">zip file</div>
         <div
           class="textarea-bordered col-span-4 flex flex-col bg-base-100 p-4"
-          :class="[isDrag && 'border-accent border']"
+          :class="[isDrag && 'border border-accent']"
           @drop.prevent="fileRef = enableRef && !enableDisabledReason ? $event.dataTransfer!.files![0] : null"
           @dragover.prevent="isDrag = enableRef && !enableDisabledReason"
           @dragleave="isDrag = false"
@@ -332,7 +332,7 @@ watch(
             <input
               type="file"
               accept=".zip"
-              class="file-input file-input-bordered file-input-sm w-full"
+              class="file-input-bordered file-input file-input-sm w-full"
               :disabled="!enableRef || Boolean(enableDisabledReason)"
               @change="
                 (e: Event) => {

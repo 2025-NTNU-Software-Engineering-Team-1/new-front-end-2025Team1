@@ -57,7 +57,7 @@ const loadProblems = async () => {
       // 空題目列表不是錯誤，只是課程還沒有題目
     } else {
       const errorMsg = res.Message || res.data?.Message || t("discussion.err_unknown");
-      error.value = t("discussion.err_problems_list") ;
+      error.value = t("discussion.err_problems_list") + errorMsg;
     }
   } catch (err) {
     console.error("Error loading problems:", err);
@@ -193,13 +193,13 @@ const submitPost = async () => {
       router.push(`/course/${route.params.name}/discussion/${postId}`);
     } else {
       const errorMsg = response.Message || response.data?.Message || t("discussion.err.err_unknown");
-      error.value = t("discussion.err.err_failed_create") ;
+      error.value = t("discussion.err.err_failed_create") + errorMsg;
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     console.error("Error submitting post:", err);
     const errorMsg = err.response?.data?.Message || err.message || t("discussion.err.err_network");
-    error.value = t("discussion.err.err_failed_create") ;
+    error.value = t("discussion.err.err_failed_create") + errorMsg;
   } finally {
     submitting.value = false;
   }

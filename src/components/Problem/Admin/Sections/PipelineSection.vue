@@ -239,10 +239,10 @@ async function fetchStaticAnalysisOptions() {
 // ==========================================
 // Section: Mode Switching (White/Blacklist)
 // ==========================================
-const syntaxMode = ref<"whitelist" | "blacklist">("whitelist");
-const importMode = ref<"whitelist" | "blacklist">("whitelist");
-const headerMode = ref<"whitelist" | "blacklist">("whitelist");
-const functionMode = ref<"whitelist" | "blacklist">("whitelist");
+const syntaxMode = ref<"whitelist" | "blacklist">("blacklist");
+const importMode = ref<"whitelist" | "blacklist">("blacklist");
+const headerMode = ref<"whitelist" | "blacklist">("blacklist");
+const functionMode = ref<"whitelist" | "blacklist">("blacklist");
 
 // Watchers: Clear the opposite list when mode switches
 watch(syntaxMode, (newMode) => {

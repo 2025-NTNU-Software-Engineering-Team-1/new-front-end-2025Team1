@@ -1124,7 +1124,7 @@ onBeforeUnmount(() => {
                       }"
                       @click="problem.config!.networkAccessRestriction!.external!.model = 'White'"
                     >
-                      <span>{{ t("course.problems.networkAccessWhitelist") }}<</span>
+                      <span>{{ t("course.problems.networkAccessWhitelist") }}</span>
                     </button>
                     <button
                       class="mode-switcher-option"

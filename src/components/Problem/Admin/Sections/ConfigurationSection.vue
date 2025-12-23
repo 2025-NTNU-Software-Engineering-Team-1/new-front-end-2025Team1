@@ -1,5 +1,6 @@
 <script setup lang="ts">
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 // ==========================================
 // Imports
 // ==========================================
@@ -849,12 +850,8 @@ onBeforeUnmount(() => {
             </div>
 
             <div v-if="isFetchingKeys" class="flex items-center gap-2 py-4 text-sm opacity-70">
-<<<<<<< HEAD
-              <span class="loading loading-spinner loading-sm"></span> Loading keys...
-=======
               <span class="loading-spinner loading-sm loading"></span>
               {{ t("course.problem.aiKeyLoadingKeys") }}
->>>>>>> 33b40e3 (enable language switching on setting config page (f4-config))
             </div>
 
             <div v-else class="grid grid-cols-1 gap-3 md:grid-cols-2">

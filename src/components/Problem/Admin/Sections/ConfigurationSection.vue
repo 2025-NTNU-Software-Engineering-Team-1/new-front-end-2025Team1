@@ -17,6 +17,9 @@ import { assertFileSizeOK, validateFilesForAIAC } from "@/utils/checkFileSize";
 import { fetcher } from "@/models/api";
 import api from "@/models/api";
 
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
+
 // ==========================================
 // [CONFIG] Console Debug Mode
 // ==========================================
@@ -630,7 +633,9 @@ onBeforeUnmount(() => {
   <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
     <!-- Allowed Languages -->
     <div class="form-control rounded-lg border border-gray-400 p-4">
-      <label class="label"><span class="label-text">Allowed Languages</span></label>
+      <label class="label"
+        ><span class="label-text">{{ t("course.problem.allowedLanguages") }}</span></label
+      >
       <LanguageMultiSelect
         :model-value="problem.allowedLanguage"
         @update:model-value="(v) => (problem.allowedLanguage = v)"
@@ -639,7 +644,9 @@ onBeforeUnmount(() => {
 
     <!-- Tags -->
     <div class="form-control rounded-lg border border-gray-400 p-4">
-      <label class="label"><span class="label-text">Tags</span></label>
+      <label class="label"
+        ><span class="label-text">{{ t("course.problem.tags") }}</span></label
+      >
       <input
         type="text"
         class="input-bordered input"
@@ -656,7 +663,9 @@ onBeforeUnmount(() => {
 
     <!-- Quota -->
     <div class="form-control rounded-lg border border-gray-400 p-4">
-      <label class="label"><span class="label-text">Quota</span></label>
+      <label class="label"
+        ><span class="label-text">{{ t("course.problem.quota") }}</span></label
+      >
       <input
         type="number"
         :min="-1"
@@ -676,22 +685,24 @@ onBeforeUnmount(() => {
 
     <!-- Accepted Format -->
     <div class="form-control rounded-lg border border-gray-400 p-4">
-      <label class="label"><span class="label-text">Accepted Format</span></label>
+      <label class="label"
+        ><span class="label-text">{{ t("course.problem.acceptedFormat") }}</span></label
+      >
       <div class="flex flex-wrap items-center gap-6">
         <label class="label cursor-pointer gap-2">
           <input type="radio" class="radio" value="code" v-model="problem.config!.acceptedFormat as any" />
-          <span class="label-text">Code</span>
+          <span class="label-text">{{ t("course.problem.code") }}</span>
         </label>
         <label class="label cursor-pointer gap-2">
           <input type="radio" class="radio" value="zip" v-model="problem.config!.acceptedFormat as any" />
-          <span class="label-text">Zip</span>
+          <span class="label-text">{{ t("course.problem.Zip") }}</span>
         </label>
       </div>
       <div
         v-if="problem.config!.acceptedFormat === 'zip'"
         class="mt-3 flex items-center gap-2 rounded border border-gray-400 p-3"
       >
-        <span class="label-text">Max ZIP Size (MB)</span>
+        <span class="label-text">{{ t("course.problem.maxZipSize") }}</span>
         <input
           type="number"
           class="input-bordered input input-sm w-28 text-center"
@@ -706,7 +717,7 @@ onBeforeUnmount(() => {
             )
           "
         />
-        <span class="whitespace-nowrap text-xs opacity-70">(default 50 MB)</span>
+        <span class="whitespace-nowrap text-xs opacity-70">{{ t("course.problem.maxZipSizeDefault") }}</span>
       </div>
     </div>
 
@@ -714,7 +725,7 @@ onBeforeUnmount(() => {
     <div class="col-span-2 rounded-lg border border-gray-400 p-4">
       <div class="flex items-center gap-4">
         <label class="label cursor-pointer justify-start gap-x-4">
-          <span class="label-text">AI TA</span>
+          <span class="label-text">{{ t("course.problem.aiTA") }}</span>
           <input type="checkbox" class="toggle" v-model="problem.config!.aiVTuber" />
         </label>
       </div>
@@ -728,7 +739,7 @@ onBeforeUnmount(() => {
             <div class="flex flex-wrap items-center gap-x-8 gap-y-4">
               <div class="flex min-w-[260px] flex-1 items-center gap-3">
                 <label class="label mb-0 w-28">
-                  <span class="label-text">AI Model</span>
+                  <span class="label-text">{{ t("course.problem.aiModel") }}</span>
                 </label>
                 <select
                   class="select-bordered select select-sm flex-1"
@@ -741,7 +752,7 @@ onBeforeUnmount(() => {
               </div>
               <div class="flex min-w-[300px] flex-1 items-center gap-3">
                 <label class="label mb-0 w-32">
-                  <span class="label-text">Upload AC files</span>
+                  <span class="label-text">{{ t("course.problem.uploadACFiles") }}</span>
                 </label>
                 <div class="w-full">
                   <input
@@ -771,15 +782,17 @@ onBeforeUnmount(() => {
           <div class="form-control">
             <div class="mb-2 flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <label class="label-text">Select API Keys</label>
+                <label class="label-text">{{ t("course.problem.selectAPIKeys") }}</label>
 
                 <div v-if="selectedKeyStats.total > 0" class="ml-2 flex items-center gap-2">
-                  <div class="badge badge-neutral badge-sm">Total: {{ selectedKeyStats.total }}</div>
+                  <div class="badge badge-neutral badge-sm">
+                    {{ t("course.problem.aiKeyTotal", { total: selectedKeyStats.total }) }}
+                  </div>
                   <div v-if="selectedKeyStats.active > 0" class="badge badge-info badge-sm">
-                    Active: {{ selectedKeyStats.active }}
+                    {{ t("course.problem.aiKeyActive", { stats: selectedKeyStats.active }) }}
                   </div>
                   <div v-if="selectedKeyStats.inactive > 0" class="badge badge-error badge-sm">
-                    Inactive: {{ selectedKeyStats.inactive }}
+                    {{ t("course.problem.aiKeyInactive", { stats: selectedKeyStats.inactive }) }}
                   </div>
                 </div>
                 <div class="relative">
@@ -800,15 +813,23 @@ onBeforeUnmount(() => {
                       class="key-suggestion-tooltip absolute left-6 top-full z-50 mt-2 w-72 rounded-md border border-gray-400 bg-base-100 p-3 shadow-xl"
                     >
                       <div v-if="isFetchingSuggestion" class="flex items-center text-sm">
-                        <ui-spinner class="mr-2" /> Fetching suggestion...
+                        <ui-spinner class="mr-2" /> {{ t("course.problem.aiKeyFetchingSuggestion") }}
                       </div>
                       <div v-else-if="suggestionError" class="text-error text-sm">
                         {{ suggestionError }}
                       </div>
                       <div v-else-if="keySuggestion" class="space-y-1 text-sm">
-                        <div><b>Student count:</b> {{ keySuggestion.student_count }}</div>
-                        <div><b>Suggested keys:</b> {{ keySuggestion.suggested_key_count }}</div>
-                        <div><b>Reason:</b> {{ keySuggestion.reason }}</div>
+                        <div>
+                          <b>{{ t("course.problem.aiKeySuggestionStudentCount") }}</b>
+                          {{ keySuggestion.student_count }}
+                        </div>
+                        <div>
+                          <b>{{ t("course.problem.aiKeySuggestionSuggestedKeys") }}</b>
+                          {{ keySuggestion.suggested_key_count }}
+                        </div>
+                        <div>
+                          <b>{{ t("course.problem.aiKeySuggestionReason") }}</b> {{ keySuggestion.reason }}
+                        </div>
                       </div>
                     </div>
                   </transition>
@@ -824,11 +845,16 @@ onBeforeUnmount(() => {
                 placeholder="Search by Key Name"
                 @keyup.enter="scrollToKey"
               />
-              <button class="btn btn-sm" @click="scrollToKey">Search</button>
+              <button class="btn btn-sm" @click="scrollToKey">{{ t("course.problem.aiKeySearch") }}</button>
             </div>
 
             <div v-if="isFetchingKeys" class="flex items-center gap-2 py-4 text-sm opacity-70">
+<<<<<<< HEAD
               <span class="loading loading-spinner loading-sm"></span> Loading keys...
+=======
+              <span class="loading-spinner loading-sm loading"></span>
+              {{ t("course.problem.aiKeyLoadingKeys") }}
+>>>>>>> 33b40e3 (enable language switching on setting config page (f4-config))
             </div>
 
             <div v-else class="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -850,7 +876,7 @@ onBeforeUnmount(() => {
                     >
                       <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                     </svg>
-                    <span class="label-text">active keys</span>
+                    <span class="label-text">{{ t("course.problem.activeAiKeys") }}</span>
                     <span class="badge badge-info badge-sm">{{ apiKeys.active.length }}</span>
                   </div>
                 </button>
@@ -902,7 +928,7 @@ onBeforeUnmount(() => {
                     >
                       <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                     </svg>
-                    <span class="label-text">inactive keys</span>
+                    <span class="label-text">{{ t("course.problem.inactiveAiKeys") }}</span>
                     <span class="badge badge-error badge-sm">{{ apiKeys.inactive.length }}</span>
                   </div>
                 </button>
@@ -946,13 +972,13 @@ onBeforeUnmount(() => {
     <!-- Trial Mode -->
     <div class="form-control col-span-2 rounded-lg border border-gray-400 p-4">
       <label class="label ml-1 cursor-pointer justify-start gap-x-4">
-        <span class="label-text">Trial Mode</span>
+        <span class="label-text">{{ t("course.problem.trialMode") }}</span>
         <input type="checkbox" class="toggle" v-model="problem.config!.trialMode" />
       </label>
       <div v-if="problem.config!.trialMode" class="mt-3 space-y-4 rounded border border-gray-400 p-4">
         <div class="form-control w-full max-w-xs">
           <label class="label">
-            <span class="label-text">Max Number of Trial</span>
+            <span class="label-text">{{ t("course.problem.trialMaxNumber") }}</span>
           </label>
           <input
             type="number"
@@ -974,32 +1000,34 @@ onBeforeUnmount(() => {
         <div class="flex flex-wrap gap-x-8 gap-y-4 rounded border border-gray-300 bg-base-100 p-3">
           <div class="form-control">
             <label class="label cursor-pointer gap-3">
-              <span class="label-text font-semibold">Result Visible</span>
+              <span class="label-text font-semibold">{{ t("course.problem.resultVisible") }}</span>
               <input
                 type="checkbox"
                 class="toggle toggle-success toggle-sm"
                 v-model="problem.config!.trialResultVisible"
               />
             </label>
-            <span class="px-1 text-xs opacity-70"> Allow viewing execution output. </span>
+            <span class="px-1 text-xs opacity-70">{{ t("course.problem.allowViewingExecutionOutput") }}</span>
           </div>
 
           <div class="form-control">
             <label class="label cursor-pointer gap-3">
-              <span class="label-text font-semibold">Result Downloadable</span>
+              <span class="label-text font-semibold">{{ t("course.problem.resultDownloadable") }}</span>
               <input
                 type="checkbox"
                 class="toggle toggle-success toggle-sm"
                 v-model="problem.config!.trialResultDownloadable"
               />
             </label>
-            <span class="px-1 text-xs opacity-70"> Allow downloading output files. </span>
+            <span class="px-1 text-xs opacity-70">
+              {{ t("course.problem.allowDownloadingOutputFiles") }}
+            </span>
           </div>
         </div>
 
         <div class="form-control w-full max-w-xs">
           <label class="label">
-            <span class="label-text">Upload Public Test Data (.zip)</span>
+            <span class="label-text">{{ t("course.problem.uploadPublicTestData") }}</span>
           </label>
           <input
             type="file"
@@ -1027,7 +1055,7 @@ onBeforeUnmount(() => {
 
         <div class="form-control w-full max-w-xs">
           <label class="label">
-            <span class="label-text">Upload AC files</span>
+            <span class="label-text">{{ t("course.problem.uploadACFiles") }}<</span>
           </label>
           <input
             type="file"
@@ -1068,11 +1096,13 @@ onBeforeUnmount(() => {
         <div v-if="showNetworkSection" class="mt-3 space-y-4 rounded border-none p-2">
           <div class="rounded border border-gray-400 p-4">
             <label class="label mb-2"
-              ><span class="label-text font-semibold">Network Access Restriction (External)</span></label
+              ><span class="label-text font-semibold">{{
+                t("course.problem.networkAccessRestriction")
+              }}</span></label
             >
             <div class="grid grid-cols-1 gap-4 p-1 md:grid-cols-2">
               <div class="col-span-1 flex items-center gap-4 md:col-span-2">
-                <span class="label-text">Access Model:</span>
+                <span class="label-text">{{ t("course.problem.networkAccessModel") }}</span>
                 <div class="mode-switcher">
                   <div class="mode-switcher-container">
                     <div
@@ -1089,7 +1119,7 @@ onBeforeUnmount(() => {
                       }"
                       @click="problem.config!.networkAccessRestriction!.external!.model = 'White'"
                     >
-                      <span>Whitelist</span>
+                      <span>{{ t("course.problem.networkAccessWhitelist") }}<</span>
                     </button>
                     <button
                       class="mode-switcher-option"
@@ -1098,7 +1128,7 @@ onBeforeUnmount(() => {
                       }"
                       @click="problem.config!.networkAccessRestriction!.external!.model = 'Black'"
                     >
-                      <span>Blacklist</span>
+                      <span>{{ t("course.problem.networkAccessBlacklist") }}</span>
                     </button>
                   </div>
                 </div>
@@ -1111,7 +1141,9 @@ onBeforeUnmount(() => {
               </div>
 
               <div>
-                <label class="label"><span class="label-text">IP List</span></label>
+                <label class="label"
+                  ><span class="label-text">{{ t("course.problem.networkAccessIPList") }}</span></label
+                >
                 <MultiStringInput
                   v-model="problem.config!.networkAccessRestriction!.external!.ip"
                   placeholder="e.g. 8.8.8.8"
@@ -1124,7 +1156,9 @@ onBeforeUnmount(() => {
               </div>
 
               <div>
-                <label class="label"><span class="label-text">URL List</span></label>
+                <label class="label"
+                  ><span class="label-text">{{ t("course.problem.networkAccessURLList") }}</span></label
+                >
                 <MultiStringInput
                   v-model="problem.config!.networkAccessRestriction!.external!.url"
                   placeholder="e.g. google.com"
@@ -1139,7 +1173,7 @@ onBeforeUnmount(() => {
           </div>
           <div class="rounded border border-gray-400 p-4">
             <label class="label mb-2 justify-between">
-              <span class="label-text font-semibold">Sandbox Environment (Sidecars & Dockerfiles)</span>
+              <span class="label-text font-semibold">{{ t("course.problem.SandboxEnvironment") }}</span>
             </label>
 
             <div class="mb-6">
@@ -1150,24 +1184,30 @@ onBeforeUnmount(() => {
 
             <div class="form-control">
               <label class="label justify-start gap-x-4">
-                <span class="label-text font-semibold">Dockerfiles</span>
+                <span class="label-text font-semibold">{{ t("course.problem.dockerFiles") }}</span>
                 <div class="flex items-center gap-2">
                   <div v-if="hasAsset('network_dockerfile')" class="flex items-center gap-2">
-                    <span class="badge badge-outline badge-success text-xs">Uploaded</span>
+                    <span class="badge badge-success badge-outline text-xs">{{
+                      t("course.problem.uploaded")
+                    }}</span>
                     <a
                       :href="assetDownloadUrl('network_dockerfile') || '#'"
                       class="btn btn-xs"
                       target="_blank"
                       rel="noopener"
                     >
-                      Download
+                      {{ t("course.problem.download") }}
                     </a>
                   </div>
-                  <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
+                  <span v-else class="badge badge-outline text-xs opacity-70">{{
+                    t("course.problem.notUploaded")
+                  }}</span>
                 </div>
               </label>
               <div class="mt-2">
-                <label class="label"><span class="label-text">Upload dockerfiles.zip</span></label>
+                <label class="label"
+                  ><span class="label-text">{{ t("course.problem.uploadDockerFilesZip") }}</span></label
+                >
                 <input
                   type="file"
                   accept=".zip"
@@ -1254,16 +1294,18 @@ onBeforeUnmount(() => {
 
     <!-- Artifact Collection -->
     <div class="form-control col-span-1 rounded-lg border border-gray-400 p-4 md:col-span-2">
-      <label class="label"><span class="label-text">Artifact Collection (Optional)</span></label>
+      <label class="label"
+        ><span class="label-text">{{ t("course.problem.ArtifactCollection") }}</span></label
+      >
       <div class="flex gap-4">
         <label class="label cursor-pointer gap-2">
           <input type="checkbox" class="checkbox" v-model="artifactCompiledBinary" />
-          <span class="label-text">Compiled Binary</span>
+          <span class="label-text">{{ t("course.problem.CompiledBinary") }}</span>
         </label>
 
         <label class="label cursor-pointer gap-2">
           <input type="checkbox" class="checkbox" v-model="artifactZip" />
-          <span class="label-text">Student Artifact (Zip)</span>
+          <span class="label-text">{{ t("course.problem.StudentArtifact") }}</span>
         </label>
       </div>
     </div>

@@ -317,7 +317,7 @@
       "err_failed_reply": "回覆失敗",
       "err_network": "網路錯誤。 ",
       "err_problems_list": "無法載入題目列表。",
-      "err_failed_create": "發布失敗",
+      "err_failed_create": "發布失敗，請檢查是否有包含程式碼",
       "err_failed_search": "搜尋失敗"
     },
     "detail": {

@@ -7,6 +7,7 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    AdminManualModal: typeof import('./../components/Problem/Admin/AdminManualModal.vue')['default']
     AdminProblemForm: typeof import('./../components/Problem/Admin/AdminProblemForm.vue')['default']
     AIChatbot: typeof import('./../components/AIChatbot.vue')['default']
     AnnouncementCard: typeof import('./../components/Announcement/AnnouncementCard.vue')['default']

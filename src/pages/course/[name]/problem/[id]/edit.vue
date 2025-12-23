@@ -6,6 +6,7 @@ import { useRoute, useRouter } from "vue-router";
 import api, { fetcher } from "@/models/api";
 import axios, { type AxiosError } from "axios";
 import AdminProblemForm from "@/components/Problem/Admin/AdminProblemForm.vue";
+import AdminManualModal from "@/components/Problem/Admin/AdminManualModal.vue";
 
 // ==========================================
 // [CONFIG] Console Debug Mode
@@ -433,6 +434,7 @@ const mockProblemMeta = {
         <div class="card-title mb-3 justify-between">
           Edit Problem: {{ $route.params.id }} - {{ edittingProblem?.problemName }}
           <div class="flex gap-x-3">
+            <AdminManualModal />
             <button
               :class="['btn btn-error btn-outline btn-sm lg:btn-md', formElement?.isLoading && 'loading']"
               @click="delete_"

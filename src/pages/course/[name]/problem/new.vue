@@ -8,6 +8,7 @@ import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import api from "@/models/api";
 import AdminProblemForm from "@/components/Problem/Admin/AdminProblemForm.vue";
+import AdminManualModal from "@/components/Problem/Admin/AdminManualModal.vue";
 
 // ==========================================
 // [CONFIG] Console Debug Mode
@@ -266,7 +267,10 @@ const openJSON = ref(false);
   <div class="card-container">
     <div class="card min-w-full">
       <div class="card-body">
-        <div class="card-title mb-3 justify-between">New Problem</div>
+        <div class="card-title mb-3 justify-between">
+          New Problem
+          <AdminManualModal />
+        </div>
 
         <admin-problem-form ref="formElement" @update="update" @submit="submit" />
 

@@ -93,7 +93,7 @@ const problemLink = computed(() => {
               <router-link
                 v-if="problemLink"
                 :to="problemLink"
-                class="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary hover:bg-primary/20 transition-colors"
+                class="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary transition-colors hover:bg-primary/20"
                 @click.stop
               >
                 <span class="text-primary">#</span>
@@ -101,7 +101,7 @@ const problemLink = computed(() => {
               </router-link>
               <span
                 v-else
-                class="inline-flex items-center gap-1 rounded-full bg-gray-100 dark:bg-gray-700 px-3 py-1 text-sm font-medium text-gray-600 dark:text-gray-300"
+                class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-300"
               >
                 <span>#</span>
                 <span>{{ post.problemName || `Problem ${post.problemId}` }}</span>

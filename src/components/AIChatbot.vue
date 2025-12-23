@@ -589,16 +589,19 @@ onBeforeUnmount(() => {
                     <div v-if="msg.phase === 'thinking'" class="typing-dots">
                       <span></span><span></span><span></span>
                     </div>
+                    <div v-else-if="msg.phase === 'typing'" class="whitespace-pre-wrap leading-relaxed">
+                      {{ msg.displayText ?? "" }}
+                    </div>
                     <div v-else class="markdown-body leading-relaxed">
-                      <MarkdownRenderer :md="String(msg.displayText ?? msg.text)" />
+                      <MarkdownRenderer :md="String(msg.text ?? '')" />
                     </div>
                   </div>
 
                   <!-- 🔊 語音播放按鈕 -->
                   <button
-                    v-if="msg.phase !== 'thinking' && String(msg.displayText ?? msg.text).trim()"
+                    v-if="msg.phase === 'done' && String(msg.text ?? '').trim()"
                     class="tts-btn mt-1 flex h-7 w-7 items-center justify-center rounded-full border border-white/40 bg-white/30 backdrop-blur-sm hover:bg-white/50"
-                    @click="speakText(msg.id, String(msg.displayText ?? msg.text))"
+                    @click="speakText(msg.id, String(msg.text ?? ''))"
                     :title="speakingMsgId === msg.id ? '停止朗讀' : '播放語音'"
                   >
                     <svg
@@ -651,11 +654,13 @@ onBeforeUnmount(() => {
             >
               解釋這題
             </button>
-            <input
+            <textarea
               v-model="draft"
-              class="flex-1 rounded-2xl border border-white/40 bg-white/50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
-              placeholder="輸入訊息..."
-              @keydown.enter.prevent="send"
+              rows="2"
+              class="flex-1 resize-none rounded-2xl border border-white/40 bg-white/50 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-300"
+              placeholder="輸入訊息…（Enter 送出，Shift+Enter 換行）"
+              @keydown.enter.exact.prevent="send"
+              @keydown.enter.shift.stop
             />
             <button
               class="chat-icon-btn flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-r from-purple-400 to-indigo-400 text-white shadow-md"
@@ -826,4 +831,22 @@ onBeforeUnmount(() => {
     opacity: 1;
   }
 }
+
+/* Markdown 表格樣式 + hover（scoped 必須用 :deep） */
+.markdown-body :deep(table) {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.markdown-body :deep(th),
+.markdown-body :deep(td) {
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 8px 10px;
+  vertical-align: top;
+}
+
+.markdown-body :deep(tbody tr:hover) {
+  background: rgba(255, 255, 255, 0.12);
+}
+
 </style>

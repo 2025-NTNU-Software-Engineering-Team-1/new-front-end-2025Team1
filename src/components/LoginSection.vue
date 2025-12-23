@@ -8,7 +8,7 @@ import api from "@/models/api";
 import axios from "axios";
 import { useI18n } from "vue-i18n";
 // @ts-expect-error - No type definitions available
-import cowsay from "cowsay2";
+import * as cowsay from "cowsay2";
 
 const envMode = import.meta.env.MODE;
 const envApiBaseUrl = import.meta.env.VITE_APP_API_BASE_URL;
@@ -96,7 +96,7 @@ async function login() {
               type="text"
               name="username"
               :placeholder="$t('components.loginSection.placeholder.username')"
-              :class="['input-bordered input', v$.username.$error && 'input-error']"
+              :class="['input-bordered input bg-base-100 w-full', v$.username.$error && 'input-error']"
             />
             <label class="label" v-show="v$.username.$error">
               <span class="label-text-alt text-error" v-text="v$.username.$errors[0]?.$message" />
@@ -111,22 +111,23 @@ async function login() {
               type="password"
               name="password"
               :placeholder="$t('components.loginSection.placeholder.pw')"
-              :class="['input-bordered input', v$.password.$error && 'input-error']"
+              :class="['input-bordered input bg-base-100 w-full', v$.password.$error && 'input-error']"
               @keydown.enter="login"
             />
-            <label class="label flex-row-reverse">
-              <a href="/password_reset" class="label-text-alt link link-hover">{{
-                $t("components.loginSection.forgot")
-              }}</a>
+            <label class="label justify-between">
               <span
                 v-show="v$.password.$error"
                 class="label-text-alt text-error"
                 v-text="v$.password.$errors[0]?.$message"
               />
+              <span v-show="!v$.password.$error"></span>
+              <a href="/password_reset" class="label-text-alt link link-hover">{{
+                $t("components.loginSection.forgot")
+              }}</a>
             </label>
           </div>
           <div class="form-control mt-6">
-            <button :class="['btn btn-primary', loginForm.isLoading && 'loading']" @click="login">
+            <button :class="['btn btn-primary w-full', loginForm.isLoading && 'loading']" @click="login">
               {{ $t("components.loginSection.button") }}
             </button>
           </div>

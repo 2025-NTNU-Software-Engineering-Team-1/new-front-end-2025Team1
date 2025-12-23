@@ -40,57 +40,62 @@ const session = useSession();
 <template>
   <label for="noj-drawer" class="drawer-overlay"></label>
   <ul
-    :class="['menu w-40 flex-col overflow-y-auto bg-primary py-4 text-white', isMini ? 'lg:w-14' : 'lg:w-28']"
+    :class="[
+      'menu bg-primary h-full w-40 flex-col gap-2 px-0 py-6 text-white',
+      isMini ? 'overflow-hidden lg:w-14' : 'overflow-y-auto lg:w-28',
+    ]"
   >
     <router-link class="my-2 flex cursor-pointer justify-center" to="/">
       <img src="../assets/logo.svg" alt="NOJ Logo" :class="['mb-2', isMini ? 'w-10' : 'w-14']" />
     </router-link>
     <li>
-      <side-bar-link :class="{ 'btn-lg': !isMini, 'btn-active': matchRoute('/') }" to="/">
+      <side-bar-link :class="{ 'btn-lg': !isMini, 'sidebar-active': matchRoute('/') }" to="/">
         <i-uil-home class="h-6 w-6" />
-        <span v-show="!isMini" class="text-sm">{{ $t("components.sideBar.home") }}</span>
+        <span v-show="!isMini" class="text-base">{{ $t("components.sideBar.home") }}</span>
       </side-bar-link>
     </li>
     <li v-if="session.isLogin">
-      <side-bar-link :class="{ 'btn-lg': !isMini, 'btn-active': matchRoute('/courses') }" to="/courses">
+      <side-bar-link :class="{ 'btn-lg': !isMini, 'sidebar-active': matchRoute('/courses') }" to="/courses">
         <i-uil-book-alt class="h-6 w-6" />
-        <span v-show="!isMini" class="text-sm">{{ $t("components.sideBar.course") }}</span>
+        <span v-show="!isMini" class="text-base">{{ $t("components.sideBar.course") }}</span>
       </side-bar-link>
     </li>
     <li>
-      <side-bar-link :class="{ 'btn-lg': !isMini, 'btn-active': matchRoute('/about') }" to="/about">
+      <side-bar-link :class="{ 'btn-lg': !isMini, 'sidebar-active': matchRoute('/about') }" to="/about">
         <i-uil-map-marker-info class="h-6 w-6" />
-        <span v-show="!isMini" class="text-sm">{{ $t("components.sideBar.about") }}</span>
+        <span v-show="!isMini" class="text-base">{{ $t("components.sideBar.about") }}</span>
       </side-bar-link>
     </li>
 
     <div class="flex-1" />
 
     <li v-if="session.isAdmin">
-      <side-bar-link :class="{ 'btn-lg': !isMini, 'btn-active': matchRoute('/admin') }" to="/admin">
+      <side-bar-link :class="{ 'btn-lg': !isMini, 'sidebar-active': matchRoute('/admin') }" to="/admin">
         <i-uil-constructor class="h-6 w-6" />
-        <span v-show="!isMini" class="text-sm">{{ $t("components.sideBar.admin") }}</span>
+        <span v-show="!isMini" class="text-base">{{ $t("components.sideBar.admin") }}</span>
       </side-bar-link>
     </li>
     <li v-if="session.isLogin">
-      <side-bar-link :class="{ 'btn-lg': !isMini, 'btn-active': matchRoute('/profile') }" to="/profile">
+      <side-bar-link :class="{ 'btn-lg': !isMini, 'sidebar-active': matchRoute('/profile') }" to="/profile">
         <i-uil-user class="h-6 w-6" />
-        <span v-show="!isMini" class="text-sm">{{ $t("components.sideBar.profile") }}</span>
+        <span v-show="!isMini" class="text-base">{{ $t("components.sideBar.profile") }}</span>
       </side-bar-link>
     </li>
     <li>
-      <side-bar-link :class="{ 'btn-lg': !isMini, 'btn-active': matchRoute('/settings') }" to="/settings">
+      <side-bar-link :class="{ 'btn-lg': !isMini, 'sidebar-active': matchRoute('/settings') }" to="/settings">
         <i-uil-language class="h-6 w-6" />
       </side-bar-link>
     </li>
     <li>
-      <label class="btn btn-primary rounded-none p-2" @click="toggleDark()">
+      <label class="btn btn-primary w-full justify-center rounded-none p-2" @click="toggleDark()">
         <i-uil-sun v-if="isDark" class="swap-on h-6 w-6" />
         <i-uil-moon v-else class="swap-off h-6 w-6" />
       </label>
     </li>
     <li v-if="isDesktop">
-      <label class="swap swap-rotate">
+      <label
+        class="swap swap-rotate w-full cursor-pointer justify-center py-2 transition-colors hover:bg-[#26568c] hover:text-white"
+      >
         <input v-model="isMiniSidebarToggled" type="checkbox" />
         <i-uil-angle-double-right class="swap-on h-6 w-6" />
         <i-uil-angle-double-left class="swap-off h-6 w-6" />

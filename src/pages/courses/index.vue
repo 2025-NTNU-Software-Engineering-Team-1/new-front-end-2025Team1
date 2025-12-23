@@ -51,10 +51,12 @@ const rolesCanCreateCourse = [UserRole.Admin, UserRole.Teacher];
               <tr v-for="{ course, teacher } in displayedCourses" :key="course" class="hover">
                 <td
                   :class="{
-                    'min-w-[10rem] max-w-[12rem] whitespace-pre-wrap': !isDesktop,
+                    'max-w-[12rem] min-w-[10rem] whitespace-pre-wrap': !isDesktop,
                   }"
                 >
-                  <router-link :to="`/course/${course}`" class="link link-hover">{{ course }}</router-link>
+                  <router-link :to="`/course/${course}`" class="link link-hover text-lg">{{
+                    course
+                  }}</router-link>
                 </td>
                 <td>{{ teacher.username }}</td>
               </tr>

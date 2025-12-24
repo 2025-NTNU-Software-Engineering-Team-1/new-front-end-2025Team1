@@ -388,7 +388,7 @@ const networkItemsCount = computed(() => {
                                         ? 'from-accent/80 to-accent text-accent-content bg-gradient-to-br'
                                         : 'from-error/80 to-error text-error-content bg-gradient-to-br'
                                     "
-                                    :style="{ animationDelay: `${idx * 0.15 + symIdx * 0.05}s` }"
+                                    :style="{ animationDelay: `${idx * 0.15 + Number(symIdx) * 0.05}s` }"
                                   >
                                     <span class="relative z-10">{{ sym }}</span>
                                     <div
@@ -488,7 +488,7 @@ const networkItemsCount = computed(() => {
                                         ? 'from-accent/80 to-accent text-accent-content bg-gradient-to-br'
                                         : 'from-error/80 to-error text-error-content bg-gradient-to-br'
                                     "
-                                    :style="{ animationDelay: `${idx * 0.15 + symIdx * 0.05}s` }"
+                                    :style="{ animationDelay: `${idx * 0.15 + Number(symIdx) * 0.05}s` }"
                                   >
                                     <span class="relative z-10">{{ sym }}</span>
                                     <div
@@ -539,7 +539,7 @@ const networkItemsCount = computed(() => {
             </thead>
             <tbody>
               <tr v-for="({ memoryLimit, timeLimit, taskScore }, i) in subtasks" :key="i">
-                <td>{{ i + 1 }}</td>
+                <td>{{ Number(i) + 1 }}</td>
                 <td>{{ timeLimit }} ms</td>
                 <td>{{ memoryLimit }} KB</td>
                 <td>{{ taskScore }}</td>

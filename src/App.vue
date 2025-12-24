@@ -46,7 +46,7 @@ watchEffect(() => {
       leave-from="opacity-100"
       leave-to="opacity-0"
     >
-      <div class="absolute bottom-8 right-4">
+      <div class="absolute right-4 bottom-8">
         <div class="alert alert-error shadow-lg">
           <div>
             <i-uil-times-circle />

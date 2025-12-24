@@ -502,7 +502,7 @@ const mockProblemMeta = {
                 <input v-model="openJSON" type="checkbox" class="toggle" />
               </div>
 
-              <pre v-if="openJSON" class="bg-base-200 whitespace-pre-wrap rounded p-2"
+              <pre v-if="openJSON" class="bg-base-200 rounded p-2 whitespace-pre-wrap"
                 >{{ JSON.stringify(edittingProblem, null, 2) }}
               </pre>
 

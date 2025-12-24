@@ -8,9 +8,21 @@ import { useSession } from "@/stores/session";
 import { formatTime } from "@/utils/formatTime";
 import { VueDatePicker } from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
+import "./vue-datepicker-override.css";
 
 const { t } = useI18n();
 const session = useSession();
+
+// DatePicker 彈窗永遠往上顯示（popperOptions 禁用 flip）
+const datePickerPlacement = "top";
+const datePickerPopperOptions = {
+  modifiers: [
+    {
+      name: "flip",
+      enabled: false,
+    },
+  ],
+};
 
 // 主要資料與函式
 const allTokens = ref<APIToken[]>([]); // 從後端取得的原始資料
@@ -360,6 +372,10 @@ async function handleDeactivate() {
               format="yyyy-MM-dd HH:mm"
               time-picker-inline
               enable-time-picker
+              :teleport="'body'"
+              :auto-position="false"
+              :placement="datePickerPlacement"
+              :popper-options="datePickerPopperOptions"
             />
           </div>
         </div>
@@ -441,6 +457,10 @@ async function handleDeactivate() {
               format="yyyy-MM-dd HH:mm"
               time-picker-inline
               enable-time-picker
+              :teleport="'body'"
+              :auto-position="false"
+              :placement="datePickerPlacement"
+              :popper-options="datePickerPopperOptions"
             />
           </div>
         </div>

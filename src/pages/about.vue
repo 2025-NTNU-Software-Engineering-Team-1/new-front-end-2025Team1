@@ -117,7 +117,7 @@ onMounted(() => {
           </div>
           <div
             v-for="(team, index) in teams"
-            class="reveal w-100 flex flex-col items-center"
+            class="reveal flex w-100 flex-col items-center"
             :ref="setTeamRefs"
             :id="`team-${index}`"
           >

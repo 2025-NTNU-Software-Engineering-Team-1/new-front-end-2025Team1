@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { TransitionRoot, TransitionChild, Dialog, DialogTitle } from "@headlessui/vue";
 
+import "./ui-dialog.css";
+
 defineProps<{
   modelValue: boolean;
 }>();
@@ -26,7 +28,7 @@ function closeModal() {
           leave-from="opacity-100"
           leave-to="opacity-0"
         >
-          <div class="fixed inset-0 bg-black bg-opacity-25" />
+          <div class="ui-dialog-overlay fixed inset-0" />
         </TransitionChild>
 
         <TransitionChild
@@ -38,7 +40,7 @@ function closeModal() {
           leave-from="opacity-100 scale-100"
           leave-to="opacity-0 scale-95"
         >
-          <div class="modal-box">
+          <div class="modal-box" style="overflow: visible; max-height: none; height: auto">
             <DialogTitle as="h3" class="text-base-content text-xl font-medium">
               <slot name="title"></slot>
             </DialogTitle>

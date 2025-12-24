@@ -282,7 +282,7 @@ watch(
         />
       </label>
       <i-uil-lock-alt v-if="enableDisabledReason" class="text-error" />
-      <span v-if="showDisabledText" class="text-error whitespace-nowrap text-sm">
+      <span v-if="showDisabledText" class="text-error text-sm whitespace-nowrap">
         {{ resourceDataWarning || enableDisabledReason }}
       </span>
       <div class="ml-auto flex items-center gap-2">

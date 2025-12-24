@@ -1043,12 +1043,23 @@ onBeforeUnmount(() => {
                 const inputEl = e.target as HTMLInputElement;
                 const file = inputEl.files?.[0] || null;
                 problem.assets!.trialModePublicTestDataZip = null;
-                inputEl.value = '';
-                if (!file) return;
-                if (!file.name.endsWith('.zip')) return;
-                if (!assertFileSizeOK(file, 'Public Test Data')) return;
+                if (!file) {
+                  inputEl.value = '';
+                  return;
+                }
+                if (!file.name.endsWith('.zip')) {
+                  inputEl.value = '';
+                  return;
+                }
+                if (!assertFileSizeOK(file, 'Public Test Data')) {
+                  inputEl.value = '';
+                  return;
+                }
                 const ok = await validateTrialPublicZip(file);
-                if (!ok) return;
+                if (!ok) {
+                  inputEl.value = '';
+                  return;
+                }
                 problem.assets!.trialModePublicTestDataZip = file;
               }
             "
@@ -1060,7 +1071,7 @@ onBeforeUnmount(() => {
 
         <div class="form-control w-full max-w-xs">
           <label class="label">
-            <span class="label-text">{{ t("course.problems.uploadACFiles") }}<</span>
+            <span class="label-text">{{ t("course.problems.uploadACFiles") }}</span>
           </label>
           <input
             type="file"

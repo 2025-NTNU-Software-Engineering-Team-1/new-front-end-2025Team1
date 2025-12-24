@@ -251,7 +251,7 @@ const networkItemsCount = computed(() => {
             <!-- 💭 Thought bubble -->
             <div
               v-if="!areRestrictionsVisible"
-              class="flex cursor-pointer select-none items-center justify-center"
+              class="flex cursor-pointer items-center justify-center select-none"
               @click="areRestrictionsVisible = true"
             >
               <div class="bubble">
@@ -265,7 +265,7 @@ const networkItemsCount = computed(() => {
               <div v-if="areRestrictionsVisible" class="space-y-10">
                 <!-- 💭 Back button styled exactly like the bubble -->
                 <div
-                  class="flex cursor-pointer select-none items-center justify-center"
+                  class="flex cursor-pointer items-center justify-center select-none"
                   @click="areRestrictionsVisible = false"
                 >
                   <div class="bubble">
@@ -280,7 +280,7 @@ const networkItemsCount = computed(() => {
                   :class="isLanguagesExpanded ? 'px-6 py-6' : 'px-4 py-2'"
                 >
                   <div
-                    class="flex cursor-pointer select-none items-center justify-between"
+                    class="flex cursor-pointer items-center justify-between select-none"
                     @click="isLanguagesExpanded = !isLanguagesExpanded"
                   >
                     <span class="text-xl font-semibold">Allowed Languages</span>
@@ -331,7 +331,7 @@ const networkItemsCount = computed(() => {
                     ></div>
                     <div class="relative">
                       <div
-                        class="mb-4 flex cursor-pointer select-none items-center justify-between"
+                        class="mb-4 flex cursor-pointer items-center justify-between select-none"
                         @click="isLibraryExpanded = !isLibraryExpanded"
                       >
                         <div class="flex flex-1 items-center gap-3">
@@ -365,7 +365,7 @@ const networkItemsCount = computed(() => {
                               <div class="mb-3 flex items-center justify-between">
                                 <span class="text-base-content text-lg font-bold">{{ s.label }}</span>
                                 <span
-                                  class="rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide"
+                                  class="rounded-full px-3 py-1 text-xs font-semibold tracking-wide uppercase"
                                   :class="
                                     s.mode === 'whitelist'
                                       ? 'bg-accent/20 text-accent-content'
@@ -432,7 +432,7 @@ const networkItemsCount = computed(() => {
                     ></div>
                     <div class="relative">
                       <div
-                        class="mb-4 flex cursor-pointer select-none items-center justify-between"
+                        class="mb-4 flex cursor-pointer items-center justify-between select-none"
                         @click="isNetworkExpanded = !isNetworkExpanded"
                       >
                         <div class="flex flex-1 items-center gap-3">
@@ -465,7 +465,7 @@ const networkItemsCount = computed(() => {
                               <div class="mb-3 flex items-center justify-between">
                                 <span class="text-base-content text-lg font-bold">{{ s.label }}</span>
                                 <span
-                                  class="rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide"
+                                  class="rounded-full px-3 py-1 text-xs font-semibold tracking-wide uppercase"
                                   :class="
                                     s.mode === 'whitelist'
                                       ? 'bg-accent/20 text-accent-content'

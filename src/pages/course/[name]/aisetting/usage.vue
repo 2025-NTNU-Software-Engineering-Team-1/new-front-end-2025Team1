@@ -231,7 +231,7 @@ onMounted(fetchUsage);
               class="border-base-200 bg-base-100 mb-6 rounded-lg border p-4 shadow"
             >
               <div
-                class="flex cursor-pointer select-none flex-wrap items-center justify-between gap-3"
+                class="flex cursor-pointer flex-wrap items-center justify-between gap-3 select-none"
                 @click="toggleExpand(String(keyItem.id))"
               >
                 <div class="flex items-center gap-2 text-lg font-semibold">

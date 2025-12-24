@@ -243,7 +243,7 @@ async function submitCode() {
             <div class="divider" />
             <div class="bg-base-200 relative mt-4 rounded-lg p-4 transition-all duration-300">
               <button
-                class="absolute bottom-3 right-4 z-10 text-gray-500 hover:text-gray-700"
+                class="absolute right-4 bottom-3 z-10 text-gray-500 hover:text-gray-700"
                 @click="isExpanded = !isExpanded"
               >
                 <img

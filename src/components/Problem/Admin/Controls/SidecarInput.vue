@@ -99,7 +99,7 @@ function updateItem() {
           </tr>
 
           <tr v-if="modelValue.length === 0">
-            <td colspan="3" class="opacity-400 py-2 text-center text-sm">No sidecars configured.</td>
+            <td colspan="3" class="py-2 text-center text-sm opacity-400">No sidecars configured.</td>
           </tr>
         </tbody>
       </table>

@@ -1,0 +1,364 @@
+/* Prevent all parent containers from clipping datepicker popup */
+.card-container,
+.card,
+.card-body,
+.modal,
+.modal-box {
+  overflow: visible !important;
+  max-height: none !important;
+  height: auto !important;
+}
+/* Custom style for VueDatePicker background and text color */
+
+/* Light mode: override background and text */
+:root,
+[data-theme="light"] {
+  --vdp-bg: var(--color-base-100, #fff);
+  --vdp-text: var(--color-base-content, #1a365d);
+}
+
+[data-theme="dark"] {
+  --vdp-bg: #242a35;
+  --vdp-text: #e6eaf3;
+}
+
+/* Additional dark-mode fixes: ensure popup (teleported to body) shows correct colors
+   and readable text regardless of where it's mounted. Cover common root/class variants. */
+:root[data-theme="dark"] .dp__menu,
+[data-theme="dark"] .dp__menu,
+.dark .dp__menu,
+html[data-theme="dark"] .dp__menu,
+body[data-theme="dark"] .dp__menu {
+  background-color: var(--vdp-bg) !important;
+  color: var(--vdp-text) !important;
+  border: 1px solid rgba(255,255,255,0.06) !important;
+}
+
+/* Override component's light theme variables when page is in dark mode */
+:root[data-theme="dark"] .dp__main.dp__theme_light,
+[data-theme="dark"] .dp__main.dp__theme_light,
+.dark .dp__main.dp__theme_light,
+html[data-theme="dark"] .dp__main.dp__theme_light,
+body[data-theme="dark"] .dp__main.dp__theme_light,
+:root[data-theme="dark"] .dp__menu.dp__theme_light,
+[data-theme="dark"] .dp__menu.dp__theme_light,
+.dark .dp__menu.dp__theme_light,
+html[data-theme="dark"] .dp__menu.dp__theme_light,
+body[data-theme="dark"] .dp__menu.dp__theme_light {
+  --dp-background-color: var(--vdp-bg) !important;
+  --dp-text-color: var(--vdp-text) !important;
+  --dp-border-color: rgba(255,255,255,0.06) !important;
+  background-color: var(--vdp-bg) !important;
+  color: var(--vdp-text) !important;
+}
+
+/* Also ensure inner panels that rely on component variables use dark values */
+:root[data-theme="dark"] .dp__main.dp__theme_light .dp__panel,
+[data-theme="dark"] .dp__main.dp__theme_light .dp__panel,
+.dark .dp__main.dp__theme_light .dp__panel,
+html[data-theme="dark"] .dp__main.dp__theme_light .dp__panel,
+body[data-theme="dark"] .dp__main.dp__theme_light .dp__panel {
+  background-color: var(--vdp-bg) !important;
+  color: var(--vdp-text) !important;
+}
+
+/* Make all date/time text readable in dark mode */
+:root[data-theme="dark"] .dp__menu *,
+[data-theme="dark"] .dp__menu *,
+.dark .dp__menu *,
+html[data-theme="dark"] .dp__menu *,
+body[data-theme="dark"] .dp__menu * {
+  color: var(--vdp-text) !important;
+}
+
+/* Avoid global transparent rule that makes time panel invisible in dark mode.
+   We use targeted overrides below to set dark backgrounds for specific panels. */
+
+/* Re-apply visible backgrounds for footer and buttons so they remain distinct */
+:root[data-theme="dark"] .dp__menu .dp__footer,
+[data-theme="dark"] .dp__menu .dp__footer,
+.dark .dp__menu .dp__footer,
+html[data-theme="dark"] .dp__menu .dp__footer,
+body[data-theme="dark"] .dp__menu .dp__footer {
+  background-color: rgba(0,0,0,0.32) !important;
+}
+
+/* Ensure time number controls are visible */
+:root[data-theme="dark"] .dp__menu .dp__time .dp__number,
+[data-theme="dark"] .dp__menu .dp__time .dp__number,
+.dark .dp__menu .dp__time .dp__number {
+  color: var(--vdp-text) !important;
+}
+
+/* Restore proper backgrounds for time/date panels in dark mode */
+:root[data-theme="dark"] .dp__menu .dp__panel,
+[data-theme="dark"] .dp__menu .dp__panel,
+.dark .dp__menu .dp__panel,
+html[data-theme="dark"] .dp__menu .dp__panel,
+body[data-theme="dark"] .dp__menu .dp__panel,
+:root[data-theme="dark"] .dp__menu .dp__time,
+[data-theme="dark"] .dp__menu .dp__time,
+.dark .dp__menu .dp__time,
+html[data-theme="dark"] .dp__menu .dp__time,
+body[data-theme="dark"] .dp__menu .dp__time,
+:root[data-theme="dark"] .dp__menu .dp__clock,
+[data-theme="dark"] .dp__menu .dp__clock,
+.dark .dp__menu .dp__clock {
+  background-color: var(--vdp-bg) !important;
+  background: var(--vdp-bg) !important;
+  color: var(--vdp-text) !important;
+}
+
+/* Ensure clock face area uses dark background */
+:root[data-theme="dark"] .dp__menu .dp__clock-face,
+[data-theme="dark"] .dp__menu .dp__clock-face,
+.dark .dp__menu .dp__clock-face {
+  background-color: transparent !important;
+}
+
+/* Make sure the up/down controls are visible */
+:root[data-theme="dark"] .dp__menu .dp__time .dp__arrow,
+[data-theme="dark"] .dp__menu .dp__time .dp__arrow,
+.dark .dp__menu .dp__time .dp__arrow {
+  color: var(--vdp-text) !important;
+  opacity: 0.9 !important;
+}
+
+/* Slightly brighten inactive/secondary text for contrast */
+:root[data-theme="dark"] .dp__menu .dp__day,
+[data-theme="dark"] .dp__menu .dp__day,
+.dark .dp__menu .dp__day {
+  color: #c9d6e6 !important;
+}
+
+/* Ensure footer/buttons are visible */
+:root[data-theme="dark"] .dp__menu .dp__btn,
+[data-theme="dark"] .dp__menu .dp__footer,
+.dark .dp__menu .dp__btn,
+.dark .dp__menu .dp__footer {
+  color: var(--vdp-text) !important;
+}
+
+/* Fix time-picker specific parts in dark mode (hours/minutes/clock) */
+:root[data-theme="dark"] .dp__menu .dp__time,
+[data-theme="dark"] .dp__menu .dp__time,
+.dark .dp__menu .dp__time,
+html[data-theme="dark"] .dp__menu .dp__time,
+body[data-theme="dark"] .dp__menu .dp__time,
+:root[data-theme="dark"] .dp__menu .dp__clock,
+[data-theme="dark"] .dp__menu .dp__clock,
+.dark .dp__menu .dp__clock,
+html[data-theme="dark"] .dp__menu .dp__clock,
+body[data-theme="dark"] .dp__menu .dp__clock {
+  background-color: var(--vdp-bg) !important;
+  color: var(--vdp-text) !important;
+}
+
+/* Ensure numbers and controls are visible */
+:root[data-theme="dark"] .dp__menu .dp__time .dp__number,
+[data-theme="dark"] .dp__menu .dp__time .dp__number,
+.dark .dp__menu .dp__time .dp__number {
+  color: var(--vdp-text) !important;
+  opacity: 1 !important;
+}
+
+/* Clock face and selectors */
+:root[data-theme="dark"] .dp__menu .dp__clock-face,
+[data-theme="dark"] .dp__menu .dp__clock-face,
+.dark .dp__menu .dp__clock-face {
+  background-color: transparent !important;
+}
+
+/* Buttons in footer (Cancel/Select) */
+:root[data-theme="dark"] .dp__menu .dp__btn,
+[data-theme="dark"] .dp__menu .dp__footer .dp__btn,
+.dark .dp__menu .dp__btn,
+.dark .dp__menu .dp__footer .dp__btn {
+  color: var(--vdp-text) !important;
+}
+
+/* Target VueDatePicker main popup and input */
+.dp__menu,
+.dp__input_wrap input,
+.dp__input {
+  background-color: var(--vdp-bg) !important;
+  color: var(--vdp-text) !important;
+}
+
+/* Ensure datepicker popup is above modal */
+
+/* Make datepicker popup appear above modal, but visually natural */
+.dp__menu {
+  z-index: 10510 !important;
+  position: absolute !important;
+  box-shadow:
+    0 8px 32px 0 rgba(60, 80, 120, 0.18),
+    0 1.5px 6px 0 rgba(60, 80, 120, 0.1);
+  border-radius: 0.75rem !important;
+  margin-top: 0.5rem;
+}
+
+/* If popper places the menu at bottom, visually shift it above the input */
+.dp__menu[data-popper-placement^="bottom"] {
+  transform: translateY(calc(-100% - 8px)) !important;
+}
+
+/* Ensure arrow flips visually when we translate the menu */
+.dp__menu[data-popper-placement^="bottom"] .dp__arrow {
+  bottom: -6px !important;
+  top: auto !important;
+}
+
+/* Force the datepicker visually above the input by default */
+.dp__menu {
+  transform: translateY(-120%) !important;
+  transform-origin: bottom center !important;
+}
+
+/* Adjust arrow when forcing the menu above */
+.dp__menu .dp__arrow {
+  bottom: -10px !important;
+  top: auto !important;
+  left: calc(50% - 8px) !important;
+}
+
+/* Prevent modal and its parent from clipping absolute children like datepicker */
+.modal,
+.modal-box {
+  overflow: visible !important;
+  max-height: none !important;
+  height: auto !important;
+}
+
+.dp__menu {
+  border-radius: 0.75rem !important;
+}
+
+.dp__input_wrap input,
+.dp__input {
+  border-radius: 0.5rem !important;
+}
+
+/* FINAL FORCE: ensure every datepicker sub-element uses dark background/text when app is dark
+   This uses very broad selectors and !important to override inline/theme styles the component may set. */
+html[data-theme="dark"] .dp__main,
+html[data-theme="dark"] .dp__main *,
+body[data-theme="dark"] .dp__main,
+body[data-theme="dark"] .dp__main *,
+.dp__main.dp__theme_light[data-theme="dark"],
+.dp__main.dp__theme_light[data-theme="dark"] *,
+.dp__menu.dp__theme_light[data-theme="dark"],
+.dp__menu.dp__theme_light[data-theme="dark"] *,
+.dp__main.dp__theme_light,
+.dp__main.dp__theme_light *,
+.dp__menu.dp__theme_light,
+.dp__menu.dp__theme_light * {
+  background: var(--vdp-bg) !important;
+  background-color: var(--vdp-bg) !important;
+  color: var(--vdp-text) !important;
+  border-color: rgba(255,255,255,0.06) !important;
+}
+
+/* specific controls */
+.dp__main .dp__panel,
+.dp__main .dp__time,
+.dp__main .dp__clock,
+.dp__main .dp__clock-face,
+.dp__main .dp__footer,
+.dp__main .dp__btn,
+.dp__main .dp__day,
+.dp__main .dp__number,
+.dp__menu .dp__panel,
+.dp__menu .dp__time {
+  background: var(--vdp-bg) !important;
+  color: var(--vdp-text) !important;
+}
+
+/* numbers/controls fully visible */
+.dp__main .dp__number,
+.dp__main .dp__day {
+  color: var(--vdp-text) !important;
+  opacity: 1 !important;
+}
+
+/* footer/button backgrounds */
+.dp__main .dp__footer,
+.dp__menu .dp__footer {
+  background: rgba(0,0,0,0.32) !important;
+}
+
+/* arrow/controls visibility */
+.dp__main .dp__arrow,
+.dp__main .dp__time .dp__arrow {
+  color: var(--vdp-text) !important;
+  opacity: 1 !important;
+}
+
+/* if component sets inline SVG fills, force them too */
+.dp__main svg,
+.dp__menu svg {
+  fill: currentColor !important;
+}
+
+/* Fix elements that have inline light-theme variables or inline white backgrounds.
+   Some sub-elements set `--dp-background-color: #fff` inline; target those via
+   attribute selectors and force the dark background and text in dark mode. */
+:root[data-theme="dark"] .dp__main[style*="--dp-background-color"],
+:root[data-theme="dark"] .dp__menu[style*="--dp-background-color"],
+[data-theme="dark"] .dp__main[style*="--dp-background-color"],
+[data-theme="dark"] .dp__menu[style*="--dp-background-color"] {
+  background-color: var(--vdp-bg) !important;
+  color: var(--vdp-text) !important;
+  border-color: rgba(255,255,255,0.06) !important;
+}
+
+:root[data-theme="dark"] .dp__main[style*="#fff"],
+:root[data-theme="dark"] .dp__menu[style*="#fff"],
+[data-theme="dark"] .dp__main[style*="#fff"],
+[data-theme="dark"] .dp__menu[style*="#fff"] {
+  background-color: var(--vdp-bg) !important;
+  color: var(--vdp-text) !important;
+}
+
+/* Extra: target common inline white/background patterns and force dark bg
+   This covers `#fff`, `#ffffff`, `rgb(255,255,255)`, `rgba(255,255,255,...)` and
+   inline variable tokens like `--dp-background-color` set on nodes. */
+.dp__menu [style*="#fff"],
+.dp__menu [style*="#ffffff"],
+.dp__menu [style*="rgb(255, 255, 255)"],
+.dp__menu [style*="rgb(255,255,255)"],
+.dp__menu [style*="rgba(255, 255, 255"],
+.dp__menu [style*="rgba(255,255,255"],
+.dp__menu [style*="--dp-background-color"],
+.dp__menu [style*="--dp-background"] {
+  background-color: var(--vdp-bg) !important;
+  background: var(--vdp-bg) !important;
+  color: var(--vdp-text) !important;
+}
+
+/* Ensure core panels and time/clock areas are filled with dark bg */
+.dp__menu .dp__panel,
+.dp__menu .dp__time,
+.dp__menu .dp__clock,
+.dp__menu .dp__clock-face,
+.dp__menu .dp__scroll,
+.dp__menu .dp__inner {
+  background-color: var(--vdp-bg) !important;
+  color: var(--vdp-text) !important;
+}
+
+/* If any element uses transparency, ensure backdrop shows dark bg */
+.dp__menu * {
+  background-clip: padding-box !important;
+}
+
+/* Ensure inner panels of those nodes also use the dark background */
+:root[data-theme="dark"] .dp__main[style*="--dp-background-color"] .dp__panel,
+:root[data-theme="dark"] .dp__main[style*="--dp-background-color"] .dp__time,
+[data-theme="dark"] .dp__main[style*="--dp-background-color"] .dp__panel,
+[data-theme="dark"] .dp__main[style*="--dp-background-color"] .dp__time,
+.dp__menu[style*="--dp-background-color"] .dp__panel,
+.dp__menu[style*="--dp-background-color"] .dp__time {
+  background-color: var(--vdp-bg) !important;
+  color: var(--vdp-text) !important;
+}

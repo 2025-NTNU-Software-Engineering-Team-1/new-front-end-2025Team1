@@ -206,7 +206,7 @@ function normalizeAssets(raw: any): ProblemAssets {
     resourceDataZip: null,
     resourceDataTeacherZip: null,
   };
-  if (raw?.aiVTuberFiles && !raw.aiVTuberACFiles) raw.aiVTuberACFiles = raw.aiVTuberFiles;
+  // if (raw?.aiVTuberFiles && !raw.aiVTuberACFiles) raw.aiVTuberACFiles = raw.aiVTuberFiles;
   return { ...base, ...(raw || {}) };
 }
 
@@ -316,11 +316,12 @@ async function submit() {
     // Step 2: Assets
     const assets = edittingProblem.value.assets;
     const attachedFiles: string[] = [];
-
+    /*
     if (assets?.aiVTuberACFiles) {
       assets.aiVTuberACFiles.forEach((f) => fd.append("aiVTuberACFiles", f));
       attachedFiles.push(`aiVTuberACFiles (${assets.aiVTuberACFiles.length})`);
     }
+    */
     if (assets?.testdataZip) {
       fd.append("case", assets.testdataZip);
       attachedFiles.push("case");

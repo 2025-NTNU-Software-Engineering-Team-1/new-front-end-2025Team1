@@ -31,15 +31,19 @@
 /* Dark Theme Overrides */
 [data-theme="dark"] {
   /* Brighter primary for headings/links on dark background */
-  --color-primary: hsl(207 90% 40%);
+  --color-primary: hsl(207, 94%, 20%);
   --color-primary-content: hsl(0 0% 100%);
 
-  --color-base-100: hsl(220 12% 12%);
-  --color-base-200: hsl(220 12% 9%);
-  --color-base-300: hsl(220 12% 6%);
-  --color-base-content: hsl(220 12% 95%);
+    --color-base-100: hsl(220 15% 15%);
+  /* Dark gray background */
+  --color-base-200: hsl(220 15% 10%);
+  /* Darker background */
+  --color-base-300: hsl(220 15% 5%);
+  /* Even darker */
+  --color-base-content: hsl(220 15% 90%);
+  /* Light text */
 
-  --color-secondary: hsl(205 89% 40%);
+  --color-secondary: hsl(205 89% 30%);
   --color-accent: hsl(180 100% 50%);
   /* Make neutral slightly lighter so icons / muted text are clearer */
   --color-neutral: hsl(200 18% 26%);
@@ -48,18 +52,6 @@
   --color-table-header: var(--color-base-200);
 }
 
-/* Dark mode: ensure links and icon svgs are readable */
-[data-theme="dark"] a,
-[data-theme="dark"] .link,
-[data-theme="dark"] .text-link {
-  color: var(--color-primary) !important;
-}
-
-[data-theme="dark"] svg,
-[data-theme="dark"] .icon {
-  color: var(--color-base-content) !important;
-  fill: currentColor !important;
-}
 
 /* Global Table Styling Override for DaisyUI 5 */
 .table:not(.table-zebra) :where(thead, tfoot) {

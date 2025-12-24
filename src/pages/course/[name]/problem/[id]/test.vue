@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, watchEffect, computed, ref } from "vue";
+import { reactive, watchEffect, computed, ref, onMounted } from "vue";
 import hljs from "highlight.js";
 import { BlobWriter, ZipWriter, TextReader } from "@zip.js/zip.js";
 import { useAxios } from "@vueuse/integrations/useAxios";
@@ -45,9 +45,42 @@ const showSubmitModal = ref(false);
 // const testcaseFiles = ref<Array<{ name: string; content: string }>>([]);
 // const selectedTestcases = ref<string[]>([]);
 
-// Test settings from test-cases page
+// Test settings from test-cases page (loaded from localStorage)
 const useDefaultTestcases = ref(true);
 const customTestcasesBlob = ref<Blob | null>(null);
+
+const storageKey = computed(() => `testcase_settings_${route.params.id}`);
+const loadTestcaseSettings = async () => {
+  try {
+    const settingsJson = localStorage.getItem(storageKey.value);
+    if (settingsJson) {
+      const settings = JSON.parse(settingsJson);
+      useDefaultTestcases.value = settings.useDefaultTestcases ?? true;
+      
+      // Load custom testcases blob if exists
+      const blobBase64 = localStorage.getItem(`${storageKey.value}_blob`);
+      if (blobBase64 && !useDefaultTestcases.value) {
+        try {
+          // Convert data URL to blob
+          const response = await fetch(blobBase64);
+          const blob = await response.blob();
+          customTestcasesBlob.value = blob;
+        } catch (err) {
+          console.error("Failed to load custom testcases blob:", err);
+        }
+      } else {
+        customTestcasesBlob.value = null;
+      }
+    }
+  } catch (err) {
+    console.error("Failed to load testcase settings:", err);
+  }
+};
+
+// Load settings when component mounts
+onMounted(() => {
+  loadTestcaseSettings();
+});
 
 const form = reactive({
   code: "",

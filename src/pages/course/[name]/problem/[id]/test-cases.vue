@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
-import { useRoute } from "vue-router";
-import { useTitle } from "@vueuse/core";
+import { useRoute, useRouter } from "vue-router";
+import { useTitle, useStorage } from "@vueuse/core";
 import api, { fetcher } from "@/models/api";
 import { useI18n } from "vue-i18n";
 import { ZipReader, BlobReader, TextWriter, ZipWriter, BlobWriter, TextReader } from "@zip.js/zip.js";
 
 const route = useRoute();
+const router = useRouter();
 const { t } = useI18n();
 
 useTitle(`Test Cases - ${route.params.id} - ${route.params.name} | Normal OJ`);
@@ -139,14 +140,33 @@ async function saveTestcaseSettings() {
       testcaseBlob = await testcaseZipWriter.close();
     }
 
-    const formData = new FormData();
-    formData.append("use_default_testcases", useDefaultTestcases.value.toString());
+    // Save settings to localStorage for test.vue to use
+    const storageKey = `testcase_settings_${route.params.id}`;
+    const settings = {
+      useDefaultTestcases: useDefaultTestcases.value,
+      selectedTestcases: selectedTestcases.value,
+      testcaseFiles: testcaseFiles.value.map(f => ({ name: f.name, content: f.content })),
+    };
+    localStorage.setItem(storageKey, JSON.stringify(settings));
+    
+    // If custom testcases blob exists, convert to base64 and store
     if (testcaseBlob) {
-      formData.append("custom_testcases", testcaseBlob);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64 = reader.result as string;
+        localStorage.setItem(`${storageKey}_blob`, base64);
+      };
+      reader.readAsDataURL(testcaseBlob);
+    } else {
+      localStorage.removeItem(`${storageKey}_blob`);
     }
-
-    await fetcher.post(`/problem/${route.params.id}/test-settings`, formData);
+    
     saveSuccess.value = true;
+    
+    // Navigate to test page after a short delay to show success message
+    setTimeout(() => {
+      router.push(`/course/${route.params.name}/problem/${route.params.id}/test`);
+    }, 1000);
   } catch (error) {
     saveError.value = true;
     console.error("Error saving testcase settings:", error);

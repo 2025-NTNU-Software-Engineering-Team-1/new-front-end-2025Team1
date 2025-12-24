@@ -95,19 +95,31 @@ function remove(index: number) {
 
 function toggleEdit(index: number) {
   if (editingIndex.value === index) {
+    // Commit changes when closing edit
+    commitEdit();
     editingIndex.value = null;
   } else {
+    // Initialize edit buffers with current values
+    const sidecar = props.modelValue[index];
+    editArgs.value = argsToString(sidecar.args);
+    editEnv.value = envToString(sidecar.env);
     editingIndex.value = index;
   }
 }
 
-function updateSidecar(index: number, field: "args" | "env", value: string) {
+// Local buffers for editing
+const editArgs = ref("");
+const editEnv = ref("");
+
+function commitEdit() {
+  if (editingIndex.value === null) return;
+  const index = editingIndex.value;
   const newList = [...props.modelValue];
-  if (field === "args") {
-    newList[index].args = parseArgsString(value);
-  } else {
-    newList[index].env = parseEnvString(value);
-  }
+  newList[index] = {
+    ...newList[index],
+    args: parseArgsString(editArgs.value),
+    env: parseEnvString(editEnv.value),
+  };
   emit("update:modelValue", newList);
 }
 
@@ -117,55 +129,67 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
 
 <template>
   <div>
-    <div class="border-base-300 bg-base-200 mb-4 rounded-lg border p-3">
-      <!-- 上排：Name + Args -->
-      <div class="mb-2 flex items-end gap-2">
-        <div class="form-control flex-1">
-          <label class="label py-1"><span class="label-text-alt">Name</span></label>
-          <input
-            placeholder="Name (e.g. mysql)"
-            class="input-bordered input input-sm"
-            v-model="newName"
-            @keydown.enter.prevent="add"
-          />
+    <!-- Add New Sidecar Form -->
+    <div class="rounded-lg border border-base-content/30 bg-base-200 p-4 mb-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Left Column: Name & Image -->
+        <div class="space-y-3">
+          <div class="form-control">
+            <label class="label py-0">
+              <span class="label-text">Name</span>
+            </label>
+            <input
+              placeholder="e.g. mysql"
+              class="input input-bordered input-sm w-full"
+              v-model="newName"
+              @keydown.enter.prevent="add"
+            />
+          </div>
+          <div class="form-control">
+            <label class="label py-0">
+              <span class="label-text">Image</span>
+            </label>
+            <input
+              placeholder="e.g. mysql:8.0"
+              class="input input-bordered input-sm w-full"
+              v-model="newImage"
+              @keydown.enter.prevent="add"
+            />
+          </div>
         </div>
-
-        <div class="form-control flex-[2]">
-          <label class="label py-1"><span class="label-text-alt">Args (comma-separated)</span></label>
-          <input
-            placeholder="--port=3306, --host=0.0.0.0"
-            class="input-bordered input input-sm"
-            v-model="newArgs"
-          />
+        <!-- Right Column: Args & Env -->
+        <div class="space-y-3">
+          <div class="form-control">
+            <label class="label py-0">
+              <span class="label-text">Args</span>
+              <span class="label-text-alt opacity-60">comma-separated</span>
+            </label>
+            <input
+              placeholder="--port=3306, --host=0.0.0.0"
+              class="input input-bordered input-sm w-full"
+              v-model="newArgs"
+            />
+          </div>
+          <div class="form-control">
+            <label class="label py-0">
+              <span class="label-text">Env</span>
+              <span class="label-text-alt opacity-60">KEY=VALUE per line</span>
+            </label>
+            <textarea
+              placeholder="MYSQL_ROOT_PASSWORD=secret&#10;MYSQL_DATABASE=testdb"
+              class="textarea textarea-bordered textarea-sm h-16 text-xs w-full"
+              v-model="newEnv"
+            />
+          </div>
         </div>
-
-        <button class="btn btn-sm" @click="add">ADD</button>
       </div>
-
-      <!-- 下排：Image + Env -->
-      <div class="flex items-start gap-2">
-        <div class="form-control flex-1">
-          <label class="label py-1"><span class="label-text-alt">Image</span></label>
-          <input
-            placeholder="Image (e.g. mysql:8.0)"
-            class="input-bordered input input-sm"
-            v-model="newImage"
-            @keydown.enter.prevent="add"
-          />
-        </div>
-
-        <div class="form-control flex-[2]">
-          <label class="label py-1"><span class="label-text-alt">Env (KEY=VALUE per line)</span></label>
-          <textarea
-            placeholder="MYSQL_ROOT_PASSWORD=secret&#10;MYSQL_DATABASE=testdb"
-            class="textarea-bordered textarea textarea-sm h-16 text-xs"
-            v-model="newEnv"
-          />
-        </div>
+      <!-- Add Button -->
+      <div class="mt-4 flex justify-end">
+        <button class="btn btn-sm btn-primary" @click="add">Add Sidecar</button>
       </div>
     </div>
 
-    <div class="border-base-content/20 overflow-x-auto rounded-lg border">
+    <div class="border-base-content/30 overflow-x-auto rounded-lg border">
       <table class="table-sm table w-full">
         <thead class="bg-base-200">
           <tr>
@@ -194,11 +218,12 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
               <td class="py-1 text-center">
                 <button
                   class="btn btn-ghost btn-xs"
+                  :class="{ 'text-success': editingIndex === idx }"
                   @click="toggleEdit(idx)"
-                  title="Edit"
+                  :title="editingIndex === idx ? 'Save' : 'Edit'"
                 >
                   <i-uil-edit v-if="editingIndex !== idx" />
-                  <i-uil-times v-else />
+                  <i-uil-check v-else />
                 </button>
                 <button class="btn btn-ghost btn-xs text-error" @click="remove(idx)" title="Remove">
                   <i-uil-trash-alt />
@@ -213,8 +238,7 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
                     <label class="label py-0"><span class="label-text-alt">Args</span></label>
                     <input
                       class="input-bordered input input-sm"
-                      :value="getSidecarArgs(sidecar)"
-                      @input="updateSidecar(idx, 'args', ($event.target as HTMLInputElement).value)"
+                      v-model="editArgs"
                       placeholder="--port=3306, --host=0.0.0.0"
                     />
                   </div>
@@ -222,8 +246,7 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
                     <label class="label py-0"><span class="label-text-alt">Env (KEY=VALUE)</span></label>
                     <textarea
                       class="textarea-bordered textarea textarea-sm h-16 text-xs"
-                      :value="getSidecarEnv(sidecar)"
-                      @input="updateSidecar(idx, 'env', ($event.target as HTMLTextAreaElement).value)"
+                      v-model="editEnv"
                       placeholder="KEY=VALUE"
                     />
                   </div>
@@ -233,7 +256,7 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
           </template>
 
           <tr v-if="modelValue.length === 0">
-            <td colspan="3" class="py-2 text-center text-sm opacity-400">No sidecars configured.</td>
+            <td colspan="5" class="py-2 text-center text-sm opacity-70">No sidecars configured.</td>
           </tr>
         </tbody>
       </table>

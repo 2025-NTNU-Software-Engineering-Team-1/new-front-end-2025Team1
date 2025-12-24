@@ -1001,63 +1001,63 @@ onBeforeUnmount(() => {
         <span class="label-text">{{ t("course.problems.trialMode") }}</span>
         <input type="checkbox" class="toggle" v-model="problem.config!.trialMode" />
       </label>
-      <div v-if="problem.config!.trialMode" class="mt-3 space-y-4 rounded border border-gray-400 p-4">
-        <div class="form-control w-full max-w-xs">
-          <label class="label">
-            <span class="label-text">{{ t("course.problems.trialMaxNumber") }}</span>
-          </label>
-          <input
-            type="number"
-            :min="-1"
-            :max="500"
-            step="1"
-            :class="['input-bordered input w-full', trialQuotaError && 'input-error']"
-            :value="localTrialLimit"
-            @input="onTrialLimitInput"
-            placeholder="-1 (unlimited) or 1–500"
-          />
-          <label class="label">
-            <span class="label-text-alt" :class="trialQuotaError ? 'text-error' : ''">
-              {{ trialQuotaError || "-1 means unlimited" }}
-            </span>
-          </label>
-        </div>
+      <div v-if="problem.config!.trialMode" class="mt-3 space-y-4">
+        <!-- Trial Settings Row -->
+        <div class="flex flex-wrap items-start gap-x-8 gap-y-4">
+          <div class="form-control w-full max-w-xs">
+            <label class="label">
+              <span class="label-text">{{ t("course.problems.trialMaxNumber") }}</span>
+            </label>
+            <input
+              type="number"
+              :min="-1"
+              :max="500"
+              step="1"
+              :class="['input-bordered input w-full', trialQuotaError && 'input-error']"
+              :value="localTrialLimit"
+              @input="onTrialLimitInput"
+              placeholder="-1 (unlimited) or 1–500"
+            />
+            <label class="label">
+              <span class="label-text-alt" :class="trialQuotaError ? 'text-error' : ''">
+                {{ trialQuotaError || "-1 means unlimited" }}
+              </span>
+            </label>
+          </div>
 
-        <div class="bg-base-100 flex flex-wrap gap-x-8 gap-y-4 rounded border border-gray-300 p-3">
           <div class="form-control">
-            <label class="label cursor-pointer gap-3">
-              <span class="label-text font-semibold">{{ t("course.problems.resultVisible") }}</span>
+            <label class="label cursor-pointer justify-start gap-x-4">
+              <span class="label-text">{{ t("course.problems.resultVisible") }}</span>
               <input
                 type="checkbox"
                 class="toggle toggle-success toggle-sm"
                 v-model="problem.config!.trialResultVisible"
               />
             </label>
-            <span class="px-1 text-xs opacity-70">{{
+            <span class="text-xs opacity-70">{{
               t("course.problems.allowViewingExecutionOutput")
             }}</span>
           </div>
 
           <div class="form-control">
-            <label class="label cursor-pointer gap-3">
-              <span class="label-text font-semibold">{{ t("course.problems.resultDownloadable") }}</span>
+            <label class="label cursor-pointer justify-start gap-x-4">
+              <span class="label-text">{{ t("course.problems.resultDownloadable") }}</span>
               <input
                 type="checkbox"
                 class="toggle toggle-success toggle-sm"
                 v-model="problem.config!.trialResultDownloadable"
               />
             </label>
-            <span class="px-1 text-xs opacity-70">
+            <span class="text-xs opacity-70">
               {{ t("course.problems.allowDownloadingOutputFiles") }}
             </span>
           </div>
         </div>
 
-        <div class="form-control w-full max-w-md">
-          <div class="flex items-center justify-between">
-            <label class="label">
-              <span class="label-text">{{ t("course.problems.uploadPublicTestData") }}</span>
-            </label>
+        <!-- Upload Public Test Data - Card Style -->
+        <div class="rounded-lg border border-gray-500 p-4">
+          <div class="flex items-center gap-4">
+            <span class="label-text">{{ t("course.problems.uploadPublicTestData") }}</span>
             <div class="flex items-center gap-2">
               <div
                 v-if="hasAsset('public_testdata') || problem.assets?.trialModePublicTestDataZip"
@@ -1077,52 +1077,53 @@ onBeforeUnmount(() => {
               <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
             </div>
           </div>
-          <input
-            type="file"
-            accept=".zip"
-            class="file-input-bordered file-input file-input-sm w-full"
-            :class="{ 'input-error': v$?.assets?.trialModePublicTestDataZip?.$error }"
-            @change="
-              async (e: Event) => {
-                const inputEl = e.target as HTMLInputElement;
-                const file = inputEl.files?.[0] || null;
-                problem.assets!.trialModePublicTestDataZip = null;
-                if (!file) {
-                  inputEl.value = '';
+          <div class="mt-3 flex items-center gap-2">
+            <input
+              type="file"
+              accept=".zip"
+              class="file-input-bordered file-input file-input-sm w-56"
+              :class="{ 'input-error': v$?.assets?.trialModePublicTestDataZip?.$error }"
+              @change="
+                async (e: Event) => {
+                  const inputEl = e.target as HTMLInputElement;
+                  const file = inputEl.files?.[0] || null;
+                  problem.assets!.trialModePublicTestDataZip = null;
+                  if (!file) {
+                    inputEl.value = '';
+                    v$?.assets?.trialModePublicTestDataZip?.$touch();
+                    return;
+                  }
+                  if (!file.name.endsWith('.zip')) {
+                    inputEl.value = '';
+                    return;
+                  }
+                  if (!assertFileSizeOK(file, 'Public Test Data')) {
+                    inputEl.value = '';
+                    return;
+                  }
+                  const ok = await validateTrialPublicZip(file);
+                  if (!ok) {
+                    inputEl.value = '';
+                    return;
+                  }
+                  problem.assets!.trialModePublicTestDataZip = file;
                   v$?.assets?.trialModePublicTestDataZip?.$touch();
-                  return;
                 }
-                if (!file.name.endsWith('.zip')) {
-                  inputEl.value = '';
-                  return;
-                }
-                if (!assertFileSizeOK(file, 'Public Test Data')) {
-                  inputEl.value = '';
-                  return;
-                }
-                const ok = await validateTrialPublicZip(file);
-                if (!ok) {
-                  inputEl.value = '';
-                  return;
-                }
-                problem.assets!.trialModePublicTestDataZip = file;
-                v$?.assets?.trialModePublicTestDataZip?.$touch();
-              }
-            "
-          />
-          <label class="label">
-            <span class="label-text-alt opacity-70"> Only <code>.in</code> and <code>.out</code> files inside ZIP; each <code>.in</code> must have a corresponding <code>.out</code> file; ≤ 1 GB </span>
-          </label>
+              "
+            />
+          </div>
+          <div class="mt-1 pl-1 text-xs opacity-70">
+            Only <code>.in</code> and <code>.out</code> files inside ZIP; each <code>.in</code> must have a corresponding <code>.out</code> file; ≤ 1 GB
+          </div>
           <label v-if="v$?.assets?.trialModePublicTestDataZip?.$error" class="label">
             <span class="label-text-alt text-error">{{ v$.assets.trialModePublicTestDataZip.$errors[0]?.$message }}</span>
           </label>
         </div>
 
-        <div class="form-control w-full max-w-md">
-          <div class="flex items-center justify-between">
-            <label class="label">
-              <span class="label-text">{{ t("course.problems.uploadACFiles") }}</span>
-            </label>
+        <!-- Upload AC Files - Card Style -->
+        <div class="rounded-lg border border-gray-500 p-4">
+          <div class="flex items-center gap-4">
+            <span class="label-text">{{ t("course.problems.uploadACFiles") }}</span>
             <div class="flex items-center gap-2">
               <div
                 v-if="hasAsset('ac_code') || (problem.assets?.trialModeACFiles && problem.assets.trialModeACFiles.length > 0)"
@@ -1142,28 +1143,28 @@ onBeforeUnmount(() => {
               <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
             </div>
           </div>
-          <input
-            type="file"
-            multiple
-            accept=".c,.cpp,.py"
-            class="file-input-bordered file-input file-input-sm w-full"
-            :class="{ 'input-error': v$?.assets?.trialModeACFiles?.$error }"
-            @change="
-              (e: Event) => {
-                const files = Array.from((e.target as HTMLInputElement).files || []) as File[];
-                const allowedExts = ['.c', '.cpp', '.py'];
-                const valid = validateFilesForAIAC(files, allowedExts);
-                problem.assets!.trialModeACFiles = valid;
-                if (valid.length === 0) (e.target as HTMLInputElement).value = '';
-                v$?.assets?.trialModeACFiles?.$touch();
-              }
-            "
-          />
-          <label class="label mt-1">
-            <span class="label-text-alt text-sm opacity-70">
-              Allowed: .c, .cpp, .py
-            </span>
-          </label>
+          <div class="mt-3 flex items-center gap-2">
+            <input
+              type="file"
+              multiple
+              accept=".c,.cpp,.py"
+              class="file-input-bordered file-input file-input-sm w-56"
+              :class="{ 'input-error': v$?.assets?.trialModeACFiles?.$error }"
+              @change="
+                (e: Event) => {
+                  const files = Array.from((e.target as HTMLInputElement).files || []) as File[];
+                  const allowedExts = ['.c', '.cpp', '.py'];
+                  const valid = validateFilesForAIAC(files, allowedExts);
+                  problem.assets!.trialModeACFiles = valid;
+                  if (valid.length === 0) (e.target as HTMLInputElement).value = '';
+                  v$?.assets?.trialModeACFiles?.$touch();
+                }
+              "
+            />
+          </div>
+          <div class="mt-1 pl-1 text-xs opacity-70">
+            Allowed: .c, .cpp, .py
+          </div>
           <label v-if="v$?.assets?.trialModeACFiles?.$error" class="label">
             <span class="label-text-alt text-error">{{ v$.assets.trialModeACFiles.$errors[0]?.$message }}</span>
           </label>
@@ -1184,15 +1185,17 @@ onBeforeUnmount(() => {
         enter-active-class="transition ease-out duration-200"
         leave-active-class="transition ease-in duration-150"
       >
-        <div v-if="showNetworkSection" class="mt-3 space-y-4 rounded border-none p-2">
-          <div class="rounded border border-gray-400 p-4">
-            <label class="label mb-2"
-              ><span class="label-text font-semibold">{{
+        <div v-if="showNetworkSection" class="mt-3 space-y-4 p-2">
+          <!-- Network Access Restriction Section -->
+          <div class="rounded-lg border border-gray-500 overflow-hidden">
+            <div class="bg-base-300 px-4 py-2">
+              <span class="text-base-content font-medium">{{
                 t("course.problems.networkAccessRestriction")
-              }}</span></label
-            >
-            <div class="grid grid-cols-1 gap-4 p-1 md:grid-cols-2">
-              <div class="col-span-1 flex items-center gap-4 md:col-span-2">
+              }}</span>
+            </div>
+            <div class="p-4">
+              <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div class="col-span-1 flex items-center gap-4 md:col-span-2">
                 <span class="label-text">{{ t("course.problems.networkAccessModel") }}</span>
                 <div class="mode-switcher">
                   <div class="mode-switcher-container">
@@ -1261,21 +1264,27 @@ onBeforeUnmount(() => {
                 />
               </div>
             </div>
+            </div> <!-- close p-4 content -->
           </div>
-          <div class="rounded border border-gray-400 p-4">
-            <label class="label mb-2 justify-between">
-              <span class="label-text font-semibold">{{ t("course.problems.SandboxEnvironment") }}</span>
-            </label>
 
-            <div class="mb-6">
-              <SidecarInput v-model="problem.config!.networkAccessRestriction!.sidecars" />
+          <!-- Sandbox Environment Section -->
+          <div class="rounded-lg border border-gray-500 overflow-hidden">
+            <div class="bg-base-300 px-4 py-2">
+              <span class="text-base-content font-medium">{{ t("course.problems.SandboxEnvironment") }}</span>
             </div>
+            <div class="p-4 space-y-4">
+              <!-- Sidecars -->
+              <div class="rounded-lg border border-base-content/30 p-4">
+                <div class="mb-3">
+                  <span class="label-text font-medium">Sidecars</span>
+                </div>
+                <SidecarInput v-model="problem.config!.networkAccessRestriction!.sidecars" />
+              </div>
 
-            <div class="divider"></div>
-
-            <div class="form-control">
-              <label class="label justify-start gap-x-4">
-                <span class="label-text font-semibold">{{ t("course.problems.dockerFiles") }}</span>
+              <!-- Dockerfiles -->
+              <div class="rounded-lg border border-base-content/30 p-4">
+              <div class="flex items-center gap-3">
+                <span class="label-text">{{ t("course.problems.dockerFiles") }}</span>
                 <div class="flex items-center gap-2">
                   <div v-if="hasAsset('network_dockerfile')" class="flex items-center gap-2">
                     <span class="badge badge-success badge-outline text-xs">{{
@@ -1294,11 +1303,9 @@ onBeforeUnmount(() => {
                     t("course.problems.notUploaded")
                   }}</span>
                 </div>
-              </label>
-              <div class="mt-2">
-                <label class="label"
-                  ><span class="label-text">{{ t("course.problems.uploadDockerFilesZip") }}</span></label
-                >
+              </div>
+              <div class="mt-3 flex items-center gap-3">
+                <span class="label-text text-sm opacity-80">{{ t("course.problems.uploadDockerFilesZip") }}</span>
                 <input
                   type="file"
                   accept=".zip"
@@ -1377,6 +1384,7 @@ onBeforeUnmount(() => {
                   </ul>
                 </div>
               </div>
+              </div> <!-- close Dockerfiles bordered section -->
             </div>
           </div>
         </div>

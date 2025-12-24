@@ -1121,13 +1121,14 @@ onBeforeUnmount(() => {
           <input
             type="file"
             multiple
-            :accept="getAIFileExtensions().join(',')"
+            accept=".c,.cpp,.py"
             class="file-input-bordered file-input file-input-sm w-full"
             :class="{ 'input-error': v$?.assets?.trialModeACFiles?.$error }"
             @change="
               (e: Event) => {
                 const files = Array.from((e.target as HTMLInputElement).files || []) as File[];
-                const valid = validateFilesForAIAC(files, getAIFileExtensions());
+                const allowedExts = ['.c', '.cpp', '.py'];
+                const valid = validateFilesForAIAC(files, allowedExts);
                 problem.assets!.trialModeACFiles = valid;
                 if (valid.length === 0) (e.target as HTMLInputElement).value = '';
                 v$?.assets?.trialModeACFiles?.$touch();
@@ -1136,7 +1137,7 @@ onBeforeUnmount(() => {
           />
           <label class="label mt-1">
             <span class="label-text-alt text-sm opacity-70">
-              Allowed: {{ getAIFileExtensions().join(", ") }}
+              Allowed: .c, .cpp, .py
             </span>
           </label>
           <label v-if="v$?.assets?.trialModeACFiles?.$error" class="label">

@@ -148,7 +148,7 @@ async function test() {
     // Check for specific error messages from backend
     const axiosError = error as AxiosError<{ message?: string }>;
     const backendMessage = axiosError?.response?.data?.message || "";
-    
+
     if (backendMessage.includes("Trial mode is not enabled")) {
       form.errorMessage = t("course.problem.test.err.trialModeNotEnabled");
     } else if (backendMessage.includes("permission") || backendMessage.includes("Forbidden")) {

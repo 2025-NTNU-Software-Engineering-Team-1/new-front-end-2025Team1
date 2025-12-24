@@ -3,6 +3,7 @@
 // ==========================================
 // Imports
 // ==========================================
+import { useI18n } from "vue-i18n";
 import { onMounted, inject, Ref, ref, watch, computed } from "vue";
 import { useRoute } from "vue-router";
 
@@ -12,7 +13,7 @@ import MultiStringInput from "../Controls/MultiStringInput.vue";
 // Utils & API
 import api from "@/models/api";
 import { assertFileSizeOK } from "@/utils/checkFileSize";
-
+const { t } = useI18n();
 // ==========================================
 // [CONFIG] Console Debug Mode
 // ==========================================
@@ -397,18 +398,18 @@ onMounted(async () => {
   <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
     <!-- File Access -->
     <div class="col-span-2 rounded-lg border border-gray-400 p-4">
-      <div class="mb-2 text-sm font-semibold">File Access</div>
+      <div class="mb-2 text-sm font-semibold">{{t("course.problems.fileAccess")}}</div>
       <div class="flex flex-wrap gap-6">
         <div class="form-control">
           <label class="label cursor-pointer justify-start gap-x-2">
-            <span class="label-text">Allow Read</span>
+            <span class="label-text">{{t("course.problems.fileAccessAllowedRead")}}</span>
             <input type="checkbox" class="toggle" v-model="allowReadToggle" />
           </label>
         </div>
         <div class="form-control">
           <label class="label cursor-pointer justify-start gap-x-2">
             <span class="label-text flex items-center gap-2">
-              <span>Allow Write</span>
+              <span>{{t("course.problems.fileAccessAllowedWrite")}}</span>
               <i-uil-lock-alt v-if="!allowReadToggle" class="text-error" />
             </span>
             <input type="checkbox" class="toggle" :disabled="!allowReadToggle" v-model="allowWriteToggle" />
@@ -418,7 +419,7 @@ onMounted(async () => {
             class="mt-1 pl-1 text-xs"
             :class="allowWriteWarningError ? 'text-error' : 'opacity-70'"
           >
-            {{ allowWriteWarning }}
+            {{ t("course.problems.allowWriteWarning") }}
           </p>
         </div>
       </div>
@@ -427,7 +428,7 @@ onMounted(async () => {
     <!-- Library Restrictions -->
     <div class="form-control col-span-2 rounded-lg border border-gray-400 p-4">
       <label class="label cursor-pointer justify-start gap-x-4">
-        <span class="label-text">Library Restrictions</span>
+        <span class="label-text">{{t("course.problems.libraryRestrictions")}}</span>
         <input
           type="checkbox"
           class="toggle"
@@ -439,78 +440,47 @@ onMounted(async () => {
         v-if="problem.pipeline!.staticAnalysis!.libraryRestrictions!.enabled"
         class="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2"
       >
-        <!-- ===== Syntax Restrictions ===== -->
+        <!-- ===== 上排左邊：syntax ===== -->
         <div class="rounded-lg border border-gray-400 p-3">
           <div class="mb-3 flex items-center justify-between">
-            <h4 class="text font-medium">Syntax Restrictions</h4>
-
-            <div class="flex items-center gap-2">
-              <!-- Select all / Clear -->
-              <button
-                type="button"
-                class="btn btn-xs"
-                @click="selectAllBackend('syntax', syntaxMode)"
-                :disabled="getBackendOptions('syntax').length === 0"
-              >
-                Select all
-              </button>
-              <button type="button" class="btn btn-xs btn-ghost" @click="clearSection('syntax', syntaxMode)">
-                Clear
-              </button>
-
-              <!-- mode switcher -->
-              <div class="mode-switcher">
-                <div class="mode-switcher-container">
-                  <div
-                    class="mode-switcher-slider"
-                    :class="{ 'slider-blacklist': syntaxMode === 'blacklist' }"
-                  ></div>
-                  <button
-                    class="mode-switcher-option"
-                    :class="{ active: syntaxMode === 'whitelist' }"
-                    @click="syntaxMode = 'whitelist'"
-                  >
-                    <span>Whitelist</span>
-                  </button>
-                  <button
-                    class="mode-switcher-option"
-                    :class="{ active: syntaxMode === 'blacklist' }"
-                    @click="syntaxMode = 'blacklist'"
-                  >
-                    <span>Blacklist</span>
-                  </button>
-                </div>
+            <h4 class="text font-medium">{{ t("course.problems.syntaxRestrictions") }}</h4>
+            <!-- 滑動開關 -->
+            <div class="mode-switcher">
+              <div class="mode-switcher-container">
+                <div
+                  class="mode-switcher-slider"
+                  :class="{ 'slider-blacklist': syntaxMode === 'blacklist' }"
+                ></div>
+                <button
+                  class="mode-switcher-option"
+                  :class="{ active: syntaxMode === 'whitelist' }"
+                  @click="syntaxMode = 'whitelist'"
+                >
+                  <span>{{t("course.problems.restrictionWhite")}}</span>
+                </button>
+                <button
+                  class="mode-switcher-option"
+                  :class="{ active: syntaxMode === 'blacklist' }"
+                  @click="syntaxMode = 'blacklist'"
+                >
+                  <span>{{t("course.problems.restrictionBlack")}}</span>
+                </button>
               </div>
             </div>
           </div>
 
-          <div class="mb-2 flex flex-wrap gap-2">
-            <template v-for="opt in getLibList('syntax', syntaxMode)" :key="`syntax-selected-${opt}`">
-              <button
-                class="btn btn-xs"
-                :class="syntaxMode === 'whitelist' ? 'btn-info' : 'btn-error'"
-                @click="
-                  toggleItem(problem.pipeline!.staticAnalysis!.libraryRestrictions![syntaxMode]!.syntax, opt)
-                "
-              >
-                {{ opt }}
-              </button>
-            </template>
-          </div>
-
-          <div class="my-2">
-            <MultiStringInput
-              v-model="problem.pipeline!.staticAnalysis!.libraryRestrictions![syntaxMode]!.syntax"
-              placeholder="Add syntax keyword"
-              :badge-class="syntaxMode === 'whitelist' ? 'badge-info' : 'badge-error'"
-            />
-          </div>
-
           <div class="mt-2 flex flex-wrap gap-2">
             <button
-              v-for="opt in getCandidates('syntax', syntaxMode)"
-              :key="`syntax-candidate-${opt}`"
+              v-for="opt in defaultSyntaxOptions"
+              :key="`syntax-${opt}`"
               class="btn btn-xs"
+              :class="
+                problem.pipeline!.staticAnalysis!.libraryRestrictions![syntaxMode]!.syntax.includes(opt)
+                  ? syntaxMode === 'whitelist'
+                    ? 'btn-info'
+                    : 'btn-error'
+                  : ''
+              "
               @click="
                 toggleItem(problem.pipeline!.staticAnalysis!.libraryRestrictions![syntaxMode]!.syntax, opt)
               "
@@ -518,292 +488,201 @@ onMounted(async () => {
               {{ opt }}
             </button>
           </div>
+
+          <div class="mt-2">
+            <MultiStringInput
+              v-model="problem.pipeline!.staticAnalysis!.libraryRestrictions![syntaxMode]!.syntax"
+              :placeholder="t('course.problems.placeholderSyntax')"
+              :badge-class="syntaxMode === 'whitelist' ? 'badge-info' : 'badge-error'"
+            />
+          </div>
         </div>
 
-        <!-- ===== Imports Restrictions ===== -->
+        <!-- ===== 上排右邊：imports ===== -->
         <div class="relative rounded-lg border border-gray-400 p-3">
-          <!-- disable overlay -->
+          <!-- 禁用遮罩提示 -->
           <div
             v-if="!allowImports"
             class="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-gray-900/80 backdrop-blur-sm"
           >
             <div class="px-4 text-center">
               <i-uil-lock-alt class="text-warning mb-2 text-4xl" />
-              <p class="text-sm font-medium text-gray-300">Imports Restrictions Disabled</p>
-              <p class="mt-1 text-xs text-gray-400">Python language must be enabled to use this feature</p>
+              <p class="text-sm font-medium text-gray-300">{{t("course.problems.restrictionDisabled")}}</p>
+              <p class="mt-1 text-xs text-gray-400">{{t("course.problems.restrictionDisabledInfo")}}</p>
             </div>
           </div>
 
           <div class="mb-3 flex items-center justify-between">
-            <h4 class="text font-medium">Imports Restrictions</h4>
-
-            <div class="flex items-center gap-2">
-              <button
-                type="button"
-                class="btn btn-xs"
-                @click="selectAllBackend('imports', importMode)"
-                :disabled="!allowImports || getBackendOptions('imports').length === 0"
-              >
-                Select all
-              </button>
-              <button
-                type="button"
-                class="btn btn-xs btn-ghost"
-                @click="clearSection('imports', importMode)"
-                :disabled="!allowImports"
-              >
-                Clear
-              </button>
-
-              <!-- mode switcher -->
-              <div class="mode-switcher">
-                <div class="mode-switcher-container">
-                  <div
-                    class="mode-switcher-slider"
-                    :class="{ 'slider-blacklist': importMode === 'blacklist' }"
-                  ></div>
-                  <button
-                    class="mode-switcher-option"
-                    :class="{ active: importMode === 'whitelist' }"
-                    @click="importMode = 'whitelist'"
-                    :disabled="!allowImports"
-                  >
-                    <span>Whitelist</span>
-                  </button>
-                  <button
-                    class="mode-switcher-option"
-                    :class="{ active: importMode === 'blacklist' }"
-                    @click="importMode = 'blacklist'"
-                    :disabled="!allowImports"
-                  >
-                    <span>Blacklist</span>
-                  </button>
-                </div>
+            <h4 class="text font-medium">{{ t("course.problems.importsRestrictions") }}</h4>
+            <!-- 滑動開關 -->
+            <div class="mode-switcher">
+              <div class="mode-switcher-container">
+                <div
+                  class="mode-switcher-slider"
+                  :class="{ 'slider-blacklist': importMode === 'blacklist' }"
+                ></div>
+                <button
+                  class="mode-switcher-option"
+                  :class="{ active: importMode === 'whitelist' }"
+                  @click="importMode = 'whitelist'"
+                  :disabled="!allowImports"
+                >
+                  <span>{{t("course.problems.restrictionWhite")}}</span>
+                </button>
+                <button
+                  class="mode-switcher-option"
+                  :class="{ active: importMode === 'blacklist' }"
+                  @click="importMode = 'blacklist'"
+                  :disabled="!allowImports"
+                >
+                  <span>{{t("course.problems.restrictionBlack")}}</span>
+                </button>
               </div>
             </div>
           </div>
 
-          <template v-if="allowImports">
-            <div class="mb-2 flex flex-wrap gap-2">
-              <template v-for="opt in getLibList('imports', importMode)" :key="`import-selected-${opt}`">
-                <button
-                  class="btn btn-xs"
-                  :class="importMode === 'whitelist' ? 'btn-info' : 'btn-error'"
-                  @click="
-                    toggleItem(
-                      problem.pipeline!.staticAnalysis!.libraryRestrictions![importMode]!.imports,
-                      opt,
-                    )
-                  "
-                >
-                  {{ opt }}
-                </button>
-              </template>
-            </div>
+          <div v-if="allowImports" class="mt-2 flex flex-wrap gap-2">
+            <button
+              v-for="opt in libraryOptions.imports"
+              :key="`import-${opt}`"
+              class="btn btn-xs"
+              :class="
+                problem.pipeline!.staticAnalysis!.libraryRestrictions![importMode]!.imports.includes(opt)
+                  ? importMode === 'whitelist'
+                    ? 'btn-info'
+                    : 'btn-error'
+                  : ''
+              "
+              @click="
+                toggleItem(problem.pipeline!.staticAnalysis!.libraryRestrictions![importMode]!.imports, opt)
+              "
+            >
+              {{ opt }}
+            </button>
+          </div>
 
-            <div class="my-2">
-              <MultiStringInput
-                v-model="problem.pipeline!.staticAnalysis!.libraryRestrictions![importMode]!.imports"
-                placeholder="Add import"
-                :badge-class="importMode === 'whitelist' ? 'badge-info' : 'badge-error'"
-              />
-            </div>
-
-            <div class="mt-2 flex flex-wrap gap-2">
-              <button
-                v-for="opt in getCandidates('imports', importMode)"
-                :key="`import-candidate-${opt}`"
-                class="btn btn-xs"
-                @click="
-                  toggleItem(problem.pipeline!.staticAnalysis!.libraryRestrictions![importMode]!.imports, opt)
-                "
-              >
-                {{ opt }}
-              </button>
-            </div>
-          </template>
+          <div v-if="allowImports" class="mt-2">
+            <MultiStringInput
+              v-model="problem.pipeline!.staticAnalysis!.libraryRestrictions![importMode]!.imports"
+              :placeholder="t('course.problems.placeholderImport')"
+              :badge-class="importMode === 'whitelist' ? 'badge-info' : 'badge-error'"
+            />
+          </div>
         </div>
 
-        <!-- ===== Headers Restrictions ===== -->
+        <!-- ===== 下排左邊：headers ===== -->
         <div class="relative rounded-lg border border-gray-400 p-3">
+          <!-- 禁用遮罩提示 -->
           <div
             v-if="!allowHeaders"
             class="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-gray-900/80 backdrop-blur-sm"
           >
             <div class="px-4 text-center">
               <i-uil-lock-alt class="text-warning mb-2 text-4xl" />
-              <p class="text-sm font-medium text-gray-300">Headers Restrictions Disabled</p>
-              <p class="mt-1 text-xs text-gray-400">C or C++ language must be enabled to use this feature</p>
+              <p class="text-sm font-medium text-gray-300">{{ t("course.problem.headersRestrictionDisabled") }}</p>
+              <p class="mt-1 text-xs text-gray-400">{{ t("course.problem.headersRestrictionInfo") }}</p>
             </div>
           </div>
 
           <div class="mb-3 flex items-center justify-between">
-            <h4 class="text font-medium">Headers Restrictions</h4>
-
-            <div class="flex items-center gap-2">
-              <button
-                type="button"
-                class="btn btn-xs"
-                @click="selectAllBackend('headers', headerMode)"
-                :disabled="!allowHeaders || getBackendOptions('headers').length === 0"
-              >
-                Select all
-              </button>
-              <button
-                type="button"
-                class="btn btn-xs btn-ghost"
-                @click="clearSection('headers', headerMode)"
-                :disabled="!allowHeaders"
-              >
-                Clear
-              </button>
-
-              <div class="mode-switcher">
-                <div class="mode-switcher-container">
-                  <div
-                    class="mode-switcher-slider"
-                    :class="{ 'slider-blacklist': headerMode === 'blacklist' }"
-                  ></div>
-                  <button
-                    class="mode-switcher-option"
-                    :class="{ active: headerMode === 'whitelist' }"
-                    @click="headerMode = 'whitelist'"
-                    :disabled="!allowHeaders"
-                  >
-                    <span>Whitelist</span>
-                  </button>
-                  <button
-                    class="mode-switcher-option"
-                    :class="{ active: headerMode === 'blacklist' }"
-                    @click="headerMode = 'blacklist'"
-                    :disabled="!allowHeaders"
-                  >
-                    <span>Blacklist</span>
-                  </button>
-                </div>
+            <h4 class="text font-medium">{{ t("course.problems.headersRestrictions") }}</h4>
+            <!-- 滑動開關 -->
+            <div class="mode-switcher">
+              <div class="mode-switcher-container">
+                <div
+                  class="mode-switcher-slider"
+                  :class="{ 'slider-blacklist': headerMode === 'blacklist' }"
+                ></div>
+                <button
+                  class="mode-switcher-option"
+                  :class="{ active: headerMode === 'whitelist' }"
+                  @click="headerMode = 'whitelist'"
+                  :disabled="!allowHeaders"
+                >
+                  <span>{{t("course.problems.restrictionWhite")}}</span>
+                </button>
+                <button
+                  class="mode-switcher-option"
+                  :class="{ active: headerMode === 'blacklist' }"
+                  @click="headerMode = 'blacklist'"
+                  :disabled="!allowHeaders"
+                >
+                  <span>{{t("course.problems.restrictionBlack")}}</span>
+                </button>
               </div>
             </div>
           </div>
 
-          <template v-if="allowHeaders">
-            <div class="mb-2 flex flex-wrap gap-2">
-              <template v-for="opt in getLibList('headers', headerMode)" :key="`header-selected-${opt}`">
-                <button
-                  class="btn btn-xs"
-                  :class="headerMode === 'whitelist' ? 'btn-info' : 'btn-error'"
-                  @click="
-                    toggleItem(
-                      problem.pipeline!.staticAnalysis!.libraryRestrictions![headerMode]!.headers,
-                      opt,
-                    )
-                  "
-                >
-                  {{ opt }}
-                </button>
-              </template>
-            </div>
+          <div v-if="allowHeaders" class="mt-2 flex flex-wrap gap-2">
+            <button
+              v-for="opt in libraryOptions.headers"
+              :key="`header-${opt}`"
+              class="btn btn-xs"
+              :class="
+                problem.pipeline!.staticAnalysis!.libraryRestrictions![headerMode]!.headers.includes(opt)
+                  ? headerMode === 'whitelist'
+                    ? 'btn-info'
+                    : 'btn-error'
+                  : ''
+              "
+              @click="
+                toggleItem(problem.pipeline!.staticAnalysis!.libraryRestrictions![headerMode]!.headers, opt)
+              "
+            >
+              {{ opt }}
+            </button>
+          </div>
 
-            <div class="my-2">
-              <MultiStringInput
-                v-model="problem.pipeline!.staticAnalysis!.libraryRestrictions![headerMode]!.headers"
-                placeholder="Add header"
-                :badge-class="headerMode === 'whitelist' ? 'badge-info' : 'badge-error'"
-              />
-            </div>
-
-            <div class="mt-2 flex flex-wrap gap-2">
-              <button
-                v-for="opt in getCandidates('headers', headerMode)"
-                :key="`header-candidate-${opt}`"
-                class="btn btn-xs"
-                @click="
-                  toggleItem(problem.pipeline!.staticAnalysis!.libraryRestrictions![headerMode]!.headers, opt)
-                "
-              >
-                {{ opt }}
-              </button>
-            </div>
-          </template>
+          <div v-if="allowHeaders" class="mt-2">
+            <MultiStringInput
+              v-model="problem.pipeline!.staticAnalysis!.libraryRestrictions![headerMode]!.headers"
+              :placeholder="t('course.problems.placeholderHeader')"
+              :badge-class="headerMode === 'whitelist' ? 'badge-info' : 'badge-error'"
+            />
+          </div>
         </div>
 
-        <!-- ===== Functions Restrictions ===== -->
+        <!-- ===== 下排右邊：functions ===== -->
         <div class="rounded-lg border border-gray-400 p-3">
           <div class="mb-3 flex items-center justify-between">
-            <h4 class="text font-medium">Functions Restrictions</h4>
-
-            <div class="flex items-center gap-2">
-              <button
-                type="button"
-                class="btn btn-xs"
-                @click="selectAllBackend('functions', functionMode)"
-                :disabled="getBackendOptions('functions').length === 0"
-              >
-                Select all
-              </button>
-              <button
-                type="button"
-                class="btn btn-xs btn-ghost"
-                @click="clearSection('functions', functionMode)"
-              >
-                Clear
-              </button>
-
-              <!-- mode switcher -->
-              <div class="mode-switcher">
-                <div class="mode-switcher-container">
-                  <div
-                    class="mode-switcher-slider"
-                    :class="{ 'slider-blacklist': functionMode === 'blacklist' }"
-                  ></div>
-                  <button
-                    class="mode-switcher-option"
-                    :class="{ active: functionMode === 'whitelist' }"
-                    @click="functionMode = 'whitelist'"
-                  >
-                    <span>Whitelist</span>
-                  </button>
-                  <button
-                    class="mode-switcher-option"
-                    :class="{ active: functionMode === 'blacklist' }"
-                    @click="functionMode = 'blacklist'"
-                  >
-                    <span>Blacklist</span>
-                  </button>
-                </div>
+            <h4 class="text font-medium">{{ t("course.problems.functionsRestrictions") }}</h4>
+            <!-- 滑動開關 --> 
+            <div class="mode-switcher">
+              <div class="mode-switcher-container">
+                <div
+                  class="mode-switcher-slider"
+                  :class="{ 'slider-blacklist': functionMode === 'blacklist' }"
+                ></div>
+                <button
+                  class="mode-switcher-option"
+                  :class="{ active: functionMode === 'whitelist' }"
+                  @click="functionMode = 'whitelist'"
+                >
+                  <span>{{t("course.problems.restrictionWhite")}}</span>
+                </button>
+                <button
+                  class="mode-switcher-option"
+                  :class="{ active: functionMode === 'blacklist' }"
+                  @click="functionMode = 'blacklist'"
+                >
+                  <span>{{t("course.problems.restrictionBlack")}}</span>
+                </button>
               </div>
             </div>
-          </div>
-
-          <div class="mb-2 flex flex-wrap gap-2">
-            <template v-for="opt in getLibList('functions', functionMode)" :key="`fn-selected-${opt}`">
-              <button
-                class="btn btn-xs"
-                :class="functionMode === 'whitelist' ? 'btn-info' : 'btn-error'"
-                @click="
-                  toggleItem(
-                    problem.pipeline!.staticAnalysis!.libraryRestrictions![functionMode]!.functions,
-                    opt,
-                  )
-                "
-              >
-                {{ opt }}
-              </button>
-            </template>
-          </div>
-
-          <div class="my-2">
-            <MultiStringInput
-              v-model="problem.pipeline!.staticAnalysis!.libraryRestrictions![functionMode]!.functions"
-              placeholder="Add function"
-              :badge-class="functionMode === 'whitelist' ? 'badge-info' : 'badge-error'"
-            />
           </div>
 
           <div class="mt-2 flex flex-wrap gap-2">
             <button
-              v-for="opt in getCandidates('functions', functionMode)"
-              :key="`fn-candidate-${opt}`"
+              v-for="opt in libraryOptions.functions"
+              :key="`func-${opt}`"
               class="btn btn-xs"
+              :class="
+                problem.pipeline!.staticAnalysis!.libraryRestrictions![functionMode]!.functions.includes(opt)
+                  ? functionMode === 'whitelist'
+                    ? 'btn-info'
+                    : 'btn-error'
+                  : ''
+              "
               @click="
                 toggleItem(
                   problem.pipeline!.staticAnalysis!.libraryRestrictions![functionMode]!.functions,
@@ -814,6 +693,14 @@ onMounted(async () => {
               {{ opt }}
             </button>
           </div>
+
+          <div class="mt-2">
+            <MultiStringInput
+              v-model="problem.pipeline!.staticAnalysis!.libraryRestrictions![functionMode]!.functions"
+              :placeholder="t('course.problems.placeholderFunction')"
+              :badge-class="functionMode === 'whitelist' ? 'badge-info' : 'badge-error'"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -822,7 +709,7 @@ onMounted(async () => {
     <div class="form-control col-span-1 md:col-span-2">
       <div class="rounded-lg border border-gray-400 p-4">
         <label class="label mb-2">
-          <span class="label-text">Execution Mode</span>
+          <span class="label-text">{{t("course.problems.executionMode")}}</span>
         </label>
 
         <!-- radio options -->
@@ -834,7 +721,7 @@ onMounted(async () => {
               value="general"
               v-model="problem.pipeline!.executionMode as any"
             />
-            <span class="label-text">General</span>
+            <span class="label-text">{{t("course.problems.executionModeGeneral")}}</span>
           </label>
           <label class="label cursor-pointer gap-2">
             <input
@@ -843,7 +730,7 @@ onMounted(async () => {
               value="functionOnly"
               v-model="problem.pipeline!.executionMode as any"
             />
-            <span class="label-text">Function Only</span>
+            <span class="label-text">{{t("course.problems.executionModeFuncitonOnly")}}</span>
           </label>
           <label class="label cursor-pointer gap-2">
             <input
@@ -852,7 +739,7 @@ onMounted(async () => {
               value="interactive"
               v-model="problem.pipeline!.executionMode as any"
             />
-            <span class="label-text">Interactive</span>
+            <span class="label-text">{{t("course.problems.executionModeInteractive")}}</span>
           </label>
         </div>
 
@@ -867,14 +754,14 @@ onMounted(async () => {
           <div class="form-control">
             <div class="flex flex-wrap items-center gap-4">
               <label class="label mb-0 cursor-pointer justify-start gap-x-2">
-                <span class="label-text">Upload Makefile.zip</span>
+                <span class="label-text">{{t("course.problems.uploadFile")}}</span>
               </label>
               <div class="flex items-center gap-2">
                 <div
                   v-if="hasAsset('makefile') || problem.assets?.makefileZip"
                   class="flex items-center gap-2"
                 >
-                  <span class="badge badge-outline badge-success text-xs">Uploaded</span>
+                  <span class="badge badge-outline badge-success text-xs">{{t("course.problems.upload")}}</span>
                   <a
                     v-if="hasAsset('makefile')"
                     :href="assetDownloadUrl('makefile') || '#'"
@@ -882,10 +769,10 @@ onMounted(async () => {
                     target="_blank"
                     rel="noopener"
                   >
-                    Download
+                    {{t("course.problems.download")}}
                   </a>
                 </div>
-                <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
+                <span v-else class="badge badge-outline text-xs opacity-70">{{t("course.problems.notNotUploaded")}}</span>
               </div>
               <input
                 type="file"
@@ -921,19 +808,19 @@ onMounted(async () => {
             <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
               <!-- 左：Teacher first -->
               <label class="label mb-0 cursor-pointer justify-start gap-x-2">
-                <span class="label-text flex items-center gap-1">Teacher First</span>
+                <span class="label-text flex items-center gap-1">{{t("course.problems.ineractiveTeacherFirst")}}</span>
                 <input type="checkbox" class="toggle toggle-sm" v-model="problem.pipeline!.teacherFirst" />
               </label>
 
               <!-- 右：Teacher_Code -->
               <div class="flex items-center gap-x-2">
-                <span class="text-sm opacity-80">Upload Teacher Code</span>
+                <span class="text-sm opacity-80">{{t("course.problems.interactiveUploadTeacherCode")}}</span>
                 <div class="flex items-center gap-2">
                   <div
                     v-if="hasAsset('teacher_file') || problem.assets?.teacherFile"
                     class="flex items-center gap-2"
                   >
-                    <span class="badge badge-outline badge-success text-xs">Uploaded</span>
+                    <span class="badge badge-outline badge-success text-xs">{{t("course.problems.uploaded")}}</span>
                     <a
                       v-if="hasAsset('teacher_file')"
                       :href="assetDownloadUrl('teacher_file') || '#'"
@@ -941,10 +828,10 @@ onMounted(async () => {
                       target="_blank"
                       rel="noopener"
                     >
-                      Download
+                      {{t("course.problems.download")}}
                     </a>
                   </div>
-                  <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
+                  <span v-else class="badge badge-outline text-xs opacity-70">{{t("course.problems.notNotUploaded")}}</span>
                 </div>
                 <input
                   type="file"
@@ -981,7 +868,7 @@ onMounted(async () => {
         <div class="flex items-center gap-4">
           <label class="label cursor-pointer justify-start gap-x-4">
             <span class="label-text flex items-center gap-1">
-              <span>Custom Checker</span>
+              <span>{{t("course.problems.customChecker")}}</span>
               <i-uil-lock-alt
                 v-if="problem.pipeline!.executionMode === 'interactive'"
                 class="text-error"
@@ -1001,7 +888,7 @@ onMounted(async () => {
               v-if="hasAsset('checker') || problem.assets?.customCheckerPy"
               class="flex items-center gap-2"
             >
-              <span class="badge badge-outline badge-success text-xs">Uploaded</span>
+              <span class="badge badge-outline badge-success text-xs">{{t("course.problems.uploaded")}}</span>
               <a
                 v-if="hasAsset('checker')"
                 :href="assetDownloadUrl('checker') || '#'"
@@ -1009,16 +896,16 @@ onMounted(async () => {
                 target="_blank"
                 rel="noopener"
               >
-                Download
+                {{t("course.problems.download")}}
               </a>
             </div>
-            <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
+            <span v-else class="badge badge-outline text-xs opacity-70">{{t("course.problems.notNotUploaded")}}</span>
           </div>
         </div>
 
         <div v-if="problem.pipeline!.customChecker" class="flex flex-col gap-x-2">
           <div class="flex items-center gap-x-2">
-            <span class="pl-1 text-sm opacity-80">Upload Custom_Checker.py</span>
+            <span class="pl-1 text-sm opacity-80">{{t("course.problems.uploadCustomChecker")}}</span>
             <input
               type="file"
               accept=".py"
@@ -1047,8 +934,8 @@ onMounted(async () => {
         <div v-else class="pl-1 text-xs opacity-70">
           {{
             problem.pipeline!.executionMode === "interactive"
-              ? "Custom Checker disabled in Interactive mode."
-              : "Enable to upload Custom_Checker.py"
+              ? t("course.problems.uploadCustomCheckerWarning")
+              : t("course.problems.uploadCustomCheckerInfo")
           }}
         </div>
       </div>
@@ -1059,12 +946,12 @@ onMounted(async () => {
       <div class="rounded-lg border border-gray-400 p-4">
         <div class="flex items-center gap-4">
           <label class="label cursor-pointer justify-start gap-x-4">
-            <span class="label-text">Custom Scoring Script</span>
+            <span class="label-text">{{t("course.problems.customScoringScript")}}</span>
             <input type="checkbox" class="toggle" v-model="(problem as any).pipeline.scoringScript.custom" />
           </label>
           <div class="flex items-center gap-2">
             <div v-if="hasAsset('scoring_script') || problem.assets?.scorePy" class="flex items-center gap-2">
-              <span class="badge badge-outline badge-success text-xs">Uploaded</span>
+              <span class="badge badge-outline badge-success text-xs">{{t("course.problems.uploaded")}}</span>
               <a
                 v-if="hasAsset('scoring_script')"
                 :href="assetDownloadUrl('scoring_script') || '#'"
@@ -1072,16 +959,16 @@ onMounted(async () => {
                 target="_blank"
                 rel="noopener"
               >
-                Download
+                {{t("course.problems.download")}}
               </a>
             </div>
-            <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
+            <span v-else class="badge badge-outline text-xs opacity-70">{{t("course.problems.notNotUploaded")}}</span>
           </div>
         </div>
 
         <div v-if="(problem as any).pipeline.scoringScript?.custom" class="flex flex-col gap-x-2">
           <div class="flex items-center gap-x-2">
-            <span class="pl-1 text-sm opacity-80">Upload Custom_Scorer.py</span>
+            <span class="pl-1 text-sm opacity-80">{{t("course.problems.uploadCustomScorer")}}</span>
             <input
               type="file"
               accept=".py"
@@ -1104,7 +991,7 @@ onMounted(async () => {
             <span class="label-text-alt text-error">{{ v$.assets.scorePy.$errors[0]?.$message }}</span>
           </label>
         </div>
-        <div v-else class="pl-1 text-xs opacity-70">Enable to upload Custom_Scorer.py</div>
+        <div v-else class="pl-1 text-xs opacity-70">{{ t("course.problems.uploadCustomScorerInfo") }}</div>
       </div>
     </div>
   </div>

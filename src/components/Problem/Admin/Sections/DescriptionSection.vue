@@ -1,6 +1,8 @@
 <script setup lang="ts">
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { inject, Ref } from "vue";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 defineProps<{ v$: any }>();
 defineEmits<{
@@ -12,7 +14,7 @@ const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
 
 <template>
   <div class="form-control w-full">
-    <label class="label"><span class="label-text">Description of problem</span></label>
+    <label class="label"><span class="label-text">{{ t("course.problems.descriptionProblem") }}</span></label>
     <textarea
       :class="['textarea-bordered textarea h-24', v$.description.description.$error && 'textarea-error']"
       :value="problem.description.description"
@@ -29,7 +31,7 @@ const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
   </div>
 
   <div class="form-control mt-2 w-full">
-    <label class="label"><span class="label-text">Description of Input</span></label>
+    <label class="label"><span class="label-text">{{ t("course.problems.descriptionInput") }}</span></label>
     <textarea
       :class="['textarea-bordered textarea h-24', v$.description.input.$error && 'textarea-error']"
       :value="problem.description.input"
@@ -46,7 +48,7 @@ const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
   </div>
 
   <div class="form-control mt-2 w-full">
-    <label class="label"><span class="label-text">Description of Output</span></label>
+    <label class="label"><span class="label-text">{{ t("course.problems.descriptionOutput") }}</span></label>
     <textarea
       :class="['textarea-bordered textarea h-24', v$.description.output.$error && 'textarea-error']"
       :value="problem.description.output"
@@ -76,7 +78,7 @@ const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
       <!-- Input -->
       <div class="form-control">
         <label class="label">
-          <span class="label-text">Examples - Input {{ no }}</span>
+          <span class="label-text">{{ $t('course.problems.exampleInput', { no: no }) }}</span>
         </label>
         <textarea
           class="textarea-bordered textarea h-24"
@@ -97,7 +99,7 @@ const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
       <!-- Output -->
       <div class="form-control">
         <label class="label">
-          <span class="label-text">Examples - Output {{ no }}</span>
+          <span class="label-text">{{ $t('course.problems.exampleOutput', { no: no }) }}</span>
         </label>
         <textarea
           class="textarea-bordered textarea h-24"
@@ -129,7 +131,7 @@ const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
           })
         "
       >
-        <i-uil-plus class="mr-1" /> Add sample
+        <i-uil-plus class="mr-1" /> {{ t("course.problems.AddSample") }}
       </div>
     </div>
     <div class="tooltip" data-tip="remove last sample">
@@ -143,13 +145,13 @@ const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
           })
         "
       >
-        <i-uil-minus class="mr-1" /> Remove last
+        <i-uil-minus class="mr-1" /> {{t("course.problems.RemoveLast")}}
       </div>
     </div>
   </div>
 
   <div class="form-control mt-2 w-full">
-    <label class="label"><span class="label-text">Hint</span></label>
+    <label class="label"><span class="label-text">{{t("course.problems.hint")}}</span></label>
     <textarea
       :class="['textarea-bordered textarea h-24', v$.description.hint.$error && 'textarea-error']"
       :value="problem.description.hint"

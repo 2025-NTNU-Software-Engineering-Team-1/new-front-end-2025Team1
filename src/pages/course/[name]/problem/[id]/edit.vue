@@ -195,7 +195,7 @@ function normalizeAssets(raw: any): ProblemAssets {
   const base: ProblemAssets = {
     trialModePublicTestDataZip: raw?.trialModePublicTestDataZip ?? null,
     trialModeACFiles: raw?.trialModeACFiles ?? null,
-    aiVTuberACFiles: null,
+    //aiVTuberACFiles: null,
     customCheckerPy: null,
     makefileZip: null,
     teacherFile: null,

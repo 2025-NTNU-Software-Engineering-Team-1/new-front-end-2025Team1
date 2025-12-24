@@ -63,7 +63,7 @@ function getPanelByErrorPath(path: string): PanelKey {
     if (path.startsWith("assets.dockerfilesZip")) return "config";
 
     if (
-      path.startsWith("assets.aiVTuberACFiles") ||
+      //path.startsWith("assets.aiVTuberACFiles") ||
       path.startsWith("assets.trialModeACFiles") ||
       path.startsWith("assets.trialModePublicTestDataZip")
     )
@@ -328,6 +328,7 @@ const rules = {
   },
 
   assets: {
+    /*
     aiVTuberACFiles: {
       requiredWhenVtuber: helpers.withMessage(
         "AI VTuber is enabled: please upload at least one AC file.",
@@ -338,6 +339,7 @@ const rules = {
         },
       ),
     },
+    */
 
     trialModeACFiles: {
       requiredWhenTrial: helpers.withMessage(

@@ -122,7 +122,7 @@ const newProblem = ref<ProblemForm>({
   assets: {
     trialModePublicTestDataZip: null,
     trialModeACFiles: null,
-    aiVTuberACFiles: null,
+    //aiVTuberACFiles: null,
     customCheckerPy: null,
     makefileZip: null,
     teacherFile: null,

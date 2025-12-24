@@ -97,7 +97,7 @@ onMounted(() => {
           <h1 class="uppercase">{{ t("about.links") }}</h1>
           <div class="flex gap-12">
             <a href="https://fb.me/noj.tw" class="mx-12" target="_blank" rel="noopener noreferrer">
-              <i-uil-facebook class="h-28 w-28" />
+              <i-uil-facebook class="h-28 w-28" color="rgb(1, 11, 37)" />
             </a>
             <a
               href="https://github.com/Normal-OJ/Normal-OJ"
@@ -105,7 +105,7 @@ onMounted(() => {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <i-uil-github class="h-28 w-28" />
+              <i-uil-github class="h-28 w-28" color="rgb(1, 11, 37)" />
             </a>
           </div>
         </div>
@@ -161,5 +161,18 @@ onMounted(() => {
   -ms-transform: none;
   -o-transform: none;
   transform: none;
+}
+
+h1 {
+  font-size: 2.25rem; /* Ensure h1 is larger than other text */
+  font-weight: bold;
+  text-transform: uppercase;
+  color: rgb(1, 11, 37);
+}
+h3 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-top: 2rem;
+  color: rgb(1, 11, 37);
 }
 </style>

@@ -10,7 +10,7 @@
 /* Light Theme Overrides */
 :root,
 [data-theme="light"] {
-  --color-primary: hsl(207 100% 20%);
+  --color-primary: hsl(207, 94%, 20%);
   --color-primary-content: hsl(0 0% 100%);
 
   --color-base-100: hsl(0 0% 100%);

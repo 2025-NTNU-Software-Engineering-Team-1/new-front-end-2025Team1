@@ -532,7 +532,7 @@ function downloadModalJson() {
               <span class="label-text text-primary-content font-semibold">JSON Data</span>
             </label>
             <div class="bg-base-200 text-base-content rounded p-4">
-              <pre class="font-mono text-sm whitespace-pre-wrap">{{ currentDetailData.jsonData }}</pre>
+              <pre class="whitespace-pre-wrap font-mono text-sm">{{ currentDetailData.jsonData }}</pre>
             </div>
           </div>
         </div>

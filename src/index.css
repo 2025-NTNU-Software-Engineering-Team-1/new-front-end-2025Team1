@@ -123,12 +123,12 @@
   flex-direction: column;
 }
 
-.form-control>.label {
+.form-control > .label {
   padding-bottom: 0.25rem;
 }
 
-.form-control>textarea,
-.form-control>input,
-.form-control>select {
+.form-control > textarea,
+.form-control > input,
+.form-control > select {
   width: 100%;
 }

@@ -80,9 +80,9 @@ async function switchPage(id: string) {
       <!-- Modal wrapper -->
       <div class="absolute inset-0 flex items-center justify-center p-4">
         <!-- Modal box -->
-        <div class="w-full max-w-6xl overflow-hidden rounded-lg bg-base-100 shadow-2xl">
+        <div class="bg-base-100 w-full max-w-6xl overflow-hidden rounded-lg shadow-2xl">
           <!-- Header -->
-          <div class="flex items-center justify-between border-b border-base-300 px-4 py-3">
+          <div class="border-base-300 flex items-center justify-between border-b px-4 py-3">
             <div class="text-lg font-bold">Problem Admin Manual</div>
             <button type="button" class="btn btn-sm btn-circle" @click="closeManual">✕</button>
           </div>
@@ -95,7 +95,7 @@ async function switchPage(id: string) {
           -->
           <div class="grid h-[75vh] min-h-0 grid-cols-12 overflow-hidden">
             <!-- Left: navigation (scrollable) -->
-            <aside class="col-span-3 min-h-0 border-r border-base-300 bg-base-200/50">
+            <aside class="border-base-300 bg-base-200/50 col-span-3 min-h-0 border-r">
               <div class="h-full min-h-0 overflow-y-auto p-2">
                 <button
                   v-for="p in PROBLEM_ADMIN_MANUAL_PAGES"
@@ -124,7 +124,7 @@ async function switchPage(id: string) {
           </div>
 
           <!-- Footer -->
-          <div class="flex justify-end border-t border-base-300 px-4 py-3">
+          <div class="border-base-300 flex justify-end border-t px-4 py-3">
             <button type="button" class="btn" @click="closeManual">Close</button>
           </div>
         </div>

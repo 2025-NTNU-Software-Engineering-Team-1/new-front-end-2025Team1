@@ -75,7 +75,7 @@ const { data: announcements, error, isLoading } = useAxios<AnnouncementList>("/a
               </thead>
               <tbody>
                 <tr v-for="{ title, createTime, annId } in announcements" :key="annId" class="hover">
-                  <td class="max-w-[12rem] min-w-[10rem] truncate">
+                  <td class="min-w-[10rem] max-w-[12rem] truncate">
                     <router-link :to="`/announcements/${annId}`" class="link link-hover max-w-full text-lg">
                       {{ title }}
                     </router-link>

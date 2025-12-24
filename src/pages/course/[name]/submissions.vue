@@ -81,6 +81,12 @@ const maxPage = computed(() => {
   return submissionCount.value ? Math.ceil(submissionCount.value / 10) : 1;
 });
 
+// Only show loading skeleton on initial load, not on background refreshes
+// This prevents FOUC when polling for pending submissions
+const isInitialLoading = computed(() => {
+  return isLoading.value && data.value == null;
+});
+
 // Check if there are any pending submissions that need auto-refresh
 const hasPendingSubmissions = computed(() => {
   return submissions.value?.some(
@@ -395,7 +401,7 @@ async function deleteSubmission(id: string) {
 
         <data-status-wrapper
           :error="(error as AxiosError) || (fetchProblemError as AxiosError)"
-          :is-loading="isLoading"
+          :is-loading="isInitialLoading"
         >
           <template #loading>
             <skeleton-table :col="9" :row="5" />

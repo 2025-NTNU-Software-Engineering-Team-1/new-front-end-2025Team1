@@ -590,8 +590,8 @@ const networkItemsCount = computed(() => {
 
 .bubble {
   position: relative;
-  background-color: var(--b2, theme("colors.base-200"));
-  color: var(--bc, theme("colors.base-content"));
+  background-color: var(--color-base-200);
+  color: var(--color-base-content);
   font-weight: 600;
   border-radius: 9999px;
   padding: 0.75rem 1.5rem;
@@ -601,7 +601,7 @@ const networkItemsCount = computed(() => {
 }
 .bubble:hover {
   transform: scale(1.05);
-  background-color: var(--b3, theme("colors.base-300"));
+  background-color: var(--color-base-300);
 }
 .bubble-tail {
   position: absolute;
@@ -609,7 +609,7 @@ const networkItemsCount = computed(() => {
   left: 1.5rem;
   width: 0;
   height: 0;
-  border-top: 8px solid var(--b2, theme("colors.base-200"));
+  border-top: 8px solid var(--color-base-200);
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
 }

@@ -120,6 +120,7 @@ const libraryItemsCount = computed(() => {
   return libraryEntries.value.reduce((sum, entry) => sum + (entry.items?.length || 0), 0);
 });
 
+// waiting for maxcho
 const networkItemsCount = computed(() => {
   if (!net.value?.enabled) return 0;
   return networkSections.value.reduce((sum, section) => sum + (section.items?.length || 0), 0);

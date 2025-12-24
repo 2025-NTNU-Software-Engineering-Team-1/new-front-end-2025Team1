@@ -90,44 +90,48 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="prose mx-auto mt-10 w-full pb-60 font-mono" id="links">
-    <div class="flex w-full flex-col items-center">
-      <h1 class="uppercase">{{ t("about.links") }}</h1>
-      <div class="flex gap-12">
-        <a href="https://fb.me/noj.tw" class="mx-12" target="_blank" rel="noopener noreferrer">
-          <i-uil-facebook class="h-28 w-28" />
-        </a>
-        <a
-          href="https://github.com/Normal-OJ/Normal-OJ"
-          class="mx-12"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <i-uil-github class="h-28 w-28" />
-        </a>
-      </div>
-    </div>
+  <div class="flex h-screen">
+    <div class="flex-1 overflow-y-scroll">
+      <div class="prose mx-auto mt-10 w-full pb-60 font-mono" id="links">
+        <div class="flex w-full flex-col items-center">
+          <h1 class="uppercase">{{ t("about.links") }}</h1>
+          <div class="flex gap-12">
+            <a href="https://fb.me/noj.tw" class="mx-12" target="_blank" rel="noopener noreferrer">
+              <i-uil-facebook class="h-28 w-28" />
+            </a>
+            <a
+              href="https://github.com/Normal-OJ/Normal-OJ"
+              class="mx-12"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <i-uil-github class="h-28 w-28" />
+            </a>
+          </div>
+        </div>
 
-    <div class="mt-16 flex w-full flex-col items-center">
-      <h1 class="uppercase">{{ t("about.contributor") }}</h1>
-      <div id="scroll-hint" class="reveal visible absolute bottom-16">
-        <i-uil-angle-double-down class="h-16 w-16" />
-      </div>
-      <div
-        v-for="(team, index) in teams"
-        class="reveal flex w-full flex-col items-center"
-        :ref="setTeamRefs"
-        :id="`team-${index}`"
-      >
-        <h3>{{ team.title }}</h3>
-        <div class="w-fix my-4 grid grid-cols-2 gap-x-40 gap-y-8 md:grid-cols-4 lg:grid-cols-6">
-          <div v-for="name in team.people" class="not-prose flex flex-col items-center">
-            <div class="avatar">
-              <div class="mask mask-squircle w-16">
-                <img :src="`https://github.com/${name}.png`" :alt="`${name}'s github profile avatar`" />
+        <div class="mt-16 flex w-full flex-col items-center">
+          <h1 class="uppercase">{{ t("about.contributor") }}</h1>
+          <div id="scroll-hint" class="reveal visible absolute bottom-16">
+            <i-uil-angle-double-down class="h-16 w-16" />
+          </div>
+          <div
+            v-for="(team, index) in teams"
+            class="reveal flex w-100 flex-col items-center"
+            :ref="setTeamRefs"
+            :id="`team-${index}`"
+          >
+            <h3>{{ team.title }}</h3>
+            <div class="w-fix my-4 grid grid-cols-2 gap-x-40 gap-y-8 md:grid-cols-4 lg:grid-cols-6">
+              <div v-for="name in team.people" class="not-prose flex flex-col items-center">
+                <div class="avatar">
+                  <div class="mask mask-squircle w-16">
+                    <img :src="`https://github.com/${name}.png`" :alt="`${name}'s github profile avatar`" />
+                  </div>
+                </div>
+                <span class="mt-2 text-sm">{{ name }}</span>
               </div>
             </div>
-            <span class="mt-2 text-sm">{{ name }}</span>
           </div>
         </div>
       </div>

@@ -115,3 +115,19 @@
   background-color: #26568c !important;
   color: white !important;
 }
+
+/* Fix DaisyUI 5 form-control layout - ensure vertical stacking */
+.form-control {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-control>.label {
+  padding-bottom: 0.25rem;
+}
+
+.form-control>textarea,
+.form-control>input,
+.form-control>select {
+  width: 100%;
+}

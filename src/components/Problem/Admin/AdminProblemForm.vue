@@ -562,7 +562,7 @@ async function submit() {
     <div class="collapse-arrow rounded-box bg-base-200 collapse">
       <input type="checkbox" class="peer" v-model="openPanels.desc" />
       <div class="collapse-title font-semibold">Set Description</div>
-      <div class="collapse-content">
+      <div class="collapse-content pt-4">
         <DescriptionSection :v$="v$" @update="update" />
       </div>
     </div>
@@ -570,7 +570,7 @@ async function submit() {
     <div ref="sectionRefs.config" class="collapse-arrow rounded-box bg-base-200 collapse">
       <input type="checkbox" class="peer" v-model="openPanels.config" />
       <div class="collapse-title font-semibold">Set Configuration</div>
-      <div class="collapse-content">
+      <div class="collapse-content pt-4">
         <ConfigurationSection />
       </div>
     </div>
@@ -578,7 +578,7 @@ async function submit() {
     <div ref="sectionRefs.pipeline" class="collapse-arrow rounded-box bg-base-200 collapse">
       <input type="checkbox" class="peer" v-model="openPanels.pipeline" />
       <div class="collapse-title font-semibold">Set Pipeline</div>
-      <div class="collapse-content">
+      <div class="collapse-content pt-4">
         <PipelineSection />
       </div>
     </div>
@@ -586,7 +586,7 @@ async function submit() {
     <div ref="sectionRefs.testdata" class="collapse-arrow rounded-box bg-base-200 collapse">
       <input type="checkbox" class="peer" v-model="openPanels.testdata" />
       <div class="collapse-title font-semibold">Set Test Data</div>
-      <div class="collapse-content">
+      <div class="collapse-content pt-4">
         <TestDataSection :v$="v$ as any" />
       </div>
     </div>
@@ -594,7 +594,7 @@ async function submit() {
     <div ref="sectionRefs.resdata" class="collapse-arrow rounded-box bg-base-200 collapse">
       <input type="checkbox" class="peer" v-model="openPanels.resdata" />
       <div class="collapse-title font-semibold">Set Resource Data</div>
-      <div class="collapse-content">
+      <div class="collapse-content pt-4">
         <div class="flex flex-col gap-4">
           <ResourceDataSection variant="student" />
           <ResourceDataSection variant="teacher" />

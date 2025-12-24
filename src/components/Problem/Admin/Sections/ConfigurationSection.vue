@@ -1037,10 +1037,29 @@ onBeforeUnmount(() => {
           <label class="label">
             <span class="label-text">{{ t("course.problems.uploadPublicTestData") }}</span>
           </label>
+          <div class="flex items-center gap-2">
+            <div
+              v-if="hasAsset('public_testdata') || problem.assets?.trialModePublicTestDataZip"
+              class="flex items-center gap-2"
+            >
+              <span class="badge badge-outline badge-success text-xs">Uploaded</span>
+              <a
+                v-if="hasAsset('public_testdata')"
+                :href="assetDownloadUrl('public_testdata') || '#'"
+                class="btn btn-xs"
+                target="_blank"
+                rel="noopener"
+              >
+                Download
+              </a>
+            </div>
+            <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
+          </div>
           <input
             type="file"
             accept=".zip"
             class="file-input-bordered file-input file-input-sm w-full"
+            :class="{ 'input-error': v$?.assets?.trialModePublicTestDataZip?.$error }"
             @change="
               async (e: Event) => {
                 const inputEl = e.target as HTMLInputElement;
@@ -1048,6 +1067,7 @@ onBeforeUnmount(() => {
                 problem.assets!.trialModePublicTestDataZip = null;
                 if (!file) {
                   inputEl.value = '';
+                  v$?.assets?.trialModePublicTestDataZip?.$touch();
                   return;
                 }
                 if (!file.name.endsWith('.zip')) {
@@ -1064,11 +1084,15 @@ onBeforeUnmount(() => {
                   return;
                 }
                 problem.assets!.trialModePublicTestDataZip = file;
+                v$?.assets?.trialModePublicTestDataZip?.$touch();
               }
             "
           />
           <label class="label">
             <span class="label-text-alt opacity-70"> Only <code>.in</code> files inside ZIP; ≤ 1 GB </span>
+          </label>
+          <label v-if="v$?.assets?.trialModePublicTestDataZip?.$error" class="label">
+            <span class="label-text-alt text-error">{{ v$.assets.trialModePublicTestDataZip.$errors[0]?.$message }}</span>
           </label>
         </div>
 
@@ -1076,17 +1100,37 @@ onBeforeUnmount(() => {
           <label class="label">
             <span class="label-text">{{ t("course.problems.uploadACFiles") }}</span>
           </label>
+          <div class="flex items-center gap-2">
+            <div
+              v-if="hasAsset('ac_code') || (problem.assets?.trialModeACFiles && problem.assets.trialModeACFiles.length > 0)"
+              class="flex items-center gap-2"
+            >
+              <span class="badge badge-outline badge-success text-xs">Uploaded</span>
+              <a
+                v-if="hasAsset('ac_code')"
+                :href="assetDownloadUrl('ac_code') || '#'"
+                class="btn btn-xs"
+                target="_blank"
+                rel="noopener"
+              >
+                Download
+              </a>
+            </div>
+            <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
+          </div>
           <input
             type="file"
             multiple
             :accept="getAIFileExtensions().join(',')"
             class="file-input-bordered file-input file-input-sm w-full"
+            :class="{ 'input-error': v$?.assets?.trialModeACFiles?.$error }"
             @change="
               (e: Event) => {
                 const files = Array.from((e.target as HTMLInputElement).files || []) as File[];
                 const valid = validateFilesForAIAC(files, getAIFileExtensions());
                 problem.assets!.trialModeACFiles = valid;
                 if (valid.length === 0) (e.target as HTMLInputElement).value = '';
+                v$?.assets?.trialModeACFiles?.$touch();
               }
             "
           />
@@ -1094,6 +1138,9 @@ onBeforeUnmount(() => {
             <span class="label-text-alt text-sm opacity-70">
               Allowed: {{ getAIFileExtensions().join(", ") }}
             </span>
+          </label>
+          <label v-if="v$?.assets?.trialModeACFiles?.$error" class="label">
+            <span class="label-text-alt text-error">{{ v$.assets.trialModeACFiles.$errors[0]?.$message }}</span>
           </label>
         </div>
       </div>

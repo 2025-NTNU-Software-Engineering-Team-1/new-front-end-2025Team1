@@ -163,16 +163,26 @@ onMounted(() => {
   transform: none;
 }
 
-h1 {
+.prose h1 {
   font-size: 2.25rem; /* Ensure h1 is larger than other text */
   font-weight: bold;
   text-transform: uppercase;
   color: rgb(1, 11, 37);
 }
-h3 {
+.prose h3 {
   font-size: 1.5rem;
   font-weight: bold;
   margin-top: 2rem;
   color: rgb(1, 11, 37);
+}
+
+/* Dark mode overrides (use theme variables for contrast) */
+[data-theme="dark"] .prose h1,
+:root[data-theme="dark"] .prose h1 {
+  color: var(--color-base-content) !important;
+}
+[data-theme="dark"] .prose h3,
+:root[data-theme="dark"] .prose h3 {
+  color: var(--color-base-content) !important;
 }
 </style>

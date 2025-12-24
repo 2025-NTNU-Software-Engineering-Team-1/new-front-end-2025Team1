@@ -347,6 +347,50 @@
       },
       "compile_error": {
         "title": "編譯錯誤訊息"
+      },
+      "scoreEdit": {
+        "titleTotal": "編輯總分",
+        "titleTask": "編輯任務 {index} 分數",
+        "description": "手動調整提交分數。",
+        "scoreRangeTotal": "分數範圍：0 - 100",
+        "scoreRangeTask": "分數範圍：0 - {max}",
+        "scoreRangeTaskNoLimit": "分數範圍：0（無上限）",
+        "autoUpdate": "手動更新將自動更新作業成績",
+        "recordSaved": "將保存修改記錄",
+        "totalScoreWarning": "注意：修改總分不會改變個別任務分數。總分可能與任務分數總和不同。",
+        "newScore": "新分數",
+        "reason": "原因（選填）",
+        "reasonPlaceholder": "您為什麼要修改這個分數？",
+        "cancel": "取消",
+        "submit": "提交"
+      },
+      "scoreHistory": {
+        "title": "分數修改歷史",
+        "show": "顯示",
+        "hide": "隱藏",
+        "records": "{count} 筆記錄",
+        "noRecords": "沒有分數修改記錄。",
+        "modifier": "修改者",
+        "time": "時間",
+        "target": "目標",
+        "before": "修改前",
+        "after": "修改後",
+        "reason": "原因",
+        "totalScore": "總分",
+        "task": "任務 {index}"
+      },
+      "caseOutput": {
+        "title": "測試案例 Artifact",
+        "viewTitle": "檢視 Artifact",
+        "stdout": "標準輸出 (stdout)",
+        "stderr": "標準錯誤 (stderr)",
+        "noStdout": "無輸出檔案",
+        "emptyStdout": "（輸出為空）",
+        "noStderr": "無錯誤輸出檔案",
+        "emptyStderr": "（錯誤輸出為空）",
+        "artifactFiles": "Artifact 檔案",
+        "binaryFile": "二進位檔案：{fileName}（無法預覽）",
+        "close": "關閉"
       }
     },
     "members": {

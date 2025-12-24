@@ -103,6 +103,57 @@ const Submission = {
         : `/submission/${id}/artifact/${kind}`;
     return `${base}${path}`;
   },
+
+  // Manual grade APIs for frontend score editing
+  manualGrade: (id: string, score: number, reason?: string) =>
+    fetcher.put<{
+      ok: boolean;
+      beforeScore: number;
+      afterScore: number;
+    }>(`/submission/${id}/manual-grade`, { score, reason }),
+
+  manualGradeTask: (id: string, taskIndex: number, score: number, reason?: string) =>
+    fetcher.put<{
+      ok: boolean;
+      taskIndex: number;
+      beforeScore: number;
+      afterScore: number;
+      newTotalScore: number;
+    }>(`/submission/${id}/manual-grade/task/${taskIndex}`, { score, reason }),
+
+  getScoreHistory: (id: string) =>
+    fetcher.get<{
+      ok: boolean;
+      history: Array<{
+        modifier: string;
+        timestamp: number;
+        beforeScore: number;
+        afterScore: number;
+        taskIndex: number | null;
+        reason: string | null;
+      }>;
+      count: number;
+    }>(`/submission/${id}/score-history`),
+
+  // Get case output (stdout/stderr)
+  getCaseOutput: (id: string, taskNo: number, caseNo: number) =>
+    fetcher.get<{
+      stdout: string;
+      stderr: string;
+    }>(`/submission/${id}/output/${taskNo}/${caseNo}`),
+
+  // Get case artifact files (all files in artifact zip including stdout, stderr, images, etc.)
+  getCaseArtifactFiles: (id: string, taskNo: number, caseNo: number) =>
+    fetcher.get<{
+      stdout: string | null;  // null means file doesn't exist, '' means empty file
+      stderr: string | null;
+      files: Record<string, {
+        type: 'text' | 'image' | 'binary';
+        content: string;
+        extension: string;
+        mimeType?: string;
+      }>;
+    }>(`/submission/${id}/artifact/case/${taskNo}/${caseNo}`),
 };
 
 type TrialHistoryItem = {
@@ -223,6 +274,19 @@ const TrialSubmission = {
     fetcher.delete<{ status: string; message: string; data: { ok: boolean } }>(
       `/trial-submission/${trialSubmissionId}`,
     ),
+
+  // API 12: Get specialized case artifact files (stdout, stderr, etc.)
+  getTrialCaseArtifactFiles: (trialSubmissionId: string, taskNo: number, caseNo: number) =>
+    fetcher.get<{
+      stdout: string | null;
+      stderr: string | null;
+      files: Record<string, {
+        type: 'text' | 'image' | 'binary';
+        content: string;
+        extension: string;
+        mimeType?: string;
+      }>;
+    }>(`/trial-submission/${trialSubmissionId}/artifact/case/${taskNo}/${caseNo}`),
 };
 
 //test api

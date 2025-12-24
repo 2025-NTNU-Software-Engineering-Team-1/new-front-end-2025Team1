@@ -348,6 +348,10 @@ const rules = {
         () => {
           const cfg = problem.value.config;
           if (!cfg?.trialMode) return true;
+          // Check if already uploaded via assetPaths
+          const assetPaths = (cfg as any)?.assetPaths || {};
+          if (assetPaths['ac_code']) return true;
+          // Check if new file is being uploaded
           return (problem.value.assets?.trialModeACFiles?.length ?? 0) > 0;
         },
       ),
@@ -359,6 +363,10 @@ const rules = {
         () => {
           const cfg = problem.value.config;
           if (!cfg?.trialMode) return true;
+          // Check if already uploaded via assetPaths
+          const assetPaths = (cfg as any)?.assetPaths || {};
+          if (assetPaths['public_testdata']) return true;
+          // Check if new file is being uploaded
           return !!problem.value.assets?.trialModePublicTestDataZip;
         },
       ),

@@ -207,7 +207,7 @@ interface ProblemPipeline {
 interface ProblemAssets {
   trialModePublicTestDataZip?: File | null;
   trialModeACFiles?: File[] | null;
-  aiVTuberFiles?: File[] | null;
+  //aiVTuberFiles?: File[] | null;
   aiVTuberACFiles?: File[] | null;
   customCheckerPy?: File | null;
   makefileZip?: File | null;

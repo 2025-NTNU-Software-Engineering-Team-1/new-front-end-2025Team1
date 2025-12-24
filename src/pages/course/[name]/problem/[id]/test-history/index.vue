@@ -21,7 +21,7 @@ type TestHistoryItem = {
   result: SubmissionStatusCodes;
   score: number;
   lang: string;
-  timestamp: string;
+  timestamp: number;
 };
 
 const testHistory = ref<TestHistoryItem[]>([]);
@@ -46,7 +46,7 @@ onMounted(async () => {
           result: mapStatusToCode(item.status),
           score: item.score,
           lang: LANG[item.language_type] || "Unknown",
-          timestamp: String(item.timestamp),
+          timestamp: Number(item.timestamp),
         })) || [];
       console.log("Loaded trial history:", testHistory.value);
     } else {

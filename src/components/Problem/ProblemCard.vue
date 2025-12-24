@@ -120,6 +120,7 @@ const libraryItemsCount = computed(() => {
   return libraryEntries.value.reduce((sum, entry) => sum + (entry.items?.length || 0), 0);
 });
 
+// waiting for maxcho
 const networkItemsCount = computed(() => {
   if (!net.value?.enabled) return 0;
   return networkSections.value.reduce((sum, section) => sum + (section.items?.length || 0), 0);
@@ -388,7 +389,7 @@ const networkItemsCount = computed(() => {
                                         ? 'from-accent/80 to-accent text-accent-content bg-gradient-to-br'
                                         : 'from-error/80 to-error text-error-content bg-gradient-to-br'
                                     "
-                                    :style="{ animationDelay: `${idx * 0.15 + symIdx * 0.05}s` }"
+                                    :style="{ animationDelay: `${idx * 0.15 + Number(symIdx) * 0.05}s` }"
                                   >
                                     <span class="relative z-10">{{ sym }}</span>
                                     <div
@@ -488,7 +489,7 @@ const networkItemsCount = computed(() => {
                                         ? 'from-accent/80 to-accent text-accent-content bg-gradient-to-br'
                                         : 'from-error/80 to-error text-error-content bg-gradient-to-br'
                                     "
-                                    :style="{ animationDelay: `${idx * 0.15 + symIdx * 0.05}s` }"
+                                    :style="{ animationDelay: `${idx * 0.15 + Number(symIdx) * 0.05}s` }"
                                   >
                                     <span class="relative z-10">{{ sym }}</span>
                                     <div
@@ -539,7 +540,7 @@ const networkItemsCount = computed(() => {
             </thead>
             <tbody>
               <tr v-for="({ memoryLimit, timeLimit, taskScore }, i) in subtasks" :key="i">
-                <td>{{ i + 1 }}</td>
+                <td>{{ Number(i) + 1 }}</td>
                 <td>{{ timeLimit }} ms</td>
                 <td>{{ memoryLimit }} KB</td>
                 <td>{{ taskScore }}</td>

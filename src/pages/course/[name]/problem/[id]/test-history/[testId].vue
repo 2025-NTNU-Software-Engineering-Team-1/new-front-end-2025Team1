@@ -88,7 +88,7 @@ onMounted(async () => {
       runTime: Math.max(...(response.data.tasks?.map((t) => t.exec_time) ?? [0])),
       memoryUsage: Math.max(...(response.data.tasks?.map((t) => t.memory_usage) ?? [0])),
       score: response.data.score,
-      languageType: 1, // TODO: Get from backend
+      languageType: response.data.language_type ?? 1,
       timestamp: new Date(response.data.timestamp).getTime(),
       code: "", // TODO: Get code from backend
       tasks:

@@ -395,6 +395,7 @@ function removeDockerEnv(index: number) {
 // ==========================================
 // Section: AI File Extension Helper
 // ==========================================
+
 function getAIFileExtensions() {
   const lang = problem.value.allowedLanguage;
   const list: string[] = [];
@@ -757,6 +758,7 @@ onBeforeUnmount(() => {
                   <option value="gemini-2.5-pro">gemini 2.5 pro</option>
                 </select>
               </div>
+              <!--
               <div class="flex min-w-[300px] flex-1 items-center gap-3">
                 <label class="label mb-0 w-32">
                   <span class="label-text">{{ t("course.problems.uploadACFiles") }}</span>
@@ -783,6 +785,7 @@ onBeforeUnmount(() => {
                   </label>
                 </div>
               </div>
+-->
             </div>
           </div>
 

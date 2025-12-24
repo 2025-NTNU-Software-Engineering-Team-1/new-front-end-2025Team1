@@ -716,7 +716,7 @@ onBeforeUnmount(() => {
       <label class="label"
         ><span class="label-text">{{ t("course.problems.acceptedFormat") }}</span></label
       >
-      <div class="flex flex-wrap items-center gap-6">
+      <div class="mt-2 flex flex-wrap items-center gap-6">
         <label class="label cursor-pointer gap-2">
           <input type="radio" class="radio" value="code" v-model="problem.config!.acceptedFormat as any" />
           <span class="label-text">{{ t("course.problems.code") }}</span>
@@ -1053,27 +1053,29 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
-        <div class="form-control w-full max-w-xs">
-          <label class="label">
-            <span class="label-text">{{ t("course.problems.uploadPublicTestData") }}</span>
-          </label>
-          <div class="flex items-center gap-2">
-            <div
-              v-if="hasAsset('public_testdata') || problem.assets?.trialModePublicTestDataZip"
-              class="flex items-center gap-2"
-            >
-              <span class="badge badge-outline badge-success text-xs">Uploaded</span>
-              <a
-                v-if="hasAsset('public_testdata')"
-                :href="assetDownloadUrl('public_testdata') || '#'"
-                class="btn btn-xs"
-                target="_blank"
-                rel="noopener"
+        <div class="form-control w-full max-w-md">
+          <div class="flex items-center justify-between">
+            <label class="label">
+              <span class="label-text">{{ t("course.problems.uploadPublicTestData") }}</span>
+            </label>
+            <div class="flex items-center gap-2">
+              <div
+                v-if="hasAsset('public_testdata') || problem.assets?.trialModePublicTestDataZip"
+                class="flex items-center gap-2"
               >
-                Download
-              </a>
+                <span class="badge badge-outline badge-success text-xs">Uploaded</span>
+                <a
+                  v-if="hasAsset('public_testdata')"
+                  :href="assetDownloadUrl('public_testdata') || '#'"
+                  class="btn btn-xs"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  Download
+                </a>
+              </div>
+              <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
             </div>
-            <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
           </div>
           <input
             type="file"
@@ -1138,25 +1140,26 @@ onBeforeUnmount(() => {
             </div>
             <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
           </div>
-          <input
-            type="file"
-            multiple
-            :accept="getAIFileExtensions().join(',')"
-            class="file-input-bordered file-input file-input-sm w-full"
-            :class="{ 'input-error': v$?.assets?.trialModeACFiles?.$error }"
-            @change="
-              (e: Event) => {
-                const files = Array.from((e.target as HTMLInputElement).files || []) as File[];
-                const valid = validateFilesForAIAC(files, getAIFileExtensions());
-                problem.assets!.trialModeACFiles = valid;
-                if (valid.length === 0) (e.target as HTMLInputElement).value = '';
-                v$?.assets?.trialModeACFiles?.$touch();
-              }
-            "
-          />
+            <input
+              type="file"
+              multiple
+            accept=".c,.cpp,.py"
+              class="file-input-bordered file-input file-input-sm w-full"
+              :class="{ 'input-error': v$?.assets?.trialModeACFiles?.$error }"
+              @change="
+                (e: Event) => {
+                  const files = Array.from((e.target as HTMLInputElement).files || []) as File[];
+                const allowedExts = ['.c', '.cpp', '.py'];
+                const valid = validateFilesForAIAC(files, allowedExts);
+                  problem.assets!.trialModeACFiles = valid;
+                  if (valid.length === 0) (e.target as HTMLInputElement).value = '';
+                  v$?.assets?.trialModeACFiles?.$touch();
+                }
+              "
+            />
           <label class="label mt-1">
             <span class="label-text-alt text-sm opacity-70">
-              Allowed: {{ getAIFileExtensions().join(", ") }}
+              Allowed: .c, .cpp, .py
             </span>
           </label>
           <label v-if="v$?.assets?.trialModeACFiles?.$error" class="label">

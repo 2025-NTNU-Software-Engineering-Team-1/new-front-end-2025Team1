@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { useAxios } from "@vueuse/integrations/useAxios";
 import { useRoute, useRouter } from "vue-router";
-import { computed, ref, watch } from "vue";
+import { computed, ref, watch, watchEffect, onActivated } from "vue";
+import { useIntervalFn } from "@vueuse/core";
 import queryString from "query-string";
-import { fetcher } from "@/models/api";
+import api, { fetcher } from "@/models/api";
 import { useSession } from "@/stores/session";
-import { LANG, LANGUAGE_OPTIONS, SUBMISSION_STATUS_REPR } from "@/constants";
+import { LANG, LANGUAGE_OPTIONS, SUBMISSION_STATUS_REPR, SUBMISSION_STATUS_CODE } from "@/constants";
 import { formatTime } from "@/utils/formatTime";
 import { timeFromNow } from "@/utils/timeFromNow";
 import { useTitle, useClipboard } from "@vueuse/core";
@@ -80,6 +81,53 @@ const maxPage = computed(() => {
   return submissionCount.value ? Math.ceil(submissionCount.value / 10) : 1;
 });
 
+// Check if there are any pending submissions that need auto-refresh
+const hasPendingSubmissions = computed(() => {
+  return submissions.value?.some(
+    (sub) => sub.status === SUBMISSION_STATUS_CODE.PENDING || sub.status === -1
+  ) ?? false;
+});
+
+// Auto-refresh polling: refresh list every 2 seconds (similar to detail page)
+// Always execute refresh, then check if we should stop in watchEffect
+const { pause, resume, isActive } = useIntervalFn(() => {
+  if (submissions.value != null && !isLoading.value) {
+    // Add cache-busting timestamp to ensure fresh data
+    const url = `${getSubmissionsUrl.value}${getSubmissionsUrl.value.includes('?') ? '&' : '?'}_t=${Date.now()}`;
+    execute(url);
+  }
+}, 2000, { immediate: false }); // Don't start immediately, wait for data
+
+// Control polling based on pending submissions
+watchEffect(() => {
+  if (submissions.value != null) {
+    if (hasPendingSubmissions.value) {
+      // Ensure polling is active when there are pending submissions
+      if (!isActive.value) {
+        resume();
+      }
+    } else {
+      // Stop polling when no pending submissions
+      if (isActive.value) {
+        pause();
+      }
+    }
+  }
+});
+
+// Refresh when page is activated (e.g., returning from detail page)
+onActivated(() => {
+  if (!isLoading.value) {
+    // Add cache-busting timestamp to ensure fresh data
+    const url = `${getSubmissionsUrl.value}${getSubmissionsUrl.value.includes('?') ? '&' : '?'}_t=${Date.now()}`;
+    execute(url);
+  }
+  // Ensure polling is active if there are pending submissions
+  if (hasPendingSubmissions.value && !isActive.value) {
+    resume();
+  }
+});
+
 const {
   problemSelections,
   problemId2Meta,
@@ -120,6 +168,115 @@ async function downloadAllSubmissions() {
   a.click();
   URL.revokeObjectURL(urlBlob);
 }
+
+// Rejudge All functionality
+const isRejudgeAllLoading = ref(false);
+async function rejudgeAll() {
+  // Get all submissions matching current filter
+  const query: SubmissionListQuery = {
+    ...routeQuery.value.filter,
+    offset: 0,
+    count: -1, // Get all
+    course: route.params.name as string,
+  };
+  const qs = queryString.stringify(query, { skipNull: true, skipEmptyString: true });
+  const url = `/submission?${qs}`;
+  
+  let allSubmissions: any[] = [];
+  try {
+    const { data } = await fetcher.get<GetSubmissionListResponse>(url);
+    allSubmissions = data?.submissions || [];
+  } catch (err) {
+    console.error("Failed to fetch submissions:", err);
+    alert("Failed to fetch submissions. Please try again.");
+    return;
+  }
+
+  if (allSubmissions.length === 0) {
+    alert("No submissions found matching the current filter.");
+    return;
+  }
+
+  // Warn if more than 20 submissions
+  if (allSubmissions.length > 20) {
+    const confirmed = confirm(
+      `Warning: You are about to rejudge ${allSubmissions.length} submissions.\n\n` +
+      `This may take a long time and put significant load on the system.\n\n` +
+      `Are you sure you want to continue?`
+    );
+    if (!confirmed) {
+      return;
+    }
+  } else {
+    const confirmed = confirm(
+      `Are you sure you want to rejudge ${allSubmissions.length} submission(s)?`
+    );
+    if (!confirmed) {
+      return;
+    }
+  }
+
+  isRejudgeAllLoading.value = true;
+  let successCount = 0;
+  let failedCount = 0;
+  let skippedCount = 0;
+
+  try {
+    // Rejudge each submission individually
+    for (const submission of allSubmissions) {
+      try {
+        // Skip if never judged or recently sent
+        if (submission.status === -2) {
+          skippedCount++;
+          continue;
+        }
+        if (submission.status === -1) {
+          // Check if recently sent (within 60 seconds)
+          const submissionTime = new Date(submission.timestamp).getTime();
+          const now = Date.now();
+          if (now - submissionTime < 60000) {
+            skippedCount++;
+            continue;
+          }
+        }
+
+        await api.Submission.rejudge(submission.submissionId);
+        successCount++;
+      } catch (err) {
+        console.error(`Failed to rejudge submission ${submission.submissionId}:`, err);
+        failedCount++;
+      }
+    }
+
+    console.log(`Rejudge completed. Success: ${successCount}, Failed: ${failedCount}, Skipped: ${skippedCount}`);
+    // Reload the list
+    router.go(0);
+  } catch (err) {
+    console.error("Rejudge all failed:", err);
+  } finally {
+    isRejudgeAllLoading.value = false;
+  }
+}
+
+// Delete functionality
+const deletingIds = ref<Set<string>>(new Set());
+async function deleteSubmission(id: string) {
+  if (!confirm(`Are you sure you want to delete submission ${id}?`)) {
+    return;
+  }
+  deletingIds.value.add(id);
+  try {
+    const response = await api.Submission.delete(id);
+    if (response.data?.ok) {
+      // Reload the list
+      execute(getSubmissionsUrl.value);
+    }
+  } catch (err) {
+    console.error("Delete failed:", err);
+  } finally {
+    deletingIds.value.delete(id);
+  }
+}
 </script>
 
 <template>
@@ -129,11 +286,18 @@ async function downloadAllSubmissions() {
         <div class="card-title justify-between">
           {{ $t("course.submissions.text") }}
 
-          <div v-if="session.isAdmin" class="flex justify-between gap-4">
+          <div v-if="session.isAdmin" class="flex items-center justify-between gap-4">
+            <button
+              :class="['btn btn-warning btn-sm', isRejudgeAllLoading && 'loading']"
+              :disabled="isRejudgeAllLoading"
+              @click="rejudgeAll"
+            >
+              <i-uil-repeat class="mr-1" /> Rejudge All
+            </button>
             <div class="tooltip tooltip-bottom" data-tip="Download submissions json file">
-              <div class="btn" @click="downloadAllSubmissions">
+              <button class="btn btn-sm" @click="downloadAllSubmissions">
                 <i-uil-file-download class="h-5 w-5" />
-              </div>
+              </button>
             </div>
             <input
               v-model="searchUsername"
@@ -143,11 +307,18 @@ async function downloadAllSubmissions() {
               @keydown.enter="mutateFilter({ username: searchUsername })"
             />
           </div>
-          <div v-if="session.isTeacher" class="flex justify-between gap-4">
+          <div v-if="session.isTeacher" class="flex items-center justify-between gap-4">
+            <button
+              :class="['btn btn-warning btn-sm', isRejudgeAllLoading && 'loading']"
+              :disabled="isRejudgeAllLoading"
+              @click="rejudgeAll"
+            >
+              <i-uil-repeat class="mr-1" /> Rejudge All
+            </button>
             <div class="tooltip tooltip-bottom" data-tip="Download submissions json file">
-              <div class="btn" @click="downloadAllSubmissions">
+              <button class="btn btn-sm" @click="downloadAllSubmissions">
                 <i-uil-file-download class="h-5 w-5" />
-              </div>
+              </button>
             </div>
             <input
               v-model="searchUsername"
@@ -157,11 +328,18 @@ async function downloadAllSubmissions() {
               @keydown.enter="mutateFilter({ username: searchUsername })"
             />
           </div>
-          <div v-if="session.isTA" class="flex justify-between gap-4">
+          <div v-if="session.isTA" class="flex items-center justify-between gap-4">
+            <button
+              :class="['btn btn-warning btn-sm', isRejudgeAllLoading && 'loading']"
+              :disabled="isRejudgeAllLoading"
+              @click="rejudgeAll"
+            >
+              <i-uil-repeat class="mr-1" /> Rejudge All
+            </button>
             <div class="tooltip tooltip-bottom" data-tip="Download submissions json file">
-              <div class="btn" @click="downloadAllSubmissions">
+              <button class="btn btn-sm" @click="downloadAllSubmissions">
                 <i-uil-file-download class="h-5 w-5" />
-              </div>
+              </button>
             </div>
             <input
               v-model="searchUsername"
@@ -238,6 +416,7 @@ async function downloadAllSubmissions() {
                   <th v-if="session.isAdmin">{{ $t("course.submissions.table.ipAddr") }}</th>
                   <th v-if="session.isTeacher">{{ $t("course.submissions.table.ipAddr") }}</th>
                   <th v-if="session.isTA">{{ $t("course.submissions.table.ipAddr") }}</th>
+                  <th v-if="session.isAdmin"></th>
                 </tr>
               </thead>
               <tbody>
@@ -299,6 +478,18 @@ async function downloadAllSubmissions() {
                   <td v-if="session.isAdmin">{{ submission.ipAddr }}</td>
                   <td v-if="session.isTeacher">{{ submission.ipAddr }}</td>
                   <td v-if="session.isTA">{{ submission.ipAddr }}</td>
+                  <td v-if="session.isAdmin">
+                    <div class="tooltip" data-tip="Delete">
+                      <button
+                        class="btn btn-ghost btn-sm btn-circle text-error"
+                        :class="{ loading: deletingIds.has(submission.submissionId) }"
+                        :disabled="deletingIds.has(submission.submissionId)"
+                        @click="deleteSubmission(submission.submissionId)"
+                      >
+                        <i-uil-trash-alt v-if="!deletingIds.has(submission.submissionId)" class="lg:h-5 lg:w-5" />
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               </tbody>
             </table>

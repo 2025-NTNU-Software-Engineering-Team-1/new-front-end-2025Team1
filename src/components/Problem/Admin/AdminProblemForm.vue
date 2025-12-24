@@ -569,43 +569,43 @@ async function submit() {
   </div>
 
   <!-- Section fold panels -->
-  <div ref="sectionRefs.desc" class="mt-4 flex flex-col gap-3">
+  <div ref="sectionRefs.desc" class="mt-4 flex flex-col gap-2">
     <div class="collapse-arrow rounded-box bg-base-200 collapse">
       <input type="checkbox" class="peer" v-model="openPanels.desc" />
-      <div class="collapse-title font-semibold">{{t("course.problems.setDescription")}}</div>
-      <div class="collapse-content pt-4">
+      <div class="collapse-title min-h-0 py-2 flex items-center text-base font-semibold" style="height: 2.5rem; min-height: 2.5rem;">{{t("course.problems.setDescription")}}</div>
+      <div class="collapse-content peer-checked:pt-4">
         <DescriptionSection :v$="v$" @update="update" />
       </div>
     </div>
 
     <div ref="sectionRefs.config" class="collapse-arrow rounded-box bg-base-200 collapse">
       <input type="checkbox" class="peer" v-model="openPanels.config" />
-      <div class="collapse-title font-semibold">{{t("course.problems.setConfiguration")}}</div>
-      <div class="collapse-content pt-4">
+      <div class="collapse-title min-h-0 py-2 flex items-center text-base font-semibold" style="height: 2.5rem; min-height: 2.5rem;">{{t("course.problems.setConfiguration")}}</div>
+      <div class="collapse-content peer-checked:pt-4">
         <ConfigurationSection />
       </div>
     </div>
 
     <div ref="sectionRefs.pipeline" class="collapse-arrow rounded-box bg-base-200 collapse">
       <input type="checkbox" class="peer" v-model="openPanels.pipeline" />
-      <div class="collapse-title font-semibold">{{t("course.problems.setPipelines")}}</div>
-      <div class="collapse-content pt-4">
+      <div class="collapse-title min-h-0 py-2 flex items-center text-base font-semibold" style="height: 2.5rem; min-height: 2.5rem;">{{t("course.problems.setPipelines")}}</div>
+      <div class="collapse-content peer-checked:pt-4">
         <PipelineSection />
       </div>
     </div>
 
     <div ref="sectionRefs.testdata" class="collapse-arrow rounded-box bg-base-200 collapse">
       <input type="checkbox" class="peer" v-model="openPanels.testdata" />
-      <div class="collapse-title font-semibold">{{t("course.problems.setTestData")}}</div>
-      <div class="collapse-content pt-4">
+      <div class="collapse-title min-h-0 py-2 flex items-center text-base font-semibold" style="height: 2.5rem; min-height: 2.5rem;">{{t("course.problems.setTestData")}}</div>
+      <div class="collapse-content peer-checked:pt-4">
         <TestDataSection :v$="v$ as any" />
       </div>
     </div>
 
     <div ref="sectionRefs.resdata" class="collapse-arrow rounded-box bg-base-200 collapse">
       <input type="checkbox" class="peer" v-model="openPanels.resdata" />
-      <div class="collapse-title font-semibold">{{t("course.problems.setResourceData")}}</div>
-      <div class="collapse-content pt-4">
+      <div class="collapse-title min-h-0 py-2 flex items-center text-base font-semibold" style="height: 2.5rem; min-height: 2.5rem;">{{t("course.problems.setResourceData")}}</div>
+      <div class="collapse-content peer-checked:pt-4">
         <div class="flex flex-col gap-4">
           <ResourceDataSection variant="student" />
           <ResourceDataSection variant="teacher" />
@@ -636,3 +636,41 @@ async function submit() {
     </button>
   </div>
 </template>
+
+<style>
+/* Override DaisyUI collapse for compact, vertically centered headers */
+/* Using global styles to ensure proper override of DaisyUI defaults */
+
+.collapse-arrow.rounded-box > .collapse-title {
+  padding: 6px 1rem 10px 1rem !important;
+  min-height: 2.5rem !important;
+  height: 2.5rem !important;
+  display: flex !important;
+  align-items: center !important;
+  line-height: 1 !important;
+}
+
+.collapse-arrow.rounded-box > .collapse-title::after {
+  /* Ensure the arrow is vertically centered */
+  position: absolute !important;
+  top: 40% !important;
+  right: 1rem !important;
+  transform: translateY(-50%) rotate(45deg) !important;
+  margin-top: 0 !important;
+}
+
+/* When checkbox is NOT checked - hide content completely */
+.collapse-arrow.rounded-box > input[type="checkbox"]:not(:checked) ~ .collapse-content {
+  padding: 0 !important;
+  min-height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* When checkbox IS checked - show content with padding */
+.collapse-arrow.rounded-box > input[type="checkbox"]:checked ~ .collapse-content {
+  padding-top: 1rem !important;
+  padding-bottom: 1.5rem !important;
+}
+</style>
+

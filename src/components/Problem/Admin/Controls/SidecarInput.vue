@@ -118,33 +118,19 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
 <template>
   <div>
     <div class="border-base-300 bg-base-200 mb-4 rounded-lg border p-3">
-      <div class="mb-3 flex items-end gap-2">
+      <!-- 上排：Name + Args -->
+      <div class="mb-2 flex items-end gap-2">
         <div class="form-control flex-1">
           <label class="label py-1"><span class="label-text-alt">Name</span></label>
           <input
             placeholder="Name (e.g. mysql)"
-            class="input-bordered input input-sm flex-1"
+            class="input-bordered input input-sm"
             v-model="newName"
             @keydown.enter.prevent="add"
           />
         </div>
 
         <div class="form-control flex-[2]">
-          <label class="label py-1"><span class="label-text-alt">Image</span></label>
-          <input
-            placeholder="Image (e.g. mysql:8.0)"
-            class="input-bordered input input-sm flex-[2]"
-            v-model="newImage"
-            @keydown.enter.prevent="add"
-          />
-        </div>
-
-        <button class="btn btn-sm" @click="add">ADD</button>
-      </div>
-
-      <!-- Args and Env inputs -->
-      <div class="grid grid-cols-1 gap-2 md:grid-cols-2">
-        <div class="form-control">
           <label class="label py-1"><span class="label-text-alt">Args (comma-separated)</span></label>
           <input
             placeholder="--port=3306, --host=0.0.0.0"
@@ -152,7 +138,23 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
             v-model="newArgs"
           />
         </div>
-        <div class="form-control">
+
+        <button class="btn btn-sm" @click="add">ADD</button>
+      </div>
+
+      <!-- 下排：Image + Env -->
+      <div class="flex items-start gap-2">
+        <div class="form-control flex-1">
+          <label class="label py-1"><span class="label-text-alt">Image</span></label>
+          <input
+            placeholder="Image (e.g. mysql:8.0)"
+            class="input-bordered input input-sm"
+            v-model="newImage"
+            @keydown.enter.prevent="add"
+          />
+        </div>
+
+        <div class="form-control flex-[2]">
           <label class="label py-1"><span class="label-text-alt">Env (KEY=VALUE per line)</span></label>
           <textarea
             placeholder="MYSQL_ROOT_PASSWORD=secret&#10;MYSQL_DATABASE=testdb"

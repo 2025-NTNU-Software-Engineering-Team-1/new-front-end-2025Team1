@@ -392,7 +392,7 @@ onMounted(async () => {
   <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
     <!-- File Access -->
     <div class="col-span-2 rounded-lg border border-gray-400 p-4">
-      <div class="mb-2 text-sm font-semibold">{{t("course.problems.fileAccess")}}</div>
+      <label class="label"><span class="label-text font-semibold">{{t("course.problems.fileAccess")}}</span></label>
       <div class="flex flex-wrap gap-6">
         <div class="form-control">
           <label class="label cursor-pointer justify-start gap-x-2">
@@ -432,9 +432,156 @@ onMounted(async () => {
 
       <div
         v-if="problem.pipeline!.staticAnalysis!.libraryRestrictions!.enabled"
-        class="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2"
+        class="mt-3 space-y-4"
       >
-        <!-- ===== 上排左邊：syntax ===== -->
+        <!-- ===== Library Restrictions (Imports/Headers/Functions) 統一開關 ===== -->
+        <div class="rounded-lg border border-gray-400 p-3">
+          <div class="mb-3 flex items-center justify-between">
+            <h4 class="text font-medium">{{ t("course.problems.libraryRestrictionsGroup") || "Library Restrictions" }}</h4>
+            <!-- 統一滑動開關 -->
+            <div class="mode-switcher">
+              <div class="mode-switcher-container">
+                <div
+                  class="mode-switcher-slider"
+                  :class="{ 'slider-blacklist': libraryMode === 'blacklist' }"
+                ></div>
+                <button
+                  class="mode-switcher-option"
+                  :class="{ active: libraryMode === 'whitelist' }"
+                  @click="libraryMode = 'whitelist'"
+                >
+                  <span>{{t("course.problems.restrictionWhite")}}</span>
+                </button>
+                <button
+                  class="mode-switcher-option"
+                  :class="{ active: libraryMode === 'blacklist' }"
+                  @click="libraryMode = 'blacklist'"
+                >
+                  <span>{{t("course.problems.restrictionBlack")}}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 三個輸入區塊並排 -->
+          <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+            <!-- Imports -->
+            <div class="relative rounded border border-gray-500 p-2">
+              <div
+                v-if="!allowImports"
+                class="absolute inset-0 z-10 flex items-center justify-center rounded bg-gray-900/80 backdrop-blur-sm"
+              >
+                <div class="px-2 text-center">
+                  <i-uil-lock-alt class="text-warning mb-1 text-2xl" />
+                  <p class="text-xs font-medium text-gray-300">{{t("course.problems.restrictionDisabled")}}</p>
+                </div>
+              </div>
+              <h5 class="mb-2 text-sm font-medium">{{ t("course.problems.importsRestrictions") }}</h5>
+              <div v-if="allowImports" class="flex flex-wrap gap-1">
+                <button
+                  v-for="opt in libraryOptions.imports"
+                  :key="`import-${opt}`"
+                  class="btn btn-xs"
+                  :class="
+                    problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.imports.includes(opt)
+                      ? libraryMode === 'whitelist'
+                        ? 'btn-info'
+                        : 'btn-error'
+                      : ''
+                  "
+                  @click="
+                    toggleItem(problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.imports, opt)
+                  "
+                >
+                  {{ opt }}
+                </button>
+              </div>
+              <div v-if="allowImports" class="mt-2">
+                <MultiStringInput
+                  v-model="problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.imports"
+                  :placeholder="t('course.problems.placeholderImport')"
+                  :badge-class="libraryMode === 'whitelist' ? 'badge-info' : 'badge-error'"
+                />
+              </div>
+            </div>
+
+            <!-- Headers -->
+            <div class="relative rounded border border-gray-500 p-2">
+              <div
+                v-if="!allowHeaders"
+                class="absolute inset-0 z-10 flex items-center justify-center rounded bg-gray-900/80 backdrop-blur-sm"
+              >
+                <div class="px-2 text-center">
+                  <i-uil-lock-alt class="text-warning mb-1 text-2xl" />
+                  <p class="text-xs font-medium text-gray-300">{{ t("course.problem.headersRestrictionDisabled") }}</p>
+                </div>
+              </div>
+              <h5 class="mb-2 text-sm font-medium">{{ t("course.problems.headersRestrictions") }}</h5>
+              <div v-if="allowHeaders" class="flex flex-wrap gap-1">
+                <button
+                  v-for="opt in libraryOptions.headers"
+                  :key="`header-${opt}`"
+                  class="btn btn-xs"
+                  :class="
+                    problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.headers.includes(opt)
+                      ? libraryMode === 'whitelist'
+                        ? 'btn-info'
+                        : 'btn-error'
+                      : ''
+                  "
+                  @click="
+                    toggleItem(problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.headers, opt)
+                  "
+                >
+                  {{ opt }}
+                </button>
+              </div>
+              <div v-if="allowHeaders" class="mt-2">
+                <MultiStringInput
+                  v-model="problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.headers"
+                  :placeholder="t('course.problems.placeholderHeader')"
+                  :badge-class="libraryMode === 'whitelist' ? 'badge-info' : 'badge-error'"
+                />
+              </div>
+            </div>
+
+            <!-- Functions -->
+            <div class="rounded border border-gray-500 p-2">
+              <h5 class="mb-2 text-sm font-medium">{{ t("course.problems.functionsRestrictions") }}</h5>
+              <div class="flex flex-wrap gap-1">
+                <button
+                  v-for="opt in libraryOptions.functions"
+                  :key="`func-${opt}`"
+                  class="btn btn-xs"
+                  :class="
+                    problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.functions.includes(opt)
+                      ? libraryMode === 'whitelist'
+                        ? 'btn-info'
+                        : 'btn-error'
+                      : ''
+                  "
+                  @click="
+                    toggleItem(
+                      problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.functions,
+                      opt,
+                    )
+                  "
+                >
+                  {{ opt }}
+                </button>
+              </div>
+              <div class="mt-2">
+                <MultiStringInput
+                  v-model="problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.functions"
+                  :placeholder="t('course.problems.placeholderFunction')"
+                  :badge-class="libraryMode === 'whitelist' ? 'badge-info' : 'badge-error'"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== Syntax Restrictions 獨立開關 ===== -->
         <div class="rounded-lg border border-gray-400 p-3">
           <div class="mb-3 flex items-center justify-between">
             <h4 class="text font-medium">{{ t("course.problems.syntaxRestrictions") }}</h4>
@@ -488,211 +635,6 @@ onMounted(async () => {
               v-model="problem.pipeline!.staticAnalysis!.libraryRestrictions![syntaxMode]!.syntax"
               :placeholder="t('course.problems.placeholderSyntax')"
               :badge-class="syntaxMode === 'whitelist' ? 'badge-info' : 'badge-error'"
-            />
-          </div>
-        </div>
-
-        <!-- ===== 上排右邊：imports ===== -->
-        <div class="relative rounded-lg border border-gray-400 p-3">
-          <!-- 禁用遮罩提示 -->
-          <div
-            v-if="!allowImports"
-            class="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-gray-900/80 backdrop-blur-sm"
-          >
-            <div class="px-4 text-center">
-              <i-uil-lock-alt class="text-warning mb-2 text-4xl" />
-              <p class="text-sm font-medium text-gray-300">{{t("course.problems.restrictionDisabled")}}</p>
-              <p class="mt-1 text-xs text-gray-400">{{t("course.problems.restrictionDisabledInfo")}}</p>
-            </div>
-          </div>
-
-          <div class="mb-3 flex items-center justify-between">
-            <h4 class="text font-medium">{{ t("course.problems.importsRestrictions") }}</h4>
-            <!-- 滑動開關 -->
-            <div class="mode-switcher">
-              <div class="mode-switcher-container">
-                <div
-                  class="mode-switcher-slider"
-                  :class="{ 'slider-blacklist': importMode === 'blacklist' }"
-                ></div>
-                <button
-                  class="mode-switcher-option"
-                  :class="{ active: importMode === 'whitelist' }"
-                  @click="importMode = 'whitelist'"
-                  :disabled="!allowImports"
-                >
-                  <span>{{t("course.problems.restrictionWhite")}}</span>
-                </button>
-                <button
-                  class="mode-switcher-option"
-                  :class="{ active: importMode === 'blacklist' }"
-                  @click="importMode = 'blacklist'"
-                  :disabled="!allowImports"
-                >
-                  <span>{{t("course.problems.restrictionBlack")}}</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div v-if="allowImports" class="mt-2 flex flex-wrap gap-2">
-            <button
-              v-for="opt in libraryOptions.imports"
-              :key="`import-${opt}`"
-              class="btn btn-xs"
-              :class="
-                problem.pipeline!.staticAnalysis!.libraryRestrictions![importMode]!.imports.includes(opt)
-                  ? importMode === 'whitelist'
-                    ? 'btn-info'
-                    : 'btn-error'
-                  : ''
-              "
-              @click="
-                toggleItem(problem.pipeline!.staticAnalysis!.libraryRestrictions![importMode]!.imports, opt)
-              "
-            >
-              {{ opt }}
-            </button>
-          </div>
-
-          <div v-if="allowImports" class="mt-2">
-            <MultiStringInput
-              v-model="problem.pipeline!.staticAnalysis!.libraryRestrictions![importMode]!.imports"
-              :placeholder="t('course.problems.placeholderImport')"
-              :badge-class="importMode === 'whitelist' ? 'badge-info' : 'badge-error'"
-            />
-          </div>
-        </div>
-
-        <!-- ===== 下排左邊：headers ===== -->
-        <div class="relative rounded-lg border border-gray-400 p-3">
-          <!-- 禁用遮罩提示 -->
-          <div
-            v-if="!allowHeaders"
-            class="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-gray-900/80 backdrop-blur-sm"
-          >
-            <div class="px-4 text-center">
-              <i-uil-lock-alt class="text-warning mb-2 text-4xl" />
-              <p class="text-sm font-medium text-gray-300">{{ t("course.problem.headersRestrictionDisabled") }}</p>
-              <p class="mt-1 text-xs text-gray-400">{{ t("course.problem.headersRestrictionInfo") }}</p>
-            </div>
-          </div>
-
-          <div class="mb-3 flex items-center justify-between">
-            <h4 class="text font-medium">{{ t("course.problems.headersRestrictions") }}</h4>
-            <!-- 滑動開關 -->
-            <div class="mode-switcher">
-              <div class="mode-switcher-container">
-                <div
-                  class="mode-switcher-slider"
-                  :class="{ 'slider-blacklist': headerMode === 'blacklist' }"
-                ></div>
-                <button
-                  class="mode-switcher-option"
-                  :class="{ active: headerMode === 'whitelist' }"
-                  @click="headerMode = 'whitelist'"
-                  :disabled="!allowHeaders"
-                >
-                  <span>{{t("course.problems.restrictionWhite")}}</span>
-                </button>
-                <button
-                  class="mode-switcher-option"
-                  :class="{ active: headerMode === 'blacklist' }"
-                  @click="headerMode = 'blacklist'"
-                  :disabled="!allowHeaders"
-                >
-                  <span>{{t("course.problems.restrictionBlack")}}</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div v-if="allowHeaders" class="mt-2 flex flex-wrap gap-2">
-            <button
-              v-for="opt in libraryOptions.headers"
-              :key="`header-${opt}`"
-              class="btn btn-xs"
-              :class="
-                problem.pipeline!.staticAnalysis!.libraryRestrictions![headerMode]!.headers.includes(opt)
-                  ? headerMode === 'whitelist'
-                    ? 'btn-info'
-                    : 'btn-error'
-                  : ''
-              "
-              @click="
-                toggleItem(problem.pipeline!.staticAnalysis!.libraryRestrictions![headerMode]!.headers, opt)
-              "
-            >
-              {{ opt }}
-            </button>
-          </div>
-
-          <div v-if="allowHeaders" class="mt-2">
-            <MultiStringInput
-              v-model="problem.pipeline!.staticAnalysis!.libraryRestrictions![headerMode]!.headers"
-              :placeholder="t('course.problems.placeholderHeader')"
-              :badge-class="headerMode === 'whitelist' ? 'badge-info' : 'badge-error'"
-            />
-          </div>
-        </div>
-
-        <!-- ===== 下排右邊：functions ===== -->
-        <div class="rounded-lg border border-gray-400 p-3">
-          <div class="mb-3 flex items-center justify-between">
-            <h4 class="text font-medium">{{ t("course.problems.functionsRestrictions") }}</h4>
-            <!-- 滑動開關 --> 
-            <div class="mode-switcher">
-              <div class="mode-switcher-container">
-                <div
-                  class="mode-switcher-slider"
-                  :class="{ 'slider-blacklist': functionMode === 'blacklist' }"
-                ></div>
-                <button
-                  class="mode-switcher-option"
-                  :class="{ active: functionMode === 'whitelist' }"
-                  @click="functionMode = 'whitelist'"
-                >
-                  <span>{{t("course.problems.restrictionWhite")}}</span>
-                </button>
-                <button
-                  class="mode-switcher-option"
-                  :class="{ active: functionMode === 'blacklist' }"
-                  @click="functionMode = 'blacklist'"
-                >
-                  <span>{{t("course.problems.restrictionBlack")}}</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-2 flex flex-wrap gap-2">
-            <button
-              v-for="opt in libraryOptions.functions"
-              :key="`func-${opt}`"
-              class="btn btn-xs"
-              :class="
-                problem.pipeline!.staticAnalysis!.libraryRestrictions![functionMode]!.functions.includes(opt)
-                  ? functionMode === 'whitelist'
-                    ? 'btn-info'
-                    : 'btn-error'
-                  : ''
-              "
-              @click="
-                toggleItem(
-                  problem.pipeline!.staticAnalysis!.libraryRestrictions![functionMode]!.functions,
-                  opt,
-                )
-              "
-            >
-              {{ opt }}
-            </button>
-          </div>
-
-          <div class="mt-2">
-            <MultiStringInput
-              v-model="problem.pipeline!.staticAnalysis!.libraryRestrictions![functionMode]!.functions"
-              :placeholder="t('course.problems.placeholderFunction')"
-              :badge-class="functionMode === 'whitelist' ? 'badge-info' : 'badge-error'"
             />
           </div>
         </div>

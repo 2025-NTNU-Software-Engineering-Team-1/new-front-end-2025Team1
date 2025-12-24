@@ -311,8 +311,8 @@ watch(
     </div>
 
     <div class="mt-2 overflow-hidden rounded-lg">
-      <div class="grid grid-cols-5">
-        <div class="bg-base-300 col-span-1 flex items-center justify-center text-sm">{{t("course.problems.zipFile")}}</div>
+        <div class="grid grid-cols-5 pb-4">
+          <div class="bg-base-300 col-span-1 flex items-center justify-center text-sm rounded-l-lg">{{t("course.problems.zipFile")}}</div>
         <div
           class="textarea-bordered bg-base-100 col-span-4 flex flex-col p-4"
           :class="[isDrag && 'border-accent border']"

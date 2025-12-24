@@ -242,7 +242,7 @@ function downloadTaskZip(taskIndex: number) {
             </button>
             <button
               v-if="session.isAdmin"
-              :class="['btn btn-error md:btn-md', isDeleteLoading && 'loading']"
+              :class="['btn btn-outline btn-error md:btn-md hover:bg-error hover:border-error hover:text-error-content', isDeleteLoading && 'loading']"
               :disabled="isDeleteLoading"
               @click="deleteSubmission"
             >

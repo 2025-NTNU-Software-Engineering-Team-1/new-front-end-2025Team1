@@ -384,7 +384,7 @@ async function deleteTrialSubmission() {
             <!-- Delete Button (only shown if user has permission) -->
             <button
               v-if="canRejudge"
-              :class="['btn btn-error btn-sm', isDeleteLoading && 'loading']"
+              :class="['btn btn-outline btn-error btn-sm hover:bg-error hover:border-error hover:text-error-content', isDeleteLoading && 'loading']"
               :disabled="isDeleteLoading"
               @click="deleteTrialSubmission"
             >

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useTitle } from "@vueuse/core";
 import api from "@/models/api";
@@ -15,6 +15,17 @@ const router = useRouter();
 const { t } = useI18n();
 
 useTitle(`Test History - ${route.params.id} - ${route.params.name} | Normal OJ`);
+
+// Determine back button path based on where user came from
+const getBackPath = () => {
+  const from = String(route.query.from || '');
+  // If came from problems list page, return to problems list
+  if (from === 'problems') {
+    return `/course/${route.params.name}/problems`;
+  }
+  // Default: return to test page (when from problem detail page or test page)
+  return `/course/${route.params.name}/problem/${route.params.id}/test`;
+};
 
 // Define a typed shape for the history items so TypeScript knows what properties exist
 type TestHistoryItem = {
@@ -162,7 +173,7 @@ async function deleteTrialSubmission(id: string | number, event: Event) {
               <i-uil-repeat class="mr-1" /> Rejudge All
             </button>
             <router-link
-              :to="backPath"
+              :to="getBackPath()"
               class="btn btn-sm"
             >
               <i-uil-arrow-left class="mr-1" />
@@ -188,7 +199,7 @@ async function deleteTrialSubmission(id: string | number, event: Event) {
                     <th>{{ t("course.problem.test.historyModal.table.score") }}</th>
                     <th>{{ t("course.submission.general.lang") }}</th>
                     <th>{{ t("course.problem.test.historyModal.table.time") }}</th>
-                    <th v-if="canRejudge">Action</th>
+                    <th v-if="canRejudge"></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -213,7 +224,7 @@ async function deleteTrialSubmission(id: string | number, event: Event) {
                     <td>{{ dayjs(item.timestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
                     <td v-if="canRejudge">
                       <button
-                        class="btn btn-ghost btn-xs text-error"
+                        class="btn btn-outline btn-error btn-xs hover:bg-error hover:border-error hover:text-error-content"
                         :class="{ loading: deletingIds.has(item.id) }"
                         :disabled="deletingIds.has(item.id)"
                         @click="deleteTrialSubmission(item.id, $event)"

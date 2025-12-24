@@ -96,7 +96,9 @@
         "err": {
           "code": "Please paste your source code to test.",
           "lang": "Please select the programming language.",
-          "msg": "Oops! Something went wrong when testing the code. Try again later."
+          "msg": "Oops! Something went wrong when testing the code. Try again later.",
+          "trialModeNotEnabled": "Trial mode is not enabled for this problem. Please contact the instructor to enable it.",
+          "permissionDenied": "You do not have permission to use the trial feature for this problem."
         },
         "card": {
           "title": "Test problem #",

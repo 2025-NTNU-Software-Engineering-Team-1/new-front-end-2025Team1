@@ -357,6 +357,27 @@ async function submit() {
       fd.append("resource_data_teacher.zip", assets.resourceDataTeacherZip);
       attachedFiles.push("resource_data_teacher.zip");
     }
+    if (assets?.trialModePublicTestDataZip) {
+      fd.append("public_testdata.zip", assets.trialModePublicTestDataZip);
+      attachedFiles.push("public_testdata.zip");
+    }
+    if (assets?.trialModeACFiles) {
+      // trialModeACFiles can contain multiple files (ac_code.c, ac_code.cpp, ac_code.py)
+      if (Array.isArray(assets.trialModeACFiles)) {
+        assets.trialModeACFiles.forEach((f) => {
+          if (f.name.endsWith(".c")) fd.append("ac_code.c", f);
+          else if (f.name.endsWith(".cpp")) fd.append("ac_code.cpp", f);
+          else if (f.name.endsWith(".py")) fd.append("ac_code.py", f);
+          attachedFiles.push(f.name);
+        });
+      } else {
+        const f = assets.trialModeACFiles as unknown as File;
+        if (f.name.endsWith(".c")) fd.append("ac_code.c", f);
+        else if (f.name.endsWith(".cpp")) fd.append("ac_code.cpp", f);
+        else if (f.name.endsWith(".py")) fd.append("ac_code.py", f);
+        attachedFiles.push(f.name);
+      }
+    }
 
     logger.log("Step 2: Attaching Assets", attachedFiles);
 

@@ -55,6 +55,7 @@ const form = reactive({
   testInput: "",
   isLoading: false,
   isSubmitError: false,
+  errorMessage: "",
 });
 const rules = {
   code: { required: helpers.withMessage(t("course.problem.submit.err.code"), required) },
@@ -107,11 +108,11 @@ async function test() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     })) as any;
 
-    if (requestResponse.status === "err" || !requestResponse.trial_submission_id) {
+    if (requestResponse.status === "err" || !requestResponse.data?.trial_submission_id) {
       throw new Error(requestResponse.message || "Failed to create trial submission");
     }
 
-    const trialSubmissionId = requestResponse.trial_submission_id;
+    const trialSubmissionId = requestResponse.data.trial_submission_id;
     console.log("requestResponse =", requestResponse);
     console.log("trialSubmissionId =", trialSubmissionId);
 
@@ -144,7 +145,18 @@ async function test() {
     router.push(`/course/${route.params.name}/problem/${route.params.id}/test-history`);
   } catch (error) {
     form.isSubmitError = true;
-    throw error;
+    // Check for specific error messages from backend
+    const axiosError = error as AxiosError<{ message?: string }>;
+    const backendMessage = axiosError?.response?.data?.message || "";
+    
+    if (backendMessage.includes("Trial mode is not enabled")) {
+      form.errorMessage = t("course.problem.test.err.trialModeNotEnabled");
+    } else if (backendMessage.includes("permission") || backendMessage.includes("Forbidden")) {
+      form.errorMessage = t("course.problem.test.err.permissionDenied");
+    } else {
+      form.errorMessage = t("course.problem.test.err.msg");
+    }
+    console.error("Trial submission error:", error);
   } finally {
     form.isLoading = false;
   }
@@ -334,7 +346,7 @@ async function submitCode() {
 
             <div class="alert alert-error" v-if="form.isSubmitError">
               <i-uil-exclamation-triangle class="h-6 w-6" />
-              <span>{{ t("course.problem.test.err.msg") }}</span>
+              <span>{{ form.errorMessage }}</span>
             </div>
           </div>
 

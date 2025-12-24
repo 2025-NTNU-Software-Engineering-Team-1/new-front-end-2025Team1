@@ -185,12 +185,32 @@ async function validateTrialPublicZip(file: File): Promise<boolean> {
       return false;
     }
 
-    // Validation: ONLY .in files allowed
-    const invalid = entries.filter(({ filename }) => !filename.endsWith(".in"));
+    // Validation: ONLY .in and .out files allowed
+    // Public test data should contain both input (.in) and expected output (.out) files
+    const invalid = entries.filter(
+      ({ filename }) => !filename.endsWith(".in") && !filename.endsWith(".out")
+    );
     if (invalid.length > 0) {
       logger.error(
-        "Invalid files found (must be .in)",
+        "Invalid files found (must be .in or .out)",
         invalid.map((e) => e.filename),
+      );
+      return false;
+    }
+
+    // Check that for each .in file, there should be a corresponding .out file
+    const inFiles = entries
+      .filter((e) => e.filename.endsWith(".in"))
+      .map((e) => e.filename.replace(/\.in$/, ""));
+    const outFiles = entries
+      .filter((e) => e.filename.endsWith(".out"))
+      .map((e) => e.filename.replace(/\.out$/, ""));
+
+    const missingOutFiles = inFiles.filter((name) => !outFiles.includes(name));
+    if (missingOutFiles.length > 0) {
+      logger.error(
+        "Missing .out files for the following .in files:",
+        missingOutFiles.map((name) => `${name}.in`),
       );
       return false;
     }
@@ -1089,7 +1109,7 @@ onBeforeUnmount(() => {
             "
           />
           <label class="label">
-            <span class="label-text-alt opacity-70"> Only <code>.in</code> files inside ZIP; ≤ 1 GB </span>
+            <span class="label-text-alt opacity-70"> Only <code>.in</code> and <code>.out</code> files inside ZIP; each <code>.in</code> must have a corresponding <code>.out</code> file; ≤ 1 GB </span>
           </label>
           <label v-if="v$?.assets?.trialModePublicTestDataZip?.$error" class="label">
             <span class="label-text-alt text-error">{{ v$.assets.trialModePublicTestDataZip.$errors[0]?.$message }}</span>

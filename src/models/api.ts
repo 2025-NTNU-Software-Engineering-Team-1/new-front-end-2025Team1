@@ -84,6 +84,17 @@ const Submission = {
 
   rejudge: (id: string) => fetcher.get(`/submission/${id}/rejudge`),
 
+  rejudgeAll: (problemId: number) =>
+    fetcher.post<{
+      ok: boolean;
+      success: number;
+      failed: number;
+      skipped: number;
+    }>("/submission/rejudge-all", { problem_id: problemId }),
+
+  delete: (id: string) =>
+    fetcher.delete<{ ok: boolean }>(`/submission/${id}`),
+
   getArtifactUrl: (id: string, kind: "compiledBinary" | "zip", taskIndex?: number) => {
     const base = (fetcher.defaults.baseURL || "").toString().replace(/\/$/, "");
     const path =
@@ -182,6 +193,36 @@ const TrialSubmission = {
   // API 7: 下載一整題該Test Submission的所有測資結果
   // GET /trial-submission/<Trial_Submission_Id>/download
   downloadAllResults: (trialSubmissionId: string) => `/trial-submission/${trialSubmissionId}/download`,
+
+  // API 8: Rejudge 單一 Trial Submission
+  // GET /trial-submission/<trial_id>/rejudge
+  rejudge: (trialSubmissionId: string) =>
+    fetcher.get<{ status: string; message: string; data: { ok: boolean } }>(
+      `/trial-submission/${trialSubmissionId}/rejudge`,
+    ),
+
+  // API 9: Rejudge All Trial Submissions for a problem
+  // POST /trial-submission/rejudge-all/<problem_id>
+  rejudgeAll: (problemId: number) =>
+    fetcher.post<{
+      status: string;
+      message: string;
+      data: { success: number; failed: number; skipped: number };
+    }>(`/trial-submission/rejudge-all/${problemId}`),
+
+  // API 10: Check if user can rejudge trial submissions for a problem
+  // GET /trial-submission/check-rejudge-permission/<problem_id>
+  checkRejudgePermission: (problemId: number) =>
+    fetcher.get<{ status: string; data: { can_rejudge: boolean } }>(
+      `/trial-submission/check-rejudge-permission/${problemId}`,
+    ),
+
+  // API 11: Delete a trial submission
+  // DELETE /trial-submission/<trial_id>
+  delete: (trialSubmissionId: string) =>
+    fetcher.delete<{ status: string; message: string; data: { ok: boolean } }>(
+      `/trial-submission/${trialSubmissionId}`,
+    ),
 };
 
 //test api

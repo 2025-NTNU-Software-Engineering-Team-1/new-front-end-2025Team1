@@ -118,6 +118,14 @@ const maxPage = computed(() => {
                     <template v-else> {{ quota - submitCount }} / {{ quota }} </template>
                   </td>
                   <td>
+                    <div class="tooltip" data-tip="Test History">
+                      <router-link
+                        class="btn btn-ghost btn-sm btn-circle mr-1"
+                        :to="`/course/${$route.params.name}/problem/${problemId}/test-history?from=problems`"
+                      >
+                        <i-uil-history class="lg:h-5 lg:w-5" />
+                      </router-link>
+                    </div>
                     <div class="tooltip" data-tip="Stats">
                       <router-link
                         class="btn btn-ghost btn-sm btn-circle mr-1"

@@ -1118,45 +1118,47 @@ onBeforeUnmount(() => {
           </label>
         </div>
 
-        <div class="form-control w-full max-w-xs">
-          <label class="label">
-            <span class="label-text">{{ t("course.problems.uploadACFiles") }}</span>
-          </label>
-          <div class="flex items-center gap-2">
-            <div
-              v-if="hasAsset('ac_code') || (problem.assets?.trialModeACFiles && problem.assets.trialModeACFiles.length > 0)"
-              class="flex items-center gap-2"
-            >
-              <span class="badge badge-outline badge-success text-xs">Uploaded</span>
-              <a
-                v-if="hasAsset('ac_code')"
-                :href="assetDownloadUrl('ac_code') || '#'"
-                class="btn btn-xs"
-                target="_blank"
-                rel="noopener"
+        <div class="form-control w-full max-w-md">
+          <div class="flex items-center justify-between">
+            <label class="label">
+              <span class="label-text">{{ t("course.problems.uploadACFiles") }}</span>
+            </label>
+            <div class="flex items-center gap-2">
+              <div
+                v-if="hasAsset('ac_code') || (problem.assets?.trialModeACFiles && problem.assets.trialModeACFiles.length > 0)"
+                class="flex items-center gap-2"
               >
-                Download
-              </a>
+                <span class="badge badge-outline badge-success text-xs">Uploaded</span>
+                <a
+                  v-if="hasAsset('ac_code')"
+                  :href="assetDownloadUrl('ac_code') || '#'"
+                  class="btn btn-xs"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  Download
+                </a>
+              </div>
+              <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
             </div>
-            <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
           </div>
-            <input
-              type="file"
-              multiple
+          <input
+            type="file"
+            multiple
             accept=".c,.cpp,.py"
-              class="file-input-bordered file-input file-input-sm w-full"
-              :class="{ 'input-error': v$?.assets?.trialModeACFiles?.$error }"
-              @change="
-                (e: Event) => {
-                  const files = Array.from((e.target as HTMLInputElement).files || []) as File[];
+            class="file-input-bordered file-input file-input-sm w-full"
+            :class="{ 'input-error': v$?.assets?.trialModeACFiles?.$error }"
+            @change="
+              (e: Event) => {
+                const files = Array.from((e.target as HTMLInputElement).files || []) as File[];
                 const allowedExts = ['.c', '.cpp', '.py'];
                 const valid = validateFilesForAIAC(files, allowedExts);
-                  problem.assets!.trialModeACFiles = valid;
-                  if (valid.length === 0) (e.target as HTMLInputElement).value = '';
-                  v$?.assets?.trialModeACFiles?.$touch();
-                }
-              "
-            />
+                problem.assets!.trialModeACFiles = valid;
+                if (valid.length === 0) (e.target as HTMLInputElement).value = '';
+                v$?.assets?.trialModeACFiles?.$touch();
+              }
+            "
+          />
           <label class="label mt-1">
             <span class="label-text-alt text-sm opacity-70">
               Allowed: .c, .cpp, .py

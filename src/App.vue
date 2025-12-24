@@ -28,7 +28,7 @@ watchEffect(() => {
 <template>
   <div class="drawer lg:drawer-open h-screen w-screen">
     <input id="noj-drawer" type="checkbox" class="drawer-toggle" />
-    <div class="drawer-content">
+    <div class="drawer-content overflow-y-auto">
       <top-bar class="sticky top-0 z-20 lg:hidden" />
       <router-view />
     </div>

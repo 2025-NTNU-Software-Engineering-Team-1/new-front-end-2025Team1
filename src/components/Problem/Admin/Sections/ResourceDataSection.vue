@@ -7,6 +7,7 @@ import { inject, Ref, ref, watch, computed } from "vue";
 import { useRoute } from "vue-router";
 import { ZipReader, BlobReader } from "@zip.js/zip.js";
 import { assertFileSizeOK } from "@/utils/checkFileSize";
+import { useI18n } from "vue-i18n";
 
 // ==========================================
 // [CONFIG] Console Debug Mode
@@ -53,7 +54,7 @@ const props = withDefaults(defineProps<{ variant?: "student" | "teacher" }>(), {
 const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
 const route = useRoute();
 const isDrag = ref(false);
-
+const { t } = useI18n();
 // Safety Check
 if (!problem || !problem.value) {
   logger.error("Problem injection failed");
@@ -70,7 +71,7 @@ const enableKey = computed(() => (isTeacher.value ? "resourceDataTeacher" : "res
 const assetKey = computed(() => (isTeacher.value ? "resourceDataTeacherZip" : "resourceDataZip"));
 const assetPathKey = computed(() => (isTeacher.value ? "resource_data_teacher" : "resource_data"));
 const labelText = computed(() =>
-  isTeacher.value ? "Set ResourceData (Teacher)" : "Set ResourceData (Student)",
+  isTeacher.value ? t("course.problems.setResourceDataTeacher") : t("course.problems.setResourceDataStudent"),
 );
 
 // ==========================================
@@ -107,14 +108,14 @@ const hasRemoteAsset = computed(() =>
 const resourceDataWarning = computed(() => {
   if (isTeacher.value) return "";
   if (!allowReadSatisfied.value && enableRef.value) {
-    return "Enable Allow Read to use Resource Data.";
+    return t("course.problem.allowReadToUse");
   }
   return "";
 });
 
 const enableDisabledReason = computed(() => {
-  if (!hasTestdata.value) return "Upload TestData first";
-  if (!allowReadSatisfied.value) return "Allow Read required";
+  if (!hasTestdata.value) return t("course.problems.uploadTestDataFirst");
+  if (!allowReadSatisfied.value) return t("course.problems.allowReadRequired");
   return "";
 });
 
@@ -226,7 +227,7 @@ watch(
 
         // Check if prefix matches defined TestData (0001, 0002...)
         if (!prefixSet.has(prefix)) {
-          const msg = `ResourceData 檔名前綴不符測資結構: ${base}`;
+          const msg = t("course.problems.prefixMismatch", { base });
           logger.error("Validation Failed", msg);
           alert(msg);
           fileRef.value = null;
@@ -241,7 +242,10 @@ watch(
       // 3. Verify completeness (Every test case must have a resource file?)
       // Logic from original code: sizes must match exactly.
       if (seenCases.size !== prefixSet.size) {
-        const msg = "ResourceData 檔案數量與 TestData 測資數量不一致，請確認每個 case 都有對應資源。";
+        const msg = t("course.problems.countMismatch", {
+          seen: seenCases.size,
+          expected: prefixSet.size,
+        });
         logger.error("Count Mismatch", { seen: seenCases.size, expected: prefixSet.size });
         alert(msg);
         fileRef.value = null;
@@ -268,7 +272,7 @@ watch(
     <div class="flex flex-wrap items-center gap-3">
       <span class="label-text">{{ labelText }}</span>
       <label class="label cursor-pointer justify-start gap-x-2">
-        <span class="label-text">Enable</span>
+        <span class="label-text">{{t("course.problems.enable")}}</span>
         <input
           type="checkbox"
           class="toggle"
@@ -290,10 +294,10 @@ watch(
           v-if="resourceCaseCount !== null || hasRemoteAsset"
           class="badge badge-outline badge-success text-xs"
         >
-          Current: {{ resourceCaseCount ?? remoteTaskCount ?? "remote" }} task(s)
+          {{t("course.problems.current")}} {{ resourceCaseCount ?? remoteTaskCount ?? "remote" }} {{t("course.problems.tasks")}}
         </span>
-        <span v-else-if="fileRef" class="badge badge-outline badge-success text-xs"> Uploaded </span>
-        <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
+        <span v-else-if="fileRef" class="badge badge-outline badge-success text-xs"> {{ t("course.problems.uploaded") }} </span>
+        <span v-else class="badge badge-outline text-xs opacity-70">{{t("course.problems.notUploaded")}}</span>
         <a
           v-if="downloadUrl && hasRemoteAsset"
           class="btn btn-xs"
@@ -301,14 +305,14 @@ watch(
           target="_blank"
           rel="noopener"
         >
-          Download current
+          {{t("course.problems.downloadCurrent")}}
         </a>
       </div>
     </div>
 
     <div class="mt-2 overflow-hidden rounded-lg">
       <div class="grid grid-cols-5">
-        <div class="bg-base-300 col-span-1 flex items-center justify-center text-sm">zip file</div>
+        <div class="bg-base-300 col-span-1 flex items-center justify-center text-sm">{{t("course.problems.zipFile")}}</div>
         <div
           class="textarea-bordered bg-base-100 col-span-4 flex flex-col p-4"
           :class="[isDrag && 'border-accent border']"
@@ -322,9 +326,9 @@ watch(
                 ? enableDisabledReason
                 : allowReadSatisfied
                   ? enableRef
-                    ? "Drop a zip file here"
-                    : "Enable first, then upload"
-                  : "Enable Allow Read first"
+                    ? t("course.problems.dropFileHere")
+                    : t("course.problems.EnablefirstThenUpload")
+                  : t("course.problems.EnableAllowReadfirst")
             }}
           </div>
 

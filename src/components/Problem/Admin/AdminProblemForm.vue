@@ -3,6 +3,7 @@ import { inject, ref, Ref, onMounted, provide } from "vue";
 import { nextTick, reactive, computed } from "vue";
 import useVuelidate from "@vuelidate/core";
 import { required, maxLength, between, helpers } from "@vuelidate/validators";
+import { useI18n } from "vue-i18n";
 
 import DescriptionSection from "./Sections/DescriptionSection.vue";
 import ConfigurationSection from "./Sections/ConfigurationSection.vue";
@@ -31,7 +32,7 @@ const openPanels = reactive({
   testdata: false,
   resdata: false,
 });
-
+const { t } = useI18n();
 const sectionRefs: Record<PanelKey, ReturnType<typeof ref<HTMLElement | null>>> = {
   desc: ref(null),
   config: ref(null),
@@ -531,7 +532,7 @@ async function submit() {
   <div class="grid grid-cols-2 gap-y-4">
     <div class="form-control w-full max-w-xs">
       <label class="label">
-        <span class="label-text">Problem name</span>
+        <span class="label-text">{{ t("course.problems.problemName") }}</span>
       </label>
 
       <input
@@ -548,7 +549,7 @@ async function submit() {
 
     <div class="form-control">
       <label class="label cursor-pointer justify-start gap-x-4">
-        <span class="label-text">Hidden</span>
+        <span class="label-text">{{t("components.problem.forms.hiddenToggle")}}</span>
         <input
           type="checkbox"
           class="toggle toggle-success"
@@ -563,7 +564,7 @@ async function submit() {
   <div ref="sectionRefs.desc" class="mt-4 flex flex-col gap-3">
     <div class="collapse-arrow rounded-box bg-base-200 collapse">
       <input type="checkbox" class="peer" v-model="openPanels.desc" />
-      <div class="collapse-title font-semibold">Set Description</div>
+      <div class="collapse-title font-semibold">{{t("course.problems.setDescription")}}</div>
       <div class="collapse-content pt-4">
         <DescriptionSection :v$="v$" @update="update" />
       </div>
@@ -571,7 +572,7 @@ async function submit() {
 
     <div ref="sectionRefs.config" class="collapse-arrow rounded-box bg-base-200 collapse">
       <input type="checkbox" class="peer" v-model="openPanels.config" />
-      <div class="collapse-title font-semibold">Set Configuration</div>
+      <div class="collapse-title font-semibold">{{t("course.problems.setConfiguration")}}</div>
       <div class="collapse-content pt-4">
         <ConfigurationSection />
       </div>
@@ -579,7 +580,7 @@ async function submit() {
 
     <div ref="sectionRefs.pipeline" class="collapse-arrow rounded-box bg-base-200 collapse">
       <input type="checkbox" class="peer" v-model="openPanels.pipeline" />
-      <div class="collapse-title font-semibold">Set Pipeline</div>
+      <div class="collapse-title font-semibold">{{t("course.problems.setPipelines")}}</div>
       <div class="collapse-content pt-4">
         <PipelineSection />
       </div>
@@ -587,7 +588,7 @@ async function submit() {
 
     <div ref="sectionRefs.testdata" class="collapse-arrow rounded-box bg-base-200 collapse">
       <input type="checkbox" class="peer" v-model="openPanels.testdata" />
-      <div class="collapse-title font-semibold">Set Test Data</div>
+      <div class="collapse-title font-semibold">{{t("course.problems.setTestData")}}</div>
       <div class="collapse-content pt-4">
         <TestDataSection :v$="v$ as any" />
       </div>
@@ -595,7 +596,7 @@ async function submit() {
 
     <div ref="sectionRefs.resdata" class="collapse-arrow rounded-box bg-base-200 collapse">
       <input type="checkbox" class="peer" v-model="openPanels.resdata" />
-      <div class="collapse-title font-semibold">Set Resource Data</div>
+      <div class="collapse-title font-semibold">{{t("course.problems.setResourceData")}}</div>
       <div class="collapse-content pt-4">
         <div class="flex flex-col gap-4">
           <ResourceDataSection variant="student" />
@@ -607,7 +608,7 @@ async function submit() {
 
   <div v-if="v$.$error" class="alert alert-error mt-3">
     <div class="flex flex-col gap-2">
-      <div class="font-semibold">Submission blocked. Please fix the following:</div>
+      <div class="font-semibold">{{t("course.problems.submissionBlocked")}}</div>
 
       <ul class="list-disc pl-5 text-sm">
         <li v-for="(e, idx) in errorSummary" :key="idx">
@@ -623,7 +624,7 @@ async function submit() {
   <!-- Submit -->
   <div class="mt-6 flex justify-end">
     <button :class="['btn btn-success', isLoading && 'loading']" @click="submit">
-      <i-uil-file-upload-alt class="mr-1 lg:h-5 lg:w-5" /> Submit
+      <i-uil-file-upload-alt class="mr-1 lg:h-5 lg:w-5" /> {{ t("course.members.submit") }}
     </button>
   </div>
 </template>

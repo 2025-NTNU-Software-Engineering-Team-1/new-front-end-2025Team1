@@ -7,6 +7,8 @@ import { inject, Ref, ref, watch, computed } from "vue";
 import { useRoute } from "vue-router";
 import { ZipReader, BlobReader } from "@zip.js/zip.js";
 import { assertFileSizeOK } from "@/utils/checkFileSize";
+import { THEME_KEY } from "vue-echarts";
+import { useI18n } from "vue-i18n";
 
 // ==========================================
 // Props & Injection
@@ -16,7 +18,7 @@ defineProps<{ v$: any }>();
 const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
 const route = useRoute();
 const isDrag = ref(false);
-
+const { t } = useI18n();
 // ==========================================
 // [CONFIG] Console Debug Mode
 // ==========================================
@@ -168,12 +170,12 @@ watch(
 <template>
   <div class="form-control col-span-2">
     <label class="label">
-      <span class="label-text">Test Data Zip</span>
+      <span class="label-text">{{t("course.problems.testDataZip")}}</span>
       <div class="flex items-center gap-2">
         <span v-if="hasBackendTestcase" class="badge badge-outline badge-success text-xs">
           Current: {{ currentTaskLabel }}
         </span>
-        <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
+        <span v-else class="badge badge-outline text-xs opacity-70">{{t("course.problems.notUploaded")}}</span>
         <a
           v-if="hasBackendTestcase && downloadUrl"
           class="btn btn-xs"
@@ -181,7 +183,7 @@ watch(
           target="_blank"
           rel="noopener"
         >
-          Download current
+          {{t("course.problems.downloadCurrent")}}
         </a>
       </div>
     </label>
@@ -190,7 +192,7 @@ watch(
     <div class="mt-2 overflow-hidden rounded-lg">
       <div class="grid grid-cols-5">
         <!-- 左側灰底區 -->
-        <div class="bg-base-300 col-span-1 flex items-center justify-center text-sm">zip file</div>
+        <div class="bg-base-300 col-span-1 flex items-center justify-center text-sm">{{t("course.problems.zipFile")}}</div>
 
         <!-- 右側白底上傳區 -->
         <div
@@ -201,7 +203,7 @@ watch(
           @dragleave="isDrag = false"
         >
           <!-- 永� 在上方顯示 -->
-          <div class="mb-2 text-sm opacity-70">Drop a zip file here</div>
+          <div class="mb-2 text-sm opacity-70">{{t("course.problems.dropFileHere")}}</div>
 
           <!-- 選擇或顯示檔案 -->
           <template v-if="!problem.assets!.testdataZip">
@@ -241,19 +243,19 @@ watch(
     />
 
     <!-- Tasks 表� � -->
-    <template v-for="(t, i) in problem.testCaseInfo.tasks" :key="i">
+    <template v-for="(task, i) in problem.testCaseInfo.tasks" :key="i">
       <div class="mt-2 grid grid-cols-1 gap-3 md:grid-cols-4">
         <div class="form-control">
-          <label class="label"><span class="label-text">#Cases</span></label>
-          <input type="text" class="input-bordered input" :value="t.caseCount" readonly />
+          <label class="label"><span class="label-text">{{t("course.problems.cases")}}</span></label>
+          <input type="text" class="input-bordered input" :value="task.caseCount" readonly />
         </div>
 
         <div class="form-control">
-          <label class="label"><span class="label-text">Score</span></label>
+          <label class="label"><span class="label-text">{{t("course.problems.score")}}</span></label>
           <input
             type="number"
             class="input-bordered input"
-            :value="t.taskScore"
+            :value="task.taskScore"
             @input="
               problem.testCaseInfo.tasks[i].taskScore = Number(($event.target as HTMLInputElement).value)
             "
@@ -261,11 +263,11 @@ watch(
         </div>
 
         <div class="form-control">
-          <label class="label"><span class="label-text">Memory limit (KB)</span></label>
+          <label class="label"><span class="label-text">{{t("course.problems.memoryLimit")}}</span></label>
           <input
             type="number"
             class="input-bordered input"
-            :value="t.memoryLimit"
+            :value="task.memoryLimit"
             @input="
               problem.testCaseInfo.tasks[i].memoryLimit = Number(($event.target as HTMLInputElement).value)
             "
@@ -273,11 +275,11 @@ watch(
         </div>
 
         <div class="form-control">
-          <label class="label"><span class="label-text">Time limit (ms)</span></label>
+          <label class="label"><span class="label-text">{{t("course.problems.timeLimit")}}</span></label>
           <input
             type="number"
             class="input-bordered input"
-            :value="t.timeLimit"
+            :value="task.timeLimit"
             @input="
               problem.testCaseInfo.tasks[i].timeLimit = Number(($event.target as HTMLInputElement).value)
             "

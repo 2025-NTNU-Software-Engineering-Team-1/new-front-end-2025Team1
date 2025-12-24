@@ -178,11 +178,28 @@ async function rejudge() {
     router.go(0);
   } catch (error) {
     logger.error("Rejudge Failed", error);
-    alert("Request to rejudge failed.");
-    throw error;
   } finally {
     isRejudgeLoading.value = false;
     logger.groupEnd();
+  }
+}
+
+const isDeleteLoading = ref(false);
+async function deleteSubmission() {
+  if (!confirm("Are you sure you want to delete this submission?")) {
+    return;
+  }
+  isDeleteLoading.value = true;
+  try {
+    const response = await api.Submission.delete(route.params.id as string);
+    if (response.data?.ok) {
+      // Navigate back to submissions list
+      router.push(`/course/${route.params.name}/submissions`);
+    }
+  } catch (error) {
+    console.error("Delete failed:", error);
+  } finally {
+    isDeleteLoading.value = false;
   }
 }
 
@@ -215,13 +232,22 @@ function downloadTaskZip(taskIndex: number) {
             <div v-if="enableCompiledBinary" class="btn md:btn-md" @click="downloadCompiledBinary">
               <i-uil-folder-download class="mr-1" /> Download binary
             </div>
-            <div
+            <button
               v-if="session.isAdmin"
-              :class="['btn md:btn-md', isRejudgeLoading && 'loading']"
+              :class="['btn btn-warning md:btn-md', isRejudgeLoading && 'loading']"
+              :disabled="isRejudgeLoading"
               @click="rejudge"
             >
               <i-uil-repeat class="mr-1" /> Rejudge
-            </div>
+            </button>
+            <button
+              v-if="session.isAdmin"
+              :class="['btn btn-error md:btn-md', isDeleteLoading && 'loading']"
+              :disabled="isDeleteLoading"
+              @click="deleteSubmission"
+            >
+              <i-uil-trash-alt class="mr-1" /> Delete
+            </button>
           </div>
         </div>
 

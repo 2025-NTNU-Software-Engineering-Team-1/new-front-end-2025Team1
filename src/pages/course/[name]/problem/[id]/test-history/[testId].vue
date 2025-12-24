@@ -2,7 +2,7 @@
 import { ref, watchEffect, onMounted } from "vue";
 import { useClipboard, useIntervalFn } from "@vueuse/core";
 import { useAxios } from "@vueuse/integrations/useAxios";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { SUBMISSION_STATUS_CODE, LANG } from "@/constants";
 import api, { fetcher } from "@/models/api";
 import { useSession } from "@/stores/session";
@@ -11,6 +11,7 @@ import dayjs from "dayjs";
 
 const session = useSession();
 const route = useRoute();
+const router = useRouter();
 useTitle(`Test History - ${route.params.testId} - ${route.params.name} | Normal OJ`);
 // const router = useRouter();
 
@@ -56,6 +57,7 @@ const testResult = ref<TestResult | null>(null);
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const error = ref<any>(undefined);
 const isLoading = ref(false);
+const canRejudge = ref(false);
 
 const {
   data: CEOutput,
@@ -70,48 +72,65 @@ const {
   },
 );
 
+// Fetch trial submission data (used for both initial load and polling)
+async function fetchTrialSubmission() {
+  const response = await api.TrialSubmission.getTrialSubmission(String(route.params.testId));
+
+  // Convert backend response to frontend format
+  testResult.value = {
+    id: response.data.trial_submission_id,
+    problemId: route.params.id as string,
+    user: {
+      username: session.username || "Unknown",
+      displayedName: session.displayedName || "Unknown",
+    },
+    status: mapStatusToCode(response.data.status),
+    runTime: Math.max(...(response.data.tasks?.map((t) => t.exec_time) ?? [0])),
+    memoryUsage: Math.max(...(response.data.tasks?.map((t) => t.memory_usage) ?? [0])),
+    score: response.data.score,
+    languageType: response.data.language_type ?? 1,
+    timestamp: new Date(response.data.timestamp).getTime(),
+    code: response.data.code ?? "",
+    tasks:
+      response.data.tasks?.map((task, idx) => ({
+        taskId: idx,
+        exec_time: task.exec_time,
+        memory_usage: task.memory_usage,
+        score: task.score,
+        status: mapStatusToCode(task.status),
+        cases: [
+          {
+            id: 0,
+            status: mapStatusToCode(task.status),
+            exec_time: task.exec_time,
+            memory_usage: task.memory_usage,
+            input: "",
+            expectedOutput: "",
+            actualOutput: task.stdout,
+          },
+        ],
+      })) ?? [],
+  };
+}
+
 // API 5: Load trial submission details when component mounts
 onMounted(async () => {
   try {
     isLoading.value = true;
-    const response = await api.TrialSubmission.getTrialSubmission(String(route.params.testId));
-
-    // Convert backend response to frontend format
-    testResult.value = {
-      id: response.data.trial_submission_id,
-      problemId: route.params.id as string,
-      user: {
-        username: session.username || "Unknown",
-        displayedName: session.displayedName || "Unknown",
-      },
-      status: mapStatusToCode(response.data.status),
-      runTime: Math.max(...(response.data.tasks?.map((t) => t.exec_time) ?? [0])),
-      memoryUsage: Math.max(...(response.data.tasks?.map((t) => t.memory_usage) ?? [0])),
-      score: response.data.score,
-      languageType: response.data.language_type ?? 1,
-      timestamp: new Date(response.data.timestamp).getTime(),
-      code: "", // TODO: Get code from backend
-      tasks:
-        response.data.tasks?.map((task, idx) => ({
-          taskId: idx,
-          exec_time: task.exec_time,
-          memory_usage: task.memory_usage,
-          score: task.score,
-          status: mapStatusToCode(task.status),
-          cases: [
-            {
-              id: 0,
-              status: mapStatusToCode(task.status),
-              exec_time: task.exec_time,
-              memory_usage: task.memory_usage,
-              input: "",
-              expectedOutput: "",
-              actualOutput: task.stdout,
-            },
-          ],
-        })) ?? [],
-    };
-
+    
+    // Check rejudge permission (only for Admin/Teacher/TA)
+    if (session.isAdmin || session.isTeacher || session.isTA) {
+      try {
+        const problemId = Number(route.params.id);
+        const permResponse = await api.TrialSubmission.checkRejudgePermission(problemId);
+        canRejudge.value = permResponse.data?.can_rejudge ?? false;
+      } catch (err) {
+        console.warn("Failed to check rejudge permission:", err);
+        canRejudge.value = false;
+      }
+    }
+    
+    await fetchTrialSubmission();
     console.log("Loaded trial submission details:", testResult.value);
   } catch (err) {
     console.error("Error loading trial submission details:", err);
@@ -139,10 +158,13 @@ function mapStatusToCode(status: string): SubmissionStatusCodes {
 
 const { copy, copied, isSupported } = useClipboard();
 
+// Auto-refresh polling (every 2 seconds while status is Pending)
 const { pause, isActive } = useIntervalFn(() => {
-  // if (testResult.value != null) {
-  //   execute();
-  // }
+  if (testResult.value != null && testResult.value.status === SUBMISSION_STATUS_CODE.PENDING) {
+    fetchTrialSubmission().catch((err) => {
+      console.error("Polling error:", err);
+    });
+  }
 }, 2000);
 
 const expandTasks = ref<boolean[]>([]);
@@ -151,8 +173,13 @@ watchEffect(() => {
     if (testResult.value.tasks) {
       expandTasks.value = testResult.value.tasks.map(() => false);
     }
+    // Stop polling when status is no longer Pending
     if (testResult.value.status !== SUBMISSION_STATUS_CODE.PENDING) {
-      pause();
+      if (isActive.value) {
+        console.log("Judging finished. Polling stopped.", { finalStatus: testResult.value.status });
+        pause();
+      }
+      // Fetch CE output if compile error
       if (testResult.value.status === SUBMISSION_STATUS_CODE.COMPILE_ERROR) {
         fetchCEOutput();
       }
@@ -302,6 +329,40 @@ function downloadModalJson() {
     downloadFile(filename, currentDetailData.value.jsonData, "application/json");
   }
 }
+
+// Rejudge functionality (follows normal submission pattern)
+const isRejudgeLoading = ref(false);
+async function rejudge() {
+  isRejudgeLoading.value = true;
+  try {
+    await api.TrialSubmission.rejudge(String(route.params.testId));
+    router.go(0);
+  } catch (err) {
+    console.error("Rejudge failed:", err);
+  } finally {
+    isRejudgeLoading.value = false;
+  }
+}
+
+// Delete functionality
+const isDeleteLoading = ref(false);
+async function deleteTrialSubmission() {
+  if (!confirm("Are you sure you want to delete this trial submission?")) {
+    return;
+  }
+  isDeleteLoading.value = true;
+  try {
+    const response = await api.TrialSubmission.delete(String(route.params.testId));
+    if (response.data?.ok) {
+      // Navigate back to list
+      router.push(`/course/${route.params.name}/problem/${route.params.id}/test-history`);
+    }
+  } catch (err: unknown) {
+    console.error("Delete failed:", err);
+  } finally {
+    isDeleteLoading.value = false;
+  }
+}
 </script>
 
 <template>
@@ -311,8 +372,26 @@ function downloadModalJson() {
         <div class="flex flex-wrap items-center justify-between gap-4">
           <div class="card-title md:text-2xl lg:text-3xl">Test History #{{ $route.params.testId }}</div>
           <div class="flex flex-wrap gap-2">
+            <!-- Rejudge Button (only shown if user has permission) -->
+            <button
+              v-if="canRejudge"
+              :class="['btn btn-warning btn-sm', isRejudgeLoading && 'loading']"
+              :disabled="isRejudgeLoading"
+              @click="rejudge"
+            >
+              <i-uil-repeat class="mr-1" /> Rejudge
+            </button>
+            <!-- Delete Button (only shown if user has permission) -->
+            <button
+              v-if="canRejudge"
+              :class="['btn btn-error btn-sm', isDeleteLoading && 'loading']"
+              :disabled="isDeleteLoading"
+              @click="deleteTrialSubmission"
+            >
+              <i-uil-trash-alt class="mr-1" /> Delete
+            </button>
             <router-link
-              :to="`/course/${route.params.name}/problem/${route.params.id}/test-history`"
+              :to="`/course/${route.params.name}/problem/${route.params.id}/test-history${route.query.from ? `?from=${route.query.from}` : ''}`"
               class="btn btn-sm"
             >
               <i-uil-arrow-left class="mr-1" /> Back to List

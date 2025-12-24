@@ -55,7 +55,7 @@ const navs = [
       <router-link :to="`/course/${$route.params.name}${path}`">{{ name }}</router-link>
     </li>
   </ul>
-  <div v-else class="scrollbar-hide w-full overflow-scroll">
+  <div v-else class="w-full overflow-scroll">
     <div class="tabs mx-auto w-max">
       <template v-for="{ name, path } in navs">
         <a

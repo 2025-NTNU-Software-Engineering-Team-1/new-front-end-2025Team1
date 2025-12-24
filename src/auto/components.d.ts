@@ -55,6 +55,7 @@ declare module 'vue' {
     IUilMinus: typeof import('~icons/uil/minus')['default']
     IUilMonitor: typeof import('~icons/uil/monitor')['default']
     IUilMoon: typeof import('~icons/uil/moon')['default']
+    IUilPen: typeof import('~icons/uil/pen')['default']
     IUilPlus: typeof import('~icons/uil/plus')['default']
     IUilPlusCircle: typeof import('~icons/uil/plus-circle')['default']
     IUilQuestionCircle: typeof import('~icons/uil/question-circle')['default']

@@ -592,7 +592,7 @@ onBeforeUnmount(() => {
                     <div v-else-if="msg.phase === 'typing'" class="leading-relaxed whitespace-pre-wrap">
                       {{ msg.displayText ?? "" }}
                     </div>
-                    <div v-else class="markdown-body leading-relaxed">
+                    <div v-else class="markdown-body ai-msg leading-relaxed">
                       <MarkdownRenderer :md="String(msg.text ?? '')" />
                     </div>
                   </div>
@@ -635,7 +635,7 @@ onBeforeUnmount(() => {
                 <div
                   class="rounded-2xl rounded-tr-sm bg-gradient-to-r from-indigo-400 to-purple-500 px-3 py-2 text-sm text-white shadow-md"
                 >
-                  <div class="markdown-body text-white/95">
+                  <div class="markdown-body user-msg text-white/95">
                     <MarkdownRenderer :md="String(msg.displayText ?? msg.text)" />
                   </div>
                 </div>
@@ -657,7 +657,7 @@ onBeforeUnmount(() => {
             <textarea
               v-model="draft"
               rows="2"
-              class="flex-1 resize-none rounded-2xl border border-white/40 bg-white/50 px-3 py-2 text-sm focus:ring-2 focus:ring-purple-300 focus:outline-none"
+              class="flex-1 resize-none rounded-2xl border border-white/40 bg-white/50 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-500 focus:ring-2 focus:ring-purple-300 focus:outline-none"
               placeholder="輸入訊息…（Enter 送出，Shift+Enter 換行）"
               @keydown.enter.exact.prevent="send"
               @keydown.enter.shift.stop
@@ -847,5 +847,21 @@ onBeforeUnmount(() => {
 
 .markdown-body :deep(tbody tr:hover) {
   background: rgba(255, 255, 255, 0.12);
+}
+
+/* Inline code background in chat */
+.ai-msg :deep(code) {
+  background-color: rgba(255, 255, 255, 0.6) !important;
+  color: #0f172a !important; /* slate-900 */
+  padding: 0.2em 0.4em;
+  border-radius: 0.375rem; /* rounded-md */
+  font-weight: 500;
+}
+.user-msg :deep(code) {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  color: #ffffff !important;
+  padding: 0.2em 0.4em;
+  border-radius: 0.375rem;
+  font-weight: 500;
 }
 </style>

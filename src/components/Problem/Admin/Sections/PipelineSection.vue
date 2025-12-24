@@ -240,7 +240,9 @@ async function fetchStaticAnalysisOptions() {
 // ==========================================
 // Section: Mode Switching (White/Blacklist)
 // ==========================================
+// Simplified: 2 modes instead of 4
 const syntaxMode = ref<"whitelist" | "blacklist">("blacklist");
+const libraryMode = ref<"whitelist" | "blacklist">("blacklist"); // Combined: imports + headers + functions
 const importMode = ref<"whitelist" | "blacklist">("blacklist");
 const headerMode = ref<"whitelist" | "blacklist">("blacklist");
 const functionMode = ref<"whitelist" | "blacklist">("blacklist");
@@ -252,21 +254,13 @@ watch(syntaxMode, (newMode) => {
     problem.value.pipeline.staticAnalysis.libraryRestrictions[oppositeMode].syntax = [];
   }
 });
-watch(importMode, (newMode) => {
+
+// libraryMode controls imports, headers, and functions together
+watch(libraryMode, (newMode) => {
   const oppositeMode = newMode === "whitelist" ? "blacklist" : "whitelist";
   if (problem.value.pipeline?.staticAnalysis?.libraryRestrictions?.[oppositeMode]) {
     problem.value.pipeline.staticAnalysis.libraryRestrictions[oppositeMode].imports = [];
-  }
-});
-watch(headerMode, (newMode) => {
-  const oppositeMode = newMode === "whitelist" ? "blacklist" : "whitelist";
-  if (problem.value.pipeline?.staticAnalysis?.libraryRestrictions?.[oppositeMode]) {
     problem.value.pipeline.staticAnalysis.libraryRestrictions[oppositeMode].headers = [];
-  }
-});
-watch(functionMode, (newMode) => {
-  const oppositeMode = newMode === "whitelist" ? "blacklist" : "whitelist";
-  if (problem.value.pipeline?.staticAnalysis?.libraryRestrictions?.[oppositeMode]) {
     problem.value.pipeline.staticAnalysis.libraryRestrictions[oppositeMode].functions = [];
   }
 });

@@ -13,7 +13,7 @@ import MultiStringInput from "../Controls/MultiStringInput.vue";
 import SidecarInput from "../Controls/SidecarInput.vue";
 
 // Utils & API
-import { assertFileSizeOK, validateFilesForAIAC } from "@/utils/checkFileSize";
+import { assertFileSizeOK } from "@/utils/checkFileSize";
 import { fetcher } from "@/models/api";
 import api from "@/models/api";
 

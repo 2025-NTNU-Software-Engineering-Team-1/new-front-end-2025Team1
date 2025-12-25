@@ -577,7 +577,6 @@ async function fetchExistingKeySelection() {
   if (!courseName.value || typeof courseName.value !== "string") return;
 
   const currentProblemId = Number(route.params.id);
-  // Note: We proceed even if Problem ID is invalid, mainly to load the local JSON keys.
 
   logger.group(`Key Restoration (Merge Strategy)`);
 
@@ -586,31 +585,23 @@ async function fetchExistingKeySelection() {
   const keysFromApi: string[] = [];
 
   // ---------------------------------------------------------
-  // [SOURCE 1] Local JSON (Hardcoded / Fallback Data)
+  // [SOURCE 1] Local JSON (Current Config) - Modified
   // ---------------------------------------------------------
+  // Modification: Instead of using hardcoded localJsonData,
+  // we directly read from the problem.value configuration.
+  // This captures ALL keys present in the 'aiVTuberApiKeys' array.
   try {
-    // Define the specific JSON structure as requested
-    const localJsonData = {
-      ACUser: 0,
-      allowedLanguage: 3,
-      config: {
-        trialMode: false,
-        aiVTuber: true,
-        aiVTuberApiKeys: [
-          "694cd92bb8251d590b2312db", // <--- Target Key
-        ],
-        aiVTuberMode: "gemini-2.5-flash-lite",
-        // ... other config fields omitted for brevity
-      },
-      // ... other root fields omitted for brevity
-    };
+    const currentConfigKeys = problem.value.config?.aiVTuberApiKeys;
 
-    if (localJsonData.config?.aiVTuberApiKeys && Array.isArray(localJsonData.config.aiVTuberApiKeys)) {
-      keysFromLocal.push(...localJsonData.config.aiVTuberApiKeys);
-      logger.log(`[Source: Local] Found ${keysFromLocal.length} keys:`, keysFromLocal);
+    if (Array.isArray(currentConfigKeys)) {
+      // Push all found Key IDs into the local array
+      keysFromLocal.push(...currentConfigKeys);
+      logger.log(`[Source: Local JSON] Found ${keysFromLocal.length} keys from config:`, keysFromLocal);
+    } else {
+      logger.log(`[Source: Local JSON] No keys found in config or format is invalid.`);
     }
   } catch (err) {
-    logger.error("[Source: Local] Failed to parse local JSON data", err);
+    logger.error("[Source: Local] Failed to parse local config data", err);
   }
 
   // ---------------------------------------------------------
@@ -648,13 +639,16 @@ async function fetchExistingKeySelection() {
   // ---------------------------------------------------------
   try {
     // Merge: Current Selection + Local JSON Keys + API Keys
-    // Set ensures uniqueness automatically
+    // The Set object automatically removes duplicates.
+    // This combines the keys from your JSON and the keys from the API history.
     const mergedSet = new Set([...selectedKeys.value, ...keysFromLocal, ...keysFromApi]);
 
     const finalKeys = Array.from(mergedSet);
 
     // Update State
     selectedKeys.value = finalKeys;
+
+    // Ensure problem config is synced
     if (problem.value.config) {
       problem.value.config.aiVTuberApiKeys = finalKeys;
     }
@@ -666,7 +660,6 @@ async function fetchExistingKeySelection() {
     logger.groupEnd();
   }
 }
-
 // ==========================================
 // Section: API Keys Management
 // ==========================================
@@ -881,7 +874,7 @@ const tagsString = computed({
       return;
     }
     problem.value.tags = val
-      .replace(/(?:，|逗號|comma|Comma)/g, ",")
+      .replace(/(?:，|逗號|逗點|comma|Comma)/g, ",")
       .split(",")
       .map((s) => s.trim())
       .filter((s) => s.length > 0);

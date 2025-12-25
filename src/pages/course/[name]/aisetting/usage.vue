@@ -1,9 +1,34 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import { useTitle } from "@vueuse/core";
 import api from "@/models/api";
 import { useI18n } from "vue-i18n";
+
+// --- ECharts Imports ---
+import { use } from "echarts/core";
+import { CanvasRenderer } from "echarts/renderers";
+import { BarChart, GraphChart } from "echarts/charts";
+import {
+  GridComponent,
+  TooltipComponent,
+  LegendComponent,
+  TitleComponent,
+  DataZoomComponent,
+} from "echarts/components";
+import VChart from "vue-echarts";
+
+// Register ECharts components
+use([
+  CanvasRenderer,
+  BarChart,
+  GraphChart,
+  GridComponent,
+  TooltipComponent,
+  LegendComponent,
+  TitleComponent,
+  DataZoomComponent,
+]);
 
 const { t } = useI18n();
 
@@ -45,12 +70,30 @@ const logger = {
 };
 
 const route = useRoute();
-// const { t } = useI18n();
 useTitle(`AI Usage - ${route.params.name} | Normal OJ`);
 
 const isLoading = ref(false);
 const error = ref<unknown>(null);
 const expandedKeys = ref<Record<string, boolean>>({});
+
+// [STATE] Control Chart Section Expansion (Default Closed)
+const isChartExpanded = ref(false);
+
+// --- Interfaces ---
+
+// [NEW] Interface for ECharts Tooltip Params to fix "no-explicit-any"
+interface ChartTooltipParam {
+  componentType?: "series";
+  seriesType?: string;
+  seriesIndex?: number;
+  seriesName?: string;
+  name: string;
+  dataIndex: number;
+  data: unknown;
+  value: number | string;
+  color?: string;
+  marker?: string;
+}
 
 interface ProblemUsage {
   problem_id: number;
@@ -80,6 +123,153 @@ interface CourseUsageData {
 
 const data = ref<CourseUsageData | null>(null);
 
+// ==========================================
+// [CHART LOGIC] Aggregation & Config
+// ==========================================
+const chartType = ref<"bar" | "bubble">("bar");
+
+const problemStats = computed(() => {
+  if (!data.value || !data.value.keys) return [];
+
+  const map = new Map<number, { id: number; name: string; total: number }>();
+
+  data.value.keys.forEach((key) => {
+    key.problem_usages.forEach((usage) => {
+      const pid = usage.problem_id;
+      if (!map.has(pid)) {
+        map.set(pid, {
+          id: pid,
+          name: usage.problem_name,
+          total: 0,
+        });
+      }
+      map.get(pid)!.total += usage.total_token || 0;
+    });
+  });
+
+  return Array.from(map.values()).sort((a, b) => b.total - a.total);
+});
+
+// Helper color palette for bubbles
+const colorPalette = [
+  "#3b82f6",
+  "#ef4444",
+  "#10b981",
+  "#f59e0b",
+  "#8b5cf6",
+  "#6366f1",
+  "#ec4899",
+  "#14b8a6",
+  "#f97316",
+];
+
+const chartOption = computed(() => {
+  const stats = problemStats.value;
+  const isBubble = chartType.value === "bubble";
+
+  // Common Tooltip Configuration
+  const tooltip = {
+    trigger: isBubble ? "item" : "axis",
+    axisPointer: { type: "shadow" },
+    // [FIXED] Use strict type instead of 'any'
+    formatter: (params: ChartTooltipParam | ChartTooltipParam[]) => {
+      const p = Array.isArray(params) ? params[0] : params;
+      const val = Number(p.value);
+      const marker =
+        p.marker ||
+        `<span style="display:inline-block;margin-right:4px;border-radius:10px;width:10px;height:10px;background-color:${p.color};"></span>`;
+
+      return `
+        <div style="font-weight:bold; margin-bottom: 4px;">${p.name}</div>
+        <div style="display: flex; align-items: center; gap: 4px;">
+          ${marker}
+          Token Usage: <span style="font-weight:bold;">${val.toLocaleString()}</span>
+        </div>
+      `;
+    },
+  };
+
+  // --- BAR CHART CONFIG ---
+  if (!isBubble) {
+    return {
+      tooltip,
+      grid: { left: "3%", right: "4%", bottom: "10%", containLabel: true },
+      dataZoom: [
+        { type: "inside", start: 0, end: stats.length > 20 ? 30 : 100 },
+        { type: "slider", bottom: 10 },
+      ],
+      xAxis: {
+        type: "category",
+        data: stats.map((i) => i.name),
+        axisLabel: { interval: 0, rotate: 45, width: 100, overflow: "truncate" },
+      },
+      yAxis: { type: "value", name: "Total Tokens" },
+      series: [
+        {
+          name: "Token Usage",
+          type: "bar",
+          data: stats.map((i) => i.total),
+          itemStyle: { color: "#3b82f6", borderRadius: [4, 4, 0, 0] },
+        },
+      ],
+    };
+  }
+
+  // --- PACKED BUBBLE CHART CONFIG (Graph Force Layout) ---
+  const maxVal = Math.max(...stats.map((s) => s.total), 1);
+  const minVal = Math.min(...stats.map((s) => s.total), 0);
+
+  const graphData = stats.map((item, index) => {
+    const ratio = (item.total - minVal) / (maxVal - minVal || 1);
+    const size = 30 + ratio * 90; // range 30 -> 120
+
+    return {
+      name: item.name,
+      value: item.total,
+      symbolSize: size,
+      draggable: true,
+      itemStyle: {
+        color: colorPalette[index % colorPalette.length],
+        shadowBlur: 10,
+        shadowColor: "rgba(0,0,0,0.1)",
+      },
+      label: {
+        show: size > 40,
+        formatter: "{b}",
+        fontSize: 10,
+        color: "#fff",
+        textBorderColor: "#000",
+        textBorderWidth: 2,
+      },
+    };
+  });
+
+  return {
+    tooltip,
+    xAxis: { show: false },
+    yAxis: { show: false },
+    series: [
+      {
+        type: "graph",
+        layout: "force",
+        data: graphData,
+        roam: true,
+        label: { show: true, position: "inside" },
+        force: {
+          repulsion: 200,
+          gravity: 0.1,
+          edgeLength: 30,
+          layoutAnimation: true,
+        },
+      },
+    ],
+  };
+});
+
+// ==========================================
+// [DATA LOGIC] Fetching & Parsing
+// ==========================================
+
 function parseApiResponse(res: unknown) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data = (res as any)?.data;
@@ -92,7 +282,6 @@ function parseApiResponse(res: unknown) {
   return { isSuccess, message, data, rawStatus };
 }
 
-// Sort desc, calculate avg, check if flat
 function calcKeyStatistics(usages: ProblemUsage[]): {
   total: number;
   average: number;
@@ -102,23 +291,12 @@ function calcKeyStatistics(usages: ProblemUsage[]): {
   if (!usages || usages.length === 0) {
     return { total: 0, average: 0, isFlat: true, sortedUsages: [] };
   }
-
-  // Sort descending by token usage
-  const sortedUsages = [...usages].sort((a, b) => {
-    return (b.total_token ?? 0) - (a.total_token ?? 0);
-  });
-
+  const sortedUsages = [...usages].sort((a, b) => (b.total_token ?? 0) - (a.total_token ?? 0));
   const total = sortedUsages.reduce((acc, u) => acc + (u.total_token ?? 0), 0);
-
-  // Check boundaries
   const maxVal = sortedUsages[0].total_token ?? 0;
   const minVal = sortedUsages[sortedUsages.length - 1].total_token ?? 0;
-
-  // If max == min, the data is "flat" (e.g., all 0 or all equal)
   const isFlat = maxVal === minVal;
-
   const average = total / sortedUsages.length;
-
   return { total, average, isFlat, sortedUsages };
 }
 
@@ -127,43 +305,23 @@ async function fetchUsage() {
   isLoading.value = true;
   error.value = null;
 
+  // [FIXED] Changed 'any' to 'unknown' to fix ESLint error
   try {
     const res = await api.CourseAPIUsage.getCourseUsage(route.params.name as string);
     const { isSuccess, data: resData, message } = parseApiResponse(res);
 
-    if (!isSuccess && !resData) {
-      throw new Error(message || "Failed to fetch usage data");
-    }
+    if (!isSuccess && !resData) throw new Error(message || "Failed to fetch usage data");
 
     const rawKeys: RawKeyItem[] = resData?.keys || [];
-    logger.log(`Found ${rawKeys.length} keys`);
-
     const keys: KeyItem[] = rawKeys.map((key, index) => {
-      // --- Data Integrity Check ---
-      const missingFields: string[] = [];
-      if (key.id == null) missingFields.push("id");
-      if (!key.key_name) missingFields.push("key_name");
-      if (!key.problem_usages) missingFields.push("problem_usages");
-
-      if (missingFields.length > 0) {
-        logger.error(`Missing Data at Index ${index}`, missingFields);
-      }
-
       const safeUsages = key.problem_usages || [];
-
-      // Calculate stats and sort
       const { total, average, isFlat, sortedUsages } = calcKeyStatistics(safeUsages);
-
-      logger.groupCollapsed(`Key: ${key.key_name}`);
-      logger.log(`Total: ${total}, Avg: ${average}, IsFlat: ${isFlat}`);
-      logger.groupEnd();
-
       return {
         ...key,
         id: key.id || `temp-${index}`,
         key_name: key.key_name || "Unknown Key",
         created_by: key.created_by || "Unknown User",
-        problem_usages: sortedUsages, // Sorted list
+        problem_usages: sortedUsages,
         all_total_token: total,
         average_token: average,
         is_flat: isFlat,
@@ -171,13 +329,19 @@ async function fetchUsage() {
     });
 
     const totalToken = keys.reduce((sum, k) => sum + (k.all_total_token || 0), 0);
-    logger.success("Calculation Complete", { totalToken });
-
     data.value = { totalToken, keys };
     expandedKeys.value = Object.fromEntries(keys.map((k) => [String(k.id), false]));
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (err: any) {
-    const errMsg = err?.response?.data?.message || err?.message || "Failed to load API usage data";
+  } catch (err: unknown) {
+    // [FIXED] Define temporary interface for type assertion
+    interface ApiError {
+      response?: { data?: { message?: string } };
+      message?: string;
+    }
+
+    // Safely cast error
+    const apiErr = err as ApiError;
+    const errMsg = apiErr?.response?.data?.message || apiErr?.message || "Failed to load API usage data";
+
     logger.error("Fetch Usage Error", err);
     error.value = errMsg;
     data.value = null;
@@ -217,13 +381,68 @@ onMounted(fetchUsage);
         <template v-else-if="error">
           <div class="alert alert-error shadow-lg">
             <div>
-              <i-uil-times-circle />
-              <span>{{ error }}</span>
+              <i-uil-times-circle /><span>{{ error }}</span>
             </div>
           </div>
         </template>
 
         <template v-else>
+          <div
+            v-if="problemStats.length > 0"
+            class="card border-base-200 bg-base-100 mb-8 border shadow-sm transition-all"
+          >
+            <div
+              class="hover:bg-base-200/50 flex cursor-pointer select-none items-center justify-between rounded-t-lg p-4 transition-colors"
+              @click="isChartExpanded = !isChartExpanded"
+            >
+              <div class="text-base-content/80 flex items-center gap-3 font-bold">
+                <span
+                  class="transform text-xl transition-transform duration-200"
+                  :class="{ 'rotate-90': isChartExpanded }"
+                >
+                  ▸
+                </span>
+                <span class="text-lg">Problem Usage Analysis</span>
+              </div>
+              <div class="text-base-content/50 font-mono text-xs">
+                {{ isChartExpanded ? "Click to collapse" : "Click to expand" }}
+              </div>
+            </div>
+
+            <transition name="fade">
+              <div v-if="isChartExpanded" class="card-body border-base-200 border-t p-4">
+                <div class="mb-4 flex items-center justify-end">
+                  <div class="btn-group">
+                    <button
+                      class="btn btn-sm"
+                      :class="{ 'btn-primary': chartType === 'bar' }"
+                      @click="chartType = 'bar'"
+                    >
+                      Bar Chart
+                    </button>
+                    <button
+                      class="btn btn-sm"
+                      :class="{ 'btn-primary': chartType === 'bubble' }"
+                      @click="chartType = 'bubble'"
+                    >
+                      Packed Bubble
+                    </button>
+                  </div>
+                </div>
+
+                <div class="relative h-[500px] w-full">
+                  <v-chart class="h-full w-full" :option="chartOption" :key="chartType" autoresize />
+                  <div
+                    v-if="chartType === 'bubble'"
+                    class="text-base-content/40 bg-base-100/80 absolute bottom-2 right-2 rounded px-2 py-1 text-xs"
+                  >
+                    * Drag bubbles to play physics
+                  </div>
+                </div>
+              </div>
+            </transition>
+          </div>
+
           <div v-if="data?.keys.length">
             <div
               v-for="keyItem in data.keys"
@@ -235,7 +454,13 @@ onMounted(fetchUsage);
                 @click="toggleExpand(String(keyItem.id))"
               >
                 <div class="flex items-center gap-2 text-lg font-semibold">
-                  <span>{{ expandedKeys[keyItem.id] ? "▼" : "▸" }}</span>
+                  <span
+                    class="inline-block transform text-xl transition-transform duration-200"
+                    :class="{ 'rotate-90': expandedKeys[keyItem.id] }"
+                  >
+                    ▸
+                  </span>
+
                   {{ keyItem.key_name }}
                 </div>
                 <div class="text-sm">
@@ -265,7 +490,6 @@ onMounted(fetchUsage);
                     <tbody>
                       <tr v-for="(usage, index) in keyItem.problem_usages" :key="usage.problem_id">
                         <td class="font-mono text-xs opacity-50">{{ index + 1 }}</td>
-
                         <td>
                           <div class="flex items-center gap-2">
                             <router-link
@@ -274,24 +498,20 @@ onMounted(fetchUsage);
                             >
                               {{ usage.problem_name }}
                             </router-link>
-
                             <template v-if="!keyItem.is_flat">
                               <span
                                 v-if="index === 0"
                                 class="badge badge-error badge-sm gap-1 font-bold text-white"
+                                >TOP 1</span
                               >
-                                TOP 1
-                              </span>
                               <span
                                 v-else-if="(usage.total_token || 0) > keyItem.average_token * 1.5"
                                 class="badge badge-warning badge-sm text-xs"
+                                >High</span
                               >
-                                High
-                              </span>
                             </template>
                           </div>
                         </td>
-
                         <td class="text-right font-mono">
                           <span :class="{ 'text-base-content font-bold': index === 0 && !keyItem.is_flat }">
                             {{ usage.total_token?.toLocaleString?.() || 0 }}
@@ -304,7 +524,6 @@ onMounted(fetchUsage);
               </transition>
             </div>
           </div>
-
           <p v-else class="text-base-content/70 italic">{{ t("course.aisetting.usage.noData") }}</p>
         </template>
       </div>

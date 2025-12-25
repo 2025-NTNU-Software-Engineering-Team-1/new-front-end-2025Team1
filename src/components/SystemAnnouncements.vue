@@ -37,7 +37,7 @@ const { data: announcements, error, isLoading } = useAxios<AnnouncementList>("/a
               <tbody>
                 <tr v-for="{ title, createTime, annId } in announcements" :key="annId" class="hover">
                   <td>
-                    <router-link :to="`/announcements/${annId}`" class="link link-hover text-lg">
+                    <router-link :to="`/announcements/${annId}`" class="block min-w-0 break-words whitespace-normal hover:underline text-primary">
                       {{ title }}
                     </router-link>
                   </td>

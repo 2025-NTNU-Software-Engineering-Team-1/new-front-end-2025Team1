@@ -7,7 +7,7 @@ import { useTitle } from "@vueuse/core";
 import type { AxiosError } from "axios";
 
 useTitle("Admin - Login Records | Normal OJ");
-const { t } = useI18n();
+useI18n();
 
 // Pagination state
 const currentPage = ref(1);
@@ -49,11 +49,11 @@ onMounted(fetchData);
 
 // Data is already { records, total } after interceptor merge
 const records = computed(() => {
-  const d = data.value as any;
+  const d = data.value as { records?: LoginRecord[]; total?: number } | undefined;
   return d?.records || [];
 });
 const totalRecords = computed(() => {
-  const d = data.value as any;
+  const d = data.value as { records?: LoginRecord[]; total?: number } | undefined;
   return d?.total || 0;
 });
 const totalPages = computed(() => Math.ceil(totalRecords.value / pageSize.value));

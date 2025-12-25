@@ -95,25 +95,45 @@ async function fetchTrialSubmission() {
     timestamp: new Date(response.data.timestamp).getTime(),
     code: response.data.code ?? "",
     tasks:
-      response.data.tasks?.map((task, idx) => ({
-        taskId: idx,
-        exec_time: task.exec_time,
-        memory_usage: task.memory_usage,
-        score: task.score,
-        status: mapStatusToCode(task.status),
-        cases: task.cases?.map((caseData, caseIdx) => ({
-          id: caseIdx,
-          status: mapStatusToCode(caseData.status),
-          exec_time: caseData.exec_time,
-          memory_usage: caseData.memory_usage,
-          input: caseData.input || "",
-          expectedOutput: caseData.answer || "",
-          actualOutput: caseData.stdout || "",
-          // Store backend's original indices
-          originalTaskIndex: idx,
-          originalCaseIndex: caseIdx,
-        })) ?? [],
-      })) ?? [],
+      response.data.tasks?.map((task, idx) => {
+        // Define backend task type with cases
+        const backendTask = task as {
+          status: string;
+          exec_time: number;
+          memory_usage: number;
+          score: number;
+          stdout?: string;
+          stderr?: string;
+          cases?: Array<{
+            status: string;
+            exec_time: number;
+            memory_usage: number;
+            input?: string;
+            answer?: string;
+            stdout?: string;
+          }>;
+        };
+        return {
+          taskId: idx,
+          exec_time: backendTask.exec_time,
+          memory_usage: backendTask.memory_usage,
+          score: backendTask.score,
+          status: mapStatusToCode(backendTask.status),
+          cases:
+            backendTask.cases?.map((caseData, caseIdx) => ({
+              id: caseIdx,
+              status: mapStatusToCode(caseData.status),
+              exec_time: caseData.exec_time,
+              memory_usage: caseData.memory_usage,
+              input: caseData.input || "",
+              expectedOutput: caseData.answer || "",
+              actualOutput: caseData.stdout || "",
+              // Store backend's original indices
+              originalTaskIndex: idx,
+              originalCaseIndex: caseIdx,
+            })) ?? [],
+        };
+      }) ?? [],
   };
 }
 
@@ -235,11 +255,16 @@ async function viewCaseOutput(taskIndex: number, caseIndex: number) {
       backendCaseIndex,
     );
     // Use input/answer from API response (artifact), fallback to testCase data
+    // Cast response.data to include optional input/answer fields
+    const artifactData = response.data as typeof response.data & {
+      input?: string | null;
+      answer?: string | null;
+    };
     caseOutputData.value = {
       ...response.data,
       // Prefer artifact's input/answer, fallback to testCase's data
-      input: response.data.input || testCase?.input || null,
-      expectedOutput: response.data.answer || testCase?.expectedOutput || null,
+      input: artifactData.input || testCase?.input || null,
+      expectedOutput: artifactData.answer || testCase?.expectedOutput || null,
     };
   } catch (err: unknown) {
     console.error("Failed to load case artifact files", err);
@@ -721,8 +746,8 @@ async function deleteTrialSubmission() {
 
   <!-- Detail Modal -->
   <dialog ref="detailModal" class="modal">
-    <div class="modal-box max-w-5xl max-h-[90vh] overflow-y-auto">
-      <h3 class="font-bold text-lg">
+    <div class="modal-box max-h-[90vh] max-w-5xl overflow-y-auto">
+      <h3 class="text-lg font-bold">
         {{ currentDetailData?.title }}
       </h3>
 
@@ -734,7 +759,7 @@ async function deleteTrialSubmission() {
               <span class="label-text font-semibold">JSON Data</span>
             </label>
             <div class="bg-base-200 rounded p-4">
-              <pre class="whitespace-pre-wrap font-mono text-sm">{{ currentDetailData.jsonData }}</pre>
+              <pre class="font-mono text-sm whitespace-pre-wrap">{{ currentDetailData.jsonData }}</pre>
             </div>
           </div>
         </div>
@@ -745,9 +770,7 @@ async function deleteTrialSubmission() {
         <button class="btn btn-success btn-sm" @click="downloadModalJson">
           <i-uil-download-alt class="mr-1" /> Download JSON
         </button>
-        <button class="btn btn-sm" @click="closeDetailModal">
-          Close
-        </button>
+        <button class="btn btn-sm" @click="closeDetailModal">Close</button>
       </div>
     </div>
     <form method="dialog" class="modal-backdrop">
@@ -781,44 +804,40 @@ async function deleteTrialSubmission() {
         </div>
 
         <!-- Content -->
-        <div v-if="caseOutputData" :class="{'opacity-50 pointer-events-none': caseOutputLoading}" class="space-y-6">
+        <div
+          v-if="caseOutputData"
+          :class="{ 'pointer-events-none opacity-50': caseOutputLoading }"
+          class="space-y-6"
+        >
           <!-- Input Section -->
           <div>
             <label class="label pb-2">
-              <span class="label-text font-semibold text-base">Input</span>
+              <span class="label-text text-base font-semibold">Input</span>
             </label>
             <div v-if="caseOutputData.input === null || caseOutputData.input === undefined">
-              <div class="text-base-content/60 italic py-2">
-                Input data not available.
-              </div>
+              <div class="text-base-content/60 py-2 italic">Input data not available.</div>
             </div>
             <div v-else class="mt-2">
               <div v-if="caseOutputData.input.trim()">
                 <code-editor v-model="caseOutputData.input" readonly />
               </div>
-              <div v-else class="text-base-content/60 italic py-2">
-                Empty
-              </div>
+              <div v-else class="text-base-content/60 py-2 italic">Empty</div>
             </div>
           </div>
 
           <!-- Expected Output Section -->
           <div>
             <label class="label pb-2">
-              <span class="label-text font-semibold text-base">Expected Output (Answer)</span>
+              <span class="label-text text-base font-semibold">Expected Output (Answer)</span>
             </label>
             <div v-if="caseOutputData.expectedOutput === null || caseOutputData.expectedOutput === undefined">
-              <div class="text-base-content/60 italic py-2">
-                Expected output not available.
-              </div>
+              <div class="text-base-content/60 py-2 italic">Expected output not available.</div>
             </div>
             <div v-else class="mt-2">
               <div v-if="caseOutputData.expectedOutput.trim()">
                 <code-editor v-model="caseOutputData.expectedOutput" readonly />
               </div>
-              <div v-else class="text-base-content/60 italic py-2">
-                Empty
-              </div>
+              <div v-else class="text-base-content/60 py-2 italic">Empty</div>
             </div>
           </div>
 

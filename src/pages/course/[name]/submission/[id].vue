@@ -469,17 +469,19 @@ const hasPrevCase = computed(() => {
 
 function navigateCase(direction: 1 | -1) {
   if (!currentViewingCase.value || !submission.value) return;
-  
+
   const { taskIndex, caseIndex } = currentViewingCase.value;
   const tasks = submission.value.tasks;
-  
-  if (direction === 1) { // Next
+
+  if (direction === 1) {
+    // Next
     if (caseIndex + 1 < tasks[taskIndex].cases.length) {
       viewCaseOutput(taskIndex, caseIndex + 1);
     } else if (taskIndex + 1 < tasks.length) {
       viewCaseOutput(taskIndex + 1, 0);
     }
-  } else { // Prev
+  } else {
+    // Prev
     if (caseIndex - 1 >= 0) {
       viewCaseOutput(taskIndex, caseIndex - 1);
     } else if (taskIndex - 1 >= 0) {
@@ -933,7 +935,7 @@ watch(submission, (val) => {
   <dialog ref="binaryNotFoundModal" class="modal">
     <div class="modal-box">
       <h3 class="text-lg font-bold">
-        <i-uil-exclamation-triangle class="mr-2 text-warning" />
+        <i-uil-exclamation-triangle class="text-warning mr-2" />
         {{ $t("course.submission.binaryNotFound.title") }}
       </h3>
 
@@ -943,11 +945,7 @@ watch(submission, (val) => {
         <button class="btn" @click="closeBinaryNotFoundModal">
           {{ $t("course.submission.binaryNotFound.cancel") }}
         </button>
-        <button
-          class="btn btn-warning"
-          @click="confirmRejudgeForBinary"
-          :disabled="isRejudgeLoading"
-        >
+        <button class="btn btn-warning" @click="confirmRejudgeForBinary" :disabled="isRejudgeLoading">
           <i-uil-repeat class="mr-1" />
           {{ $t("course.submission.binaryNotFound.rejudge") }}
         </button>

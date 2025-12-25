@@ -310,12 +310,12 @@ onMounted(fetchKeys);
 
         <!-- Toast notifications - fixed position at bottom right -->
         <div class="toast toast-end toast-bottom z-50">
-          <div v-if="errorMsg" class="alert alert-error py-2 px-4 text-sm">
-            <i-uil-times-circle class="w-4 h-4" />
+          <div v-if="errorMsg" class="alert alert-error px-4 py-2 text-sm">
+            <i-uil-times-circle class="h-4 w-4" />
             <span>{{ errorMsg }}</span>
           </div>
-          <div v-if="successMsg" class="alert alert-success py-2 px-4 text-sm">
-            <i-uil-check-circle class="w-4 h-4" />
+          <div v-if="successMsg" class="alert alert-success px-4 py-2 text-sm">
+            <i-uil-check-circle class="h-4 w-4" />
             <span>{{ successMsg }}</span>
           </div>
         </div>
@@ -328,13 +328,15 @@ onMounted(fetchKeys);
             <!-- Key Name Input - Editable -->
             <div class="form-control">
               <label class="label pb-1">
-                <span class="label-text text-sm font-medium">{{ t("course.aisetting.setup.input.name") }}</span>
+                <span class="label-text text-sm font-medium">{{
+                  t("course.aisetting.setup.input.name")
+                }}</span>
               </label>
               <input
                 type="text"
                 v-model="newKey.name"
                 :placeholder="t('course.aisetting.setup.input.name')"
-                class="input input-bordered w-full bg-base-100"
+                class="input input-bordered bg-base-100 w-full"
                 maxlength="50"
               />
             </div>
@@ -342,13 +344,15 @@ onMounted(fetchKeys);
             <!-- API Key Value Input - Editable -->
             <div class="form-control">
               <label class="label pb-1">
-                <span class="label-text text-sm font-medium">{{ t("course.aisetting.setup.input.value") }}</span>
+                <span class="label-text text-sm font-medium">{{
+                  t("course.aisetting.setup.input.value")
+                }}</span>
               </label>
               <input
                 type="text"
                 v-model="newKey.value"
                 :placeholder="t('course.aisetting.setup.input.value')"
-                class="input input-bordered w-full bg-base-100"
+                class="input input-bordered bg-base-100 w-full"
                 maxlength="50"
               />
             </div>
@@ -356,19 +360,26 @@ onMounted(fetchKeys);
             <!-- Created By - Read-only with gray background -->
             <div class="form-control">
               <label class="label pb-1">
-                <span class="label-text text-sm font-medium">{{ t("course.aisetting.setup.display.createdBy") }}</span>
+                <span class="label-text text-sm font-medium">{{
+                  t("course.aisetting.setup.display.createdBy")
+                }}</span>
               </label>
               <input
                 type="text"
                 :value="session.displayedName || session.username"
-                class="input input-bordered w-full bg-base-300 dark:bg-base-300/50 text-base-content/70 cursor-not-allowed"
+                class="input input-bordered bg-base-300 dark:bg-base-300/50 text-base-content/70 w-full cursor-not-allowed"
                 disabled
               />
             </div>
           </div>
 
           <div class="mt-5 flex justify-end">
-            <button class="btn btn-success gap-2" :class="{ loading: isAddingKey }" :disabled="isAddingKey" @click="addKey">
+            <button
+              class="btn btn-success gap-2"
+              :class="{ loading: isAddingKey }"
+              :disabled="isAddingKey"
+              @click="addKey"
+            >
               <i-uil-plus v-if="!isAddingKey" />
               {{ t("course.aisetting.setup.input.addKey") }}
             </button>
@@ -400,12 +411,14 @@ onMounted(fetchKeys);
               <!-- Key Name - Editable -->
               <div class="md:col-span-3">
                 <label class="label pb-1">
-                  <span class="label-text text-xs opacity-70">{{ t("course.aisetting.setup.display.keyName") }}</span>
+                  <span class="label-text text-xs opacity-70">{{
+                    t("course.aisetting.setup.display.keyName")
+                  }}</span>
                 </label>
                 <input
                   type="text"
                   v-model="k.key_name"
-                  class="input input-bordered input-sm w-full bg-base-100"
+                  class="input input-bordered input-sm bg-base-100 w-full"
                   maxlength="50"
                 />
               </div>
@@ -413,9 +426,13 @@ onMounted(fetchKeys);
               <!-- Masked Value - Read-only with gray background -->
               <div class="md:col-span-3">
                 <label class="label pb-1">
-                  <span class="label-text text-xs opacity-70">{{ t("course.aisetting.setup.display.masked") }}</span>
+                  <span class="label-text text-xs opacity-70">{{
+                    t("course.aisetting.setup.display.masked")
+                  }}</span>
                 </label>
-                <div class="input input-bordered input-sm w-full bg-base-300 dark:bg-base-300/50 text-base-content/70 flex items-center font-mono cursor-not-allowed">
+                <div
+                  class="input input-bordered input-sm bg-base-300 dark:bg-base-300/50 text-base-content/70 flex w-full cursor-not-allowed items-center font-mono"
+                >
                   {{ k.masked_value }}
                 </div>
               </div>
@@ -423,12 +440,14 @@ onMounted(fetchKeys);
               <!-- Created By - Read-only with gray background -->
               <div class="md:col-span-2">
                 <label class="label pb-1">
-                  <span class="label-text text-xs opacity-70">{{ t("course.aisetting.setup.display.createdBy") }}</span>
+                  <span class="label-text text-xs opacity-70">{{
+                    t("course.aisetting.setup.display.createdBy")
+                  }}</span>
                 </label>
                 <input
                   type="text"
                   :value="k.created_by"
-                  class="input input-bordered input-sm w-full bg-base-300 dark:bg-base-300/50 text-base-content/70 cursor-not-allowed"
+                  class="input input-bordered input-sm bg-base-300 dark:bg-base-300/50 text-base-content/70 w-full cursor-not-allowed"
                   disabled
                 />
               </div>
@@ -436,7 +455,9 @@ onMounted(fetchKeys);
               <!-- Active Toggle -->
               <div class="md:col-span-2">
                 <label class="label pb-1">
-                  <span class="label-text text-xs opacity-70">{{ t("course.aisetting.setup.display.active") }}</span>
+                  <span class="label-text text-xs opacity-70">{{
+                    t("course.aisetting.setup.display.active")
+                  }}</span>
                 </label>
                 <div class="flex h-8 items-center">
                   <input
@@ -449,7 +470,7 @@ onMounted(fetchKeys);
               </div>
 
               <!-- Action Buttons -->
-              <div class="md:col-span-2 flex justify-end gap-2">
+              <div class="flex justify-end gap-2 md:col-span-2">
                 <button class="btn btn-success btn-sm" @click="updateKey(k)">
                   {{ t("course.aisetting.setup.display.save") }}
                 </button>

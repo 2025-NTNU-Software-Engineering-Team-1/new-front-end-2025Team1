@@ -70,7 +70,6 @@ function hasTrialHistory(id: number) {
   return !!(cfg && cfg.trialMode);
 }
 
-
 const page = ref(!isNaN(Number(route.query.page)) ? Number(route.query.page) : 1);
 watchEffect(() => {
   if (problems.value != null && (page.value < 1 || page.value >= problems.value.length)) {
@@ -80,7 +79,9 @@ watchEffect(() => {
 
 // Prefetch visible problem details for AI-TA badge
 watchEffect(() => {
-  const visible = (problems.value || []).slice((page.value - 1) * 10, page.value * 10).map((p) => p.problemId);
+  const visible = (problems.value || [])
+    .slice((page.value - 1) * 10, page.value * 10)
+    .map((p) => p.problemId);
   if (visible.length) prefetchDetailsFor(visible);
 });
 watch(page, () => {
@@ -158,7 +159,9 @@ const maxPage = computed(() => {
                   </td>
                   <td>
                     {{ problemName }}
-                    <span v-if="aiVTuber || hasAiVtuber(problemId)" class="badge badge-secondary ml-2">AI-TA</span>
+                    <span v-if="aiVTuber || hasAiVtuber(problemId)" class="badge badge-secondary ml-2"
+                      >AI-TA</span
+                    >
                   </td>
                   <td v-if="rolesCanReadProblemStatus.includes(session.role)">
                     <span class="badge ml-1">{{ status === 0 ? "VISIBLE" : "HIDDEN" }}</span>
@@ -174,16 +177,20 @@ const maxPage = computed(() => {
                   </td>
                   <td>
                     <!-- Test History button (always visible, disabled if no trial mode) -->
-                    <div 
-                      class="tooltip" 
+                    <div
+                      class="tooltip"
                       :data-tip="hasTrialHistory(problemId) ? 'Test History' : 'Trial Mode Disabled'"
                     >
                       <router-link
                         :class="[
                           'btn btn-ghost btn-sm btn-circle mr-1',
-                          !hasTrialHistory(problemId) && 'opacity-30 pointer-events-none'
+                          !hasTrialHistory(problemId) && 'pointer-events-none opacity-30',
                         ]"
-                        :to="hasTrialHistory(problemId) ? `/course/${$route.params.name}/problem/${problemId}/test-history?from=problems` : '#'"
+                        :to="
+                          hasTrialHistory(problemId)
+                            ? `/course/${$route.params.name}/problem/${problemId}/test-history?from=problems`
+                            : '#'
+                        "
                         :tabindex="hasTrialHistory(problemId) ? 0 : -1"
                       >
                         <i-uil-history class="lg:h-5 lg:w-5" />
@@ -250,10 +257,9 @@ const maxPage = computed(() => {
             </table>
             <template
               v-else
-              v-for="{ problemId, problemName, tags, quota, submitCount, status, aiVTuber } in (problems || []).slice(
-                (page - 1) * 10,
-                page * 10,
-              )"
+              v-for="{ problemId, problemName, tags, quota, submitCount, status, aiVTuber } in (
+                problems || []
+              ).slice((page - 1) * 10, page * 10)"
             >
               <problem-info
                 :id="problemId"

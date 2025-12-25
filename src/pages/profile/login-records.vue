@@ -7,7 +7,7 @@ import { useTitle } from "@vueuse/core";
 import type { AxiosError } from "axios";
 
 useTitle("Login Records - Profile | Normal OJ");
-const { t } = useI18n();
+useI18n();
 
 // Pagination state
 const currentPage = ref(1);
@@ -45,11 +45,11 @@ onMounted(fetchData);
 
 // Data is already { records, total } after interceptor merge
 const records = computed(() => {
-  const d = data.value as any;
+  const d = data.value as { records?: LoginRecord[]; total?: number } | undefined;
   return d?.records || [];
 });
 const totalRecords = computed(() => {
-  const d = data.value as any;
+  const d = data.value as { records?: LoginRecord[]; total?: number } | undefined;
   return d?.total || 0;
 });
 const totalPages = computed(() => Math.ceil(totalRecords.value / pageSize.value));
@@ -88,7 +88,7 @@ interface LoginRecord {
 </script>
 
 <template>
-  <div class="p-4 space-y-4">
+  <div class="space-y-4 p-4">
     <h2 class="text-xl font-bold">{{ $t("loginRecords.title") }}</h2>
 
     <!-- Header with actions -->
@@ -103,7 +103,7 @@ interface LoginRecord {
         {{ $t("loginRecords.download") }}
       </button>
 
-      <span class="text-sm text-base-content/70">
+      <span class="text-base-content/70 text-sm">
         {{ $t("loginRecords.rowCount", { n: totalRecords }) }}
       </span>
     </div>
@@ -115,7 +115,7 @@ interface LoginRecord {
       </template>
       <template #data>
         <div class="overflow-x-auto">
-          <table class="table table-compact w-full">
+          <table class="table-compact table w-full">
             <thead>
               <tr>
                 <th>{{ $t("loginRecords.table.ipAddress") }}</th>
@@ -125,7 +125,7 @@ interface LoginRecord {
             </thead>
             <tbody>
               <tr v-if="records.length === 0">
-                <td colspan="3" class="text-center text-base-content/50">
+                <td colspan="3" class="text-base-content/50 text-center">
                   {{ $t("loginRecords.noRecords") }}
                 </td>
               </tr>
@@ -139,9 +139,7 @@ interface LoginRecord {
                     ]"
                   >
                     {{
-                      record.success
-                        ? $t("loginRecords.status.success")
-                        : $t("loginRecords.status.failed")
+                      record.success ? $t("loginRecords.status.success") : $t("loginRecords.status.failed")
                     }}
                   </span>
                 </td>
@@ -152,18 +150,12 @@ interface LoginRecord {
         </div>
 
         <!-- Pagination -->
-        <div v-if="totalPages > 1" class="flex justify-center mt-4">
+        <div v-if="totalPages > 1" class="mt-4 flex justify-center">
           <div class="btn-group">
-            <button
-              class="btn btn-sm"
-              :disabled="currentPage === 1"
-              @click="goToPage(currentPage - 1)"
-            >
+            <button class="btn btn-sm" :disabled="currentPage === 1" @click="goToPage(currentPage - 1)">
               «
             </button>
-            <button class="btn btn-sm">
-              {{ currentPage }} / {{ totalPages }}
-            </button>
+            <button class="btn btn-sm">{{ currentPage }} / {{ totalPages }}</button>
             <button
               class="btn btn-sm"
               :disabled="currentPage === totalPages"

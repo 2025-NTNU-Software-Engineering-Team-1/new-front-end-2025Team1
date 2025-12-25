@@ -11,7 +11,7 @@ import { useI18n } from "vue-i18n";
 const route = useRoute();
 const router = useRouter();
 const session = useSession();
-const { t } = useI18n();
+useI18n();
 
 useTitle(`Members - ${route.params.name} | Normal OJ`);
 enum MemberTableColumn {

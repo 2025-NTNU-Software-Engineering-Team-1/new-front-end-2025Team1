@@ -406,11 +406,18 @@ async function fetchAiCheckerKeys() {
   isFetchingAiKeys.value = true;
   try {
     const res = await api.AIVTuber.getCourseKeys(courseName);
-    const data = res?.data?.data?.keys || res?.data?.keys || [];
-    aiCheckerApiKeys.value = data.filter((k: any) => k.is_active).map((k: any) => ({
-      id: String(k.id),
-      key_name: k.key_name,
-    }));
+    // Handle potential nested data structure from API
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const resData = res?.data as any;
+    const data = resData?.data?.keys || resData?.keys || [];
+    aiCheckerApiKeys.value = data
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .filter((k: any) => k.is_active)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .map((k: any) => ({
+        id: String(k.id),
+        key_name: k.key_name,
+      }));
     logger.success("AI Checker Keys", aiCheckerApiKeys.value);
   } catch (err) {
     logger.error("Failed to fetch AI Checker keys", err);
@@ -945,14 +952,14 @@ watch(
               "
             />
           </div>
-        <label v-if="v$?.assets?.customCheckerPy?.$error" class="label">
+          <label v-if="v$?.assets?.customCheckerPy?.$error" class="label">
             <span class="label-text-alt text-error">{{
               v$.assets.customCheckerPy.$errors[0]?.$message
             }}</span>
           </label>
 
           <!-- AI Checker Sub-Options -->
-          <div class="mt-4 rounded-lg border border-gray-500 bg-base-200/50 p-4">
+          <div class="bg-base-200/50 mt-4 rounded-lg border border-gray-500 p-4">
             <div class="flex items-center gap-4">
               <label class="label cursor-pointer justify-start gap-x-4">
                 <span class="label-text">{{ t("course.problems.aiCheckerEnable") }}</span>
@@ -998,10 +1005,7 @@ watch(
                 <label class="label">
                   <span class="label-text">{{ t("course.problems.aiCheckerModel") }}</span>
                 </label>
-                <select
-                  class="select-bordered select select-sm"
-                  v-model="problem.config!.aiChecker!.model"
-                >
+                <select class="select-bordered select select-sm" v-model="problem.config!.aiChecker!.model">
                   <option value="gemini-2.5-flash-lite">gemini 2.5 flash lite</option>
                   <option value="gemini-2.5-flash">gemini 2.5 flash</option>
                   <option value="gemini-2.5-pro">gemini 2.5 pro</option>

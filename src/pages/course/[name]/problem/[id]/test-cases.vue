@@ -2,7 +2,7 @@
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useTitle } from "@vueuse/core";
-import api from "@/models/api";
+// api import removed - not currently used
 import { useI18n } from "vue-i18n";
 import { ZipReader, BlobReader, TextWriter, ZipWriter, BlobWriter, TextReader } from "@zip.js/zip.js";
 
@@ -244,7 +244,7 @@ async function downloadTestcases() {
 
           <div class="rounded border p-4">
             <h4 class="mb-2 font-semibold">{{ t("course.problem.test.testcaseModal.preview") }}</h4>
-            <div class="bg-base-200 h-64 max-w-full overflow-auto whitespace-pre-wrap rounded border p-2">
+            <div class="bg-base-200 h-64 max-w-full overflow-auto rounded border p-2 whitespace-pre-wrap">
               <template v-if="selectedTestcaseContent.includes('blob:')">
                 <div v-for="(line, idx) in selectedTestcaseContent.split('\n')" :key="idx">
                   <template v-if="line.startsWith('blob:')">

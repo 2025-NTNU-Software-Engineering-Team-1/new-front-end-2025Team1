@@ -10,7 +10,7 @@ import type { AxiosError } from "axios";
 const route = useRoute();
 const courseName = computed(() => route.params.name as string);
 useTitle(() => `Login Records - ${courseName.value} | Normal OJ`);
-const { t } = useI18n();
+useI18n();
 
 // Pagination state
 const currentPage = ref(1);
@@ -52,11 +52,11 @@ onMounted(fetchData);
 
 // Data is already { records, total } after interceptor merge
 const records = computed(() => {
-  const d = data.value as any;
+  const d = data.value as { records?: LoginRecord[]; total?: number } | undefined;
   return d?.records || [];
 });
 const totalRecords = computed(() => {
-  const d = data.value as any;
+  const d = data.value as { records?: LoginRecord[]; total?: number } | undefined;
   return d?.total || 0;
 });
 const totalPages = computed(() => Math.ceil(totalRecords.value / pageSize.value));
@@ -101,13 +101,16 @@ interface LoginRecord {
         <h2 class="card-title">{{ $t("loginRecords.title") }}</h2>
 
         <!-- Header with search and actions -->
-        <div class="flex flex-wrap items-center gap-4 my-4">
+        <div class="my-4 flex flex-wrap items-center gap-4">
           <input
             v-model="searchName"
             :placeholder="$t('admin.user.search-name')"
             type="text"
             class="input input-bordered"
-            @keyup.enter="currentPage = 1; fetchData()"
+            @keyup.enter="
+              currentPage = 1;
+              fetchData();
+            "
           />
 
           <button class="btn btn-ghost btn-sm" @click="refresh">
@@ -120,7 +123,7 @@ interface LoginRecord {
             {{ $t("loginRecords.download") }}
           </button>
 
-          <span class="text-sm text-base-content/70">
+          <span class="text-base-content/70 text-sm">
             {{ $t("loginRecords.rowCount", { n: totalRecords }) }}
           </span>
         </div>
@@ -132,7 +135,7 @@ interface LoginRecord {
           </template>
           <template #data>
             <div class="overflow-x-auto">
-              <table class="table table-compact w-full">
+              <table class="table-compact table w-full">
                 <thead>
                   <tr>
                     <th>{{ $t("loginRecords.table.username") }}</th>
@@ -143,7 +146,7 @@ interface LoginRecord {
                 </thead>
                 <tbody>
                   <tr v-if="records.length === 0">
-                    <td colspan="4" class="text-center text-base-content/50">
+                    <td colspan="4" class="text-base-content/50 text-center">
                       {{ $t("loginRecords.noRecords") }}
                     </td>
                   </tr>
@@ -171,18 +174,12 @@ interface LoginRecord {
             </div>
 
             <!-- Pagination -->
-            <div v-if="totalPages > 1" class="flex justify-center mt-4">
+            <div v-if="totalPages > 1" class="mt-4 flex justify-center">
               <div class="btn-group">
-                <button
-                  class="btn btn-sm"
-                  :disabled="currentPage === 1"
-                  @click="goToPage(currentPage - 1)"
-                >
+                <button class="btn btn-sm" :disabled="currentPage === 1" @click="goToPage(currentPage - 1)">
                   «
                 </button>
-                <button class="btn btn-sm">
-                  {{ currentPage }} / {{ totalPages }}
-                </button>
+                <button class="btn btn-sm">{{ currentPage }} / {{ totalPages }}</button>
                 <button
                   class="btn btn-sm"
                   :disabled="currentPage === totalPages"

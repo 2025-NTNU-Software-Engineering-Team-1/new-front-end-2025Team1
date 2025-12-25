@@ -284,7 +284,7 @@ const networkItemsCount = computed(() => {
                 <transition name="fade">
                   <div
                     v-if="showReminder"
-                    class="group absolute -right-2 -top-2 z-10 flex animate-bounce cursor-pointer items-center justify-center hover:animate-none"
+                    class="group absolute -top-2 -right-2 z-10 flex animate-bounce cursor-pointer items-center justify-center hover:animate-none"
                     title="Active restrictions found"
                     @click="areRestrictionsVisible = true"
                   >
@@ -315,11 +315,11 @@ const networkItemsCount = computed(() => {
               >
                 <div>
                   <div
-                    class="mb-6 flex cursor-pointer select-none items-center gap-3"
+                    class="mb-6 flex cursor-pointer items-center gap-3 select-none"
                     @click="isLanguagesExpanded = !isLanguagesExpanded"
                   >
                     <div class="bg-primary h-6 w-1 rounded-full"></div>
-                    <span class="text-base-content/80 text-lg font-bold uppercase tracking-wide"
+                    <span class="text-base-content/80 text-lg font-bold tracking-wide uppercase"
                       >Allowed Languages</span
                     >
                     <span class="bg-base-300 text-base-content/60 rounded px-2 py-1 font-mono text-xs">{{
@@ -351,11 +351,11 @@ const networkItemsCount = computed(() => {
                 <div class="grid grid-cols-1 gap-10 lg:grid-cols-2">
                   <div class="space-y-6">
                     <div
-                      class="mb-2 flex cursor-pointer select-none items-center gap-3"
+                      class="mb-2 flex cursor-pointer items-center gap-3 select-none"
                       @click="isLibraryExpanded = !isLibraryExpanded"
                     >
                       <div class="bg-secondary h-6 w-1 rounded-full"></div>
-                      <span class="text-base-content/80 text-lg font-bold uppercase tracking-wide"
+                      <span class="text-base-content/80 text-lg font-bold tracking-wide uppercase"
                         >Library Analysis</span
                       >
                       <span
@@ -380,7 +380,7 @@ const networkItemsCount = computed(() => {
                             <span class="text-base-content/90 text-sm font-bold">{{ s.label }}</span>
 
                             <div
-                              class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider"
+                              class="flex items-center gap-2 text-[10px] font-bold tracking-wider uppercase"
                             >
                               <template v-if="s.mode === 'whitelist'">
                                 <span
@@ -408,7 +408,7 @@ const networkItemsCount = computed(() => {
                             <span
                               v-for="sym in s.items"
                               :key="sym"
-                              class="bg-base-200/50 text-base-content/80 hover:text-primary hover:bg-base-200 inline-flex select-none items-center rounded px-2 py-1 font-mono text-xs transition-colors"
+                              class="bg-base-200/50 text-base-content/80 hover:text-primary hover:bg-base-200 inline-flex items-center rounded px-2 py-1 font-mono text-xs transition-colors select-none"
                             >
                               {{ sym }}
                             </span>
@@ -426,11 +426,11 @@ const networkItemsCount = computed(() => {
 
                   <div class="space-y-6">
                     <div
-                      class="mb-2 flex cursor-pointer select-none items-center gap-3"
+                      class="mb-2 flex cursor-pointer items-center gap-3 select-none"
                       @click="isNetworkExpanded = !isNetworkExpanded"
                     >
                       <div class="bg-warning h-6 w-1 rounded-full"></div>
-                      <span class="text-base-content/80 text-lg font-bold uppercase tracking-wide"
+                      <span class="text-base-content/80 text-lg font-bold tracking-wide uppercase"
                         >Network Access</span
                       >
                       <span
@@ -454,7 +454,7 @@ const networkItemsCount = computed(() => {
                             <span class="text-base-content/90 text-sm font-bold">{{ s.label }}</span>
 
                             <div
-                              class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider"
+                              class="flex items-center gap-2 text-[10px] font-bold tracking-wider uppercase"
                             >
                               <template v-if="s.mode === 'whitelist'">
                                 <span
@@ -482,7 +482,7 @@ const networkItemsCount = computed(() => {
                             <span
                               v-for="sym in s.items"
                               :key="sym"
-                              class="bg-base-200/50 text-base-content/80 hover:text-primary hover:bg-base-200 inline-flex select-none items-center rounded px-2 py-1 font-mono text-xs transition-colors"
+                              class="bg-base-200/50 text-base-content/80 hover:text-primary hover:bg-base-200 inline-flex items-center rounded px-2 py-1 font-mono text-xs transition-colors select-none"
                             >
                               {{ sym }}
                             </span>

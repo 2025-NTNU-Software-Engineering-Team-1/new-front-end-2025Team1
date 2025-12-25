@@ -1243,10 +1243,10 @@ onBeforeUnmount(() => {
                   target="_blank"
                   rel="noopener"
                 >
-                  Download
+                  {{t("course.problems.download")}}
                 </a>
               </div>
-              <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
+              <span v-else class="badge badge-outline text-xs opacity-70">{{t("")}}</span>
             </div>
           </div>
           <div class="mt-3 flex items-center gap-2">

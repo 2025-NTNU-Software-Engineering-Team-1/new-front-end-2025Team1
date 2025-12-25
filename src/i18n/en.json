@@ -321,7 +321,14 @@
       "setPipelines": "Set Pipeline",
       "setTestData": "Set Test Data",
       "setResourceData": "Set Resource Data",
-      "submissionBlocked": "Submission blocked. Please fix the following:"
+      "submissionBlocked": "Submission blocked. Please fix the following:",
+      "commaSeparated": "Comma separated",
+      "meansUnlimited":"-1 means unlimited",
+      "allowedlan": "Allowed: .c, .cpp, .py",
+      "networkSidecars":"Network & Sidecars",
+      "onlyAllowSpecificInfo":"Only allow specific IPs/URLs. Block everything else.",
+      "blockSpecificInfo":"Block specific IPs/URLs. Allow everything else.",
+      "Sidecars":"Sidecars"
     },
     "submissions": {
       "text": "Submissions",

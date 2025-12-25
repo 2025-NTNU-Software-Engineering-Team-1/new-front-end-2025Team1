@@ -432,37 +432,70 @@ async function fetchExistingKeySelection() {
   if (!courseName.value || typeof courseName.value !== "string") return;
 
   const currentProblemId = Number(route.params.id);
-  if (!currentProblemId || isNaN(currentProblemId)) return;
+  if (!currentProblemId || isNaN(currentProblemId)) {
+    logger.warn("Skipping key restore: Invalid Problem ID", route.params.id);
+    return;
+  }
 
-  logger.group("Restore Selected Keys from Usage");
+  logger.group(`Restore Selected Keys (Problem ID: ${currentProblemId})`);
 
   try {
     const res = await api.CourseAPIUsage.getCourseUsage(courseName.value);
     const { isSuccess, data } = parseApiResponse(res);
 
     if (isSuccess && data?.keys) {
-      const foundKeyIds: string[] = [];
-      data.keys.forEach((key: any) => {
-        const isUsedByThisProblem = key.problem_usages?.some(
-          (usage: any) => Number(usage.problem_id) === currentProblemId,
-        );
-        if (isUsedByThisProblem) {
-          foundKeyIds.push(String(key.id));
-        }
+      if (DEBUG_MODE) {
+        console.groupCollapsed("%c[Analysis] API Data Inspection", "color: #aaa");
+        console.log("Raw Data Keys:", data.keys);
+        console.groupEnd();
+      }
+
+      const debugAnalysis = data.keys.map((key: any) => {
+        const usages = key.problem_usages || [];
+        const matchFound = usages.some((usage: any) => Number(usage.problem_id) === currentProblemId);
+        return {
+          KeyID: key.id,
+          KeyName: key.key_name,
+          TotalUsages: usages.length,
+          IsUsedByThisProblem: matchFound,
+          UsageIDs: usages.map((u: any) => u.problem_id).join(", "),
+        };
       });
 
+      if (DEBUG_MODE) {
+        console.group("%c[Table] Key Usage Matching Logic", "color: #eab308");
+        console.table(debugAnalysis);
+        console.groupEnd();
+      }
+
+      const foundKeyIds: string[] = debugAnalysis
+        .filter((item: any) => item.IsUsedByThisProblem)
+        .map((item: any) => String(item.KeyID));
+
       if (foundKeyIds.length > 0) {
+        const oldSelection = [...selectedKeys.value];
         const mergedKeys = new Set([...selectedKeys.value, ...foundKeyIds]);
-        selectedKeys.value = Array.from(mergedKeys);
+        const newSelection = Array.from(mergedKeys);
+
+        logger.log("State Update Report", {
+          foundOnServer: foundKeyIds,
+          previousLocalSelection: oldSelection,
+          finalMergedSelection: newSelection,
+          newlyAdded: foundKeyIds.filter((id) => !oldSelection.includes(id)),
+        });
+
+        selectedKeys.value = newSelection;
 
         if (problem.value.config) {
           problem.value.config.aiVTuberApiKeys = selectedKeys.value;
         }
 
-        logger.success(`Restored ${foundKeyIds.length} keys for Problem ID ${currentProblemId}`, foundKeyIds);
+        logger.success(`Restored ${foundKeyIds.length} keys for Problem ID ${currentProblemId}`);
       } else {
-        logger.log("No existing key usage found for this problem.");
+        logger.log("No existing key usage found for this problem in API response.");
       }
+    } else {
+      logger.warn("API Response invalid or no keys data", data);
     }
   } catch (err) {
     logger.error("Failed to restore existing key selection", err);

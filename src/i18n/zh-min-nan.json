@@ -3,27 +3,972 @@
     "title": "設定",
     "selectLang": "選擇語言"
   },
-  "profile": {
-    "menu": {
-      "login_records": "登入紀錄"
+  "about": {
+    "contributor": "貢獻者",
+    "links": "連結",
+    "maintainer": "維護人員",
+    "serviceLearning2022": "臺師大資工系 2022 年秋季服務學習",
+    "serviceLearning2021": "臺師大資工系 2021 年春季服務學習",
+    "swe2019": "2019 年秋季軟體工程「紅隊」組"
+  },
+  "course": {
+    "ann": {
+      "index": {
+        "title": "公告",
+        "table": {
+          "title": "標題",
+          "author": "發布者",
+          "time": "發布時間"
+        },
+        "new": "新增"
+      },
+      "new": {
+        "title": "新增公告",
+        "preview": "預覽"
+      }
+    },
+    "hw": {
+      "index": {
+        "title": "作業",
+        "new": "新增"
+      },
+      "new": {
+        "title": "新增作業",
+        "preview": "預覽"
+      }
+    },
+    "aisetting": {
+      "setupPage": "設置",
+      "usagePage": "用量",
+      "setup": {
+        "title": "AI 管理 - 設定",
+        "subtitleNewKey": "新增金鑰資訊 (Gemini)",
+        "subtitleExistingKey": "現有金鑰",
+        "input": {
+          "name": "金鑰名稱 *",
+          "value": "API 金鑰值",
+          "addKey": "新增金鑰"
+        },
+        "display": {
+          "noKey": "暫時無金鑰",
+          "keyName": "金鑰名稱",
+          "masked": "金鑰 (已崁起來)",
+          "createdBy": "建立者",
+          "active": "啟用",
+          "save": "儲存",
+          "delete": "刪除"
+        }
+      },
+      "usage": {
+        "title": "API 用量 ({name})",
+        "totalUsage": "Token 總使用量:",
+        "cycleUsage": "單日週期用量",
+        "totalCycleUsage": "本週期總用量",
+        "cycleTokenUsed": "週期已用量",
+        "sinceReset": "自 {time} 起",
+        "cycleTooltip": "這系自頂擺重置了後的用量。系統每 24 小時會自動重置週期計數，用來控制 API 請求頻率限制。",
+        "cycleExpired": "週期已超過 24 小時，會佇下一次 AI 呼叫時更新",
+        "used_by_summary": "予 {count} 個題目使用 • Token",
+        "created_by_summary": "• 由 {name} 所建立",
+        "rank": "排名",
+        "problemName": "題目名稱",
+        "tokenUsed": "Token 已用量",
+        "noData": "猶無 API 金鑰使用資料",
+        "problemUsageAnalysis": "題目使用分析",
+        "clickToCollapse": "點擊收起",
+        "clickToExpand": "點擊展開",
+        "barChart": "長條圖",
+        "PackedBubble": "氣泡圖",
+        "dragBubbleStoPlayPhysics": "*拖曳氣泡就會使體驗效果",
+        "keyUsageBreakdown": "使用狀況分析",
+        "Average": "平均",
+        "tokensProblem": "tokens/題目",
+        "totalTokens": "全部 Tokens"
+      }
+    },
+    "problem": {
+      "new": {
+        "title": "新增題目",
+        "preview": "預覽",
+        "json": "JSON（供開發人員檢查）"
+      },
+      "submit": {
+        "err": {
+          "code": "請佇遮貼上你的原始碼來繳交。",
+          "lang": "請選擇程式語言。",
+          "msg": "害啊！繳交程式碼的時陣發生錯誤。請等咧再試看覓。"
+        },
+        "card": {
+          "title": "繳交至題號 ",
+          "placeholder": "佇遮貼上程式碼"
+        },
+        "lang": {
+          "text": "語言",
+          "select": "選擇語言"
+        },
+        "text": "提交"
+      },
+      "test": {
+        "err": {
+          "code": "請佇遮貼上你的原始碼來測試。",
+          "lang": "請選擇程式語言。",
+          "msg": "害啊！測試程式碼的時陣發生錯誤。請等咧再試看覓。",
+          "trialModeNotEnabled": "這个題目猶未開放試測功能，請聯絡老師抑是助教啟用。",
+          "permissionDenied": "你無權限使用這个題目的試測功能。"
+        },
+        "card": {
+          "title": "測試題號 ",
+          "code": "原始碼",
+          "testInput": "測試輸入",
+          "placeholder": "佇遮貼上程式碼",
+          "testInputPlaceholder": "佇遮輸入測試資料"
+        },
+        "lang": {
+          "text": "語言",
+          "select": "選擇語言"
+        },
+        "text": "執行測試",
+        "submit": "提交",
+        "history": "歷史記錄",
+        "testcase": "測資",
+        "run": "執行",
+        "submitModal": {
+          "title": "提交確認",
+          "message": "確定欲提交這个程式碼進行正式評分無？",
+          "cancel": "取消",
+          "confirm": "確定提交"
+        },
+        "historyModal": {
+          "title": "測試歷史記錄",
+          "table": {
+            "id": "編號",
+            "result": "結果",
+            "score": "分數",
+            "time": "時間"
+          },
+          "detail": "詳細資訊",
+          "close": "關閉"
+        },
+        "testcaseModal": {
+          "title": "測資設定",
+          "useDefault": "使用預設測資",
+          "customTestcases": "自訂測資設定",
+          "files": "檔案",
+          "preview": "預覽",
+          "cancel": "取消",
+          "save": "儲存變更",
+          "alert": "請至少選擇一个測資檔案",
+          "confirm": "已有測資檔案，確定欲覆蓋無？",
+          "pdfNotice": "PDF 檔案，請點擊下方連結下載：",
+          "unsupported": "無支援的檔案格式 ({ext})，請點擊下方連結下載：",
+          "download": "點擊下載",
+          "saveSuccess": "測資設定已儲存",
+          "saveError": "儲存測資設定時發生錯誤",
+          "noTestcasesToDownload": "無可下載的測資檔案，請先上傳測資",
+          "emptyTestcaseFile": "測資檔案是空的，無法下載",
+          "downloadFailed": "下載測資失敗，請等咧再試"
+        },
+        "testcaseType": {
+          "label": "測資類型",
+          "public": "公開測資",
+          "custom": "自訂測資"
+        }
+      },
+      "stats": {
+        "pieTitle": "繳交結果",
+        "title": "數據檢視－題號",
+        "general": {
+          "tried": "已嘗試使用者數量",
+          "ac": "AC 使用者數量",
+          "acRatio": "AC Submission 比率",
+          "avg": "平均分數",
+          "sd": "標準差"
+        },
+        "table": {
+          "runtimeRank": {
+            "title": "執行時間前十名",
+            "id": "名次",
+            "user": "使用者",
+            "runtime": "執行時間",
+            "time": "繳交時間"
+          },
+          "memoryRank": {
+            "title": "記憶體用量前十名",
+            "id": "名次",
+            "user": "使用者",
+            "memory": "記憶體用量",
+            "time": "繳交時間"
+          }
+        }
+      }
+    },
+    "problems": {
+      "text": "題目",
+      "id": "題號",
+      "name": "題名",
+      "tags": "標籤",
+      "quota": "額度",
+      "new": "新增",
+      "status": "隱藏",
+      "allowedLanguages": "允許的程式語言",
+      "acceptedFormat": "允許的格式",
+      "code": "程式碼",
+      "zip": "壓縮檔",
+      "maxZipSize": "壓縮檔之大小上限 (MB)",
+      "maxZipSizeDefault": "(預設 50 MB)",
+      "aiTA": "AI 助教",
+      "aiModel": "AI (Gemini) 模型",
+      "uploadACFiles": "上傳 AC 檔",
+      "selectAPIKeys": "選擇 API 金鑰",
+      "aiKeyTotal": "總用量: {total}",
+      "aiKeyActive": "啟用: {stats}",
+      "aiKeyInactive": "停用: {stats}",
+      "aiKeyFetchingSuggestion": "獲取建議...",
+      "aiKeySuggestionStudentCount": "學生人數:",
+      "aiKeySuggestionSuggestedKeys": "建議之金鑰數量:",
+      "aiKeySuggestionReason": "原因:",
+      "aiKeySearch": "搜尋",
+      "aiKeyLoadingKeys": "載入金鑰...",
+      "activeAiKeys": "啟用中的金鑰",
+      "inactiveAiKeys": "停用中的金鑰",
+      "trialMode": "測試模式",
+      "trialMaxNumber": "測試次數上限",
+      "resultVisible": "結果可供檢視",
+      "allowViewingExecutionOutput": "可檢視執行之輸出結果",
+      "resultDownloadable": "結果可供下載",
+      "allowDownloadingOutputFiles": "可下載執行之輸出結果",
+      "uploadPublicTestData": "上傳測資 (.zip)",
+      "networkAccessRestriction": "網路存取限制 (External)",
+      "networkAccessModel": "存取模式:",
+      "networkAccessWhitelist": "白名單",
+      "networkAccessBlacklist": "黑名單",
+      "networkAccessIPList": "IP List",
+      "networkAccessURLList": "URL List",
+      "SandboxEnvironment": "沙盒環境 (Sidecars & Dockerfiles)",
+      "dockerFiles": "Dockerfiles",
+      "uploaded": "已上傳",
+      "notUploaded": "未上傳",
+      "download": "下載",
+      "uploadDockerFilesZip": "上傳 dockerfiles.zip",
+      "ArtifactCollection": "產物收集 (可選)",
+      "CompiledBinary": "編譯後之二進位檔",
+      "StudentArtifact": "學生產物 (Zip)",
+      "fileAccess": "檔案存取權限",
+      "fileAccessAllowedRead": "允許讀取",
+      "fileAccessAllowedWrite": "允許寫入",
+      "allowWriteWarning": "允許寫入需要先允許讀取。",
+      "libraryRestrictionsGroup": "函式庫限制",
+      "syntaxRestrictions": "語法限制",
+      "restrictionBlack": "黑名單",
+      "restrictionWhite": "白名單",
+      "restrictionDisabled": "已停用匯入限制",
+      "restrictionDisabledInfo": "必須啟用 Python 語言才會使使用此功能",
+      "importsRestrictions": "匯入限制",
+      "headersRestrictions": "標頭檔限制",
+      "headersRestrictionDisabled": "已停用標頭檔限制",
+      "headersRestrictionInfo": "必須啟用 C/C++ 語言才會使使用此功能",
+      "functionsRestrictions": "函式限制",
+      "executionMode": "執行模式",
+      "executionModeGeneral": "一般模式",
+      "executionModeFuncitonOnly": "僅限函式模式",
+      "executionModeInteractive": "互動模式",
+      "uploadFile": "上傳 Makefile.zip",
+      "upload": "上傳",
+      "notNotUploaded": "未上傳",
+      "ineractiveTeacherFirst": "老師端程式優先執行",
+      "interactiveUploadTeacherCode": "上傳老師端程式碼",
+      "customChecker": "自定義檢查器 ",
+      "uploadCustomChecker": "上傳 Custom_Checker.py",
+      "uploadCustomCheckerInfo": "啟用後可上傳 Custom_Checker.py",
+      "uploadCustomCheckerWarning": "Custom Checker disabled in Interactive mode.",
+      "aiCheckerEnable": "啟用 AI",
+      "aiCheckerApiKey": "API Key",
+      "aiCheckerModel": "Model",
+      "aiCheckerSelectKey": "選擇 API Key",
+      "customScoringScript": "自定義計分腳本",
+      "uploadCustomScorer": "上傳 Custom_Scorer.py",
+      "uploadCustomScorerInfo": "啟用後可上傳 Custom_Scorer.py",
+      "placeholderSyntax": "加入語法關鍵字",
+      "placeholderImport": "加入匯入",
+      "placeholderHeader": "加入標頭檔",
+      "placeholderFunction": "加入函式",
+      "descriptionProblem": "題目描述",
+      "descriptionInput": "輸入說明",
+      "descriptionOutput": "輸出說明",
+      "exampleInput": "範例輸入 {no}",
+      "exampleOutput": "範例輸出 {no}",
+      "AddSample": "新增範例",
+      "RemoveLast": "移除最後一項",
+      "hint": "提示",
+      "testDataZip": "測資壓縮檔",
+      "zipFile": "ZIP 檔案",
+      "downloadCurrent": "下載目前測資",
+      "dropFileHere": "將 ZIP 檔拖曳至此",
+      "cases": "測試案例",
+      "score": "分數",
+      "memoryLimit": "記憶體限制 (KB)",
+      "timeLimit": "時間限制 (ms)",
+      "setResourceDataTeacher": "設定資源檔案 (教師版)",
+      "setResourceDataStudent": "設定資源檔案 (學生版)",
+      "enable": "啟用",
+      "allowReadToUse": "請先開啟「允許讀取」權限以使用資源檔案。",
+      "uploadTestDataFirst": "請先上傳測試資料 (TestData)",
+      "allowReadRequired": "需要「允許讀取」權限",
+      "prefixMismatch": "資源檔案名稱前綴不符：{base}，不符合測資結構設定。",
+      "countMismatch": "資源檔案數量與測資數量不一致，請確認每個測試案例皆有對應資源。",
+      "task": "個題組",
+      "current": "目前：",
+      "EnablefirstThenUpload": "請先啟用功能，再進行上傳",
+      "EnableAllowReadfirst": "請先開啟「允許讀取」權限",
+      "problemName": "題目名稱",
+      "setDescription": "設定題目敘述",
+      "setConfiguration": "進行配置設定",
+      "setPipelines": "設定 Pipeline",
+      "setTestData": "設定測試資料",
+      "setResourceData": "設定資源資料",
+      "submissionBlocked": "提交已被阻擋。請修正以下事項：",
+      "commaSeparated": "用逗號分隔",
+      "meansUnlimited": "-1 代表無限制",
+      "allowedlan": "允許: .c, .cpp, .py",
+      "networkSidecars": "內外網服務(Network & Sidecars)",
+      "onlyAllowSpecificInfo": "僅允許特定的 IP/URL。封鎖所有其他內容",
+      "blockSpecificInfo": "封鎖特定 IPs/URLs. 允許所有其他內容.",
+      "Sidecars": "Sidecars",
+      "delete": "刪除",
+      "discardChanges": "取消變更",
+      "Preview": "預覽",
+      "editProblem": "編輯題目:"
+    },
+    "submissions": {
+      "text": "繳交狀態",
+      "problem": "題目",
+      "status": "狀態",
+      "lang": "語言",
+      "clear": "清除",
+      "table": {
+        "id": "id",
+        "pid": "題號",
+        "user": "使用者",
+        "result": "評判結果",
+        "score": "得分",
+        "runtime": "執行時間",
+        "memory": "記憶體用量",
+        "lang": "語言",
+        "time": "繳交時間",
+        "ipAddr": "IP 位址"
+      }
+    },
+    "submission": {
+      "title": "Submission ID: ",
+      "general": {
+        "title": "總覽",
+        "problem": "題號",
+        "user": "使用者",
+        "status": "評判結果",
+        "runtime": "執行時間",
+        "memory": "記憶體用量",
+        "score": "得分",
+        "lang": "語言",
+        "time": "繳交時間",
+        "ipAddr": "IP 位址"
+      },
+      "detail": {
+        "title": "細節",
+        "desc": "作業當咧改，頁面會自動更新。",
+        "id": "子任務",
+        "status": "評判結果",
+        "runtime": "執行時間",
+        "memory": "記憶體用量",
+        "score": "得分",
+        "overall": "整體結果",
+        "result": {
+          "hide": "隱藏所有結果",
+          "show": "顯示所有結果"
+        }
+      },
+      "source": {
+        "text": "原始碼",
+        "copied": "複製好矣！",
+        "copy": "複製"
+      },
+      "compile_error": {
+        "title": "編譯錯誤訊息"
+      },
+      "scoreEdit": {
+        "titleTotal": "編輯總分",
+        "titleTask": "編輯任務 {index} 分數",
+        "description": "手動調整提交分數。",
+        "scoreRangeTotal": "分數範圍：0 - 100",
+        "scoreRangeTask": "分數範圍：0 - {max}",
+        "scoreRangeTaskNoLimit": "分數範圍：0（無上限）",
+        "autoUpdate": "手動更新會自動更新作業成績",
+        "recordSaved": "會保存修改記錄",
+        "totalScoreWarning": "注意：修改總分袂改變個別任務分數。總分可能佮任務分數總和無仝。",
+        "newScore": "新分數",
+        "reason": "原因（選填）",
+        "reasonPlaceholder": "你為啥物欲修改這个分數？",
+        "cancel": "取消",
+        "submit": "提交"
+      },
+      "scoreHistory": {
+        "title": "分數修改歷史",
+        "show": "顯示",
+        "hide": "隱藏",
+        "records": "{count} 筆記錄",
+        "noRecords": "無分數修改記錄。",
+        "modifier": "修改者",
+        "time": "時間",
+        "target": "目標",
+        "before": "修改前",
+        "after": "修改後",
+        "reason": "原因",
+        "totalScore": "總分",
+        "task": "任務 {index}"
+      },
+      "caseOutput": {
+        "title": "測試案例 Artifact",
+        "viewTitle": "檢視 Artifact",
+        "stdout": "標準輸出 (stdout)",
+        "stderr": "標準錯誤 (stderr)",
+        "noStdout": "無輸出檔案",
+        "emptyStdout": "（輸出是空的）",
+        "noStderr": "無錯誤輸出檔案",
+        "emptyStderr": "（錯誤輸出是空的）",
+        "artifactFiles": "Artifact 檔案",
+        "binaryFile": "二進位檔案：{fileName}（無法預覽）",
+        "close": "關閉"
+      },
+      "binaryNotFound": {
+        "title": "揣無編譯後的可執行檔",
+        "description": "這个提交的編譯後可執行檔無法取得。這可能是佇啟用產物收集功能之前建立的提交。你敢欲 Rejudge 這个提交來產生編譯後的可執行檔？",
+        "cancel": "取消",
+        "rejudge": "Rejudge"
+      }
+    },
+    "members": {
+      "title": "成員",
+      "new": "新增",
+      "sortBy": "排序依據",
+      "cancel": "取消",
+      "submit": "送出",
+      "csvUploadHint": {
+        "header": "上傳一个 csv 檔來批次新增學生，第一列 Headers 應為：",
+        "content": "第二列開始每列為一个成員的資料",
+        "caution": "請注意若系統已有使用者使用了 CSV 中的 username 或 email，則該學生依舊會被加入課程，但其他欄位的資訊袂更新, 若欲強制更新伊的資訊請勾選下方的選項。"
+      },
+      "forceUpdate": "強制更新已存在的使用者的資訊",
+      "standardizeUsername": "統一使用者名稱（字母大寫）",
+      "csvFiles": "CSV 檔案",
+      "csvUpload": "CSV 檔案上傳",
+      "csvUploadInfo": "拖曳檔案至此處或點擊選擇",
+      "manualInput": "手動輸入",
+      "optionUsername": "使用者名稱",
+      "optionDisplayName": "顯示名稱",
+      "optionRole": "角色",
+      "tableUsername": "使用者名稱",
+      "tableDisplayedName": "顯示名稱",
+      "tableRole": "角色"
     }
   },
-  "about": {},
-  "course": {},
-  "admin": {
-    "tab": {
-      "loginRecords": "登入紀錄"
+  "courses": {
+    "index": {
+      "list": "課程清單",
+      "table": {
+        "course": "課程",
+        "teacher": "教師",
+        "semester": "學期"
+      },
+      "new": "新增"
+    },
+    "new": {
+      "title": "新增課程",
+      "nameField": "課程名稱",
+      "teacherField": "課程教師",
+      "submit": "送出",
+      "unknown-error-occurred": "發生未知錯誤 :("
+    }
+  },
+  "discussion": {
+    "placeholder": "搜揣討論...",
+    "post": "發文",
+    "hot": "熱門",
+    "new": "最新",
+    "solved": "已解決",
+    "closed": "已關閉",
+    "noPosts": "猶無貼文",
+    "noSearchResults": "揣無符合搜尋條件的貼文",
+    "create": {
+      "title": "建立貼文",
+      "problem": "題目",
+      "problemPlaceholder": "選擇題目",
+      "category": "分類",
+      "generalDiscussion": "一般討論",
+      "question": "問題/求助",
+      "solutionSharing": "解題分享",
+      "bugReport": "錯誤回報",
+      "suggestions": "建議",
+      "language": "Language",
+      "none": "無",
+      "titleLabel": "標題",
+      "titlePlaceholder": "輸入標題",
+      "contentLabel": "內容",
+      "contentPlaceholder": "佇遮輸入貼文內容...",
+      "contentHint": "支援 Markdown 語法",
+      "contentIncluded": "包含程式碼",
+      "submit": "發表",
+      "cancel": "取消",
+      "submit_post_err": {
+        "title_required": "標題袂使是空的。",
+        "content_required": "內容袂使是空的。",
+        "problem_required": "請選擇題目。",
+        "contentallowed": "此題目不允許分享程式碼，請刪除程式碼內容了後再發布",
+        "contains_invisible": "標題包含不可見或控制字元，請移除了後再試",
+        "submit_processing": "當咧發布貼文，請稍等..."
+      }
+    },
+    "contentallowed": {
+      "role": "角色：{userRole} | 截止時間前學生無法分享程式碼",
+      "allowed": "此題目允許分享程式碼",
+      "not_allowed": "此題目不允許分享程式碼",
+      "deadline": "截止時間：{deadline}"
+    },
+    "err": {
+      "err": "請嘗試重新載入",
+      "err_unknown": "未知錯誤",
+      "err_failed_load": "載入失敗",
+      "err_failed_find": "無法揣著該貼文。",
+      "err_failed_reply": "回覆失敗",
+      "err_network": "網路錯誤。",
+      "err_problems_list": "無法載入題目列表。",
+      "err_failed_create": "發布失敗，請檢查是否有包含程式碼",
+      "err_failed_search": "搜尋失敗"
+    },
+    "detail": {
+      "by": "由",
+      "comments": "留言",
+      "noComments": "（無真實留言 — 這是模擬資料）",
+      "notFound": "揣無貼文。",
+      "mockContent": "這是貼文 {id} 的模擬內容。稍後將替換為真實 API 資料。",
+      "solved": "已解決",
+      "closed": "已關閉",
+      "closed_msg": "此貼文已關閉，無法新增留言。",
+      "reply": {
+        "title": "新增留言",
+        "placeholder": "輸入你的留言...",
+        "submit": "送出",
+        "cancel": "取消",
+        "no_comments": "此貼文猶無留言，成做第一個留言的人吧！",
+        "replyto_comment": "回覆留言",
+        "post_reply": "發表回覆",
+        "start": "開始討論"
+      }
+    },
+    "card": {
+      "likes": "{count} 个讚",
+      "comments": "{count} 則留言",
+      "views": "{count} 次觀看"
+    },
+    "problems": {
+      "title": "題目",
+      "selectProblem": "選擇題目以查看討論",
+      "discussionCount": "{count} 則討論",
+      "noDiscussions": "猶無討論",
+      "backToProblems": "返回題目列表",
+      "backToDiscussion": "返回討論區"
+    },
+    "component": {
+      "pin": {
+        "action_Is_Pinned": "取消置頂",
+        "status_Is_Pinned": "已取消置頂",
+        "info_Is_Pinned": "確定欲取消置頂此貼文無？",
+        "action_Not_Pinned": "置頂貼文",
+        "status_Not_Pinned": "已置頂",
+        "info_Not_Pinned": "確定欲置頂此貼文無？"
+      },
+      "solve": {
+        "action_Is_Solved": "標記為未解決",
+        "status_Is_Solved": "已標記為未解決",
+        "info_Is_Solved": "確定欲將此貼文標記為未解決無？",
+        "action_Not_Solved": "標記為已解決",
+        "status_Not_Solved": "已標記為已解決",
+        "info_Not_Solved": "確定欲將此貼文標記為已解決無？"
+      },
+      "post_action": {
+        "close_title": "關閉貼文",
+        "close_info": "關閉了後就無法繼續回覆此貼文，確定欲關閉無？",
+        "close_status": "貼文已關閉",
+        "delete_title": "刪除貼文",
+        "delete_info": "刪除了後無法復原，確定欲刪除此貼文無？",
+        "delete_status": "貼文已刪除"
+      },
+      "is_pinned": "置頂",
+      "not_pinned": "取消置頂",
+      "close": "關閉討論",
+      "delete": "刪除貼文",
+      "confirm": "確認",
+      "cancel": "取消",
+      "reply": {
+        "reply": "回覆",
+        "edit": "編輯",
+        "delete": "刪除",
+        "delete_reply": "刪除回覆",
+        "delete_reply_info": "刪除了後無法復原，確定欲刪除此回覆無？",
+        "delete_confirm": "確認刪除"
+      },
+      "time": {
+        "just_now": "拄才",
+        "minute_ago": "分鐘前",
+        "hour_ago": "小時前",
+        "day_ago": "天前",
+        "today": "今仔日",
+        "yesterday": "昨昏"
+      }
+    }
+  },
+  "ann": {
+    "id": {
+      "back": "返回"
     }
   },
   "components": {
+    "validation": {
+      "not_blank": "袂使是空白或者只有空白字元",
+      "contains_invisible": "包含不可見或控制字元"
+    },
+    "ann": {
+      "form": {
+        "titleField": "標題",
+        "pinToggle": "置頂",
+        "descField": "內容",
+        "submit": "送出"
+      },
+      "card": {
+        "lastUpdate": "最後更新時間：{time}",
+        "postBy": "由 {author} 張貼於 {time}"
+      }
+    },
+    "hw": {
+      "form": {
+        "nameField": "作業名稱",
+        "problems": "題目集",
+        "fromField": "開始時間",
+        "dueField": "截止時間",
+        "descField": "說明",
+        "submit": "送出"
+      },
+      "validation": {
+        "not_blank": "名稱袂使是空白或者只有空白字元",
+        "contains_invisible": "包含不可見或控制字元"
+      },
+      "card": {
+        "statusLabel": {
+          "running": "進行中",
+          "notStart": "未開始",
+          "over": "已結束"
+        },
+        "availability": {
+          "text": "期限",
+          "from": "自",
+          "due": "至"
+        },
+        "problems": {
+          "text": "題目",
+          "id": "序號",
+          "pid": "題號",
+          "name": "題名",
+          "quota": "額度",
+          "score": "得分",
+          "stats": "數據",
+          "copycat": "抄襲"
+        },
+        "description": {
+          "text": "說明",
+          "edit": "編輯",
+          "stats": "數據"
+        }
+      }
+    },
+    "problem": {
+      "forms": {
+        "nameField": "題目名稱",
+        "hiddenToggle": "隱藏",
+        "quotaField": "額度",
+        "quotaHint": "若輸入 -1 則為無額度限制",
+        "tags": "標籤",
+        "tagsHint": "多个標籤以逗號分隔，例如：「HW1,HW2」",
+        "type": "題型",
+        "allowedLangs": "作答語言",
+        "testdata": "測資",
+        "howToPack": "了解測資檔案格式",
+        "dropFile": "拖曳檔案至此，或透過正手邊按鈕選擇檔案",
+        "subtask": "子任務 {no}",
+        "numOfCases": "測資筆數",
+        "score": "子任務分數",
+        "memoryLimit": "記憶體限制（MB）",
+        "timeLimit": "執行時間限制（ms）",
+        "submit": "送出",
+        "probDescForm": {
+          "desc": "說明",
+          "input": "輸入",
+          "output": "輸出",
+          "hint": "提示",
+          "err": {
+            "input": "範例輸入錯誤: ",
+            "output": "範例輸出錯誤: "
+          },
+          "sample": {
+            "input": "範例輸入 ",
+            "output": "範例輸出 "
+          }
+        },
+        "testdataRule1": "你需要將所有的輸入輸出檔囥佇一个 .zip 檔，且必須遵照以下命名規則",
+        "testdataRule2": "輸入檔的檔名應為 \"sstt.in\"，其中 \"ss\" 代表是第几个子任務，而 \"tt\" 代表是該子任務中的第幾筆測資",
+        "testdataRule3": "仝款，輸出檔的檔名應為 \"sstt.out\"，另請注意 \"ss\" 和 \"tt\" 是從零開始編號.",
+        "testdataRule4": "舉例來說，一个有 3 个子任務的題目，其子任務的測資數量分別是 3, 5, 15",
+        "testdataRule5": "按呢 zip 檔內應該包含遮的檔案：",
+        "gotIt": "好"
+      },
+      "card": {
+        "title": "題目編號 ",
+        "quota": "額度",
+        "score": "得分",
+        "submit": "提交",
+        "test": "測試",
+        "stats": "數據",
+        "desc": "說明",
+        "input": "輸入",
+        "output": "輸出",
+        "ex": "範例",
+        "sample": {
+          "id": "編號",
+          "input": "輸入",
+          "output": "輸出"
+        },
+        "hint": "提示",
+        "subtasks": {
+          "title": "子任務",
+          "id": "編號",
+          "tl": "執行時間限制",
+          "ml": "記憶體限制",
+          "score": "配分"
+        },
+        "noContent": "無",
+        "unlimited": "無限制"
+      },
+      "infoCard": {
+        "score": "得分",
+        "tags": "標籤",
+        "quota": "額度",
+        "unlimited": "無限制"
+      },
+      "manual": {
+        "open": "說明",
+        "title": "題目管理說明",
+        "close": "關閉",
+        "pageNotFound": "揣無頁面。"
+      }
+    },
     "courseSideBar": {
+      "ann": "公告",
+      "hw": "作業",
+      "problems": "題目",
+      "submissions": "繳交狀態",
+      "discussion": "討論區",
+      "members": "成員",
+      "aisetting": "AI 管理",
       "loginRecords": "登入紀錄"
+    },
+    "systemAnn": {
+      "ann": "公告",
+      "title": "標題",
+      "createTime": "建立時間"
+    },
+    "loginSection": {
+      "welcome": "歡迎轉來，{user}",
+      "signin": "登入",
+      "loginFailed": "登入失敗：帳號 / 電子郵件地址抑是密碼輸入錯誤",
+      "username": "帳號 / 電子郵件地址",
+      "pw": "密碼",
+      "placeholder": {
+        "username": "帳號 / 電子郵件地址",
+        "pw": "密碼"
+      },
+      "forgot": "袂記密碼?",
+      "button": "登入"
+    },
+    "sideBar": {
+      "home": "首頁",
+      "course": "課程",
+      "about": "關於",
+      "admin": "管理",
+      "profile": "個人"
+    },
+    "dueCountdown": {
+      "days": "日",
+      "hours": "小時",
+      "min": "分",
+      "sec": "秒"
+    },
+    "markdownRenderer": {
+      "noContent": "無"
+    },
+    "dataStatusWrapper": {
+      "errorMsg": "害啊！系統發生了一些錯誤，請重新嘗試，若嘗試幾若擺皆失敗請聯絡管理員。"
+    }
+  },
+  "admin": {
+    "user": {
+      "pwHint": "留空則不改變密碼，改變密碼了後該使用者會被登出",
+      "cancel": "取消",
+      "submit": "提交",
+      "password": "密碼",
+      "role": "角色",
+      "display-name": "顯示名稱",
+      "username": "帳號",
+      "editing": "當咧編輯：{user}",
+      "student": "學生",
+      "teacher": "教師",
+      "admin": "管理員",
+      "ta": "助教",
+      "select-role": "選擇角色",
+      "row-count": "資料筆數：{n}",
+      "search-name": "搜尋名稱"
+    },
+    "unknown-error-occurred": "發生未知錯誤 :(",
+    "tab": {
+      "dashboard": "儀表板",
+      "user": "使用者",
+      "loginRecords": "登入紀錄"
+    },
+    "dashboard": {
+      "usercount": {
+        "title": "使用者總覽",
+        "count": "數量",
+        "total": "總數"
+      },
+      "coursecount": {
+        "title": "課程總覽",
+        "coursename": "課程名稱",
+        "user": "人數",
+        "homework": "作業數量",
+        "problem": "題目數量",
+        "submission": "提交數量"
+      }
+    }
+  },
+  "errorCode": {
+    "ERR001": "登入失敗：帳號抑是密碼錯誤。",
+    "ERR002": "登入失敗：帳號尚未開通，請至 https://v1.noj.tw 驗證信箱以開通帳號。",
+    "UNKNOWN": "未知的錯誤，請洽助教或管理者協助處理，或請稍等再試一擺。"
+  },
+  "password_reset": {
+    "forgot-password": "袂記密碼",
+    "description": "請輸入你註冊用的信箱，阮會傳送一封電子郵件予你。",
+    "submit": "送出",
+    "email": "電子郵件",
+    "status": {
+      "error": "揣無該信箱。",
+      "success": "發送成功，請檢查你的電子信箱。"
+    },
+    "return-home": "轉去首頁"
+  },
+  "profile": {
+    "title": "個人資料",
+    "rules": {
+      "confirmPassword": {
+        "sameAsRef": "密碼無符合。"
+      }
+    },
+    "username": "帳號",
+    "dispname": "顯示名稱",
+    "email": "電子郵件",
+    "role": "角色",
+    "signOut": "登出",
+    "pw": {
+      "change": "變更密碼",
+      "success": "密碼已成功變更",
+      "new": "新密碼",
+      "confirm": "確認新密碼",
+      "current": "舊密碼",
+      "placeholder": {
+        "new": "新密碼",
+        "again": "再輸入一次新密碼",
+        "current": "舊密碼"
+      },
+      "submit": "送出"
+    },
+    "wrongPassword": "密碼錯誤",
+    "operationFailed": "操作失敗，請稍等再重試",
+    "menu": {
+      "accountInfo": "帳號資訊",
+      "user_information": "使用者資訊",
+      "api_token": "API 金鑰",
+      "login_records": "登入紀錄"
+    },
+    "breadcrumb": {
+      "profile": "個人資料"
+    },
+    "apiToken": {
+      "title": "API 金鑰",
+      "create_new_key": "建立新的金鑰",
+      "description": "請佇新增了後立即複製並儲存你的金鑰，並確保毋通佮任何人分享或佇任何公開的網域上洩露。",
+      "search_placeholder": "搜尋…",
+      "table": {
+        "name": "名稱",
+        "status": "狀態",
+        "created": "建立時間",
+        "last_used": "頂擺使用",
+        "due_time": "到期時間",
+        "scope": "權限範圍",
+        "owner": "擁有者"
+      },
+      "view_scopes": "查看",
+      "status_active": "啟用中",
+      "status_deactivated": "已停用",
+      "scopes": {
+        "read_only": "唯讀",
+        "read_write": "讀寫",
+        "admin": "管理員",
+        "none": "無"
+      },
+      "create_modal": {
+        "title": "建立新的金鑰",
+        "name_label": "名稱",
+        "name_placeholder": "我的新金鑰",
+        "name_required_alert": "請輸入 Token 名稱",
+        "name_contains_invisible": "Token 名稱包含不可見或控制字元，請移除了後再試",
+        "scope_label": "權限範圍",
+        "date_label": "日期",
+        "cancel": "取消",
+        "create": "建立"
+      },
+      "success_modal": {
+        "warning": "警告",
+        "message": "請妥善保存此金鑰，否則將無法再次查看。",
+        "copied": "複製好矣！",
+        "copy": "複製",
+        "ok": "確認"
+      },
+      "edit_modal": {
+        "title": "編輯 API 金鑰",
+        "original_info": "原始資訊",
+        "new_name_label": "新名稱",
+        "update": "更新"
+      },
+      "view_scope_modal": {
+        "title": "權限列表"
+      },
+      "deactivate_modal": {
+        "title": "停用 API 金鑰",
+        "token_info": "金鑰資訊",
+        "deactivate": "停用"
+      }
     }
   },
   "loginRecords": {
     "title": "登入紀錄",
     "table": {
-      "username": "使用者姓名",
+      "username": "使用者名稱",
       "ipAddress": "IP 位址",
       "success": "狀態",
       "timestamp": "時間"

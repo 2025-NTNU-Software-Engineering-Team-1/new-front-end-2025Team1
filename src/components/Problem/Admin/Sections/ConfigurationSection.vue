@@ -413,8 +413,7 @@ function removeDockerEnv(index: number) {
 // ==========================================
 // Section: AI File Extension Helper
 // ==========================================
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+/*
 function getAIFileExtensions() {
   const lang = problem.value.allowedLanguage;
   const list: string[] = [];
@@ -423,9 +422,10 @@ function getAIFileExtensions() {
   if (lang & 4) list.push(".py");
   return list;
 }
+*/
 
 // ==========================================
-// [NEW] Section: Restore Selected Keys via Usage API
+// Section: Restore Selected Keys via Usage API
 // ==========================================
 async function fetchExistingKeySelection() {
   if (!courseName.value) await fetchCourseName();
@@ -575,6 +575,21 @@ function scrollToKey() {
     });
   }
 }
+
+// ==========================================
+// Section: Selected Keys Management
+// ==========================================
+const selectedKeyObjects = computed(() => {
+  const all = [...(apiKeys.active || []), ...(apiKeys.inactive || [])] as any[];
+  return all.filter((k) => selectedKeys.value.includes(k.id));
+});
+function removeSelectedKey(id: string) {
+  const idx = selectedKeys.value.indexOf(id);
+  if (idx !== -1) {
+    selectedKeys.value.splice(idx, 1);
+  }
+}
+const isSelectedKeysOpen = ref(true);
 
 // ==========================================
 // Section: Suggestion Tooltip
@@ -861,7 +876,7 @@ onBeforeUnmount(() => {
                   </label>
                 </div>
               </div>
--->
+              -->
             </div>
           </div>
 
@@ -874,13 +889,8 @@ onBeforeUnmount(() => {
                   <div class="badge badge-neutral badge-sm">
                     {{ t("course.problems.aiKeyTotal", { total: selectedKeyStats.total }) }}
                   </div>
-                  <div v-if="selectedKeyStats.active > 0" class="badge badge-info badge-sm">
-                    {{ t("course.problems.aiKeyActive", { stats: selectedKeyStats.active }) }}
-                  </div>
-                  <div v-if="selectedKeyStats.inactive > 0" class="badge badge-error badge-sm">
-                    {{ t("course.problems.aiKeyInactive", { stats: selectedKeyStats.inactive }) }}
-                  </div>
                 </div>
+
                 <div class="relative">
                   <button
                     type="button"
@@ -892,7 +902,6 @@ onBeforeUnmount(() => {
                   >
                     <i-uil-question-circle class="text-info" />
                   </button>
-
                   <transition name="fade">
                     <div
                       v-if="showSuggestionTooltip"
@@ -920,6 +929,58 @@ onBeforeUnmount(() => {
                     </div>
                   </transition>
                 </div>
+              </div>
+            </div>
+
+            <div
+              v-if="selectedKeyObjects.length > 0"
+              class="border-info/50 bg-base-200 mb-4 overflow-hidden rounded-lg border"
+            >
+              <button
+                type="button"
+                @click="isSelectedKeysOpen = !isSelectedKeysOpen"
+                class="hover:bg-info/10 flex w-full items-center justify-between px-3 py-2 text-left transition-colors"
+              >
+                <div class="flex items-center gap-2">
+                  <span class="text-info text-xs font-bold">
+                    Selected Keys ({{ selectedKeyObjects.length }}) - Click items below to remove
+                  </span>
+                </div>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="text-info h-4 w-4 transition-transform duration-200"
+                  :class="{ 'rotate-180': isSelectedKeysOpen }"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              <div v-show="isSelectedKeysOpen" class="p-2 pt-0">
+                <transition-group name="list" tag="div" class="grid grid-cols-1 gap-2">
+                  <div
+                    v-for="key in selectedKeyObjects"
+                    :key="key.id"
+                    @click="removeSelectedKey(key.id)"
+                    class="bg-base-100 border-info/30 group flex cursor-pointer items-start gap-3 rounded-lg border p-2 shadow-sm transition hover:border-red-300 hover:bg-red-50"
+                  >
+                    <div class="flex h-full items-center pt-1">
+                      <i-uil-check-circle class="text-success text-lg group-hover:hidden" />
+                      <i-uil-times-circle class="text-error hidden text-lg group-hover:block" />
+                    </div>
+                    <div class="flex-1 overflow-hidden">
+                      <div class="text-base-content group-hover:text-error truncate text-sm font-semibold">
+                        {{ key.key_name }}
+                      </div>
+                      <div class="mt-0.5 truncate text-xs text-gray-400">
+                        {{ key.masked_value }} ({{ key.created_by }})
+                      </div>
+                    </div>
+                  </div>
+                </transition-group>
               </div>
             </div>
 
@@ -964,31 +1025,32 @@ onBeforeUnmount(() => {
                 </button>
 
                 <div v-show="showActiveKeys" class="h-64 overflow-y-auto p-3">
-                  <label
-                    v-for="key in apiKeys.active as any[]"
-                    :key="(key as any).id"
-                    :ref="(el) => (activeKeyRefs[(key as any).id] = el as HTMLElement)"
-                    class="hover:border-info/30 hover:bg-base-200 flex cursor-pointer items-start gap-3 rounded-lg border border-transparent p-3 transition"
-                  >
-                    <input
-                      type="checkbox"
-                      class="checkbox checkbox-info checkbox-sm mt-1"
-                      :value="key.id"
-                      v-model="selectedKeys"
-                    />
-                    <div class="flex-1">
-                      <div class="truncate text-sm font-semibold">Key: {{ key.key_name }}</div>
-                      <div class="mt-1 text-xs text-gray-400">
-                        Creator: {{ key.created_by }} // {{ key.masked_value }}
+                  <template v-for="key in apiKeys.active as any[]" :key="(key as any).id">
+                    <label
+                      v-if="!selectedKeys.includes(key.id)"
+                      :ref="(el) => (activeKeyRefs[(key as any).id] = el as HTMLElement)"
+                      class="hover:border-info/30 hover:bg-base-200 flex cursor-pointer items-start gap-3 rounded-lg border border-transparent p-3 transition"
+                    >
+                      <input
+                        type="checkbox"
+                        class="checkbox checkbox-info checkbox-sm mt-1"
+                        :value="key.id"
+                        v-model="selectedKeys"
+                      />
+                      <div class="flex-1">
+                        <div class="truncate text-sm font-semibold">Key: {{ key.key_name }}</div>
+                        <div class="mt-1 text-xs text-gray-400">
+                          Creator: {{ key.created_by }} // {{ key.masked_value }}
+                        </div>
+                        <div class="mt-1 text-xs text-gray-400">
+                          Number of Requests: {{ key.request_count }}
+                        </div>
+                        <div class="mt-1 text-xs text-gray-400">
+                          Token: input*{{ key.input_token }} ; output*{{ key.output_token }}
+                        </div>
                       </div>
-                      <div class="mt-1 text-xs text-gray-400">
-                        Number of Requests: {{ key.request_count }}
-                      </div>
-                      <div class="mt-1 text-xs text-gray-400">
-                        Token: input*{{ key.input_token }} ; output*{{ key.output_token }}
-                      </div>
-                    </div>
-                  </label>
+                    </label>
+                  </template>
                 </div>
               </div>
 
@@ -1016,31 +1078,32 @@ onBeforeUnmount(() => {
                 </button>
 
                 <div v-show="showInactiveKeys" class="h-64 overflow-y-auto p-3">
-                  <label
-                    v-for="key in apiKeys.inactive as any[]"
-                    :key="(key as any).id"
-                    :ref="(el) => (inactiveKeyRefs[(key as any).id] = el as HTMLElement)"
-                    class="hover:border-error/30 hover:bg-base-200 flex cursor-pointer items-start gap-3 rounded-lg border border-transparent p-3 transition"
-                  >
-                    <input
-                      type="checkbox"
-                      class="checkbox checkbox-error checkbox-sm mt-1"
-                      :value="key.id"
-                      v-model="selectedKeys"
-                    />
-                    <div class="flex-1">
-                      <div class="truncate text-sm font-semibold">Key: {{ key.key_name }}</div>
-                      <div class="mt-1 text-xs text-gray-400">
-                        Creator: {{ key.created_by }} // {{ key.masked_value }}
+                  <template v-for="key in apiKeys.inactive as any[]" :key="(key as any).id">
+                    <label
+                      v-if="!selectedKeys.includes(key.id)"
+                      :ref="(el) => (inactiveKeyRefs[(key as any).id] = el as HTMLElement)"
+                      class="hover:border-error/30 hover:bg-base-200 flex cursor-pointer items-start gap-3 rounded-lg border border-transparent p-3 transition"
+                    >
+                      <input
+                        type="checkbox"
+                        class="checkbox checkbox-error checkbox-sm mt-1"
+                        :value="key.id"
+                        v-model="selectedKeys"
+                      />
+                      <div class="flex-1">
+                        <div class="truncate text-sm font-semibold">Key: {{ key.key_name }}</div>
+                        <div class="mt-1 text-xs text-gray-400">
+                          Creator: {{ key.created_by }} // {{ key.masked_value }}
+                        </div>
+                        <div class="mt-1 text-xs text-gray-400">
+                          Number of Requests: {{ key.request_count }}
+                        </div>
+                        <div class="mt-1 text-xs text-gray-400">
+                          Token: input*{{ key.input_token }} ; output*{{ key.output_token }}
+                        </div>
                       </div>
-                      <div class="mt-1 text-xs text-gray-400">
-                        Number of Requests: {{ key.request_count }}
-                      </div>
-                      <div class="mt-1 text-xs text-gray-400">
-                        Token: input*{{ key.input_token }} ; output*{{ key.output_token }}
-                      </div>
-                    </div>
-                  </label>
+                    </label>
+                  </template>
                 </div>
               </div>
             </div>

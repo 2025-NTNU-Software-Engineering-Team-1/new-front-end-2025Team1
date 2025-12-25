@@ -221,16 +221,6 @@ const maxPage = computed(() => {
                 :is-teacher="session.isTeacher"
                 :is-ta="session.isTA"
               />
-              <problem-info
-                :id="problemId"
-                :problem-name="problemName"
-                :unlimited-quota="isQuotaUnlimited(quota)"
-                :quota-limit="quota"
-                :quota-remaining="quota - submitCount"
-                :tags="tags"
-                :visible="status"
-                :is-admin="session.isTeacher"
-              />
             </template>
           </template>
         </data-status-wrapper>

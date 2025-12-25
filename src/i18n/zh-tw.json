@@ -437,6 +437,12 @@
         "artifactFiles": "Artifact 檔案",
         "binaryFile": "二進位檔案：{fileName}（無法預覽）",
         "close": "關閉"
+      },
+      "binaryNotFound": {
+        "title": "找不到編譯後的可執行檔",
+        "description": "此提交的編譯後可執行檔無法取得。這可能發生在啟用產物收集功能之前建立的提交。您是否要 Rejudge 此提交以產生編譯後的可執行檔？",
+        "cancel": "取消",
+        "rejudge": "Rejudge"
       }
     },
     "members": {

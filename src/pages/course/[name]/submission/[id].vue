@@ -209,10 +209,49 @@ async function deleteSubmission() {
 }
 
 // Download artifact (files provided by backend)
-function downloadCompiledBinary() {
+// Binary not found modal state
+const binaryNotFoundModal = ref<HTMLDialogElement | null>(null);
+
+async function downloadCompiledBinary() {
   logger.log("Action: Download Compiled Binary");
   const url = api.Submission.getArtifactUrl(route.params.id as string, "compiledBinary");
-  window.open(url, "_blank");
+
+  try {
+    // Use HEAD request to check if binary exists first
+    const response = await fetch(url, {
+      method: "HEAD",
+      credentials: "include",
+    });
+
+    if (response.ok) {
+      // Binary exists, proceed with download
+      window.open(url, "_blank");
+    } else if (response.status === 404) {
+      // Binary not found, check if artifact collection is enabled
+      if (enableCompiledBinary.value) {
+        logger.warn("Binary not found but artifact collection is enabled. Prompting rejudge.");
+        binaryNotFoundModal.value?.showModal();
+      } else {
+        alert("Compiled binary not available.");
+      }
+    } else {
+      // Other errors
+      alert(`Failed to download binary: ${response.statusText}`);
+    }
+  } catch (err) {
+    logger.error("Failed to check binary availability", err);
+    // Fallback: try to open directly
+    window.open(url, "_blank");
+  }
+}
+
+function closeBinaryNotFoundModal() {
+  binaryNotFoundModal.value?.close();
+}
+
+async function confirmRejudgeForBinary() {
+  closeBinaryNotFoundModal();
+  await rejudge();
 }
 
 function downloadTaskZip(taskIndex: number) {
@@ -882,6 +921,35 @@ watch(submission, (val) => {
         </button>
         <button class="btn btn-success" @click="submitScoreEdit" :disabled="isScoreSubmitting">
           {{ $t("course.submission.scoreEdit.submit") }}
+        </button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </dialog>
+
+  <!-- Binary Not Found Modal (prompts rejudge) -->
+  <dialog ref="binaryNotFoundModal" class="modal">
+    <div class="modal-box">
+      <h3 class="text-lg font-bold">
+        <i-uil-exclamation-triangle class="mr-2 text-warning" />
+        {{ $t("course.submission.binaryNotFound.title") }}
+      </h3>
+
+      <p class="py-4">{{ $t("course.submission.binaryNotFound.description") }}</p>
+
+      <div class="modal-action">
+        <button class="btn" @click="closeBinaryNotFoundModal">
+          {{ $t("course.submission.binaryNotFound.cancel") }}
+        </button>
+        <button
+          class="btn btn-warning"
+          @click="confirmRejudgeForBinary"
+          :disabled="isRejudgeLoading"
+        >
+          <i-uil-repeat class="mr-1" />
+          {{ $t("course.submission.binaryNotFound.rejudge") }}
         </button>
       </div>
     </div>

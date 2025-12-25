@@ -453,6 +453,12 @@
         "artifactFiles": "Artifact Files",
         "binaryFile": "Binary file: {fileName} (cannot preview)",
         "close": "Close"
+      },
+      "binaryNotFound": {
+        "title": "Compiled Binary Not Found",
+        "description": "The compiled binary for this submission is not available. This may happen for submissions created before artifact collection was enabled. Would you like to rejudge this submission to generate the compiled binary?",
+        "cancel": "Cancel",
+        "rejudge": "Rejudge"
       }
     },
     "members": {

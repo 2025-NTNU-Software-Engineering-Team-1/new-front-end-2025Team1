@@ -1325,22 +1325,22 @@ onBeforeUnmount(() => {
             <input
               type="file"
               multiple
-              accept=".c,.cpp,.py"
               class="file-input-bordered file-input file-input-sm w-56"
               :class="{ 'input-error': v$?.assets?.trialModeACFiles?.$error }"
               @change="
                 (e: Event) => {
-                  const files = Array.from((e.target as HTMLInputElement).files || []) as File[];
-                  const allowedExts = ['.c', '.cpp', '.py'];
-                  const valid = validateFilesForAIAC(files, allowedExts);
+                  const inputEl = e.target as HTMLInputElement;
+                  const files = Array.from(inputEl.files || []) as File[];
+                  // 僅檢查檔案大小，不限制副檔名
+                  const valid = files.filter((f) => assertFileSizeOK(f, 'AC File'));
                   problem.assets!.trialModeACFiles = valid;
-                  if (valid.length === 0) (e.target as HTMLInputElement).value = '';
+                  if (valid.length === 0) inputEl.value = '';
                   v$?.assets?.trialModeACFiles?.$touch();
                 }
               "
             />
           </div>
-          <div class="mt-1 pl-1 text-xs opacity-70">Allowed: .c, .cpp, .py</div>
+          <div class="mt-1 pl-1 text-xs opacity-70">Allowed: Any file</div>
           <label v-if="v$?.assets?.trialModeACFiles?.$error" class="label">
             <span class="label-text-alt text-error">{{
               v$.assets.trialModeACFiles.$errors[0]?.$message

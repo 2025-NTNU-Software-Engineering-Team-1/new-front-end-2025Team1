@@ -45,7 +45,7 @@ const userLikeStatus = ref<boolean | null>(null);
 const loadProblems = async () => {
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const response: any = await API.Discussion.getProblems({ Limit: 100, Course_Id: route.params.name });
+    const response: any = await API.Discussion.getProblems({ Limit: 100, Course_Id: route.params.name as string });
     const status = response.data?.Status;
     const problemsData = response.data?.Problems;
 

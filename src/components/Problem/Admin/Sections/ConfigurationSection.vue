@@ -437,65 +437,58 @@ async function fetchExistingKeySelection() {
     return;
   }
 
-  logger.group(`Restore Selected Keys (Problem ID: ${currentProblemId})`);
+  logger.group(`Key Usage Inspection (Target Problem ID: ${currentProblemId})`);
 
   try {
     const res = await api.CourseAPIUsage.getCourseUsage(courseName.value);
     const { isSuccess, data } = parseApiResponse(res);
 
     if (isSuccess && data?.keys) {
-      if (DEBUG_MODE) {
-        console.groupCollapsed("%c[Analysis] API Data Inspection", "color: #aaa");
-        console.log("Raw Data Keys:", data.keys);
-        console.groupEnd();
-      }
-
-      const debugAnalysis = data.keys.map((key: any) => {
+      // ============================================================
+      // [DEBUG CORE] 生成「Key vs Problem IDs」對照表
+      // ============================================================
+      const debugTable = data.keys.map((key: any) => {
         const usages = key.problem_usages || [];
-        const matchFound = usages.some((usage: any) => Number(usage.problem_id) === currentProblemId);
+
+        const associatedProblemIds = usages.map((u: any) => u.problem_id);
+
+        const isMatch = associatedProblemIds.some((pid: any) => Number(pid) === currentProblemId);
+
         return {
-          KeyID: key.id,
-          KeyName: key.key_name,
-          TotalUsages: usages.length,
-          IsUsedByThisProblem: matchFound,
-          UsageIDs: usages.map((u: any) => u.problem_id).join(", "),
+          "Key Name": key.key_name,
+          "Key ID": key.id,
+          Count: usages.length,
+          "⚠️ ALL Problem IDs": associatedProblemIds.join(", "),
+          "Match Current?": isMatch ? "✅ YES" : "❌ NO",
         };
       });
 
       if (DEBUG_MODE) {
-        console.group("%c[Table] Key Usage Matching Logic", "color: #eab308");
-        console.table(debugAnalysis);
-        console.groupEnd();
+        console.log(
+          "%c下表列出所有 Key 對應的 Problem ID 清單：",
+          "color: #0ea5e9; font-weight: bold; font-size: 1.1em;",
+        );
+
+        console.table(debugTable);
       }
 
-      const foundKeyIds: string[] = debugAnalysis
-        .filter((item: any) => item.IsUsedByThisProblem)
-        .map((item: any) => String(item.KeyID));
+      const foundKeyIds: string[] = debugTable
+        .filter((row: any) => row["Match Current?"] === "✅ YES")
+        .map((row: any) => String(row["Key ID"]));
 
       if (foundKeyIds.length > 0) {
-        const oldSelection = [...selectedKeys.value];
         const mergedKeys = new Set([...selectedKeys.value, ...foundKeyIds]);
-        const newSelection = Array.from(mergedKeys);
-
-        logger.log("State Update Report", {
-          foundOnServer: foundKeyIds,
-          previousLocalSelection: oldSelection,
-          finalMergedSelection: newSelection,
-          newlyAdded: foundKeyIds.filter((id) => !oldSelection.includes(id)),
-        });
-
-        selectedKeys.value = newSelection;
+        selectedKeys.value = Array.from(mergedKeys);
 
         if (problem.value.config) {
           problem.value.config.aiVTuberApiKeys = selectedKeys.value;
         }
-
-        logger.success(`Restored ${foundKeyIds.length} keys for Problem ID ${currentProblemId}`);
+        logger.success(`Auto-selected ${foundKeyIds.length} keys based on history.`);
       } else {
-        logger.log("No existing key usage found for this problem in API response.");
+        logger.log("No usage history matches this problem ID.");
       }
     } else {
-      logger.warn("API Response invalid or no keys data", data);
+      logger.warn("API returned no keys or failed status.", data);
     }
   } catch (err) {
     logger.error("Failed to restore existing key selection", err);

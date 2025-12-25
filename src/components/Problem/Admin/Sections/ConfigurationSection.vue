@@ -870,6 +870,18 @@ const selectedKeyStats = computed(() => {
   };
 });
 
+const tagsString = computed({
+  get: () => {
+    return problem.value.tags ? problem.value.tags.join(", ") : "";
+  },
+  set: (val: string) => {
+    problem.value.tags = val
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+  },
+});
+
 // ==========================================
 // Section: Lifecycle Hooks
 // ==========================================
@@ -923,23 +935,14 @@ onBeforeUnmount(() => {
     </div>
 
     <div class="form-control rounded-lg border border-gray-400 p-4">
-      <label class="label"
-        ><span class="label-text">{{ t("course.problems.tags") }}</span></label
-      >
-      <input
-        type="text"
-        class="input-bordered input"
-        :value="problem.tags.join(',')"
-        @input="
-          problem.tags = ($event.target as HTMLInputElement).value
-            .split(',')
-            .map((s) => s.trim())
-            .filter(Boolean)
-        "
-      />
-      <label class="label"
-        ><span class="label-text-alt">{{ t("course.problems.commaSeparated") }}</span></label
-      >
+      <label class="label">
+        <span class="label-text">{{ t("course.problems.tags") }}</span>
+      </label>
+
+      <input type="text" class="input-bordered input" v-model.lazy="tagsString" placeholder="tag1, tag2" />
+      <label class="label">
+        <span class="label-text-alt">{{ t("course.problems.commaSeparated") }}</span>
+      </label>
     </div>
 
     <div class="form-control rounded-lg border border-gray-400 p-4">

@@ -11,16 +11,17 @@ const isLoading = ref(false);
 const errorMsg = ref("");
 defineExpose({ isLoading, errorMsg });
 
-// A small regex to detect common invisible/control characters (zero-width, NBSP, controls)
-const INVISIBLE_RE = new RegExp("\\p{C}|\\u00A0|\\u200B|\\u200C|\\u200D|\\u2060|\\uFEFF", "u");
+import { containsInvisible } from "@/utils/validators";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 
 const notBlank = helpers.withMessage(
-  "Title cannot be empty or whitespace",
+  () => t("components.validation.not_blank"),
   (value: unknown) => typeof value === "string" && value.trim().length > 0,
 );
 const noInvisible = helpers.withMessage(
-  "Contains invisible control characters",
-  (value: unknown) => typeof value !== "string" || !INVISIBLE_RE.test(value),
+  () => t("components.validation.contains_invisible"),
+  (value: unknown) => typeof value !== "string" || !containsInvisible(value),
 );
 
 const rules = {

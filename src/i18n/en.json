@@ -504,8 +504,7 @@
         "title_required": "Title cannot be empty.",
         "content_required": "Content cannot be empty.",
         "problem_required": "Please select a problem.",
-        "contentallowed": "This problem does not allow sharing code, please remove the code content before posting.",
-        "submit_processing": "Posting, please wait..."
+        "contentallowed": "This problem does not allow sharing code, please remove the code content before posting.",        "contains_invisible": "Title contains invisible or control characters. Please remove them.",        "submit_processing": "Posting, please wait..."
       }
     },
     "contentallowed": {
@@ -608,6 +607,10 @@
     }
   },
   "components": {
+    "validation": {
+      "not_blank": "Cannot be empty or whitespace",
+      "contains_invisible": "Contains invisible or control characters"
+    },
     "ann": {
       "form": {
         "titleField": "Title",
@@ -628,6 +631,10 @@
         "dueField": "Due",
         "descField": "Description",
         "submit": "Submit"
+      },
+      "validation": {
+        "not_blank": "Name cannot be empty or whitespace",
+        "contains_invisible": "Contains invisible or control characters"
       },
       "card": {
         "statusLabel": {
@@ -903,6 +910,7 @@
         "name_label": "Name",
         "name_placeholder": "My new key",
         "name_required_alert": "Please remember to name your token",
+        "name_contains_invisible": "Token name contains invisible or control characters. Please remove them.",
         "scope_label": "Scope",
         "date_label": "Date",
         "cancel": "Cancel",

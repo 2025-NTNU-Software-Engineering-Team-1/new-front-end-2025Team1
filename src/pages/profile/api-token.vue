@@ -11,6 +11,7 @@ import "@vuepic/vue-datepicker/dist/main.css";
 import "./vue-datepicker-override.css";
 
 const { t } = useI18n();
+import { containsInvisible } from "@/utils/validators";
 const session = useSession();
 
 // DatePicker 彈窗永遠往上顯示（popperOptions 禁用 flip）
@@ -94,6 +95,10 @@ async function handleCreate() {
     alert(t("profile.apiToken.create_modal.name_required_alert"));
     return;
   }
+  if (containsInvisible(newApiTokenForm.name)) {
+    alert(t("profile.apiToken.create_modal.name_contains_invisible"));
+    return;
+  }
   console.log("正在建立新的 Token:", newApiTokenForm);
 
   try {
@@ -134,6 +139,10 @@ function openEditModal(token: APIToken) {
 // 後端串接點 (4/5) - 編輯 API Token
 async function handleUpdate() {
   if (!editingToken.value) return;
+  if (containsInvisible(editApiTokenForm.name)) {
+    alert(t("profile.apiToken.edit_modal.name_contains_invisible"));
+    return;
+  }
   console.log("正在更新 Token:", editingToken.value?.ID, "新資料:", editApiTokenForm);
 
   try {

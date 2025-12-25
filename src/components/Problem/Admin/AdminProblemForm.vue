@@ -3,6 +3,7 @@ import { inject, ref, Ref, onMounted, provide } from "vue";
 import { nextTick, reactive, computed } from "vue";
 import useVuelidate from "@vuelidate/core";
 import { required, maxLength, between, helpers } from "@vuelidate/validators";
+import { containsInvisible } from "@/utils/validators";
 import { useI18n } from "vue-i18n";
 
 import DescriptionSection from "./Sections/DescriptionSection.vue";
@@ -275,8 +276,18 @@ function hasRemoteAsset(key: string): boolean {
 // ==========================================
 // Section: Validation Rules
 // ==========================================
+const noInvisible = helpers.withMessage(
+  () => t("components.validation.contains_invisible"),
+  (value: unknown) => typeof value !== "string" || !containsInvisible(value),
+);
+
+const notBlank = helpers.withMessage(
+  () => t("components.validation.not_blank"),
+  (v: unknown) => typeof v === "string" && v.trim().length > 0,
+);
+
 const rules = {
-  problemName: { required, maxLength: maxLength(64) },
+  problemName: { required, notBlank, maxLength: maxLength(64), noInvisible },
 
   description: {
     description: { maxLength: maxLength(10000) },

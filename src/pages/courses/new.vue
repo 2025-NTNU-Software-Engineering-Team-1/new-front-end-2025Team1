@@ -5,8 +5,9 @@ import { useRouter } from "vue-router";
 import api from "@/models/api";
 import axios from "axios";
 import useVuelidate from "@vuelidate/core";
-import { required, maxLength } from "@vuelidate/validators";
+import { required, maxLength, helpers } from "@vuelidate/validators";
 import { useI18n } from "vue-i18n";
+import { containsInvisible } from "@/utils/validators";
 
 const router = useRouter();
 const { t } = useI18n();
@@ -19,9 +20,19 @@ const newCourse = reactive<CourseForm>({
 const isLoading = ref(false);
 const errorMsg = ref("");
 
+const noInvisible = helpers.withMessage(
+  () => t("components.validation.contains_invisible"),
+  (value: unknown) => typeof value !== "string" || !containsInvisible(value),
+);
+
+const notBlank = helpers.withMessage(
+  () => t("components.validation.not_blank"),
+  (value: unknown) => typeof value === "string" && value.trim().length > 0,
+);
+
 const rules = {
-  course: { required, maxLength: maxLength(64) },
-  teacher: { required },
+  course: { required, notBlank, maxLength: maxLength(64), noInvisible },
+  teacher: { required, noInvisible },
 };
 const v$ = useVuelidate(rules, newCourse);
 

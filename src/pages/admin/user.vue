@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import api, { fetcher } from "@/models/api";
 import useVuelidate from "@vuelidate/core";
-import { required, maxLength, between, integer, minLength } from "@vuelidate/validators";
+import { required, maxLength, between, integer, minLength, helpers } from "@vuelidate/validators";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import axios, { type AxiosError } from "axios";
 import { computed, ref } from "vue";
 import { useI18n } from "vue-i18n";
+import { containsInvisible } from "@/utils/validators";
 import { ROLE } from "@/constants";
 import { useTitle } from "@vueuse/core";
 
@@ -34,8 +35,13 @@ const initialUserForm = {
   password: "",
 };
 const userForm = ref<UserEditionForm>({ ...initialUserForm });
+const noInvisible = helpers.withMessage(
+  () => t("components.validation.contains_invisible"),
+  (value: unknown) => typeof value !== "string" || !containsInvisible(value),
+);
+
 const rules = {
-  displayedName: { maxLength: maxLength(16) },
+  displayedName: { maxLength: maxLength(16), noInvisible },
   role: { required, between: between(0, 3), integer },
   password: { minLength: minLength(1) },
 };

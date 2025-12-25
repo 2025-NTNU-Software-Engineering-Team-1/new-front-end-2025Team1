@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import useVuelidate from "@vuelidate/core";
-import { required, maxLength } from "@vuelidate/validators";
+import { required, maxLength, helpers } from "@vuelidate/validators";
 
 interface Props {
   value: Announcement | AnnouncementForm;
@@ -11,8 +11,21 @@ const isLoading = ref(false);
 const errorMsg = ref("");
 defineExpose({ isLoading, errorMsg });
 
+// A small regex to detect common invisible/control characters (zero-width, NBSP, controls)
+const INVISIBLE_RE = new RegExp("\\p{C}|\\u00A0|\\u200B|\\u200C|\\u200D|\\u2060|\\uFEFF", "u");
+
+const notBlank = helpers.withMessage(
+  "Title cannot be empty or whitespace",
+  (value: unknown) => typeof value === "string" && value.trim().length > 0,
+);
+const noInvisible = helpers.withMessage(
+  "Contains invisible control characters",
+  (value: unknown) => typeof value !== "string" || !INVISIBLE_RE.test(value),
+);
+
 const rules = {
-  title: { required, maxLength: maxLength(64) },
+  title: { required, notBlank, noInvisible, maxLength: maxLength(64) },
+  // Allow markdown to contain invisible characters (authors may paste content), only enforce length
   markdown: { maxLength: maxLength(100000) },
   pinned: { required },
 };

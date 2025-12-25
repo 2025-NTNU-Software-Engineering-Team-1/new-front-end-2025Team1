@@ -306,7 +306,13 @@
       "setPipelines": "設定Pipeline",
       "setTestData": "設定測試資料",
       "setResourceData": "設定資源資料",
-      "submissionBlocked": "提交已被阻擋。請修正以下事項："
+      "submissionBlocked": "提交已被阻擋。請修正以下事項：",
+      "commaSeparated": "用逗號分隔",
+      "meansUnlimited":"-1 代表無限制",
+      "allowedlan": "允許: .c, .cpp, .py",
+      "networkSidecars":"內外網服務(Network & Sidecars)",
+      "onlyAllowSpecificInfo":"僅允許特定的 IP/URL。封鎖所有其他內容",
+      "blockSpecificInfo":"封鎖特定 IPs/URLs. 允許所有其他內容."
     },
     "submissions": {
       "text": "繳交狀態",

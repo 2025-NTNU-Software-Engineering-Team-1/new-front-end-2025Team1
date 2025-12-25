@@ -811,7 +811,7 @@ onBeforeUnmount(() => {
             .filter(Boolean)
         "
       />
-      <label class="label"><span class="label-text-alt">Comma separated</span></label>
+      <label class="label"><span class="label-text-alt">{{ t("course.problems.commaSeparated") }}</span></label>
     </div>
 
     <!-- Quota -->
@@ -831,7 +831,7 @@ onBeforeUnmount(() => {
       />
       <label class="label">
         <span class="label-text-alt" :class="quotaError ? 'text-error' : ''">
-          {{ quotaError || "-1 means unlimited" }}
+          {{ quotaError || t("course.problems.meansUnlimited") }}
         </span>
       </label>
     </div>
@@ -1243,10 +1243,10 @@ onBeforeUnmount(() => {
                   target="_blank"
                   rel="noopener"
                 >
-                  Download
+                  {{t("course.problems.download")}}
                 </a>
               </div>
-              <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
+              <span v-else class="badge badge-outline text-xs opacity-70">{{t("")}}</span>
             </div>
           </div>
           <div class="mt-3 flex items-center gap-2">
@@ -1307,7 +1307,7 @@ onBeforeUnmount(() => {
                 "
                 class="flex items-center gap-2"
               >
-                <span class="badge badge-outline badge-success text-xs">Uploaded</span>
+                <span class="badge badge-outline badge-success text-xs">{{ t("course.problems.uploaded") }}</span>
                 <a
                   v-if="hasAsset('ac_code')"
                   :href="assetDownloadUrl('ac_code') || '#'"
@@ -1315,10 +1315,10 @@ onBeforeUnmount(() => {
                   target="_blank"
                   rel="noopener"
                 >
-                  Download
+                  {{ t("course.problems.download") }}
                 </a>
               </div>
-              <span v-else class="badge badge-outline text-xs opacity-70">Not Uploaded</span>
+              <span v-else class="badge badge-outline text-xs opacity-70">{{ t("course.problems.notUploaded") }}</span>
             </div>
           </div>
           <div class="mt-3 flex items-center gap-2">
@@ -1340,7 +1340,7 @@ onBeforeUnmount(() => {
               "
             />
           </div>
-          <div class="mt-1 pl-1 text-xs opacity-70">Allowed: Any file</div>
+          <div class="mt-1 pl-1 text-xs opacity-70">{{ t("course.problems.allowedlan") }}</div>
           <label v-if="v$?.assets?.trialModeACFiles?.$error" class="label">
             <span class="label-text-alt text-error">{{
               v$.assets.trialModeACFiles.$errors[0]?.$message
@@ -1354,7 +1354,7 @@ onBeforeUnmount(() => {
     <div class="form-control col-span-2 rounded-lg border border-gray-400 p-4">
       <div class="flex items-center gap-4">
         <label class="label ml-1 cursor-pointer justify-start gap-x-4">
-          <span class="label-text">Network & Sidecars</span>
+          <span class="label-text">{{ t("course.problems.networkSidecars") }}</span>
           <input type="checkbox" class="toggle" v-model="problem.config!.networkAccessEnabled" />
         </label>
       </div>
@@ -1406,9 +1406,9 @@ onBeforeUnmount(() => {
                   </div>
                   <div class="ml-2 text-xs opacity-70">
                     <span v-if="problem.config!.networkAccessRestriction!.external!.model === 'White'">
-                      Only allow specific IPs/URLs. Block everything else.
+                      {{ t("course.problems.onlyAllowSpecificInfo") }}
                     </span>
-                    <span v-else> Block specific IPs/URLs. Allow everything else. </span>
+                    <span v-else> {{ t("course.problems.blockSpecificInfo") }} </span>
                   </div>
                 </div>
 
@@ -1455,7 +1455,7 @@ onBeforeUnmount(() => {
               <!-- Sidecars -->
               <div class="border-base-content/30 rounded-lg border p-4">
                 <div class="mb-3">
-                  <span class="label-text font-medium">Sidecars</span>
+                  <span class="label-text font-medium">{{ t("course.problems.Sidecars") }}</span>
                 </div>
                 <SidecarInput v-model="problem.config!.networkAccessRestriction!.sidecars" />
               </div>

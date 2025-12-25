@@ -42,7 +42,7 @@
       "usagePage": "Usage",
       "setup": {
         "title": "AI Management – Set Up",
-        "subtitleNewKey": "Add New API Key (Gimini)",
+        "subtitleNewKey": "Add New API Key (Gemini)",
         "subtitleExistingKey": "Existing Key",
         "input": {
           "name": "Key Name *",

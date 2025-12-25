@@ -588,6 +588,70 @@ async function fetchExistingKeySelection() {
     const { isSuccess, data } = parseApiResponse(res);
 
     if (isSuccess && data?.keys) {
+      // ---------------------------------------------------------
+      // [DEBUG LOGIC] Detailed Key Usage Inspection
+      // ---------------------------------------------------------
+      if (DEBUG_MODE) {
+        console.group("[Detailed Analysis] Backend Key Usage Report");
+        console.log("Raw API Response:", data);
+
+        const keys = data.keys;
+        console.log(`Total Keys Found: ${keys.length}`);
+
+        keys.forEach((key: any, index: number) => {
+          const usages = key.problem_usages || [];
+
+          // 1. Calculate Statistics
+          const totalKeyTokens = usages.reduce(
+            (sum: number, u: any) => sum + (Number(u.total_token) || 0),
+            0,
+          );
+          const isUsedByCurrent = usages.some((u: any) => Number(u.problem_id) === currentProblemId);
+
+          // 2. Formatting
+          const statusIcon = isUsedByCurrent ? "✅ (Active in Current Problem)" : "⬜";
+          const titleStyle = isUsedByCurrent
+            ? "color: #10b981; font-weight: bold; font-size: 1.1em;"
+            : "color: #6b7280; font-weight: normal;";
+
+          // 3. Grouped Output per Key
+          console.groupCollapsed(`%cKey #${index + 1}: ${key.key_name} ${statusIcon}`, titleStyle);
+
+          console.log(`🔹 Key Information:`);
+          console.log(`   - ID: ${key.id}`);
+          console.log(`   - Name: ${key.key_name}`);
+          console.log(`   - Creator: ${key.created_by}`);
+          console.log(`   - Masked Value: ${key.masked_value}`);
+
+          console.log(`🔹 Usage Statistics:`);
+          console.log(`   - Total Token Consumption:`, totalKeyTokens);
+          console.log(`   - Linked Problems Count:`, usages.length);
+
+          // 4. Detailed Usage Table
+          if (usages.length > 0) {
+            console.log(`👇 Detailed breakdown by problem:`);
+            console.table(
+              usages.map((u: any) => ({
+                "Problem ID": u.problem_id,
+                "Problem Name": u.problem_name,
+                "Tokens Consumed": u.total_token,
+                "Is Current Target?": Number(u.problem_id) === currentProblemId ? "YES" : "NO",
+              })),
+            );
+          } else {
+            console.log("ℹ️ No usage history recorded for this key.");
+          }
+
+          console.groupEnd(); // End Key Group
+        });
+
+        console.groupEnd(); // End Analysis Group
+      }
+      // ---------------------------------------------------------
+      // [END DEBUG LOGIC]
+      // ---------------------------------------------------------
+
+      // Restore Selection Logic
       const debugTable = data.keys.map((key: any) => {
         const usages = key.problem_usages || [];
         const associatedProblemIds = usages.map((u: any) => u.problem_id);
@@ -597,17 +661,12 @@ async function fetchExistingKeySelection() {
           "Key Name": key.key_name,
           "Key ID": key.id,
           Count: usages.length,
-          "⚠️ ALL Problem IDs": associatedProblemIds.join(", "),
-          "Match Current?": isMatch ? "✅ YES" : "❌ NO",
+          Matched: isMatch,
         };
       });
 
-      if (DEBUG_MODE) {
-        console.table(debugTable);
-      }
-
       const foundKeyIds: string[] = debugTable
-        .filter((row: any) => row["Match Current?"] === "✅ YES")
+        .filter((row: any) => row.Matched)
         .map((row: any) => String(row["Key ID"]));
 
       if (foundKeyIds.length > 0) {
@@ -617,9 +676,9 @@ async function fetchExistingKeySelection() {
         if (problem.value.config) {
           problem.value.config.aiVTuberApiKeys = selectedKeys.value;
         }
-        logger.success(`Auto-selected ${foundKeyIds.length} keys based on history.`);
+        logger.success(`Auto-selected ${foundKeyIds.length} keys based on usage history.`);
       } else {
-        logger.log("No usage history matches this problem ID.");
+        logger.log("No previous usage found for this problem ID. No keys auto-selected.");
       }
     } else {
       logger.warn("API returned no keys or failed status.", data);

@@ -1325,16 +1325,16 @@ onBeforeUnmount(() => {
             <input
               type="file"
               multiple
-              accept=".c,.cpp,.py"
               class="file-input-bordered file-input file-input-sm w-56"
               :class="{ 'input-error': v$?.assets?.trialModeACFiles?.$error }"
               @change="
                 (e: Event) => {
-                  const files = Array.from((e.target as HTMLInputElement).files || []) as File[];
-                  const allowedExts = ['.c', '.cpp', '.py'];
-                  const valid = validateFilesForAIAC(files, allowedExts);
+                  const inputEl = e.target as HTMLInputElement;
+                  const files = Array.from(inputEl.files || []) as File[];
+                  // 僅檢查檔案大小，不限制副檔名
+                  const valid = files.filter((f) => assertFileSizeOK(f, 'AC File'));
                   problem.assets!.trialModeACFiles = valid;
-                  if (valid.length === 0) (e.target as HTMLInputElement).value = '';
+                  if (valid.length === 0) inputEl.value = '';
                   v$?.assets?.trialModeACFiles?.$touch();
                 }
               "

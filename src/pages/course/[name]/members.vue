@@ -288,10 +288,10 @@ async function submit() {
         <!-- Tab Switcher -->
         <div class="tabs tabs-boxed mb-4">
           <a class="tab" :class="{ 'tab-active': inputMode === 'csv' }" @click="inputMode = 'csv'">
-            CSV 檔案上傳
+            {{$t("course.members.csvUpload")}}
           </a>
           <a class="tab" :class="{ 'tab-active': inputMode === 'manual' }" @click="inputMode = 'manual'">
-            手動輸入
+            {{$t("course.members.manualInput")}}
           </a>
         </div>
 
@@ -300,11 +300,11 @@ async function submit() {
           <div class="mt-2 overflow-hidden rounded-lg">
             <div class="grid grid-cols-5">
               <!-- Left Label -->
-              <div class="bg-base-300 col-span-1 flex items-center justify-center text-sm">CSV 檔案</div>
+              <div class="bg-base-300 col-span-1 flex items-center justify-center text-sm">{{$t("course.members.csvFiles")}}</div>
               <!-- Right Upload Area -->
               <div class="textarea-bordered bg-base-100 col-span-4 p-4">
                 <template v-if="!newMembers">
-                  <div class="mb-2 text-sm opacity-70">拖曳檔案至此處或點擊選擇</div>
+                  <div class="mb-2 text-sm opacity-70">{{$t("course.members.csvUploadInfo")}}</div>
                   <input
                     type="file"
                     accept=".csv"

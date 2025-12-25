@@ -430,7 +430,7 @@ onMounted(async () => {
     <!-- Library Restrictions -->
     <div class="form-control col-span-2 rounded-lg border border-gray-400 p-4">
       <label class="label cursor-pointer justify-start gap-x-4">
-        <span class="label-text">{{ t("course.problems.libraryRestrictions") }}</span>
+        <span class="label-text">{{ t("course.problems.libraryRestrictionsGroup") }}</span>
         <input
           type="checkbox"
           class="toggle"

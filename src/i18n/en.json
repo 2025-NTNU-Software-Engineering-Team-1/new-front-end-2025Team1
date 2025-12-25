@@ -151,7 +151,7 @@
         "testcaseModal": {
           "title": "Testcase Settings",
           "useDefault": "Use default testcases",
-          "customTestcases": "Custom Testcases",
+          "customTestcases": "Custom Testcase Settings",
           "files": "Files",
           "preview": "Preview",
           "cancel": "Cancel",
@@ -162,7 +162,15 @@
           "alert": "Please select at least one test case file.",
           "pdfNotice": "click the link below to download",
           "unsupported": "Unsupported file type: {ext}",
-          "download": "open and download file"
+          "download": "open and download file",
+          "noTestcasesToDownload": "No testcases available to download. Please upload testcases first.",
+          "emptyTestcaseFile": "Testcase file is empty and cannot be downloaded.",
+          "downloadFailed": "Failed to download testcases. Please try again later."
+        },
+        "testcaseType": {
+          "label": "Test Data Type",
+          "public": "Public Test Cases",
+          "custom": "Custom Test Cases"
         }
       },
       "stats": {

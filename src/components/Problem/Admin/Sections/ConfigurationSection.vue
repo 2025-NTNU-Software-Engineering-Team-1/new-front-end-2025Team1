@@ -82,6 +82,19 @@ const v$ = inject<any>("v$");
 const route = useRoute();
 
 // ==========================================
+// Trial Mode Logic
+// ==========================================
+watch(
+  () => problem.value.config?.trialResultVisible,
+  (newVal: boolean | undefined) => {
+    // If viewing is disabled, downloading must also be disabled
+    if (newVal === false && problem.value.config) {
+      problem.value.config.trialResultDownloadable = false;
+    }
+  }
+);
+
+// ==========================================
 // Section: Course Information
 // ==========================================
 const courseName = ref<string | null>(null);
@@ -180,43 +193,55 @@ async function validateTrialPublicZip(file: File): Promise<boolean> {
     const entries = await reader.getEntries();
     await reader.close?.();
 
-    if (!entries.length) {
-      logger.error("Zip is empty");
+    // Filter out directories and system files (e.g. __MACOSX)
+    const validEntries = entries.filter((e: any) => {
+      if (e.directory) return false;
+      if (e.filename.endsWith("/")) return false; // explicit check just in case
+      if (e.filename.includes("__MACOSX")) return false;
+      if (e.filename.split("/").pop()?.startsWith(".")) return false; // hidden files
+      return true;
+    });
+
+    if (!validEntries.length) {
+      const msg = "Zip contains no valid files (or only empty folders).";
+      logger.error(msg);
+      alert(msg);
       return false;
     }
 
-    // Validation: ONLY .in and .out files allowed
-    // Public test data should contain both input (.in) and expected output (.out) files
-    const invalid = entries.filter(({ filename }) => !filename.endsWith(".in") && !filename.endsWith(".out"));
+    // Validation 1: ONLY .in and .out files allowed
+    const invalid = validEntries.filter(
+      (e: any) => !e.filename.endsWith(".in") && !e.filename.endsWith(".out")
+    );
     if (invalid.length > 0) {
-      logger.error(
-        "Invalid files found (must be .in or .out)",
-        invalid.map((e) => e.filename),
-      );
+      const msg = "Invalid files found (must be .in or .out only):\n" + invalid.map((e: any) => e.filename).join("\n");
+      logger.error(msg);
+      alert(msg);
       return false;
     }
 
-    // Check that for each .in file, there should be a corresponding .out file
-    const inFiles = entries
-      .filter((e) => e.filename.endsWith(".in"))
-      .map((e) => e.filename.replace(/\.in$/, ""));
-    const outFiles = entries
-      .filter((e) => e.filename.endsWith(".out"))
-      .map((e) => e.filename.replace(/\.out$/, ""));
+    // Validation 2: Pairs check
+    const inFiles = validEntries
+      .filter((e: any) => e.filename.endsWith(".in"))
+      .map((e: any) => e.filename.replace(/\.in$/, ""));
+    const outFiles = validEntries
+      .filter((e: any) => e.filename.endsWith(".out"))
+      .map((e: any) => e.filename.replace(/\.out$/, ""));
 
-    const missingOutFiles = inFiles.filter((name) => !outFiles.includes(name));
+    const missingOutFiles = inFiles.filter((name: any) => !outFiles.includes(name));
     if (missingOutFiles.length > 0) {
-      logger.error(
-        "Missing .out files for the following .in files:",
-        missingOutFiles.map((name) => `${name}.in`),
-      );
+      const msg = "Missing .out files for the following .in files:\n" + missingOutFiles.map((name: any) => `${name}.in`).join("\n");
+      logger.error(msg);
+      alert(msg);
       return false;
     }
 
-    logger.success("Validation OK", entries.length + " files");
+    logger.success("Validation OK", validEntries.length + " files");
     return true;
   } catch (err) {
-    logger.error("Failed to read zip", err);
+    const msg = "Failed to read zip file: " + err;
+    logger.error(msg);
+    alert(msg);
     return false;
   } finally {
     logger.groupEnd();
@@ -1189,6 +1214,7 @@ onBeforeUnmount(() => {
                 type="checkbox"
                 class="toggle toggle-success toggle-sm"
                 v-model="problem.config!.trialResultDownloadable"
+                :disabled="!problem.config!.trialResultVisible"
               />
             </label>
             <span class="text-xs opacity-70">

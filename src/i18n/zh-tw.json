@@ -136,11 +136,26 @@
         "testcaseModal": {
           "title": "測資設定",
           "useDefault": "使用預設測資",
-          "customTestcases": "自訂測資",
+          "customTestcases": "自訂測資設定",
           "files": "檔案",
           "preview": "預覽",
           "cancel": "取消",
-          "save": "儲存變更"
+          "save": "儲存變更",
+          "alert": "請至少選擇一個測資檔案",
+          "confirm": "已有測資檔案，確定要覆蓋嗎？",
+          "pdfNotice": "PDF 檔案，請點擊下方連結下載：",
+          "unsupported": "不支援的檔案格式 ({ext})，請點擊下方連結下載：",
+          "download": "點擊下載",
+          "saveSuccess": "測資設定已儲存",
+          "saveError": "儲存測資設定時發生錯誤",
+          "noTestcasesToDownload": "沒有可下載的測資檔案，請先上傳測資",
+          "emptyTestcaseFile": "測資檔案為空，無法下載",
+          "downloadFailed": "下載測資失敗，請稍後再試"
+        },
+        "testcaseType": {
+          "label": "測資類型",
+          "public": "公開測資",
+          "custom": "自訂測資"
         }
       },
       "stats": {

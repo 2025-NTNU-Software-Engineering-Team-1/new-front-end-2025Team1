@@ -571,7 +571,7 @@ async function submit() {
   </div>
 
   <!-- Section fold panels -->
-  <div ref="sectionRefs.desc" class="mt-4 flex flex-col gap-2">
+  <div ref="sectionRefs.desc" class="mt-4 flex flex-col gap-3">
     <div class="collapse-arrow rounded-box bg-base-200 collapse">
       <input type="checkbox" class="peer" v-model="openPanels.desc" />
       <div
@@ -664,39 +664,26 @@ async function submit() {
   </div>
 </template>
 
-<style>
-/* Override DaisyUI collapse for compact, vertically centered headers */
-/* Using global styles to ensure proper override of DaisyUI defaults */
-
-.collapse-arrow.rounded-box > .collapse-title {
-  padding: 6px 1rem 10px 1rem !important;
-  min-height: 2.5rem !important;
-  height: 2.5rem !important;
+<style scoped>
+/* Force collapse-title to be vertically centered with minimal padding */
+:deep(.collapse-title) {
   display: flex !important;
   align-items: center !important;
-  line-height: 1 !important;
-}
-
-.collapse-arrow.rounded-box > .collapse-title::after {
-  /* Ensure the arrow is vertically centered */
-  position: absolute !important;
-  top: 40% !important;
-  right: 1rem !important;
-  transform: translateY(-50%) rotate(45deg) !important;
-  margin-top: 0 !important;
-}
-
-/* When checkbox is NOT checked - hide content completely */
-.collapse-arrow.rounded-box > input[type="checkbox"]:not(:checked) ~ .collapse-content {
-  padding: 0 !important;
+  padding-top: 0.75rem !important;
+  padding-bottom: 0.75rem !important;
+  padding-left: 1rem !important;
+  padding-right: 3rem !important;
   min-height: 0 !important;
-  max-height: 0 !important;
-  overflow: hidden !important;
+  line-height: 1.5 !important;
 }
 
-/* When checkbox IS checked - show content with padding */
-.collapse-arrow.rounded-box > input[type="checkbox"]:checked ~ .collapse-content {
-  padding-top: 1rem !important;
-  padding-bottom: 1.5rem !important;
+/* Ensure the arrow icon is also vertically centered */
+:deep(.collapse-arrow > .collapse-title)::after {
+  top: 50% !important;
+  transform: translateY(-50%) rotate(0deg) !important;
+}
+
+:deep(.collapse-arrow > input[type="checkbox"]:checked ~ .collapse-title)::after {
+  transform: translateY(-50%) rotate(90deg) !important;
 }
 </style>

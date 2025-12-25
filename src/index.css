@@ -133,3 +133,12 @@
 .form-control > select {
   width: 100%;
 }
+
+/* Fix DaisyUI collapse-title alignment and padding */
+.collapse-title {
+  display: flex !important;
+  align-items: center !important;
+  padding-top: 0.75rem !important;
+  padding-bottom: 0.75rem !important;
+  min-height: 0 !important;
+}

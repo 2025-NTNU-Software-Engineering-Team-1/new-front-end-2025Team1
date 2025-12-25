@@ -12,7 +12,6 @@ const { t } = useI18n();
 
 useTitle(`Test Cases - ${route.params.id} - ${route.params.name} | Normal OJ`);
 
-const useDefaultTestcases = ref(true);
 const selectedTestcases = ref<string[]>([]);
 const testcaseFiles = ref<{ name: string; content: string }[]>([]);
 const selectedTestcaseContent = ref("");
@@ -20,40 +19,22 @@ const isLoading = ref(false);
 const saveSuccess = ref(false);
 const saveError = ref(false);
 
-// Public test cases from API
-const publicTestCases = ref<
-  Array<{
-    File_Name: string;
-    Memory_Limit: number;
-    Time_Limit: number;
-    Input_Content: string;
-    Output_Content: string;
-  }>
->([]);
-const isLoadingPublicCases = ref(false);
-
-// API 1: Load public test cases when component mounts
-onMounted(async () => {
-  try {
-    isLoadingPublicCases.value = true;
-    const response = await api.TrialSubmission.getPublicTestCases(Number(route.params.id));
-    if (response.data.status === "OK") {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      publicTestCases.value = response.data.trial_cases.map((tc: any) => ({
-        File_Name: tc.file_name,
-        Memory_Limit: tc.memory_limit,
-        Time_Limit: tc.time_limit,
-        Input_Content: tc.input_content,
-        Output_Content: tc.output_content,
-      }));
-      console.log("Loaded public test cases:", publicTestCases.value);
-    } else {
-      console.error("Failed to load public test cases");
+// Load existing custom testcases from localStorage
+onMounted(() => {
+  const storageKey = `testcase_settings_${route.params.id}`;
+  const settingsJson = localStorage.getItem(storageKey);
+  if (settingsJson) {
+    try {
+      const settings = JSON.parse(settingsJson);
+      if (settings.testcaseFiles) {
+        testcaseFiles.value = settings.testcaseFiles;
+      }
+      if (settings.selectedTestcases) {
+        selectedTestcases.value = settings.selectedTestcases;
+      }
+    } catch (err) {
+      console.error("Failed to load testcase settings:", err);
     }
-  } catch (error) {
-    console.error("Error loading public test cases:", error);
-  } finally {
-    isLoadingPublicCases.value = false;
   }
 });
 
@@ -119,7 +100,7 @@ function deleteTestcase(file: { name: string; content: string }) {
 }
 
 async function saveTestcaseSettings() {
-  if (!useDefaultTestcases.value && selectedTestcases.value.length === 0) {
+  if (selectedTestcases.value.length === 0) {
     alert(t("course.problem.test.testcaseModal.alert"));
     return;
   }
@@ -128,22 +109,18 @@ async function saveTestcaseSettings() {
   saveError.value = false;
 
   try {
-    // Create testcase zip if custom testcases are selected
-    let testcaseBlob = null;
-    if (!useDefaultTestcases.value && selectedTestcases.value.length > 0) {
-      const testcaseZipWriter = new ZipWriter(new BlobWriter("application/zip"));
-      for (const testcase of testcaseFiles.value) {
-        if (selectedTestcases.value.includes(testcase.name)) {
-          await testcaseZipWriter.add(testcase.name, new TextReader(testcase.content));
-        }
+    // Create testcase zip with selected files
+    const testcaseZipWriter = new ZipWriter(new BlobWriter("application/zip"));
+    for (const testcase of testcaseFiles.value) {
+      if (selectedTestcases.value.includes(testcase.name)) {
+        await testcaseZipWriter.add(testcase.name, new TextReader(testcase.content));
       }
-      testcaseBlob = await testcaseZipWriter.close();
     }
+    const testcaseBlob = await testcaseZipWriter.close();
 
     // Save settings to localStorage for test.vue to use
     const storageKey = `testcase_settings_${route.params.id}`;
     const settings = {
-      useDefaultTestcases: useDefaultTestcases.value,
       selectedTestcases: selectedTestcases.value,
       testcaseFiles: testcaseFiles.value.map((f) => ({ name: f.name, content: f.content })),
     };
@@ -174,35 +151,77 @@ async function saveTestcaseSettings() {
     isLoading.value = false;
   }
 }
+
+async function downloadTestcases() {
+  try {
+    const storageKey = `testcase_settings_${route.params.id}`;
+    const blobBase64 = localStorage.getItem(`${storageKey}_blob`);
+    
+    if (!blobBase64) {
+      // User-friendly error message when no testcases found
+      alert(t("course.problem.test.testcaseModal.noTestcasesToDownload"));
+      return;
+    }
+
+    // Convert data URL to blob
+    const response = await fetch(blobBase64);
+    if (!response.ok) {
+      throw new Error("Failed to fetch blob");
+    }
+    const blob = await response.blob();
+    
+    if (blob.size === 0) {
+      alert(t("course.problem.test.testcaseModal.emptyTestcaseFile"));
+      return;
+    }
+    
+    // Create download link
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `problem_${route.params.id}_custom_testcases.zip`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Error downloading testcases:", error);
+    alert(t("course.problem.test.testcaseModal.downloadFailed"));
+  }
+}
 </script>
 
 <template>
   <div class="card-container">
     <div class="card min-w-full">
       <div class="card-body">
-        <div class="flex items-center justify-between">
-          <div class="card-title">{{ t("course.problem.test.testcaseModal.title") }}</div>
-          <router-link :to="`/course/${route.params.name}/problem/${route.params.id}/test`" class="btn">
-            {{ t("course.problem.test.back") }}
-          </router-link>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="form-control">
-          <label class="label cursor-pointer justify-start gap-3">
-            <span class="label-text">{{ t("course.problem.test.testcaseModal.useDefault") }}</span>
-            <input type="checkbox" class="toggle" v-model="useDefaultTestcases" />
-          </label>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="flex flex-col gap-4">
-          <div class="flex items-center justify-between">
-            <span class="text-lg font-semibold">
-              {{ t("course.problem.test.testcaseModal.customTestcases") }}
-            </span>
+        <!-- Title and Upload section in the same row -->
+        <div class="flex items-center justify-between mb-4">
+          <div class="card-title">{{ t("course.problem.test.testcaseModal.customTestcases") }}</div>
+          
+          <!-- Upload status, download button, and file input -->
+          <div class="flex items-center gap-3">
+            <!-- Status Badge & Download -->
+            <div class="flex items-center gap-2">
+              <span 
+                v-if="testcaseFiles.length > 0" 
+                class="badge badge-success badge-outline text-xs"
+              >
+                {{ t("course.problems.uploaded") }}
+              </span>
+              <span v-else class="badge badge-outline text-xs opacity-70">
+                {{ t("course.problems.notUploaded") }}
+              </span>
+              <!-- Download Button -->
+              <button
+                v-if="testcaseFiles.length > 0"
+                class="btn btn-xs"
+                @click="downloadTestcases"
+              >
+                {{ t("course.problems.download") }}
+              </button>
+            </div>
+            <!-- File Upload Input -->
             <input
               type="file"
               class="file-input-bordered file-input w-full max-w-xs"
@@ -210,8 +229,10 @@ async function saveTestcaseSettings() {
               @change="handleTestcaseUpload"
             />
           </div>
+        </div>
 
-          <div class="grid grid-cols-2 gap-4">
+        <!-- Files and Preview section -->
+        <div class="grid grid-cols-2 gap-4">
             <div class="rounded border p-4">
               <h4 class="mb-2 font-semibold">{{ t("course.problem.test.testcaseModal.files") }}</h4>
               <div class="flex flex-col gap-2">
@@ -249,7 +270,6 @@ async function saveTestcaseSettings() {
               </div>
             </div>
           </div>
-        </div>
 
         <div class="alert alert-success mt-4" v-if="saveSuccess">
           <i-uil-check-circle class="h-6 w-6" />
@@ -261,7 +281,11 @@ async function saveTestcaseSettings() {
           <span>{{ t("course.problem.test.testcaseModal.saveError") }}</span>
         </div>
 
-        <div class="card-actions mt-4 justify-end">
+        <!-- Bottom buttons: Save and Back -->
+        <div class="card-actions mt-4 justify-end gap-2">
+          <router-link :to="`/course/${route.params.name}/problem/${route.params.id}/test`" class="btn">
+            {{ t("course.problem.test.back") }}
+          </router-link>
           <button :class="['btn btn-primary', isLoading && 'loading']" @click="saveTestcaseSettings">
             {{ t("course.problem.test.testcaseModal.save") }}
           </button>

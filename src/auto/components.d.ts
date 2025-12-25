@@ -30,6 +30,8 @@ declare module 'vue' {
     IUilAngleDoubleLeft: typeof import('~icons/uil/angle-double-left')['default']
     IUilAngleDoubleRight: typeof import('~icons/uil/angle-double-right')['default']
     IUilAngleDown: typeof import('~icons/uil/angle-down')['default']
+    IUilAngleLeft: typeof import('~icons/uil/angle-left')['default']
+    IUilAngleRight: typeof import('~icons/uil/angle-right')['default']
     IUilAngleUp: typeof import('~icons/uil/angle-up')['default']
     IUilArrowLeft: typeof import('~icons/uil/arrow-left')['default']
     IUilBan: typeof import('~icons/uil/ban')['default']

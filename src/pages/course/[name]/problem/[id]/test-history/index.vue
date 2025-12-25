@@ -223,15 +223,16 @@ async function deleteTrialSubmission(id: string | number, event: Event) {
                     <td>{{ item.lang }}</td>
                     <td>{{ dayjs(item.timestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
                     <td v-if="canRejudge">
-                      <button
-                        class="btn btn-outline btn-error btn-xs hover:bg-error hover:border-error hover:text-error-content"
-                        :class="{ loading: deletingIds.has(item.id) }"
-                        :disabled="deletingIds.has(item.id)"
-                        @click="deleteTrialSubmission(item.id, $event)"
-                        title="Delete this trial submission"
-                      >
-                        <i-uil-trash-alt v-if="!deletingIds.has(item.id)" />
-                      </button>
+                      <div class="tooltip" data-tip="Delete">
+                        <button
+                          class="btn btn-ghost btn-sm btn-circle text-error"
+                          :class="{ loading: deletingIds.has(item.id) }"
+                          :disabled="deletingIds.has(item.id)"
+                          @click="deleteTrialSubmission(item.id, $event)"
+                        >
+                          <i-uil-trash-alt v-if="!deletingIds.has(item.id)" class="lg:h-5 lg:w-5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 </tbody>

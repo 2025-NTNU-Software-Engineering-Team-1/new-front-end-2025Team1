@@ -46,34 +46,33 @@ const showSubmitModal = ref(false);
 // const selectedTestcases = ref<string[]>([]);
 
 // Test settings from test-cases page (loaded from localStorage)
-const useDefaultTestcases = ref(true);
+const useDefaultTestcases = ref(true); // Default to using public test cases
 const customTestcasesBlob = ref<Blob | null>(null);
+const hasCustomTestcases = ref(false); // Track if custom testcases exist
 
 const storageKey = computed(() => `testcase_settings_${route.params.id}`);
 const loadTestcaseSettings = async () => {
   try {
-    const settingsJson = localStorage.getItem(storageKey.value);
-    if (settingsJson) {
-      const settings = JSON.parse(settingsJson);
-      useDefaultTestcases.value = settings.useDefaultTestcases ?? true;
-
-      // Load custom testcases blob if exists
-      const blobBase64 = localStorage.getItem(`${storageKey.value}_blob`);
-      if (blobBase64 && !useDefaultTestcases.value) {
-        try {
-          // Convert data URL to blob
-          const response = await fetch(blobBase64);
-          const blob = await response.blob();
-          customTestcasesBlob.value = blob;
-        } catch (err) {
-          console.error("Failed to load custom testcases blob:", err);
-        }
-      } else {
-        customTestcasesBlob.value = null;
+    // Load custom testcases blob if exists
+    const blobBase64 = localStorage.getItem(`${storageKey.value}_blob`);
+    if (blobBase64) {
+      try {
+        // Convert data URL to blob
+        const response = await fetch(blobBase64);
+        const blob = await response.blob();
+        customTestcasesBlob.value = blob;
+        hasCustomTestcases.value = true;
+      } catch (err) {
+        console.error("Failed to load custom testcases blob:", err);
+        hasCustomTestcases.value = false;
       }
+    } else {
+      customTestcasesBlob.value = null;
+      hasCustomTestcases.value = false;
     }
   } catch (err) {
     console.error("Failed to load testcase settings:", err);
+    hasCustomTestcases.value = false;
   }
 };
 
@@ -174,8 +173,8 @@ async function test() {
       throw new Error(uploadResponse.message || "Failed to upload trial submission files");
     }
 
-    // Navigate to test history
-    router.push(`/course/${route.params.name}/problem/${route.params.id}/test-history`);
+    // Navigate to test detail page directly
+    router.push(`/course/${route.params.name}/problem/${route.params.id}/test-history/${trialSubmissionId}`);
   } catch (error) {
     form.isSubmitError = true;
     // Check for specific error messages from backend
@@ -309,7 +308,7 @@ async function submitCode() {
             </div>
 
             <div class="flex items-center justify-between gap-4">
-              <div class="form-control flex-1">
+              <div class="flex gap-4 flex-1">
                 <label class="form-control w-60">
                   <div class="label">
                     <span class="label-text text-sm text-gray-500">{{
@@ -318,17 +317,45 @@ async function submitCode() {
                   </div>
                   <select
                     v-model="v$.lang.$model"
-                    :class="['select-bordered select w-60', v$.lang.$error && 'input-error']"
+                    :class="['select-bordered select w-full', v$.lang.$error && 'input-error']"
                   >
                     <option :value="-1" disabled hidden>{{ t("course.problem.test.lang.select") }}</option>
                     <option v-for="lang in langOptions" :key="lang.value" :value="lang.value">
                       {{ lang.text }}
                     </option>
                   </select>
+                  <label class="label" v-show="v$.lang.$error">
+                    <span class="label-text-alt text-error">{{ v$.lang.$errors[0]?.$message }}</span>
+                  </label>
                 </label>
-
-                <label class="label" v-show="v$.lang.$error">
-                  <span class="label-text-alt text-error">{{ v$.lang.$errors[0]?.$message }}</span>
+                
+                <!-- Test Case Type Selection (only show if custom testcases exist) -->
+                <label v-if="hasCustomTestcases" class="form-control w-60">
+                  <div class="label">
+                    <span class="label-text text-sm text-gray-500">
+                      {{ t("course.problem.test.testcaseType.label") }}
+                    </span>
+                  </div>
+                  <div class="flex flex-col gap-2">
+                    <label class="label cursor-pointer justify-start gap-3 py-1">
+                      <input 
+                        type="radio" 
+                        class="radio radio-primary radio-sm" 
+                        :value="true" 
+                        v-model="useDefaultTestcases" 
+                      />
+                      <span class="label-text">{{ t("course.problem.test.testcaseType.public") }}</span>
+                    </label>
+                    <label class="label cursor-pointer justify-start gap-3 py-1">
+                      <input 
+                        type="radio" 
+                        class="radio radio-primary radio-sm" 
+                        :value="false" 
+                        v-model="useDefaultTestcases" 
+                      />
+                      <span class="label-text">{{ t("course.problem.test.testcaseType.custom") }}</span>
+                    </label>
+                  </div>
                 </label>
               </div>
 

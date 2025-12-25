@@ -27,7 +27,7 @@ defineEmits<{
         leave-to-class="opacity-0"
       >
         <ListboxOptions
-          class="bg-base-100 absolute mt-1 max-h-80 w-full overflow-auto rounded-md py-1 text-base shadow-lg sm:text-sm z-50"
+          class="bg-base-100 absolute z-50 mt-1 max-h-80 w-full overflow-auto rounded-md py-1 text-base shadow-lg sm:text-sm"
         >
           <ListboxOption
             v-slot="{ active, selected }"

@@ -43,7 +43,6 @@ const logger = {
 };
 
 const route = useRoute();
-// const { t } = useI18n();
 useTitle(`AI Setting - ${route.params.name} | Normal OJ`);
 
 const isLoading = ref(false);
@@ -51,6 +50,7 @@ const errorMsg = ref("");
 const successMsg = ref("");
 const session = useSession();
 
+// Interface definition for API Keys
 interface ApiKey {
   id: string;
   key_name: string;
@@ -61,12 +61,17 @@ interface ApiKey {
 
 const apiKeys = ref<ApiKey[]>([]);
 
+// State for the new key input form
 const newKey = ref({
   name: "",
   value: "",
   maskedDisplay: "",
 });
 
+/**
+ * Helper to normalize API responses.
+ * Extracts status, message, and data safely.
+ */
 function parseApiResponse(res: unknown) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data = (res as any)?.data;
@@ -79,6 +84,9 @@ function parseApiResponse(res: unknown) {
   return { isSuccess, message, data, rawStatus };
 }
 
+/**
+ * Fetch all existing keys for the current course.
+ */
 async function fetchKeys() {
   logger.group(`Fetch Keys: ${route.params.name}`);
   isLoading.value = true;
@@ -90,7 +98,7 @@ async function fetchKeys() {
     const rawKeys = res?.data?.keys || [];
     logger.log(`Found ${rawKeys.length} keys`);
 
-    // clean
+    // Data cleaning and safety checks
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     apiKeys.value = rawKeys.map((k: any, index: number) => {
       const missing: string[] = [];
@@ -102,7 +110,7 @@ async function fetchKeys() {
         logger.error(`Key at index ${index} missing fields:`, missing);
       }
 
-      // safe object
+      // Return a safe object structure
       return {
         id: k.id || `temp-id-${index}-${Date.now()}`,
         key_name: k.key_name || "(Unnamed Key)",
@@ -121,14 +129,23 @@ async function fetchKeys() {
   }
 }
 
-// === 新增 Key ===
+// === Action: Add New Key ===
 async function addKey() {
   logger.group("Action: Add Key");
 
-  // 前端驗證
+  // 1. Basic Empty Check
   if (!newKey.value.name.trim() || !newKey.value.value.trim()) {
     errorMsg.value = "Key name and value are required.";
     logger.error("Validation Error", "Empty fields");
+    logger.groupEnd();
+    return;
+  }
+
+  // 2. Length Validation (Safety Check)
+  // Ensure inputs do not exceed 50 characters
+  if (newKey.value.name.length > 50 || newKey.value.value.length > 50) {
+    errorMsg.value = "Key name and value must be 50 characters or less.";
+    logger.error("Validation Error", "Input length exceeded 50 chars");
     logger.groupEnd();
     return;
   }
@@ -154,8 +171,10 @@ async function addKey() {
       logger.success("Add Success", message);
       successMsg.value = message;
 
+      // Update masked display for feedback
       newKey.value.maskedDisplay = data?.masked_id || "";
 
+      // Reset form
       newKey.value.value = "";
       newKey.value.name = "";
 
@@ -174,9 +193,21 @@ async function addKey() {
   }
 }
 
-// === 更新 Key ===
+// === Action: Update Key ===
 async function updateKey(key: ApiKey) {
   logger.group(`Action: Update Key [${key.id}]`);
+
+  // Length Validation
+  if (key.key_name.length > 50) {
+    errorMsg.value = "Key name must be 50 characters or less.";
+    logger.error("Validation Error", "Key name length exceeded 50 chars");
+
+    // Refresh keys to revert invalid change
+    await fetchKeys();
+    logger.groupEnd();
+    return;
+  }
+
   isLoading.value = true;
   successMsg.value = "";
   errorMsg.value = "";
@@ -212,7 +243,7 @@ async function updateKey(key: ApiKey) {
   }
 }
 
-// === 刪除 Key ===
+// === Action: Delete Key ===
 async function deleteKey(keyId: string) {
   logger.group(`Action: Delete Key [${keyId}]`);
 
@@ -264,6 +295,7 @@ onMounted(fetchKeys);
             <i-uil-times-circle /> <span>{{ errorMsg }}</span>
           </div>
         </div>
+
         <div v-if="successMsg" class="alert alert-success shadow-lg">
           <div>
             <i-uil-check-circle /> <span>{{ successMsg }}</span>
@@ -279,12 +311,14 @@ onMounted(fetchKeys);
               v-model="newKey.name"
               :placeholder="t('course.aisetting.setup.input.name')"
               class="input-bordered input w-full"
+              maxlength="50"
             />
             <input
               type="text"
               v-model="newKey.value"
               :placeholder="t('course.aisetting.setup.input.value')"
               class="input-bordered input w-full"
+              maxlength="50"
             />
             <input
               type="text"
@@ -324,12 +358,19 @@ onMounted(fetchKeys);
             >
               <div class="col-span-2">
                 <label class="text-xs opacity-70">{{ t("course.aisetting.setup.display.keyName") }}</label>
-                <input type="text" v-model="k.key_name" class="input-bordered input input-sm w-full" />
+                <input
+                  type="text"
+                  v-model="k.key_name"
+                  class="input-bordered input input-sm w-full"
+                  maxlength="50"
+                />
               </div>
+
               <div class="col-span-2 text-sm">
                 <label class="text-xs opacity-70">{{ t("course.aisetting.setup.display.masked") }}</label>
                 <div class="font-mono">{{ k.masked_value }}</div>
               </div>
+
               <div class="col-span-1">
                 <label class="text-xs opacity-70">{{ t("course.aisetting.setup.display.createdBy") }}</label>
                 <input
@@ -339,6 +380,7 @@ onMounted(fetchKeys);
                   disabled
                 />
               </div>
+
               <div class="flex items-center gap-2">
                 <label class="label-text mr-2 text-xs opacity-70">{{
                   t("course.aisetting.setup.display.active")
@@ -350,6 +392,7 @@ onMounted(fetchKeys);
                   @change="updateKey(k)"
                 />
               </div>
+
               <div class="flex justify-end gap-2">
                 <button class="btn btn-success btn-xs" @click="updateKey(k)">
                   {{ t("course.aisetting.setup.display.save") }}

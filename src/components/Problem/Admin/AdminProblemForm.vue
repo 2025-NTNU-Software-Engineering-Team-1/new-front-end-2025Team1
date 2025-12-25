@@ -19,6 +19,13 @@ interface VuelidateError {
 
 type PanelKey = "desc" | "config" | "pipeline" | "testdata" | "resdata";
 
+type SidecarItem = {
+  name?: string;
+  image?: string;
+  args?: string | string[];
+  env?: string | Record<string, unknown>;
+};
+
 // ==========================================
 // [CONFIG] Console Debug Mode
 // ==========================================
@@ -358,7 +365,7 @@ const rules = {
         const sidecars = cfg.networkAccessRestriction?.sidecars || [];
         if (sidecars.length > MAX_LIST_SIZE) return false;
 
-        return sidecars.every((sc: any) => {
+        return sidecars.every((sc: SidecarItem) => {
           if (!sc.name || !sc.image) return false; // Required fields
           if (sc.name.length > MAX_CHAR_LENGTH) return false;
           if (sc.image.length > MAX_CHAR_LENGTH) return false;

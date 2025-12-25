@@ -52,7 +52,7 @@
         "display": {
           "noKey": "暫無金鑰",
           "keyName": "金鑰名稱",
-          "masked": "遮罩值",
+          "masked": "金鑰(已遮罩)",
           "createdBy": "建立者",
           "active": "啟用",
           "save": "儲存",

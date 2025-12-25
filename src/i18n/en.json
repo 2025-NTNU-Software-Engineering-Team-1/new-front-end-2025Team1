@@ -52,7 +52,7 @@
         "display": {
           "noKey": "No keys yet.",
           "keyName": "Key Name",
-          "masked": "Masked",
+          "masked": "Key (masked)",
           "createdBy": "Created By",
           "active": "Active",
           "save": "Save",

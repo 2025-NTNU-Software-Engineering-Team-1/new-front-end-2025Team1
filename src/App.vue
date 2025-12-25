@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import { watchEffect } from "vue"; // 1. 匯入 computed
-//import { useRoute } from "vue-router"; // 2. 匯入 useRoute
+import { watchEffect } from "vue";
+//import { useRoute } from "vue-router";
 import { useGlobal } from "@/stores/global";
 import { TransitionRoot } from "@headlessui/vue";
 import { useI18n } from "vue-i18n";
 import dayjs from "dayjs";
 
 const global = useGlobal();
-//const route = useRoute(); // 4. 取得當前路由
 
 const { locale } = useI18n();
 watchEffect(() => {
@@ -31,6 +30,13 @@ watchEffect(() => {
     <div class="drawer-content overflow-y-auto">
       <top-bar class="sticky top-0 z-20 lg:hidden" />
       <router-view />
+
+      <div class="hidden" style="display: none" aria-hidden="true">
+        <div id="team-0"></div>
+        <div id="team-1"></div>
+        <div id="team-2"></div>
+        <div id="team-3"></div>
+      </div>
     </div>
     <div class="drawer-side z-50 h-full">
       <side-bar />

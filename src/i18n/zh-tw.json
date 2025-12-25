@@ -194,7 +194,7 @@
       "aiKeyInactive": "停用: {stats}",
       "aiKeyFetchingSuggestion": "獲取建議...",
       "aiKeySuggestionStudentCount": "學生人數:",
-      "aiKeySuggestionSuggestedKeys": "建議之金鑰的數量:",
+      "aiKeySuggestionSuggestedKeys": "建議之金鑰數量:",
       "aiKeySuggestionReason": "原因:",
       "aiKeySearch": "搜尋",
       "aiKeyLoadingKeys": "載入金鑰...",

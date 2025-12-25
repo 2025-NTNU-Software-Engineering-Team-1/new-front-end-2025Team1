@@ -243,7 +243,7 @@ async function submitCode() {
             <div class="divider" />
             <div class="bg-base-200 relative mt-4 rounded-lg p-4 transition-all duration-300">
               <button
-                class="absolute cursor-pointer bottom-3 right-4 z-10 text-gray-500 hover:text-gray-700"
+                class="absolute bottom-3 right-4 z-10 cursor-pointer text-gray-500 hover:text-gray-700"
                 @click="isExpanded = !isExpanded"
               >
                 <img
@@ -269,7 +269,7 @@ async function submitCode() {
                   <div
                     class="border-base-300 bg-base-100 overflow-hidden overflow-x-auto rounded-lg border p-0"
                   >
-                    <table class="!m-0 table w-full border-collapse table-fixed border-0">
+                    <table class="!m-0 table w-full table-fixed border-collapse border-0">
                       <thead class="bg-base-300 rounded-none">
                         <tr>
                           <th class="w-12 text-center">{{ t("course.problem.test.topic.sample.id") }}</th>
@@ -279,8 +279,8 @@ async function submitCode() {
                       </thead>
                       <tbody class="rounded-none">
                         <tr v-for="(input, i) in problem?.description?.sampleInput || []" :key="i">
-                          <td class="align-top py-8 px-2 text-center">{{ i + 1 }}</td>
-                          <td class="align-top px-2">
+                          <td class="px-2 py-8 text-center align-top">{{ i + 1 }}</td>
+                          <td class="px-2 align-top">
                             <sample-code-block
                               v-if="problem?.description?.sampleInput?.[i]"
                               :code="problem?.description?.sampleInput?.[i]"
@@ -289,7 +289,7 @@ async function submitCode() {
                               t("course.problem.test.topic.noContent")
                             }}</span>
                           </td>
-                          <td class="align-top px-2">
+                          <td class="px-2 align-top">
                             <sample-code-block
                               v-if="problem?.description?.sampleOutput?.[i]"
                               :code="problem?.description?.sampleOutput?.[i]"

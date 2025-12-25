@@ -108,7 +108,7 @@ async function switchPage(id: string) {
 </script>
 
 <template>
-  <button type="button" class="btn btn-sm btn-outline" @click.stop="openManual">{{ t('components.problem.manual.open') }}</button>
+  <button type="button" class="btn btn-sm lg:btn-md btn-outline" @click.stop="openManual">{{ t('components.problem.manual.open') }}</button>
 
   <teleport to="body">
     <div v-if="open" class="fixed inset-0 z-[9999]">

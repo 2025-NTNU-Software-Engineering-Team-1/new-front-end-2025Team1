@@ -34,7 +34,7 @@ const pagination = ref<PaginationInfo>({
 const loadProblems = async () => {
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const response: any = await API.Discussion.getProblems({ Limit: 100 });
+    const response: any = await API.Discussion.getProblems({ Limit: 100, Course_Id: route.params.name });
     const status = response.data?.Status;
     const problemsData = response.data?.Problems;
 
@@ -66,6 +66,7 @@ const loadPosts = async () => {
       Mode: activeTab.value,
       Limit: pagination.value.limit,
       Page: pagination.value.page,
+      Course_Id: route.params.name,
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

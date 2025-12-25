@@ -44,6 +44,7 @@ const loadProblems = async () => {
     const response: unknown = await API.Discussion.getProblems({
       Limit: 100,
       Page: 1,
+      Course_Id: route.params.name,
     });
 
     // axios interceptor 將 response.data 展開到 response 層級

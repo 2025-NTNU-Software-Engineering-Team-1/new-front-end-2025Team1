@@ -96,7 +96,7 @@ function manualUsersToCSV(): string {
     .filter((u) => u.username.trim() && u.email.trim() && u.password.trim())
     .map((u) => `${u.username},${u.email},${u.password},${u.displayedName || ""},${u.role?.trim() || "2"}`);
   return [headers, ...rows].join("\n");
-} 
+}
 
 function isValidRole(value: unknown): boolean {
   return typeof value === "string" && /^[0-3]$/.test(value.trim());

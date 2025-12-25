@@ -99,6 +99,11 @@ interface ProblemListItem {
   type: ProblemType;
   quota: number;
   submitCount: number;
+  // AI-TA (aiVTuber) flag, optional for backward compatibility
+  aiVTuber?: boolean;
+  // Trial mode flags (optional)
+  trialModeEnabled?: boolean;
+  trialResultVisible?: boolean;
 }
 type ProblemList = ProblemListItem[];
 

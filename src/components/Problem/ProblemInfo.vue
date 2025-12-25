@@ -10,6 +10,8 @@ interface Props {
   tags: string[];
   visible: ProblemStatus;
   isAdmin: boolean;
+  // indicates whether AI-TA (aiVTuber) is enabled
+  aiVtuber?: boolean;
 }
 defineProps<Props>();
 </script>
@@ -19,7 +21,10 @@ defineProps<Props>();
     <input type="checkbox" class="peer" />
     <div class="collapse-title bg-base-200 text-base">
       <div class="flex flex-col">
-        <span class="text-lg font-bold">{{ problemName }}</span>
+        <div class="flex items-center gap-2">
+          <span class="text-lg font-bold">{{ problemName }}</span>
+          <span v-if="aiVtuber" class="badge badge-secondary">AI-TA</span>
+        </div>
         <span class="text-sm font-light"> ID: {{ id }}</span>
       </div>
     </div>

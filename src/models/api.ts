@@ -71,6 +71,8 @@ const Problem = {
     fetcher.get<{ librarySymbols: { imports: string[]; headers: string[]; functions: string[] } }>(
       `/problem/static-analysis/options`,
     ),
+  // get a problem detail
+  get: (id: string | number) => fetcher.get<Problem>(`/problem/view/${id}`),
 };
 
 const Submission = {
@@ -329,11 +331,11 @@ const Discussion = {
     Limit?: number;
     Page?: number;
     Problem_Id?: string;
-    Course_Id?: string;
+    Course_Id?: string | string[];
   }) => fetcher.get("/discussion/posts", { params }),
 
   // 2. 依關鍵字搜尋貼文
-  searchPosts: (params: { Words: string; Limit?: number; Page?: number; Course_Id?: string }) =>
+  searchPosts: (params: { Words: string; Limit?: number; Page?: number; Course_Id?: string | string[] }) =>
     fetcher.get("/discussion/search", { params }),
 
   // 3. 發佈文�
@@ -386,7 +388,7 @@ const Discussion = {
   ) => fetcher.delete(`/discussion/posts/${postId}/delete`, { data: body }),
 
   // 9. 取得題目列表
-  getProblems: (params: { Mode?: string; Limit?: number; Page?: number; Course_Id?: string }) =>
+  getProblems: (params: { Mode?: string; Limit?: number; Page?: number; Course_Id?: string | string[] }) =>
     fetcher.get("/discussion/problems", { params }),
 
   // 11. 角色權限&&截止時間

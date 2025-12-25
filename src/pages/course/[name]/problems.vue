@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useAxios } from "@vueuse/integrations/useAxios";
 import { useRoute, useRouter } from "vue-router";
-import { computed, ref, watch, watchEffect } from "vue";
-import { fetcher } from "@/models/api";
+import { computed, ref, watch, watchEffect, reactive } from "vue";
+import api, { fetcher } from "@/models/api";
 import { UserRole, useSession } from "@/stores/session";
 import { useTitle } from "@vueuse/core";
 import { isQuotaUnlimited } from "@/constants";
@@ -23,11 +23,64 @@ const {
   isLoading,
 } = useAxios<ProblemList>(`/problem?offset=0&count=-1&course=${route.params.name}`, fetcher);
 
+// Cache for problem details (keyed by problemId)
+const problemDetailCache = reactive<Record<number, Problem | null>>({});
+
+async function prefetchDetailsFor(ids: number[]) {
+  const toFetch = ids.filter((id) => !Object.prototype.hasOwnProperty.call(problemDetailCache, id));
+  await Promise.all(
+    toFetch.map(async (id) => {
+      try {
+        // Use api helper to load detailed problem JSON
+        const resp = await api.Problem.get(id);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const r: any = resp;
+        if (r && r.status === "ok" && r.data) {
+          problemDetailCache[id] = r.data as Problem;
+        } else if (r && r.data) {
+          problemDetailCache[id] = r.data as Problem;
+        } else if (r && (r as Problem).problemName) {
+          problemDetailCache[id] = r as Problem;
+        } else {
+          problemDetailCache[id] = null;
+        }
+      } catch {
+        // Ignore fetch errors but mark as null so we won't retry incessantly
+        problemDetailCache[id] = null;
+      }
+    }),
+  );
+}
+
+function hasAiVtuber(id: number) {
+  const p = problemDetailCache[id];
+  return !!(p && p.config && (p.config as ProblemConfigExtra).aiVTuber);
+}
+
+function hasTrialHistory(id: number) {
+  // check list item first (if backend provides trialResultVisible)
+  const listItem = (problems.value || []).find((p) => p.problemId === id) as ProblemListItem | undefined;
+  if (listItem && typeof (listItem as any).trialResultVisible !== "undefined") {
+    return !!(listItem as any).trialResultVisible;
+  }
+  // fallback to detailed problem config
+  const p = problemDetailCache[id];
+  const cfg = p?.config as ProblemConfigExtra | undefined;
+  return !!(cfg && cfg.trialMode && cfg.trialResultVisible);
+}
+
+
 const page = ref(!isNaN(Number(route.query.page)) ? Number(route.query.page) : 1);
 watchEffect(() => {
   if (problems.value != null && (page.value < 1 || page.value >= problems.value.length)) {
     page.value = 1;
   }
+});
+
+// Prefetch visible problem details for AI-TA badge
+watchEffect(() => {
+  const visible = (problems.value || []).slice((page.value - 1) * 10, page.value * 10).map((p) => p.problemId);
+  if (visible.length) prefetchDetailsFor(visible);
 });
 watch(page, () => {
   router.replace({ query: { page: page.value } });
@@ -91,7 +144,7 @@ const maxPage = computed(() => {
               </thead>
               <tbody>
                 <tr
-                  v-for="{ problemId, problemName, tags, quota, submitCount, status } in (
+                  v-for="{ problemId, problemName, tags, quota, submitCount, status, aiVTuber } in (
                     problems || []
                   ).slice((page - 1) * 10, page * 10)"
                   :key="problemId"
@@ -104,6 +157,7 @@ const maxPage = computed(() => {
                   </td>
                   <td>
                     {{ problemName }}
+                    <span v-if="aiVTuber || hasAiVtuber(problemId)" class="badge badge-secondary ml-2">AI-TA</span>
                   </td>
                   <td v-if="rolesCanReadProblemStatus.includes(session.role)">
                     <span class="badge ml-1">{{ status === 0 ? "VISIBLE" : "HIDDEN" }}</span>
@@ -118,7 +172,7 @@ const maxPage = computed(() => {
                     <template v-else> {{ quota - submitCount }} / {{ quota }} </template>
                   </td>
                   <td>
-                    <div class="tooltip" data-tip="Test History">
+                    <div class="tooltip" data-tip="Test History" v-if="hasTrialHistory(problemId)">
                       <router-link
                         class="btn btn-ghost btn-sm btn-circle mr-1"
                         :to="`/course/${$route.params.name}/problem/${problemId}/test-history?from=problems`"
@@ -187,7 +241,7 @@ const maxPage = computed(() => {
             </table>
             <template
               v-else
-              v-for="{ problemId, problemName, tags, quota, submitCount, status } in (problems || []).slice(
+              v-for="{ problemId, problemName, tags, quota, submitCount, status, aiVTuber } in (problems || []).slice(
                 (page - 1) * 10,
                 page * 10,
               )"
@@ -203,6 +257,7 @@ const maxPage = computed(() => {
                 :is-admin="session.isAdmin"
                 :is-teacher="session.isTeacher"
                 :is-ta="session.isTA"
+                :ai-vtuber="aiVTuber || hasAiVtuber(problemId)"
               />
             </template>
           </template>

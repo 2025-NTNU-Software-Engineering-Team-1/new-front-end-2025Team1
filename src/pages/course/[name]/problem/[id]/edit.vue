@@ -476,7 +476,7 @@ const mockProblemMeta = {
               :class="['btn btn-warning btn-sm lg:btn-md', formElement?.isLoading && 'loading']"
               @click="discard"
             >
-              <i-uil-times-circle class="mr-1 lg:h-5 lg:w-5" /> {{t("course.problems.discardChanges")}}
+              <i-uil-times-circle class="mr-1 lg:h-5 lg:w-5" /> {{ t("course.problems.discardChanges") }}
             </button>
           </div>
         </div>

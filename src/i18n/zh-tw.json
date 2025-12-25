@@ -68,13 +68,13 @@
         "problemName": "題目名稱",
         "tokenUsed": "Token 已用量",
         "noData": "尚無 API 金鑰使用資料",
-        "problemUsageAnalysis":"題目使用分析",
-        "clickToCollapse":"點擊收起",
-        "clickToExpand":"點擊展開",
+        "problemUsageAnalysis": "題目使用分析",
+        "clickToCollapse": "點擊收起",
+        "clickToExpand": "點擊展開",
         "barChart": "長條圖",
-        "PackedBubble":"氣泡圖",
-        "dragBubbleStoPlayPhysics":"*拖曳氣泡即可體驗效果",
-        "keyUsageBreakdown":"使用狀況分析",
+        "PackedBubble": "氣泡圖",
+        "dragBubbleStoPlayPhysics": "*拖曳氣泡即可體驗效果",
+        "keyUsageBreakdown": "使用狀況分析",
         "Average": "平均",
         "tokensProblem": "tokens/題目",
         "totalTokens": "全部 Tokens"
@@ -324,7 +324,7 @@
       "onlyAllowSpecificInfo": "僅允許特定的 IP/URL。封鎖所有其他內容",
       "blockSpecificInfo": "封鎖特定 IPs/URLs. 允許所有其他內容.",
       "Sidecars": "Sidecars",
-      "delete":"刪除",
+      "delete": "刪除",
       "discardChanges": "取消變更",
       "Preview": "預覽",
       "editProblem": "編輯題目:"
@@ -449,9 +449,9 @@
       "optionUsername": "使用者名稱",
       "optionDisplayName": "顯示名稱",
       "optionRole": "角色",
-      "tableUsername":"使用者名稱",
-      "tableDisplayedName":"顯示名稱",
-      "tableRole":"角色"
+      "tableUsername": "使用者名稱",
+      "tableDisplayedName": "顯示名稱",
+      "tableRole": "角色"
     }
   },
   "courses": {

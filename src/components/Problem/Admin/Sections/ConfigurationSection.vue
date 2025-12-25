@@ -874,7 +874,7 @@ const tagsString = computed({
       return;
     }
     problem.value.tags = val
-      .replace(/(?:，|逗號|逗點|comma|Comma)/g, ",")
+      .replace(/(?:，|逗號|逗點|COMMA)/g, ",")
       .split(",")
       .map((s) => s.trim())
       .filter((s) => s.length > 0);

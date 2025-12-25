@@ -401,7 +401,11 @@ onMounted(fetchUsage);
                 <span class="text-lg">{{ t("course.aisetting.usage.problemUsageAnalysis") }}</span>
               </div>
               <div class="text-base-content/50 font-mono text-xs">
-                {{ isChartExpanded ? t("course.aisetting.usage.clickToCollapse"): t("course.aisetting.usage.clickToExpand") }}
+                {{
+                  isChartExpanded
+                    ? t("course.aisetting.usage.clickToCollapse")
+                    : t("course.aisetting.usage.clickToExpand")
+                }}
               </div>
             </div>
 
@@ -432,7 +436,7 @@ onMounted(fetchUsage);
                     v-if="chartType === 'bubble'"
                     class="text-base-content/40 bg-base-100/80 absolute bottom-2 right-2 rounded px-2 py-1 text-xs"
                   >
-                    {{t("course.aisetting.usage.dragBubbleStoPlayPhysics")}}
+                    {{ t("course.aisetting.usage.dragBubbleStoPlayPhysics") }}
                   </div>
                 </div>
               </div>
@@ -441,7 +445,9 @@ onMounted(fetchUsage);
 
           <div v-if="data?.keys.length" class="mb-4 mt-8 flex items-center gap-3 px-1">
             <span class="text-2xl">🔑</span>
-            <h3 class="text-base-content/80 text-lg font-bold">{{t("course.aisetting.usage.keyUsageBreakdown")}}</h3>
+            <h3 class="text-base-content/80 text-lg font-bold">
+              {{ t("course.aisetting.usage.keyUsageBreakdown") }}
+            </h3>
             <div class="bg-base-300 ml-2 h-px flex-grow opacity-50"></div>
           </div>
 
@@ -478,7 +484,9 @@ onMounted(fetchUsage);
                     v-if="!keyItem.is_flat && keyItem.problem_usages.length > 0"
                     class="text-base-content/60 mb-2 text-xs"
                   >
-                    {{t("course.aisetting.usage.Average")}}: {{ Math.round(keyItem.average_token).toLocaleString() }} {{ t("course.aisetting.usage.tokensProblem") }}
+                    {{ t("course.aisetting.usage.Average") }}:
+                    {{ Math.round(keyItem.average_token).toLocaleString() }}
+                    {{ t("course.aisetting.usage.tokensProblem") }}
                   </div>
 
                   <table class="table-compact table w-full">

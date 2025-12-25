@@ -711,6 +711,12 @@
         "tags": "Tags",
         "quota": "Quota",
         "unlimited": "unlimited"
+      },
+      "manual": {
+        "open": "Manual",
+        "title": "Problem Admin Manual",
+        "close": "Close",
+        "pageNotFound": "Page not found."
       }
     },
     "courseSideBar": {

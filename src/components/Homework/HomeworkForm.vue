@@ -2,6 +2,9 @@
 import { toRef, computed, ref } from "vue";
 import useVuelidate from "@vuelidate/core";
 import { required, maxLength, minValue, helpers } from "@vuelidate/validators";
+import { containsInvisible } from "@/utils/validators";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 import dayjs from "dayjs";
 
 interface Props {
@@ -13,8 +16,13 @@ const isLoading = ref(false);
 const errorMsg = ref("");
 defineExpose({ isLoading, errorMsg });
 
+const noInvisible = helpers.withMessage(
+  () => t("components.hw.validation.contains_invisible"),
+  (value: unknown) => typeof value !== "string" || !containsInvisible(value),
+);
+
 const rules = {
-  name: { required, maxLength: maxLength(64) },
+  name: { required, maxLength: maxLength(64), noInvisible },
   markdown: { maxLength: maxLength(10000) },
   problemIds: { required },
   start: { required },

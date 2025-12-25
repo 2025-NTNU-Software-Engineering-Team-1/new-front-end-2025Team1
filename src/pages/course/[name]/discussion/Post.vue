@@ -3,6 +3,7 @@ import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import API from "@/models/api";
+import { containsInvisible } from "@/utils/validators";
 import type { DiscussionProblem, CreatePostParams } from "@/types/discussion";
 
 const router = useRouter();
@@ -44,7 +45,7 @@ const loadProblems = async () => {
     const response: unknown = await API.Discussion.getProblems({
       Limit: 100,
       Page: 1,
-      Course_Id: route.params.name,
+      Course_Id: route.params.name as string,
     });
 
     // axios interceptor 將 response.data 展開到 response 層級
@@ -144,6 +145,12 @@ const detectCodeContent = () => {
 const submitPost = async () => {
   if (!title.value.trim()) {
     error.value = t("discussion.create.submit_post_err.title_required");
+    return;
+  }
+
+  // Disallow invisible/control characters in title
+  if (containsInvisible(title.value)) {
+    error.value = t("discussion.create.submit_post_err.contains_invisible");
     return;
   }
 

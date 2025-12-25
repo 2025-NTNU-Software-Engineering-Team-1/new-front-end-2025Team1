@@ -484,6 +484,7 @@
         "content_required": "內容不能為空。",
         "problem_required": "請選擇題目。",
         "contentallowed": "此題目不允許分享程式碼，請刪除程式碼內容後再發布",
+        "contains_invisible": "標題包含不可見或控制字元，請移除後再試",
         "submit_processing": "正在發布貼文，請稍後..."
       }
     },
@@ -592,6 +593,10 @@
     }
   },
   "components": {
+    "validation": {
+      "not_blank": "不可為空白或僅空白字元",
+      "contains_invisible": "包含不可見或控制字元"
+    },
     "ann": {
       "form": {
         "titleField": "標題",
@@ -612,6 +617,10 @@
         "dueField": "截止時間",
         "descField": "說明",
         "submit": "送出"
+      },
+      "validation": {
+        "not_blank": "名稱不可為空白或僅空白字元",
+        "contains_invisible": "包含不可見或控制字元"
       },
       "card": {
         "statusLabel": {
@@ -886,6 +895,7 @@
         "name_label": "名稱",
         "name_placeholder": "我的新金鑰",
         "name_required_alert": "請輸入 Token 名稱",
+        "name_contains_invisible": "Token 名稱包含不可見或控制字元，請移除後再試",
         "scope_label": "權限範圍",
         "date_label": "日期",
         "cancel": "取消",

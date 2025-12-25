@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, watchEffect, computed, ref, onMounted } from "vue";
+import { reactive, watchEffect, computed, ref, onMounted, watch } from "vue";
 import hljs from "highlight.js";
 import { BlobWriter, ZipWriter, TextReader } from "@zip.js/zip.js";
 import { useAxios } from "@vueuse/integrations/useAxios";
@@ -41,6 +41,9 @@ const isExpanded = ref(true);
 
 const lang = useStorage(LOCAL_STORAGE_KEY.LAST_USED_LANG, -1);
 const showSubmitModal = ref(false);
+
+
+
 // const showTestcaseModal = ref(false);
 // const testcaseFiles = ref<Array<{ name: string; content: string }>>([]);
 // const selectedTestcases = ref<string[]>([]);
@@ -89,6 +92,23 @@ const form = reactive({
   isSubmitError: false,
   errorMessage: "",
 });
+
+// Persist source code so users won't lose typed code when navigating away
+const codeStorageKey = `test_code_${(route.params.name as string) || ""}_${(route.params.id as string) || ""}`;
+const storedCode = useStorage(codeStorageKey, "");
+// Initialize form.code from storage (if any)
+if (storedCode.value) form.code = storedCode.value;
+// Keep storage in sync with editor content
+watch(
+  () => form.code,
+  (v) => {
+    try {
+      storedCode.value = v ?? "";
+    } catch (err) {
+      console.error("Failed to persist code to storage:", err);
+    }
+  },
+);
 const rules = {
   code: { required: helpers.withMessage(t("course.problem.submit.err.code"), required) },
   lang: { betweenValue: helpers.withMessage(t("course.problem.submit.err.lang"), between(0, 3)) },

@@ -442,7 +442,11 @@
         "caution": "Note that if we find a user with the same username or email in the database, the user will still be added into course, BUT other information will not be update UNLESS you check the checkbox below."
       },
       "forceUpdate": "Force update existing users' data",
-      "standardizeUsername": "Standardize Username (uppercase)"
+      "standardizeUsername": "Standardize Username (uppercase)",
+      "csvFiles":"CSV Files",
+      "csvUpload":"CSV File Upload",
+      "csvUploadInfo":"Drag and drop file here or click to select",
+      "manualInput":"Manual Input"
     }
   },
   "courses": {

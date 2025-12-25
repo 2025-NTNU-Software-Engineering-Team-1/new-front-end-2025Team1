@@ -124,6 +124,11 @@ const enableZipArtifact = computed(() => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return !!(problem.value as any)?.config?.artifactCollection?.includes("zip");
 });
+// Check if the problem accepts zip submissions (hide source code section for zip problems)
+const isZipSubmission = computed(() => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (problem.value as any)?.config?.acceptedFormat === "zip";
+});
 const saStatusBadge = computed(() => {
   if (!submission.value || submission.value.status === SUBMISSION_STATUS_CODE.PENDING) return null;
   const status = submission.value.saStatus;
@@ -696,23 +701,26 @@ watch(submission, (val) => {
 
         <div class="my-4" />
 
-        <skeleton-card v-if="!submission" />
-        <div v-else class="card min-w-full rounded-none">
-          <div class="card-body p-0">
-            <div class="card-title md:text-xl lg:text-2xl">
-              {{ $t("course.submission.source.text") }}
-              <button
-                v-if="isSupported && submission"
-                class="btn btn-info btn-xs ml-3"
-                @click="copy(submission?.code || '')"
-              >
-                {{ copied ? $t("course.submission.source.copied") : $t("course.submission.source.copy") }}
-              </button>
+        <!-- Hide source section for zip submissions since they don't have meaningful source code -->
+        <template v-if="!isZipSubmission">
+          <skeleton-card v-if="!submission" />
+          <div v-else class="card min-w-full rounded-none">
+            <div class="card-body p-0">
+              <div class="card-title md:text-xl lg:text-2xl">
+                {{ $t("course.submission.source.text") }}
+                <button
+                  v-if="isSupported && submission"
+                  class="btn btn-info btn-xs ml-3"
+                  @click="copy(submission?.code || '')"
+                >
+                  {{ copied ? $t("course.submission.source.copied") : $t("course.submission.source.copy") }}
+                </button>
+              </div>
+              <div class="my-1" />
+              <code-editor v-model="submission.code" readonly />
             </div>
-            <div class="my-1" />
-            <code-editor v-model="submission.code" readonly />
           </div>
-        </div>
+        </template>
 
         <div class="my-6" />
 

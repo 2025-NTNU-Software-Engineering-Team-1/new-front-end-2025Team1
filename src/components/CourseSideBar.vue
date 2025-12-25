@@ -41,6 +41,9 @@ const navs = [
   ...(session.isAdmin || session.isTeacher || session.isTA
     ? [{ name: t("components.courseSideBar.aisetting"), path: "/aisetting" }]
     : []),
+  ...(session.isAdmin || session.isTeacher || session.isTA
+    ? [{ name: t("components.courseSideBar.loginRecords"), path: "/login-records" }]
+    : []),
 ];
 </script>
 

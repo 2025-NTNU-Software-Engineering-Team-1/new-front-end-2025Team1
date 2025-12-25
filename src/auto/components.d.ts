@@ -75,6 +75,7 @@ declare module 'vue' {
     IUilRepeat: typeof import('~icons/uil/repeat')['default']
     IUilRobot: typeof import('~icons/uil/robot')['default']
     IUilSun: typeof import('~icons/uil/sun')['default']
+    IUilSync: typeof import('~icons/uil/sync')['default']
     IUilTimes: typeof import('~icons/uil/times')['default']
     IUilTimesCircle: typeof import('~icons/uil/times-circle')['default']
     IUilTrashAlt: typeof import('~icons/uil/trash-alt')['default']

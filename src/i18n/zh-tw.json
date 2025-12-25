@@ -774,7 +774,8 @@
       "submissions": "繳交狀態",
       "discussion": "討論區",
       "members": "成員",
-      "aisetting": "AI 管理"
+      "aisetting": "AI 管理",
+      "loginRecords": "登入紀錄"
     },
     "systemAnn": {
       "ann": "公告",
@@ -835,7 +836,8 @@
     "unknown-error-occurred": "發生未知錯誤 :(",
     "tab": {
       "dashboard": "儀表板",
-      "user": "使用者"
+      "user": "使用者",
+      "loginRecords": "登入紀錄"
     },
     "dashboard": {
       "usercount": {
@@ -899,7 +901,8 @@
     "menu": {
       "accountInfo": "帳號資訊",
       "user_information": "使用者資訊",
-      "api_token": "API 金鑰"
+      "api_token": "API 金鑰",
+      "login_records": "登入紀錄"
     },
     "breadcrumb": {
       "profile": "個人資料"
@@ -960,5 +963,22 @@
         "deactivate": "停用"
       }
     }
+  },
+  "loginRecords": {
+    "title": "登入紀錄",
+    "table": {
+      "username": "使用者名稱",
+      "ipAddress": "IP 位址",
+      "success": "狀態",
+      "timestamp": "時間"
+    },
+    "status": {
+      "success": "成功",
+      "failed": "失敗"
+    },
+    "refresh": "刷新",
+    "download": "下載 CSV",
+    "noRecords": "尚無登入紀錄",
+    "rowCount": "共 {n} 筆紀錄"
   }
 }

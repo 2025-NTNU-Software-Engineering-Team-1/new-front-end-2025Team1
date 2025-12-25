@@ -1,9 +1,40 @@
 {
   "settings": {
     "title": "設定",
-    "selectLang": "揀你愛个語言"
+    "selectLang": "選擇語言"
   },
-  "profile": {},
+  "profile": {
+    "menu": {
+      "login_records": "登入紀錄"
+    }
+  },
   "about": {},
-  "course": {}
+  "course": {},
+  "admin": {
+    "tab": {
+      "loginRecords": "登入紀錄"
+    }
+  },
+  "components": {
+    "courseSideBar": {
+      "loginRecords": "登入紀錄"
+    }
+  },
+  "loginRecords": {
+    "title": "登入紀錄",
+    "table": {
+      "username": "使用者姓名",
+      "ipAddress": "IP 位址",
+      "success": "狀態",
+      "timestamp": "時間"
+    },
+    "status": {
+      "success": "成功",
+      "failed": "失敗"
+    },
+    "refresh": "重整理",
+    "download": "下載 CSV",
+    "noRecords": "無登入紀錄",
+    "rowCount": "攏總有 {n} 筆紀錄"
+  }
 }

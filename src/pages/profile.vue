@@ -33,6 +33,15 @@ const { t } = useI18n();
             {{ t("profile.menu.api_token") }}
           </router-link>
         </li>
+        <li>
+          <router-link
+            to="/profile/login-records"
+            class="rounded-lg"
+            :class="{ 'bg-base-300 font-semibold': route.path === '/profile/login-records' }"
+          >
+            {{ t("profile.menu.login_records") }}
+          </router-link>
+        </li>
       </ul>
     </aside>
 
@@ -43,6 +52,7 @@ const { t } = useI18n();
             <router-link to="/profile">{{ t("profile.breadcrumb.profile") }}</router-link>
           </li>
           <li v-if="route.path === '/profile/api-token'">{{ t("profile.menu.api_token") }}</li>
+          <li v-if="route.path === '/profile/login-records'">{{ t("profile.menu.login_records") }}</li>
         </ul>
       </div>
 

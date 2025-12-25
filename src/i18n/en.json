@@ -791,7 +791,8 @@
       "submissions": "Submissions",
       "discussion": "Discussion",
       "members": "Members",
-      "aisetting": "AI Management"
+      "aisetting": "AI Management",
+      "loginRecords": "Login Records"
     },
     "systemAnn": {
       "ann": "Announcements",
@@ -852,7 +853,8 @@
     "unknown-error-occurred": "Unknown error occurred :(",
     "tab": {
       "dashboard": "Dashboard",
-      "user": "User"
+      "user": "User",
+      "loginRecords": "Login Records"
     },
     "dashboard": {
       "usercount": {
@@ -916,7 +918,8 @@
     "menu": {
       "accountInfo": "Account Information",
       "user_information": "User Information",
-      "api_token": "API Token"
+      "api_token": "API Token",
+      "login_records": "Login Records"
     },
     "breadcrumb": {
       "profile": "Profile"
@@ -977,5 +980,22 @@
         "deactivate": "Deactivate"
       }
     }
+  },
+  "loginRecords": {
+    "title": "Login Records",
+    "table": {
+      "username": "Username",
+      "ipAddress": "IP Address",
+      "success": "Status",
+      "timestamp": "Time"
+    },
+    "status": {
+      "success": "Success",
+      "failed": "Failed"
+    },
+    "refresh": "Refresh",
+    "download": "Download CSV",
+    "noRecords": "No login records",
+    "rowCount": "{n} record(s)"
   }
 }

@@ -308,7 +308,7 @@ async function submitCode() {
             </div>
 
             <div class="flex items-center justify-between gap-4">
-              <div class="flex gap-4 flex-1">
+              <div class="flex flex-1 gap-4">
                 <label class="form-control w-60">
                   <div class="label">
                     <span class="label-text text-sm text-gray-500">{{
@@ -328,7 +328,7 @@ async function submitCode() {
                     <span class="label-text-alt text-error">{{ v$.lang.$errors[0]?.$message }}</span>
                   </label>
                 </label>
-                
+
                 <!-- Test Case Type Selection (only show if custom testcases exist) -->
                 <label v-if="hasCustomTestcases" class="form-control w-60">
                   <div class="label">
@@ -338,20 +338,20 @@ async function submitCode() {
                   </div>
                   <div class="flex flex-col gap-2">
                     <label class="label cursor-pointer justify-start gap-3 py-1">
-                      <input 
-                        type="radio" 
-                        class="radio radio-primary radio-sm" 
-                        :value="true" 
-                        v-model="useDefaultTestcases" 
+                      <input
+                        type="radio"
+                        class="radio radio-primary radio-sm"
+                        :value="true"
+                        v-model="useDefaultTestcases"
                       />
                       <span class="label-text">{{ t("course.problem.test.testcaseType.public") }}</span>
                     </label>
                     <label class="label cursor-pointer justify-start gap-3 py-1">
-                      <input 
-                        type="radio" 
-                        class="radio radio-primary radio-sm" 
-                        :value="false" 
-                        v-model="useDefaultTestcases" 
+                      <input
+                        type="radio"
+                        class="radio radio-primary radio-sm"
+                        :value="false"
+                        v-model="useDefaultTestcases"
                       />
                       <span class="label-text">{{ t("course.problem.test.testcaseType.custom") }}</span>
                     </label>

@@ -91,7 +91,7 @@ watch(
     if (newVal === false && problem.value.config) {
       problem.value.config.trialResultDownloadable = false;
     }
-  }
+  },
 );
 
 // ==========================================
@@ -211,10 +211,11 @@ async function validateTrialPublicZip(file: File): Promise<boolean> {
 
     // Validation 1: ONLY .in and .out files allowed
     const invalid = validEntries.filter(
-      (e: any) => !e.filename.endsWith(".in") && !e.filename.endsWith(".out")
+      (e: any) => !e.filename.endsWith(".in") && !e.filename.endsWith(".out"),
     );
     if (invalid.length > 0) {
-      const msg = "Invalid files found (must be .in or .out only):\n" + invalid.map((e: any) => e.filename).join("\n");
+      const msg =
+        "Invalid files found (must be .in or .out only):\n" + invalid.map((e: any) => e.filename).join("\n");
       logger.error(msg);
       alert(msg);
       return false;
@@ -230,7 +231,9 @@ async function validateTrialPublicZip(file: File): Promise<boolean> {
 
     const missingOutFiles = inFiles.filter((name: any) => !outFiles.includes(name));
     if (missingOutFiles.length > 0) {
-      const msg = "Missing .out files for the following .in files:\n" + missingOutFiles.map((name: any) => `${name}.in`).join("\n");
+      const msg =
+        "Missing .out files for the following .in files:\n" +
+        missingOutFiles.map((name: any) => `${name}.in`).join("\n");
       logger.error(msg);
       alert(msg);
       return false;

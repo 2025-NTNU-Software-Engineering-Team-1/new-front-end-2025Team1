@@ -156,7 +156,7 @@ async function downloadTestcases() {
   try {
     const storageKey = `testcase_settings_${route.params.id}`;
     const blobBase64 = localStorage.getItem(`${storageKey}_blob`);
-    
+
     if (!blobBase64) {
       // User-friendly error message when no testcases found
       alert(t("course.problem.test.testcaseModal.noTestcasesToDownload"));
@@ -169,15 +169,15 @@ async function downloadTestcases() {
       throw new Error("Failed to fetch blob");
     }
     const blob = await response.blob();
-    
+
     if (blob.size === 0) {
       alert(t("course.problem.test.testcaseModal.emptyTestcaseFile"));
       return;
     }
-    
+
     // Create download link
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
     link.download = `problem_${route.params.id}_custom_testcases.zip`;
     document.body.appendChild(link);
@@ -196,28 +196,21 @@ async function downloadTestcases() {
     <div class="card min-w-full">
       <div class="card-body">
         <!-- Title and Upload section in the same row -->
-        <div class="flex items-center justify-between mb-4">
+        <div class="mb-4 flex items-center justify-between">
           <div class="card-title">{{ t("course.problem.test.testcaseModal.customTestcases") }}</div>
-          
+
           <!-- Upload status, download button, and file input -->
           <div class="flex items-center gap-3">
             <!-- Status Badge & Download -->
             <div class="flex items-center gap-2">
-              <span 
-                v-if="testcaseFiles.length > 0" 
-                class="badge badge-success badge-outline text-xs"
-              >
+              <span v-if="testcaseFiles.length > 0" class="badge badge-success badge-outline text-xs">
                 {{ t("course.problems.uploaded") }}
               </span>
               <span v-else class="badge badge-outline text-xs opacity-70">
                 {{ t("course.problems.notUploaded") }}
               </span>
               <!-- Download Button -->
-              <button
-                v-if="testcaseFiles.length > 0"
-                class="btn btn-xs"
-                @click="downloadTestcases"
-              >
+              <button v-if="testcaseFiles.length > 0" class="btn btn-xs" @click="downloadTestcases">
                 {{ t("course.problems.download") }}
               </button>
             </div>
@@ -233,43 +226,43 @@ async function downloadTestcases() {
 
         <!-- Files and Preview section -->
         <div class="grid grid-cols-2 gap-4">
-            <div class="rounded border p-4">
-              <h4 class="mb-2 font-semibold">{{ t("course.problem.test.testcaseModal.files") }}</h4>
-              <div class="flex flex-col gap-2">
-                <label v-for="file in testcaseFiles" :key="file.name" class="flex items-center gap-2">
-                  <input type="checkbox" class="checkbox" v-model="selectedTestcases" :value="file.name" />
-                  <span>{{ file.name }}</span>
-                  <button class="btn btn-ghost btn-xs" @click="previewTestcase(file)">
-                    <i-uil-eye class="h-4 w-4" />
-                  </button>
-                  <button class="btn btn-ghost btn-xs text-error" @click="deleteTestcase(file)">
-                    <i-uil-trash-alt class="h-4 w-4" />
-                  </button>
-                </label>
-              </div>
-            </div>
-
-            <div class="rounded border p-4">
-              <h4 class="mb-2 font-semibold">{{ t("course.problem.test.testcaseModal.preview") }}</h4>
-              <div class="bg-base-200 h-64 max-w-full overflow-auto whitespace-pre-wrap rounded border p-2">
-                <template v-if="selectedTestcaseContent.includes('blob:')">
-                  <div v-for="(line, idx) in selectedTestcaseContent.split('\n')" :key="idx">
-                    <template v-if="line.startsWith('blob:')">
-                      <a :href="line" target="_blank" class="link break-all text-blue-500 underline">
-                        {{ t("course.problem.test.testcaseModal.download") }}
-                      </a>
-                    </template>
-                    <template v-else>
-                      {{ line }}
-                    </template>
-                  </div>
-                </template>
-                <template v-else>
-                  <pre><code>{{ selectedTestcaseContent }}</code></pre>
-                </template>
-              </div>
+          <div class="rounded border p-4">
+            <h4 class="mb-2 font-semibold">{{ t("course.problem.test.testcaseModal.files") }}</h4>
+            <div class="flex flex-col gap-2">
+              <label v-for="file in testcaseFiles" :key="file.name" class="flex items-center gap-2">
+                <input type="checkbox" class="checkbox" v-model="selectedTestcases" :value="file.name" />
+                <span>{{ file.name }}</span>
+                <button class="btn btn-ghost btn-xs" @click="previewTestcase(file)">
+                  <i-uil-eye class="h-4 w-4" />
+                </button>
+                <button class="btn btn-ghost btn-xs text-error" @click="deleteTestcase(file)">
+                  <i-uil-trash-alt class="h-4 w-4" />
+                </button>
+              </label>
             </div>
           </div>
+
+          <div class="rounded border p-4">
+            <h4 class="mb-2 font-semibold">{{ t("course.problem.test.testcaseModal.preview") }}</h4>
+            <div class="bg-base-200 h-64 max-w-full overflow-auto whitespace-pre-wrap rounded border p-2">
+              <template v-if="selectedTestcaseContent.includes('blob:')">
+                <div v-for="(line, idx) in selectedTestcaseContent.split('\n')" :key="idx">
+                  <template v-if="line.startsWith('blob:')">
+                    <a :href="line" target="_blank" class="link break-all text-blue-500 underline">
+                      {{ t("course.problem.test.testcaseModal.download") }}
+                    </a>
+                  </template>
+                  <template v-else>
+                    {{ line }}
+                  </template>
+                </div>
+              </template>
+              <template v-else>
+                <pre><code>{{ selectedTestcaseContent }}</code></pre>
+              </template>
+            </div>
+          </div>
+        </div>
 
         <div class="alert alert-success mt-4" v-if="saveSuccess">
           <i-uil-check-circle class="h-6 w-6" />

@@ -171,7 +171,6 @@ const chartOption = computed(() => {
   const tooltip = {
     trigger: isBubble ? "item" : "axis",
     axisPointer: { type: "shadow" },
-    // [FIXED] Use strict type instead of 'any'
     formatter: (params: ChartTooltipParam | ChartTooltipParam[]) => {
       const p = Array.isArray(params) ? params[0] : params;
       const val = Number(p.value);
@@ -305,7 +304,6 @@ async function fetchUsage() {
   isLoading.value = true;
   error.value = null;
 
-  // [FIXED] Changed 'any' to 'unknown' to fix ESLint error
   try {
     const res = await api.CourseAPIUsage.getCourseUsage(route.params.name as string);
     const { isSuccess, data: resData, message } = parseApiResponse(res);
@@ -332,13 +330,11 @@ async function fetchUsage() {
     data.value = { totalToken, keys };
     expandedKeys.value = Object.fromEntries(keys.map((k) => [String(k.id), false]));
   } catch (err: unknown) {
-    // [FIXED] Define temporary interface for type assertion
     interface ApiError {
       response?: { data?: { message?: string } };
       message?: string;
     }
 
-    // Safely cast error
     const apiErr = err as ApiError;
     const errMsg = apiErr?.response?.data?.message || apiErr?.message || "Failed to load API usage data";
 
@@ -441,6 +437,12 @@ onMounted(fetchUsage);
                 </div>
               </div>
             </transition>
+          </div>
+
+          <div v-if="data?.keys.length" class="mb-4 mt-8 flex items-center gap-3 px-1">
+            <span class="text-2xl">🔑</span>
+            <h3 class="text-base-content/80 text-lg font-bold">Key Usage Breakdown</h3>
+            <div class="bg-base-300 ml-2 h-px flex-grow opacity-50"></div>
           </div>
 
           <div v-if="data?.keys.length">

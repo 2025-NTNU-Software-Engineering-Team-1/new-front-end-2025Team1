@@ -128,4 +128,4 @@ Select which artifact types should be retained or made available for download:
 - `Compiled Binary`: the compiled binary file
 - `Student Artifact (zip)`: the student's submitted zip
 
-This setting is stored in `config.artifactCollection`. 
+This setting is stored in `config.artifactCollection`.

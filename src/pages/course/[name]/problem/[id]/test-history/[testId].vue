@@ -258,17 +258,19 @@ const hasPrevCase = computed(() => {
 
 function navigateCase(direction: 1 | -1) {
   if (!currentViewingCase.value || !testResult.value) return;
-  
+
   const { taskIndex, caseIndex } = currentViewingCase.value;
   const tasks = testResult.value.tasks;
-  
-  if (direction === 1) { // Next
+
+  if (direction === 1) {
+    // Next
     if (caseIndex + 1 < tasks[taskIndex].cases.length) {
       viewCaseOutput(taskIndex, caseIndex + 1);
     } else if (taskIndex + 1 < tasks.length) {
       viewCaseOutput(taskIndex + 1, 0);
     }
-  } else { // Prev
+  } else {
+    // Prev
     if (caseIndex - 1 >= 0) {
       viewCaseOutput(taskIndex, caseIndex - 1);
     } else if (taskIndex - 1 >= 0) {
@@ -740,17 +742,20 @@ async function deleteTrialSubmission() {
 
   <!-- Case Output Modal -->
   <dialog ref="caseOutputModal" class="modal">
-    <div class="modal-box max-w-5xl max-h-[90vh] overflow-y-auto">
-      <h3 class="font-bold text-lg">
+    <div class="modal-box max-h-[90vh] max-w-5xl overflow-y-auto">
+      <h3 class="text-lg font-bold">
         Case Output
         <span v-if="currentViewingCase" class="text-base font-normal opacity-70">
           ({{ currentViewingCase.taskIndex }}-{{ currentViewingCase.caseIndex }})
         </span>
       </h3>
 
-      <div class="py-4 relative min-h-[200px]">
+      <div class="relative min-h-[200px] py-4">
         <!-- Loading Overlay -->
-        <div v-if="caseOutputLoading" class="absolute inset-0 z-10 flex items-center justify-center bg-base-100/50">
+        <div
+          v-if="caseOutputLoading"
+          class="bg-base-100/50 absolute inset-0 z-10 flex items-center justify-center"
+        >
           <ui-spinner class="h-8 w-8" />
         </div>
 
@@ -761,82 +766,78 @@ async function deleteTrialSubmission() {
         </div>
 
         <!-- Content -->
-        <div v-if="caseOutputData" :class="{'opacity-50 pointer-events-none': caseOutputLoading}" class="space-y-6">
+        <div
+          v-if="caseOutputData"
+          :class="{ 'pointer-events-none opacity-50': caseOutputLoading }"
+          class="space-y-6"
+        >
           <!-- Stdout Section -->
           <div>
             <label class="label pb-2">
-              <span class="label-text font-semibold text-base">Standard Output (stdout)</span>
+              <span class="label-text text-base font-semibold">Standard Output (stdout)</span>
             </label>
             <div v-if="caseOutputData.stdout === null">
               <!-- File doesn't exist -->
-              <div class="text-base-content/60 italic py-2">
-                Stdout file does not exist.
-              </div>
+              <div class="text-base-content/60 py-2 italic">Stdout file does not exist.</div>
             </div>
             <div v-else class="mt-2">
               <!-- File exists (could be empty string) -->
               <div v-if="caseOutputData.stdout.trim()">
                 <code-editor v-model="caseOutputData.stdout" readonly />
               </div>
-              <div v-else class="text-base-content/60 italic py-2">
-                Empty
-              </div>
+              <div v-else class="text-base-content/60 py-2 italic">Empty</div>
             </div>
           </div>
 
           <!-- Stderr Section -->
           <div class="mt-6">
             <label class="label pb-2">
-              <span class="label-text font-semibold text-base">Standard Error (stderr)</span>
+              <span class="label-text text-base font-semibold">Standard Error (stderr)</span>
             </label>
             <div v-if="caseOutputData.stderr === null">
               <!-- File doesn't exist -->
-              <div class="text-base-content/60 italic py-2">
-                 Stderr file does not exist.
-              </div>
+              <div class="text-base-content/60 py-2 italic">Stderr file does not exist.</div>
             </div>
             <div v-else class="mt-2">
               <!-- File exists (could be empty string) -->
               <div v-if="caseOutputData.stderr.trim()">
                 <code-editor v-model="caseOutputData.stderr" readonly />
               </div>
-              <div v-else class="text-base-content/60 italic py-2">
-                Empty
-              </div>
+              <div v-else class="text-base-content/60 py-2 italic">Empty</div>
             </div>
           </div>
 
           <!-- Artifact Files Section -->
           <div v-if="caseOutputData.files && Object.keys(caseOutputData.files).length > 0" class="mt-6">
             <label class="label pb-2">
-              <span class="label-text font-semibold text-base">Artifact Files</span>
+              <span class="label-text text-base font-semibold">Artifact Files</span>
             </label>
-            <div class="space-y-4 mt-2">
+            <div class="mt-2 space-y-4">
               <div
                 v-for="(file, fileName) in caseOutputData.files"
                 :key="fileName"
-                class="border border-base-300 rounded-lg p-4"
+                class="border-base-300 rounded-lg border p-4"
               >
                 <!-- File Header -->
-                <div class="flex items-center gap-2 mb-3">
+                <div class="mb-3 flex items-center gap-2">
                   <i :class="getFileIconClass(file.extension)" class="h-5 w-5" />
                   <span class="font-medium">{{ fileName }}</span>
-                  <span class="badge badge-sm">{{ file.extension || 'no ext' }}</span>
+                  <span class="badge badge-sm">{{ file.extension || "no ext" }}</span>
                 </div>
 
                 <!-- Image Files -->
-                <div v-if="file.type === 'image'" class="flex justify-center bg-base-100 p-4 rounded">
+                <div v-if="file.type === 'image'" class="bg-base-100 flex justify-center rounded p-4">
                   <img
                     :src="`data:${file.mimeType || 'image/png'};base64,${file.content}`"
                     :alt="String(fileName)"
-                    style="max-width: 100%; max-height: 70vh; min-width: 200px; min-height: 200px;"
-                    class="object-contain rounded border border-base-300 shadow-sm"
+                    style="max-width: 100%; max-height: 70vh; min-width: 200px; min-height: 200px"
+                    class="border-base-300 rounded border object-contain shadow-sm"
                   />
                 </div>
 
                 <!-- Markdown Files -->
                 <div v-else-if="file.extension === '.md' && file.type === 'text'" class="mt-2">
-                   <!-- Fallback to code editor or assumes markdown renderer exists -->
+                  <!-- Fallback to code editor or assumes markdown renderer exists -->
                   <markdown-renderer :content="file.content" />
                 </div>
 
@@ -846,7 +847,7 @@ async function deleteTrialSubmission() {
                 </div>
 
                 <!-- Binary Files (not images) -->
-                <div v-else class="text-base-content/60 italic py-2">
+                <div v-else class="text-base-content/60 py-2 italic">
                   Binary file content cannot be previewed.
                 </div>
               </div>
@@ -857,17 +858,15 @@ async function deleteTrialSubmission() {
 
       <!-- Buttons -->
       <div class="modal-action justify-between">
-         <div class="flex gap-2">
-           <button class="btn" :disabled="!hasPrevCase" @click="navigateCase(-1)">
-             <i-uil-angle-left class="mr-1" /> Previous Case
-           </button>
-           <button class="btn" :disabled="!hasNextCase" @click="navigateCase(1)">
-             Next Case <i-uil-angle-right class="ml-1" />
-           </button>
-         </div>
-        <button class="btn" @click="closeCaseOutputModal">
-          Close
-        </button>
+        <div class="flex gap-2">
+          <button class="btn" :disabled="!hasPrevCase" @click="navigateCase(-1)">
+            <i-uil-angle-left class="mr-1" /> Previous Case
+          </button>
+          <button class="btn" :disabled="!hasNextCase" @click="navigateCase(1)">
+            Next Case <i-uil-angle-right class="ml-1" />
+          </button>
+        </div>
+        <button class="btn" @click="closeCaseOutputModal">Close</button>
       </div>
     </div>
     <form method="dialog" class="modal-backdrop">

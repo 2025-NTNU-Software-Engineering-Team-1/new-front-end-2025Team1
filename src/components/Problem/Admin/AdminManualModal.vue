@@ -23,7 +23,9 @@ const open = ref(false);
 const lang = ref<"en" | "zh">("en");
 
 // pages switches between EN/ZH content
-const pages = computed(() => (lang.value === "en" ? PROBLEM_ADMIN_MANUAL_PAGES : PROBLEM_ADMIN_MANUAL_PAGES_ZH));
+const pages = computed(() =>
+  lang.value === "en" ? PROBLEM_ADMIN_MANUAL_PAGES : PROBLEM_ADMIN_MANUAL_PAGES_ZH,
+);
 
 const { t, locale } = useI18n();
 
@@ -49,11 +51,12 @@ function openManual() {
 
   // Restore per-language scroll position after DOM update
   nextTick(() => {
-    if (contentRef.value) contentRef.value.scrollTop = scrollMemory.get(`${lang.value}:${activeId.value}`) ?? 0;
+    if (contentRef.value)
+      contentRef.value.scrollTop = scrollMemory.get(`${lang.value}:${activeId.value}`) ?? 0;
   });
 
   open.value = true;
-} 
+}
 
 function closeManual() {
   open.value = false;
@@ -88,7 +91,8 @@ function setLang(l: "en" | "zh") {
   }
 
   nextTick(() => {
-    if (contentRef.value) contentRef.value.scrollTop = scrollMemory.get(`${lang.value}:${activeId.value}`) ?? 0;
+    if (contentRef.value)
+      contentRef.value.scrollTop = scrollMemory.get(`${lang.value}:${activeId.value}`) ?? 0;
   });
 }
 
@@ -108,7 +112,9 @@ async function switchPage(id: string) {
 </script>
 
 <template>
-  <button type="button" class="btn btn-sm lg:btn-md btn-outline" @click.stop="openManual">{{ t('components.problem.manual.open') }}</button>
+  <button type="button" class="btn btn-sm lg:btn-md btn-outline" @click.stop="openManual">
+    {{ t("components.problem.manual.open") }}
+  </button>
 
   <teleport to="body">
     <div v-if="open" class="fixed inset-0 z-[9999]">
@@ -122,12 +128,26 @@ async function switchPage(id: string) {
           <!-- Header -->
           <div class="border-base-300 flex items-center justify-between border-b px-4 py-3">
             <div class="flex items-center gap-4">
-              <div class="text-lg font-bold">{{ t('components.problem.manual.title') }}</div>
+              <div class="text-lg font-bold">{{ t("components.problem.manual.title") }}</div>
 
               <!-- Language toggle -->
               <div class="btn-group btn-group-sm">
-                <button type="button" class="btn btn-sm" :class="lang === 'en' ? 'btn-active' : ''" @click="setLang('en')">EN</button>
-                <button type="button" class="btn btn-sm" :class="lang === 'zh' ? 'btn-active' : ''" @click="setLang('zh')">中文</button>
+                <button
+                  type="button"
+                  class="btn btn-sm"
+                  :class="lang === 'en' ? 'btn-active' : ''"
+                  @click="setLang('en')"
+                >
+                  EN
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-sm"
+                  :class="lang === 'zh' ? 'btn-active' : ''"
+                  @click="setLang('zh')"
+                >
+                  中文
+                </button>
               </div>
             </div>
 
@@ -164,7 +184,7 @@ async function switchPage(id: string) {
                   <MarkdownRenderer :md="activePage.md" />
                 </template>
                 <template v-else>
-                  <div class="opacity-70">{{ t('components.problem.manual.pageNotFound') }}</div>
+                  <div class="opacity-70">{{ t("components.problem.manual.pageNotFound") }}</div>
                 </template>
               </div>
             </main>
@@ -172,7 +192,9 @@ async function switchPage(id: string) {
 
           <!-- Footer -->
           <div class="border-base-300 flex justify-end border-t px-4 py-3">
-            <button type="button" class="btn" @click="closeManual">{{ t('components.problem.manual.close') }}</button>
+            <button type="button" class="btn" @click="closeManual">
+              {{ t("components.problem.manual.close") }}
+            </button>
           </div>
         </div>
       </div>

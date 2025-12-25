@@ -496,11 +496,11 @@ async function deleteTrialSubmission() {
             <!-- Rejudge Button (only shown if user has permission) -->
             <button
               v-if="canRejudge"
-              :class="['btn btn-warning btn-sm', isRejudgeLoading && 'loading']"
+              class="btn btn-warning btn-sm"
               :disabled="isRejudgeLoading"
               @click="rejudge"
             >
-              <i-uil-repeat class="mr-1" /> Rejudge
+              <i-uil-repeat class="mr-1" :class="{ 'animate-spin': isRejudgeLoading }" /> Rejudge
             </button>
             <!-- Delete Button (only shown if user has permission) -->
             <button

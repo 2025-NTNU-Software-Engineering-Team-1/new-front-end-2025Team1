@@ -27,7 +27,8 @@ const rules = {
   title: { required, notBlank, noInvisible, maxLength: maxLength(64) },
   // Allow markdown to contain invisible characters (authors may paste content), only enforce length
   markdown: { maxLength: maxLength(100000) },
-  pinned: { required },
+  // pinned is a boolean (true/false). Do NOT use `required` here because `required` treats `false` as invalid.
+  pinned: {},
 };
 const v$ = useVuelidate(rules, props.value);
 

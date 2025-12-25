@@ -13,8 +13,8 @@ defineProps<Props>();
       <div class="card-body">
         <div class="card-title mb-8 flex w-full items-start gap-2">
           <span v-if="announcement.pinned" class=" shrink-0 text-xl" title="置頂">📌</span>
-          <span class="block flex-1 min-w-0 break-all whitespace-normal text-primary text-2xl font-bold">
-          {{ announcement.title }}
+          <span class="block flex-1 min-w-0 break-all whitespace-normal text-base-content/80 dark:text-base-content/80 text-2xl font-bold">
+            {{ announcement.title }}
           </span>
         </div>
         <div class="w-full overflow-x-hidden break-all">

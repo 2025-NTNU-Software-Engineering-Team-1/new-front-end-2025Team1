@@ -93,19 +93,12 @@ const problemLink = computed(() => {
               <router-link
                 v-if="problemLink"
                 :to="problemLink"
-                class="bg-primary/10 text-primary hover:bg-primary/20 inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-medium transition-colors"
+                class="bg-primary/3 hover:bg-primary/6 dark:bg-primary/2 dark:hover:bg-primary/4 inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-medium transition-colors text-base-content/80 dark:text-base-content/80 visited:text-base-content/80 dark:visited:text-base-content/80"
                 @click.stop
-              >
-                <span class="text-primary">#</span>
-                <span>{{ post.problemName || `Problem ${post.problemId}` }}</span>
-              </router-link>
-              <span
-                v-else
-                class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-300"
               >
                 <span>#</span>
                 <span>{{ post.problemName || `Problem ${post.problemId}` }}</span>
-              </span>
+              </router-link>
             </div>
             <div class="mt-2 text-sm text-gray-600 dark:text-gray-300">{{ post.excerpt }}</div>
           </div>

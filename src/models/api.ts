@@ -324,8 +324,13 @@ const User = {
 };
 const Discussion = {
   // 1. 取得貼文列表 (New/Hot 切換)
-  getPosts: (params: { Mode?: string; Limit?: number; Page?: number; Problem_Id?: string; Course_Id?: string }) =>
-    fetcher.get("/discussion/posts", { params }),
+  getPosts: (params: {
+    Mode?: string;
+    Limit?: number;
+    Page?: number;
+    Problem_Id?: string;
+    Course_Id?: string;
+  }) => fetcher.get("/discussion/posts", { params }),
 
   // 2. 依關鍵字搜尋貼文
   searchPosts: (params: { Words: string; Limit?: number; Page?: number; Course_Id?: string }) =>

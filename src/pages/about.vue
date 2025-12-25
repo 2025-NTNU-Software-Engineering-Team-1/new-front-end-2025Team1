@@ -148,12 +148,18 @@ onMounted(() => {
 
 /* Respect system preference */
 @media (prefers-color-scheme: dark) {
-  :root { --icon-color: var(--icon-color-dark); }
+  :root {
+    --icon-color: var(--icon-color-dark);
+  }
 }
 
 /* Respect app data-theme attribute if used */
-:root[data-theme="dark"] { --icon-color: var(--icon-color-dark); }
-:root[data-theme="light"] { --icon-color: var(--icon-color-light); }
+:root[data-theme="dark"] {
+  --icon-color: var(--icon-color-dark);
+}
+:root[data-theme="light"] {
+  --icon-color: var(--icon-color-light);
+}
 
 /* Ensure icon components pick up color; use ::v-deep for scoped style */
 ::v-deep i-uil-github,

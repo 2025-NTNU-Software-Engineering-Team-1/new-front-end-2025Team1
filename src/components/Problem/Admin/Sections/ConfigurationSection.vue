@@ -432,24 +432,49 @@ async function fetchExistingKeySelection() {
   if (!courseName.value || typeof courseName.value !== "string") return;
 
   const currentProblemId = Number(route.params.id);
-  if (!currentProblemId || isNaN(currentProblemId)) return;
+  if (!currentProblemId || isNaN(currentProblemId)) {
+    logger.warn("Skipping key restore: Invalid Problem ID", route.params.id);
+    return;
+  }
 
-  logger.group("Restore Selected Keys from Usage");
+  logger.group(`Key Usage Inspection (Target Problem ID: ${currentProblemId})`);
 
   try {
     const res = await api.CourseAPIUsage.getCourseUsage(courseName.value);
     const { isSuccess, data } = parseApiResponse(res);
 
     if (isSuccess && data?.keys) {
-      const foundKeyIds: string[] = [];
-      data.keys.forEach((key: any) => {
-        const isUsedByThisProblem = key.problem_usages?.some(
-          (usage: any) => Number(usage.problem_id) === currentProblemId,
-        );
-        if (isUsedByThisProblem) {
-          foundKeyIds.push(String(key.id));
-        }
+      // ============================================================
+      // [DEBUG CORE] Table of Key vs Problem IDs
+      // ============================================================
+      const debugTable = data.keys.map((key: any) => {
+        const usages = key.problem_usages || [];
+
+        const associatedProblemIds = usages.map((u: any) => u.problem_id);
+
+        const isMatch = associatedProblemIds.some((pid: any) => Number(pid) === currentProblemId);
+
+        return {
+          "Key Name": key.key_name,
+          "Key ID": key.id,
+          Count: usages.length,
+          "⚠️ ALL Problem IDs": associatedProblemIds.join(", "),
+          "Match Current?": isMatch ? "✅ YES" : "❌ NO",
+        };
       });
+
+      if (DEBUG_MODE) {
+        console.log(
+          "%cThe following table lists all the Problem IDs corresponding to each Key:",
+          "color: #0ea5e9; font-weight: bold; font-size: 1.1em;",
+        );
+
+        console.table(debugTable);
+      }
+
+      const foundKeyIds: string[] = debugTable
+        .filter((row: any) => row["Match Current?"] === "✅ YES")
+        .map((row: any) => String(row["Key ID"]));
 
       if (foundKeyIds.length > 0) {
         const mergedKeys = new Set([...selectedKeys.value, ...foundKeyIds]);
@@ -458,11 +483,12 @@ async function fetchExistingKeySelection() {
         if (problem.value.config) {
           problem.value.config.aiVTuberApiKeys = selectedKeys.value;
         }
-
-        logger.success(`Restored ${foundKeyIds.length} keys for Problem ID ${currentProblemId}`, foundKeyIds);
+        logger.success(`Auto-selected ${foundKeyIds.length} keys based on history.`);
       } else {
-        logger.log("No existing key usage found for this problem.");
+        logger.log("No usage history matches this problem ID.");
       }
+    } else {
+      logger.warn("API returned no keys or failed status.", data);
     }
   } catch (err) {
     logger.error("Failed to restore existing key selection", err);

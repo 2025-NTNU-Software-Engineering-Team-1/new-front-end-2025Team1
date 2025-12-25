@@ -42,7 +42,7 @@
       "usagePage": "用量",
       "setup": {
         "title": "AI 管理 - 設定",
-        "subtitleNewKey": "新增金鑰資訊",
+        "subtitleNewKey": "新增金鑰資訊 (Gimini)",
         "subtitleExistingKey": "既有金鑰",
         "input": {
           "name": "金鑰名稱 *",

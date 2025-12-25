@@ -416,6 +416,7 @@ function removeDockerEnv(index: number) {
 // Section: AI File Extension Helper
 // ==========================================
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getAIFileExtensions() {
   const lang = problem.value.allowedLanguage;
   const list: string[] = [];

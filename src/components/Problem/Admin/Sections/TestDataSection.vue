@@ -7,7 +7,6 @@ import { inject, Ref, ref, watch, computed } from "vue";
 import { useRoute } from "vue-router";
 import { ZipReader, BlobReader } from "@zip.js/zip.js";
 import { assertFileSizeOK } from "@/utils/checkFileSize";
-import { THEME_KEY } from "vue-echarts";
 import { useI18n } from "vue-i18n";
 
 // ==========================================

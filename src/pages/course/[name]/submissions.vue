@@ -188,6 +188,7 @@ async function rejudgeAll() {
   const qs = queryString.stringify(query, { skipNull: true, skipEmptyString: true });
   const url = `/submission?${qs}`;
   
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let allSubmissions: any[] = [];
   try {
     const { data } = await fetcher.get<GetSubmissionListResponse>(url);

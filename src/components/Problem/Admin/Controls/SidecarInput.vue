@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref } from "vue";
 
 interface Sidecar {
   name: string;
@@ -124,6 +124,7 @@ function commitEdit() {
 }
 
 const getSidecarArgs = (sidecar: Sidecar) => argsToString(sidecar.args);
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
 </script>
 

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useTitle, useStorage } from "@vueuse/core";
-import api, { fetcher } from "@/models/api";
+import { useTitle } from "@vueuse/core";
+import api from "@/models/api";
 import { useI18n } from "vue-i18n";
 import { ZipReader, BlobReader, TextWriter, ZipWriter, BlobWriter, TextReader } from "@zip.js/zip.js";
 

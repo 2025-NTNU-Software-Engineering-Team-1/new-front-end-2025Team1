@@ -326,9 +326,11 @@ async function submitScoreEdit() {
     
     // Refresh score history
     fetchScoreHistory();
-  } catch (err: any) {
-    logger.error("Score edit failed", err);
-    const errorMessage = err?.response?.data?.message || err?.message || "Failed to update score. Please try again.";
+  } catch (err: unknown) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const axiosErr = err as any;
+    logger.error("Score edit failed", axiosErr);
+    const errorMessage = axiosErr?.response?.data?.message || axiosErr?.message || "Failed to update score. Please try again.";
     alert(errorMessage);
   } finally {
     isScoreSubmitting.value = false;
@@ -386,9 +388,11 @@ async function viewCaseOutput(taskIndex: number, caseIndex: number) {
     );
     caseOutputData.value = response.data;
     logger.success(`Case artifact files loaded for task ${taskIndex}, case ${caseIndex}`);
-  } catch (err: any) {
-    logger.error("Failed to load case artifact files", err);
-    caseOutputError.value = err?.response?.data?.message || err?.message || "Failed to load artifact files";
+  } catch (err: unknown) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const axiosErr = err as any;
+    logger.error("Failed to load case artifact files", axiosErr);
+    caseOutputError.value = axiosErr?.response?.data?.message || axiosErr?.message || "Failed to load artifact files";
   } finally {
     caseOutputLoading.value = false;
   }

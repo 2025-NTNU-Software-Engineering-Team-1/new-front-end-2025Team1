@@ -243,8 +243,11 @@ async function fetchStaticAnalysisOptions() {
 // Simplified: 2 modes instead of 4
 const syntaxMode = ref<"whitelist" | "blacklist">("blacklist");
 const libraryMode = ref<"whitelist" | "blacklist">("blacklist"); // Combined: imports + headers + functions
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const importMode = ref<"whitelist" | "blacklist">("blacklist");
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const headerMode = ref<"whitelist" | "blacklist">("blacklist");
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const functionMode = ref<"whitelist" | "blacklist">("blacklist");
 
 // Watchers: Clear the opposite list when mode switches
@@ -352,16 +355,19 @@ function getBackendOptions(section: LibSection): string[] {
   return libraryOptions.value.functions || [];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function selectAllBackend(section: LibSection, mode: LibMode) {
   const current = getLibList(section, mode);
   const backend = getBackendOptions(section);
   setLibList(section, mode, [...current, ...backend]);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function clearSection(section: LibSection, mode: LibMode) {
   setLibList(section, mode, []);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function getCandidates(section: LibSection, mode: LibMode) {
   const selected = new Set(getLibList(section, mode));
   return getBackendOptions(section).filter((x) => !selected.has(x));

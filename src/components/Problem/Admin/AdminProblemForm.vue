@@ -349,6 +349,7 @@ const rules = {
           const cfg = problem.value.config;
           if (!cfg?.trialMode) return true;
           // Check if already uploaded via assetPaths
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const assetPaths = (cfg as any)?.assetPaths || {};
           if (assetPaths['ac_code']) return true;
           // Check if new file is being uploaded
@@ -364,6 +365,7 @@ const rules = {
           const cfg = problem.value.config;
           if (!cfg?.trialMode) return true;
           // Check if already uploaded via assetPaths
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const assetPaths = (cfg as any)?.assetPaths || {};
           if (assetPaths['public_testdata']) return true;
           // Check if new file is being uploaded

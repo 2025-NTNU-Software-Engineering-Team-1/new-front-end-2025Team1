@@ -224,9 +224,10 @@ async function viewCaseOutput(taskIndex: number, caseIndex: number) {
       caseIndex
     );
     caseOutputData.value = response.data;
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Failed to load case artifact files", err);
-    caseOutputError.value = err?.response?.data?.message || err?.message || "Failed to load artifact files";
+    const axiosErr = err as { response?: { data?: { message?: string } }; message?: string };
+    caseOutputError.value = axiosErr?.response?.data?.message || axiosErr?.message || "Failed to load artifact files";
   } finally {
     caseOutputLoading.value = false;
   }
@@ -291,6 +292,7 @@ function openTaskDetailModal(taskIndex: number) {
 }
 
 // 打開 Case 詳細資訊模態框
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function openCaseDetailModal(taskIndex: number, caseIndex: number) {
   const task = testResult.value?.tasks[taskIndex];
   const testCase = task?.cases[caseIndex];

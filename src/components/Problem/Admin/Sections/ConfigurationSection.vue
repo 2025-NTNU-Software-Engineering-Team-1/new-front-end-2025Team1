@@ -831,6 +831,72 @@ function onClickOutside(event: MouseEvent) {
 }
 
 // ==========================================
+// [NEW] Section: Drag and Drop Logic & API Update
+// ==========================================
+const isDragging = ref(false); // Controls UI styling during drag operations
+
+// 1. Call backend API to update Key status
+async function updateKeyStatus(keyId: string, newStatus: boolean) {
+  if (!courseName.value) return;
+
+  logger.log(`Updating key ${keyId} to status: ${newStatus}`);
+
+  try {
+    // API path implementation based on the provided screenshot
+    // Route: /course/${courseName}/ai/key/${keyId}
+    const res = await fetcher.patch(`/course/${courseName.value}/ai/key/${keyId}`, {
+      is_active: newStatus,
+    });
+
+    const { isSuccess, message } = parseApiResponse(res);
+
+    if (isSuccess) {
+      logger.success("Key status updated successfully");
+      // After successful update, re-fetch Keys to refresh list categorization
+      await fetchKeys();
+    } else {
+      throw new Error(message || "Update failed");
+    }
+  } catch (err) {
+    logger.error("Failed to update key status", err);
+    alert("Failed to update key status. Please try again.");
+  }
+}
+
+// 2. Drag Start Handler
+function onDragStart(evt: DragEvent, keyId: string, currentStatus: boolean) {
+  if (evt.dataTransfer) {
+    evt.dataTransfer.effectAllowed = "move";
+    evt.dataTransfer.dropEffect = "move";
+    // Store the dragged ID and its current status in the data transfer object
+    evt.dataTransfer.setData("keyId", keyId);
+    evt.dataTransfer.setData("currentStatus", String(currentStatus));
+    isDragging.value = true;
+  }
+}
+
+// 3. Drag End Handler - Used to reset UI state
+function onDragEnd() {
+  isDragging.value = false;
+}
+
+// 4. Drop Handler
+async function onDrop(evt: DragEvent, targetStatus: boolean) {
+  isDragging.value = false;
+  if (!evt.dataTransfer) return;
+
+  const keyId = evt.dataTransfer.getData("keyId");
+  const currentStatusStr = evt.dataTransfer.getData("currentStatus");
+  const currentStatus = currentStatusStr === "true";
+
+  // If status hasn't changed (e.g., dragged from Active to Active), do nothing
+  if (currentStatus === targetStatus) return;
+
+  // Call API to update the status
+  await updateKeyStatus(keyId, targetStatus);
+}
+
+// ==========================================
 // Section: Sidecars & Network Helper
 // ==========================================
 const hasExistingNetworkConfig = computed(() => {
@@ -1155,7 +1221,13 @@ onBeforeUnmount(() => {
             </div>
 
             <div v-else class="grid grid-cols-1 gap-3 md:grid-cols-2">
-              <div class="overflow-hidden rounded-lg border border-gray-400">
+              <div
+                class="overflow-hidden rounded-lg border border-gray-400 transition-colors duration-300"
+                :class="{ 'border-info bg-info/5 border-dashed': isDragging }"
+                @dragover.prevent
+                @dragenter.prevent
+                @drop="onDrop($event, true)"
+              >
                 <button
                   type="button"
                   @click="showActiveKeys = !showActiveKeys"
@@ -1176,6 +1248,9 @@ onBeforeUnmount(() => {
                     <span class="label-text">{{ t("course.problems.activeAiKeys") }}</span>
                     <span class="badge badge-info badge-sm">{{ apiKeys.active.length }}</span>
                   </div>
+                  <span v-if="isDragging" class="text-info animate-pulse text-xs font-bold">
+                    Drop to Activate
+                  </span>
                 </button>
 
                 <div v-show="showActiveKeys" class="h-64 overflow-y-auto p-3">
@@ -1183,7 +1258,10 @@ onBeforeUnmount(() => {
                     <label
                       v-if="!selectedKeys.includes(key.id)"
                       :ref="(el) => (activeKeyRefs[(key as any).id] = el as HTMLElement)"
-                      class="hover:border-info/30 hover:bg-base-200 flex cursor-pointer items-start gap-3 rounded-lg border border-transparent p-3 transition"
+                      class="hover:border-info/30 hover:bg-base-200 flex cursor-move items-start gap-3 rounded-lg border border-transparent p-3 transition"
+                      draggable="true"
+                      @dragstart="onDragStart($event, key.id, true)"
+                      @dragend="onDragEnd"
                     >
                       <input
                         type="checkbox"
@@ -1208,7 +1286,13 @@ onBeforeUnmount(() => {
                 </div>
               </div>
 
-              <div class="overflow-hidden rounded-lg border border-gray-400">
+              <div
+                class="overflow-hidden rounded-lg border border-gray-400 transition-colors duration-300"
+                :class="{ 'border-error bg-error/5 border-dashed': isDragging }"
+                @dragover.prevent
+                @dragenter.prevent
+                @drop="onDrop($event, false)"
+              >
                 <button
                   type="button"
                   @click="showInactiveKeys = !showInactiveKeys"
@@ -1229,6 +1313,9 @@ onBeforeUnmount(() => {
                     <span class="label-text">{{ t("course.problems.inactiveAiKeys") }}</span>
                     <span class="badge badge-error badge-sm">{{ apiKeys.inactive.length }}</span>
                   </div>
+                  <span v-if="isDragging" class="text-error animate-pulse text-xs font-bold">
+                    Drop to Deactivate
+                  </span>
                 </button>
 
                 <div v-show="showInactiveKeys" class="h-64 overflow-y-auto p-3">
@@ -1236,7 +1323,10 @@ onBeforeUnmount(() => {
                     <label
                       v-if="!selectedKeys.includes(key.id)"
                       :ref="(el) => (inactiveKeyRefs[(key as any).id] = el as HTMLElement)"
-                      class="hover:border-error/30 hover:bg-base-200 flex cursor-pointer items-start gap-3 rounded-lg border border-transparent p-3 transition"
+                      class="hover:border-error/30 hover:bg-base-200 flex cursor-move items-start gap-3 rounded-lg border border-transparent p-3 transition"
+                      draggable="true"
+                      @dragstart="onDragStart($event, key.id, false)"
+                      @dragend="onDragEnd"
                     >
                       <input
                         type="checkbox"

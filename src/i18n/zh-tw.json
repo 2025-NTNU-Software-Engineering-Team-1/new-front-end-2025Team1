@@ -241,7 +241,7 @@
       "fileAccessAllowedRead": "允許讀取",
       "fileAccessAllowedWrite": "允許寫入",
       "allowWriteWarning": "允許寫入需要先允許讀取。",
-      "libraryRestrictions": "函式庫限制",
+      "libraryRestrictionsGroup": "函式庫限制",
       "syntaxRestrictions": "語法限制",
       "restrictionBlack": "黑名單",
       "restrictionWhite": "白名單",

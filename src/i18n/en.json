@@ -256,7 +256,7 @@
       "fileAccessAllowedRead": "Allowed Read",
       "fileAccessAllowedWrite": "Allowed Write",
       "allowWriteWarning": "Allow Write requires Allow Read.",
-      "libraryRestrictions": "Library Restrictions",
+      "libraryRestrictionsGroup": "Library Restrictions",
       "syntaxRestrictions": "Syntax Restrictions",
       "restrictionBlack": "Black List",
       "restrictionWhite": "White List",

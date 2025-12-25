@@ -42,7 +42,7 @@
       "usagePage": "用量",
       "setup": {
         "title": "AI 管理 - 設定",
-        "subtitleNewKey": "新增金鑰資訊 (Gimini)",
+        "subtitleNewKey": "新增金鑰資訊 (Gemini)",
         "subtitleExistingKey": "既有金鑰",
         "input": {
           "name": "金鑰名稱 *",
@@ -201,7 +201,7 @@
       "maxZipSize": "壓縮檔之大小上限 (MB)",
       "maxZipSizeDefault": "(預設 50 MB)",
       "aiTA": "AI 助教",
-      "aiModel": "AI 模型",
+      "aiModel": "AI (Gemini) 模型",
       "uploadACFiles": "上傳 AC 檔",
       "selectAPIKeys": "選擇 API 金鑰",
       "aiKeyTotal": "總用量: {total}",

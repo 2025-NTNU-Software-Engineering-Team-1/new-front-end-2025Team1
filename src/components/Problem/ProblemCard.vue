@@ -6,8 +6,8 @@ import api from "@/models/api";
 import { isQuotaUnlimited, LANGUAGE_OPTIONS } from "@/constants";
 
 const isLanguagesExpanded = ref(false);
-const isLibraryExpanded = ref(false);
-const isNetworkExpanded = ref(false);
+const isLibraryExpanded = ref(true);
+const isNetworkExpanded = ref(true);
 
 const areRestrictionsVisible = ref(false);
 
@@ -21,7 +21,6 @@ const props = withDefaults(defineProps<Props>(), {
 
 const session = useSession();
 
-// 高分、提交次數、子任務
 const submitCount = computed(() => (props.problem as any).submitCount ?? 0);
 const highScore = computed(() => (props.problem as any).highScore ?? 0);
 const subtasks = computed(() => {
@@ -29,7 +28,7 @@ const subtasks = computed(() => {
   return p.testCase ?? p.testCaseInfo?.tasks ?? [];
 });
 
-// 下載測資
+// Download test data
 function downloadTestCase(problemId: number) {
   window.location.assign(api.Problem.getTestCaseUrl(problemId));
 }
@@ -114,13 +113,12 @@ const networkSections = computed(() => {
   ];
 });
 
-/* ====== 統計數據 ====== */
+// Statistical data
 const libraryItemsCount = computed(() => {
   if (!lib.value?.enabled) return 0;
   return libraryEntries.value.reduce((sum, entry) => sum + (entry.items?.length || 0), 0);
 });
 
-// waiting for maxcho
 const networkItemsCount = computed(() => {
   if (!net.value?.enabled) return 0;
   return networkSections.value.reduce((sum, section) => sum + (section.items?.length || 0), 0);
@@ -130,7 +128,6 @@ const networkItemsCount = computed(() => {
 <template>
   <div class="card min-w-full">
     <div class="card-body">
-      <!-- ===== Header ===== -->
       <div class="flex flex-wrap items-start justify-between gap-y-4">
         <div class="flex flex-col gap-4">
           <div class="card-title md:text-2xl lg:text-3xl">
@@ -205,7 +202,6 @@ const networkItemsCount = computed(() => {
 
       <div class="divider" />
 
-      <!-- ===== Descriptions / Examples ===== -->
       <div class="card min-w-full rounded-none">
         <div class="card-body p-0">
           <div class="card-title md:text-xl lg:text-2xl">
@@ -246,286 +242,213 @@ const networkItemsCount = computed(() => {
           <div class="card-title md:text-xl lg:text-2xl">{{ $t("components.problem.card.hint") }}</div>
           <markdown-renderer class="mb-8" :md="props.problem.description.hint" />
 
-          <!-- ===== Restrictions Group Wrapper ===== -->
           <div class="relative my-12">
-            <!-- 💭 Thought bubble -->
-            <div
-              v-if="!areRestrictionsVisible"
-              class="flex cursor-pointer items-center justify-center select-none"
-              @click="areRestrictionsVisible = true"
-            >
-              <div class="bubble">
-                💭 Restrictions
-                <div class="bubble-tail"></div>
-              </div>
+            <div class="mb-8 flex justify-center">
+              <button
+                class="btn btn-outline border-base-300 hover:bg-base-200 hover:border-primary gap-2 rounded-full px-6 font-mono normal-case transition-all active:scale-95"
+                @click="areRestrictionsVisible = !areRestrictionsVisible"
+              >
+                <span class="text-lg">{{ areRestrictionsVisible ? "×" : "⚙" }}</span>
+                <span>{{
+                  areRestrictionsVisible ? "Hide Constraints" : "View Environment Constraints"
+                }}</span>
+              </button>
             </div>
 
-            <!-- Drop animation for ALL blocks -->
             <transition name="drop" mode="out-in">
-              <div v-if="areRestrictionsVisible" class="space-y-10">
-                <!-- 💭 Back button styled exactly like the bubble -->
-                <div
-                  class="flex cursor-pointer items-center justify-center select-none"
-                  @click="areRestrictionsVisible = false"
-                >
-                  <div class="bubble">
-                    💭 Restrictions
-                    <div class="bubble-tail"></div>
-                  </div>
-                </div>
-
-                <!-- ===== Allowed Languages ===== -->
-                <div
-                  class="border-base-300 from-base-200 to-base-300 relative mb-8 overflow-hidden rounded-2xl border bg-gradient-to-br transition-all duration-300"
-                  :class="isLanguagesExpanded ? 'px-6 py-6' : 'px-4 py-2'"
-                >
+              <div
+                v-if="areRestrictionsVisible"
+                class="bg-base-200/30 border-base-200 space-y-12 rounded-3xl border p-6 md:p-10"
+              >
+                <div>
                   <div
-                    class="flex cursor-pointer items-center justify-between select-none"
+                    class="mb-6 flex cursor-pointer select-none items-center gap-3"
                     @click="isLanguagesExpanded = !isLanguagesExpanded"
                   >
-                    <span class="text-xl font-semibold">Allowed Languages</span>
-                    <span
-                      class="text-base-content/50 hover:text-base-content transition-transform duration-300"
-                      :class="{ 'rotate-180': isLanguagesExpanded }"
+                    <div class="bg-primary h-6 w-1 rounded-full"></div>
+                    <span class="text-base-content/80 text-lg font-bold uppercase tracking-wide"
+                      >Allowed Languages</span
                     >
-                      ▼
-                    </span>
+                    <span class="bg-base-300 text-base-content/60 rounded px-2 py-1 font-mono text-xs">{{
+                      allowedLangTexts.length
+                    }}</span>
                   </div>
 
                   <transition name="fade">
                     <div
                       v-show="isLanguagesExpanded"
-                      class="mt-4 flex flex-wrap gap-3 transition-all duration-300"
+                      class="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6"
                     >
-                      <span
+                      <div
                         v-for="(lang, idx) in allowedLangTexts"
                         :key="lang"
-                        class="from-info/20 to-info/30 hover:from-info/30 hover:to-info/40 text-info-content group relative overflow-hidden rounded-xl bg-gradient-to-br px-5 py-3 font-mono text-base font-bold transition-all duration-300 hover:scale-105"
-                        :style="{ animationDelay: `${idx * 0.1}s` }"
+                        class="border-base-content/10 bg-base-100 hover:border-primary group relative flex cursor-default items-center justify-center rounded-lg border px-4 py-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+                        :style="{ animationDelay: `${idx * 0.05}s` }"
                       >
-                        <span class="relative">{{ lang }}</span>
-                      </span>
+                        <span
+                          class="text-base-content/80 group-hover:text-primary font-mono text-sm font-bold transition-colors"
+                        >
+                          {{ lang }}
+                        </span>
+                      </div>
                     </div>
                   </transition>
-
-                  <div
-                    v-show="!isLanguagesExpanded"
-                    class="text-base-content/70 mt-1 text-center text-sm leading-tight"
-                  >
-                    <span class="font-semibold">{{ allowedLangTexts.length }}</span>
-                    <span class="ml-1"
-                      >{{ allowedLangTexts.length === 1 ? "language" : "languages" }} allowed</span
-                    >
-                  </div>
                 </div>
 
-                <!-- ===== Restrictions (Library + Network) ===== -->
-                <div class="mb-10 grid grid-cols-1 gap-6 lg:grid-cols-2">
-                  <!-- Library Restrictions -->
-                  <div
-                    class="border-base-300 from-base-200 via-base-200 to-base-300 group relative overflow-hidden rounded-2xl border bg-gradient-to-br transition-all duration-300"
-                    :class="isLibraryExpanded ? 'p-6' : 'p-4'"
-                  >
+                <div class="grid grid-cols-1 gap-10 lg:grid-cols-2">
+                  <div class="space-y-6">
                     <div
-                      class="to-secondary/5 from-primary/5 absolute inset-0 bg-gradient-to-br opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                    ></div>
-                    <div class="relative">
-                      <div
-                        class="mb-4 flex cursor-pointer items-center justify-between select-none"
-                        @click="isLibraryExpanded = !isLibraryExpanded"
+                      class="mb-2 flex cursor-pointer select-none items-center gap-3"
+                      @click="isLibraryExpanded = !isLibraryExpanded"
+                    >
+                      <div class="bg-secondary h-6 w-1 rounded-full"></div>
+                      <span class="text-base-content/80 text-lg font-bold uppercase tracking-wide"
+                        >Library Analysis</span
                       >
-                        <div class="flex flex-1 items-center gap-3">
-                          <div
-                            class="to-secondary from-primary bg-gradient-to-r bg-clip-text text-xl font-bold text-transparent"
-                          >
-                            Library Restrictions
-                          </div>
-                          <div
-                            class="to-secondary/30 from-primary/30 h-1 flex-1 rounded-full bg-gradient-to-r"
-                          ></div>
-                        </div>
-                        <span
-                          class="text-base-content/50 hover:text-base-content ml-3 transition-transform duration-300"
-                          :class="{ 'rotate-180': isLibraryExpanded }"
+                      <span
+                        v-if="lib?.enabled"
+                        class="bg-base-300 text-base-content/60 rounded px-2 py-1 font-mono text-xs"
+                      >
+                        {{ libraryItemsCount }}
+                      </span>
+                      <span v-else class="badge badge-ghost badge-sm">Disabled</span>
+                    </div>
+
+                    <transition name="fade">
+                      <div v-show="isLibraryExpanded && lib?.enabled" class="space-y-3">
+                        <div
+                          v-for="(s, idx) in libraryEntries"
+                          :key="s.label"
+                          class="border-base-content/5 bg-base-100/60 hover:bg-base-100 hover:border-base-content/20 relative flex flex-col gap-3 rounded-xl border p-4 transition-all hover:shadow-sm"
+                          :class="{ 'opacity-50 grayscale': s.disabled }"
+                          :style="{ animationDelay: `${idx * 0.1}s` }"
                         >
-                          ▼
-                        </span>
-                      </div>
+                          <div class="flex items-center justify-between">
+                            <span class="text-base-content/90 text-sm font-bold">{{ s.label }}</span>
 
-                      <template v-if="isLibraryExpanded">
-                        <template v-if="lib?.enabled">
-                          <div class="space-y-4">
                             <div
-                              v-for="(s, idx) in libraryEntries"
-                              :key="s.label"
-                              class="border-base-300 bg-base-100/80 hover:bg-base-100 relative overflow-hidden rounded-xl border p-4 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
-                              :class="s.disabled && 'opacity-50'"
-                              :style="{ animationDelay: `${idx * 0.15}s` }"
+                              class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider"
                             >
-                              <div class="mb-3 flex items-center justify-between">
-                                <span class="text-base-content text-lg font-bold">{{ s.label }}</span>
+                              <template v-if="s.mode === 'whitelist'">
                                 <span
-                                  class="rounded-full px-3 py-1 text-xs font-semibold tracking-wide uppercase"
-                                  :class="
-                                    s.mode === 'whitelist'
-                                      ? 'bg-accent/20 text-accent-content'
-                                      : s.mode === 'blacklist'
-                                        ? 'bg-error/20 text-error-content'
-                                        : 'bg-base-300 text-base-content'
-                                  "
-                                >
-                                  {{ s.mode }}
-                                </span>
-                              </div>
-
-                              <div class="mt-2 flex flex-wrap gap-2">
-                                <template v-if="s.items?.length">
-                                  <span
-                                    v-for="(sym, symIdx) in s.items"
-                                    :key="sym"
-                                    class="relative overflow-hidden rounded-lg px-3 py-1.5 font-mono text-sm font-semibold transition-all duration-200 hover:scale-105 hover:shadow-md"
-                                    :class="
-                                      s.mode === 'whitelist'
-                                        ? 'from-accent/80 to-accent text-accent-content bg-gradient-to-br'
-                                        : 'from-error/80 to-error text-error-content bg-gradient-to-br'
-                                    "
-                                    :style="{ animationDelay: `${idx * 0.15 + Number(symIdx) * 0.05}s` }"
-                                  >
-                                    <span class="relative z-10">{{ sym }}</span>
-                                    <div
-                                      class="absolute inset-0 translate-y-full bg-white/20 transition-transform duration-300 group-hover:translate-y-0"
-                                    ></div>
-                                  </span>
-                                </template>
-                                <span class="text-base-content/60 text-sm italic" v-else>No restriction</span>
-                              </div>
+                                  class="bg-success h-2 w-2 animate-pulse rounded-full shadow-[0_0_8px_rgba(var(--su),0.6)]"
+                                ></span>
+                                <span class="text-success">Allowed Only</span>
+                              </template>
+                              <template v-else-if="s.mode === 'blacklist'">
+                                <span
+                                  class="bg-error h-2 w-2 rounded-full shadow-[0_0_8px_rgba(var(--er),0.6)]"
+                                ></span>
+                                <span class="text-error">Blocked</span>
+                              </template>
+                              <template v-else>
+                                <span class="bg-base-300 h-2 w-2 rounded-full"></span>
+                                <span class="text-base-content/40">Unrestricted</span>
+                              </template>
                             </div>
                           </div>
-                        </template>
-                        <div v-else class="text-base-content/60 py-8 text-center italic">
-                          <div class="mb-2 text-lg">No restrictions</div>
-                          <div
-                            class="via-base-content/20 mx-auto h-1 w-20 rounded-full bg-gradient-to-r from-transparent to-transparent"
-                          ></div>
-                        </div>
-                      </template>
 
-                      <div v-if="!isLibraryExpanded" class="text-base-content/70 text-center">
-                        <template v-if="lib?.enabled">
-                          <span class="font-semibold">{{ libraryItemsCount }}</span>
-                          <span class="text-sm"
-                            >{{ libraryItemsCount === 1 ? "item" : "items" }} restricted</span
+                          <div
+                            v-if="s.items?.length"
+                            class="border-base-content/10 flex flex-wrap gap-2 border-l-2 pl-3"
                           >
-                        </template>
-                        <span v-else class="text-sm italic">Empty</span>
+                            <span
+                              v-for="sym in s.items"
+                              :key="sym"
+                              class="bg-base-200/50 text-base-content/80 hover:text-primary hover:bg-base-200 inline-flex select-none items-center rounded px-2 py-1 font-mono text-xs transition-colors"
+                            >
+                              {{ sym }}
+                            </span>
+                          </div>
+                          <div v-else class="text-base-content/30 pl-3 text-xs italic">
+                            {{ s.disabled ? "Not applicable" : "No rules defined" }}
+                          </div>
+                        </div>
                       </div>
+                    </transition>
+                    <div v-if="!lib?.enabled" class="text-base-content/40 pl-4 text-sm italic">
+                      No library restrictions active.
                     </div>
                   </div>
 
-                  <!-- Network Access Restriction -->
-                  <div
-                    class="border-base-300 from-base-200 via-base-200 to-base-300 group relative overflow-hidden rounded-2xl border bg-gradient-to-br transition-all duration-300"
-                    :class="isNetworkExpanded ? 'p-6' : 'p-4'"
-                  >
+                  <div class="space-y-6">
                     <div
-                      class="from-info/5 to-warning/5 absolute inset-0 bg-gradient-to-br opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                    ></div>
-                    <div class="relative">
-                      <div
-                        class="mb-4 flex cursor-pointer items-center justify-between select-none"
-                        @click="isNetworkExpanded = !isNetworkExpanded"
+                      class="mb-2 flex cursor-pointer select-none items-center gap-3"
+                      @click="isNetworkExpanded = !isNetworkExpanded"
+                    >
+                      <div class="bg-warning h-6 w-1 rounded-full"></div>
+                      <span class="text-base-content/80 text-lg font-bold uppercase tracking-wide"
+                        >Network Access</span
                       >
-                        <div class="flex flex-1 items-center gap-3">
-                          <div
-                            class="from-info to-warning bg-gradient-to-r bg-clip-text text-xl font-bold text-transparent"
-                          >
-                            Network Access Restriction
-                          </div>
-                          <div
-                            class="from-info/30 to-warning/30 h-1 flex-1 rounded-full bg-gradient-to-r"
-                          ></div>
-                        </div>
-                        <span
-                          class="text-base-content/50 hover:text-base-content ml-3 transition-transform duration-300"
-                          :class="{ 'rotate-180': isNetworkExpanded }"
+                      <span
+                        v-if="net?.enabled"
+                        class="bg-base-300 text-base-content/60 rounded px-2 py-1 font-mono text-xs"
+                      >
+                        {{ networkItemsCount }}
+                      </span>
+                      <span v-else class="badge badge-ghost badge-sm">Disabled</span>
+                    </div>
+
+                    <transition name="fade">
+                      <div v-show="isNetworkExpanded && net?.enabled" class="space-y-3">
+                        <div
+                          v-for="(s, idx) in networkSections"
+                          :key="s.label"
+                          class="border-base-content/5 bg-base-100/60 hover:bg-base-100 hover:border-base-content/20 relative flex flex-col gap-3 rounded-xl border p-4 transition-all hover:shadow-sm"
+                          :style="{ animationDelay: `${idx * 0.1}s` }"
                         >
-                          ▼
-                        </span>
-                      </div>
+                          <div class="flex items-center justify-between">
+                            <span class="text-base-content/90 text-sm font-bold">{{ s.label }}</span>
 
-                      <template v-if="isNetworkExpanded">
-                        <template v-if="net?.enabled">
-                          <div class="space-y-4">
                             <div
-                              v-for="(s, idx) in networkSections"
-                              :key="s.label"
-                              class="border-base-300 bg-base-100/80 hover:bg-base-100 relative overflow-hidden rounded-xl border p-4 backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
-                              :style="{ animationDelay: `${idx * 0.15}s` }"
+                              class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider"
                             >
-                              <div class="mb-3 flex items-center justify-between">
-                                <span class="text-base-content text-lg font-bold">{{ s.label }}</span>
+                              <template v-if="s.mode === 'whitelist'">
                                 <span
-                                  class="rounded-full px-3 py-1 text-xs font-semibold tracking-wide uppercase"
-                                  :class="
-                                    s.mode === 'whitelist'
-                                      ? 'bg-accent/20 text-accent-content'
-                                      : s.mode === 'blacklist'
-                                        ? 'bg-error/20 text-error-content'
-                                        : 'bg-base-300 text-base-content'
-                                  "
-                                >
-                                  {{ s.mode }}
-                                </span>
-                              </div>
-
-                              <div class="mt-2 flex flex-wrap gap-2">
-                                <template v-if="s.items?.length">
-                                  <span
-                                    v-for="(sym, symIdx) in s.items"
-                                    :key="sym"
-                                    class="relative overflow-hidden rounded-lg px-3 py-1.5 font-mono text-sm font-semibold transition-all duration-200 hover:scale-105 hover:shadow-md"
-                                    :class="
-                                      s.mode === 'whitelist'
-                                        ? 'from-accent/80 to-accent text-accent-content bg-gradient-to-br'
-                                        : 'from-error/80 to-error text-error-content bg-gradient-to-br'
-                                    "
-                                    :style="{ animationDelay: `${idx * 0.15 + Number(symIdx) * 0.05}s` }"
-                                  >
-                                    <span class="relative z-10">{{ sym }}</span>
-                                    <div
-                                      class="absolute inset-0 translate-y-full bg-white/20 transition-transform duration-300 group-hover:translate-y-0"
-                                    ></div>
-                                  </span>
-                                </template>
-                                <span v-else class="text-base-content/60 text-sm italic">No restriction</span>
-                              </div>
+                                  class="bg-success h-2 w-2 animate-pulse rounded-full shadow-[0_0_8px_rgba(var(--su),0.6)]"
+                                ></span>
+                                <span class="text-success">Allowed Only</span>
+                              </template>
+                              <template v-else-if="s.mode === 'blacklist'">
+                                <span
+                                  class="bg-error h-2 w-2 rounded-full shadow-[0_0_8px_rgba(var(--er),0.6)]"
+                                ></span>
+                                <span class="text-error">Blocked</span>
+                              </template>
+                              <template v-else>
+                                <span class="bg-base-300 h-2 w-2 rounded-full"></span>
+                                <span class="text-base-content/40">Unrestricted</span>
+                              </template>
                             </div>
                           </div>
-                        </template>
-                        <div v-else class="text-base-content/60 py-8 text-center italic">
-                          <div class="mb-2 text-lg">No restrictions</div>
-                          <div
-                            class="via-base-content/20 mx-auto h-1 w-20 rounded-full bg-gradient-to-r from-transparent to-transparent"
-                          ></div>
-                        </div>
-                      </template>
 
-                      <div v-if="!isNetworkExpanded" class="text-base-content/70 text-center">
-                        <template v-if="net?.enabled">
-                          <span class="font-semibold">{{ networkItemsCount }}</span>
-                          <span class="text-sm"
-                            >{{ networkItemsCount === 1 ? "item" : "items" }} restricted</span
+                          <div
+                            v-if="s.items?.length"
+                            class="border-base-content/10 flex flex-wrap gap-2 border-l-2 pl-3"
                           >
-                        </template>
-                        <span v-else class="text-sm italic">Empty</span>
+                            <span
+                              v-for="sym in s.items"
+                              :key="sym"
+                              class="bg-base-200/50 text-base-content/80 hover:text-primary hover:bg-base-200 inline-flex select-none items-center rounded px-2 py-1 font-mono text-xs transition-colors"
+                            >
+                              {{ sym }}
+                            </span>
+                          </div>
+                          <div v-else class="text-base-content/30 pl-3 text-xs italic">
+                            No specific rules defined
+                          </div>
+                        </div>
                       </div>
+                    </transition>
+                    <div v-if="!net?.enabled" class="text-base-content/40 pl-4 text-sm italic">
+                      No network restrictions active.
                     </div>
                   </div>
                 </div>
               </div>
             </transition>
           </div>
-          <!-- ===== Subtasks ===== -->
+
           <div class="card-title md:text-xl lg:text-2xl">
             {{ $t("components.problem.card.subtasks.title") }}
           </div>
@@ -554,64 +477,36 @@ const networkItemsCount = computed(() => {
 </template>
 
 <style scoped>
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.fade-enter-active,
+.fade-leave-active {
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
 }
 
-.space-y-4 > *,
-.space-y-3 > * {
-  animation: fadeInUp 0.5s ease-out forwards;
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
+  transform: translateY(-5px);
 }
 
 .drop-enter-active {
-  animation: dropDown 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+  animation: dropDown 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.drop-leave-active {
+  animation: dropDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) reverse;
 }
 
 @keyframes dropDown {
   0% {
     opacity: 0;
-    transform: translateY(-150px) scale(0.9);
-  }
-  60% {
-    transform: translateY(15px) scale(1.02);
+    transform: translateY(-20px) scale(0.98);
+    max-height: 0;
   }
   100% {
     opacity: 1;
     transform: translateY(0) scale(1);
+    max-height: 2000px;
   }
-}
-
-.bubble {
-  position: relative;
-  background-color: var(--color-base-200);
-  color: var(--color-base-content);
-  font-weight: 600;
-  border-radius: 9999px;
-  padding: 0.75rem 1.5rem;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  font-size: 1.125rem;
-  transition: all 0.3s ease;
-}
-.bubble:hover {
-  transform: scale(1.05);
-  background-color: var(--color-base-300);
-}
-.bubble-tail {
-  position: absolute;
-  bottom: -8px;
-  left: 1.5rem;
-  width: 0;
-  height: 0;
-  border-top: 8px solid var(--color-base-200);
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
 }
 </style>

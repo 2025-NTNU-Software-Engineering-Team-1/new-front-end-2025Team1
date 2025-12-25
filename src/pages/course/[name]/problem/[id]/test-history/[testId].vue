@@ -686,7 +686,7 @@ async function deleteTrialSubmission() {
               <span class="label-text text-primary-content font-semibold">JSON Data</span>
             </label>
             <div class="bg-base-200 text-base-content rounded p-4">
-              <pre class="font-mono text-sm whitespace-pre-wrap">{{ currentDetailData.jsonData }}</pre>
+              <pre class="whitespace-pre-wrap font-mono text-sm">{{ currentDetailData.jsonData }}</pre>
             </div>
           </div>
         </div>
@@ -754,7 +754,7 @@ async function deleteTrialSubmission() {
                   readonly
                   class="absolute inset-0"
                 />
-                <div v-else class="absolute inset-0 flex items-center justify-center text-gray-500 italic">
+                <div v-else class="absolute inset-0 flex items-center justify-center italic text-gray-500">
                   No Content
                 </div>
               </div>
@@ -776,7 +776,7 @@ async function deleteTrialSubmission() {
                   readonly
                   class="absolute inset-0"
                 />
-                <div v-else class="absolute inset-0 flex items-center justify-center text-gray-500 italic">
+                <div v-else class="absolute inset-0 flex items-center justify-center italic text-gray-500">
                   No Content
                 </div>
               </div>

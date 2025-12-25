@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { useSession } from "@/stores/session";
 import api from "@/models/api";
 import { isQuotaUnlimited, LANGUAGE_OPTIONS } from "@/constants";
@@ -111,6 +111,31 @@ const networkSections = computed(() => {
     },
     { label: "Connect With Local", ...pickNetMode(net.value.connectWithLocal) },
   ];
+});
+
+/* ====== Reminder Logic (New) ====== */
+const isReminderDismissed = ref(false);
+
+// exclude Language
+const totalRestrictionsCount = computed(() => {
+  const libCount = lib.value?.enabled ? libraryItemsCount.value : 0;
+  const netCount = net.value?.enabled ? networkItemsCount.value : 0;
+  return libCount + netCount;
+});
+
+const showReminder = computed(() => {
+  return !areRestrictionsVisible.value && !isReminderDismissed.value && totalRestrictionsCount.value > 0;
+});
+
+function dismissReminder(event?: Event) {
+  event?.stopPropagation();
+  isReminderDismissed.value = true;
+}
+
+watch(areRestrictionsVisible, (newVal) => {
+  if (newVal) {
+    isReminderDismissed.value = true;
+  }
 });
 
 // Statistical data
@@ -244,15 +269,42 @@ const networkItemsCount = computed(() => {
 
           <div class="relative my-12">
             <div class="mb-8 flex justify-center">
-              <button
-                class="btn btn-outline border-base-300 hover:bg-base-200 hover:border-primary gap-2 rounded-full px-6 font-mono normal-case transition-all active:scale-95"
-                @click="areRestrictionsVisible = !areRestrictionsVisible"
-              >
-                <span class="text-lg">{{ areRestrictionsVisible ? "×" : "⚙" }}</span>
-                <span>{{
-                  areRestrictionsVisible ? "Hide Constraints" : "View Environment Constraints"
-                }}</span>
-              </button>
+              <div class="relative inline-block">
+                <button
+                  class="btn btn-outline border-base-300 hover:bg-base-200 hover:border-primary gap-2 rounded-full px-6 font-mono normal-case transition-all active:scale-95"
+                  @click="areRestrictionsVisible = !areRestrictionsVisible"
+                >
+                  <span class="text-lg">{{ areRestrictionsVisible ? "×" : "⚙" }}</span>
+                  <span>{{
+                    areRestrictionsVisible ? "Hide Constraints" : "View Environment Constraints"
+                  }}</span>
+                </button>
+
+                <transition name="fade">
+                  <div
+                    v-if="showReminder"
+                    class="group absolute -right-2 -top-2 z-10 flex animate-bounce cursor-pointer items-center justify-center hover:animate-none"
+                    title="Active restrictions found"
+                    @click="areRestrictionsVisible = true"
+                  >
+                    <div
+                      class="badge badge-error shadow-error/40 gap-1 p-3 text-xs font-bold text-white shadow-lg"
+                    >
+                      <span>{{ totalRestrictionsCount }}</span>
+
+                      <div class="h-3 w-[1px] bg-white/30"></div>
+
+                      <div
+                        class="flex h-4 w-4 items-center justify-center rounded-full transition-colors hover:bg-white/20"
+                        @click="dismissReminder"
+                        title="Dismiss reminder"
+                      >
+                        ×
+                      </div>
+                    </div>
+                  </div>
+                </transition>
+              </div>
             </div>
 
             <transition name="drop" mode="out-in">

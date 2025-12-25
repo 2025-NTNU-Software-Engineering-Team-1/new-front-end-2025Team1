@@ -34,7 +34,7 @@
   --color-primary: hsl(207, 94%, 20%);
   --color-primary-content: hsl(0 0% 100%);
 
-    --color-base-100: hsl(220 15% 15%);
+  --color-base-100: hsl(220 15% 15%);
   /* Dark gray background */
   --color-base-200: hsl(220 15% 10%);
   /* Darker background */
@@ -51,7 +51,6 @@
   /* Reset table headers for dark mode to match base-200 */
   --color-table-header: var(--color-base-200);
 }
-
 
 /* Global Table Styling Override for DaisyUI 5 */
 .table:not(.table-zebra) :where(thead, tfoot) {

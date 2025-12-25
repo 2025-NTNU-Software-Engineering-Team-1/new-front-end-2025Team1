@@ -18,9 +18,9 @@ useTitle(`Test History - ${route.params.id} - ${route.params.name} | Normal OJ`)
 
 // Determine back button path based on where user came from
 const getBackPath = () => {
-  const from = String(route.query.from || '');
+  const from = String(route.query.from || "");
   // If came from problems list page, return to problems list
-  if (from === 'problems') {
+  if (from === "problems") {
     return `/course/${route.params.name}/problems`;
   }
   // Default: return to test page (when from problem detail page or test page)
@@ -46,7 +46,7 @@ const canRejudge = ref(false);
 onMounted(async () => {
   try {
     isLoading.value = true;
-    
+
     // Check rejudge permission (only for Admin/Teacher/TA)
     if (session.isAdmin || session.isTeacher || session.isTA) {
       try {
@@ -59,7 +59,7 @@ onMounted(async () => {
         canRejudge.value = false;
       }
     }
-    
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response: any = await api.TrialSubmission.getTrialHistory(Number(route.params.id));
 
@@ -137,11 +137,11 @@ async function rejudgeAll() {
 const deletingIds = ref<Set<string | number>>(new Set());
 async function deleteTrialSubmission(id: string | number, event: Event) {
   event.stopPropagation(); // Prevent row click navigation
-  
+
   if (!confirm(`Are you sure you want to delete trial submission ${id}?`)) {
     return;
   }
-  
+
   deletingIds.value.add(id);
   try {
     const response = await api.TrialSubmission.delete(String(id));
@@ -175,10 +175,7 @@ async function deleteTrialSubmission(id: string | number, event: Event) {
             >
               <i-uil-repeat class="mr-1" /> Rejudge All
             </button>
-            <router-link
-              :to="getBackPath()"
-              class="btn btn-sm"
-            >
+            <router-link :to="getBackPath()" class="btn btn-sm">
               <i-uil-arrow-left class="mr-1" />
               {{ t("course.problem.test.back") }}
             </router-link>

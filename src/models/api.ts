@@ -92,8 +92,7 @@ const Submission = {
       skipped: number;
     }>("/submission/rejudge-all", { problem_id: problemId }),
 
-  delete: (id: string) =>
-    fetcher.delete<{ ok: boolean }>(`/submission/${id}`),
+  delete: (id: string) => fetcher.delete<{ ok: boolean }>(`/submission/${id}`),
 
   getArtifactUrl: (id: string, kind: "compiledBinary" | "zip", taskIndex?: number) => {
     const base = (fetcher.defaults.baseURL || "").toString().replace(/\/$/, "");
@@ -145,14 +144,17 @@ const Submission = {
   // Get case artifact files (all files in artifact zip including stdout, stderr, images, etc.)
   getCaseArtifactFiles: (id: string, taskNo: number, caseNo: number) =>
     fetcher.get<{
-      stdout: string | null;  // null means file doesn't exist, '' means empty file
+      stdout: string | null; // null means file doesn't exist, '' means empty file
       stderr: string | null;
-      files: Record<string, {
-        type: 'text' | 'image' | 'binary';
-        content: string;
-        extension: string;
-        mimeType?: string;
-      }>;
+      files: Record<
+        string,
+        {
+          type: "text" | "image" | "binary";
+          content: string;
+          extension: string;
+          mimeType?: string;
+        }
+      >;
     }>(`/submission/${id}/artifact/case/${taskNo}/${caseNo}`),
 };
 
@@ -282,12 +284,15 @@ const TrialSubmission = {
     fetcher.get<{
       stdout: string | null;
       stderr: string | null;
-      files: Record<string, {
-        type: 'text' | 'image' | 'binary';
-        content: string;
-        extension: string;
-        mimeType?: string;
-      }>;
+      files: Record<
+        string,
+        {
+          type: "text" | "image" | "binary";
+          content: string;
+          extension: string;
+          mimeType?: string;
+        }
+      >;
     }>(`/trial-submission/${trialSubmissionId}/artifact/case/${taskNo}/${caseNo}`),
 };
 

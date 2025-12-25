@@ -31,7 +31,7 @@ html[data-theme="dark"] .dp__menu,
 body[data-theme="dark"] .dp__menu {
   background-color: var(--vdp-bg) !important;
   color: var(--vdp-text) !important;
-  border: 1px solid rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
 }
 
 /* Override component's light theme variables when page is in dark mode */
@@ -47,7 +47,7 @@ html[data-theme="dark"] .dp__menu.dp__theme_light,
 body[data-theme="dark"] .dp__menu.dp__theme_light {
   --dp-background-color: var(--vdp-bg) !important;
   --dp-text-color: var(--vdp-text) !important;
-  --dp-border-color: rgba(255,255,255,0.06) !important;
+  --dp-border-color: rgba(255, 255, 255, 0.06) !important;
   background-color: var(--vdp-bg) !important;
   color: var(--vdp-text) !important;
 }
@@ -80,7 +80,7 @@ body[data-theme="dark"] .dp__menu * {
 .dark .dp__menu .dp__footer,
 html[data-theme="dark"] .dp__menu .dp__footer,
 body[data-theme="dark"] .dp__menu .dp__footer {
-  background-color: rgba(0,0,0,0.32) !important;
+  background-color: rgba(0, 0, 0, 0.32) !important;
 }
 
 /* Ensure time number controls are visible */
@@ -256,7 +256,7 @@ body[data-theme="dark"] .dp__main *,
   background: var(--vdp-bg) !important;
   background-color: var(--vdp-bg) !important;
   color: var(--vdp-text) !important;
-  border-color: rgba(255,255,255,0.06) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
 }
 
 /* specific controls */
@@ -284,7 +284,7 @@ body[data-theme="dark"] .dp__main *,
 /* footer/button backgrounds */
 .dp__main .dp__footer,
 .dp__menu .dp__footer {
-  background: rgba(0,0,0,0.32) !important;
+  background: rgba(0, 0, 0, 0.32) !important;
 }
 
 /* arrow/controls visibility */
@@ -309,7 +309,7 @@ body[data-theme="dark"] .dp__main *,
 [data-theme="dark"] .dp__menu[style*="--dp-background-color"] {
   background-color: var(--vdp-bg) !important;
   color: var(--vdp-text) !important;
-  border-color: rgba(255,255,255,0.06) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
 }
 
 :root[data-theme="dark"] .dp__main[style*="#fff"],

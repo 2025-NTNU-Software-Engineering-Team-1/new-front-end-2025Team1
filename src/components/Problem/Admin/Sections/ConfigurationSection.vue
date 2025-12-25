@@ -187,9 +187,7 @@ async function validateTrialPublicZip(file: File): Promise<boolean> {
 
     // Validation: ONLY .in and .out files allowed
     // Public test data should contain both input (.in) and expected output (.out) files
-    const invalid = entries.filter(
-      ({ filename }) => !filename.endsWith(".in") && !filename.endsWith(".out")
-    );
+    const invalid = entries.filter(({ filename }) => !filename.endsWith(".in") && !filename.endsWith(".out"));
     if (invalid.length > 0) {
       logger.error(
         "Invalid files found (must be .in or .out)",
@@ -1035,9 +1033,7 @@ onBeforeUnmount(() => {
                 v-model="problem.config!.trialResultVisible"
               />
             </label>
-            <span class="text-xs opacity-70">{{
-              t("course.problems.allowViewingExecutionOutput")
-            }}</span>
+            <span class="text-xs opacity-70">{{ t("course.problems.allowViewingExecutionOutput") }}</span>
           </div>
 
           <div class="form-control">
@@ -1114,10 +1110,13 @@ onBeforeUnmount(() => {
             />
           </div>
           <div class="mt-1 pl-1 text-xs opacity-70">
-            Only <code>.in</code> and <code>.out</code> files inside ZIP; each <code>.in</code> must have a corresponding <code>.out</code> file; ≤ 1 GB
+            Only <code>.in</code> and <code>.out</code> files inside ZIP; each <code>.in</code> must have a
+            corresponding <code>.out</code> file; ≤ 1 GB
           </div>
           <label v-if="v$?.assets?.trialModePublicTestDataZip?.$error" class="label">
-            <span class="label-text-alt text-error">{{ v$.assets.trialModePublicTestDataZip.$errors[0]?.$message }}</span>
+            <span class="label-text-alt text-error">{{
+              v$.assets.trialModePublicTestDataZip.$errors[0]?.$message
+            }}</span>
           </label>
         </div>
 
@@ -1127,7 +1126,10 @@ onBeforeUnmount(() => {
             <span class="label-text">{{ t("course.problems.uploadACFiles") }}</span>
             <div class="flex items-center gap-2">
               <div
-                v-if="hasAsset('ac_code') || (problem.assets?.trialModeACFiles && problem.assets.trialModeACFiles.length > 0)"
+                v-if="
+                  hasAsset('ac_code') ||
+                  (problem.assets?.trialModeACFiles && problem.assets.trialModeACFiles.length > 0)
+                "
                 class="flex items-center gap-2"
               >
                 <span class="badge badge-outline badge-success text-xs">Uploaded</span>
@@ -1163,11 +1165,11 @@ onBeforeUnmount(() => {
               "
             />
           </div>
-          <div class="mt-1 pl-1 text-xs opacity-70">
-            Allowed: .c, .cpp, .py
-          </div>
+          <div class="mt-1 pl-1 text-xs opacity-70">Allowed: .c, .cpp, .py</div>
           <label v-if="v$?.assets?.trialModeACFiles?.$error" class="label">
-            <span class="label-text-alt text-error">{{ v$.assets.trialModeACFiles.$errors[0]?.$message }}</span>
+            <span class="label-text-alt text-error">{{
+              v$.assets.trialModeACFiles.$errors[0]?.$message
+            }}</span>
           </label>
         </div>
       </div>
@@ -1188,7 +1190,7 @@ onBeforeUnmount(() => {
       >
         <div v-if="showNetworkSection" class="mt-3 space-y-4 p-2">
           <!-- Network Access Restriction Section -->
-          <div class="rounded-lg border border-gray-500 overflow-hidden">
+          <div class="overflow-hidden rounded-lg border border-gray-500">
             <div class="bg-base-300 px-4 py-2">
               <span class="text-base-content font-medium">{{
                 t("course.problems.networkAccessRestriction")
@@ -1197,85 +1199,86 @@ onBeforeUnmount(() => {
             <div class="p-4">
               <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div class="col-span-1 flex items-center gap-4 md:col-span-2">
-                <span class="label-text">{{ t("course.problems.networkAccessModel") }}</span>
-                <div class="mode-switcher">
-                  <div class="mode-switcher-container">
-                    <div
-                      class="mode-switcher-slider"
-                      :class="{
-                        'slider-blacklist':
-                          problem.config!.networkAccessRestriction!.external!.model === 'Black',
-                      }"
-                    ></div>
-                    <button
-                      class="mode-switcher-option"
-                      :class="{
-                        active: problem.config!.networkAccessRestriction!.external!.model === 'White',
-                      }"
-                      @click="problem.config!.networkAccessRestriction!.external!.model = 'White'"
-                    >
-                      <span>{{ t("course.problems.networkAccessWhitelist") }}</span>
-                    </button>
-                    <button
-                      class="mode-switcher-option"
-                      :class="{
-                        active: problem.config!.networkAccessRestriction!.external!.model === 'Black',
-                      }"
-                      @click="problem.config!.networkAccessRestriction!.external!.model = 'Black'"
-                    >
-                      <span>{{ t("course.problems.networkAccessBlacklist") }}</span>
-                    </button>
+                  <span class="label-text">{{ t("course.problems.networkAccessModel") }}</span>
+                  <div class="mode-switcher">
+                    <div class="mode-switcher-container">
+                      <div
+                        class="mode-switcher-slider"
+                        :class="{
+                          'slider-blacklist':
+                            problem.config!.networkAccessRestriction!.external!.model === 'Black',
+                        }"
+                      ></div>
+                      <button
+                        class="mode-switcher-option"
+                        :class="{
+                          active: problem.config!.networkAccessRestriction!.external!.model === 'White',
+                        }"
+                        @click="problem.config!.networkAccessRestriction!.external!.model = 'White'"
+                      >
+                        <span>{{ t("course.problems.networkAccessWhitelist") }}</span>
+                      </button>
+                      <button
+                        class="mode-switcher-option"
+                        :class="{
+                          active: problem.config!.networkAccessRestriction!.external!.model === 'Black',
+                        }"
+                        @click="problem.config!.networkAccessRestriction!.external!.model = 'Black'"
+                      >
+                        <span>{{ t("course.problems.networkAccessBlacklist") }}</span>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="ml-2 text-xs opacity-70">
+                    <span v-if="problem.config!.networkAccessRestriction!.external!.model === 'White'">
+                      Only allow specific IPs/URLs. Block everything else.
+                    </span>
+                    <span v-else> Block specific IPs/URLs. Allow everything else. </span>
                   </div>
                 </div>
-                <div class="ml-2 text-xs opacity-70">
-                  <span v-if="problem.config!.networkAccessRestriction!.external!.model === 'White'">
-                    Only allow specific IPs/URLs. Block everything else.
-                  </span>
-                  <span v-else> Block specific IPs/URLs. Allow everything else. </span>
+
+                <div>
+                  <label class="label"
+                    ><span class="label-text">{{ t("course.problems.networkAccessIPList") }}</span></label
+                  >
+                  <MultiStringInput
+                    v-model="problem.config!.networkAccessRestriction!.external!.ip"
+                    placeholder="e.g. 8.8.8.8"
+                    :badge-class="
+                      problem.config!.networkAccessRestriction!.external!.model === 'White'
+                        ? 'badge-info'
+                        : 'badge-error'
+                    "
+                  />
+                </div>
+
+                <div>
+                  <label class="label"
+                    ><span class="label-text">{{ t("course.problems.networkAccessURLList") }}</span></label
+                  >
+                  <MultiStringInput
+                    v-model="problem.config!.networkAccessRestriction!.external!.url"
+                    placeholder="e.g. google.com"
+                    :badge-class="
+                      problem.config!.networkAccessRestriction!.external!.model === 'White'
+                        ? 'badge-info'
+                        : 'badge-error'
+                    "
+                  />
                 </div>
               </div>
-
-              <div>
-                <label class="label"
-                  ><span class="label-text">{{ t("course.problems.networkAccessIPList") }}</span></label
-                >
-                <MultiStringInput
-                  v-model="problem.config!.networkAccessRestriction!.external!.ip"
-                  placeholder="e.g. 8.8.8.8"
-                  :badge-class="
-                    problem.config!.networkAccessRestriction!.external!.model === 'White'
-                      ? 'badge-info'
-                      : 'badge-error'
-                  "
-                />
-              </div>
-
-              <div>
-                <label class="label"
-                  ><span class="label-text">{{ t("course.problems.networkAccessURLList") }}</span></label
-                >
-                <MultiStringInput
-                  v-model="problem.config!.networkAccessRestriction!.external!.url"
-                  placeholder="e.g. google.com"
-                  :badge-class="
-                    problem.config!.networkAccessRestriction!.external!.model === 'White'
-                      ? 'badge-info'
-                      : 'badge-error'
-                  "
-                />
-              </div>
             </div>
-            </div> <!-- close p-4 content -->
+            <!-- close p-4 content -->
           </div>
 
           <!-- Sandbox Environment Section -->
-          <div class="rounded-lg border border-gray-500 overflow-hidden">
+          <div class="overflow-hidden rounded-lg border border-gray-500">
             <div class="bg-base-300 px-4 py-2">
               <span class="text-base-content font-medium">{{ t("course.problems.SandboxEnvironment") }}</span>
             </div>
-            <div class="p-4 space-y-4">
+            <div class="space-y-4 p-4">
               <!-- Sidecars -->
-              <div class="rounded-lg border border-base-content/30 p-4">
+              <div class="border-base-content/30 rounded-lg border p-4">
                 <div class="mb-3">
                   <span class="label-text font-medium">Sidecars</span>
                 </div>
@@ -1283,109 +1286,112 @@ onBeforeUnmount(() => {
               </div>
 
               <!-- Dockerfiles -->
-              <div class="rounded-lg border border-base-content/30 p-4">
-              <div class="flex items-center gap-3">
-                <span class="label-text">{{ t("course.problems.dockerFiles") }}</span>
-                <div class="flex items-center gap-2">
-                  <div v-if="hasAsset('network_dockerfile')" class="flex items-center gap-2">
-                    <span class="badge badge-success badge-outline text-xs">{{
-                      t("course.problems.uploaded")
-                    }}</span>
-                    <a
-                      :href="assetDownloadUrl('network_dockerfile') || '#'"
-                      class="btn btn-xs"
-                      target="_blank"
-                      rel="noopener"
-                    >
-                      {{ t("course.problems.download") }}
-                    </a>
-                  </div>
-                  <span v-else class="badge badge-outline text-xs opacity-70">{{
-                    t("course.problems.notUploaded")
-                  }}</span>
-                </div>
-              </div>
-              <div class="mt-3 flex items-center gap-3">
-                <span class="label-text text-sm opacity-80">{{ t("course.problems.uploadDockerFilesZip") }}</span>
-                <input
-                  type="file"
-                  accept=".zip"
-                  class="file-input-bordered file-input w-full max-w-xs"
-                  :class="{ 'input-error': v$?.assets?.dockerfilesZip?.$error || dockerZipError }"
-                  @change="
-                    async (e: Event) => {
-                      const file = (e.target as HTMLInputElement).files?.[0] || null;
-                      // Reset previous
-                      detectedDockerEnvs = [];
-                      dockerZipError = '';
-
-                      const nar = problem.config!.networkAccessRestriction as any;
-                      if (nar?.custom_env) nar.custom_env.env_list = [];
-
-                      if (file) {
-                        // file size
-                        if (!assertFileSizeOK(file, 'dockerfiles.zip')) {
-                          problem.assets!.dockerfilesZip = null;
-                          (e.target as HTMLInputElement).value = '';
-                          return;
-                        }
-                        // check zip structure
-                        const isValid = await inspectDockerZip(file);
-                        if (!isValid) {
-                          problem.assets!.dockerfilesZip = null;
-                          (e.target as HTMLInputElement).value = '';
-                          return;
-                        }
-                        problem.assets!.dockerfilesZip = file;
-                      } else {
-                        problem.assets!.dockerfilesZip = null;
-                        loadSavedDockerEnvs();
-                      }
-                      v$?.assets?.dockerfilesZip?.$touch();
-                    }
-                  "
-                />
-                <label v-if="v$?.assets?.dockerfilesZip?.$error || dockerZipError" class="label">
-                  <span class="label-text-alt text-error whitespace-pre-line">
-                    {{ v$?.assets?.dockerfilesZip?.$errors[0]?.$message || dockerZipError }}
-                  </span>
-                </label>
-
-                <div
-                  v-if="detectedDockerEnvs.length > 0"
-                  class="border-success/30 bg-base-200 mt-2 w-full max-w-xs rounded border p-3 text-xs"
-                >
-                  <div class="text-success mb-2 flex items-center gap-1 font-bold">
-                    <i-uil-check-circle />
-                    {{
-                      problem.assets?.dockerfilesZip
-                        ? "Environment(s) to be established:"
-                        : "List of environments:"
-                    }}
-                  </div>
-                  <ul class="list-inside space-y-1 opacity-80">
-                    <li
-                      v-for="(env, index) in detectedDockerEnvs"
-                      :key="env"
-                      class="hover:bg-base-300 flex items-center justify-between rounded px-1 transition-colors"
-                    >
-                      <div>
-                        <span class="font-mono font-bold">{{ env }}</span>
-                      </div>
-
-                      <button
-                        type="button"
-                        class="btn btn-ghost btn-xs text-error h-6 min-h-0 w-6 p-0"
-                        @click="removeDockerEnv(index)"
-                        title="Remove this environment"
+              <div class="border-base-content/30 rounded-lg border p-4">
+                <div class="flex items-center gap-3">
+                  <span class="label-text">{{ t("course.problems.dockerFiles") }}</span>
+                  <div class="flex items-center gap-2">
+                    <div v-if="hasAsset('network_dockerfile')" class="flex items-center gap-2">
+                      <span class="badge badge-success badge-outline text-xs">{{
+                        t("course.problems.uploaded")
+                      }}</span>
+                      <a
+                        :href="assetDownloadUrl('network_dockerfile') || '#'"
+                        class="btn btn-xs"
+                        target="_blank"
+                        rel="noopener"
                       >
-                        <i-uil-trash-alt />
-                      </button>
-                    </li>
-                  </ul>
+                        {{ t("course.problems.download") }}
+                      </a>
+                    </div>
+                    <span v-else class="badge badge-outline text-xs opacity-70">{{
+                      t("course.problems.notUploaded")
+                    }}</span>
+                  </div>
+                </div>
+                <div class="mt-3 flex items-center gap-3">
+                  <span class="label-text text-sm opacity-80">{{
+                    t("course.problems.uploadDockerFilesZip")
+                  }}</span>
+                  <input
+                    type="file"
+                    accept=".zip"
+                    class="file-input-bordered file-input w-full max-w-xs"
+                    :class="{ 'input-error': v$?.assets?.dockerfilesZip?.$error || dockerZipError }"
+                    @change="
+                      async (e: Event) => {
+                        const file = (e.target as HTMLInputElement).files?.[0] || null;
+                        // Reset previous
+                        detectedDockerEnvs = [];
+                        dockerZipError = '';
+
+                        const nar = problem.config!.networkAccessRestriction as any;
+                        if (nar?.custom_env) nar.custom_env.env_list = [];
+
+                        if (file) {
+                          // file size
+                          if (!assertFileSizeOK(file, 'dockerfiles.zip')) {
+                            problem.assets!.dockerfilesZip = null;
+                            (e.target as HTMLInputElement).value = '';
+                            return;
+                          }
+                          // check zip structure
+                          const isValid = await inspectDockerZip(file);
+                          if (!isValid) {
+                            problem.assets!.dockerfilesZip = null;
+                            (e.target as HTMLInputElement).value = '';
+                            return;
+                          }
+                          problem.assets!.dockerfilesZip = file;
+                        } else {
+                          problem.assets!.dockerfilesZip = null;
+                          loadSavedDockerEnvs();
+                        }
+                        v$?.assets?.dockerfilesZip?.$touch();
+                      }
+                    "
+                  />
+                  <label v-if="v$?.assets?.dockerfilesZip?.$error || dockerZipError" class="label">
+                    <span class="label-text-alt text-error whitespace-pre-line">
+                      {{ v$?.assets?.dockerfilesZip?.$errors[0]?.$message || dockerZipError }}
+                    </span>
+                  </label>
+
+                  <div
+                    v-if="detectedDockerEnvs.length > 0"
+                    class="border-success/30 bg-base-200 mt-2 w-full max-w-xs rounded border p-3 text-xs"
+                  >
+                    <div class="text-success mb-2 flex items-center gap-1 font-bold">
+                      <i-uil-check-circle />
+                      {{
+                        problem.assets?.dockerfilesZip
+                          ? "Environment(s) to be established:"
+                          : "List of environments:"
+                      }}
+                    </div>
+                    <ul class="list-inside space-y-1 opacity-80">
+                      <li
+                        v-for="(env, index) in detectedDockerEnvs"
+                        :key="env"
+                        class="hover:bg-base-300 flex items-center justify-between rounded px-1 transition-colors"
+                      >
+                        <div>
+                          <span class="font-mono font-bold">{{ env }}</span>
+                        </div>
+
+                        <button
+                          type="button"
+                          class="btn btn-ghost btn-xs text-error h-6 min-h-0 w-6 p-0"
+                          @click="removeDockerEnv(index)"
+                          title="Remove this environment"
+                        >
+                          <i-uil-trash-alt />
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
-              </div> <!-- close Dockerfiles bordered section -->
+              <!-- close Dockerfiles bordered section -->
             </div>
           </div>
         </div>

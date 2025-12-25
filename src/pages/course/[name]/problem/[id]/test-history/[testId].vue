@@ -117,7 +117,7 @@ async function fetchTrialSubmission() {
 onMounted(async () => {
   try {
     isLoading.value = true;
-    
+
     // Check rejudge permission (only for Admin/Teacher/TA)
     if (session.isAdmin || session.isTeacher || session.isTA) {
       try {
@@ -130,7 +130,7 @@ onMounted(async () => {
         canRejudge.value = false;
       }
     }
-    
+
     await fetchTrialSubmission();
     console.log("Loaded trial submission details:", testResult.value);
   } catch (err) {
@@ -192,14 +192,14 @@ watchEffect(() => {
 // View Case Output Feature
 // ==========================================
 type ArtifactFile = {
-  type: 'text' | 'image' | 'binary';
+  type: "text" | "image" | "binary";
   content: string;
   extension: string;
   mimeType?: string;
 };
 
 type CaseArtifactData = {
-  stdout: string | null;  // null means file doesn't exist, '' means empty file
+  stdout: string | null; // null means file doesn't exist, '' means empty file
   stderr: string | null;
   files: Record<string, ArtifactFile>;
 };
@@ -221,13 +221,14 @@ async function viewCaseOutput(taskIndex: number, caseIndex: number) {
     const response = await api.TrialSubmission.getTrialCaseArtifactFiles(
       String(route.params.testId),
       taskIndex,
-      caseIndex
+      caseIndex,
     );
     caseOutputData.value = response.data;
   } catch (err: unknown) {
     console.error("Failed to load case artifact files", err);
     const axiosErr = err as { response?: { data?: { message?: string } }; message?: string };
-    caseOutputError.value = axiosErr?.response?.data?.message || axiosErr?.message || "Failed to load artifact files";
+    caseOutputError.value =
+      axiosErr?.response?.data?.message || axiosErr?.message || "Failed to load artifact files";
   } finally {
     caseOutputLoading.value = false;
   }
@@ -243,16 +244,16 @@ function closeCaseOutputModal() {
 // Helper function to get file icon class based on extension
 function getFileIconClass(ext: string): string {
   const extLower = ext.toLowerCase();
-  if (['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg'].includes(extLower)) {
-    return 'i-uil-image';
+  if ([".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".svg"].includes(extLower)) {
+    return "i-uil-image";
   }
-  if (['.md'].includes(extLower)) {
-    return 'i-uil-file-alt';
+  if ([".md"].includes(extLower)) {
+    return "i-uil-file-alt";
   }
-  if (['.txt', '.log'].includes(extLower)) {
-    return 'i-uil-file';
+  if ([".txt", ".log"].includes(extLower)) {
+    return "i-uil-file";
   }
-  return 'i-uil-file';
+  return "i-uil-file";
 }
 
 // Modal state
@@ -455,7 +456,10 @@ async function deleteTrialSubmission() {
             <!-- Delete Button (only shown if user has permission) -->
             <button
               v-if="canRejudge"
-              :class="['btn btn-outline btn-error btn-sm hover:bg-error hover:border-error hover:text-error-content', isDeleteLoading && 'loading']"
+              :class="[
+                'btn btn-outline btn-error btn-sm hover:bg-error hover:border-error hover:text-error-content',
+                isDeleteLoading && 'loading',
+              ]"
               :disabled="isDeleteLoading"
               @click="deleteTrialSubmission"
             >
@@ -699,10 +703,10 @@ async function deleteTrialSubmission() {
 
   <!-- Case Output Modal -->
   <dialog ref="caseOutputModal" class="modal">
-    <div class="modal-box w-11/12 max-w-5xl h-[80vh] flex flex-col p-0 overflow-hidden bg-base-100">
+    <div class="modal-box bg-base-100 flex h-[80vh] w-11/12 max-w-5xl flex-col overflow-hidden p-0">
       <!-- Header -->
-      <div class="p-4 border-b border-base-200 flex justify-between items-center bg-base-200/50">
-        <h3 class="font-bold text-lg flex items-center gap-2">
+      <div class="border-base-200 bg-base-200/50 flex items-center justify-between border-b p-4">
+        <h3 class="flex items-center gap-2 text-lg font-bold">
           <i-uil-eye class="text-primary" />
           Test Case Details
           <span v-if="currentViewingCase" class="badge badge-primary badge-outline">
@@ -715,17 +719,17 @@ async function deleteTrialSubmission() {
       </div>
 
       <!-- Content -->
-      <div class="flex-1 overflow-y-auto p-6 space-y-6">
+      <div class="flex-1 space-y-6 overflow-y-auto p-6">
         <!-- Loading State -->
-        <div v-if="caseOutputLoading" class="flex flex-col items-center justify-center h-64 opacity-60">
-          <ui-spinner class="w-12 h-12 mb-4 text-primary" />
+        <div v-if="caseOutputLoading" class="flex h-64 flex-col items-center justify-center opacity-60">
+          <ui-spinner class="text-primary mb-4 h-12 w-12" />
           <p>Loading artifact files...</p>
         </div>
 
         <!-- Error State -->
         <div v-else-if="caseOutputError" class="alert alert-error shadow-lg">
           <div>
-            <i-uil-exclamation-circle class="w-6 h-6" />
+            <i-uil-exclamation-circle class="h-6 w-6" />
             <span>{{ caseOutputError }}</span>
           </div>
         </div>
@@ -733,15 +737,17 @@ async function deleteTrialSubmission() {
         <!-- Data -->
         <template v-else-if="caseOutputData">
           <!-- Standard Output Streams -->
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <!-- Stdout -->
-            <div class="flex flex-col gap-2 h-[400px]">
-              <div class="font-semibold flex items-center gap-2">
+            <div class="flex h-[400px] flex-col gap-2">
+              <div class="flex items-center gap-2 font-semibold">
                 <i-uil-monitor /> Standard Output (stdout)
-                <span v-if="caseOutputData.stdout === null" class="badge badge-ghost badge-sm">Not Available</span>
+                <span v-if="caseOutputData.stdout === null" class="badge badge-ghost badge-sm"
+                  >Not Available</span
+                >
                 <span v-else-if="caseOutputData.stdout === ''" class="badge badge-ghost badge-sm">Empty</span>
               </div>
-              <div class="flex-1 relative border rounded-lg overflow-hidden bg-[#1e1e1e]">
+              <div class="relative flex-1 overflow-hidden rounded-lg border bg-[#1e1e1e]">
                 <code-editor
                   v-if="caseOutputData.stdout"
                   :model-value="caseOutputData.stdout"
@@ -755,13 +761,15 @@ async function deleteTrialSubmission() {
             </div>
 
             <!-- Stderr -->
-            <div class="flex flex-col gap-2 h-[400px]">
-              <div class="font-semibold flex items-center gap-2">
+            <div class="flex h-[400px] flex-col gap-2">
+              <div class="flex items-center gap-2 font-semibold">
                 <i-uil-exclamation-triangle /> Standard Error (stderr)
-                <span v-if="caseOutputData.stderr === null" class="badge badge-ghost badge-sm">Not Available</span>
+                <span v-if="caseOutputData.stderr === null" class="badge badge-ghost badge-sm"
+                  >Not Available</span
+                >
                 <span v-else-if="caseOutputData.stderr === ''" class="badge badge-ghost badge-sm">Empty</span>
               </div>
-              <div class="flex-1 relative border rounded-lg overflow-hidden bg-[#1e1e1e]">
+              <div class="relative flex-1 overflow-hidden rounded-lg border bg-[#1e1e1e]">
                 <code-editor
                   v-if="caseOutputData.stderr"
                   :model-value="caseOutputData.stderr"
@@ -777,29 +785,43 @@ async function deleteTrialSubmission() {
 
           <!-- Other Artifact Files -->
           <div v-if="Object.keys(caseOutputData.files).length > 0" class="divider">Generated Files</div>
-          
+
           <div v-if="Object.keys(caseOutputData.files).length > 0" class="grid grid-cols-1 gap-6">
-            <div v-for="(file, name) in caseOutputData.files" :key="name" class="card bg-base-200 shadow-sm border border-base-300">
+            <div
+              v-for="(file, name) in caseOutputData.files"
+              :key="name"
+              class="card bg-base-200 border-base-300 border shadow-sm"
+            >
               <div class="card-body p-4">
-                <h4 class="card-title text-base flex items-center gap-2">
+                <h4 class="card-title flex items-center gap-2 text-base">
                   <span :class="getFileIconClass(file.extension)"></span>
                   {{ name }}
                   <div class="badge badge-sm badge-outline">{{ file.type }}</div>
                 </h4>
-                
+
                 <!-- Text Content -->
-                <div v-if="file.type === 'text'" class="mt-2 h-64 relative border rounded bg-[#1e1e1e]">
+                <div v-if="file.type === 'text'" class="relative mt-2 h-64 rounded border bg-[#1e1e1e]">
                   <code-editor :model-value="file.content" readonly class="absolute inset-0" />
                 </div>
-                
+
                 <!-- Image Content -->
-                <div v-else-if="file.type === 'image'" class="mt-2 flex justify-center bg-base-300/50 p-4 rounded border">
-                  <img :src="`data:${file.mimeType};base64,${file.content}`" :alt="name" class="max-h-96 object-contain" />
+                <div
+                  v-else-if="file.type === 'image'"
+                  class="bg-base-300/50 mt-2 flex justify-center rounded border p-4"
+                >
+                  <img
+                    :src="`data:${file.mimeType};base64,${file.content}`"
+                    :alt="name"
+                    class="max-h-96 object-contain"
+                  />
                 </div>
-                
+
                 <!-- Binary/Other Content -->
-                <div v-else class="mt-2 p-8 flex flex-col items-center justify-center bg-base-300/50 rounded border text-base-content/70">
-                  <i-uil-file-download-alt class="text-4xl mb-2" />
+                <div
+                  v-else
+                  class="bg-base-300/50 text-base-content/70 mt-2 flex flex-col items-center justify-center rounded border p-8"
+                >
+                  <i-uil-file-download-alt class="mb-2 text-4xl" />
                   <p>Binary file content cannot be previewed.</p>
                 </div>
               </div>
@@ -809,7 +831,7 @@ async function deleteTrialSubmission() {
       </div>
 
       <!-- Footer -->
-      <div class="p-4 border-t border-base-200 flex justify-end gap-2 bg-base-200/50">
+      <div class="border-base-200 bg-base-200/50 flex justify-end gap-2 border-t p-4">
         <button class="btn" @click="closeCaseOutputModal">Close</button>
       </div>
     </div>

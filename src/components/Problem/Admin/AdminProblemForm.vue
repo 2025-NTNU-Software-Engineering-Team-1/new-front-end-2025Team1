@@ -351,7 +351,7 @@ const rules = {
           // Check if already uploaded via assetPaths
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const assetPaths = (cfg as any)?.assetPaths || {};
-          if (assetPaths['ac_code']) return true;
+          if (assetPaths["ac_code"]) return true;
           // Check if new file is being uploaded
           return (problem.value.assets?.trialModeACFiles?.length ?? 0) > 0;
         },
@@ -367,7 +367,7 @@ const rules = {
           // Check if already uploaded via assetPaths
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const assetPaths = (cfg as any)?.assetPaths || {};
-          if (assetPaths['public_testdata']) return true;
+          if (assetPaths["public_testdata"]) return true;
           // Check if new file is being uploaded
           return !!problem.value.assets?.trialModePublicTestDataZip;
         },
@@ -559,7 +559,7 @@ async function submit() {
 
     <div class="form-control">
       <label class="label cursor-pointer justify-start gap-x-4">
-        <span class="label-text">{{t("components.problem.forms.hiddenToggle")}}</span>
+        <span class="label-text">{{ t("components.problem.forms.hiddenToggle") }}</span>
         <input
           type="checkbox"
           class="toggle toggle-success"
@@ -574,7 +574,12 @@ async function submit() {
   <div ref="sectionRefs.desc" class="mt-4 flex flex-col gap-2">
     <div class="collapse-arrow rounded-box bg-base-200 collapse">
       <input type="checkbox" class="peer" v-model="openPanels.desc" />
-      <div class="collapse-title min-h-0 py-2 flex items-center text-base font-semibold" style="height: 2.5rem; min-height: 2.5rem;">{{t("course.problems.setDescription")}}</div>
+      <div
+        class="collapse-title flex min-h-0 items-center py-2 text-base font-semibold"
+        style="height: 2.5rem; min-height: 2.5rem"
+      >
+        {{ t("course.problems.setDescription") }}
+      </div>
       <div class="collapse-content peer-checked:pt-4">
         <DescriptionSection :v$="v$" @update="update" />
       </div>
@@ -582,7 +587,12 @@ async function submit() {
 
     <div ref="sectionRefs.config" class="collapse-arrow rounded-box bg-base-200 collapse">
       <input type="checkbox" class="peer" v-model="openPanels.config" />
-      <div class="collapse-title min-h-0 py-2 flex items-center text-base font-semibold" style="height: 2.5rem; min-height: 2.5rem;">{{t("course.problems.setConfiguration")}}</div>
+      <div
+        class="collapse-title flex min-h-0 items-center py-2 text-base font-semibold"
+        style="height: 2.5rem; min-height: 2.5rem"
+      >
+        {{ t("course.problems.setConfiguration") }}
+      </div>
       <div class="collapse-content peer-checked:pt-4">
         <ConfigurationSection />
       </div>
@@ -590,7 +600,12 @@ async function submit() {
 
     <div ref="sectionRefs.pipeline" class="collapse-arrow rounded-box bg-base-200 collapse">
       <input type="checkbox" class="peer" v-model="openPanels.pipeline" />
-      <div class="collapse-title min-h-0 py-2 flex items-center text-base font-semibold" style="height: 2.5rem; min-height: 2.5rem;">{{t("course.problems.setPipelines")}}</div>
+      <div
+        class="collapse-title flex min-h-0 items-center py-2 text-base font-semibold"
+        style="height: 2.5rem; min-height: 2.5rem"
+      >
+        {{ t("course.problems.setPipelines") }}
+      </div>
       <div class="collapse-content peer-checked:pt-4">
         <PipelineSection />
       </div>
@@ -598,7 +613,12 @@ async function submit() {
 
     <div ref="sectionRefs.testdata" class="collapse-arrow rounded-box bg-base-200 collapse">
       <input type="checkbox" class="peer" v-model="openPanels.testdata" />
-      <div class="collapse-title min-h-0 py-2 flex items-center text-base font-semibold" style="height: 2.5rem; min-height: 2.5rem;">{{t("course.problems.setTestData")}}</div>
+      <div
+        class="collapse-title flex min-h-0 items-center py-2 text-base font-semibold"
+        style="height: 2.5rem; min-height: 2.5rem"
+      >
+        {{ t("course.problems.setTestData") }}
+      </div>
       <div class="collapse-content peer-checked:pt-4">
         <TestDataSection :v$="v$ as any" />
       </div>
@@ -606,7 +626,12 @@ async function submit() {
 
     <div ref="sectionRefs.resdata" class="collapse-arrow rounded-box bg-base-200 collapse">
       <input type="checkbox" class="peer" v-model="openPanels.resdata" />
-      <div class="collapse-title min-h-0 py-2 flex items-center text-base font-semibold" style="height: 2.5rem; min-height: 2.5rem;">{{t("course.problems.setResourceData")}}</div>
+      <div
+        class="collapse-title flex min-h-0 items-center py-2 text-base font-semibold"
+        style="height: 2.5rem; min-height: 2.5rem"
+      >
+        {{ t("course.problems.setResourceData") }}
+      </div>
       <div class="collapse-content peer-checked:pt-4">
         <div class="flex flex-col gap-4">
           <ResourceDataSection variant="student" />
@@ -618,7 +643,7 @@ async function submit() {
 
   <div v-if="v$.$error" class="alert alert-error mt-3">
     <div class="flex flex-col gap-2">
-      <div class="font-semibold">{{t("course.problems.submissionBlocked")}}</div>
+      <div class="font-semibold">{{ t("course.problems.submissionBlocked") }}</div>
 
       <ul class="list-disc pl-5 text-sm">
         <li v-for="(e, idx) in errorSummary" :key="idx">
@@ -675,4 +700,3 @@ async function submit() {
   padding-bottom: 1.5rem !important;
 }
 </style>
-

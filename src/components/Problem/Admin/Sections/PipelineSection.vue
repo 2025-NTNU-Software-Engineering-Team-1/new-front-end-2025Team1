@@ -398,18 +398,20 @@ onMounted(async () => {
   <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
     <!-- File Access -->
     <div class="col-span-2 rounded-lg border border-gray-400 p-4">
-      <label class="label"><span class="label-text font-semibold">{{t("course.problems.fileAccess")}}</span></label>
+      <label class="label"
+        ><span class="label-text font-semibold">{{ t("course.problems.fileAccess") }}</span></label
+      >
       <div class="flex flex-wrap gap-6">
         <div class="form-control">
           <label class="label cursor-pointer justify-start gap-x-2">
-            <span class="label-text">{{t("course.problems.fileAccessAllowedRead")}}</span>
+            <span class="label-text">{{ t("course.problems.fileAccessAllowedRead") }}</span>
             <input type="checkbox" class="toggle" v-model="allowReadToggle" />
           </label>
         </div>
         <div class="form-control">
           <label class="label cursor-pointer justify-start gap-x-2">
             <span class="label-text flex items-center gap-2">
-              <span>{{t("course.problems.fileAccessAllowedWrite")}}</span>
+              <span>{{ t("course.problems.fileAccessAllowedWrite") }}</span>
               <i-uil-lock-alt v-if="!allowReadToggle" class="text-error" />
             </span>
             <input type="checkbox" class="toggle" :disabled="!allowReadToggle" v-model="allowWriteToggle" />
@@ -428,7 +430,7 @@ onMounted(async () => {
     <!-- Library Restrictions -->
     <div class="form-control col-span-2 rounded-lg border border-gray-400 p-4">
       <label class="label cursor-pointer justify-start gap-x-4">
-        <span class="label-text">{{t("course.problems.libraryRestrictions")}}</span>
+        <span class="label-text">{{ t("course.problems.libraryRestrictions") }}</span>
         <input
           type="checkbox"
           class="toggle"
@@ -436,14 +438,13 @@ onMounted(async () => {
         />
       </label>
 
-      <div
-        v-if="problem.pipeline!.staticAnalysis!.libraryRestrictions!.enabled"
-        class="mt-3 space-y-4"
-      >
+      <div v-if="problem.pipeline!.staticAnalysis!.libraryRestrictions!.enabled" class="mt-3 space-y-4">
         <!-- ===== Library Restrictions (Imports/Headers/Functions) 統一開關 ===== -->
         <div class="rounded-lg border border-gray-400 p-3">
           <div class="mb-3 flex items-center justify-between">
-            <h4 class="text font-medium">{{ t("course.problems.libraryRestrictionsGroup") || "Library Restrictions" }}</h4>
+            <h4 class="text font-medium">
+              {{ t("course.problems.libraryRestrictionsGroup") || "Library Restrictions" }}
+            </h4>
             <!-- 統一滑動開關 -->
             <div class="mode-switcher">
               <div class="mode-switcher-container">
@@ -456,14 +457,14 @@ onMounted(async () => {
                   :class="{ active: libraryMode === 'whitelist' }"
                   @click="libraryMode = 'whitelist'"
                 >
-                  <span>{{t("course.problems.restrictionWhite")}}</span>
+                  <span>{{ t("course.problems.restrictionWhite") }}</span>
                 </button>
                 <button
                   class="mode-switcher-option"
                   :class="{ active: libraryMode === 'blacklist' }"
                   @click="libraryMode = 'blacklist'"
                 >
-                  <span>{{t("course.problems.restrictionBlack")}}</span>
+                  <span>{{ t("course.problems.restrictionBlack") }}</span>
                 </button>
               </div>
             </div>
@@ -479,7 +480,9 @@ onMounted(async () => {
               >
                 <div class="px-2 text-center">
                   <i-uil-lock-alt class="text-warning mb-1 text-2xl" />
-                  <p class="text-xs font-medium text-gray-300">{{t("course.problems.restrictionDisabled")}}</p>
+                  <p class="text-xs font-medium text-gray-300">
+                    {{ t("course.problems.restrictionDisabled") }}
+                  </p>
                 </div>
               </div>
               <h5 class="mb-2 text-sm font-medium">{{ t("course.problems.importsRestrictions") }}</h5>
@@ -496,7 +499,10 @@ onMounted(async () => {
                       : ''
                   "
                   @click="
-                    toggleItem(problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.imports, opt)
+                    toggleItem(
+                      problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.imports,
+                      opt,
+                    )
                   "
                 >
                   {{ opt }}
@@ -519,7 +525,9 @@ onMounted(async () => {
               >
                 <div class="px-2 text-center">
                   <i-uil-lock-alt class="text-warning mb-1 text-2xl" />
-                  <p class="text-xs font-medium text-gray-300">{{ t("course.problem.headersRestrictionDisabled") }}</p>
+                  <p class="text-xs font-medium text-gray-300">
+                    {{ t("course.problem.headersRestrictionDisabled") }}
+                  </p>
                 </div>
               </div>
               <h5 class="mb-2 text-sm font-medium">{{ t("course.problems.headersRestrictions") }}</h5>
@@ -536,7 +544,10 @@ onMounted(async () => {
                       : ''
                   "
                   @click="
-                    toggleItem(problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.headers, opt)
+                    toggleItem(
+                      problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.headers,
+                      opt,
+                    )
                   "
                 >
                   {{ opt }}
@@ -560,7 +571,9 @@ onMounted(async () => {
                   :key="`func-${opt}`"
                   class="btn btn-xs"
                   :class="
-                    problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.functions.includes(opt)
+                    problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.functions.includes(
+                      opt,
+                    )
                       ? libraryMode === 'whitelist'
                         ? 'btn-info'
                         : 'btn-error'
@@ -603,14 +616,14 @@ onMounted(async () => {
                   :class="{ active: syntaxMode === 'whitelist' }"
                   @click="syntaxMode = 'whitelist'"
                 >
-                  <span>{{t("course.problems.restrictionWhite")}}</span>
+                  <span>{{ t("course.problems.restrictionWhite") }}</span>
                 </button>
                 <button
                   class="mode-switcher-option"
                   :class="{ active: syntaxMode === 'blacklist' }"
                   @click="syntaxMode = 'blacklist'"
                 >
-                  <span>{{t("course.problems.restrictionBlack")}}</span>
+                  <span>{{ t("course.problems.restrictionBlack") }}</span>
                 </button>
               </div>
             </div>
@@ -651,7 +664,7 @@ onMounted(async () => {
     <div class="form-control col-span-1 md:col-span-2">
       <div class="rounded-lg border border-gray-400 p-4">
         <label class="label mb-2">
-          <span class="label-text">{{t("course.problems.executionMode")}}</span>
+          <span class="label-text">{{ t("course.problems.executionMode") }}</span>
         </label>
 
         <!-- radio options -->
@@ -663,7 +676,7 @@ onMounted(async () => {
               value="general"
               v-model="problem.pipeline!.executionMode as any"
             />
-            <span class="label-text">{{t("course.problems.executionModeGeneral")}}</span>
+            <span class="label-text">{{ t("course.problems.executionModeGeneral") }}</span>
           </label>
           <label class="label cursor-pointer gap-2">
             <input
@@ -672,7 +685,7 @@ onMounted(async () => {
               value="functionOnly"
               v-model="problem.pipeline!.executionMode as any"
             />
-            <span class="label-text">{{t("course.problems.executionModeFuncitonOnly")}}</span>
+            <span class="label-text">{{ t("course.problems.executionModeFuncitonOnly") }}</span>
           </label>
           <label class="label cursor-pointer gap-2">
             <input
@@ -681,7 +694,7 @@ onMounted(async () => {
               value="interactive"
               v-model="problem.pipeline!.executionMode as any"
             />
-            <span class="label-text">{{t("course.problems.executionModeInteractive")}}</span>
+            <span class="label-text">{{ t("course.problems.executionModeInteractive") }}</span>
           </label>
         </div>
 
@@ -696,14 +709,16 @@ onMounted(async () => {
           <div class="form-control">
             <div class="flex flex-wrap items-center gap-4">
               <label class="label mb-0 cursor-pointer justify-start gap-x-2">
-                <span class="label-text">{{t("course.problems.uploadFile")}}</span>
+                <span class="label-text">{{ t("course.problems.uploadFile") }}</span>
               </label>
               <div class="flex items-center gap-2">
                 <div
                   v-if="hasAsset('makefile') || problem.assets?.makefileZip"
                   class="flex items-center gap-2"
                 >
-                  <span class="badge badge-outline badge-success text-xs">{{t("course.problems.upload")}}</span>
+                  <span class="badge badge-outline badge-success text-xs">{{
+                    t("course.problems.upload")
+                  }}</span>
                   <a
                     v-if="hasAsset('makefile')"
                     :href="assetDownloadUrl('makefile') || '#'"
@@ -711,10 +726,12 @@ onMounted(async () => {
                     target="_blank"
                     rel="noopener"
                   >
-                    {{t("course.problems.download")}}
+                    {{ t("course.problems.download") }}
                   </a>
                 </div>
-                <span v-else class="badge badge-outline text-xs opacity-70">{{t("course.problems.notNotUploaded")}}</span>
+                <span v-else class="badge badge-outline text-xs opacity-70">{{
+                  t("course.problems.notNotUploaded")
+                }}</span>
               </div>
               <input
                 type="file"
@@ -750,19 +767,25 @@ onMounted(async () => {
             <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
               <!-- 左：Teacher first -->
               <label class="label mb-0 cursor-pointer justify-start gap-x-2">
-                <span class="label-text flex items-center gap-1">{{t("course.problems.ineractiveTeacherFirst")}}</span>
+                <span class="label-text flex items-center gap-1">{{
+                  t("course.problems.ineractiveTeacherFirst")
+                }}</span>
                 <input type="checkbox" class="toggle toggle-sm" v-model="problem.pipeline!.teacherFirst" />
               </label>
 
               <!-- 右：Teacher_Code -->
               <div class="flex items-center gap-x-2">
-                <span class="text-sm opacity-80">{{t("course.problems.interactiveUploadTeacherCode")}}</span>
+                <span class="text-sm opacity-80">{{
+                  t("course.problems.interactiveUploadTeacherCode")
+                }}</span>
                 <div class="flex items-center gap-2">
                   <div
                     v-if="hasAsset('teacher_file') || problem.assets?.teacherFile"
                     class="flex items-center gap-2"
                   >
-                    <span class="badge badge-outline badge-success text-xs">{{t("course.problems.uploaded")}}</span>
+                    <span class="badge badge-outline badge-success text-xs">{{
+                      t("course.problems.uploaded")
+                    }}</span>
                     <a
                       v-if="hasAsset('teacher_file')"
                       :href="assetDownloadUrl('teacher_file') || '#'"
@@ -770,10 +793,12 @@ onMounted(async () => {
                       target="_blank"
                       rel="noopener"
                     >
-                      {{t("course.problems.download")}}
+                      {{ t("course.problems.download") }}
                     </a>
                   </div>
-                  <span v-else class="badge badge-outline text-xs opacity-70">{{t("course.problems.notNotUploaded")}}</span>
+                  <span v-else class="badge badge-outline text-xs opacity-70">{{
+                    t("course.problems.notNotUploaded")
+                  }}</span>
                 </div>
                 <input
                   type="file"
@@ -810,7 +835,7 @@ onMounted(async () => {
         <div class="flex items-center gap-4">
           <label class="label cursor-pointer justify-start gap-x-4">
             <span class="label-text flex items-center gap-1">
-              <span>{{t("course.problems.customChecker")}}</span>
+              <span>{{ t("course.problems.customChecker") }}</span>
               <i-uil-lock-alt
                 v-if="problem.pipeline!.executionMode === 'interactive'"
                 class="text-error"
@@ -830,7 +855,9 @@ onMounted(async () => {
               v-if="hasAsset('checker') || problem.assets?.customCheckerPy"
               class="flex items-center gap-2"
             >
-              <span class="badge badge-outline badge-success text-xs">{{t("course.problems.uploaded")}}</span>
+              <span class="badge badge-outline badge-success text-xs">{{
+                t("course.problems.uploaded")
+              }}</span>
               <a
                 v-if="hasAsset('checker')"
                 :href="assetDownloadUrl('checker') || '#'"
@@ -838,16 +865,18 @@ onMounted(async () => {
                 target="_blank"
                 rel="noopener"
               >
-                {{t("course.problems.download")}}
+                {{ t("course.problems.download") }}
               </a>
             </div>
-            <span v-else class="badge badge-outline text-xs opacity-70">{{t("course.problems.notNotUploaded")}}</span>
+            <span v-else class="badge badge-outline text-xs opacity-70">{{
+              t("course.problems.notNotUploaded")
+            }}</span>
           </div>
         </div>
 
         <div v-if="problem.pipeline!.customChecker" class="flex flex-col gap-x-2">
           <div class="flex items-center gap-x-2">
-            <span class="pl-1 text-sm opacity-80">{{t("course.problems.uploadCustomChecker")}}</span>
+            <span class="pl-1 text-sm opacity-80">{{ t("course.problems.uploadCustomChecker") }}</span>
             <input
               type="file"
               accept=".py"
@@ -888,12 +917,14 @@ onMounted(async () => {
       <div class="rounded-lg border border-gray-400 p-4">
         <div class="flex items-center gap-4">
           <label class="label cursor-pointer justify-start gap-x-4">
-            <span class="label-text">{{t("course.problems.customScoringScript")}}</span>
+            <span class="label-text">{{ t("course.problems.customScoringScript") }}</span>
             <input type="checkbox" class="toggle" v-model="(problem as any).pipeline.scoringScript.custom" />
           </label>
           <div class="flex items-center gap-2">
             <div v-if="hasAsset('scoring_script') || problem.assets?.scorePy" class="flex items-center gap-2">
-              <span class="badge badge-outline badge-success text-xs">{{t("course.problems.uploaded")}}</span>
+              <span class="badge badge-outline badge-success text-xs">{{
+                t("course.problems.uploaded")
+              }}</span>
               <a
                 v-if="hasAsset('scoring_script')"
                 :href="assetDownloadUrl('scoring_script') || '#'"
@@ -901,16 +932,18 @@ onMounted(async () => {
                 target="_blank"
                 rel="noopener"
               >
-                {{t("course.problems.download")}}
+                {{ t("course.problems.download") }}
               </a>
             </div>
-            <span v-else class="badge badge-outline text-xs opacity-70">{{t("course.problems.notNotUploaded")}}</span>
+            <span v-else class="badge badge-outline text-xs opacity-70">{{
+              t("course.problems.notNotUploaded")
+            }}</span>
           </div>
         </div>
 
         <div v-if="(problem as any).pipeline.scoringScript?.custom" class="flex flex-col gap-x-2">
           <div class="flex items-center gap-x-2">
-            <span class="pl-1 text-sm opacity-80">{{t("course.problems.uploadCustomScorer")}}</span>
+            <span class="pl-1 text-sm opacity-80">{{ t("course.problems.uploadCustomScorer") }}</span>
             <input
               type="file"
               accept=".py"

@@ -131,8 +131,8 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
 <template>
   <div>
     <!-- Add New Sidecar Form -->
-    <div class="rounded-lg border border-base-content/30 bg-base-200 p-4 mb-4">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="border-base-content/30 bg-base-200 mb-4 rounded-lg border p-4">
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
         <!-- Left Column: Name & Image -->
         <div class="space-y-3">
           <div class="form-control">
@@ -178,7 +178,7 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
             </label>
             <textarea
               placeholder="MYSQL_ROOT_PASSWORD=secret&#10;MYSQL_DATABASE=testdb"
-              class="textarea textarea-bordered textarea-sm h-16 text-xs w-full"
+              class="textarea textarea-bordered textarea-sm h-16 w-full text-xs"
               v-model="newEnv"
             />
           </div>

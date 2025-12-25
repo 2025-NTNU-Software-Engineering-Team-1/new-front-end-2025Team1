@@ -366,20 +366,19 @@ async function submit() {
       // trialModeACFiles
       if (Array.isArray(assets.trialModeACFiles)) {
         assets.trialModeACFiles.forEach((f) => {
-
-          const ext = f.name.split('.').pop()?.toLowerCase() || '';
-          if (ext === 'c') fd.append("ac_code.c", f);
-          else if (ext === 'cpp') fd.append("ac_code.cpp", f);
-          else if (ext === 'py') fd.append("ac_code.py", f);
+          const ext = f.name.split(".").pop()?.toLowerCase() || "";
+          if (ext === "c") fd.append("ac_code.c", f);
+          else if (ext === "cpp") fd.append("ac_code.cpp", f);
+          else if (ext === "py") fd.append("ac_code.py", f);
           else fd.append("ac_code", f, f.name);
           attachedFiles.push(f.name);
         });
       } else {
         const f = assets.trialModeACFiles as unknown as File;
-        const ext = f.name.split('.').pop()?.toLowerCase() || '';
-        if (ext === 'c') fd.append("ac_code.c", f);
-        else if (ext === 'cpp') fd.append("ac_code.cpp", f);
-        else if (ext === 'py') fd.append("ac_code.py", f);
+        const ext = f.name.split(".").pop()?.toLowerCase() || "";
+        if (ext === "c") fd.append("ac_code.c", f);
+        else if (ext === "cpp") fd.append("ac_code.cpp", f);
+        else if (ext === "py") fd.append("ac_code.py", f);
         else fd.append("ac_code", f, f.name);
         attachedFiles.push(f.name);
       }

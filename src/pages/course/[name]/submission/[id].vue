@@ -235,10 +235,10 @@ const isScoreSubmitting = ref(false);
 // Get max score for a task (from problem config)
 const getTaskMaxScore = (taskIndex: number): number | undefined => {
   if (!problem.value || !submission.value) {
-    logger.warn('getTaskMaxScore: problem or submission not loaded');
+    logger.warn("getTaskMaxScore: problem or submission not loaded");
     return undefined;
   }
-  
+
   // The API returns testCase as the tasks ARRAY directly (not {tasks: [...]})
   // See model/problem.py line 132: testCase='testCase__tasks'
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -246,36 +246,36 @@ const getTaskMaxScore = (taskIndex: number): number | undefined => {
   try {
     // testCase IS the tasks array directly
     let tasks = prob?.testCase;
-    logger.log('getTaskMaxScore: raw testCase', { testCase: tasks, taskIndex });
-    
+    logger.log("getTaskMaxScore: raw testCase", { testCase: tasks, taskIndex });
+
     // Fallback: if testCase is an object with tasks property
     if (tasks && !Array.isArray(tasks) && tasks.tasks) {
       tasks = tasks.tasks;
-      logger.log('getTaskMaxScore: using nested tasks property');
+      logger.log("getTaskMaxScore: using nested tasks property");
     }
-    
+
     if (tasks && Array.isArray(tasks) && taskIndex >= 0 && taskIndex < tasks.length) {
       const task = tasks[taskIndex];
-      logger.log('getTaskMaxScore: task found', task);
+      logger.log("getTaskMaxScore: task found", task);
       // Try both camelCase (from db_field) and snake_case
       const taskScore = task?.taskScore ?? task?.task_score;
-      logger.log('getTaskMaxScore: taskScore', taskScore);
-      if (taskScore != null && typeof taskScore === 'number' && taskScore > 0) {
+      logger.log("getTaskMaxScore: taskScore", taskScore);
+      if (taskScore != null && typeof taskScore === "number" && taskScore > 0) {
         return taskScore;
       }
     } else {
-      logger.warn('getTaskMaxScore: tasks not array or invalid index', { tasks, taskIndex });
+      logger.warn("getTaskMaxScore: tasks not array or invalid index", { tasks, taskIndex });
     }
   } catch (e) {
     // Fallback: no max limit
-    logger.error('Failed to get task score limit:', e);
+    logger.error("Failed to get task score limit:", e);
   }
   return undefined; // No limit
 };
 
 function openScoreEditModal(taskIndex: number | null = null) {
   if (!submission.value) return;
-  
+
   editTaskIndex.value = taskIndex;
   if (taskIndex === null) {
     // Edit total score
@@ -294,12 +294,12 @@ function closeScoreEditModal() {
 
 async function submitScoreEdit() {
   if (!submission.value) return;
-  
+
   isScoreSubmitting.value = true;
   try {
     const submissionId = route.params.id as string;
     const reason = editReason.value.trim() || undefined;
-    
+
     if (editTaskIndex.value === null) {
       // Edit total score
       await api.Submission.manualGrade(submissionId, editScore.value, reason);
@@ -309,28 +309,29 @@ async function submitScoreEdit() {
       await api.Submission.manualGradeTask(submissionId, editTaskIndex.value, editScore.value, reason);
       logger.success(`Task ${editTaskIndex.value} score updated successfully`);
     }
-    
+
     closeScoreEditModal();
-    
+
     // Refresh submission data (only once, don't trigger polling)
     // Ensure polling stays paused if submission is not pending
     const wasPending = submission.value.status === SUBMISSION_STATUS_CODE.PENDING;
     await execute();
-    
+
     // If submission was not pending before, ensure polling stays paused
     if (!wasPending && submission.value && submission.value.status !== SUBMISSION_STATUS_CODE.PENDING) {
       if (isActive.value) {
         pause();
       }
     }
-    
+
     // Refresh score history
     fetchScoreHistory();
   } catch (err: unknown) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const axiosErr = err as any;
     logger.error("Score edit failed", axiosErr);
-    const errorMessage = axiosErr?.response?.data?.message || axiosErr?.message || "Failed to update score. Please try again.";
+    const errorMessage =
+      axiosErr?.response?.data?.message || axiosErr?.message || "Failed to update score. Please try again.";
     alert(errorMessage);
   } finally {
     isScoreSubmitting.value = false;
@@ -355,14 +356,14 @@ const showScoreHistory = ref(false);
 // View Case Output Feature
 // ==========================================
 type ArtifactFile = {
-  type: 'text' | 'image' | 'binary';
+  type: "text" | "image" | "binary";
   content: string;
   extension: string;
   mimeType?: string;
 };
 
 type CaseArtifactData = {
-  stdout: string | null;  // null means file doesn't exist, '' means empty file
+  stdout: string | null; // null means file doesn't exist, '' means empty file
   stderr: string | null;
   files: Record<string, ArtifactFile>;
 };
@@ -384,7 +385,7 @@ async function viewCaseOutput(taskIndex: number, caseIndex: number) {
     const response = await api.Submission.getCaseArtifactFiles(
       route.params.id as string,
       taskIndex,
-      caseIndex
+      caseIndex,
     );
     caseOutputData.value = response.data;
     logger.success(`Case artifact files loaded for task ${taskIndex}, case ${caseIndex}`);
@@ -392,7 +393,8 @@ async function viewCaseOutput(taskIndex: number, caseIndex: number) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const axiosErr = err as any;
     logger.error("Failed to load case artifact files", axiosErr);
-    caseOutputError.value = axiosErr?.response?.data?.message || axiosErr?.message || "Failed to load artifact files";
+    caseOutputError.value =
+      axiosErr?.response?.data?.message || axiosErr?.message || "Failed to load artifact files";
   } finally {
     caseOutputLoading.value = false;
   }
@@ -408,21 +410,21 @@ function closeCaseOutputModal() {
 // Helper function to get file icon class based on extension
 function getFileIconClass(ext: string): string {
   const extLower = ext.toLowerCase();
-  if (['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg'].includes(extLower)) {
-    return 'i-uil-image';
+  if ([".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".svg"].includes(extLower)) {
+    return "i-uil-image";
   }
-  if (['.md'].includes(extLower)) {
-    return 'i-uil-file-alt';
+  if ([".md"].includes(extLower)) {
+    return "i-uil-file-alt";
   }
-  if (['.txt', '.log'].includes(extLower)) {
-    return 'i-uil-file';
+  if ([".txt", ".log"].includes(extLower)) {
+    return "i-uil-file";
   }
-  return 'i-uil-file';
+  return "i-uil-file";
 }
 
 async function fetchScoreHistory() {
   if (!canEditScore.value) return;
-  
+
   isHistoryLoading.value = true;
   try {
     const response = await api.Submission.getScoreHistory(route.params.id as string);
@@ -475,7 +477,10 @@ watch(submission, (val) => {
             </button>
             <button
               v-if="session.isAdmin"
-              :class="['btn btn-outline btn-error md:btn-md hover:bg-error hover:border-error hover:text-error-content', isDeleteLoading && 'loading']"
+              :class="[
+                'btn btn-outline btn-error md:btn-md hover:bg-error hover:border-error hover:text-error-content',
+                isDeleteLoading && 'loading',
+              ]"
               :disabled="isDeleteLoading"
               @click="deleteSubmission"
             >
@@ -711,11 +716,17 @@ watch(submission, (val) => {
           <div class="card min-w-full rounded-none">
             <div class="card-body p-0">
               <div class="flex items-center gap-3">
-                <div class="card-title md:text-xl lg:text-2xl">{{ $t("course.submission.scoreHistory.title") }}</div>
+                <div class="card-title md:text-xl lg:text-2xl">
+                  {{ $t("course.submission.scoreHistory.title") }}
+                </div>
                 <button class="btn btn-ghost btn-sm" @click="toggleScoreHistory">
                   <i-uil-angle-down v-if="!showScoreHistory" />
                   <i-uil-angle-up v-else />
-                  {{ showScoreHistory ? $t("course.submission.scoreHistory.hide") : $t("course.submission.scoreHistory.show") }}
+                  {{
+                    showScoreHistory
+                      ? $t("course.submission.scoreHistory.hide")
+                      : $t("course.submission.scoreHistory.show")
+                  }}
                 </button>
                 <span v-if="scoreHistory.length > 0" class="badge badge-info">
                   {{ $t("course.submission.scoreHistory.records", { count: scoreHistory.length }) }}
@@ -727,7 +738,7 @@ watch(submission, (val) => {
                 <div v-else-if="scoreHistory.length === 0" class="italic opacity-70">
                   {{ $t("course.submission.scoreHistory.noRecords") }}
                 </div>
-                <table v-else class="table table-compact w-full">
+                <table v-else class="table-compact table w-full">
                   <thead>
                     <tr>
                       <th>{{ $t("course.submission.scoreHistory.modifier") }}</th>
@@ -743,9 +754,11 @@ watch(submission, (val) => {
                       <td>{{ record.modifier }}</td>
                       <td>{{ formatTime(record.timestamp) }}</td>
                       <td>
-                        {{ record.taskIndex === null 
-                          ? $t("course.submission.scoreHistory.totalScore") 
-                          : $t("course.submission.scoreHistory.task", { index: record.taskIndex }) }}
+                        {{
+                          record.taskIndex === null
+                            ? $t("course.submission.scoreHistory.totalScore")
+                            : $t("course.submission.scoreHistory.task", { index: record.taskIndex })
+                        }}
                       </td>
                       <td>{{ record.beforeScore }}</td>
                       <td>{{ record.afterScore }}</td>
@@ -764,20 +777,24 @@ watch(submission, (val) => {
   <!-- Score Edit Modal -->
   <dialog ref="scoreEditModal" class="modal">
     <div class="modal-box">
-      <h3 class="font-bold text-lg">
-        {{ editTaskIndex === null 
-          ? $t("course.submission.scoreEdit.titleTotal") 
-          : $t("course.submission.scoreEdit.titleTask", { index: editTaskIndex }) }}
+      <h3 class="text-lg font-bold">
+        {{
+          editTaskIndex === null
+            ? $t("course.submission.scoreEdit.titleTotal")
+            : $t("course.submission.scoreEdit.titleTask", { index: editTaskIndex })
+        }}
       </h3>
 
       <!-- Description -->
       <p class="py-2">{{ $t("course.submission.scoreEdit.description") }}</p>
-      <ul class="list-disc list-inside text-sm opacity-70 mb-4">
+      <ul class="mb-4 list-inside list-disc text-sm opacity-70">
         <li v-if="editTaskIndex === null">{{ $t("course.submission.scoreEdit.scoreRangeTotal") }}</li>
         <li v-else>
-          {{ getTaskMaxScore(editTaskIndex) 
-            ? $t("course.submission.scoreEdit.scoreRangeTask", { max: getTaskMaxScore(editTaskIndex) })
-            : $t("course.submission.scoreEdit.scoreRangeTaskNoLimit") }}
+          {{
+            getTaskMaxScore(editTaskIndex)
+              ? $t("course.submission.scoreEdit.scoreRangeTask", { max: getTaskMaxScore(editTaskIndex) })
+              : $t("course.submission.scoreEdit.scoreRangeTaskNoLimit")
+          }}
         </li>
         <li>{{ $t("course.submission.scoreEdit.autoUpdate") }}</li>
         <li>{{ $t("course.submission.scoreEdit.recordSaved") }}</li>
@@ -800,7 +817,7 @@ watch(submission, (val) => {
         />
       </div>
 
-      <div class="form-control w-full mt-3">
+      <div class="form-control mt-3 w-full">
         <label class="label">
           <span class="label-text">{{ $t("course.submission.scoreEdit.reason") }}</span>
         </label>
@@ -814,12 +831,10 @@ watch(submission, (val) => {
 
       <!-- Buttons -->
       <div class="modal-action">
-        <button class="btn" @click="closeScoreEditModal">{{ $t("course.submission.scoreEdit.cancel") }}</button>
-        <button
-          class="btn btn-success"
-          @click="submitScoreEdit"
-          :disabled="isScoreSubmitting"
-        >
+        <button class="btn" @click="closeScoreEditModal">
+          {{ $t("course.submission.scoreEdit.cancel") }}
+        </button>
+        <button class="btn btn-success" @click="submitScoreEdit" :disabled="isScoreSubmitting">
           {{ $t("course.submission.scoreEdit.submit") }}
         </button>
       </div>
@@ -831,8 +846,8 @@ watch(submission, (val) => {
 
   <!-- Case Output Modal -->
   <dialog ref="caseOutputModal" class="modal">
-    <div class="modal-box max-w-5xl max-h-[90vh] overflow-y-auto">
-      <h3 class="font-bold text-lg">
+    <div class="modal-box max-h-[90vh] max-w-5xl overflow-y-auto">
+      <h3 class="text-lg font-bold">
         {{ $t("course.submission.caseOutput.title") }}
         <span v-if="currentViewingCase" class="text-base font-normal opacity-70">
           ({{ currentViewingCase.taskIndex }}-{{ currentViewingCase.caseIndex }})
@@ -856,11 +871,13 @@ watch(submission, (val) => {
           <!-- Stdout Section -->
           <div>
             <label class="label pb-2">
-              <span class="label-text font-semibold text-base">{{ $t("course.submission.caseOutput.stdout") }}</span>
+              <span class="label-text text-base font-semibold">{{
+                $t("course.submission.caseOutput.stdout")
+              }}</span>
             </label>
             <div v-if="caseOutputData.stdout === null">
               <!-- File doesn't exist -->
-              <div class="text-base-content/60 italic py-2">
+              <div class="text-base-content/60 py-2 italic">
                 {{ $t("course.submission.caseOutput.noStdout") }}
               </div>
             </div>
@@ -869,7 +886,7 @@ watch(submission, (val) => {
               <div v-if="caseOutputData.stdout.trim()">
                 <code-editor v-model="caseOutputData.stdout" readonly />
               </div>
-              <div v-else class="text-base-content/60 italic py-2">
+              <div v-else class="text-base-content/60 py-2 italic">
                 {{ $t("course.submission.caseOutput.emptyStdout") }}
               </div>
             </div>
@@ -878,11 +895,13 @@ watch(submission, (val) => {
           <!-- Stderr Section -->
           <div class="mt-6">
             <label class="label pb-2">
-              <span class="label-text font-semibold text-base">{{ $t("course.submission.caseOutput.stderr") }}</span>
+              <span class="label-text text-base font-semibold">{{
+                $t("course.submission.caseOutput.stderr")
+              }}</span>
             </label>
             <div v-if="caseOutputData.stderr === null">
               <!-- File doesn't exist -->
-              <div class="text-base-content/60 italic py-2">
+              <div class="text-base-content/60 py-2 italic">
                 {{ $t("course.submission.caseOutput.noStderr") }}
               </div>
             </div>
@@ -891,7 +910,7 @@ watch(submission, (val) => {
               <div v-if="caseOutputData.stderr.trim()">
                 <code-editor v-model="caseOutputData.stderr" readonly />
               </div>
-              <div v-else class="text-base-content/60 italic py-2">
+              <div v-else class="text-base-content/60 py-2 italic">
                 {{ $t("course.submission.caseOutput.emptyStderr") }}
               </div>
             </div>
@@ -900,28 +919,30 @@ watch(submission, (val) => {
           <!-- Artifact Files Section -->
           <div v-if="caseOutputData.files && Object.keys(caseOutputData.files).length > 0" class="mt-6">
             <label class="label pb-2">
-              <span class="label-text font-semibold text-base">{{ $t("course.submission.caseOutput.artifactFiles") }}</span>
+              <span class="label-text text-base font-semibold">{{
+                $t("course.submission.caseOutput.artifactFiles")
+              }}</span>
             </label>
-            <div class="space-y-4 mt-2">
+            <div class="mt-2 space-y-4">
               <div
                 v-for="(file, fileName) in caseOutputData.files"
                 :key="fileName"
-                class="border border-base-300 rounded-lg p-4"
+                class="border-base-300 rounded-lg border p-4"
               >
                 <!-- File Header -->
-                <div class="flex items-center gap-2 mb-3">
+                <div class="mb-3 flex items-center gap-2">
                   <i :class="getFileIconClass(file.extension)" class="h-5 w-5" />
                   <span class="font-medium">{{ fileName }}</span>
-                  <span class="badge badge-sm">{{ file.extension || 'no ext' }}</span>
+                  <span class="badge badge-sm">{{ file.extension || "no ext" }}</span>
                 </div>
 
                 <!-- Image Files -->
-                <div v-if="file.type === 'image'" class="flex justify-center bg-base-100 p-4 rounded">
+                <div v-if="file.type === 'image'" class="bg-base-100 flex justify-center rounded p-4">
                   <img
                     :src="`data:${file.mimeType || 'image/png'};base64,${file.content}`"
                     :alt="String(fileName)"
-                    style="max-width: 100%; max-height: 70vh; min-width: 200px; min-height: 200px;"
-                    class="object-contain rounded border border-base-300 shadow-sm"
+                    style="max-width: 100%; max-height: 70vh; min-width: 200px; min-height: 200px"
+                    class="border-base-300 rounded border object-contain shadow-sm"
                   />
                 </div>
 
@@ -936,7 +957,7 @@ watch(submission, (val) => {
                 </div>
 
                 <!-- Binary Files (not images) -->
-                <div v-else class="text-base-content/60 italic py-2">
+                <div v-else class="text-base-content/60 py-2 italic">
                   {{ $t("course.submission.caseOutput.binaryFile", { fileName }) }}
                 </div>
               </div>

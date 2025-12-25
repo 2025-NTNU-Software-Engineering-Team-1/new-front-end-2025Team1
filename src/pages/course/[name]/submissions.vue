@@ -89,20 +89,22 @@ const isInitialLoading = computed(() => {
 
 // Check if there are any pending submissions that need auto-refresh
 const hasPendingSubmissions = computed(() => {
-  return submissions.value?.some(
-    (sub) => sub.status === SUBMISSION_STATUS_CODE.PENDING
-  ) ?? false;
+  return submissions.value?.some((sub) => sub.status === SUBMISSION_STATUS_CODE.PENDING) ?? false;
 });
 
 // Auto-refresh polling: refresh list every 2 seconds (similar to detail page)
 // Always execute refresh, then check if we should stop in watchEffect
-const { pause, resume, isActive } = useIntervalFn(() => {
-  if (submissions.value != null && !isLoading.value) {
-    // Add cache-busting timestamp to ensure fresh data
-    const url = `${getSubmissionsUrl.value}${getSubmissionsUrl.value.includes('?') ? '&' : '?'}_t=${Date.now()}`;
-    execute(url);
-  }
-}, 2000, { immediate: false }); // Don't start immediately, wait for data
+const { pause, resume, isActive } = useIntervalFn(
+  () => {
+    if (submissions.value != null && !isLoading.value) {
+      // Add cache-busting timestamp to ensure fresh data
+      const url = `${getSubmissionsUrl.value}${getSubmissionsUrl.value.includes("?") ? "&" : "?"}_t=${Date.now()}`;
+      execute(url);
+    }
+  },
+  2000,
+  { immediate: false },
+); // Don't start immediately, wait for data
 
 // Control polling based on pending submissions
 watchEffect(() => {
@@ -125,7 +127,7 @@ watchEffect(() => {
 onActivated(() => {
   if (!isLoading.value) {
     // Add cache-busting timestamp to ensure fresh data
-    const url = `${getSubmissionsUrl.value}${getSubmissionsUrl.value.includes('?') ? '&' : '?'}_t=${Date.now()}`;
+    const url = `${getSubmissionsUrl.value}${getSubmissionsUrl.value.includes("?") ? "&" : "?"}_t=${Date.now()}`;
     execute(url);
   }
   // Ensure polling is active if there are pending submissions
@@ -187,7 +189,7 @@ async function rejudgeAll() {
   };
   const qs = queryString.stringify(query, { skipNull: true, skipEmptyString: true });
   const url = `/submission?${qs}`;
-  
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let allSubmissions: any[] = [];
   try {
@@ -208,16 +210,14 @@ async function rejudgeAll() {
   if (allSubmissions.length > 20) {
     const confirmed = confirm(
       `Warning: You are about to rejudge ${allSubmissions.length} submissions.\n\n` +
-      `This may take a long time and put significant load on the system.\n\n` +
-      `Are you sure you want to continue?`
+        `This may take a long time and put significant load on the system.\n\n` +
+        `Are you sure you want to continue?`,
     );
     if (!confirmed) {
       return;
     }
   } else {
-    const confirmed = confirm(
-      `Are you sure you want to rejudge ${allSubmissions.length} submission(s)?`
-    );
+    const confirmed = confirm(`Are you sure you want to rejudge ${allSubmissions.length} submission(s)?`);
     if (!confirmed) {
       return;
     }
@@ -255,7 +255,9 @@ async function rejudgeAll() {
       }
     }
 
-    console.log(`Rejudge completed. Success: ${successCount}, Failed: ${failedCount}, Skipped: ${skippedCount}`);
+    console.log(
+      `Rejudge completed. Success: ${successCount}, Failed: ${failedCount}, Skipped: ${skippedCount}`,
+    );
     // Reload the list
     router.go(0);
   } catch (err) {
@@ -493,7 +495,10 @@ async function deleteSubmission(id: string) {
                         :disabled="deletingIds.has(submission.submissionId)"
                         @click="deleteSubmission(submission.submissionId)"
                       >
-                        <i-uil-trash-alt v-if="!deletingIds.has(submission.submissionId)" class="lg:h-5 lg:w-5" />
+                        <i-uil-trash-alt
+                          v-if="!deletingIds.has(submission.submissionId)"
+                          class="lg:h-5 lg:w-5"
+                        />
                       </button>
                     </div>
                   </td>

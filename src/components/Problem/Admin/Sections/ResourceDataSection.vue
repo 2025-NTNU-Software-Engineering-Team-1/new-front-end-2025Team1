@@ -272,7 +272,7 @@ watch(
     <div class="flex flex-wrap items-center gap-3">
       <span class="label-text">{{ labelText }}</span>
       <label class="label cursor-pointer justify-start gap-x-2">
-        <span class="label-text">{{t("course.problems.enable")}}</span>
+        <span class="label-text">{{ t("course.problems.enable") }}</span>
         <input
           type="checkbox"
           class="toggle"
@@ -294,10 +294,15 @@ watch(
           v-if="resourceCaseCount !== null || hasRemoteAsset"
           class="badge badge-outline badge-success text-xs"
         >
-          {{t("course.problems.current")}} {{ resourceCaseCount ?? remoteTaskCount ?? "remote" }} {{t("course.problems.tasks")}}
+          {{ t("course.problems.current") }} {{ resourceCaseCount ?? remoteTaskCount ?? "remote" }}
+          {{ t("course.problems.tasks") }}
         </span>
-        <span v-else-if="fileRef" class="badge badge-outline badge-success text-xs"> {{ t("course.problems.uploaded") }} </span>
-        <span v-else class="badge badge-outline text-xs opacity-70">{{t("course.problems.notUploaded")}}</span>
+        <span v-else-if="fileRef" class="badge badge-outline badge-success text-xs">
+          {{ t("course.problems.uploaded") }}
+        </span>
+        <span v-else class="badge badge-outline text-xs opacity-70">{{
+          t("course.problems.notUploaded")
+        }}</span>
         <a
           v-if="downloadUrl && hasRemoteAsset"
           class="btn btn-xs"
@@ -305,14 +310,16 @@ watch(
           target="_blank"
           rel="noopener"
         >
-          {{t("course.problems.downloadCurrent")}}
+          {{ t("course.problems.downloadCurrent") }}
         </a>
       </div>
     </div>
 
     <div class="mt-2 overflow-hidden rounded-lg">
-        <div class="grid grid-cols-5 pb-4">
-          <div class="bg-base-300 col-span-1 flex items-center justify-center text-sm rounded-l-lg">{{t("course.problems.zipFile")}}</div>
+      <div class="grid grid-cols-5 pb-4">
+        <div class="bg-base-300 col-span-1 flex items-center justify-center rounded-l-lg text-sm">
+          {{ t("course.problems.zipFile") }}
+        </div>
         <div
           class="textarea-bordered bg-base-100 col-span-4 flex flex-col p-4"
           :class="[isDrag && 'border-accent border']"

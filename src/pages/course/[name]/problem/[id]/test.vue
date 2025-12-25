@@ -56,7 +56,7 @@ const loadTestcaseSettings = async () => {
     if (settingsJson) {
       const settings = JSON.parse(settingsJson);
       useDefaultTestcases.value = settings.useDefaultTestcases ?? true;
-      
+
       // Load custom testcases blob if exists
       const blobBase64 = localStorage.getItem(`${storageKey.value}_blob`);
       if (blobBase64 && !useDefaultTestcases.value) {

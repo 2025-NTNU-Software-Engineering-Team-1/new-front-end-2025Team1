@@ -145,10 +145,10 @@ async function saveTestcaseSettings() {
     const settings = {
       useDefaultTestcases: useDefaultTestcases.value,
       selectedTestcases: selectedTestcases.value,
-      testcaseFiles: testcaseFiles.value.map(f => ({ name: f.name, content: f.content })),
+      testcaseFiles: testcaseFiles.value.map((f) => ({ name: f.name, content: f.content })),
     };
     localStorage.setItem(storageKey, JSON.stringify(settings));
-    
+
     // If custom testcases blob exists, convert to base64 and store
     if (testcaseBlob) {
       const reader = new FileReader();
@@ -160,9 +160,9 @@ async function saveTestcaseSettings() {
     } else {
       localStorage.removeItem(`${storageKey}_blob`);
     }
-    
+
     saveSuccess.value = true;
-    
+
     // Navigate to test page after a short delay to show success message
     setTimeout(() => {
       router.push(`/course/${route.params.name}/problem/${route.params.id}/test`);

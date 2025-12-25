@@ -425,6 +425,53 @@ function getAIFileExtensions() {
 }
 
 // ==========================================
+// [NEW] Section: Restore Selected Keys via Usage API
+// ==========================================
+async function fetchExistingKeySelection() {
+  if (!courseName.value) await fetchCourseName();
+  if (!courseName.value || typeof courseName.value !== "string") return;
+
+  const currentProblemId = Number(route.params.id);
+  if (!currentProblemId || isNaN(currentProblemId)) return;
+
+  logger.group("Restore Selected Keys from Usage");
+
+  try {
+    const res = await api.CourseAPIUsage.getCourseUsage(courseName.value);
+    const { isSuccess, data } = parseApiResponse(res);
+
+    if (isSuccess && data?.keys) {
+      const foundKeyIds: string[] = [];
+      data.keys.forEach((key: any) => {
+        const isUsedByThisProblem = key.problem_usages?.some(
+          (usage: any) => Number(usage.problem_id) === currentProblemId,
+        );
+        if (isUsedByThisProblem) {
+          foundKeyIds.push(String(key.id));
+        }
+      });
+
+      if (foundKeyIds.length > 0) {
+        const mergedKeys = new Set([...selectedKeys.value, ...foundKeyIds]);
+        selectedKeys.value = Array.from(mergedKeys);
+
+        if (problem.value.config) {
+          problem.value.config.aiVTuberApiKeys = selectedKeys.value;
+        }
+
+        logger.success(`Restored ${foundKeyIds.length} keys for Problem ID ${currentProblemId}`, foundKeyIds);
+      } else {
+        logger.log("No existing key usage found for this problem.");
+      }
+    }
+  } catch (err) {
+    logger.error("Failed to restore existing key selection", err);
+  } finally {
+    logger.groupEnd();
+  }
+}
+
+// ==========================================
 // Section: API Keys Management
 // ==========================================
 const apiKeys = reactive<{ active: unknown[]; inactive: unknown[] }>({
@@ -615,6 +662,16 @@ const selectedKeyStats = computed(() => {
     active: activeCount,
     inactive: inactiveCount,
   };
+});
+
+// ==========================================
+// Section: Lifecycle Hooks
+// ==========================================
+onMounted(async () => {
+  initArtifactCollection();
+  await fetchKeys();
+  await fetchExistingKeySelection();
+  document.addEventListener("click", onClickOutside);
 });
 
 watch(

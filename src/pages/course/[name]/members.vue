@@ -50,6 +50,65 @@ const isProcessingSignup = ref(false);
 const errorMsg = ref("");
 const previewCSV = ref<{ headers?: string[]; body?: string[][] }>({});
 
+// Manual input mode
+type InputMode = 'csv' | 'manual';
+const inputMode = ref<InputMode>('csv');
+
+interface ManualUser {
+  username: string;
+  email: string;
+  password: string;
+  displayedName: string;
+  role: string;
+}
+
+const roleOptions = [
+  { text: 'Student', value: '0' },
+  { text: 'Teacher', value: '1' },
+  { text: 'Admin', value: '2' },
+  { text: 'TA', value: '3' },
+];
+
+const createEmptyUser = (): ManualUser => ({
+  username: '',
+  email: '',
+  password: '',
+  displayedName: '',
+  role: '0',
+});
+
+const manualUsers = ref<ManualUser[]>([createEmptyUser()]);
+
+function addManualUser() {
+  manualUsers.value.push(createEmptyUser());
+}
+
+function removeManualUser(index: number) {
+  if (manualUsers.value.length > 1) {
+    manualUsers.value.splice(index, 1);
+  }
+}
+
+function manualUsersToCSV(): string {
+  const headers = 'username,email,password,displayedName,role';
+  const rows = manualUsers.value
+    .filter(u => u.username.trim() && u.email.trim() && u.password.trim())
+    .map(u => `${u.username},${u.email},${u.password},${u.displayedName || ''},${u.role || '0'}`);
+  return [headers, ...rows].join('\n');
+}
+
+// Reset form when modal opens/closes
+watch(isOpen, (open) => {
+  if (!open) {
+    // Reset form when modal closes
+    newMembers.value = null;
+    newMembersCSVString.value = '';
+    previewCSV.value = {};
+    manualUsers.value = [createEmptyUser()];
+    errorMsg.value = '';
+  }
+});
+
 // no csv validation was handled
 const standardizeUsername = (csv: string): string => {
   const rows = csv.split("\n");
@@ -82,15 +141,32 @@ watch(newMembers, () => {
   reader.readAsText(newMembers.value);
 });
 async function submit() {
-  if (!newMembersCSVString.value) return;
+  let csvData = '';
+  
+  if (inputMode.value === 'csv') {
+    if (!newMembersCSVString.value) return;
+    csvData = shouldStandardizeUsername.value
+      ? standardizeUsername(newMembersCSVString.value)
+      : newMembersCSVString.value;
+  } else {
+    // Manual input mode
+    csvData = manualUsersToCSV();
+    if (shouldStandardizeUsername.value) {
+      csvData = standardizeUsername(csvData);
+    }
+    // Validate that we have at least one valid user
+    const lines = csvData.split('\n');
+    if (lines.length < 2) {
+      errorMsg.value = 'Please fill in at least one user with username, email and password';
+      return;
+    }
+  }
+  
   isProcessingSignup.value = true;
-  const csv = shouldStandardizeUsername.value
-    ? standardizeUsername(newMembersCSVString.value)
-    : newMembersCSVString.value;
 
   try {
     await api.Auth.batchSignup({
-      newUsers: csv,
+      newUsers: csvData,
       force: forceUpdate.value,
       course: route.params.name as string,
     });
@@ -163,7 +239,8 @@ async function submit() {
 
     <input v-model="isOpen" type="checkbox" id="my-modal" class="modal-toggle" />
     <div class="modal">
-      <div class="modal-box">
+      <div class="modal-box max-w-4xl">
+        <!-- Header Info -->
         <div>
           {{ $t("course.members.csvUploadHint.header") }}
           <ul class="ml-4 list-disc">
@@ -185,6 +262,7 @@ async function submit() {
 
         <div class="my-4" />
 
+        <!-- Options -->
         <div class="form-control">
           <label class="label cursor-pointer">
             <span class="label-text">{{ $t("course.members.standardizeUsername") }}</span>
@@ -192,6 +270,7 @@ async function submit() {
           </label>
         </div>
 
+        <!-- Error Message -->
         <div class="alert alert-error shadow-lg" v-if="errorMsg">
           <div>
             <i-uil-times-circle />
@@ -206,35 +285,133 @@ async function submit() {
           </label>
         </div>
 
-        <template v-if="!newMembers">
-          <input
-            type="file"
-            id="file-uploader"
-            accept=".csv"
-            @change="newMembers = ($event.target as HTMLInputElement).files?.[0]"
-          />
-        </template>
-        <template v-else>
-          <table class="table-auto">
-            <thead>
-              <tr v-if="previewCSV.headers">
-                <th v-for="h in previewCSV.headers">{{ h }}</th>
-              </tr>
-            </thead>
-            <tbody v-if="previewCSV.body">
-              <tr v-for="r in previewCSV.body">
-                <td v-for="c in r">
-                  {{ c }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="flex">
-            <button class="btn btn-sm" @click="newMembers = null">
-              <i-uil-times />
-            </button>
+        <!-- Tab Switcher -->
+        <div class="tabs tabs-boxed mb-4">
+          <a 
+            class="tab" 
+            :class="{ 'tab-active': inputMode === 'csv' }"
+            @click="inputMode = 'csv'"
+          >
+            CSV 檔案上傳
+          </a>
+          <a 
+            class="tab" 
+            :class="{ 'tab-active': inputMode === 'manual' }"
+            @click="inputMode = 'manual'"
+          >
+            手動輸入
+          </a>
+        </div>
+
+        <!-- CSV Upload Mode -->
+        <template v-if="inputMode === 'csv'">
+          <div class="mt-2 overflow-hidden rounded-lg">
+            <div class="grid grid-cols-5">
+              <!-- Left Label -->
+              <div class="bg-base-300 col-span-1 flex items-center justify-center text-sm">CSV 檔案</div>
+              <!-- Right Upload Area -->
+              <div class="textarea-bordered bg-base-100 col-span-4 p-4">
+                <template v-if="!newMembers">
+                  <div class="mb-2 text-sm opacity-70">拖曳檔案至此處或點擊選擇</div>
+                  <input
+                    type="file"
+                    accept=".csv"
+                    class="file-input-bordered file-input file-input-sm w-full"
+                    @change="newMembers = ($event.target as HTMLInputElement).files?.[0]"
+                  />
+                </template>
+                <template v-else>
+                  <div class="flex items-center gap-2 mb-2">
+                    <span class="font-medium">{{ newMembers.name }}</span>
+                    <button class="btn btn-sm btn-ghost" @click="newMembers = null">
+                      <i-uil-times />
+                    </button>
+                  </div>
+                  <div class="overflow-x-auto max-h-48">
+                    <table class="table table-compact w-full">
+                      <thead>
+                        <tr v-if="previewCSV.headers">
+                          <th v-for="h in previewCSV.headers" :key="h">{{ h }}</th>
+                        </tr>
+                      </thead>
+                      <tbody v-if="previewCSV.body">
+                        <tr v-for="(r, idx) in previewCSV.body" :key="idx">
+                          <td v-for="(c, cidx) in r" :key="cidx">{{ c }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </template>
+              </div>
+            </div>
           </div>
         </template>
+
+        <!-- Manual Input Mode -->
+        <template v-else>
+          <div class="space-y-3">
+            <!-- Header Row -->
+            <div class="grid grid-cols-12 gap-2 text-sm font-semibold opacity-70 px-1">
+              <div class="col-span-2">Username *</div>
+              <div class="col-span-3">Email *</div>
+              <div class="col-span-2">Password *</div>
+              <div class="col-span-2">Display Name</div>
+              <div class="col-span-2">Role</div>
+              <div class="col-span-1"></div>
+            </div>
+            
+            <!-- User Rows -->
+            <div v-for="(user, index) in manualUsers" :key="index" class="grid grid-cols-12 gap-2 items-center">
+              <input 
+                v-model="user.username" 
+                type="text" 
+                placeholder="username"
+                class="input input-bordered input-sm col-span-2"
+              />
+              <input 
+                v-model="user.email" 
+                type="email" 
+                placeholder="email@example.com"
+                class="input input-bordered input-sm col-span-3"
+              />
+              <input 
+                v-model="user.password" 
+                type="text" 
+                placeholder="password"
+                class="input input-bordered input-sm col-span-2"
+              />
+              <input 
+                v-model="user.displayedName" 
+                type="text" 
+                placeholder="(optional)"
+                class="input input-bordered input-sm col-span-2"
+              />
+              <select 
+                v-model="user.role" 
+                class="select select-bordered select-sm col-span-2"
+              >
+                <option v-for="opt in roleOptions" :key="opt.value" :value="opt.value">
+                  {{ opt.text }}
+                </option>
+              </select>
+              <div class="col-span-1 flex gap-1">
+                <button class="btn btn-sm btn-ghost" @click="addManualUser" aria-label="Add user">
+                  <i-uil-plus />
+                </button>
+                <button 
+                  class="btn btn-sm btn-ghost" 
+                  @click="removeManualUser(index)" 
+                  :disabled="manualUsers.length <= 1"
+                  aria-label="Remove user"
+                >
+                  <i-uil-minus />
+                </button>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- Modal Actions -->
         <div class="modal-action">
           <label for="my-modal" class="btn btn-ghost">{{ $t("course.members.cancel") }}</label>
           <div :class="['btn btn-success ml-3', isProcessingSignup && 'loading']" @click="submit">

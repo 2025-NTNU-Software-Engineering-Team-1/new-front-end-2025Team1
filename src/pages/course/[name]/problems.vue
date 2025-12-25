@@ -157,15 +157,7 @@ const maxPage = computed(() => {
                         <i-uil-file-exclamation-alt class="lg:h-5 lg:w-5" />
                       </router-link>
                     </div>
-                    <div class="tooltip" data-tip="Copycat">
-                      <router-link
-                        v-if="session.isTeacher"
-                        class="btn btn-ghost btn-sm btn-circle mr-1"
-                        :to="`/course/${$route.params.name}/problem/${problemId}/copycat`"
-                      >
-                        <i-uil-file-exclamation-alt class="lg:h-5 lg:w-5" />
-                      </router-link>
-                    </div>
+
                     <div class="tooltip" data-tip="Edit">
                       <router-link
                         v-if="session.isAdmin"
@@ -183,15 +175,6 @@ const maxPage = computed(() => {
                       </router-link>
                       <router-link
                         v-if="session.isTA"
-                        class="btn btn-ghost btn-sm btn-circle"
-                        :to="`/course/${$route.params.name}/problem/${problemId}/edit`"
-                      >
-                        <i-uil-edit class="lg:h-5 lg:w-5" />
-                      </router-link>
-                    </div>
-                    <div class="tooltip" data-tip="Edit">
-                      <router-link
-                        v-if="session.isTeacher"
                         class="btn btn-ghost btn-sm btn-circle"
                         :to="`/course/${$route.params.name}/problem/${problemId}/edit`"
                       >

@@ -67,7 +67,7 @@ const sortedAnnouncements = computed(() => {
             <skeleton-table :col="3" :row="5" />
           </template>
           <template #data>
-            <table class="table w-full">
+            <table class="table w-full table-fixed !min-w-0">
               <thead>
                 <tr>
                   <th>{{ $t("course.ann.index.table.title") }}</th>
@@ -85,11 +85,11 @@ const sortedAnnouncements = computed(() => {
                   class="hover"
                 >
                   <td>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 min-w-0">
                       <span v-if="pinned" class="text-lg" title="置頂">📌</span>
                       <router-link
                         :to="`/course/${$route.params.name}/announcements/${annId}`"
-                        class="link link-hover"
+                        class="block min-w-0 break-words whitespace-normal hover:underline text-primary"
                       >
                         {{ title }}
                       </router-link>

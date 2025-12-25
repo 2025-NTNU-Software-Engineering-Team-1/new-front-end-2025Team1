@@ -445,7 +445,7 @@ async function fetchExistingKeySelection() {
 
     if (isSuccess && data?.keys) {
       // ============================================================
-      // [DEBUG CORE] 生成「Key vs Problem IDs」對照表
+      // [DEBUG CORE] Table of Key vs Problem IDs
       // ============================================================
       const debugTable = data.keys.map((key: any) => {
         const usages = key.problem_usages || [];
@@ -465,7 +465,7 @@ async function fetchExistingKeySelection() {
 
       if (DEBUG_MODE) {
         console.log(
-          "%c下表列出所有 Key 對應的 Problem ID 清單：",
+          "%cThe following table lists all the Problem IDs corresponding to each Key:",
           "color: #0ea5e9; font-weight: bold; font-size: 1.1em;",
         );
 

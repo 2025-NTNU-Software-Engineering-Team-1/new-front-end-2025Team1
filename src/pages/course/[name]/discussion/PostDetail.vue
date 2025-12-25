@@ -402,9 +402,9 @@ onMounted(async () => {
                   <router-link
                     v-if="problemLink"
                     :to="problemLink"
-                    class="bg-primary/10 text-primary hover:bg-primary/20 inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-medium transition-colors"
+                    class="bg-primary/10 hover:bg-primary/20 inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-medium transition-colors text-base-content/80 dark:text-base-content/80 visited:text-base-content/80 dark:visited:text-base-content/80"
                   >
-                    <span class="text-primary">#</span>
+                    <span class="">#</span>
                     <span>{{ postProblemName || `Problem ${postProblemId}` }}</span>
                   </router-link>
                 </div>

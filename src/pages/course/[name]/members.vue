@@ -63,9 +63,9 @@ interface ManualUser {
 }
 
 const roleOptions = [
-  { text: "Student", value: "0" },
+  { text: "Admin", value: "0" },
   { text: "Teacher", value: "1" },
-  { text: "Admin", value: "2" },
+  { text: "Student", value: "2" },
   { text: "TA", value: "3" },
 ];
 
@@ -74,7 +74,8 @@ const createEmptyUser = (): ManualUser => ({
   email: "",
   password: "",
   displayedName: "",
-  role: "0",
+  // Default to Student (backend Role.STUDENT === 2)
+  role: "2",
 });
 
 const manualUsers = ref<ManualUser[]>([createEmptyUser()]);
@@ -93,8 +94,12 @@ function manualUsersToCSV(): string {
   const headers = "username,email,password,displayedName,role";
   const rows = manualUsers.value
     .filter((u) => u.username.trim() && u.email.trim() && u.password.trim())
-    .map((u) => `${u.username},${u.email},${u.password},${u.displayedName || ""},${u.role || "0"}`);
+    .map((u) => `${u.username},${u.email},${u.password},${u.displayedName || ""},${u.role?.trim() || "2"}`);
   return [headers, ...rows].join("\n");
+} 
+
+function isValidRole(value: unknown): boolean {
+  return typeof value === "string" && /^[0-3]$/.test(value.trim());
 }
 
 // Reset form when modal opens/closes
@@ -142,6 +147,8 @@ watch(newMembers, () => {
 });
 async function submit() {
   let csvData = "";
+  // Clear previous errors
+  errorMsg.value = "";
 
   if (inputMode.value === "csv") {
     if (!newMembersCSVString.value) return;
@@ -159,6 +166,33 @@ async function submit() {
     if (lines.length < 2) {
       errorMsg.value = "Please fill in at least one user with username, email and password";
       return;
+    }
+  }
+
+  // Validate role values before sending
+  if (inputMode.value === "manual") {
+    for (const u of manualUsers.value) {
+      if (!u.username.trim() || !u.email.trim() || !u.password.trim()) continue; // skip empty rows
+      if (!isValidRole(u.role)) {
+        errorMsg.value = `Invalid role "${u.role}" for user "${u.username}". Allowed: 0=Admin,1=Teacher,2=Student,3=TA`;
+        return;
+      }
+    }
+  } else {
+    // CSV mode: if role column present, validate values
+    const rows = csvData.split("\n");
+    const headerCols = rows[0].split(",").map((h) => h.trim());
+    const roleIdx = headerCols.findIndex((h) => h === "role");
+    if (roleIdx >= 0) {
+      for (let i = 1; i < rows.length; i++) {
+        const cols = rows[i].split(",");
+        const val = (cols[roleIdx] || "").trim();
+        if (!val) continue; // optional
+        if (!/^[0-3]$/.test(val)) {
+          errorMsg.value = `Invalid role "${val}" on CSV line ${i + 1}. Allowed: 0=Admin,1=Teacher,2=Student,3=TA`;
+          return;
+        }
+      }
     }
   }
 

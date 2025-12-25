@@ -216,7 +216,7 @@
       "maxZipSize": "Max ZIP Size (MB)",
       "maxZipSizeDefault": "(default 50 MB)",
       "aiTA": "AI TA",
-      "aiModel": "AI Model",
+      "aiModel": "AI (Gemini) Model",
       "uploadACFiles": "Upload AC files",
       "selectAPIKeys": "Select API Keys",
       "aiKeyTotal": "Total: {total}",

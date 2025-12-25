@@ -99,6 +99,7 @@ interface ProblemUsage {
   problem_id: number;
   problem_name: string;
   total_token?: number;
+  cycle_token?: number;
 }
 
 interface RawKeyItem {
@@ -107,10 +108,14 @@ interface RawKeyItem {
   created_by: string;
   masked_value: string;
   problem_usages: ProblemUsage[];
+  rpd?: number;
+  last_reset_date?: string;
+  cycle_total_token?: number;
 }
 
 interface KeyItem extends RawKeyItem {
   all_total_token: number;
+  all_cycle_token: number;
   average_token: number;
   is_flat: boolean;
   problem_usages: ProblemUsage[];
@@ -118,6 +123,8 @@ interface KeyItem extends RawKeyItem {
 
 interface CourseUsageData {
   totalToken: number;
+  totalCycleToken: number;
+  lastResetDate: string | null;
   keys: KeyItem[];
 }
 
@@ -314,6 +321,7 @@ async function fetchUsage() {
     const keys: KeyItem[] = rawKeys.map((key, index) => {
       const safeUsages = key.problem_usages || [];
       const { total, average, isFlat, sortedUsages } = calcKeyStatistics(safeUsages);
+      const cycleTotal = safeUsages.reduce((sum, u) => sum + (u.cycle_token || 0), 0);
       return {
         ...key,
         id: key.id || `temp-${index}`,
@@ -321,13 +329,17 @@ async function fetchUsage() {
         created_by: key.created_by || "Unknown User",
         problem_usages: sortedUsages,
         all_total_token: total,
+        all_cycle_token: key.cycle_total_token || cycleTotal,
         average_token: average,
         is_flat: isFlat,
       };
     });
 
     const totalToken = keys.reduce((sum, k) => sum + (k.all_total_token || 0), 0);
-    data.value = { totalToken, keys };
+    const totalCycleToken = keys.reduce((sum, k) => sum + (k.all_cycle_token || 0), 0);
+    // Use the first key's last_reset_date as reference (all keys should reset together)
+    const lastResetDate = rawKeys.length > 0 ? rawKeys[0].last_reset_date || null : null;
+    data.value = { totalToken, totalCycleToken, lastResetDate, keys };
     expandedKeys.value = Object.fromEntries(keys.map((k) => [String(k.id), false]));
   } catch (err: unknown) {
     interface ApiError {
@@ -351,6 +363,35 @@ function toggleExpand(id: string) {
   expandedKeys.value[id] = !expandedKeys.value[id];
 }
 
+function formatResetDate(isoString: string | null): string {
+  if (!isoString) return "";
+  try {
+    const date = new Date(isoString);
+    return date.toLocaleString(undefined, {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return isoString;
+  }
+}
+
+// Check if the cycle has exceeded 24 hours (lazy reset behavior)
+const isCycleExpired = computed(() => {
+  if (!data.value?.lastResetDate) return false;
+  try {
+    const resetDate = new Date(data.value.lastResetDate);
+    const now = new Date();
+    const diffMs = now.getTime() - resetDate.getTime();
+    const diffHours = diffMs / (1000 * 60 * 60);
+    return diffHours >= 24;
+  } catch {
+    return false;
+  }
+});
+
 onMounted(fetchUsage);
 </script>
 
@@ -362,12 +403,31 @@ onMounted(fetchUsage);
           {{ t("course.aisetting.usage.title", { name: route.params.name }) }}
         </div>
 
-        <div
-          v-if="data?.totalToken != null"
-          class="border-base-300 bg-base-200 mb-8 rounded-lg border p-4 text-center text-lg font-semibold"
-        >
-          {{ t("course.aisetting.usage.totalUsage") }}
-          <span>{{ data.totalToken.toLocaleString() }}</span>
+        <!-- Hero Stats Section -->
+        <div v-if="data?.totalToken != null" class="mb-8 grid gap-4 md:grid-cols-2">
+          <!-- Total Token Usage -->
+          <div class="border-base-300 bg-base-200 rounded-lg border p-4 text-center">
+            <div class="text-base-content/60 mb-1 text-sm">{{ t("course.aisetting.usage.totalUsage") }}</div>
+            <div class="text-2xl font-bold">{{ data.totalToken.toLocaleString() }}</div>
+          </div>
+
+          <!-- 1-Day Cycle Usage -->
+          <div class="border-base-300 bg-base-200 rounded-lg border p-4 text-center">
+            <div class="text-base-content/60 mb-1 flex items-center justify-center gap-1 text-sm">
+              <span>🔄</span>
+              <span>{{ t("course.aisetting.usage.cycleUsage") }}</span>
+              <div class="tooltip tooltip-bottom" :data-tip="t('course.aisetting.usage.cycleTooltip')">
+                <span class="cursor-help text-xs opacity-60">ⓘ</span>
+              </div>
+            </div>
+            <div class="text-2xl font-bold">{{ data.totalCycleToken?.toLocaleString() || 0 }}</div>
+            <div v-if="data.lastResetDate" class="text-base-content/50 mt-1 text-xs">
+              {{ t("course.aisetting.usage.sinceReset", { time: formatResetDate(data.lastResetDate) }) }}
+            </div>
+            <div v-if="isCycleExpired" class="text-base-content/40 mt-1 text-xs italic">
+              {{ t("course.aisetting.usage.cycleExpired") }}
+            </div>
+          </div>
         </div>
 
         <template v-if="isLoading">
@@ -495,6 +555,7 @@ onMounted(fetchUsage);
                         <th class="w-16">{{ t("course.aisetting.usage.rank") }}</th>
                         <th>{{ t("course.aisetting.usage.problemName") }}</th>
                         <th class="text-right">{{ t("course.aisetting.usage.tokenUsed") }}</th>
+                        <th class="text-right">{{ t("course.aisetting.usage.cycleTokenUsed") }}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -526,6 +587,9 @@ onMounted(fetchUsage);
                           <span :class="{ 'text-base-content font-bold': index === 0 && !keyItem.is_flat }">
                             {{ usage.total_token?.toLocaleString?.() || 0 }}
                           </span>
+                        </td>
+                        <td class="text-right font-mono text-sm opacity-70">
+                          {{ usage.cycle_token?.toLocaleString?.() || 0 }}
                         </td>
                       </tr>
                     </tbody>

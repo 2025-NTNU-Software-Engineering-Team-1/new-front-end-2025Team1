@@ -62,6 +62,12 @@
       "usage": {
         "title": "API Usage ({name})",
         "totalUsage": "Total Token Usage：",
+        "cycleUsage": "1-Day Cycle Usage",
+        "totalCycleUsage": "Current Cycle Total",
+        "cycleTokenUsed": "Cycle Used",
+        "sinceReset": "since {time}",
+        "cycleTooltip": "Usage since last reset. The system resets cycle counters every 24 hours to manage API rate limits.",
+        "cycleExpired": "Cycle exceeded 24h, will update on next AI call",
         "used_by_summary": "Used by {count} problems • Token",
         "created_by_summary": "• Created by {name}",
         "rank": "Rank",

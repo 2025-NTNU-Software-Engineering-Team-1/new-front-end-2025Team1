@@ -62,6 +62,12 @@
       "usage": {
         "title": "API 用量 ({name})",
         "totalUsage": "Token 總使用量:",
+        "cycleUsage": "單日週期用量",
+        "totalCycleUsage": "本週期總用量",
+        "cycleTokenUsed": "週期已用量",
+        "sinceReset": "自 {time} 起",
+        "cycleTooltip": "此為自上次重置以來的用量。系統每 24 小時會自動重置週期計數，用於控制 API 請求頻率限制。",
+        "cycleExpired": "週期已超過 24 小時，將在下次 AI 呼叫時更新",
         "used_by_summary": "被 {count} 個題目使用 • Token",
         "created_by_summary": "• 由 {name} 所建立",
         "rank": "排名",

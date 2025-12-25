@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useTitle } from "@vueuse/core";
 import api from "@/models/api";
@@ -46,8 +46,26 @@ const route = useRoute();
 useTitle(`AI Setting - ${route.params.name} | Normal OJ`);
 
 const isLoading = ref(false);
+const isAddingKey = ref(false);
 const errorMsg = ref("");
 const successMsg = ref("");
+
+// Auto-dismiss success/error messages after 3 seconds
+watch(successMsg, (newVal) => {
+  if (newVal) {
+    setTimeout(() => {
+      successMsg.value = "";
+    }, 3000);
+  }
+});
+
+watch(errorMsg, (newVal) => {
+  if (newVal) {
+    setTimeout(() => {
+      errorMsg.value = "";
+    }, 5000);
+  }
+});
 const session = useSession();
 
 // Interface definition for API Keys
@@ -152,7 +170,7 @@ async function addKey() {
 
   errorMsg.value = "";
   successMsg.value = "";
-  isLoading.value = true;
+  isAddingKey.value = true;
 
   const payload = {
     key_name: newKey.value.name,
@@ -188,7 +206,7 @@ async function addKey() {
     logger.error("Add Exception", err);
     errorMsg.value = err?.response?.data?.message ?? "Failed to add key.";
   } finally {
-    isLoading.value = false;
+    isAddingKey.value = false;
     logger.groupEnd();
   }
 }
@@ -290,47 +308,69 @@ onMounted(fetchKeys);
       <div class="card-body">
         <div class="card-title mb-4">{{ t("course.aisetting.setup.title") }}</div>
 
-        <div v-if="errorMsg" class="alert alert-error shadow-lg">
-          <div>
-            <i-uil-times-circle /> <span>{{ errorMsg }}</span>
+        <!-- Toast notifications - fixed position at bottom right -->
+        <div class="toast toast-end toast-bottom z-50">
+          <div v-if="errorMsg" class="alert alert-error py-2 px-4 text-sm">
+            <i-uil-times-circle class="w-4 h-4" />
+            <span>{{ errorMsg }}</span>
+          </div>
+          <div v-if="successMsg" class="alert alert-success py-2 px-4 text-sm">
+            <i-uil-check-circle class="w-4 h-4" />
+            <span>{{ successMsg }}</span>
           </div>
         </div>
 
-        <div v-if="successMsg" class="alert alert-success shadow-lg">
-          <div>
-            <i-uil-check-circle /> <span>{{ successMsg }}</span>
+        <!-- Add New Key Section -->
+        <div class="border-base-300 bg-base-200/30 dark:bg-base-200/10 mb-8 rounded-lg border p-5">
+          <h3 class="mb-4 text-lg font-semibold">{{ t("course.aisetting.setup.subtitleNewKey") }}</h3>
+
+          <div class="grid gap-4 md:grid-cols-3">
+            <!-- Key Name Input - Editable -->
+            <div class="form-control">
+              <label class="label pb-1">
+                <span class="label-text text-sm font-medium">{{ t("course.aisetting.setup.input.name") }}</span>
+              </label>
+              <input
+                type="text"
+                v-model="newKey.name"
+                :placeholder="t('course.aisetting.setup.input.name')"
+                class="input input-bordered w-full bg-base-100"
+                maxlength="50"
+              />
+            </div>
+
+            <!-- API Key Value Input - Editable -->
+            <div class="form-control">
+              <label class="label pb-1">
+                <span class="label-text text-sm font-medium">{{ t("course.aisetting.setup.input.value") }}</span>
+              </label>
+              <input
+                type="text"
+                v-model="newKey.value"
+                :placeholder="t('course.aisetting.setup.input.value')"
+                class="input input-bordered w-full bg-base-100"
+                maxlength="50"
+              />
+            </div>
+
+            <!-- Created By - Read-only with gray background -->
+            <div class="form-control">
+              <label class="label pb-1">
+                <span class="label-text text-sm font-medium">{{ t("course.aisetting.setup.display.createdBy") }}</span>
+              </label>
+              <input
+                type="text"
+                :value="session.displayedName || session.username"
+                class="input input-bordered w-full bg-base-300 dark:bg-base-300/50 text-base-content/70 cursor-not-allowed"
+                disabled
+              />
+            </div>
           </div>
-        </div>
 
-        <div class="border-base-300 mb-8 rounded-lg border p-4">
-          <h3 class="mb-2 text-lg font-semibold">{{ t("course.aisetting.setup.subtitleNewKey") }}</h3>
-
-          <div class="grid gap-3 md:grid-cols-3">
-            <input
-              type="text"
-              v-model="newKey.name"
-              :placeholder="t('course.aisetting.setup.input.name')"
-              class="input-bordered input w-full"
-              maxlength="50"
-            />
-            <input
-              type="text"
-              v-model="newKey.value"
-              :placeholder="t('course.aisetting.setup.input.value')"
-              class="input-bordered input w-full"
-              maxlength="50"
-            />
-            <input
-              type="text"
-              :value="session.displayedName || session.username"
-              class="input-bordered input w-full text-gray-500"
-              disabled
-            />
-          </div>
-
-          <div class="mt-4 flex justify-end">
-            <button class="btn btn-success" :class="{ loading: isLoading }" @click="addKey">
-              <i-uil-plus class="mr-1" /> {{ t("course.aisetting.setup.input.addKey") }}
+          <div class="mt-5 flex justify-end">
+            <button class="btn btn-success gap-2" :class="{ loading: isAddingKey }" :disabled="isAddingKey" @click="addKey">
+              <i-uil-plus v-if="!isAddingKey" />
+              {{ t("course.aisetting.setup.input.addKey") }}
             </button>
           </div>
 
@@ -339,50 +379,63 @@ onMounted(fetchKeys);
           </div>
         </div>
 
-        <div class="border-base-300 rounded-lg border p-4">
+        <!-- Existing Keys Section -->
+        <div class="border-base-300 rounded-lg border p-5">
           <h3 class="mb-4 text-lg font-semibold">{{ t("course.aisetting.setup.subtitleExistingKey") }}</h3>
 
           <div v-if="isLoading && apiKeys.length === 0" class="py-4 text-center opacity-60">
             <ui-spinner />
           </div>
 
-          <div v-else-if="apiKeys.length === 0" class="py-2 italic opacity-70">
+          <div v-else-if="apiKeys.length === 0" class="py-4 text-center italic opacity-70">
             {{ t("course.aisetting.setup.display.noKey") }}
           </div>
 
-          <div v-else class="space-y-3">
+          <div v-else class="space-y-4">
             <div
               v-for="k in apiKeys"
               :key="k.id"
-              class="border-base-200 bg-base-100 grid grid-cols-1 gap-2 rounded-lg border p-3 md:grid-cols-7 md:items-center"
+              class="border-base-300 bg-base-100 dark:bg-base-200/20 grid grid-cols-1 gap-4 rounded-lg border p-4 md:grid-cols-12 md:items-end"
             >
-              <div class="col-span-2">
-                <label class="text-xs opacity-70">{{ t("course.aisetting.setup.display.keyName") }}</label>
+              <!-- Key Name - Editable -->
+              <div class="md:col-span-3">
+                <label class="label pb-1">
+                  <span class="label-text text-xs opacity-70">{{ t("course.aisetting.setup.display.keyName") }}</span>
+                </label>
                 <input
                   type="text"
                   v-model="k.key_name"
-                  class="input-bordered input input-sm w-full"
+                  class="input input-bordered input-sm w-full bg-base-100"
                   maxlength="50"
                 />
               </div>
 
-              <div class="col-span-2 text-sm">
-                <label class="text-xs opacity-70">{{ t("course.aisetting.setup.display.masked") }}</label>
-                <div class="font-mono">{{ k.masked_value }}</div>
+              <!-- Masked Value - Read-only with gray background -->
+              <div class="md:col-span-3">
+                <label class="label pb-1">
+                  <span class="label-text text-xs opacity-70">{{ t("course.aisetting.setup.display.masked") }}</span>
+                </label>
+                <div class="input input-bordered input-sm w-full bg-base-300 dark:bg-base-300/50 text-base-content/70 flex items-center font-mono cursor-not-allowed">
+                  {{ k.masked_value }}
+                </div>
               </div>
 
-              <div class="col-span-1">
-                <label class="text-xs opacity-70">{{ t("course.aisetting.setup.display.createdBy") }}</label>
+              <!-- Created By - Read-only with gray background -->
+              <div class="md:col-span-2">
+                <label class="label pb-1">
+                  <span class="label-text text-xs opacity-70">{{ t("course.aisetting.setup.display.createdBy") }}</span>
+                </label>
                 <input
                   type="text"
-                  v-model="k.created_by"
-                  class="input-bordered input input-sm w-full"
+                  :value="k.created_by"
+                  class="input input-bordered input-sm w-full bg-base-300 dark:bg-base-300/50 text-base-content/70 cursor-not-allowed"
                   disabled
                 />
               </div>
 
-              <div class="flex items-center gap-2">
-                <label class="label-text mr-2 text-xs opacity-70">{{
+              <!-- Active Toggle -->
+              <div class="md:col-span-2 flex items-center gap-2 md:justify-center md:pb-0">
+                <label class="label-text text-xs opacity-70">{{
                   t("course.aisetting.setup.display.active")
                 }}</label>
                 <input
@@ -393,11 +446,12 @@ onMounted(fetchKeys);
                 />
               </div>
 
-              <div class="flex justify-end gap-2">
-                <button class="btn btn-success btn-xs" @click="updateKey(k)">
+              <!-- Action Buttons -->
+              <div class="md:col-span-2 flex justify-end gap-2">
+                <button class="btn btn-success btn-sm" @click="updateKey(k)">
                   {{ t("course.aisetting.setup.display.save") }}
                 </button>
-                <button class="btn btn-error btn-xs" @click="deleteKey(k.id)">
+                <button class="btn btn-error btn-sm" @click="deleteKey(k.id)">
                   {{ t("course.aisetting.setup.display.delete") }}
                 </button>
               </div>

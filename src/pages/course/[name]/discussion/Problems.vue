@@ -30,6 +30,7 @@ const loadProblems = async () => {
       Mode: "All", // 後端只支援 "All" 模式
       Limit: pagination.value.limit,
       Page: pagination.value.page,
+      Course_Id: route.params.name,
     };
 
     console.log("Loading problems with params:", params);
@@ -67,7 +68,7 @@ const allPosts = ref<any[]>([]);
 const loadAllPosts = async () => {
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const response: any = await API.Discussion.getPosts({ Limit: 1000 });
+    const response: any = await API.Discussion.getPosts({ Limit: 1000, Course_Id: route.params.name });
     const status = response.Status || response.data?.Status;
     const postsData = response.Posts || response.data?.Posts;
 

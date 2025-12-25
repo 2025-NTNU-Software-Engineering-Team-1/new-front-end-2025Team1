@@ -97,7 +97,7 @@ onMounted(() => {
           <h1 class="uppercase">{{ t("about.links") }}</h1>
           <div class="flex gap-12">
             <a href="https://fb.me/noj.tw" class="mx-12" target="_blank" rel="noopener noreferrer">
-              <i-uil-facebook class="h-28 w-28" color="hsl(0 0% 100%)" />
+              <i-uil-facebook class="h-28 w-28" color="var(--icon-color)" aria-label="facebook" />
             </a>
             <a
               href="https://github.com/Normal-OJ/Normal-OJ"
@@ -105,7 +105,7 @@ onMounted(() => {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <i-uil-github class="h-28 w-28" color="hsl(0 0% 100%)" />
+              <i-uil-github class="h-28 w-28" color="var(--icon-color)" aria-label="github" />
             </a>
           </div>
         </div>
@@ -140,6 +140,31 @@ onMounted(() => {
 </template>
 
 <style scoped>
+:root {
+  --icon-color-light: hsl(224, 70%, 6%);
+  --icon-color-dark: hsl(0 0% 100%);
+  --icon-color: var(--icon-color-light);
+}
+
+/* Respect system preference */
+@media (prefers-color-scheme: dark) {
+  :root { --icon-color: var(--icon-color-dark); }
+}
+
+/* Respect app data-theme attribute if used */
+:root[data-theme="dark"] { --icon-color: var(--icon-color-dark); }
+:root[data-theme="light"] { --icon-color: var(--icon-color-light); }
+
+/* Ensure icon components pick up color; use ::v-deep for scoped style */
+::v-deep i-uil-github,
+::v-deep i-uil-facebook {
+  color: var(--icon-color);
+}
+::v-deep i-uil-github svg,
+::v-deep i-uil-facebook svg {
+  fill: currentColor;
+}
+
 .reveal {
   opacity: 0;
   -webkit-transform: scale(0.8);

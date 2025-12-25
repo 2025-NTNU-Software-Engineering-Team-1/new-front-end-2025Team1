@@ -24,7 +24,7 @@ const { data: problem, error, isLoading } = useAxios<Problem>(`/problem/view/${r
         <problem-card v-if="problem" :problem="problem" />
 
         <AIChatbot
-          v-if="problem && (problem.config?.aiVTuber || true)"
+          v-if="problem && Boolean(problem.config?.aiVTuber)"
           :course-id="route.params.name as string"
           :course-name="route.params.name as string"
           :problem-id="route.params.id as string"

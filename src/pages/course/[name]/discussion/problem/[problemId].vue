@@ -41,7 +41,7 @@ const pagination = ref<PaginationInfo>({
 const loadProblems = async () => {
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const response: any = await API.Discussion.getProblems({ Limit: 100 });
+    const response: any = await API.Discussion.getProblems({ Limit: 100, Course_Id: route.params.name });
     const status = response.data?.Status;
     const problemsData = response.data?.Problems;
 
@@ -73,6 +73,7 @@ const loadProblemPosts = async () => {
       Problem_Id: problemId,
       Limit: pagination.value.limit,
       Page: pagination.value.page,
+      Course_Id: route.params.name,
     };
 
     console.log("Loading posts for problem:", problemId, "with params:", params);
@@ -144,6 +145,7 @@ const searchProblemPosts = async () => {
       Problem_Id: problemId,
       Limit: 100, // 載入更多以便搜尋
       Page: 1,
+      Course_Id: route.params.name,
     };
 
     console.log("Searching problem posts with params:", params);

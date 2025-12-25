@@ -7,10 +7,12 @@ import { ROLE } from "@/constants";
 import { useTitle } from "@vueuse/core";
 import { useSession, UserRole } from "@/stores/session";
 import axios, { type AxiosError } from "axios";
-
+import { useI18n } from "vue-i18n";
 const route = useRoute();
 const router = useRouter();
 const session = useSession();
+const { t } = useI18n();
+
 useTitle(`Members - ${route.params.name} | Normal OJ`);
 enum MemberTableColumn {
   USERNAME = "username",
@@ -239,9 +241,9 @@ async function submit() {
               <span class="label-text">{{ $t("course.members.sortBy") }}</span>
             </label>
             <select v-model="sortBy" class="select-bordered select w-full max-w-xs">
-              <option :value="MemberTableColumn.USERNAME">Username</option>
-              <option :value="MemberTableColumn.DISPLAYED_NAME">Display Name</option>
-              <option :value="MemberTableColumn.ROLE">Role</option>
+              <option :value="MemberTableColumn.USERNAME">{{ $t("course.members.optionUsername") }}</option>
+              <option :value="MemberTableColumn.DISPLAYED_NAME">{{ $t("course.members.optionDisplayName") }}</option>
+              <option :value="MemberTableColumn.ROLE">{{ $t("course.members.optionRole") }}</option>
             </select>
           </div>
         </div>
@@ -253,9 +255,9 @@ async function submit() {
             <table class="table w-full">
               <thead>
                 <tr>
-                  <th>username</th>
-                  <th>display name</th>
-                  <th>role</th>
+                  <th>{{ $t("course.members.tableUsername") }}</th>
+                  <th>{{ $t("course.members.tableDisplayedName") }}</th>
+                  <th>{{ $t("course.members.tableRole") }}</th>
                 </tr>
               </thead>
               <tbody>

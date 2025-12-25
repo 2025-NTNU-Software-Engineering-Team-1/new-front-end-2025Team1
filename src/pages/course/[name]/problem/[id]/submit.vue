@@ -262,11 +262,13 @@ async function submit() {
       // ==========================================
 
       // Check for makefile in ROOT with ANY extension (e.g., makefile, makefile.txt)
+      // [UPDATE]: Allow both "makefile" and "Makefile" (case insensitive for M)
       const hasRootMakefile = fileNames.some((name) => {
         // Must be in root (no '/')
         if (name.includes("/")) return false;
-        // Strict "makefile" prefix check
-        return name === "makefile" || name.startsWith("makefile.");
+        const lower = name.toLowerCase();
+        // Strict "makefile" prefix check (covers Makefile, makefile, Makefile.txt, etc.)
+        return lower === "makefile" || lower.startsWith("makefile.");
       });
 
       const cFiles = fileNames.filter((n) => n.endsWith(".c"));
@@ -288,7 +290,7 @@ async function submit() {
         // User chose C
         if (!hasRootMakefile) {
           errorMsg =
-            "Missing 'makefile' at root level. File must be named 'makefile' (extensions like .txt are allowed).";
+            "Missing 'makefile' (or 'Makefile') at root level. File must be named 'makefile' (extensions like .txt are allowed).";
         } else if (cppFiles.length > 0) {
           errorMsg = "Language mismatch: You selected C, but the Zip contains C++ files (.cpp).";
         } else if (pyFiles.length > 0) {
@@ -298,7 +300,7 @@ async function submit() {
         // User chose C++
         if (!hasRootMakefile) {
           errorMsg =
-            "Missing 'makefile' at root level. File must be named 'makefile' (extensions like .txt are allowed).";
+            "Missing 'makefile' (or 'Makefile') at root level. File must be named 'makefile' (extensions like .txt are allowed).";
         } else if (cFiles.length > 0) {
           errorMsg = "Language mismatch: You selected C++, but the Zip contains C files (.c).";
         } else if (pyFiles.length > 0) {

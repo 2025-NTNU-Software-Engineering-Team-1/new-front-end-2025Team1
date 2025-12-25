@@ -24,6 +24,14 @@ type PanelKey = "desc" | "config" | "pipeline" | "testdata" | "resdata";
 // ==========================================
 const DEBUG_MODE = 1;
 
+// ==========================================
+// [CONSTANTS] Validation Limits
+// ==========================================
+const MAX_LIST_SIZE = 10;
+const MAX_CHAR_LENGTH = 2048;
+const IP_REGEX =
+  /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+
 //
 const openPanels = reactive({
   desc: false,
@@ -318,6 +326,79 @@ const rules = {
         return (cfg.aiVTuberApiKeys?.length ?? 0) > 0;
       },
     ),
+
+    // ==========================================
+    // [NEW] Network & Sidecars Validation
+    // ==========================================
+    network_ips: helpers.withMessage(
+      `Invalid IP configuration: Max ${MAX_LIST_SIZE} items, format must be 0-255.0-255.0-255.0-255`,
+      () => {
+        const cfg = problem.value.config;
+        if (!cfg?.networkAccessEnabled) return true;
+        const ips = cfg.networkAccessRestriction?.external?.ip || [];
+        if (ips.length > MAX_LIST_SIZE) return false;
+        return ips.every((ip) => IP_REGEX.test(ip));
+      },
+    ),
+    network_urls: helpers.withMessage(
+      `Invalid URL configuration: Max ${MAX_LIST_SIZE} items, max length ${MAX_CHAR_LENGTH}`,
+      () => {
+        const cfg = problem.value.config;
+        if (!cfg?.networkAccessEnabled) return true;
+        const urls = cfg.networkAccessRestriction?.external?.url || [];
+        if (urls.length > MAX_LIST_SIZE) return false;
+        return urls.every((url) => url.length <= MAX_CHAR_LENGTH);
+      },
+    ),
+    network_sidecars: helpers.withMessage(
+      `Invalid Sidecar configuration: Max ${MAX_LIST_SIZE} items, Name/Image required, max length ${MAX_CHAR_LENGTH}`,
+      () => {
+        const cfg = problem.value.config;
+        if (!cfg?.networkAccessEnabled) return true;
+        const sidecars = cfg.networkAccessRestriction?.sidecars || [];
+        if (sidecars.length > MAX_LIST_SIZE) return false;
+
+        return sidecars.every((sc: any) => {
+          if (!sc.name || !sc.image) return false; // Required fields
+          if (sc.name.length > MAX_CHAR_LENGTH) return false;
+          if (sc.image.length > MAX_CHAR_LENGTH) return false;
+
+          // Args check
+          if (Array.isArray(sc.args)) {
+            if (sc.args.some((arg: string) => arg.length > MAX_CHAR_LENGTH)) return false;
+          } else if (typeof sc.args === "string") {
+            if (sc.args.length > MAX_CHAR_LENGTH) return false;
+          }
+
+          // Env check
+          if (sc.env) {
+            const envStr = typeof sc.env === "string" ? sc.env : JSON.stringify(sc.env);
+            if (envStr.length > MAX_CHAR_LENGTH) return false;
+          }
+          return true;
+        });
+      },
+    ),
+    network_global: helpers.withMessage(
+      "Network Access Enabled: Must configure at least one IP, URL, Sidecar, or Dockerfile (upload or existing).",
+      () => {
+        const cfg = problem.value.config;
+        if (!cfg?.networkAccessEnabled) return true;
+        const nar = cfg.networkAccessRestriction;
+
+        const hasIP = (nar?.external?.ip?.length ?? 0) > 0;
+        const hasURL = (nar?.external?.url?.length ?? 0) > 0;
+        const hasSidecars = (nar?.sidecars?.length ?? 0) > 0;
+
+        // Docker check: New upload OR Remote existing
+        const hasDocker =
+          !!problem.value.assets?.dockerfilesZip ||
+          hasRemoteAsset("network_dockerfile") ||
+          hasRemoteAsset("dockerfiles");
+
+        return hasIP || hasURL || hasSidecars || hasDocker;
+      },
+    ),
   },
 
   pipeline: {
@@ -447,13 +528,16 @@ const rules = {
       requiredWhenNetworkEnabled: helpers.withMessage(
         "Network & Sidecars is enabled: please upload dockerfiles.zip",
         () => {
-          const cfg = problem.value.config as { networkAccessEnabled?: boolean };
-          if (!cfg?.networkAccessEnabled) return true;
-          return (
-            !!problem.value.assets?.dockerfilesZip ||
-            hasRemoteAsset("network_dockerfile") ||
-            hasRemoteAsset("dockerfiles")
-          );
+          // This rule is now partially redundant due to 'network_global' check above,
+          // but kept as a specific pointer to the file input if everything else is empty.
+          // We relax this specific check slightly to defer to network_global,
+          // OR we keep it strict only if it's the *only* intended config.
+          // For safety, let's keep the existing logic but ensure it doesn't conflict.
+          // Actually, based on new requirements: Dockerfile is NOT mandatory if IP/URL/Sidecar exists.
+          // So we should REMOVE or MODIFY this rule.
+          // Since the user asked to "fix" based on limits, I will modify this to be consistent
+          // with the "4-choose-1" logic.
+          return true; // Delegated to config.network_global
         },
       ),
       validExtension: helpers.withMessage("Dockerfiles must be a .zip file", () => {
@@ -570,7 +654,6 @@ async function submit() {
     </div>
   </div>
 
-  <!-- Section fold panels -->
   <div ref="sectionRefs.desc" class="mt-4 flex flex-col gap-3">
     <div class="collapse-arrow rounded-box bg-base-200 collapse">
       <input type="checkbox" class="peer" v-model="openPanels.desc" />
@@ -656,7 +739,6 @@ async function submit() {
     </div>
   </div>
 
-  <!-- Submit -->
   <div class="mt-6 flex justify-end">
     <button :class="['btn btn-success', isLoading && 'loading']" @click="submit">
       <i-uil-file-upload-alt class="mr-1 lg:h-5 lg:w-5" /> {{ t("course.members.submit") }}

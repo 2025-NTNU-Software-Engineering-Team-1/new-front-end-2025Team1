@@ -42,8 +42,6 @@ const isExpanded = ref(true);
 const lang = useStorage(LOCAL_STORAGE_KEY.LAST_USED_LANG, -1);
 const showSubmitModal = ref(false);
 
-
-
 // const showTestcaseModal = ref(false);
 // const testcaseFiles = ref<Array<{ name: string; content: string }>>([]);
 // const selectedTestcases = ref<string[]>([]);

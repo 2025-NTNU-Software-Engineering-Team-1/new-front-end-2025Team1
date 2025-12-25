@@ -358,19 +358,22 @@ async function submit() {
       fd.append("resource_data_teacher.zip", assets.resourceDataTeacherZip);
       attachedFiles.push("resource_data_teacher.zip");
     }
+
+    // [New] Trial Mode Assets Upload Logic
     if (assets?.trialModePublicTestDataZip) {
       fd.append("public_testdata.zip", assets.trialModePublicTestDataZip);
       attachedFiles.push("public_testdata.zip");
     }
     if (assets?.trialModeACFiles) {
-      // trialModeACFiles
+      // trialModeACFiles could be File[] or single File depending on upstream logic
       if (Array.isArray(assets.trialModeACFiles)) {
         assets.trialModeACFiles.forEach((f) => {
           const ext = f.name.split(".").pop()?.toLowerCase() || "";
+          // Naming convention for backend AC checker
           if (ext === "c") fd.append("ac_code.c", f);
           else if (ext === "cpp") fd.append("ac_code.cpp", f);
           else if (ext === "py") fd.append("ac_code.py", f);
-          else fd.append("ac_code", f, f.name);
+          else fd.append("ac_code", f, f.name); // Fallback
           attachedFiles.push(f.name);
         });
       } else {

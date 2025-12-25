@@ -308,11 +308,11 @@
       "setResourceData": "設定資源資料",
       "submissionBlocked": "提交已被阻擋。請修正以下事項：",
       "commaSeparated": "用逗號分隔",
-      "meansUnlimited":"-1 代表無限制",
+      "meansUnlimited": "-1 代表無限制",
       "allowedlan": "允許: .c, .cpp, .py",
-      "networkSidecars":"內外網服務(Network & Sidecars)",
-      "onlyAllowSpecificInfo":"僅允許特定的 IP/URL。封鎖所有其他內容",
-      "blockSpecificInfo":"封鎖特定 IPs/URLs. 允許所有其他內容."
+      "networkSidecars": "內外網服務(Network & Sidecars)",
+      "onlyAllowSpecificInfo": "僅允許特定的 IP/URL。封鎖所有其他內容",
+      "blockSpecificInfo": "封鎖特定 IPs/URLs. 允許所有其他內容."
     },
     "submissions": {
       "text": "繳交狀態",
@@ -427,10 +427,10 @@
       },
       "forceUpdate": "強制更新已存在的使用者的資訊",
       "standardizeUsername": "統一使用者名稱（字母大寫）",
-      "csvFiles":"CSV 檔案",
-      "csvUpload":"CSV 檔案上傳",
-      "csvUploadInfo":"拖曳檔案至此處或點擊選擇",
-      "manualInput":"手動輸入"
+      "csvFiles": "CSV 檔案",
+      "csvUpload": "CSV 檔案上傳",
+      "csvUploadInfo": "拖曳檔案至此處或點擊選擇",
+      "manualInput": "手動輸入"
     }
   },
   "courses": {

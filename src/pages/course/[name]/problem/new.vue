@@ -95,7 +95,7 @@ const newProblem = ref<ProblemForm>({
     networkAccessRestriction: {
       sidecars: [],
       external: {
-        model: "White",
+        model: "Black",
         ip: [],
         url: [],
       },
@@ -122,7 +122,7 @@ const newProblem = ref<ProblemForm>({
   assets: {
     trialModePublicTestDataZip: null,
     trialModeACFiles: null,
-    //aiVTuberACFiles: null,
+    // aiVTuberACFiles: null, // Legacy field, kept for reference if needed
     customCheckerPy: null,
     makefileZip: null,
     teacherFile: null,
@@ -183,10 +183,18 @@ async function submit() {
     const assets = newProblem.value.assets;
     const attachedFiles: string[] = [];
 
-    if (assets?.aiVTuberACFiles) {
-      assets.aiVTuberACFiles.forEach((f) => fd.append("aiVTuberACFiles", f));
-      attachedFiles.push(`aiVTuberACFiles (${assets.aiVTuberACFiles.length})`);
+    // --- [New] Trial Mode Assets ---
+    if (assets?.trialModePublicTestDataZip) {
+      fd.append("public_testdata.zip", assets.trialModePublicTestDataZip);
+      attachedFiles.push("public_testdata.zip");
     }
+
+    if (assets?.trialModeACFiles && assets.trialModeACFiles.length > 0) {
+      assets.trialModeACFiles.forEach((f) => fd.append("ac_code", f));
+      attachedFiles.push(`ac_code (${assets.trialModeACFiles.length})`);
+    }
+
+    // --- Standard Assets ---
     if (assets?.testdataZip) {
       fd.append("case", assets.testdataZip);
       attachedFiles.push("case");

@@ -26,6 +26,15 @@ const { t } = useI18n();
 const DEBUG_MODE = 1;
 
 // ==========================================
+// [CONSTANTS] Validation Limits
+// ==========================================
+const MAX_LIST_SIZE = 10;
+const MAX_CHAR_LENGTH = 2048;
+const MAX_DOCKER_SIZE_BYTES = 1024 * 1024 * 1024; // 1GB
+const IP_REGEX =
+  /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+
+// ==========================================
 // Logger Utility
 // ==========================================
 const logger = {
@@ -108,10 +117,8 @@ async function fetchCourseName() {
     const val = resp?.data;
 
     // [CRITICAL FIX]: Prevent assigning an object to a string variable.
-    // This prevents the API URL from becoming ".../[object Object]/..." which causes 404s.
     if (val && typeof val === "object") {
       logger.warn("Received Object instead of String ID/Name. Extracting name...", val);
-      // Attempt to extract 'name' or 'id', fallback to route param if missing.
       courseName.value = val.name || val.id || (route.params.name as string);
     } else {
       courseName.value = val || (route.params.name as string);
@@ -120,7 +127,6 @@ async function fetchCourseName() {
     logger.success("Course Name Resolved", courseName.value);
   } catch (err) {
     logger.error("Failed to fetch course info", err);
-    // Fallback to route param on failure
     courseName.value = route.params.name as string;
   } finally {
     logger.groupEnd();
@@ -160,7 +166,6 @@ function onQuotaInput(e: Event) {
 // ==========================================
 const trialQuotaError = ref("");
 const localTrialLimit = ref<number | "">(problem.value?.config?.maxNumberOfTrial ?? "");
-// const trialPublicZipError = ref<string>("");
 
 function onTrialLimitInput(e: Event) {
   const inputEl = e.target as HTMLInputElement;
@@ -196,9 +201,9 @@ async function validateTrialPublicZip(file: File): Promise<boolean> {
     // Filter out directories and system files (e.g. __MACOSX)
     const validEntries = entries.filter((e: any) => {
       if (e.directory) return false;
-      if (e.filename.endsWith("/")) return false; // explicit check just in case
+      if (e.filename.endsWith("/")) return false;
       if (e.filename.includes("__MACOSX")) return false;
-      if (e.filename.split("/").pop()?.startsWith(".")) return false; // hidden files
+      if (e.filename.split("/").pop()?.startsWith(".")) return false;
       return true;
     });
 
@@ -307,7 +312,7 @@ function initArtifactCollection() {
   }
 }
 
-// Synchronous initialization check (to ensure value exists before mount if possible)
+// Synchronous initialization check
 if (!Array.isArray(problem.value.config.artifactCollection)) {
   const cfgAny = problem.value.config as any;
   problem.value.config.artifactCollection = Array.isArray(cfgAny?.artifact_collection)
@@ -350,7 +355,7 @@ const assetDownloadUrl = (key: string) =>
   assetPaths.value[key] ? `/api/problem/${route.params.id}/asset/${key}/download` : null;
 
 // ==========================================
-// Section: Docker Zip Inspection
+// Section: Docker Zip Inspection & Validation
 // ==========================================
 const detectedDockerEnvs = ref<string[]>([]);
 const dockerZipError = ref("");
@@ -379,6 +384,13 @@ async function inspectDockerZip(file: File) {
   detectedDockerEnvs.value = [];
   dockerZipError.value = "";
 
+  // [Validation] File Size
+  if (file.size > MAX_DOCKER_SIZE_BYTES) {
+    dockerZipError.value = "File size exceeds limit (1GB)";
+    logger.error("File too large", file.size);
+    return false;
+  }
+
   try {
     const reader = new ZipReader(new BlobReader(file));
     const entries = await reader.getEntries();
@@ -387,11 +399,8 @@ async function inspectDockerZip(file: File) {
     const dockerfiles = entries.filter((e) => !e.directory && e.filename.endsWith("Dockerfile"));
 
     if (dockerfiles.length === 0) {
-      dockerZipError.value = "Not found any 'Dockerfile'.";
-      logger.error(
-        "No Dockerfile found in zip",
-        entries.map((e) => e.filename),
-      );
+      dockerZipError.value = "No 'Dockerfile' found.";
+      logger.error("No Dockerfile found in zip");
       return false;
     }
 
@@ -399,7 +408,7 @@ async function inspectDockerZip(file: File) {
     for (const entry of dockerfiles) {
       const parts = entry.filename.split("/");
 
-      // Validation: Structure must be "folder/Dockerfile"
+      // [Validation] Structure must be "folder/Dockerfile" (2 levels)
       if (parts.length !== 2) {
         dockerZipError.value = `Structure error: ${entry.filename}. Please ensure the structure is "environment_folder/Dockerfile".`;
         logger.error("Structure error", entry.filename);
@@ -409,17 +418,25 @@ async function inspectDockerZip(file: File) {
       envs.push(parts[0]);
     }
 
-    const sortedEnvs = envs.sort();
-    detectedDockerEnvs.value = sortedEnvs;
+    const uniqueEnvs = Array.from(new Set(envs.sort()));
+
+    // [Validation] Folder Count (1-5)
+    if (uniqueEnvs.length < 1 || uniqueEnvs.length > 5) {
+      dockerZipError.value = `Invalid folder count: Detected ${uniqueEnvs.length}. Must be between 1 and 5 (inclusive).`;
+      logger.error("Folder count invalid", uniqueEnvs.length);
+      return false;
+    }
+
+    detectedDockerEnvs.value = uniqueEnvs;
 
     // Save to config
     const nar = problem.value.config!.networkAccessRestriction as any;
     if (!nar.custom_env) {
       nar.custom_env = {};
     }
-    nar.custom_env.env_list = sortedEnvs;
+    nar.custom_env.env_list = uniqueEnvs;
 
-    logger.success("Docker inspection success", sortedEnvs);
+    logger.success("Docker inspection success", uniqueEnvs);
     return true;
   } catch (e) {
     logger.error("Zip read error", e);
@@ -439,18 +456,117 @@ function removeDockerEnv(index: number) {
 }
 
 // ==========================================
-// Section: AI File Extension Helper
+// Network & Sidecar Validation Logic
 // ==========================================
-/*
-function getAIFileExtensions() {
-  const lang = problem.value.allowedLanguage;
-  const list: string[] = [];
-  if (lang & 1) list.push(".c");
-  if (lang & 2) list.push(".cpp");
-  if (lang & 4) list.push(".py");
-  return list;
-}
-*/
+// This computed property scans the current configuration and returns arrays of error messages.
+// This can be used in the template to display errors under the respective fields.
+const networkErrors = computed(() => {
+  const errors: Record<string, string[]> = {
+    global: [],
+    ip: [],
+    url: [],
+    sidecars: [],
+    docker: [],
+  };
+
+  const nar = problem.value.config?.networkAccessRestriction;
+  const isEnabled = problem.value.config?.networkAccessEnabled;
+
+  // Only validate if Network Access is enabled
+  if (!isEnabled || !nar) return errors;
+
+  // 1. IP Validation
+  const ips = nar.external?.ip || [];
+  if (ips.length > MAX_LIST_SIZE) {
+    errors.ip.push(`IP count exceeds limit of ${MAX_LIST_SIZE} (Current: ${ips.length})`);
+  }
+  ips.forEach((ip, idx) => {
+    if (!IP_REGEX.test(ip)) {
+      errors.ip.push(`IP #${idx + 1} format invalid. Must be 0-255.0-255.0-255.0-255`);
+    }
+  });
+
+  // 2. URL Validation
+  const urls = nar.external?.url || [];
+  if (urls.length > MAX_LIST_SIZE) {
+    errors.url.push(`URL count exceeds limit of ${MAX_LIST_SIZE} (Current: ${urls.length})`);
+  }
+  urls.forEach((url, idx) => {
+    if (url.length > MAX_CHAR_LENGTH) {
+      errors.url.push(`URL #${idx + 1} length exceeds ${MAX_CHAR_LENGTH} characters`);
+    }
+  });
+
+  // 3. Sidecars Validation
+  const sidecars = nar.sidecars || [];
+  if (sidecars.length > MAX_LIST_SIZE) {
+    errors.sidecars.push(`Sidecar count exceeds limit of ${MAX_LIST_SIZE} (Current: ${sidecars.length})`);
+  }
+  sidecars.forEach((sc: any, idx) => {
+    // Required fields check
+    if (!sc.name || !sc.image) {
+      errors.sidecars.push(`Sidecar #${idx + 1} is missing Name or Image`);
+    }
+
+    // Length check helper
+    const checkLen = (val: any, field: string) => {
+      if (typeof val === "string" && val.length > MAX_CHAR_LENGTH) {
+        errors.sidecars.push(`Sidecar #${idx + 1} field '${field}' exceeds ${MAX_CHAR_LENGTH} characters`);
+      }
+    };
+
+    checkLen(sc.name, "Name");
+    checkLen(sc.image, "Image");
+
+    // Check args (string or array of strings)
+    if (Array.isArray(sc.args)) {
+      sc.args.forEach((arg: string) => checkLen(arg, "Args"));
+    } else if (typeof sc.args === "string") {
+      checkLen(sc.args, "Args");
+    }
+
+    // Check env (assuming stringified or value check)
+    if (sc.env) {
+      // If env is stored as object, check stringified length, or if string check directly
+      const envStr = typeof sc.env === "string" ? sc.env : JSON.stringify(sc.env);
+      if (envStr.length > MAX_CHAR_LENGTH) {
+        errors.sidecars.push(`Sidecar #${idx + 1} 'Env' configuration exceeds ${MAX_CHAR_LENGTH} characters`);
+      }
+    }
+  });
+
+  // 4. Global "At Least One" Check
+  // Check if at least one configuration exists among IP, URL, Sidecars, or Dockerfiles
+  const hasIP = ips.length > 0;
+  const hasURL = urls.length > 0;
+  const hasSidecars = sidecars.length > 0;
+  // For Docker, we check either the detected list (from an upload attempt) or if the asset key exists in config
+  const hasDocker =
+    detectedDockerEnvs.value.length > 0 ||
+    problem.value.assets?.dockerfilesZip ||
+    hasAsset("network_dockerfile");
+
+  if (!hasIP && !hasURL && !hasSidecars && !hasDocker) {
+    errors.global.push(
+      "When Network Access is enabled, at least one of IP, URL, Sidecars, or Dockerfiles must be configured.",
+    );
+  }
+
+  return errors;
+});
+
+// Optional: expose a validity flag for the parent component to disable submit
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const isNetworkConfigValid = computed(() => {
+  const e = networkErrors.value;
+  return (
+    e.global.length === 0 &&
+    e.ip.length === 0 &&
+    e.url.length === 0 &&
+    e.sidecars.length === 0 &&
+    !dockerZipError.value
+  );
+});
 
 // ==========================================
 // Section: Restore Selected Keys via Usage API
@@ -472,14 +588,9 @@ async function fetchExistingKeySelection() {
     const { isSuccess, data } = parseApiResponse(res);
 
     if (isSuccess && data?.keys) {
-      // ============================================================
-      // [DEBUG CORE] Table of Key vs Problem IDs
-      // ============================================================
       const debugTable = data.keys.map((key: any) => {
         const usages = key.problem_usages || [];
-
         const associatedProblemIds = usages.map((u: any) => u.problem_id);
-
         const isMatch = associatedProblemIds.some((pid: any) => Number(pid) === currentProblemId);
 
         return {
@@ -492,11 +603,6 @@ async function fetchExistingKeySelection() {
       });
 
       if (DEBUG_MODE) {
-        console.log(
-          "%cThe following table lists all the Problem IDs corresponding to each Key:",
-          "color: #0ea5e9; font-weight: bold; font-size: 1.1em;",
-        );
-
         console.table(debugTable);
       }
 
@@ -541,7 +647,6 @@ const showInactiveKeys = ref(true);
 async function fetchKeys() {
   if (!courseName.value) await fetchCourseName();
 
-  // If fetchCourseName failed or returned invalid data, skip to avoid 404
   if (!courseName.value || typeof courseName.value !== "string") {
     logger.error("Skipping fetchKeys: Invalid courseName", courseName.value);
     fetchError.value = "Invalid Course Name";
@@ -554,8 +659,6 @@ async function fetchKeys() {
 
   try {
     const res = await api.AIVTuber.getCourseKeys(courseName.value!);
-    // logger.log("Raw Response", res);
-
     const { isSuccess, data, message } = parseApiResponse(res);
 
     if (!isSuccess && !data) {
@@ -565,9 +668,7 @@ async function fetchKeys() {
     const rawKeys = data?.keys || [];
     logger.log(`Found ${rawKeys.length} keys`);
 
-    // Data Sanitization and Classification
     const safeKeys = rawKeys.map((k: any, index: number) => {
-      // Integrity Check
       const missing: string[] = [];
       if (!k.id) missing.push("id");
       if (!k.key_name) missing.push("key_name");
@@ -768,15 +869,6 @@ watch(selectedKeys, (keys) => {
   problem.value.config!.aiVTuberApiKeys = keys;
 });
 
-// ==========================================
-// Section: Lifecycle Hooks
-// ==========================================
-onMounted(() => {
-  initArtifactCollection();
-  fetchKeys();
-  document.addEventListener("click", onClickOutside);
-});
-
 onBeforeUnmount(() => {
   document.removeEventListener("click", onClickOutside);
 });
@@ -784,7 +876,6 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-    <!-- Allowed Languages -->
     <div class="form-control rounded-lg border border-gray-400 p-4">
       <label class="label"
         ><span class="label-text">{{ t("course.problems.allowedLanguages") }}</span></label
@@ -795,7 +886,6 @@ onBeforeUnmount(() => {
       />
     </div>
 
-    <!-- Tags -->
     <div class="form-control rounded-lg border border-gray-400 p-4">
       <label class="label"
         ><span class="label-text">{{ t("course.problems.tags") }}</span></label
@@ -811,10 +901,11 @@ onBeforeUnmount(() => {
             .filter(Boolean)
         "
       />
-      <label class="label"><span class="label-text-alt">{{ t("course.problems.commaSeparated") }}</span></label>
+      <label class="label"
+        ><span class="label-text-alt">{{ t("course.problems.commaSeparated") }}</span></label
+      >
     </div>
 
-    <!-- Quota -->
     <div class="form-control rounded-lg border border-gray-400 p-4">
       <label class="label"
         ><span class="label-text">{{ t("course.problems.quota") }}</span></label
@@ -836,7 +927,6 @@ onBeforeUnmount(() => {
       </label>
     </div>
 
-    <!-- Accepted Format -->
     <div class="form-control rounded-lg border border-gray-400 p-4">
       <label class="label"
         ><span class="label-text">{{ t("course.problems.acceptedFormat") }}</span></label
@@ -874,7 +964,6 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
-    <!-- AI VTuber -->
     <div class="col-span-2 rounded-lg border border-gray-400 p-4">
       <div class="flex items-center gap-4">
         <label class="label cursor-pointer justify-start gap-x-4">
@@ -903,34 +992,6 @@ onBeforeUnmount(() => {
                   <option value="gemini-2.5-pro">gemini 2.5 pro</option>
                 </select>
               </div>
-              <!--
-              <div class="flex min-w-[300px] flex-1 items-center gap-3">
-                <label class="label mb-0 w-32">
-                  <span class="label-text">{{ t("course.problems.uploadACFiles") }}</span>
-                </label>
-                <div class="w-full">
-                  <input
-                    type="file"
-                    multiple
-                    :accept="getAIFileExtensions().join(',')"
-                    class="file-input-bordered file-input file-input-sm w-full"
-                    @change="
-                      (e: Event) => {
-                        const files = Array.from((e.target as HTMLInputElement).files || []) as File[];
-                        const valid = validateFilesForAIAC(files, getAIFileExtensions());
-                        problem.assets!.aiVTuberACFiles = valid;
-                        if (valid.length === 0) (e.target as HTMLInputElement).value = '';
-                      }
-                    "
-                  />
-                  <label class="label mt-1">
-                    <span class="label-text-alt text-sm opacity-70">
-                      Allowed: {{ getAIFileExtensions().join(", ") }}
-                    </span>
-                  </label>
-                </div>
-              </div>
-              -->
             </div>
           </div>
 
@@ -1168,14 +1229,12 @@ onBeforeUnmount(() => {
       </transition>
     </div>
 
-    <!-- Trial Mode -->
     <div class="form-control col-span-2 rounded-lg border border-gray-400 p-4">
       <label class="label ml-1 cursor-pointer justify-start gap-x-4">
         <span class="label-text">{{ t("course.problems.trialMode") }}</span>
         <input type="checkbox" class="toggle" v-model="problem.config!.trialMode" />
       </label>
       <div v-if="problem.config!.trialMode" class="mt-3 space-y-4">
-        <!-- Trial Settings Row -->
         <div class="flex flex-wrap items-start gap-x-8 gap-y-4">
           <div class="form-control w-full max-w-xs">
             <label class="label">
@@ -1226,7 +1285,6 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
-        <!-- Upload Public Test Data - Card Style -->
         <div class="rounded-lg border border-gray-500 p-4">
           <div class="flex items-center gap-4">
             <span class="label-text">{{ t("course.problems.uploadPublicTestData") }}</span>
@@ -1243,10 +1301,10 @@ onBeforeUnmount(() => {
                   target="_blank"
                   rel="noopener"
                 >
-                  {{t("course.problems.download")}}
+                  {{ t("course.problems.download") }}
                 </a>
               </div>
-              <span v-else class="badge badge-outline text-xs opacity-70">{{t("")}}</span>
+              <span v-else class="badge badge-outline text-xs opacity-70">{{ t("") }}</span>
             </div>
           </div>
           <div class="mt-3 flex items-center gap-2">
@@ -1295,7 +1353,6 @@ onBeforeUnmount(() => {
           </label>
         </div>
 
-        <!-- Upload AC Files - Card Style -->
         <div class="rounded-lg border border-gray-500 p-4">
           <div class="flex items-center gap-4">
             <span class="label-text">{{ t("course.problems.uploadACFiles") }}</span>
@@ -1307,7 +1364,9 @@ onBeforeUnmount(() => {
                 "
                 class="flex items-center gap-2"
               >
-                <span class="badge badge-outline badge-success text-xs">{{ t("course.problems.uploaded") }}</span>
+                <span class="badge badge-outline badge-success text-xs">{{
+                  t("course.problems.uploaded")
+                }}</span>
                 <a
                   v-if="hasAsset('ac_code')"
                   :href="assetDownloadUrl('ac_code') || '#'"
@@ -1318,7 +1377,9 @@ onBeforeUnmount(() => {
                   {{ t("course.problems.download") }}
                 </a>
               </div>
-              <span v-else class="badge badge-outline text-xs opacity-70">{{ t("course.problems.notUploaded") }}</span>
+              <span v-else class="badge badge-outline text-xs opacity-70">{{
+                t("course.problems.notUploaded")
+              }}</span>
             </div>
           </div>
           <div class="mt-3 flex items-center gap-2">
@@ -1331,7 +1392,7 @@ onBeforeUnmount(() => {
                 (e: Event) => {
                   const inputEl = e.target as HTMLInputElement;
                   const files = Array.from(inputEl.files || []) as File[];
-                  // 僅檢查檔案大小，不限制副檔名
+                  // Only check size
                   const valid = files.filter((f) => assertFileSizeOK(f, 'AC File'));
                   problem.assets!.trialModeACFiles = valid;
                   if (valid.length === 0) inputEl.value = '';
@@ -1350,7 +1411,6 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
-    <!-- Network Access Restriction -->
     <div class="form-control col-span-2 rounded-lg border border-gray-400 p-4">
       <div class="flex items-center gap-4">
         <label class="label ml-1 cursor-pointer justify-start gap-x-4">
@@ -1364,7 +1424,25 @@ onBeforeUnmount(() => {
         leave-active-class="transition ease-in duration-150"
       >
         <div v-if="showNetworkSection" class="mt-3 space-y-4 p-2">
-          <!-- Network Access Restriction Section -->
+          <div v-if="networkErrors.global.length > 0" class="alert alert-warning text-sm shadow-md">
+            <div class="flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                class="h-6 w-6 shrink-0 stroke-current"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                ></path>
+              </svg>
+              <span>{{ networkErrors.global[0] }}</span>
+            </div>
+          </div>
+
           <div class="overflow-hidden rounded-lg border border-gray-500">
             <div class="bg-base-300 px-4 py-2">
               <span class="text-base-content font-medium">{{
@@ -1425,6 +1503,9 @@ onBeforeUnmount(() => {
                         : 'badge-error'
                     "
                   />
+                  <div v-if="networkErrors.ip.length > 0" class="text-error mt-1 text-xs">
+                    <div v-for="(err, i) in networkErrors.ip" :key="i">* {{ err }}</div>
+                  </div>
                 </div>
 
                 <div>
@@ -1440,27 +1521,32 @@ onBeforeUnmount(() => {
                         : 'badge-error'
                     "
                   />
+                  <div v-if="networkErrors.url.length > 0" class="text-error mt-1 text-xs">
+                    <div v-for="(err, i) in networkErrors.url" :key="i">* {{ err }}</div>
+                  </div>
                 </div>
               </div>
             </div>
-            <!-- close p-4 content -->
           </div>
 
-          <!-- Sandbox Environment Section -->
           <div class="overflow-hidden rounded-lg border border-gray-500">
             <div class="bg-base-300 px-4 py-2">
               <span class="text-base-content font-medium">{{ t("course.problems.SandboxEnvironment") }}</span>
             </div>
             <div class="space-y-4 p-4">
-              <!-- Sidecars -->
               <div class="border-base-content/30 rounded-lg border p-4">
                 <div class="mb-3">
                   <span class="label-text font-medium">{{ t("course.problems.Sidecars") }}</span>
                 </div>
                 <SidecarInput v-model="problem.config!.networkAccessRestriction!.sidecars" />
+                <div
+                  v-if="networkErrors.sidecars.length > 0"
+                  class="text-error mt-2 rounded bg-red-50 p-2 text-xs"
+                >
+                  <div v-for="(err, i) in networkErrors.sidecars" :key="i">* {{ err }}</div>
+                </div>
               </div>
 
-              <!-- Dockerfiles -->
               <div class="border-base-content/30 rounded-lg border p-4">
                 <div class="flex items-center gap-3">
                   <span class="label-text">{{ t("course.problems.dockerFiles") }}</span>
@@ -1503,13 +1589,7 @@ onBeforeUnmount(() => {
                         if (nar?.custom_env) nar.custom_env.env_list = [];
 
                         if (file) {
-                          // file size
-                          if (!assertFileSizeOK(file, 'dockerfiles.zip')) {
-                            problem.assets!.dockerfilesZip = null;
-                            (e.target as HTMLInputElement).value = '';
-                            return;
-                          }
-                          // check zip structure
+                          // Note: File size check is now inside inspectDockerZip
                           const isValid = await inspectDockerZip(file);
                           if (!isValid) {
                             problem.assets!.dockerfilesZip = null;
@@ -1566,14 +1646,12 @@ onBeforeUnmount(() => {
                   </div>
                 </div>
               </div>
-              <!-- close Dockerfiles bordered section -->
             </div>
           </div>
         </div>
       </transition>
     </div>
 
-    <!-- Artifact Collection -->
     <div class="form-control col-span-1 rounded-lg border border-gray-400 p-4 md:col-span-2">
       <label class="label"
         ><span class="label-text">{{ t("course.problems.ArtifactCollection") }}</span></label

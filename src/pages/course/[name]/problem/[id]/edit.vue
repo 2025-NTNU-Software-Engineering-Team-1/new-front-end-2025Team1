@@ -7,7 +7,7 @@ import api, { fetcher } from "@/models/api";
 import axios, { type AxiosError } from "axios";
 import AdminProblemForm from "@/components/Problem/Admin/AdminProblemForm.vue";
 import AdminManualModal from "@/components/Problem/Admin/AdminManualModal.vue";
-
+import { useI18n } from "vue-i18n";
 // ==========================================
 // [CONFIG] Console Debug Mode
 // ==========================================
@@ -48,6 +48,8 @@ const logger = {
 // ==========================================
 const route = useRoute();
 const router = useRouter();
+const { t } = useI18n();
+
 useTitle(`Edit Problem - ${route.params.id} - ${route.params.name} | Normal OJ`);
 
 const formElement = ref<InstanceType<typeof AdminProblemForm>>();
@@ -461,20 +463,20 @@ const mockProblemMeta = {
     <div class="card min-w-full">
       <div class="card-body">
         <div class="card-title mb-3 justify-between">
-          Edit Problem: {{ $route.params.id }} - {{ edittingProblem?.problemName }}
+          {{ t("course.problems.editProblem") }}{{ $route.params.id }} - {{ edittingProblem?.problemName }}
           <div class="flex gap-x-3">
             <AdminManualModal />
             <button
               :class="['btn btn-error btn-outline btn-sm lg:btn-md', formElement?.isLoading && 'loading']"
               @click="delete_"
             >
-              <i-uil-trash-alt class="mr-1 lg:h-5 lg:w-5" /> Delete
+              <i-uil-trash-alt class="mr-1 lg:h-5 lg:w-5" /> {{ t("course.problems.delete") }}
             </button>
             <button
               :class="['btn btn-warning btn-sm lg:btn-md', formElement?.isLoading && 'loading']"
               @click="discard"
             >
-              <i-uil-times-circle class="mr-1 lg:h-5 lg:w-5" /> Discard Changes
+              <i-uil-times-circle class="mr-1 lg:h-5 lg:w-5" /> {{t("course.problems.discardChanges")}}
             </button>
           </div>
         </div>
@@ -488,7 +490,7 @@ const mockProblemMeta = {
               <div class="divider" />
 
               <div class="card-title mb-3">
-                Preview
+                {{ t("course.problems.Preview") }}
                 <input v-model="openPreview" type="checkbox" class="toggle" />
               </div>
 

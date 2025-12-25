@@ -202,7 +202,7 @@ const chartOption = computed(() => {
         data: stats.map((i) => i.name),
         axisLabel: { interval: 0, rotate: 45, width: 100, overflow: "truncate" },
       },
-      yAxis: { type: "value", name: "Total Tokens" },
+      yAxis: { type: "value", name: t("course.aisetting.usage.totalTokens") },
       series: [
         {
           name: "Token Usage",
@@ -398,10 +398,10 @@ onMounted(fetchUsage);
                 >
                   ▸
                 </span>
-                <span class="text-lg">Problem Usage Analysis</span>
+                <span class="text-lg">{{ t("course.aisetting.usage.problemUsageAnalysis") }}</span>
               </div>
               <div class="text-base-content/50 font-mono text-xs">
-                {{ isChartExpanded ? "Click to collapse" : "Click to expand" }}
+                {{ isChartExpanded ? t("course.aisetting.usage.clickToCollapse"): t("course.aisetting.usage.clickToExpand") }}
               </div>
             </div>
 
@@ -414,14 +414,14 @@ onMounted(fetchUsage);
                       :class="{ 'btn-primary': chartType === 'bar' }"
                       @click="chartType = 'bar'"
                     >
-                      Bar Chart
+                      {{ t("course.aisetting.usage.barChart") }}
                     </button>
                     <button
                       class="btn btn-sm"
                       :class="{ 'btn-primary': chartType === 'bubble' }"
                       @click="chartType = 'bubble'"
                     >
-                      Packed Bubble
+                      {{ t("course.aisetting.usage.PackedBubble") }}
                     </button>
                   </div>
                 </div>
@@ -432,7 +432,7 @@ onMounted(fetchUsage);
                     v-if="chartType === 'bubble'"
                     class="text-base-content/40 bg-base-100/80 absolute bottom-2 right-2 rounded px-2 py-1 text-xs"
                   >
-                    * Drag bubbles to play physics
+                    {{t("course.aisetting.usage.dragBubbleStoPlayPhysics")}}
                   </div>
                 </div>
               </div>
@@ -441,7 +441,7 @@ onMounted(fetchUsage);
 
           <div v-if="data?.keys.length" class="mb-4 mt-8 flex items-center gap-3 px-1">
             <span class="text-2xl">🔑</span>
-            <h3 class="text-base-content/80 text-lg font-bold">Key Usage Breakdown</h3>
+            <h3 class="text-base-content/80 text-lg font-bold">{{t("course.aisetting.usage.keyUsageBreakdown")}}</h3>
             <div class="bg-base-300 ml-2 h-px flex-grow opacity-50"></div>
           </div>
 
@@ -478,7 +478,7 @@ onMounted(fetchUsage);
                     v-if="!keyItem.is_flat && keyItem.problem_usages.length > 0"
                     class="text-base-content/60 mb-2 text-xs"
                   >
-                    Average: {{ Math.round(keyItem.average_token).toLocaleString() }} tokens / problem
+                    {{t("course.aisetting.usage.Average")}}: {{ Math.round(keyItem.average_token).toLocaleString() }} {{ t("course.aisetting.usage.tokensProblem") }}
                   </div>
 
                   <table class="table-compact table w-full">

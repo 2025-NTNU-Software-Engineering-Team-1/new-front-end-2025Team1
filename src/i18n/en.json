@@ -67,7 +67,18 @@
         "rank": "Rank",
         "problemName": "Problem Name",
         "tokenUsed": "Token Used",
-        "noData": "No API key usage data."
+        "noData": "No API key usage data.",
+        "problemUsageAnalysis":"Problem Usage Analysis",
+        "clickToCollapse":"Click to Collapse",
+        "clickToExpand":"Click to Expand",
+        "barChart": "Bar Chart",
+        "packedBubble":"Packed Bubble",
+        "dragBubbleStoPlayPhysics":"* Drag bubbles to play physics",
+        "keyUsageBreakdown":"Key Usage Breakdown",
+        "Average": "Average",
+        "tokensProblem": "tokens / problem",
+        "totalTokens": "Total Tokens"
+
       }
     },
     "problem": {
@@ -328,7 +339,11 @@
       "networkSidecars": "Network & Sidecars",
       "onlyAllowSpecificInfo": "Only allow specific IPs/URLs. Block everything else.",
       "blockSpecificInfo": "Block specific IPs/URLs. Allow everything else.",
-      "Sidecars": "Sidecars"
+      "Sidecars": "Sidecars",
+      "delete":"Delete",
+      "discardChanges": "Discard Changes",
+      "preview": "Preview",
+      "editProblem": "Edit Problem:"
     },
     "submissions": {
       "text": "Submissions",
@@ -446,7 +461,13 @@
       "csvFiles": "CSV Files",
       "csvUpload": "CSV File Upload",
       "csvUploadInfo": "Drag and drop file here or click to select",
-      "manualInput": "Manual Input"
+      "manualInput": "Manual Input",
+      "optionUsername":"Username",
+      "optionDisplayName":"Display Name",
+      "optionRole":"Role",
+      "tableUsername":"username",
+      "tableDisplayedName":"displayed_name",
+      "tableRole":"role"
     }
   },
   "courses": {

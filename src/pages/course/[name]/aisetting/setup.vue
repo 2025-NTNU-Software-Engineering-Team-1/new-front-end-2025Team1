@@ -434,16 +434,18 @@ onMounted(fetchKeys);
               </div>
 
               <!-- Active Toggle -->
-              <div class="md:col-span-2 flex items-center gap-2 md:justify-center md:pb-0">
-                <label class="label-text text-xs opacity-70">{{
-                  t("course.aisetting.setup.display.active")
-                }}</label>
-                <input
-                  type="checkbox"
-                  class="toggle toggle-success toggle-sm"
-                  v-model="k.is_active"
-                  @change="updateKey(k)"
-                />
+              <div class="md:col-span-2">
+                <label class="label pb-1">
+                  <span class="label-text text-xs opacity-70">{{ t("course.aisetting.setup.display.active") }}</span>
+                </label>
+                <div class="flex h-8 items-center">
+                  <input
+                    type="checkbox"
+                    class="toggle toggle-success toggle-sm"
+                    v-model="k.is_active"
+                    @change="updateKey(k)"
+                  />
+                </div>
               </div>
 
               <!-- Action Buttons -->

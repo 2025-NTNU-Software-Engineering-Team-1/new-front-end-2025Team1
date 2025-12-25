@@ -239,6 +239,19 @@ body[data-theme="dark"] .dp__menu .dp__clock {
   border-radius: 0.5rem !important;
 }
 
+/* Fix placeholder text alignment and offset */
+.dp__input_wrap input,
+.dp__input {
+  padding-left: 2.5rem !important;
+  text-indent: 0 !important;
+}
+
+.dp__input_wrap input::placeholder,
+.dp__input::placeholder {
+  text-indent: 0 !important;
+  transform: none !important;
+}
+
 /* FINAL FORCE: ensure every datepicker sub-element uses dark background/text when app is dark
    This uses very broad selectors and !important to override inline/theme styles the component may set. */
 html[data-theme="dark"] .dp__main,

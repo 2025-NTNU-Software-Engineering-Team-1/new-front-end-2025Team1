@@ -195,6 +195,7 @@ const networkItemsCount = computed(() => {
               <i-uil-file-upload-alt /> {{ $t("components.problem.card.submit") }}
             </router-link>
             <router-link
+              v-if="props.problem.config?.trialMode"
               class="btn md:btn-md lg:btn-lg"
               :to="`/course/${$route.params.name}/problem/${$route.params.id}/test`"
             >

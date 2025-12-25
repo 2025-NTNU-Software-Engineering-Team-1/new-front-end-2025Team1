@@ -1,94 +1,88 @@
-# Pipeline（評測流程）說明
+# Pipeline (Evaluation Flow) Guide
 
-此區塊包含：File Access、Execution Mode、Library Restrictions、Custom Checker、Custom Scoring Script 等。
+This section covers File Access, Execution Mode, Library Restrictions, Custom Checker, Custom Scoring Script, and related topics.
 
 ---
 
-## File Access（Allow Read / Allow Write）
+## File Access (Allow Read / Allow Write)
 
 ### Allow Read
 
-- 允許程式讀取檔案（例如 `fopen` / `open` 等）
-- **學生 Resource Data** 需要 Allow Read 才能啟用（教師 Resource Data 不受限）
+- Allows the program to read files (e.g. `fopen` / `open`)
+- **Student Resource Data** requires Allow Read to be enabled; Teacher Resource Data is not restricted
 
 ### Allow Write
 
-- 允許程式寫入檔案
-- **Allow Write 依賴 Allow Read**：
-  - 若關閉 Allow Read，Allow Write 會被強制關閉
-  - UI 會顯示提示訊息
+- Allows the program to write files
+- **Allow Write depends on Allow Read**:
+  - If Allow Read is disabled, Allow Write will be forced off
+  - The UI will show a warning when applicable
 
 ---
 
-## Library Restrictions（靜態分析限制）
+## Library Restrictions (Static analysis restrictions)
 
-> 此功能會依語言開放不同項目：
+> Different languages support different types of restrictions:
 >
-> - Python 才能使用 Imports 限制
-> - C/C++ 才能使用 Headers 限制
+> - Python supports Imports restrictions
+> - C/C++ supports Headers restrictions
 
 ### Enabled
 
-開啟後可設定四個類別：
+When enabled, you can configure four categories:
 
 1. Syntax Restrictions
-2. Imports Restrictions（Python）
-3. Headers Restrictions（C/C++）
+2. Imports Restrictions (Python)
+3. Headers Restrictions (C/C++)
 4. Functions Restrictions
 
-每個類別可切換：
-
-- **Whitelist**：只允許列表內項目
-- **Blacklist**：禁止列表內項目
-
-切換 whitelist/blacklist 時，前端會清空另一側列表（避免混用）。
+Each category can be toggled between **Whitelist** (only allow items in the list) and **Blacklist** (disallow items in the list). Switching between modes clears the opposite list to avoid mixed usage.
 
 ---
 
-## Execution Mode（執行模式）
+## Execution Mode
 
 ### General
 
-- 一般題型（最常用）
+- Standard mode suitable for most problems
 
 ### Function Only
 
-- 需要上傳 `Makefile.zip`
-- 用途：以指定方式編譯/連結（依後端 pipeline 實作）
+- Requires uploading `Makefile.zip`
+- Use case: build/link in a specific way (backend pipeline determines exact behavior)
 
 ### Interactive
 
-- 互動題模式
-- 互動題會要求：
-  - 上傳 Teacher Code（Teacher_file）
-  - 可選 Teacher First（先跑 teacher 再跑 student，依後端行為）
+- Interactive problem mode
+- Typically requires uploading Teacher Code (Teacher_file)
+- Optionally select Teacher First (run teacher first, then student; backend-dependent)
 
-> 注意：Interactive 模式下 **Custom Checker 會被禁用**（UI 會鎖定）。
+> Note: Custom Checker is disabled in Interactive mode (UI will lock the option).
 
 ---
 
 ## Custom Checker
 
-- 開啟後需上傳 `Custom_Checker.py`
-- 用於自訂比對輸出（依後端行為）
+- When enabled, you must upload `Custom_Checker.py` (or have it pre-registered on the backend)
+- Used to programmatically compare student outputs (behavior depends on backend implementation)
 
-前端驗證：
+Frontend validation:
 
-- Custom Checker 開啟時必須有檔案（或後端已有上傳的 checker）
+- If Custom Checker is enabled, there must be an uploaded file or an existing checker on the backend
 
 ---
 
 ## Custom Scoring Script
 
-- 開啟後需上傳 `Custom_Scorer.py`
-- 用於自訂計分（依後端行為）
+- When enabled, you must upload `Custom_Scorer.py` (or rely on a backend-provided script)
+- Used to customize problem scoring rules (backend-dependent)
 
-前端驗證：
+Frontend validation:
 
-- 開啟時必須有檔案（或後端已有上傳的 scoring script）
+- If enabled, there must be an uploaded file or an existing scoring script on the backend
 
 ---
 
-## 上傳檔案大小限制
+## Upload Size Limits
 
-各上傳欄位會經過前端 `assertFileSizeOK()` 檢查。若不符合會自動清空選擇並提示錯誤（依你專案的檢查規則/上限設定）。
+All upload fields are checked client-side via `assertFileSizeOK()`. If a file exceeds limits, the selection will be cleared and an error will be shown (refer to project-specific limits).

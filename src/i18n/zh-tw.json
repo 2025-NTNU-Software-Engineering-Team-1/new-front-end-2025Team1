@@ -688,6 +688,12 @@
         "tags": "標籤",
         "quota": "額度",
         "unlimited": "無限制"
+      },
+      "manual": {
+        "open": "說明",
+        "title": "題目管理說明",
+        "close": "關閉",
+        "pageNotFound": "找不到頁面。"
       }
     },
     "courseSideBar": {

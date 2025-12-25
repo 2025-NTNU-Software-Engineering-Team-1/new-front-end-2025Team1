@@ -15,24 +15,45 @@
  */
 
 import { computed, nextTick, onBeforeUnmount, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import MarkdownRenderer from "@/components/MarkdownRenderer.vue";
-import { PROBLEM_ADMIN_MANUAL_PAGES } from "@/docs/problem-admin-manual/index";
+import { PROBLEM_ADMIN_MANUAL_PAGES, PROBLEM_ADMIN_MANUAL_PAGES_ZH } from "@/docs/problem-admin-manual/index";
 
 const open = ref(false);
-const activeId = ref(PROBLEM_ADMIN_MANUAL_PAGES[0]?.id ?? "basic");
+const lang = ref<"en" | "zh">("en");
+
+// pages switches between EN/ZH content
+const pages = computed(() => (lang.value === "en" ? PROBLEM_ADMIN_MANUAL_PAGES : PROBLEM_ADMIN_MANUAL_PAGES_ZH));
+
+const { t, locale } = useI18n();
+
+const activeId = ref(pages.value[0]?.id ?? "basic");
 
 // The scrollable content container on the right side
 const contentRef = ref<HTMLElement | null>(null);
 
-// Remember scrollTop per page id, so switching pages keeps the previous scroll position
+// Remember scrollTop per (lang + page) combination
 const scrollMemory = new Map<string, number>();
 
-// The currently active manual page object
-const activePage = computed(() => PROBLEM_ADMIN_MANUAL_PAGES.find((p) => p.id === activeId.value));
+// The currently active manual page object (from selected language)
+const activePage = computed(() => pages.value.find((p) => p.id === activeId.value));
 
 function openManual() {
+  // Default manual language to system locale: English -> en, otherwise zh
+  lang.value = locale.value === "english" ? "en" : "zh";
+
+  // Ensure activeId exists for the selected language, fallback to first page
+  if (!pages.value.find((p) => p.id === activeId.value)) {
+    activeId.value = pages.value[0]?.id ?? activeId.value;
+  }
+
+  // Restore per-language scroll position after DOM update
+  nextTick(() => {
+    if (contentRef.value) contentRef.value.scrollTop = scrollMemory.get(`${lang.value}:${activeId.value}`) ?? 0;
+  });
+
   open.value = true;
-}
+} 
 
 function closeManual() {
   open.value = false;
@@ -54,23 +75,40 @@ watch(open, (v) => {
   document.body.style.overflow = v ? "hidden" : "";
 });
 
+// Change language: remember current scroll, switch lang, restore scroll for target page
+function setLang(l: "en" | "zh") {
+  if (lang.value === l) return;
+  if (contentRef.value) scrollMemory.set(`${lang.value}:${activeId.value}`, contentRef.value.scrollTop);
+
+  lang.value = l;
+
+  // if activeId doesn't exist in the new language, fallback to first page
+  if (!pages.value.find((p) => p.id === activeId.value)) {
+    activeId.value = pages.value[0]?.id ?? activeId.value;
+  }
+
+  nextTick(() => {
+    if (contentRef.value) contentRef.value.scrollTop = scrollMemory.get(`${lang.value}:${activeId.value}`) ?? 0;
+  });
+}
+
 // Switch page:
-// 1) Save current page scrollTop
+// 1) Save current page scrollTop (per-language key)
 // 2) Change active page id
 // 3) Wait for DOM update
 // 4) Restore new page scrollTop (or 0 if never visited)
 async function switchPage(id: string) {
-  if (contentRef.value) scrollMemory.set(activeId.value, contentRef.value.scrollTop);
+  if (contentRef.value) scrollMemory.set(`${lang.value}:${activeId.value}`, contentRef.value.scrollTop);
 
   activeId.value = id;
   await nextTick();
 
-  if (contentRef.value) contentRef.value.scrollTop = scrollMemory.get(id) ?? 0;
+  if (contentRef.value) contentRef.value.scrollTop = scrollMemory.get(`${lang.value}:${id}`) ?? 0;
 }
 </script>
 
 <template>
-  <button type="button" class="btn btn-sm btn-outline" @click.stop="openManual">Manual</button>
+  <button type="button" class="btn btn-sm lg:btn-md btn-outline" @click.stop="openManual">{{ t('components.problem.manual.open') }}</button>
 
   <teleport to="body">
     <div v-if="open" class="fixed inset-0 z-[9999]">
@@ -83,7 +121,16 @@ async function switchPage(id: string) {
         <div class="bg-base-100 w-full max-w-6xl overflow-hidden rounded-lg shadow-2xl">
           <!-- Header -->
           <div class="border-base-300 flex items-center justify-between border-b px-4 py-3">
-            <div class="text-lg font-bold">Problem Admin Manual</div>
+            <div class="flex items-center gap-4">
+              <div class="text-lg font-bold">{{ t('components.problem.manual.title') }}</div>
+
+              <!-- Language toggle -->
+              <div class="btn-group btn-group-sm">
+                <button type="button" class="btn btn-sm" :class="lang === 'en' ? 'btn-active' : ''" @click="setLang('en')">EN</button>
+                <button type="button" class="btn btn-sm" :class="lang === 'zh' ? 'btn-active' : ''" @click="setLang('zh')">中文</button>
+              </div>
+            </div>
+
             <button type="button" class="btn btn-sm btn-circle" @click="closeManual">✕</button>
           </div>
 
@@ -98,7 +145,7 @@ async function switchPage(id: string) {
             <aside class="border-base-300 bg-base-200/50 col-span-3 min-h-0 border-r">
               <div class="h-full min-h-0 overflow-y-auto p-2">
                 <button
-                  v-for="p in PROBLEM_ADMIN_MANUAL_PAGES"
+                  v-for="p in pages"
                   :key="p.id"
                   type="button"
                   class="btn btn-ghost btn-sm w-full justify-start"
@@ -117,7 +164,7 @@ async function switchPage(id: string) {
                   <MarkdownRenderer :md="activePage.md" />
                 </template>
                 <template v-else>
-                  <div class="opacity-70">Page not found.</div>
+                  <div class="opacity-70">{{ t('components.problem.manual.pageNotFound') }}</div>
                 </template>
               </div>
             </main>
@@ -125,7 +172,7 @@ async function switchPage(id: string) {
 
           <!-- Footer -->
           <div class="border-base-300 flex justify-end border-t px-4 py-3">
-            <button type="button" class="btn" @click="closeManual">Close</button>
+            <button type="button" class="btn" @click="closeManual">{{ t('components.problem.manual.close') }}</button>
           </div>
         </div>
       </div>

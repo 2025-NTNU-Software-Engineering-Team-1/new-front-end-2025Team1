@@ -49,6 +49,10 @@ export const SUBMISSION_STATUS_REPR = {
     label: "Output Limit Exceed",
     color: "#BF360C",
   },
+  [8]: {
+    label: "Analysis Error",
+    color: "#FF5722",
+  },
 } as const;
 
 export const SUBMISSION_STATUS_CODE = {
@@ -61,6 +65,7 @@ export const SUBMISSION_STATUS_CODE = {
   RUNTIME_ERROR: 5,
   JUDGE_ERROR: 6,
   OUTPUT_LIMIT_EXCEED: 7,
+  ANALYSIS_ERROR: 8,
 } as const;
 
 export const LOCAL_STORAGE_KEY = {

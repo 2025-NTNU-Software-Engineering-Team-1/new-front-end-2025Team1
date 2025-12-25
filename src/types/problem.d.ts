@@ -101,7 +101,9 @@ interface ProblemListItem {
   submitCount: number;
   // AI-TA (aiVTuber) flag, optional for backward compatibility
   aiVTuber?: boolean;
-  // Trial mode flags (optional)
+  // Trial mode flag (from backend API)
+  trialMode?: boolean;
+  // Deprecated: legacy alias for trialMode
   trialModeEnabled?: boolean;
   trialResultVisible?: boolean;
 }

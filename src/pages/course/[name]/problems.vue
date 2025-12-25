@@ -58,15 +58,16 @@ function hasAiVtuber(id: number) {
 }
 
 function hasTrialHistory(id: number) {
-  // check list item first (if backend provides trialResultVisible)
-  const listItem = (problems.value || []).find((p) => p.problemId === id) as ProblemListItem | undefined;
-  if (listItem && typeof (listItem as any).trialResultVisible !== "undefined") {
-    return !!(listItem as any).trialResultVisible;
+  // check list item first (if backend provides trialMode info)
+  const listItem = (problems.value || []).find((p) => p.problemId === id);
+  // Check if trialMode is enabled (from list item or detailed config)
+  if (listItem && typeof listItem.trialMode !== "undefined") {
+    return !!listItem.trialMode;
   }
-  // fallback to detailed problem config
+  // fallback to detailed problem config - only check if trialMode is enabled
   const p = problemDetailCache[id];
   const cfg = p?.config as ProblemConfigExtra | undefined;
-  return !!(cfg && cfg.trialMode && cfg.trialResultVisible);
+  return !!(cfg && cfg.trialMode);
 }
 
 
@@ -172,10 +173,18 @@ const maxPage = computed(() => {
                     <template v-else> {{ quota - submitCount }} / {{ quota }} </template>
                   </td>
                   <td>
-                    <div class="tooltip" data-tip="Test History" v-if="hasTrialHistory(problemId)">
+                    <!-- Test History button (always visible, disabled if no trial mode) -->
+                    <div 
+                      class="tooltip" 
+                      :data-tip="hasTrialHistory(problemId) ? 'Test History' : 'Trial Mode Disabled'"
+                    >
                       <router-link
-                        class="btn btn-ghost btn-sm btn-circle mr-1"
-                        :to="`/course/${$route.params.name}/problem/${problemId}/test-history?from=problems`"
+                        :class="[
+                          'btn btn-ghost btn-sm btn-circle mr-1',
+                          !hasTrialHistory(problemId) && 'opacity-30 pointer-events-none'
+                        ]"
+                        :to="hasTrialHistory(problemId) ? `/course/${$route.params.name}/problem/${problemId}/test-history?from=problems` : '#'"
+                        :tabindex="hasTrialHistory(problemId) ? 0 : -1"
                       >
                         <i-uil-history class="lg:h-5 lg:w-5" />
                       </router-link>
@@ -258,6 +267,7 @@ const maxPage = computed(() => {
                 :is-teacher="session.isTeacher"
                 :is-ta="session.isTA"
                 :ai-vtuber="aiVTuber || hasAiVtuber(problemId)"
+                :has-trial-history="hasTrialHistory(problemId)"
               />
             </template>
           </template>

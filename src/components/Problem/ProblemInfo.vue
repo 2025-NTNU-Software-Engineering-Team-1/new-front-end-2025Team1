@@ -10,8 +10,12 @@ interface Props {
   tags: string[];
   visible: ProblemStatus;
   isAdmin: boolean;
+  isTeacher?: boolean;
+  isTA?: boolean;
   // indicates whether AI-TA (aiVTuber) is enabled
   aiVtuber?: boolean;
+  // indicates whether trial history is available for this problem
+  hasTrialHistory?: boolean;
 }
 defineProps<Props>();
 </script>
@@ -49,7 +53,21 @@ defineProps<Props>();
             <template v-else> {{ quotaRemaining }} / {{ quotaLimit }} </template>
           </div>
         </div>
-        <div v-if="isAdmin" class="stat">
+        <div v-if="hasTrialHistory" class="stat">
+          <div class="stat-figure text-base-content">
+            <i-uil-history class="h-6 w-6" />
+          </div>
+          <div class="stat-title text-sm">Test History</div>
+          <div class="stat-value text-lg">
+            <router-link
+              class="btn btn-ghost btn-sm"
+              :to="`/course/${$route.params.name}/problem/${id}/test-history?from=problems`"
+            >
+              <i-uil-history class="h-5 w-5" /> View
+            </router-link>
+          </div>
+        </div>
+        <div v-if="isAdmin || isTeacher || isTA" class="stat">
           <div class="stat-figure text-base-content">
             <i-uil-eye class="h-6 w-6" />
           </div>
@@ -58,7 +76,7 @@ defineProps<Props>();
             {{ visible === PROBLEM_STATUS.VISIBLE ? "Public" : "Hidden" }}
           </div>
         </div>
-        <div v-if="isAdmin" class="stat">
+        <div v-if="isAdmin || isTeacher || isTA" class="stat">
           <div class="stat-figure text-base-content">
             <i-uil-monitor class="h-6 w-6" />
           </div>

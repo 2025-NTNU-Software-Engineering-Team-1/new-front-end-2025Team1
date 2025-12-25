@@ -242,10 +242,15 @@ const TrialSubmission = {
       }>;
     }>(`/trial-submission/${trialSubmissionId}`),
 
-  // API 6: 下載各別測資的結果
-  // GET /trial-submission/<Trial_Submission_Id>/download/case?task_index=<t_idx>
-  downloadCaseResult: (trialSubmissionId: string, taskIndex: number) =>
-    `/trial-submission/${trialSubmissionId}/download/case?task_index=${taskIndex}`,
+  // API 6a: 下載某個 Task 的所有 case 結果（artifact zip）
+  // GET /trial-submission/<Trial_Submission_Id>/download/task/<task_index>
+  downloadTaskResult: (trialSubmissionId: string, taskIndex: number) =>
+    `/trial-submission/${trialSubmissionId}/download/task/${taskIndex}`,
+
+  // API 6b: 下載某個 Case 的結果（artifact zip）
+  // GET /trial-submission/<Trial_Submission_Id>/download/case?task_index=<t_idx>&case_index=<c_idx>
+  downloadCaseResult: (trialSubmissionId: string, taskIndex: number, caseIndex: number) =>
+    `/trial-submission/${trialSubmissionId}/download/case?task_index=${taskIndex}&case_index=${caseIndex}`,
 
   // API 7: 下載一整題該Test Submission的所有測資結果
   // GET /trial-submission/<Trial_Submission_Id>/download

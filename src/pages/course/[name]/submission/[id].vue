@@ -407,6 +407,44 @@ function closeCaseOutputModal() {
   currentViewingCase.value = null;
 }
 
+// Case Navigation
+const hasNextCase = computed(() => {
+  if (!currentViewingCase.value || !submission.value) return false;
+  const { taskIndex, caseIndex } = currentViewingCase.value;
+  const tasks = submission.value.tasks;
+  if (caseIndex + 1 < tasks[taskIndex].cases.length) return true;
+  return taskIndex + 1 < tasks.length;
+});
+
+const hasPrevCase = computed(() => {
+  if (!currentViewingCase.value || !submission.value) return false;
+  const { taskIndex, caseIndex } = currentViewingCase.value;
+  if (caseIndex > 0) return true;
+  return taskIndex > 0;
+});
+
+function navigateCase(direction: 1 | -1) {
+  if (!currentViewingCase.value || !submission.value) return;
+  
+  const { taskIndex, caseIndex } = currentViewingCase.value;
+  const tasks = submission.value.tasks;
+  
+  if (direction === 1) { // Next
+    if (caseIndex + 1 < tasks[taskIndex].cases.length) {
+      viewCaseOutput(taskIndex, caseIndex + 1);
+    } else if (taskIndex + 1 < tasks.length) {
+      viewCaseOutput(taskIndex + 1, 0);
+    }
+  } else { // Prev
+    if (caseIndex - 1 >= 0) {
+      viewCaseOutput(taskIndex, caseIndex - 1);
+    } else if (taskIndex - 1 >= 0) {
+      const prevTaskCases = tasks[taskIndex - 1].cases;
+      viewCaseOutput(taskIndex - 1, prevTaskCases.length - 1);
+    }
+  }
+}
+
 // Helper function to get file icon class based on extension
 function getFileIconClass(ext: string): string {
   const extLower = ext.toLowerCase();
@@ -967,7 +1005,15 @@ watch(submission, (val) => {
       </div>
 
       <!-- Buttons -->
-      <div class="modal-action">
+      <div class="modal-action justify-between">
+        <div class="flex gap-2">
+          <button class="btn" :disabled="!hasPrevCase" @click="navigateCase(-1)">
+            <i-uil-angle-left class="mr-1" /> Previous Case
+          </button>
+          <button class="btn" :disabled="!hasNextCase" @click="navigateCase(1)">
+            Next Case <i-uil-angle-right class="ml-1" />
+          </button>
+        </div>
         <button class="btn" @click="closeCaseOutputModal">
           {{ $t("course.submission.caseOutput.close") }}
         </button>

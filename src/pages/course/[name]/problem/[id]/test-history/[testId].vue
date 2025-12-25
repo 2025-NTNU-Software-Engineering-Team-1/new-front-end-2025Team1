@@ -24,6 +24,9 @@ type TestCase = {
   input?: string;
   expectedOutput?: string;
   actualOutput?: string;
+  // Store original backend indices for artifact file requests
+  originalTaskIndex: number;
+  originalCaseIndex: number;
 };
 
 type TestTask = {
@@ -98,17 +101,18 @@ async function fetchTrialSubmission() {
         memory_usage: task.memory_usage,
         score: task.score,
         status: mapStatusToCode(task.status),
-        cases: [
-          {
-            id: 0,
-            status: mapStatusToCode(task.status),
-            exec_time: task.exec_time,
-            memory_usage: task.memory_usage,
-            input: "",
-            expectedOutput: "",
-            actualOutput: task.stdout,
-          },
-        ],
+        cases: task.cases?.map((caseData, caseIdx) => ({
+          id: caseIdx,
+          status: mapStatusToCode(caseData.status),
+          exec_time: caseData.exec_time,
+          memory_usage: caseData.memory_usage,
+          input: caseData.input || "",
+          expectedOutput: caseData.answer || "",
+          actualOutput: caseData.stdout || "",
+          // Store backend's original indices
+          originalTaskIndex: idx,
+          originalCaseIndex: caseIdx,
+        })) ?? [],
       })) ?? [],
   };
 }
@@ -202,6 +206,8 @@ type CaseArtifactData = {
   stdout: string | null; // null means file doesn't exist, '' means empty file
   stderr: string | null;
   files: Record<string, ArtifactFile>;
+  input?: string | null; // Input from custom testcases
+  expectedOutput?: string | null; // Expected output from custom testcases
 };
 
 const caseOutputModal = ref<HTMLDialogElement | null>(null);
@@ -217,12 +223,24 @@ async function viewCaseOutput(taskIndex: number, caseIndex: number) {
   caseOutputModal.value?.showModal();
 
   try {
+    // Get the case to retrieve original backend indices and case data
+    const task = testResult.value?.tasks[taskIndex];
+    const testCase = task?.cases[caseIndex];
+    const backendTaskIndex = testCase?.originalTaskIndex ?? taskIndex;
+    const backendCaseIndex = testCase?.originalCaseIndex ?? caseIndex;
+
     const response = await api.TrialSubmission.getTrialCaseArtifactFiles(
       String(route.params.testId),
-      taskIndex,
-      caseIndex,
+      backendTaskIndex,
+      backendCaseIndex,
     );
-    caseOutputData.value = response.data;
+    // Use input/answer from API response (artifact), fallback to testCase data
+    caseOutputData.value = {
+      ...response.data,
+      // Prefer artifact's input/answer, fallback to testCase's data
+      input: response.data.input || testCase?.input || null,
+      expectedOutput: response.data.answer || testCase?.expectedOutput || null,
+    };
   } catch (err: unknown) {
     console.error("Failed to load case artifact files", err);
     const axiosErr = err as { response?: { data?: { message?: string } }; message?: string };
@@ -296,11 +314,17 @@ function getFileIconClass(ext: string): string {
 }
 
 // Modal state
-const isDetailModalOpen = ref(false);
+const detailModal = ref<HTMLDialogElement | null>(null);
 const currentDetailData = ref<{
   title: string;
   jsonData: string;
 } | null>(null);
+
+// Close detail modal
+function closeDetailModal() {
+  detailModal.value?.close();
+  currentDetailData.value = null;
+}
 
 // 打開 Task 詳細資訊模態框
 function openTaskDetailModal(taskIndex: number) {
@@ -318,9 +342,9 @@ function openTaskDetailModal(taskIndex: number) {
       status: c.status,
       exec_time: `${c.exec_time} ms`,
       memory_usage: `${c.memory_usage} KB`,
-      input: c.input || `Input data for case ${idx}`,
-      answer: c.expectedOutput || `Expected output for case ${idx}`,
-      output: c.actualOutput || `Actual output for case ${idx}`,
+      input: c.input || "(N/A)",
+      answer: c.expectedOutput || "(N/A)",
+      output: c.actualOutput || "(N/A)",
     })),
   };
 
@@ -328,71 +352,57 @@ function openTaskDetailModal(taskIndex: number) {
     title: `Task ${taskIndex} Details`,
     jsonData: JSON.stringify(data, null, 2),
   };
-  isDetailModalOpen.value = true;
-}
-
-// 打開 Case 詳細資訊模態框
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function openCaseDetailModal(taskIndex: number, caseIndex: number) {
-  const task = testResult.value?.tasks[taskIndex];
-  const testCase = task?.cases[caseIndex];
-  if (!testCase) return;
-
-  const data = {
-    stage: taskIndex,
-    case: caseIndex,
-    status: testCase.status,
-    exec_time: `${testCase.exec_time} ms`,
-    memory_usage: `${testCase.memory_usage} KB`,
-    input: testCase.input || `Input data for case ${taskIndex}-${caseIndex}`,
-    answer: testCase.expectedOutput || `Expected output for case ${taskIndex}-${caseIndex}`,
-    output: testCase.actualOutput || `Actual output for case ${taskIndex}-${caseIndex}`,
-  };
-
-  currentDetailData.value = {
-    title: `Task ${taskIndex} - Case ${caseIndex} Details`,
-    jsonData: JSON.stringify(data, null, 2),
-  };
-  isDetailModalOpen.value = true;
+  detailModal.value?.showModal();
 }
 
 // 下載 Task 結果
 function downloadTaskResult(taskIndex: number) {
-  // API 6: Download case result
+  // Use the task's original index from backend
+  const task = testResult.value?.tasks[taskIndex];
+  // For trial submissions, each frontend task maps 1:1 to backend task
+  const backendTaskIndex = task?.cases[0]?.originalTaskIndex ?? taskIndex;
+
+  // API 6a: Download entire task artifact (all cases combined)
   const trialSubmissionId = String(route.params.testId);
-  const downloadUrl = `${fetcher.defaults.baseURL}${api.TrialSubmission.downloadCaseResult(
+  const downloadUrl = `${fetcher.defaults.baseURL}${api.TrialSubmission.downloadTaskResult(
     trialSubmissionId,
-    taskIndex,
+    backendTaskIndex,
   )}`;
 
   // Trigger download by creating a temporary link
   const link = document.createElement("a");
   link.href = downloadUrl;
-  link.download = `trial-${trialSubmissionId}-task-${taskIndex}.zip`;
+  link.download = `trial-${trialSubmissionId}-task-${taskIndex}-artifact.zip`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 }
 
-// 下載 Case 結果
+// 下載 Case 結果 (artifact zip)
 function downloadCaseResult(taskIndex: number, caseIndex: number) {
   const task = testResult.value?.tasks[taskIndex];
   const testCase = task?.cases[caseIndex];
   if (!testCase) return;
 
-  const data = {
-    stage: taskIndex,
-    case: caseIndex,
-    status: testCase.status,
-    exec_time: `${testCase.exec_time} ms`,
-    memory_usage: `${testCase.memory_usage} KB`,
-    input: testCase.input || `Input data for case ${taskIndex}-${caseIndex}`,
-    answer: testCase.expectedOutput || `Expected output for case ${taskIndex}-${caseIndex}`,
-    output: testCase.actualOutput || `Actual output for case ${taskIndex}-${caseIndex}`,
-  };
+  // Get backend indices
+  const backendTaskIndex = testCase.originalTaskIndex ?? taskIndex;
+  const backendCaseIndex = testCase.originalCaseIndex ?? caseIndex;
 
-  const content = JSON.stringify(data, null, 2);
-  downloadFile(`case_${taskIndex}_${caseIndex}_result.json`, content, "application/json");
+  // API 6b: Download case artifact
+  const trialSubmissionId = String(route.params.testId);
+  const downloadUrl = `${fetcher.defaults.baseURL}${api.TrialSubmission.downloadCaseResult(
+    trialSubmissionId,
+    backendTaskIndex,
+    backendCaseIndex,
+  )}`;
+
+  // Trigger download by creating a temporary link
+  const link = document.createElement("a");
+  link.href = downloadUrl;
+  link.download = `trial-${trialSubmissionId}-task${taskIndex}-case${caseIndex}.zip`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
 
 // 下載所有結果
@@ -710,35 +720,40 @@ async function deleteTrialSubmission() {
   </div>
 
   <!-- Detail Modal -->
-  <ui-dialog v-model="isDetailModalOpen">
-    <template #title>
-      <div class="rounded-t-box bg-primary text-primary-content -m-6 p-6">
+  <dialog ref="detailModal" class="modal">
+    <div class="modal-box max-w-5xl max-h-[90vh] overflow-y-auto">
+      <h3 class="font-bold text-lg">
         {{ currentDetailData?.title }}
-      </div>
-    </template>
-    <template #content>
-      <div v-if="currentDetailData" class="bg-primary text-primary-content -m-6 p-6 pt-0">
+      </h3>
+
+      <div v-if="currentDetailData" class="py-4">
         <div class="space-y-4">
           <!-- JSON Display -->
           <div class="form-control w-full">
             <label class="label">
-              <span class="label-text text-primary-content font-semibold">JSON Data</span>
+              <span class="label-text font-semibold">JSON Data</span>
             </label>
-            <div class="bg-base-200 text-base-content rounded p-4">
+            <div class="bg-base-200 rounded p-4">
               <pre class="whitespace-pre-wrap font-mono text-sm">{{ currentDetailData.jsonData }}</pre>
             </div>
           </div>
         </div>
-
-        <div class="mt-8 flex justify-end gap-2">
-          <button class="btn btn-success btn-sm" @click="downloadModalJson">
-            <i-uil-download-alt class="mr-1" /> Download JSON
-          </button>
-          <button class="btn btn-link text-primary-content" @click="isDetailModalOpen = false">Close</button>
-        </div>
       </div>
-    </template>
-  </ui-dialog>
+
+      <!-- Buttons -->
+      <div class="modal-action justify-end gap-2">
+        <button class="btn btn-success btn-sm" @click="downloadModalJson">
+          <i-uil-download-alt class="mr-1" /> Download JSON
+        </button>
+        <button class="btn btn-sm" @click="closeDetailModal">
+          Close
+        </button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </dialog>
 
   <!-- Case Output Modal -->
   <dialog ref="caseOutputModal" class="modal">
@@ -766,11 +781,47 @@ async function deleteTrialSubmission() {
         </div>
 
         <!-- Content -->
-        <div
-          v-if="caseOutputData"
-          :class="{ 'pointer-events-none opacity-50': caseOutputLoading }"
-          class="space-y-6"
-        >
+        <div v-if="caseOutputData" :class="{'opacity-50 pointer-events-none': caseOutputLoading}" class="space-y-6">
+          <!-- Input Section -->
+          <div>
+            <label class="label pb-2">
+              <span class="label-text font-semibold text-base">Input</span>
+            </label>
+            <div v-if="caseOutputData.input === null || caseOutputData.input === undefined">
+              <div class="text-base-content/60 italic py-2">
+                Input data not available.
+              </div>
+            </div>
+            <div v-else class="mt-2">
+              <div v-if="caseOutputData.input.trim()">
+                <code-editor v-model="caseOutputData.input" readonly />
+              </div>
+              <div v-else class="text-base-content/60 italic py-2">
+                Empty
+              </div>
+            </div>
+          </div>
+
+          <!-- Expected Output Section -->
+          <div>
+            <label class="label pb-2">
+              <span class="label-text font-semibold text-base">Expected Output (Answer)</span>
+            </label>
+            <div v-if="caseOutputData.expectedOutput === null || caseOutputData.expectedOutput === undefined">
+              <div class="text-base-content/60 italic py-2">
+                Expected output not available.
+              </div>
+            </div>
+            <div v-else class="mt-2">
+              <div v-if="caseOutputData.expectedOutput.trim()">
+                <code-editor v-model="caseOutputData.expectedOutput" readonly />
+              </div>
+              <div v-else class="text-base-content/60 italic py-2">
+                Empty
+              </div>
+            </div>
+          </div>
+
           <!-- Stdout Section -->
           <div>
             <label class="label pb-2">

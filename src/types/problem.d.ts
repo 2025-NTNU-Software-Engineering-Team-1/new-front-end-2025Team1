@@ -155,6 +155,13 @@ interface ProblemConfigExtra {
   aiVTuberMode?: "gemini-2.5-flash-lite" | "gemini-2.5-flash" | "gemini-2.5-pro";
   aiVTuberApiKeys?: string[];
 
+  // AI Checker (for custom checker with AI support)
+  aiChecker?: {
+    enabled: boolean;
+    apiKeyId?: string;
+    model?: "gemini-2.5-flash-lite" | "gemini-2.5-flash" | "gemini-2.5-pro";
+  };
+
   // Network Access Restriction
   networkAccessEnabled?: boolean;
   networkAccessRestriction?: {

@@ -389,14 +389,23 @@ async function submit() {
       }
     }
 
+    const assetPaths = cfg.assetPaths || {};
+    const hasExistingAssets = Object.values(assetPaths).some((path) => Boolean(path));
+    const hasNewAssets = attachedFiles.length > 0;
+    const shouldUploadAssets = hasNewAssets || hasExistingAssets;
+
     logger.log("Step 2: Attaching Assets", attachedFiles);
 
     // Step 3: API Calls
     logger.log("Step 3: Sending Update Request...");
     await api.Problem.modify(pid, edittingProblem.value);
 
-    logger.log("Step 4: Sending Assets Upload...");
-    await api.Problem.uploadAssetsV2(pid, fd);
+    if (shouldUploadAssets) {
+      logger.log("Step 4: Sending Assets Upload...");
+      await api.Problem.uploadAssetsV2(pid, fd);
+    } else {
+      logger.log("Step 4: Skipping Assets Upload (no files, no existing assets)");
+    }
 
     logger.success("Update Successful. Redirecting...");
     router.push(`/course/${route.params.name}/problem/${route.params.id}`);

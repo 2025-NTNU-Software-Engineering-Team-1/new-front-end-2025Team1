@@ -14,6 +14,10 @@ import MultiStringInput from "../Controls/MultiStringInput.vue";
 import api from "@/models/api";
 import { assertFileSizeOK } from "@/utils/checkFileSize";
 const { t } = useI18n();
+
+// AI Checker state
+const aiCheckerApiKeys = ref<{ id: string; key_name: string }[]>([]);
+const isFetchingAiKeys = ref(false);
 // ==========================================
 // [CONFIG] Console Debug Mode
 // ==========================================
@@ -391,7 +395,52 @@ problem.value.pipeline = problem.value.pipeline || ({} as any);
 onMounted(async () => {
   initPipelineValues();
   await fetchStaticAnalysisOptions();
+  await fetchAiCheckerKeys();
 });
+
+// Fetch AI API Keys for AI Checker
+async function fetchAiCheckerKeys() {
+  const courseName = typeof route.params.name === "string" ? route.params.name : route.params.name?.[0];
+  if (!courseName) return;
+
+  isFetchingAiKeys.value = true;
+  try {
+    const res = await api.AIVTuber.getCourseKeys(courseName);
+    const data = res?.data?.data?.keys || res?.data?.keys || [];
+    aiCheckerApiKeys.value = data.filter((k: any) => k.is_active).map((k: any) => ({
+      id: String(k.id),
+      key_name: k.key_name,
+    }));
+    logger.success("AI Checker Keys", aiCheckerApiKeys.value);
+  } catch (err) {
+    logger.error("Failed to fetch AI Checker keys", err);
+  } finally {
+    isFetchingAiKeys.value = false;
+  }
+}
+
+// Ensure aiChecker config exists
+function ensureAiCheckerConfig() {
+  if (!problem.value.config) return;
+  if (!problem.value.config.aiChecker) {
+    problem.value.config.aiChecker = {
+      enabled: false,
+      apiKeyId: undefined,
+      model: "gemini-2.5-flash",
+    };
+  }
+}
+
+// Watch for AI Checker toggle to ensure config exists
+watch(
+  () => problem.value.config?.aiChecker?.enabled,
+  (enabled) => {
+    if (enabled) {
+      ensureAiCheckerConfig();
+    }
+  },
+  { immediate: true },
+);
 </script>
 
 <template>
@@ -896,11 +945,70 @@ onMounted(async () => {
               "
             />
           </div>
-          <label v-if="v$?.assets?.customCheckerPy?.$error" class="label">
+        <label v-if="v$?.assets?.customCheckerPy?.$error" class="label">
             <span class="label-text-alt text-error">{{
               v$.assets.customCheckerPy.$errors[0]?.$message
             }}</span>
           </label>
+
+          <!-- AI Checker Sub-Options -->
+          <div class="mt-4 rounded-lg border border-gray-500 bg-base-200/50 p-4">
+            <div class="flex items-center gap-4">
+              <label class="label cursor-pointer justify-start gap-x-4">
+                <span class="label-text">{{ t("course.problems.aiCheckerEnable") }}</span>
+                <input
+                  type="checkbox"
+                  class="toggle toggle-sm"
+                  :checked="problem.config?.aiChecker?.enabled || false"
+                  @change="
+                    (e: Event) => {
+                      if (!problem.config!.aiChecker) {
+                        problem.config!.aiChecker = { enabled: false, model: 'gemini-2.5-flash' };
+                      }
+                      problem.config!.aiChecker!.enabled = (e.target as HTMLInputElement).checked;
+                    }
+                  "
+                />
+              </label>
+            </div>
+
+            <!-- AI Checker Settings (only when enabled) -->
+            <div v-if="problem.config?.aiChecker?.enabled" class="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
+              <!-- API Key Selector -->
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text">{{ t("course.problems.aiCheckerApiKey") }}</span>
+                </label>
+                <select
+                  class="select-bordered select select-sm"
+                  v-model="problem.config!.aiChecker!.apiKeyId"
+                >
+                  <option disabled :value="undefined">{{ t("course.problems.aiCheckerSelectKey") }}</option>
+                  <option v-for="key in aiCheckerApiKeys" :key="key.id" :value="key.id">
+                    {{ key.key_name }}
+                  </option>
+                </select>
+                <label v-if="isFetchingAiKeys" class="label">
+                  <span class="label-text-alt opacity-70">{{ t("course.problems.aiKeyLoadingKeys") }}</span>
+                </label>
+              </div>
+
+              <!-- Model Selector (hardcoded like AI TA) -->
+              <div class="form-control">
+                <label class="label">
+                  <span class="label-text">{{ t("course.problems.aiCheckerModel") }}</span>
+                </label>
+                <select
+                  class="select-bordered select select-sm"
+                  v-model="problem.config!.aiChecker!.model"
+                >
+                  <option value="gemini-2.5-flash-lite">gemini 2.5 flash lite</option>
+                  <option value="gemini-2.5-flash">gemini 2.5 flash</option>
+                  <option value="gemini-2.5-pro">gemini 2.5 pro</option>
+                </select>
+              </div>
+            </div>
+          </div>
         </div>
         <div v-else class="pl-1 text-xs opacity-70">
           {{

@@ -870,12 +870,18 @@ const selectedKeyStats = computed(() => {
   };
 });
 
+// tag
 const tagsString = computed({
   get: () => {
     return problem.value.tags ? problem.value.tags.join(", ") : "";
   },
   set: (val: string) => {
+    if (!val) {
+      problem.value.tags = [];
+      return;
+    }
     problem.value.tags = val
+      .replace(/(?:，|逗號|comma|Comma)/g, ",")
       .split(",")
       .map((s) => s.trim())
       .filter((s) => s.length > 0);
@@ -939,7 +945,8 @@ onBeforeUnmount(() => {
         <span class="label-text">{{ t("course.problems.tags") }}</span>
       </label>
 
-      <input type="text" class="input-bordered input" v-model.lazy="tagsString" placeholder="tag1, tag2" />
+      <input type="text" class="input-bordered input" v-model.lazy="tagsString" placeholder="tag1, tag 2" />
+
       <label class="label">
         <span class="label-text-alt">{{ t("course.problems.commaSeparated") }}</span>
       </label>

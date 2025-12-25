@@ -226,6 +226,8 @@ const TrialSubmission = {
       timestamp: Date;
       status: string;
       score: number;
+      language_type?: number;
+      code?: string;
       tasks: Array<{
         status: string; // (AC, WA, TLE)
         exec_time: number;

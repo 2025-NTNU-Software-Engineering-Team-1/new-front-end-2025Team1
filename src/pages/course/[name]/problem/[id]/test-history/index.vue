@@ -52,7 +52,8 @@ onMounted(async () => {
       try {
         const problemId = Number(route.params.id);
         const permResponse = await api.TrialSubmission.checkRejudgePermission(problemId);
-        canRejudge.value = permResponse.data?.can_rejudge ?? false;
+        // API response is wrapped: { status, data: { can_rejudge } }
+        canRejudge.value = (permResponse.data as { can_rejudge?: boolean })?.can_rejudge ?? false;
       } catch (err) {
         console.warn("Failed to check rejudge permission:", err);
         canRejudge.value = false;
@@ -144,7 +145,9 @@ async function deleteTrialSubmission(id: string | number, event: Event) {
   deletingIds.value.add(id);
   try {
     const response = await api.TrialSubmission.delete(String(id));
-    if (response.data?.ok) {
+    // API response is wrapped: { status, message, data: { ok } }
+    const responseData = response.data as { ok?: boolean };
+    if (responseData?.ok) {
       // Remove from local list
       testHistory.value = testHistory.value.filter((item) => item.id !== id);
     }

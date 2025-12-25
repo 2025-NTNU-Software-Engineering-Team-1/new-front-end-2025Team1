@@ -90,7 +90,7 @@ const isInitialLoading = computed(() => {
 // Check if there are any pending submissions that need auto-refresh
 const hasPendingSubmissions = computed(() => {
   return submissions.value?.some(
-    (sub) => sub.status === SUBMISSION_STATUS_CODE.PENDING || sub.status === -1
+    (sub) => sub.status === SUBMISSION_STATUS_CODE.PENDING
   ) ?? false;
 });
 

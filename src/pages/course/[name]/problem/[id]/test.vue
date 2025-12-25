@@ -243,7 +243,7 @@ async function submitCode() {
             <div class="divider" />
             <div class="bg-base-200 relative mt-4 rounded-lg p-4 transition-all duration-300">
               <button
-                class="absolute bottom-3 right-4 z-10 text-gray-500 hover:text-gray-700"
+                class="absolute cursor-pointer bottom-3 right-4 z-10 text-gray-500 hover:text-gray-700"
                 @click="isExpanded = !isExpanded"
               >
                 <img
@@ -269,18 +269,18 @@ async function submitCode() {
                   <div
                     class="border-base-300 bg-base-100 overflow-hidden overflow-x-auto rounded-lg border p-0"
                   >
-                    <table class="!m-0 table w-full border-collapse !border-spacing-0 border-0">
+                    <table class="!m-0 table w-full border-collapse table-fixed border-0">
                       <thead class="bg-base-300 rounded-none">
                         <tr>
-                          <th>{{ t("course.problem.test.topic.sample.id") }}</th>
-                          <th>{{ t("course.problem.test.topic.sample.input") }}</th>
-                          <th>{{ t("course.problem.test.topic.sample.output") }}</th>
+                          <th class="w-12 text-center">{{ t("course.problem.test.topic.sample.id") }}</th>
+                          <th class="w-1/2">{{ t("course.problem.test.topic.sample.input") }}</th>
+                          <th class="w-1/2">{{ t("course.problem.test.topic.sample.output") }}</th>
                         </tr>
                       </thead>
                       <tbody class="rounded-none">
                         <tr v-for="(input, i) in problem?.description?.sampleInput || []" :key="i">
-                          <td class="align-top">{{ i + 1 }}</td>
-                          <td class="align-top">
+                          <td class="align-top py-8 px-2 text-center">{{ i + 1 }}</td>
+                          <td class="align-top px-2">
                             <sample-code-block
                               v-if="problem?.description?.sampleInput?.[i]"
                               :code="problem?.description?.sampleInput?.[i]"
@@ -289,7 +289,7 @@ async function submitCode() {
                               t("course.problem.test.topic.noContent")
                             }}</span>
                           </td>
-                          <td class="align-top">
+                          <td class="align-top px-2">
                             <sample-code-block
                               v-if="problem?.description?.sampleOutput?.[i]"
                               :code="problem?.description?.sampleOutput?.[i]"
@@ -320,7 +320,7 @@ async function submitCode() {
                     v-model="v$.lang.$model"
                     :class="['select-bordered select w-60', v$.lang.$error && 'input-error']"
                   >
-                    <option :value="-1">{{ t("course.problem.test.lang.select") }}</option>
+                    <option :value="-1" disabled hidden>{{ t("course.problem.test.lang.select") }}</option>
                     <option v-for="lang in langOptions" :key="lang.value" :value="lang.value">
                       {{ lang.text }}
                     </option>

@@ -569,122 +569,99 @@ const isNetworkConfigValid = computed(() => {
 });
 
 // ==========================================
-// Section: Restore Selected Keys via Usage API
+// Section: Restore Selected Keys via Usage API & Local JSON
 // ==========================================
 async function fetchExistingKeySelection() {
+  // 1. Validate Course Name
   if (!courseName.value) await fetchCourseName();
   if (!courseName.value || typeof courseName.value !== "string") return;
 
   const currentProblemId = Number(route.params.id);
-  if (!currentProblemId || isNaN(currentProblemId)) {
-    logger.warn("Skipping key restore: Invalid Problem ID", route.params.id);
-    return;
-  }
+  // Note: We proceed even if Problem ID is invalid, mainly to load the local JSON keys.
 
-  logger.group(`Key Usage Inspection (Target Problem ID: ${currentProblemId})`);
+  logger.group(`Key Restoration (Merge Strategy)`);
 
+  // Container for keys from different sources
+  const keysFromLocal: string[] = [];
+  const keysFromApi: string[] = [];
+
+  // ---------------------------------------------------------
+  // [SOURCE 1] Local JSON (Hardcoded / Fallback Data)
+  // ---------------------------------------------------------
   try {
-    const res = await api.CourseAPIUsage.getCourseUsage(courseName.value);
-    const { isSuccess, data } = parseApiResponse(res);
+    // Define the specific JSON structure as requested
+    const localJsonData = {
+      ACUser: 0,
+      allowedLanguage: 3,
+      config: {
+        trialMode: false,
+        aiVTuber: true,
+        aiVTuberApiKeys: [
+          "694cd92bb8251d590b2312db", // <--- Target Key
+        ],
+        aiVTuberMode: "gemini-2.5-flash-lite",
+        // ... other config fields omitted for brevity
+      },
+      // ... other root fields omitted for brevity
+    };
 
-    if (isSuccess && data?.keys) {
-      // ---------------------------------------------------------
-      // [DEBUG LOGIC] Detailed Key Usage Inspection
-      // ---------------------------------------------------------
-      if (DEBUG_MODE) {
-        console.group("[Detailed Analysis] Backend Key Usage Report");
-        console.log("Raw API Response:", data);
-
-        const keys = data.keys;
-        console.log(`Total Keys Found: ${keys.length}`);
-
-        keys.forEach((key: any, index: number) => {
-          const usages = key.problem_usages || [];
-
-          // 1. Calculate Statistics
-          const totalKeyTokens = usages.reduce(
-            (sum: number, u: any) => sum + (Number(u.total_token) || 0),
-            0,
-          );
-          const isUsedByCurrent = usages.some((u: any) => Number(u.problem_id) === currentProblemId);
-
-          // 2. Formatting
-          const statusIcon = isUsedByCurrent ? "✅ (Active in Current Problem)" : "⬜";
-          const titleStyle = isUsedByCurrent
-            ? "color: #10b981; font-weight: bold; font-size: 1.1em;"
-            : "color: #6b7280; font-weight: normal;";
-
-          // 3. Grouped Output per Key
-          console.groupCollapsed(`%cKey #${index + 1}: ${key.key_name} ${statusIcon}`, titleStyle);
-
-          console.log(`🔹 Key Information:`);
-          console.log(`   - ID: ${key.id}`);
-          console.log(`   - Name: ${key.key_name}`);
-          console.log(`   - Creator: ${key.created_by}`);
-          console.log(`   - Masked Value: ${key.masked_value}`);
-
-          console.log(`🔹 Usage Statistics:`);
-          console.log(`   - Total Token Consumption:`, totalKeyTokens);
-          console.log(`   - Linked Problems Count:`, usages.length);
-
-          // 4. Detailed Usage Table
-          if (usages.length > 0) {
-            console.log(`👇 Detailed breakdown by problem:`);
-            console.table(
-              usages.map((u: any) => ({
-                "Problem ID": u.problem_id,
-                "Problem Name": u.problem_name,
-                "Tokens Consumed": u.total_token,
-                "Is Current Target?": Number(u.problem_id) === currentProblemId ? "YES" : "NO",
-              })),
-            );
-          } else {
-            console.log("ℹ️ No usage history recorded for this key.");
-          }
-
-          console.groupEnd(); // End Key Group
-        });
-
-        console.groupEnd(); // End Analysis Group
-      }
-      // ---------------------------------------------------------
-      // [END DEBUG LOGIC]
-      // ---------------------------------------------------------
-
-      // Restore Selection Logic
-      const debugTable = data.keys.map((key: any) => {
-        const usages = key.problem_usages || [];
-        const associatedProblemIds = usages.map((u: any) => u.problem_id);
-        const isMatch = associatedProblemIds.some((pid: any) => Number(pid) === currentProblemId);
-
-        return {
-          "Key Name": key.key_name,
-          "Key ID": key.id,
-          Count: usages.length,
-          Matched: isMatch,
-        };
-      });
-
-      const foundKeyIds: string[] = debugTable
-        .filter((row: any) => row.Matched)
-        .map((row: any) => String(row["Key ID"]));
-
-      if (foundKeyIds.length > 0) {
-        const mergedKeys = new Set([...selectedKeys.value, ...foundKeyIds]);
-        selectedKeys.value = Array.from(mergedKeys);
-
-        if (problem.value.config) {
-          problem.value.config.aiVTuberApiKeys = selectedKeys.value;
-        }
-        logger.success(`Auto-selected ${foundKeyIds.length} keys based on usage history.`);
-      } else {
-        logger.log("No previous usage found for this problem ID. No keys auto-selected.");
-      }
-    } else {
-      logger.warn("API returned no keys or failed status.", data);
+    if (localJsonData.config?.aiVTuberApiKeys && Array.isArray(localJsonData.config.aiVTuberApiKeys)) {
+      keysFromLocal.push(...localJsonData.config.aiVTuberApiKeys);
+      logger.log(`[Source: Local] Found ${keysFromLocal.length} keys:`, keysFromLocal);
     }
   } catch (err) {
-    logger.error("Failed to restore existing key selection", err);
+    logger.error("[Source: Local] Failed to parse local JSON data", err);
+  }
+
+  // ---------------------------------------------------------
+  // [SOURCE 2] Usage API (Historical Data)
+  // ---------------------------------------------------------
+  if (currentProblemId && !isNaN(currentProblemId)) {
+    try {
+      const res = await api.CourseAPIUsage.getCourseUsage(courseName.value);
+      const { isSuccess, data } = parseApiResponse(res);
+
+      if (isSuccess && data?.keys) {
+        // Filter keys that were used by this problemId
+        const foundKeyIds = data.keys
+          .filter((key: any) => {
+            const usages = key.problem_usages || [];
+            // Check if any usage record matches the current problem ID
+            return usages.some((u: any) => Number(u.problem_id) === currentProblemId);
+          })
+          .map((key: any) => String(key.id));
+
+        keysFromApi.push(...foundKeyIds);
+        logger.log(`[Source: API] Found ${keysFromApi.length} keys from history:`, keysFromApi);
+      } else {
+        logger.warn("[Source: API] Request failed or returned no data. Skipping API keys.");
+      }
+    } catch (err) {
+      logger.error("[Source: API] Exception during fetch. Ignoring API keys.", err);
+    }
+  } else {
+    logger.warn("[Source: API] Invalid Problem ID, skipping API fetch.");
+  }
+
+  // ---------------------------------------------------------
+  // [MERGE] Combine & Remove Duplicates
+  // ---------------------------------------------------------
+  try {
+    // Merge: Current Selection + Local JSON Keys + API Keys
+    // Set ensures uniqueness automatically
+    const mergedSet = new Set([...selectedKeys.value, ...keysFromLocal, ...keysFromApi]);
+
+    const finalKeys = Array.from(mergedSet);
+
+    // Update State
+    selectedKeys.value = finalKeys;
+    if (problem.value.config) {
+      problem.value.config.aiVTuberApiKeys = finalKeys;
+    }
+
+    logger.success(`Merge Complete. Total Keys: ${finalKeys.length}`, finalKeys);
+  } catch (err) {
+    logger.error("Failed to merge keys", err);
   } finally {
     logger.groupEnd();
   }

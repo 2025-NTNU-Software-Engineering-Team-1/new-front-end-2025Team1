@@ -390,7 +390,12 @@
       "active": "啟用中",
       "inactive": "停用中",
       "selectedKeysTitle": "已選取的金鑰 ({count}) - 點擊下方項目以移除",
+<<<<<<< HEAD
       "anyFile": "任何檔案"
+=======
+      "anyFile":"任何檔案",
+      "enableCppHint":"請先啟用 C/C++ 語言才能使用此功能"
+>>>>>>> 151797c4 (Args/Image 換位置  hover修正)
     },
     "submissions": {
       "text": "繳交狀態",

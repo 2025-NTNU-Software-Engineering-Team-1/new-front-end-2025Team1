@@ -19,6 +19,10 @@ const { t, locale } = useI18n();
 const hover = computed(() => {
   return locale.value === "en" ? hover_en : hover_zh;
 });
+
+// teacher file (interactive)
+const teacherFileError = ref("");
+
 // ==========================================
 // [CONFIG] Type Definitions (Locally Defined)
 // ==========================================
@@ -1266,28 +1270,57 @@ watch(
                     t("course.problems.notNotUploaded")
                   }}</span>
                 </div>
+
                 <input
                   type="file"
                   :accept="teacherAllowedExtensions().join(',')"
                   class="file-input-bordered file-input file-input-sm w-56"
-                  :class="{ 'input-error': v$?.assets?.teacherFile?.$error }"
+                  :class="{ 'input-error': v$?.assets?.teacherFile?.$error || teacherFileError }"
                   @change="
                     (e: Event) => {
-                      const file = ((e.target as HTMLInputElement).files as FileList)?.[0] || null;
+                      const inputEl = e.target as HTMLInputElement;
+                      const file = inputEl.files?.[0] || null;
+
+                      // 1. Reset Error
+                      teacherFileError = '';
+
+                      if (!file) {
+                        problem.assets!.teacherFile = null;
+                        return;
+                      }
+
+                      // 2. Validate Extension (.py, .c, .cpp)
+                      const isExtOk = /\.(py|c|cpp)$/i.test(file.name);
+
+                      if (!isExtOk) {
+                        teacherFileError = 'Invalid file type. Only .py, .c, .cpp are allowed.';
+                        problem.assets!.teacherFile = null;
+                        inputEl.value = ''; // Force clear the input
+                        return;
+                      }
+
+                      // 3. Validate File Size
+                      if (!assertFileSizeOK(file, 'teacherFile')) {
+                        problem.assets!.teacherFile = null;
+                        inputEl.value = ''; // Force clear the input
+                        return;
+                      }
+
+                      // 4. Valid
                       problem.assets!.teacherFile = file;
                       v$?.assets?.teacherFile?.$touch();
-                      if (!file || !assertFileSizeOK(file, 'teacherFile')) {
-                        problem.assets!.teacherFile = null;
-                        (e.target as HTMLInputElement).value = '';
-                      }
                     }
                   "
                 />
               </div>
-              <label v-if="v$?.assets?.teacherFile?.$error" class="label">
-                <span class="label-text-alt text-error">{{
-                  v$.assets.teacherFile.$errors[0]?.$message
-                }}</span>
+
+              <label v-if="v$?.assets?.teacherFile?.$error || teacherFileError" class="label">
+                <span v-if="v$?.assets?.teacherFile?.$error" class="label-text-alt text-error">
+                  {{ v$.assets.teacherFile.$errors[0]?.$message }}
+                </span>
+                <span v-else-if="teacherFileError" class="label-text-alt text-error">
+                  {{ teacherFileError }}
+                </span>
               </label>
             </div>
           </div>

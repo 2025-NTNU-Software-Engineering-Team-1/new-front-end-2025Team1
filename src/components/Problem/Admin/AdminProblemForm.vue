@@ -84,8 +84,8 @@ function getPanelByErrorPath(path: string): PanelKey {
 
     if (
       //path.startsWith("assets.aiVTuberACFiles") ||
-      path.startsWith("assets.trialModeACFiles") ||
-      path.startsWith("assets.trialModePublicTestDataZip")
+      path.startsWith("assets.trialModeACFiles") // ||
+      //path.startsWith("assets.trialModePublicTestDataZip")
     )
       return "config";
 
@@ -418,41 +418,53 @@ const rules = {
         return (problem.value.assets?.trialModeACFiles?.length ?? 0) > 0;
       }),
     },
+    validExtension: helpers.withMessage("AC Files must be .c, .cpp, or .py", () => {
+      const files = problem.value.assets?.trialModeACFiles;
+      if (!files || files.length === 0) return true;
+      const allowed = [".c", ".cpp", ".py"];
+      return files.every((f) => allowed.some((ext) => f.name.toLowerCase().endsWith(ext)));
+    }),
+  },
 
-    trialModePublicTestDataZip: {
-      requiredWhenTrial: helpers.withMessage(
-        "Trial Mode is enabled: please upload Public Test Data (.zip).",
-        () => {
-          const cfg = problem.value.config;
-          if (!cfg?.trialMode) return true;
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const assetPaths = (cfg as any)?.assetPaths || {};
-          if (assetPaths["public_testdata"]) return true;
-          return !!problem.value.assets?.trialModePublicTestDataZip;
-        },
-      ),
-    },
+  trialModePublicTestDataZip: {
+    requiredWhenTrial: helpers.withMessage(
+      "Trial Mode is enabled: please upload Public Test Data (.zip).",
+      () => {
+        const cfg = problem.value.config;
+        if (!cfg?.trialMode) return true;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const assetPaths = (cfg as any)?.assetPaths || {};
+        if (assetPaths["public_testdata"]) return true;
+        return !!problem.value.assets?.trialModePublicTestDataZip;
+      },
+    ),
+  },
 
-    teacherFile: {
-      requiredWhenInteractive: helpers.withMessage("Interactive mode requires uploading Teacher Code", () => {
-        if (problem.value.pipeline?.executionMode !== "interactive") return true;
-        return !!problem.value.assets?.teacherFile || hasRemoteAsset("teacher_file");
-      }),
-      validExtension: helpers.withMessage(
-        () => {
-          const exts = getAllowedFileExtensions(problem.value.allowedLanguage);
-          return `Teacher file must have one of the following extensions: ${exts.join(", ")}`;
-        },
-        () => {
-          const file = problem.value.assets?.teacherFile;
-          if (!file) return true;
-          if (problem.value.pipeline?.executionMode !== "interactive") return true;
-          const exts = getAllowedFileExtensions(problem.value.allowedLanguage);
-          const fileName = file.name.toLowerCase();
-          return exts.some((ext) => fileName.endsWith(ext.toLowerCase()));
-        },
-      ),
-    },
+  teacherFile: {
+    requiredWhenInteractive: helpers.withMessage("Interactive mode requires uploading Teacher Code", () => {
+      if (problem.value.pipeline?.executionMode !== "interactive") return true;
+      return !!problem.value.assets?.teacherFile || hasRemoteAsset("teacher_file");
+    }),
+    validExtension: helpers.withMessage(
+      () => {
+        if (problem.value.pipeline?.executionMode === "interactive") {
+          return "Teacher file must be .c, .cpp, or .py";
+        }
+        const exts = getAllowedFileExtensions(problem.value.allowedLanguage);
+        return `Teacher file must have one of the following extensions: ${exts.join(", ")}`;
+      },
+      () => {
+        const file = problem.value.assets?.teacherFile;
+        if (!file) return true;
+        // interactive： .c .cpp .py
+        if (problem.value.pipeline?.executionMode === "interactive") {
+          return /\.(c|cpp|py)$/i.test(file.name);
+        }
+        // other
+        const allowedExts = getAllowedFileExtensions(problem.value.allowedLanguage);
+        return allowedExts.some((ext) => file.name.toLowerCase().endsWith(ext));
+      },
+    ),
 
     makefileZip: {
       requiredWhenFunctionOnly: helpers.withMessage(
@@ -518,7 +530,7 @@ const rules = {
   },
 };
 
-const v$ = useVuelidate(rules, problem);
+const v$ = useVuelidate(rules, reactive(problem.value), { $autoDirty: true });
 provide("v$", v$);
 
 function update<K extends keyof ProblemForm>(key: K, value: ProblemForm[K]) {

@@ -46,6 +46,9 @@ interface ProblemForm {
   config: ProblemConfigExtra;
   pipeline: ProblemPipeline;
   assets: ProblemAssets;
+
+  trialModePublicTestDataZip?: File | null;
+  teacherFile?: File | null;
 }
 
 /* ------------------------------

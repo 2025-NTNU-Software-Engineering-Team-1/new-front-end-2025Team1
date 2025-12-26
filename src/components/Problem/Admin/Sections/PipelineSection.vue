@@ -24,6 +24,12 @@ const isFetchingAiKeys = ref(false);
 const DEBUG_MODE = 1;
 
 // ==========================================
+// [CONFIG] Constants
+// ==========================================
+// Define the maximum limit for list items
+const MAX_ITEMS_LIMIT = 100;
+
+// ==========================================
 // Logger Utility
 // ==========================================
 const logger = {
@@ -190,15 +196,7 @@ const allowWriteToggle = computed({
   },
 });
 
-// const resourceDataEnabled = computed({
-//   get: () => problem.value.config.resourceData,
-//   set: (val: boolean) => {
-//     problem.value.config.resourceData = val;
-//   },
-// });
-
 // Computed properties for UI warnings
-// const allowWriteDisabled = computed(() => !allowReadToggle.value);
 const allowWriteWarning = computed(() => (!allowReadToggle.value ? "Allow Write requires Allow Read." : ""));
 // Show red if forcibly closed, otherwise gray
 const allowWriteWarningError = computed(() => allowWriteForceClosed.value);
@@ -221,8 +219,6 @@ async function fetchStaticAnalysisOptions() {
 
   try {
     const resp = await api.Problem.getStaticAnalysisOptions();
-    // logger.log("Raw Response", resp);
-
     const libs = (resp && resp.data && (resp.data as any).librarySymbols) || {};
     imports = Array.isArray(libs.imports) ? libs.imports : [];
     headers = Array.isArray(libs.headers) ? libs.headers : [];
@@ -244,15 +240,8 @@ async function fetchStaticAnalysisOptions() {
 // ==========================================
 // Section: Mode Switching (White/Blacklist)
 // ==========================================
-// Simplified: 2 modes instead of 4
 const syntaxMode = ref<"whitelist" | "blacklist">("blacklist");
 const libraryMode = ref<"whitelist" | "blacklist">("blacklist"); // Combined: imports + headers + functions
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const importMode = ref<"whitelist" | "blacklist">("blacklist");
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const headerMode = ref<"whitelist" | "blacklist">("blacklist");
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const functionMode = ref<"whitelist" | "blacklist">("blacklist");
 
 // Watchers: Clear the opposite list when mode switches
 watch(syntaxMode, (newMode) => {
@@ -262,7 +251,6 @@ watch(syntaxMode, (newMode) => {
   }
 });
 
-// libraryMode controls imports, headers, and functions together
 watch(libraryMode, (newMode) => {
   const oppositeMode = newMode === "whitelist" ? "blacklist" : "whitelist";
   if (problem.value.pipeline?.staticAnalysis?.libraryRestrictions?.[oppositeMode]) {
@@ -306,10 +294,70 @@ watch(
 // ==========================================
 // Section: Helpers
 // ==========================================
+
+/**
+ * Toggles an item in the array via Button Click.
+ */
 function toggleItem(arr: string[], item: string) {
   const idx = arr.indexOf(item);
-  if (idx >= 0) arr.splice(idx, 1);
-  else arr.push(item);
+  if (idx >= 0) {
+    arr.splice(idx, 1);
+  } else {
+    if (arr.length >= MAX_ITEMS_LIMIT) {
+      logger.warn("Limit reached", `Cannot add more than ${MAX_ITEMS_LIMIT} items.`);
+      return;
+    }
+    arr.push(item);
+  }
+}
+
+/**
+ * Select All Items from backend options
+ * Respects MAX_ITEMS_LIMIT
+ */
+function selectAllItems(section: LibSection, mode: LibMode) {
+  const currentArr = problem.value.pipeline!.staticAnalysis!.libraryRestrictions![mode]![section] || [];
+  const backendOpts = getBackendOptions(section);
+
+  // Combine current items with backend options, removing duplicates
+  const combined = new Set([...currentArr, ...backendOpts]);
+  const newArr = Array.from(combined);
+
+  // Apply limit
+  if (newArr.length > MAX_ITEMS_LIMIT) {
+    problem.value.pipeline!.staticAnalysis!.libraryRestrictions![mode]![section] = newArr.slice(
+      0,
+      MAX_ITEMS_LIMIT,
+    );
+    logger.warn("Limit reached", `Selected items truncated to ${MAX_ITEMS_LIMIT}.`);
+  } else {
+    problem.value.pipeline!.staticAnalysis!.libraryRestrictions![mode]![section] = newArr;
+  }
+}
+
+/**
+ * Clear All Items in a section
+ */
+function clearAllItems(section: LibSection, mode: LibMode) {
+  problem.value.pipeline!.staticAnalysis!.libraryRestrictions![mode]![section] = [];
+}
+
+/**
+ * Handles manual updates from MultiStringInput.
+ * INTERCEPTS the v-model update to enforce limits.
+ */
+function handleManualUpdate(section: LibSection, mode: LibMode, newVal: string[]) {
+  const currentArr = problem.value.pipeline!.staticAnalysis!.libraryRestrictions![mode]![section] || [];
+
+  if (newVal.length < currentArr.length) {
+    // Allowed: Deletion
+    problem.value.pipeline!.staticAnalysis!.libraryRestrictions![mode]![section] = newVal;
+  } else if (newVal.length <= MAX_ITEMS_LIMIT) {
+    // Allowed: Addition within limit
+    problem.value.pipeline!.staticAnalysis!.libraryRestrictions![mode]![section] = newVal;
+  } else {
+    logger.warn("Limit reached", `Blocked manual input. Limit: ${MAX_ITEMS_LIMIT}`);
+  }
 }
 
 function getAllowedFileExtensions(): string[] {
@@ -335,8 +383,6 @@ function isTeacherFileAllowed(file: File | null): boolean {
   const name = file.name.toLowerCase();
   return allowed.some((ext) => name.endsWith(ext));
 }
-
-//
 
 type LibSection = "syntax" | "imports" | "headers" | "functions";
 type LibMode = "whitelist" | "blacklist";
@@ -406,14 +452,10 @@ async function fetchAiCheckerKeys() {
   isFetchingAiKeys.value = true;
   try {
     const res = await api.AIVTuber.getCourseKeys(courseName);
-    // Handle potential nested data structure from API
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const resData = res?.data as any;
     const data = resData?.data?.keys || resData?.keys || [];
     aiCheckerApiKeys.value = data
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .filter((k: any) => k.is_active)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .map((k: any) => ({
         id: String(k.id),
         key_name: k.key_name,
@@ -452,7 +494,6 @@ watch(
 
 <template>
   <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-    <!-- File Access -->
     <div class="col-span-2 rounded-lg border border-gray-400 p-4">
       <label class="label"
         ><span class="label-text font-semibold">{{ t("course.problems.fileAccess") }}</span></label
@@ -483,7 +524,6 @@ watch(
       </div>
     </div>
 
-    <!-- Library Restrictions -->
     <div class="form-control col-span-2 rounded-lg border border-gray-400 p-4">
       <label class="label cursor-pointer justify-start gap-x-4">
         <span class="label-text">{{ t("course.problems.libraryRestrictionsGroup") }}</span>
@@ -495,13 +535,11 @@ watch(
       </label>
 
       <div v-if="problem.pipeline!.staticAnalysis!.libraryRestrictions!.enabled" class="mt-3 space-y-4">
-        <!-- ===== Library Restrictions (Imports/Headers/Functions) 統一開關 ===== -->
         <div class="rounded-lg border border-gray-400 p-3">
           <div class="mb-3 flex items-center justify-between">
             <h4 class="text font-medium">
               {{ t("course.problems.libraryRestrictionsGroup") || "Library Restrictions" }}
             </h4>
-            <!-- 統一滑動開關 -->
             <div class="mode-switcher">
               <div class="mode-switcher-container">
                 <div
@@ -526,22 +564,43 @@ watch(
             </div>
           </div>
 
-          <!-- 三個輸入區塊並排 -->
           <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
-            <!-- Imports -->
             <div class="relative rounded border border-gray-500 p-2">
               <div
                 v-if="!allowImports"
-                class="absolute inset-0 z-10 flex items-center justify-center rounded bg-gray-900/80 backdrop-blur-sm"
+                class="absolute inset-0 z-20 flex flex-col items-center justify-center rounded-lg border border-white/10 bg-gray-900/60 backdrop-blur-[2px]"
               >
-                <div class="px-2 text-center">
-                  <i-uil-lock-alt class="text-warning mb-1 text-2xl" />
-                  <p class="text-xs font-medium text-gray-300">
-                    {{ t("course.problems.restrictionDisabled") }}
+                <div class="flex flex-col items-center p-4 text-center">
+                  <div
+                    class="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-yellow-500/20 to-orange-500/20 ring-1 ring-white/20"
+                  >
+                    <i-uil-lock-alt class="text-2xl text-yellow-400" />
+                  </div>
+                  <h6 class="mb-1 text-sm font-bold tracking-wide text-white">Access Locked</h6>
+                  <p class="px-2 text-xs leading-relaxed text-gray-300">
+                    {{ t("course.problems.enablePythonHint") || "Enable Python Language to unlock imports." }}
                   </p>
                 </div>
               </div>
-              <h5 class="mb-2 text-sm font-medium">{{ t("course.problems.importsRestrictions") }}</h5>
+
+              <div class="mb-2 flex items-center justify-between">
+                <h5 class="text-sm font-medium">{{ t("course.problems.importsRestrictions") }}</h5>
+                <div class="flex gap-1" v-if="allowImports">
+                  <button
+                    class="btn btn-xs btn-ghost h-5 min-h-0 px-1 text-[10px]"
+                    @click="selectAllItems('imports', libraryMode)"
+                  >
+                    All
+                  </button>
+                  <button
+                    class="btn btn-xs btn-ghost text-error h-5 min-h-0 px-1 text-[10px]"
+                    @click="clearAllItems('imports', libraryMode)"
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
+
               <div v-if="allowImports" class="flex flex-wrap gap-1">
                 <button
                   v-for="opt in libraryOptions.imports"
@@ -553,6 +612,13 @@ watch(
                         ? 'btn-info'
                         : 'btn-error'
                       : ''
+                  "
+                  :disabled="
+                    !problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.imports.includes(
+                      opt,
+                    ) &&
+                    problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.imports.length >=
+                      MAX_ITEMS_LIMIT
                   "
                   @click="
                     toggleItem(
@@ -566,27 +632,59 @@ watch(
               </div>
               <div v-if="allowImports" class="mt-2">
                 <MultiStringInput
-                  v-model="problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.imports"
-                  :placeholder="t('course.problems.placeholderImport')"
+                  :model-value="problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.imports"
+                  @update:model-value="(val: string[]) => handleManualUpdate('imports', libraryMode, val)"
+                  :placeholder="
+                    problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.imports.length >=
+                    MAX_ITEMS_LIMIT
+                      ? t('course.problems.limitReached') || 'Limit Reached'
+                      : t('course.problems.placeholderImport')
+                  "
                   :badge-class="libraryMode === 'whitelist' ? 'badge-info' : 'badge-error'"
+                  :disabled="
+                    problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.imports.length >=
+                    MAX_ITEMS_LIMIT
+                  "
                 />
               </div>
             </div>
 
-            <!-- Headers -->
             <div class="relative rounded border border-gray-500 p-2">
               <div
                 v-if="!allowHeaders"
-                class="absolute inset-0 z-10 flex items-center justify-center rounded bg-gray-900/80 backdrop-blur-sm"
+                class="absolute inset-0 z-20 flex flex-col items-center justify-center rounded-lg border border-white/10 bg-gray-900/60 backdrop-blur-[2px]"
               >
-                <div class="px-2 text-center">
-                  <i-uil-lock-alt class="text-warning mb-1 text-2xl" />
-                  <p class="text-xs font-medium text-gray-300">
-                    {{ t("course.problem.headersRestrictionDisabled") }}
+                <div class="flex flex-col items-center p-4 text-center">
+                  <div
+                    class="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-yellow-500/20 to-orange-500/20 ring-1 ring-white/20"
+                  >
+                    <i-uil-lock-alt class="text-2xl text-yellow-400" />
+                  </div>
+                  <h6 class="mb-1 text-sm font-bold tracking-wide text-white">Access Locked</h6>
+                  <p class="px-2 text-xs leading-relaxed text-gray-300">
+                    {{ t("course.problems.enableCppHint") || "Enable C/C++ Language to unlock headers." }}
                   </p>
                 </div>
               </div>
-              <h5 class="mb-2 text-sm font-medium">{{ t("course.problems.headersRestrictions") }}</h5>
+
+              <div class="mb-2 flex items-center justify-between">
+                <h5 class="text-sm font-medium">{{ t("course.problems.headersRestrictions") }}</h5>
+                <div class="flex gap-1" v-if="allowHeaders">
+                  <button
+                    class="btn btn-xs btn-ghost h-5 min-h-0 px-1 text-[10px]"
+                    @click="selectAllItems('headers', libraryMode)"
+                  >
+                    All
+                  </button>
+                  <button
+                    class="btn btn-xs btn-ghost text-error h-5 min-h-0 px-1 text-[10px]"
+                    @click="clearAllItems('headers', libraryMode)"
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
+
               <div v-if="allowHeaders" class="flex flex-wrap gap-1">
                 <button
                   v-for="opt in libraryOptions.headers"
@@ -598,6 +696,13 @@ watch(
                         ? 'btn-info'
                         : 'btn-error'
                       : ''
+                  "
+                  :disabled="
+                    !problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.headers.includes(
+                      opt,
+                    ) &&
+                    problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.headers.length >=
+                      MAX_ITEMS_LIMIT
                   "
                   @click="
                     toggleItem(
@@ -611,16 +716,42 @@ watch(
               </div>
               <div v-if="allowHeaders" class="mt-2">
                 <MultiStringInput
-                  v-model="problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.headers"
-                  :placeholder="t('course.problems.placeholderHeader')"
+                  :model-value="problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.headers"
+                  @update:model-value="(val: string[]) => handleManualUpdate('headers', libraryMode, val)"
+                  :placeholder="
+                    problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.headers.length >=
+                    MAX_ITEMS_LIMIT
+                      ? t('course.problems.limitReached') || 'Limit Reached'
+                      : t('course.problems.placeholderHeader')
+                  "
                   :badge-class="libraryMode === 'whitelist' ? 'badge-info' : 'badge-error'"
+                  :disabled="
+                    problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.headers.length >=
+                    MAX_ITEMS_LIMIT
+                  "
                 />
               </div>
             </div>
 
-            <!-- Functions -->
-            <div class="rounded border border-gray-500 p-2">
-              <h5 class="mb-2 text-sm font-medium">{{ t("course.problems.functionsRestrictions") }}</h5>
+            <div class="relative rounded border border-gray-500 p-2">
+              <div class="mb-2 flex items-center justify-between">
+                <h5 class="text-sm font-medium">{{ t("course.problems.functionsRestrictions") }}</h5>
+                <div class="flex gap-1">
+                  <button
+                    class="btn btn-xs btn-ghost h-5 min-h-0 px-1 text-[10px]"
+                    @click="selectAllItems('functions', libraryMode)"
+                  >
+                    All
+                  </button>
+                  <button
+                    class="btn btn-xs btn-ghost text-error h-5 min-h-0 px-1 text-[10px]"
+                    @click="clearAllItems('functions', libraryMode)"
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
+
               <div class="flex flex-wrap gap-1">
                 <button
                   v-for="opt in libraryOptions.functions"
@@ -635,6 +766,13 @@ watch(
                         : 'btn-error'
                       : ''
                   "
+                  :disabled="
+                    !problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.functions.includes(
+                      opt,
+                    ) &&
+                    problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.functions.length >=
+                      MAX_ITEMS_LIMIT
+                  "
                   @click="
                     toggleItem(
                       problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.functions,
@@ -647,20 +785,30 @@ watch(
               </div>
               <div class="mt-2">
                 <MultiStringInput
-                  v-model="problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.functions"
-                  :placeholder="t('course.problems.placeholderFunction')"
+                  :model-value="
+                    problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.functions
+                  "
+                  @update:model-value="(val: string[]) => handleManualUpdate('functions', libraryMode, val)"
+                  :placeholder="
+                    problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.functions.length >=
+                    MAX_ITEMS_LIMIT
+                      ? t('course.problems.limitReached') || 'Limit Reached'
+                      : t('course.problems.placeholderFunction')
+                  "
                   :badge-class="libraryMode === 'whitelist' ? 'badge-info' : 'badge-error'"
+                  :disabled="
+                    problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.functions.length >=
+                    MAX_ITEMS_LIMIT
+                  "
                 />
               </div>
             </div>
           </div>
         </div>
 
-        <!-- ===== Syntax Restrictions 獨立開關 ===== -->
         <div class="rounded-lg border border-gray-400 p-3">
           <div class="mb-3 flex items-center justify-between">
             <h4 class="text font-medium">{{ t("course.problems.syntaxRestrictions") }}</h4>
-            <!-- 滑動開關 -->
             <div class="mode-switcher">
               <div class="mode-switcher-container">
                 <div
@@ -697,6 +845,11 @@ watch(
                     : 'btn-error'
                   : ''
               "
+              :disabled="
+                !problem.pipeline!.staticAnalysis!.libraryRestrictions![syntaxMode]!.syntax.includes(opt) &&
+                problem.pipeline!.staticAnalysis!.libraryRestrictions![syntaxMode]!.syntax.length >=
+                  MAX_ITEMS_LIMIT
+              "
               @click="
                 toggleItem(problem.pipeline!.staticAnalysis!.libraryRestrictions![syntaxMode]!.syntax, opt)
               "
@@ -707,23 +860,31 @@ watch(
 
           <div class="mt-2">
             <MultiStringInput
-              v-model="problem.pipeline!.staticAnalysis!.libraryRestrictions![syntaxMode]!.syntax"
-              :placeholder="t('course.problems.placeholderSyntax')"
+              :model-value="problem.pipeline!.staticAnalysis!.libraryRestrictions![syntaxMode]!.syntax"
+              @update:model-value="(val: string[]) => handleManualUpdate('syntax', syntaxMode, val)"
+              :placeholder="
+                problem.pipeline!.staticAnalysis!.libraryRestrictions![syntaxMode]!.syntax.length >=
+                MAX_ITEMS_LIMIT
+                  ? t('course.problems.limitReached') || 'Limit Reached'
+                  : t('course.problems.placeholderSyntax')
+              "
               :badge-class="syntaxMode === 'whitelist' ? 'badge-info' : 'badge-error'"
+              :disabled="
+                problem.pipeline!.staticAnalysis!.libraryRestrictions![syntaxMode]!.syntax.length >=
+                MAX_ITEMS_LIMIT
+              "
             />
           </div>
         </div>
       </div>
     </div>
 
-    <!-- === Execution mode (with all mode-linked fields) === -->
     <div class="form-control col-span-1 md:col-span-2">
       <div class="rounded-lg border border-gray-400 p-4">
         <label class="label mb-2">
           <span class="label-text">{{ t("course.problems.executionMode") }}</span>
         </label>
 
-        <!-- radio options -->
         <div class="mb-4 flex flex-wrap gap-6">
           <label class="label cursor-pointer gap-2">
             <input
@@ -754,14 +915,10 @@ watch(
           </label>
         </div>
 
-        <!-- General mode fields -->
-
-        <!-- functionOnly fields -->
         <div
           v-if="problem.pipeline!.executionMode === 'functionOnly'"
           class="rounded-lg border border-gray-400 p-4"
         >
-          <!-- makefile.zip -->
           <div class="form-control">
             <div class="flex flex-wrap items-center gap-4">
               <label class="label mb-0 cursor-pointer justify-start gap-x-2">
@@ -813,15 +970,12 @@ watch(
           </div>
         </div>
 
-        <!-- interactive fields -->
         <div
           v-if="problem.pipeline!.executionMode === 'interactive'"
           class="rounded-lg border border-gray-400 p-4"
         >
-          <!-- Teacher first & Teacher_file -->
           <div class="form-control">
             <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
-              <!-- 左：Teacher first -->
               <label class="label mb-0 cursor-pointer justify-start gap-x-2">
                 <span class="label-text flex items-center gap-1">{{
                   t("course.problems.ineractiveTeacherFirst")
@@ -829,7 +983,6 @@ watch(
                 <input type="checkbox" class="toggle toggle-sm" v-model="problem.pipeline!.teacherFirst" />
               </label>
 
-              <!-- 右：Teacher_Code -->
               <div class="flex items-center gap-x-2">
                 <span class="text-sm opacity-80">{{
                   t("course.problems.interactiveUploadTeacherCode")
@@ -885,7 +1038,6 @@ watch(
       </div>
     </div>
 
-    <!-- Custom checker (shared) -->
     <div class="form-control col-span-1 md:col-span-2">
       <div class="rounded-lg border border-gray-400 p-4">
         <div class="flex items-center gap-4">
@@ -958,7 +1110,6 @@ watch(
             }}</span>
           </label>
 
-          <!-- AI Checker Sub-Options -->
           <div class="bg-base-200/50 mt-4 rounded-lg border border-gray-500 p-4">
             <div class="flex items-center gap-4">
               <label class="label cursor-pointer justify-start gap-x-4">
@@ -979,9 +1130,7 @@ watch(
               </label>
             </div>
 
-            <!-- AI Checker Settings (only when enabled) -->
             <div v-if="problem.config?.aiChecker?.enabled" class="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
-              <!-- API Key Selector -->
               <div class="form-control">
                 <label class="label">
                   <span class="label-text">{{ t("course.problems.aiCheckerApiKey") }}</span>
@@ -1000,7 +1149,6 @@ watch(
                 </label>
               </div>
 
-              <!-- Model Selector (hardcoded like AI TA) -->
               <div class="form-control">
                 <label class="label">
                   <span class="label-text">{{ t("course.problems.aiCheckerModel") }}</span>
@@ -1024,7 +1172,6 @@ watch(
       </div>
     </div>
 
-    <!-- Custom Scoring Script -->
     <div class="form-control col-span-1 md:col-span-2">
       <div class="rounded-lg border border-gray-400 p-4">
         <div class="flex items-center gap-4">

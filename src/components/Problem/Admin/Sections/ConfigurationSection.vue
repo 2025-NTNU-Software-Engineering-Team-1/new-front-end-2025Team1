@@ -547,9 +547,7 @@ const networkErrors = computed(() => {
     hasAsset("network_dockerfile");
 
   if (!hasIP && !hasURL && !hasSidecars && !hasDocker) {
-    errors.global.push(
-      t("course.problems.whenNetworkEnabled"),
-    );
+    errors.global.push(t("course.problems.whenNetworkEnabled"));
   }
 
   return errors;
@@ -1065,7 +1063,7 @@ onBeforeUnmount(() => {
             )
           "
         />
-        <span class="text-xs whitespace-nowrap opacity-70">{{ t("course.problems.maxZipSizeDefault") }}</span>
+        <span class="whitespace-nowrap text-xs opacity-70">{{ t("course.problems.maxZipSizeDefault") }}</span>
       </div>
     </div>
 
@@ -1125,7 +1123,7 @@ onBeforeUnmount(() => {
                   <transition name="fade">
                     <div
                       v-if="showSuggestionTooltip"
-                      class="key-suggestion-tooltip bg-base-100 absolute top-full left-6 z-50 mt-2 w-72 rounded-md border border-gray-400 p-3 shadow-xl"
+                      class="key-suggestion-tooltip bg-base-100 absolute left-6 top-full z-50 mt-2 w-72 rounded-md border border-gray-400 p-3 shadow-xl"
                     >
                       <div v-if="isFetchingSuggestion" class="flex items-center text-sm">
                         <ui-spinner class="mr-2" /> {{ t("course.problems.aiKeyFetchingSuggestion") }}
@@ -1196,10 +1194,12 @@ onBeforeUnmount(() => {
                         <span class="text-base-content group-hover:text-error truncate text-sm font-semibold">
                           {{ key.key_name }}
                         </span>
-                        <span v-if="key.is_active" class="badge badge-success badge-xs font-mono"
-                          >{{t("course.problems.active")}}</span
-                        >
-                        <span v-else class="badge badge-error badge-xs font-mono">{{t("course.problems.inactive")}}</span>
+                        <span v-if="key.is_active" class="badge badge-success badge-xs font-mono">{{
+                          t("course.problems.active")
+                        }}</span>
+                        <span v-else class="badge badge-error badge-xs font-mono">{{
+                          t("course.problems.inactive")
+                        }}</span>
                       </div>
                       <div class="mt-0.5 truncate text-xs text-gray-400">
                         {{ key.masked_value }} ({{ key.created_by }})
@@ -1255,7 +1255,7 @@ onBeforeUnmount(() => {
                     <span class="badge badge-info badge-sm">{{ apiKeys.active.length }}</span>
                   </div>
                   <span v-if="isDragging" class="text-info animate-pulse text-xs font-bold">
-                   {{t("course.problems.dropToActivate")}}
+                    {{ t("course.problems.dropToActivate") }}
                   </span>
                 </button>
 
@@ -1276,15 +1276,27 @@ onBeforeUnmount(() => {
                         v-model="selectedKeys"
                       />
                       <div class="flex-1">
-                        <div class="truncate text-sm font-semibold">{{ t("course.problems.keyNameLabel", { name: key.key_name }) }}</div>
+                        <div class="truncate text-sm font-semibold">
+                          {{ t("course.problems.keyNameLabel", { name: key.key_name }) }}
+                        </div>
                         <div class="mt-1 text-xs text-gray-400">
-                          {{ t("course.problems.creatorInfo", { name: key.created_by, value: key.masked_value }) }}
+                          {{
+                            t("course.problems.creatorInfo", {
+                              name: key.created_by,
+                              value: key.masked_value,
+                            })
+                          }}
                         </div>
                         <div class="mt-1 text-xs text-gray-400">
                           {{ t("course.problems.requestCount", { count: key.request_count }) }}
                         </div>
                         <div class="mt-1 text-xs text-gray-400">
-                          {{ t("course.problems.tokenDisplay", { input: key.input_token, output: key.output_token }) }}
+                          {{
+                            t("course.problems.tokenDisplay", {
+                              input: key.input_token,
+                              output: key.output_token,
+                            })
+                          }}
                         </div>
                       </div>
                     </label>
@@ -1320,7 +1332,7 @@ onBeforeUnmount(() => {
                     <span class="badge badge-error badge-sm">{{ apiKeys.inactive.length }}</span>
                   </div>
                   <span v-if="isDragging" class="text-error animate-pulse text-xs font-bold">
-                    {{t("course.problems.dropToDeactivate")}}
+                    {{ t("course.problems.dropToDeactivate") }}
                   </span>
                 </button>
 
@@ -1341,15 +1353,27 @@ onBeforeUnmount(() => {
                         v-model="selectedKeys"
                       />
                       <div class="flex-1">
-                        <div class="truncate text-sm font-semibold">{{ t("course.problems.keyNameLabel", { name: key.key_name }) }}</div>
+                        <div class="truncate text-sm font-semibold">
+                          {{ t("course.problems.keyNameLabel", { name: key.key_name }) }}
+                        </div>
                         <div class="mt-1 text-xs text-gray-400">
-                          {{ t("course.problems.creatorInfo", { name: key.created_by, value: key.masked_value }) }}
+                          {{
+                            t("course.problems.creatorInfo", {
+                              name: key.created_by,
+                              value: key.masked_value,
+                            })
+                          }}
                         </div>
                         <div class="mt-1 text-xs text-gray-400">
                           {{ t("course.problems.requestCount", { count: key.request_count }) }}
                         </div>
                         <div class="mt-1 text-xs text-gray-400">
-                          {{ t("course.problems.tokenDisplay", { input: key.input_token, output: key.output_token }) }}
+                          {{
+                            t("course.problems.tokenDisplay", {
+                              input: key.input_token,
+                              output: key.output_token,
+                            })
+                          }}
                         </div>
                       </div>
                     </label>
@@ -1428,7 +1452,9 @@ onBeforeUnmount(() => {
                 v-if="hasAsset('public_testdata') || problem.assets?.trialModePublicTestDataZip"
                 class="flex items-center gap-2"
               >
-                <span class="badge badge-outline badge-success text-xs">{{ t("course.problems.uploaded") }}</span>
+                <span class="badge badge-outline badge-success text-xs">{{
+                  t("course.problems.uploaded")
+                }}</span>
                 <a
                   v-if="hasAsset('public_testdata')"
                   :href="assetDownloadUrl('public_testdata') || '#'"

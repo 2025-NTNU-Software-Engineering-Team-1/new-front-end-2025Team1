@@ -80,6 +80,54 @@ const currentTaskLabel = computed(() => {
 });
 
 // ==========================================
+// Input Validation Helper
+// ==========================================
+
+/**
+ * Validates and updates task fields based on specific constraints:
+ * - taskScore: Max 100
+ * - memoryLimit: Max 10 digits (Length check)
+ * - timeLimit: Max value 180000ms
+ */
+const validateTaskInput = (index: number, field: string, target: HTMLInputElement) => {
+  let val = target.value;
+
+  // 1. Validate Score: Max 100
+  if (field === "taskScore") {
+    if (Number(val) > 999) {
+      val = "999";
+    }
+  }
+
+  // 2. Validate Memory: Max length of 10 digits
+  if (field === "memoryLimit") {
+    if (val.length > 10) {
+      val = val.slice(0, 10);
+    }
+  }
+
+  // 3. Validate Time: Max value 180000
+  if (field === "timeLimit") {
+    if (Number(val) > 180000) {
+      val = "180000";
+    }
+  }
+
+  // Ensure positive numbers only (optional check to prevent negative inputs)
+  if (Number(val) < 0) {
+    val = "0";
+  }
+
+  // Update the input value visually if it was modified by our logic
+  if (target.value !== val) {
+    target.value = val;
+  }
+
+  // Update the reactive data model
+  (problem.value.testCaseInfo.tasks[index] as any)[field] = Number(val);
+};
+
+// ==========================================
 // Watcher: Zip File Processing
 // ==========================================
 watch(
@@ -189,15 +237,12 @@ watch(
       </div>
     </label>
 
-    <!-- Test Data Upload Row -->
     <div class="mt-2 overflow-hidden rounded-lg">
       <div class="grid grid-cols-5">
-        <!-- 左側灰底區 -->
         <div class="bg-base-300 col-span-1 flex items-center justify-center text-sm">
           {{ t("course.problems.zipFile") }}
         </div>
 
-        <!-- 右側白底上傳區 -->
         <div
           class="textarea-bordered bg-base-100 col-span-4 flex flex-col p-4"
           :class="[isDrag && 'border-accent border']"
@@ -205,10 +250,8 @@ watch(
           @dragover.prevent="isDrag = true"
           @dragleave="isDrag = false"
         >
-          <!-- 永� 在上方顯示 -->
           <div class="mb-2 text-sm opacity-70">{{ t("course.problems.dropFileHere") }}</div>
 
-          <!-- 選擇或顯示檔案 -->
           <template v-if="!problem.assets!.testdataZip">
             <input
               type="file"
@@ -238,14 +281,12 @@ watch(
       </div>
     </div>
 
-    <!-- 驗證錯誤訊息 -->
     <label
       class="label text-error"
       v-show="v$.testCaseInfo.tasks.$error"
       v-text="v$.testCaseInfo.tasks.$errors[0]?.$message"
     />
 
-    <!-- Tasks 表� � -->
     <template v-for="(task, i) in problem.testCaseInfo.tasks" :key="i">
       <div class="mt-2 grid grid-cols-1 gap-3 md:grid-cols-4">
         <div class="form-control">
@@ -263,9 +304,7 @@ watch(
             type="number"
             class="input-bordered input"
             :value="task.taskScore"
-            @input="
-              problem.testCaseInfo.tasks[i].taskScore = Number(($event.target as HTMLInputElement).value)
-            "
+            @input="validateTaskInput(i, 'taskScore', $event.target as HTMLInputElement)"
           />
         </div>
 
@@ -277,9 +316,7 @@ watch(
             type="number"
             class="input-bordered input"
             :value="task.memoryLimit"
-            @input="
-              problem.testCaseInfo.tasks[i].memoryLimit = Number(($event.target as HTMLInputElement).value)
-            "
+            @input="validateTaskInput(i, 'memoryLimit', $event.target as HTMLInputElement)"
           />
         </div>
 
@@ -291,9 +328,7 @@ watch(
             type="number"
             class="input-bordered input"
             :value="task.timeLimit"
-            @input="
-              problem.testCaseInfo.tasks[i].timeLimit = Number(($event.target as HTMLInputElement).value)
-            "
+            @input="validateTaskInput(i, 'timeLimit', $event.target as HTMLInputElement)"
           />
         </div>
       </div>

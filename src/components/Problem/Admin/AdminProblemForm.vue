@@ -6,6 +6,8 @@ import { required, maxLength, between, helpers } from "@vuelidate/validators";
 import { containsInvisible } from "@/utils/validators";
 import { useI18n } from "vue-i18n";
 
+// hello
+
 // [NOTE] Assuming icons are imported globally or via unplugin-icons.
 import DescriptionSection from "./Sections/DescriptionSection.vue";
 import ConfigurationSection from "./Sections/ConfigurationSection.vue";
@@ -443,7 +445,7 @@ const rules = {
         },
         () => {
           const file = problem.value.assets?.teacherFile;
-          if (!file) return true; 
+          if (!file) return true;
           if (problem.value.pipeline?.executionMode !== "interactive") return true;
           const exts = getAllowedFileExtensions(problem.value.allowedLanguage);
           const fileName = file.name.toLowerCase();
@@ -576,11 +578,14 @@ async function submit() {
 
 <template>
   <Transition name="slide-fade">
-    <div v-if="errorMsg" class="mb-4 flex items-start gap-3 rounded-lg border border-error/20 bg-error/10 p-4 shadow-sm">
-      <div class="mt-0.5 text-error">
+    <div
+      v-if="errorMsg"
+      class="border-error/20 bg-error/10 mb-4 flex items-start gap-3 rounded-lg border p-4 shadow-sm"
+    >
+      <div class="text-error mt-0.5">
         <i-uil-times-circle class="h-5 w-5" />
       </div>
-      <div class="text-sm font-medium text-error-content/90">
+      <div class="text-error-content/90 text-sm font-medium">
         {{ errorMsg }}
       </div>
     </div>
@@ -596,7 +601,9 @@ async function submit() {
         type="text"
         :class="[
           'input input-bordered w-full max-w-xs transition-colors',
-          v$.problemName.$error ? 'input-error focus:border-error focus:ring-1 focus:ring-error' : 'focus:border-primary focus:ring-1 focus:ring-primary',
+          v$.problemName.$error
+            ? 'input-error focus:border-error focus:ring-error focus:ring-1'
+            : 'focus:border-primary focus:ring-primary focus:ring-1',
         ]"
         :value="problem.problemName"
         @input="update('problemName', ($event.target as HTMLInputElement).value)"
@@ -604,7 +611,7 @@ async function submit() {
 
       <div class="min-h-[20px]">
         <Transition name="fade">
-          <div v-if="v$.problemName.$error" class="mt-1 flex items-center gap-1.5 text-xs text-error">
+          <div v-if="v$.problemName.$error" class="text-error mt-1 flex items-center gap-1.5 text-xs">
             <i-uil-exclamation-circle class="h-3.5 w-3.5 flex-shrink-0" />
             <span class="font-medium">{{ v$.problemName.$errors[0]?.$message }}</span>
           </div>
@@ -626,11 +633,9 @@ async function submit() {
   </div>
 
   <div ref="sectionRefs.desc" class="mt-4 flex flex-col gap-3">
-    <div class="collapse-arrow collapse rounded-box bg-base-200 shadow-sm border border-base-300">
+    <div class="collapse-arrow rounded-box bg-base-200 border-base-300 collapse border shadow-sm">
       <input type="checkbox" class="peer" v-model="openPanels.desc" />
-      <div
-        class="collapse-title flex min-h-0 items-center py-3 text-base font-semibold text-base-content"
-      >
+      <div class="collapse-title text-base-content flex min-h-0 items-center py-3 text-base font-semibold">
         {{ t("course.problems.setDescription") }}
       </div>
       <div class="collapse-content peer-checked:pt-2">
@@ -638,11 +643,12 @@ async function submit() {
       </div>
     </div>
 
-    <div ref="sectionRefs.config" class="collapse-arrow collapse rounded-box bg-base-200 shadow-sm border border-base-300">
+    <div
+      ref="sectionRefs.config"
+      class="collapse-arrow rounded-box bg-base-200 border-base-300 collapse border shadow-sm"
+    >
       <input type="checkbox" class="peer" v-model="openPanels.config" />
-      <div
-        class="collapse-title flex min-h-0 items-center py-3 text-base font-semibold text-base-content"
-      >
+      <div class="collapse-title text-base-content flex min-h-0 items-center py-3 text-base font-semibold">
         {{ t("course.problems.setConfiguration") }}
       </div>
       <div class="collapse-content peer-checked:pt-2">
@@ -650,11 +656,12 @@ async function submit() {
       </div>
     </div>
 
-    <div ref="sectionRefs.pipeline" class="collapse-arrow collapse rounded-box bg-base-200 shadow-sm border border-base-300">
+    <div
+      ref="sectionRefs.pipeline"
+      class="collapse-arrow rounded-box bg-base-200 border-base-300 collapse border shadow-sm"
+    >
       <input type="checkbox" class="peer" v-model="openPanels.pipeline" />
-      <div
-        class="collapse-title flex min-h-0 items-center py-3 text-base font-semibold text-base-content"
-      >
+      <div class="collapse-title text-base-content flex min-h-0 items-center py-3 text-base font-semibold">
         {{ t("course.problems.setPipelines") }}
       </div>
       <div class="collapse-content peer-checked:pt-2">
@@ -662,11 +669,12 @@ async function submit() {
       </div>
     </div>
 
-    <div ref="sectionRefs.testdata" class="collapse-arrow collapse rounded-box bg-base-200 shadow-sm border border-base-300">
+    <div
+      ref="sectionRefs.testdata"
+      class="collapse-arrow rounded-box bg-base-200 border-base-300 collapse border shadow-sm"
+    >
       <input type="checkbox" class="peer" v-model="openPanels.testdata" />
-      <div
-        class="collapse-title flex min-h-0 items-center py-3 text-base font-semibold text-base-content"
-      >
+      <div class="collapse-title text-base-content flex min-h-0 items-center py-3 text-base font-semibold">
         {{ t("course.problems.setTestData") }}
       </div>
       <div class="collapse-content peer-checked:pt-2">
@@ -674,11 +682,12 @@ async function submit() {
       </div>
     </div>
 
-    <div ref="sectionRefs.resdata" class="collapse-arrow collapse rounded-box bg-base-200 shadow-sm border border-base-300">
+    <div
+      ref="sectionRefs.resdata"
+      class="collapse-arrow rounded-box bg-base-200 border-base-300 collapse border shadow-sm"
+    >
       <input type="checkbox" class="peer" v-model="openPanels.resdata" />
-      <div
-        class="collapse-title flex min-h-0 items-center py-3 text-base font-semibold text-base-content"
-      >
+      <div class="collapse-title text-base-content flex min-h-0 items-center py-3 text-base font-semibold">
         {{ t("course.problems.setResourceData") }}
       </div>
       <div class="collapse-content peer-checked:pt-2">
@@ -691,37 +700,40 @@ async function submit() {
   </div>
 
   <Transition name="slide-up">
-    <div v-if="v$.$error" class="mt-6 rounded-xl border-l-4 border-l-error border-y border-r border-y-base-300 border-r-base-300 bg-base-100 p-5 shadow-md">
+    <div
+      v-if="v$.$error"
+      class="border-l-error border-y-base-300 border-r-base-300 bg-base-100 mt-6 rounded-xl border-y border-l-4 border-r p-5 shadow-md"
+    >
       <div class="flex items-start gap-4">
-        <div class="rounded-full bg-error/10 p-2 text-error">
-           <i-uil-exclamation-triangle class="h-6 w-6" />
+        <div class="bg-error/10 text-error rounded-full p-2">
+          <i-uil-exclamation-triangle class="h-6 w-6" />
         </div>
         <div class="flex-1">
-          <h3 class="text-lg font-bold text-base-content">
+          <h3 class="text-base-content text-lg font-bold">
             {{ t("course.problems.submissionBlocked") }}
           </h3>
-          <p class="text-sm text-base-content/70">
-            Please resolve the following issues before submitting:
-          </p>
+          <p class="text-base-content/70 text-sm">Please resolve the following issues before submitting:</p>
 
           <div class="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
             <button
               v-for="(e, idx) in errorSummary"
               :key="idx"
               type="button"
-              class="group flex items-start justify-between rounded-lg border border-transparent bg-base-200 px-3 py-2 text-left text-sm transition-all hover:border-error/30 hover:bg-error/5 hover:shadow-sm"
+              class="bg-base-200 hover:border-error/30 hover:bg-error/5 group flex items-start justify-between rounded-lg border border-transparent px-3 py-2 text-left text-sm transition-all hover:shadow-sm"
               @click="openAndScroll(e.panel)"
             >
-              <div class="flex items-start gap-2 w-full">
-                 <span class="badge badge-error badge-xs badge-outline shrink-0 mt-0.5">
+              <div class="flex w-full items-start gap-2">
+                <span class="badge badge-error badge-xs badge-outline mt-0.5 shrink-0">
                   {{ e.path }}
                 </span>
-                <span class="break-words font-medium text-base-content group-hover:text-error">
+                <span class="text-base-content group-hover:text-error break-words font-medium">
                   {{ e.message }}
                 </span>
               </div>
-              
-              <i-uil-arrow-right class="ml-2 mt-0.5 h-4 w-4 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 text-error" />
+
+              <i-uil-arrow-right
+                class="text-error ml-2 mt-0.5 h-4 w-4 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+              />
             </button>
           </div>
         </div>
@@ -729,12 +741,15 @@ async function submit() {
     </div>
   </Transition>
 
-  <div class="mt-8 flex justify-end border-t border-base-200 pt-6">
-    <button 
-      :class="['btn btn-success gap-2 px-6 font-bold text-white shadow-md transition-transform active:scale-95', isLoading && 'loading']" 
+  <div class="border-base-200 mt-8 flex justify-end border-t pt-6">
+    <button
+      :class="[
+        'btn btn-success gap-2 px-6 font-bold text-white shadow-md transition-transform active:scale-95',
+        isLoading && 'loading',
+      ]"
       @click="submit"
     >
-      <i-uil-file-upload-alt class="h-5 w-5" /> 
+      <i-uil-file-upload-alt class="h-5 w-5" />
       {{ t("course.members.submit") }}
     </button>
   </div>

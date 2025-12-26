@@ -448,7 +448,7 @@ watch(
                 <!-- Selected badge -->
                 <div
                   v-if="selectedSkinId === skin.skin_id"
-                  class="absolute top-2 right-2 rounded-full bg-purple-500 p-1"
+                  class="absolute right-2 top-2 rounded-full bg-purple-500 p-1"
                 >
                   <svg class="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
@@ -463,7 +463,7 @@ watch(
                 <!-- Delete button (only for own skins) -->
                 <button
                   v-if="canEditSkin(skin)"
-                  class="absolute top-2 left-2 hidden rounded-full bg-red-500 p-1 text-white group-hover:block hover:bg-red-600"
+                  class="absolute left-2 top-2 hidden rounded-full bg-red-500 p-1 text-white hover:bg-red-600 group-hover:block"
                   @click.stop="deleteSkin(skin.skin_id)"
                 >
                   <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -479,7 +479,7 @@ watch(
                 <!-- Edit button (only for own skins) -->
                 <button
                   v-if="canEditSkin(skin)"
-                  class="absolute top-2 left-9 hidden rounded-full bg-blue-500 p-1 text-white group-hover:block hover:bg-blue-600"
+                  class="absolute left-9 top-2 hidden rounded-full bg-blue-500 p-1 text-white hover:bg-blue-600 group-hover:block"
                   @click.stop="openEditSkin(skin)"
                 >
                   <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -544,7 +544,7 @@ watch(
                       <img :src="thumbnailPreview" alt="Thumbnail preview" class="max-h-20 rounded" />
                       <button
                         type="button"
-                        class="absolute -top-2 -right-2 rounded-full bg-red-500 p-1 text-white hover:bg-red-600"
+                        class="absolute -right-2 -top-2 rounded-full bg-red-500 p-1 text-white hover:bg-red-600"
                         @click="clearThumbnail"
                       >
                         <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

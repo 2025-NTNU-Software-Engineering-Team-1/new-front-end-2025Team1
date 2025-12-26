@@ -229,22 +229,37 @@ async function downloadTestcases() {
           <div class="rounded border p-4">
             <h4 class="mb-2 font-semibold">{{ t("course.problem.test.testcaseModal.files") }}</h4>
             <div class="flex flex-col gap-2">
-              <label v-for="file in testcaseFiles" :key="file.name" class="flex items-center gap-2">
-                <input type="checkbox" class="checkbox" v-model="selectedTestcases" :value="file.name" />
-                <span>{{ file.name }}</span>
-                <button class="btn btn-ghost btn-xs" @click="previewTestcase(file)">
-                  <i-uil-eye class="h-4 w-4" />
-                </button>
-                <button class="btn btn-ghost btn-xs text-error" @click="deleteTestcase(file)">
-                  <i-uil-trash-alt class="h-4 w-4" />
-                </button>
+              <label
+                v-for="file in testcaseFiles"
+                :key="file.name"
+                class="hover:bg-base-200 flex w-full cursor-pointer items-center gap-2 rounded p-1"
+              >
+                <input
+                  type="checkbox"
+                  class="checkbox shrink-0"
+                  v-model="selectedTestcases"
+                  :value="file.name"
+                />
+
+                <span class="min-w-0 flex-1 truncate" :title="file.name">
+                  {{ file.name }}
+                </span>
+
+                <div class="flex shrink-0 items-center gap-1">
+                  <button class="btn btn-ghost btn-xs" @click.prevent="previewTestcase(file)">
+                    <i-uil-eye class="h-4 w-4" />
+                  </button>
+                  <button class="btn btn-ghost btn-xs text-error" @click.prevent="deleteTestcase(file)">
+                    <i-uil-trash-alt class="h-4 w-4" />
+                  </button>
+                </div>
               </label>
             </div>
           </div>
 
           <div class="rounded border p-4">
             <h4 class="mb-2 font-semibold">{{ t("course.problem.test.testcaseModal.preview") }}</h4>
-            <div class="bg-base-200 h-64 max-w-full overflow-auto rounded border p-2 whitespace-pre-wrap">
+            <div class="bg-base-200 h-64 max-w-full overflow-auto whitespace-pre-wrap rounded border p-2">
               <template v-if="selectedTestcaseContent.includes('blob:')">
                 <div v-for="(line, idx) in selectedTestcaseContent.split('\n')" :key="idx">
                   <template v-if="line.startsWith('blob:')">

@@ -218,7 +218,7 @@ onMounted(async () => {
                   @keyup.enter="handleSearch"
                 />
                 <button
-                  class="absolute top-1/2 right-2 -translate-y-1/2 transform rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  class="absolute right-2 top-1/2 -translate-y-1/2 transform rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-700"
                   @click="handleSearch"
                 >
                   <svg

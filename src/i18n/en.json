@@ -187,7 +187,11 @@
         "testcaseType": {
           "label": "Test Data Type",
           "public": "Public Test Cases",
-          "custom": "Custom Test Cases"
+          "custom": "Custom Test Cases",
+          "viewPublic": "View Public",
+          "viewCustom": "View Custom",
+          "viewPublicTitle": "Public Test Cases Preview",
+          "viewCustomTitle": "Custom Test Cases Preview"
         }
       },
       "stats": {
@@ -814,6 +818,8 @@
       }
     },
     "courseSideBar": {
+      "general": "General",
+      "admin": "Management",
       "ann": "Announcements",
       "hw": "Homeworks",
       "problems": "Problems",
@@ -923,6 +929,9 @@
       "editTitle": "Edit Skin",
       "save": "Save"
     }
+  },
+  "common": {
+    "close": "Close"
   },
   "errorCode": {
     "ERR001": "Login Failed: Your username/email or password is incorrect.",

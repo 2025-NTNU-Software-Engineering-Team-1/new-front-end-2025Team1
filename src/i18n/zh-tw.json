@@ -172,7 +172,11 @@
         "testcaseType": {
           "label": "測資類型",
           "public": "公開測資",
-          "custom": "自訂測資"
+          "custom": "自訂測資",
+          "viewPublic": "查看公開",
+          "viewCustom": "查看自訂",
+          "viewPublicTitle": "公開測資預覽",
+          "viewCustomTitle": "自訂測資預覽"
         }
       },
       "stats": {
@@ -797,6 +801,8 @@
       }
     },
     "courseSideBar": {
+      "general": "一般",
+      "admin": "管理",
       "ann": "公告",
       "hw": "作業",
       "problems": "題目",
@@ -904,6 +910,9 @@
       "editTitle": "編輯皮膚",
       "save": "儲存"
     }
+  },
+  "common": {
+    "close": "關閉"
   },
   "errorCode": {
     "ERR001": "登入失敗：帳號或密碼錯誤。",

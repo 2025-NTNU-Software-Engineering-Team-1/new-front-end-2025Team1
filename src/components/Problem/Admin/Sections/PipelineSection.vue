@@ -1285,32 +1285,38 @@ watch(
                 <label class="label">
                   <span class="label-text">{{ t("course.problems.aiCheckerApiKey") }}</span>
                 </label>
-                <select
-                  class="select-bordered select select-sm"
-                  v-model="(problem.config as unknown as ExtendedProblemConfig).aiChecker!.apiKeyId"
-                >
-                  <option disabled :value="undefined">{{ t("course.problems.aiCheckerSelectKey") }}</option>
-                  <option v-for="key in aiCheckerApiKeys" :key="key.id" :value="key.id">
-                    {{ key.key_name }}
-                  </option>
-                </select>
+                <div class="dropdown dropdown-bottom w-full ">
+                  <div tabindex="0" role="button" class="select select-bordered select-sm flex items-center justify-between w-full bg-white">
+                    <span class="truncate">
+                      {{ aiCheckerApiKeys.find(k => k.id === (problem.config as any).aiChecker?.apiKeyId)?.key_name || t("course.problems.aiCheckerSelectKey") }}
+                    </span>
+                  </div>
+                  <ul tabindex="0" class="dropdown-content z-[100] menu p-2 shadow-lg bg-white rounded-box w-full border border-gray-300 mt-1 left-0">
+                    <li class="disabled px-4 py-2 text-xs opacity-50">{{ t("course.problems.aiCheckerSelectKey") }}</li>
+                    <li v-for="key in aiCheckerApiKeys" :key="key.id">
+                      <a class="text-gray-700 active:bg-gray-100" @click="(problem.config as any).aiChecker!.apiKeyId = key.id">{{ key.key_name }}</a>
+                    </li>
+                  </ul>
+                </div>
                 <label v-if="isFetchingAiKeys" class="label">
                   <span class="label-text-alt opacity-70">{{ t("course.problems.aiKeyLoadingKeys") }}</span>
                 </label>
               </div>
 
-              <div class="form-control">
+              <div class="form-control ">
                 <label class="label">
                   <span class="label-text">{{ t("course.problems.aiCheckerModel") }}</span>
                 </label>
-                <select
-                  class="select-bordered select select-sm"
-                  v-model="(problem.config as unknown as ExtendedProblemConfig).aiChecker!.model"
-                >
-                  <option value="gemini-2.5-flash-lite">gemini 2.5 flash lite</option>
-                  <option value="gemini-2.5-flash">gemini 2.5 flash</option>
-                  <option value="gemini-2.5-pro">gemini 2.5 pro</option>
-                </select>
+                <div class="dropdown dropdown-bottom w-full ">
+                  <div tabindex="0" role="button" class="select select-bordered select-sm flex items-center justify-between w-full bg-white">
+                      <span>{{ (problem.config as any).aiChecker?.model || 'Select Model' }}</span>
+                  </div>
+                  <ul tabindex="0" class="dropdown-content z-[100] menu p-2 shadow bg-white rounded-box w-full  mt-1 left-0">
+                    <li><a @click="(problem.config as any).aiChecker!.model = 'gemini-2.5-flash-lite'">gemini 2.5 flash lite</a></li>
+                    <li><a @click="(problem.config as any).aiChecker!.model = 'gemini-2.5-flash'">gemini 2.5 flash</a></li>
+                    <li><a @click="(problem.config as any).aiChecker!.model = 'gemini-2.5-pro'">gemini 2.5 pro</a></li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>

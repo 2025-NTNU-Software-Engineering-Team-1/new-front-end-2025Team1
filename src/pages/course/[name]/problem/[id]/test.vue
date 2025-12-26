@@ -358,7 +358,7 @@ async function submitCode() {
                     <label class="label cursor-pointer justify-start gap-3 py-1">
                       <input
                         type="radio"
-                        class="radio radio-primary radio-sm"
+                        class="radio radio-sm border-white checked:bg-white checked:border-white [--chkfg:black] transition-all"
                         :value="true"
                         v-model="useDefaultTestcases"
                       />
@@ -367,7 +367,7 @@ async function submitCode() {
                     <label class="label cursor-pointer justify-start gap-3 py-1">
                       <input
                         type="radio"
-                        class="radio radio-primary radio-sm"
+                        class="radio radio-sm border-white checked:bg-white checked:border-white [--chkfg:black] transition-all"
                         :value="false"
                         v-model="useDefaultTestcases"
                       />
@@ -450,11 +450,4 @@ async function submitCode() {
       </template>
     </data-status-wrapper>
   </div>
-
-  <!--改動介面-->
-  <!--card title 的class更改: 沿用舊noj-->
-  <!--解決submit按鈕彈跳視窗背景陰影問題-->
-  <!--取消test input textarea-->
-  <!--submit按鈕移動到右下-->
-  <!--語言框調短-->
 </template>

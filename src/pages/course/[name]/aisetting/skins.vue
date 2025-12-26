@@ -5,6 +5,9 @@ import api, { type VtuberSkinInfo } from "@/models/api";
 
 const { t } = useI18n();
 
+// CONSTANT: Maximum number of skins allowed
+const MAX_SKINS = 500;
+
 // =========================================
 // State Management
 // =========================================
@@ -55,6 +58,12 @@ const uploading = ref(false);
 // =========================================
 
 const openUpload = () => {
+  // CHECK: Check if the number of skins has reached the limit
+  if (skins.value.length >= MAX_SKINS) {
+    alert(`Maximum limit of ${MAX_SKINS} skins reached.`);
+    return;
+  }
+
   showUpload.value = true;
   // Reset form
   uploadName.value = "";
@@ -108,6 +117,12 @@ const onUploadThumbnailPaste = (e: ClipboardEvent) => {
 };
 
 const uploadSkin = async () => {
+  // CHECK: Double check limit before uploading
+  if (skins.value.length >= MAX_SKINS) {
+    uploadError.value = `Maximum limit of ${MAX_SKINS} skins reached.`;
+    return;
+  }
+
   if (!uploadFile.value) {
     uploadError.value = t("skinSelector.upload.errorFile");
     return;
@@ -150,7 +165,6 @@ const loadSkins = async () => {
   loading.value = true;
   error.value = null;
   try {
-    // Standard list call without limit param
     const res = await api.VtuberSkin.list();
     skins.value = Array.isArray(res.data) ? res.data : (res.data?.data ?? []);
   } catch (e) {
@@ -294,11 +308,17 @@ onMounted(() => {
   <div>
     <div class="mb-4 flex items-center justify-between">
       <h2 class="text-lg font-bold">{{ $t("admin.skins.title") }}</h2>
-      <button class="btn btn-primary btn-sm" @click="openUpload">
+
+      <button
+        class="btn btn-primary btn-sm"
+        :disabled="skins.length >= MAX_SKINS"
+        :title="skins.length >= MAX_SKINS ? `Limit of ${MAX_SKINS} skins reached` : ''"
+        @click="openUpload"
+      >
         <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
         </svg>
-        {{ $t("skinSelector.upload.button") }}
+        {{ skins.length >= MAX_SKINS ? `Limit Reached (${MAX_SKINS})` : $t("skinSelector.upload.button") }}
       </button>
     </div>
 
@@ -323,41 +343,18 @@ onMounted(() => {
         <tbody>
           <tr v-for="skin in skins" :key="skin.skin_id">
             <td>
-              <div class="flex items-center gap-2">
-                <div class="bg-base-200 h-10 w-10 overflow-hidden rounded-lg">
-                  <img
-                    v-if="skin.thumbnail_path"
-                    :src="skin.thumbnail_path"
-                    class="h-full w-full object-cover"
-                    alt=""
-                  />
-                  <span v-else class="flex h-full items-center justify-center text-lg">🎭</span>
-                </div>
-
-                <button
+              <div class="bg-base-200 h-10 w-10 overflow-hidden rounded-lg">
+                <img
                   v-if="skin.thumbnail_path"
-                  class="btn btn-sm btn-ghost btn-circle"
+                  :src="skin.thumbnail_path"
+                  class="h-full w-full cursor-pointer object-cover transition-opacity hover:opacity-80"
                   @click="openPreview(skin.thumbnail_path)"
-                  title="Preview"
-                >
-                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                    />
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                    />
-                  </svg>
-                </button>
+                  alt="Thumbnail"
+                  title="Click to preview"
+                />
+                <span v-else class="flex h-full items-center justify-center text-lg">🎭</span>
               </div>
             </td>
-
             <td class="font-medium">
               <div class="max-w-[150px] truncate">{{ skin.name }}</div>
             </td>

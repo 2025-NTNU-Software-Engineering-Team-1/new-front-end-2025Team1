@@ -1068,6 +1068,8 @@
     "switch": {
       "error": "換皮膚失敗"
     },
-    "clickToChange": "點來換外觀"
+    "clickToChange": "點來換外觀",
+    "voice": "語音 (Voice)",
+    "preview": "試聽"
   }
 }

@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref, nextTick, onBeforeUnmount, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { LAppDelegate } from "@/live2d/Framework/src/lappdelegate";
 import { setSkinConfig } from "@/live2d/Framework/src/lappdefine";
 import api from "@/models/api";
 import MarkdownRenderer from "./MarkdownRenderer.vue";
 import SkinSelector from "./SkinSelector.vue";
+import * as kokoroTTS from "@/utils/kokoroTTS";
 
 // ------- Props：從外層傳進來課程 / 題目 / 使用者資訊 -------
 const props = defineProps<{
@@ -14,6 +16,8 @@ const props = defineProps<{
   currentCode: string;
   username: string;
 }>();
+
+const { t } = useI18n();
 
 type ChatMessage = {
   id: number;
@@ -25,60 +29,58 @@ type ChatMessage = {
   prevExpressionId?: string | null;
 };
 
-// ====== TTS (Text-to-Speech) ======
+// ====== TTS (Text-to-Speech) - Kokoro TTS ======
 const speakingMsgId = ref<number | null>(null);
+const ttsLoading = ref(false);
+const ttsLoadingProgress = ref(0);
+const ttsLoadingStatus = ref("");
 
-const pickVoice = (lang = "zh-TW") => {
-  const voices = window.speechSynthesis?.getVoices?.() ?? [];
-  const exact = voices.find((v) => v.lang === lang);
-  if (exact) return exact;
+// 設定 Kokoro TTS 進度回調
+kokoroTTS.setProgressCallback((progress, status) => {
+  ttsLoadingProgress.value = progress;
+  ttsLoadingStatus.value = status;
+});
 
-  const fallback = voices.find((v) => v.lang?.startsWith("zh"));
-  return fallback ?? null;
+// 找到訊息的 emotion
+const getMessageEmotion = (msgId: number): string | undefined => {
+  const msg = messages.value.find((m) => m.id === msgId);
+  return msg?.emotion;
 };
 
-const speakText = (msgId: number, text: string) => {
-  if (!("speechSynthesis" in window)) {
-    console.warn("[TTS] browser not supported");
-    return;
-  }
-
+const speakText = async (msgId: number, text: string) => {
   const cleaned = (text ?? "").trim();
   if (!cleaned) return;
 
-  if (speakingMsgId.value === msgId && window.speechSynthesis.speaking) {
-    window.speechSynthesis.cancel();
+  // 如果正在播放同一則訊息，停止
+  if (speakingMsgId.value === msgId) {
+    kokoroTTS.stop();
     speakingMsgId.value = null;
     return;
   }
 
-  window.speechSynthesis.cancel();
-
-  const utter = new SpeechSynthesisUtterance(cleaned);
-  utter.lang = "zh-TW";
-  const voice = pickVoice("zh-TW");
-  if (voice) utter.voice = voice;
-
-  utter.rate = 1.0; // 語速 0.1 ~ 10
-  utter.pitch = 1.0; // 音高 0 ~ 2
-  utter.volume = 1.0;
-
+  // 停止當前播放
+  kokoroTTS.stop();
   speakingMsgId.value = msgId;
 
-  utter.onend = () => {
-    if (speakingMsgId.value === msgId) speakingMsgId.value = null;
-  };
-  utter.onerror = () => {
-    if (speakingMsgId.value === msgId) speakingMsgId.value = null;
-  };
+  try {
+    // 首次使用時會載入模型
+    if (!kokoroTTS.isReady()) {
+      ttsLoading.value = true;
+    }
 
-  window.speechSynthesis.speak(utter);
+    const emotion = getMessageEmotion(msgId);
+    await kokoroTTS.speak(cleaned, emotion);
+  } catch (error) {
+    console.error("[TTS] 播放失敗:", error);
+  } finally {
+    ttsLoading.value = false;
+    speakingMsgId.value = null;
+  }
 };
 
 // 關聊天窗時也停掉語音
 const stopSpeak = () => {
-  if (!("speechSynthesis" in window)) return;
-  window.speechSynthesis.cancel();
+  kokoroTTS.stop();
   speakingMsgId.value = null;
 };
 
@@ -105,6 +107,14 @@ const currentEmotionMappings = ref<Record<string, string | null>>({
   tired: "F08",
   surprised: "F06",
 });
+
+// ====== Voice Selection ======
+const voices = kokoroTTS.AVAILABLE_VOICES;
+const selectedVoice = ref(kokoroTTS.getCurrentVoice());
+
+const onVoiceChange = () => {
+  kokoroTTS.setVoice(selectedVoice.value);
+};
 
 const openSkinSelector = () => {
   showSkinSelector.value = true;
@@ -606,6 +616,20 @@ onBeforeUnmount(() => {
                 <img :src="avatarPath" class="h-full w-full object-cover" />
               </div>
               <p class="text-xs opacity-80">AI 助教</p>
+
+              <!-- Voice Selector -->
+              <div class="ml-2 flex items-center">
+                <select
+                  v-model="selectedVoice"
+                  class="bg-white/20 text-white text-xs rounded border-none py-1 px-2 cursor-pointer outline-none hover:bg-white/30 transition-colors"
+                  @change="onVoiceChange"
+                  :title="$t('skinSelector.voice')"
+                >
+                  <option v-for="v in voices" :key="v.id" :value="v.id" class="text-black bg-white">
+                    {{ v.name }}
+                  </option>
+                </select>
+              </div>
             </div>
 
             <button
@@ -659,17 +683,31 @@ onBeforeUnmount(() => {
                   <button
                     v-if="msg.phase === 'done' && String(msg.text ?? '').trim()"
                     class="tts-btn mt-1 flex h-7 w-7 items-center justify-center rounded-full border border-white/40 bg-white/30 backdrop-blur-sm hover:bg-white/50"
+                    :class="{ 'animate-pulse': ttsLoading && speakingMsgId === msg.id }"
                     @click="speakText(msg.id, String(msg.text ?? ''))"
-                    :title="speakingMsgId === msg.id ? '停止朗讀' : '播放語音'"
+                    :title="ttsLoading ? ttsLoadingStatus : (speakingMsgId === msg.id ? '停止朗讀' : '播放語音')"
+                    :disabled="ttsLoading && speakingMsgId !== msg.id"
                   >
+                    <!-- 載入中 spinner -->
                     <svg
-                      v-if="speakingMsgId === msg.id"
+                      v-if="ttsLoading && speakingMsgId === msg.id"
+                      class="h-4 w-4 animate-spin text-purple-600"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                    >
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                    <!-- 停止圖示 -->
+                    <svg
+                      v-else-if="speakingMsgId === msg.id"
                       class="h-4 w-4 text-slate-700"
                       viewBox="0 0 24 24"
                       fill="currentColor"
                     >
                       <rect x="7" y="7" width="10" height="10" rx="2" />
                     </svg>
+                    <!-- 播放圖示 -->
                     <svg
                       v-else
                       class="h-4 w-4 text-slate-700"

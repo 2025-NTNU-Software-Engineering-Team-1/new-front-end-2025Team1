@@ -1138,6 +1138,8 @@
     "switch": {
       "error": "Failed to switch skin"
     },
-    "clickToChange": "Click to change appearance"
+    "clickToChange": "Click to change appearance",
+    "voice": "Voice",
+    "preview": "Preview"
   }
 }

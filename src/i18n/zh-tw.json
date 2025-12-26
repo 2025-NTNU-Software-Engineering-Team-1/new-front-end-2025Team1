@@ -1133,6 +1133,8 @@
     "switch": {
       "error": "切換皮膚失敗"
     },
-    "clickToChange": "點擊更換外觀"
+    "clickToChange": "點擊更換外觀",
+    "voice": "語音 (Voice)",
+    "preview": "試聽"
   }
 }

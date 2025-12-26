@@ -702,7 +702,7 @@ async function submit() {
   <Transition name="slide-up">
     <div
       v-if="v$.$error"
-      class="border-l-error border-y-base-300 border-r-base-300 bg-base-100 mt-6 rounded-xl border-y border-r border-l-4 p-5 shadow-md"
+      class="border-l-error border-y-base-300 border-r-base-300 bg-base-100 mt-6 rounded-xl border-y border-l-4 border-r p-5 shadow-md"
     >
       <div class="flex items-start gap-4">
         <div class="bg-error/10 text-error rounded-full p-2">
@@ -719,20 +719,20 @@ async function submit() {
               v-for="(e, idx) in errorSummary"
               :key="idx"
               type="button"
-              class="group bg-base-200 hover:border-error/30 hover:bg-error/5 flex items-start justify-between rounded-lg border border-transparent px-3 py-2 text-left text-sm transition-all hover:shadow-sm"
+              class="bg-base-200 hover:border-error/30 hover:bg-error/5 group flex items-start justify-between rounded-lg border border-transparent px-3 py-2 text-left text-sm transition-all hover:shadow-sm"
               @click="openAndScroll(e.panel)"
             >
               <div class="flex w-full items-start gap-2">
                 <span class="badge badge-error badge-xs badge-outline mt-0.5 shrink-0">
                   {{ e.path }}
                 </span>
-                <span class="text-base-content group-hover:text-error font-medium break-words">
+                <span class="text-base-content group-hover:text-error break-words font-medium">
                   {{ e.message }}
                 </span>
               </div>
 
               <i-uil-arrow-right
-                class="text-error mt-0.5 ml-2 h-4 w-4 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+                class="text-error ml-2 mt-0.5 h-4 w-4 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
               />
             </button>
           </div>

@@ -11,6 +11,7 @@ const route = useRoute();
 const session = useSession();
 
 useTitle(`Problem - ${route.params.id} - ${route.params.name} | Normal OJ`);
+// Ensure the generic type <Problem> is correct based on your API model
 const { data: problem, error, isLoading } = useAxios<Problem>(`/problem/view/${route.params.id}`, fetcher);
 </script>
 
@@ -21,7 +22,7 @@ const { data: problem, error, isLoading } = useAxios<Problem>(`/problem/view/${r
         <skeleton-card />
       </template>
       <template #data>
-        <problem-card v-if="problem" :problem="problem" />
+        <problem-card v-if="problem" :problem="problem as any" />
 
         <AIChatbot
           v-if="problem && Boolean(problem.config?.aiVTuber)"

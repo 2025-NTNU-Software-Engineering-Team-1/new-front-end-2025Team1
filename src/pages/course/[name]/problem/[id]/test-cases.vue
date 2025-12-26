@@ -222,13 +222,13 @@ const isAllSelected = computed({
             <div class="flex items-center gap-2">
               <span
                 v-if="testcaseFiles.length > 0"
-                class="badge badge-success badge-outline inline-flex h-10 min-w-[72px] items-center justify-center px-3 py-0 text-sm whitespace-nowrap"
+                class="badge badge-success badge-outline inline-flex h-10 min-w-[72px] items-center justify-center whitespace-nowrap px-3 py-0 text-sm"
               >
                 {{ t("course.problems.uploaded") }}
               </span>
               <span
                 v-else
-                class="badge badge-outline inline-flex h-10 min-w-[90px] items-center justify-center px-3 py-0 text-center text-sm whitespace-nowrap opacity-70"
+                class="badge badge-outline inline-flex h-10 min-w-[90px] items-center justify-center whitespace-nowrap px-3 py-0 text-center text-sm opacity-70"
               >
                 {{ t("course.problems.notUploaded") }}
               </span>

@@ -548,7 +548,7 @@ const networkErrors = computed(() => {
 
   if (!hasIP && !hasURL && !hasSidecars && !hasDocker) {
     errors.global.push(
-      t("problem.configuration.whenNetworkEnabled"),
+      t("course.problems.whenNetworkEnabled"),
     );
   }
 

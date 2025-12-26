@@ -106,6 +106,7 @@ const items: ComputedRef<{ [k: string | symbol]: { path: null | string; text: st
     "course-name-aisetting": [{ path: null, text: "AI Setting" }],
     "course-name-aisetting-setup": [aiSettingPage, { path: null, text: "Setup" }],
     "course-name-aisetting-usage": [aiSettingPage, { path: null, text: "Usage" }],
+    "course-name-aisetting-skins": [aiSettingPage, { path: null, text: "Skin Management" }],
     "course-name-login-records": [{ path: null, text: "Login Records" }],
     "course-name-problem-new": [problemsPage, { path: null, text: "New" }],
   }),

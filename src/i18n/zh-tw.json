@@ -241,6 +241,7 @@
       "maxZipSizeDefault": "(預設 50 MB)",
       "aiTA": "AI 助教",
       "aiModel": "AI (Gemini) 模型",
+      "aiMaxToken": "每位學生的最大 Token 用量",
       "uploadACFiles": "上傳 AC 檔",
       "selectAPIKeys": "選擇 API 金鑰",
       "aiKeyTotal": "總用量: {total}",

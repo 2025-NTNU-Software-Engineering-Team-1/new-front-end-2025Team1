@@ -266,6 +266,7 @@ function ensureConfig() {
       trialResultVisible: false,
       trialResultDownloadable: false,
       aiVTuber: false,
+      aiMaxToken: 500,
       acceptedFormat: "code",
       maxStudentZipSizeMB: 50,
       aiVTuberApiKeys: [],
@@ -895,6 +896,38 @@ async function onDrop(evt: DragEvent, targetStatus: boolean) {
 }
 
 // ==========================================
+// Section: AI key MaxToken
+// ==========================================
+const localAiMaxToken = ref<string>(String(problem.value.config?.aiMaxToken ?? 500));
+
+function onAiMaxTokenInput(e: Event) {
+  localAiMaxToken.value = (e.target as HTMLInputElement).value;
+}
+function fixAiMaxToken() {
+  let val = parseInt(localAiMaxToken.value, 10);
+  if (isNaN(val)) val = 500;
+  if (val < 500) val = 500;
+  if (val > 100000) val = 100000;
+  localAiMaxToken.value = String(val);
+  problem.value.config!.aiMaxToken = val;
+}
+function onAiMaxTokenBlur() {
+  fixAiMaxToken();
+}
+function onAiMaxTokenKeyup(e: KeyboardEvent) {
+  if (e.key === "Enter") {
+    fixAiMaxToken();
+    (e.target as HTMLInputElement).blur();
+  }
+}
+watch(
+  () => problem.value.config?.aiMaxToken,
+  (v) => {
+    if (typeof v === "number") localAiMaxToken.value = String(v);
+  },
+);
+
+// ==========================================
 // Section: Sidecars & Network Helper
 // ==========================================
 const hasExistingNetworkConfig = computed(() => {
@@ -949,6 +982,7 @@ const tagsString = computed({
 // Section: Lifecycle Hooks
 // ==========================================
 onMounted(async () => {
+  localAiMaxToken.value = String(problem.value.config?.aiMaxToken ?? 500);
   initArtifactCollection();
   await fetchKeys();
   await fetchExistingKeySelection();
@@ -1102,6 +1136,27 @@ onBeforeUnmount(() => {
                   <option value="gemini-2.5-flash">gemini 2.5 flash</option>
                   <option value="gemini-2.5-pro">gemini 2.5 pro</option>
                 </select>
+              </div>
+              <!-- MAX AI Token -->
+              <div class="flex min-w-[200px] flex-1 flex-col">
+                <label class="label mb-1">
+                  <span class="label-text">{{ t("course.problems.aiMaxToken") }}</span>
+                </label>
+                <input
+                  type="number"
+                  class="input input-bordered input-sm"
+                  :min="500"
+                  :max="100000"
+                  step="1"
+                  :value="localAiMaxToken"
+                  @input="onAiMaxTokenInput"
+                  @blur="onAiMaxTokenBlur"
+                  @keyup="onAiMaxTokenKeyup"
+                  placeholder="500~100000"
+                />
+                <label class="label">
+                  <span class="label-text-alt">500~100000</span>
+                </label>
               </div>
             </div>
           </div>

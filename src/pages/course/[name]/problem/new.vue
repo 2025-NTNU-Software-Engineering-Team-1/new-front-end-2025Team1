@@ -97,6 +97,7 @@ const newProblem = ref<ProblemForm>({
     aiVTuber: false,
     aiVTuberApiKeys: [],
     aiVTuberMode: "gemini-2.5-flash-lite",
+    aiMaxToken: 500,
     acceptedFormat: "code",
     resourceData: false,
     resourceDataTeacher: false,

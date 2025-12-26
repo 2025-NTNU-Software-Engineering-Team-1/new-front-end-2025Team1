@@ -156,6 +156,7 @@ interface ProblemConfigExtra {
   aiVTuber: boolean;
   aiVTuberMode?: "gemini-2.5-flash-lite" | "gemini-2.5-flash" | "gemini-2.5-pro";
   aiVTuberApiKeys?: string[];
+  aiMaxToken: number;
 
   // AI Checker (for custom checker with AI support)
   aiChecker?: {

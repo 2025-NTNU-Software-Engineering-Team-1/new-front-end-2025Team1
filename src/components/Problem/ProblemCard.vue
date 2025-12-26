@@ -1,5 +1,4 @@
 <script setup lang="ts">
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { computed, ref, watch } from "vue";
 import { useSession } from "@/stores/session";
 import api from "@/models/api";
@@ -12,14 +11,89 @@ import angelImg from "@/assets/angel-mascot.png";
 import devilImg from "@/assets/devil-mascot.png";
 
 /* =========================================
+   [TYPE DEFINITIONS] - Root Cause Fix
+   Defining strict interfaces to replace 'any'.
+   These mirror the JSON structure provided by the user.
+   ========================================= */
+
+// 1. Define the Network Restriction structure
+interface NetworkRestriction {
+  sidecars?: Array<{ name: string; image: string; args?: string[] }>;
+  external?: {
+    model: "White" | "Black"; // Based on logic, model is a string
+    ip?: string[];
+    url?: string[];
+  };
+}
+
+// 2. Define the Library/Static Analysis structure
+interface LibraryList {
+  syntax?: string[];
+  imports?: string[];
+  headers?: string[];
+  functions?: string[];
+}
+
+interface LibraryRestrictions {
+  enabled: boolean;
+  whitelist?: LibraryList;
+  blacklist?: LibraryList;
+}
+
+// 3. Define the Subtask/Testcase structure
+interface TaskInfo {
+  memoryLimit: number;
+  timeLimit: number;
+  taskScore: number;
+}
+
+// 4. Unified Problem Interface
+// This interface combines properties from both Problem and ProblemForm.
+// We mark fields that might be missing in one or the other as optional (?).
+interface UnifiedProblem {
+  problemName: string;
+  allowedLanguage: number;
+  tags: string[];
+  quota: number;
+  
+  // Optional statistics (might not be in Form)
+  submitCount?: number;
+  highScore?: number;
+
+  // Test cases can be directly in root 'testCase' or inside 'testCaseInfo'
+  testCase?: TaskInfo[];
+  testCaseInfo?: { tasks: TaskInfo[] };
+
+  // Configuration objects
+  config?: {
+    trialMode?: boolean;
+    networkAccessEnabled?: boolean;
+    networkAccessRestriction?: NetworkRestriction;
+  };
+
+  pipeline?: {
+    staticAnalysis?: {
+      libraryRestrictions?: LibraryRestrictions;
+    };
+  };
+
+  description: {
+    description: string;
+    input: string;
+    output: string;
+    sampleInput: string[];
+    sampleOutput: string[];
+    hint: string;
+  };
+}
+
+/* =========================================
    [CONFIG] Mascot Positioning
    Adjust these values to move the mascot.
-   'right': Larger % or px moves it left (towards center).
-   'top': Negative px moves it up (outside the box).
    ========================================= */
 const MASCOT_POSITION = {
-  right: "10%", // Changed from -right-6 to 10% to be more centered
-  top: "-110px", // Adjust vertical height
+  right: "10%", 
+  top: "-110px", 
 };
 
 /* =========================================
@@ -31,9 +105,11 @@ const isNetworkExpanded = ref(true);
 const areRestrictionsVisible = ref(false);
 
 interface Props {
-  problem: Problem | ProblemForm;
+  // We type the prop as UnifiedProblem to avoid 'any'
+  problem: UnifiedProblem; 
   preview?: boolean;
 }
+
 const props = withDefaults(defineProps<Props>(), {
   preview: false,
 });
@@ -43,11 +119,13 @@ const session = useSession();
 /* =========================================
    Basic Problem Data & Statistics
    ========================================= */
-const submitCount = computed(() => (props.problem as any).submitCount ?? 0);
-const highScore = computed(() => (props.problem as any).highScore ?? 0);
+// Safe access using optional chaining (?? 0 provides default if undefined)
+const submitCount = computed(() => props.problem.submitCount ?? 0);
+const highScore = computed(() => props.problem.highScore ?? 0);
+
 const subtasks = computed(() => {
-  const p: any = props.problem;
-  return p.testCase ?? p.testCaseInfo?.tasks ?? [];
+  // Logic: Check root testCase first, fallback to testCaseInfo.tasks
+  return props.problem.testCase ?? props.problem.testCaseInfo?.tasks ?? [];
 });
 
 function downloadTestCase(problemId: number) {
@@ -65,9 +143,10 @@ const allowedLangTexts = computed(() =>
 const hasPython = computed(() => !!(props.problem.allowedLanguage & 4));
 const hasCOrCpp = computed(() => !!(props.problem.allowedLanguage & 3));
 
-const lib = computed(() => (props.problem as any).pipeline?.staticAnalysis?.libraryRestrictions);
-const isNetworkEnabled = computed(() => (props.problem as any).config?.networkAccessEnabled ?? false);
-const netRestriction = computed(() => (props.problem as any).config?.networkAccessRestriction);
+// Type-safe access to nested properties
+const lib = computed(() => props.problem.pipeline?.staticAnalysis?.libraryRestrictions);
+const isNetworkEnabled = computed(() => props.problem.config?.networkAccessEnabled ?? false);
+const netRestriction = computed(() => props.problem.config?.networkAccessRestriction);
 
 /* =========================================
    Data Helper: Calculate List Counts
@@ -86,6 +165,8 @@ const blacklistCount = computed(() => {
   if (l?.enabled) {
     const syntaxWl = l.whitelist?.syntax?.length || 0;
     const syntaxBl = l.blacklist?.syntax?.length || 0;
+    
+    // Logic: If syntax whitelist is empty but blacklist has items, count them as restrictions
     if (syntaxWl === 0 && syntaxBl > 0) {
       count += syntaxBl;
     }
@@ -101,6 +182,7 @@ const blacklistCount = computed(() => {
     const ext = netRestriction.value?.external;
     const isWhiteMode = ext?.model === "White";
 
+    // If NOT White mode (meaning Blacklist), explicit items are blocked restrictions
     if (!isWhiteMode) {
       count += (ext?.ip?.length || 0) + (ext?.url?.length || 0);
     }
@@ -115,7 +197,7 @@ const whitelistCount = computed(() => {
 
   if (l?.enabled) {
     if ((l.whitelist?.syntax?.length || 0) > 0) {
-      count += l.whitelist.syntax.length;
+      count += l.whitelist!.syntax!.length;
     }
     const trioWlCount = sumArrays(l.whitelist?.imports, l.whitelist?.headers, l.whitelist?.functions);
     if (trioWlCount > 0) {
@@ -125,6 +207,7 @@ const whitelistCount = computed(() => {
 
   if (isNetworkEnabled.value) {
     const ext = netRestriction.value?.external;
+    // If White mode, explicit items are allowed, implying everything else is restricted
     if (ext?.model === "White") {
       count += (ext?.ip?.length || 0) + (ext?.url?.length || 0);
     }
@@ -143,7 +226,6 @@ const mascotState = computed(() => {
   const isHighBlacklist = blacklistCount.value > THRESHOLD_BL_HIGH;
   const isLowWhitelist = whitelistCount.value > 0 && whitelistCount.value < THRESHOLD_WL_LOW;
 
-  // Updated to return image source objects. Label property removed as it is no longer used in template.
   if (isHighBlacklist && isLowWhitelist) {
     return { type: "super-devil", imgSrc: devilImg };
   } else if (isHighBlacklist || isLowWhitelist) {

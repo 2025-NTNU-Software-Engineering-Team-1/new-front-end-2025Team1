@@ -18,18 +18,21 @@ const generalNavs = [
   { name: t("components.courseSideBar.discussion"), path: "/discussion" },
 ];
 
-const adminNavs = (session.isAdmin || session.isTeacher || session.isTA)
-  ? [
-      { name: t("components.courseSideBar.members"), path: "/members" },
-      { name: t("components.courseSideBar.aisetting"), path: "/aisetting" },
-      { name: t("components.courseSideBar.loginRecords"), path: "/login-records" },
-    ]
-  : [];
+const adminNavs =
+  session.isAdmin || session.isTeacher || session.isTA
+    ? [
+        { name: t("components.courseSideBar.members"), path: "/members" },
+        { name: t("components.courseSideBar.aisetting"), path: "/aisetting" },
+        { name: t("components.courseSideBar.loginRecords"), path: "/login-records" },
+      ]
+    : [];
 </script>
 
 <template>
   <ul v-if="displayType === 'side'" class="menu-compact lg:menu-normal menu bg-base-100 w-40 p-2 text-base">
-    <li class="px-3 py-2 text-xs text-base-content/60 font-semibold tracking-wide">{{ t("components.courseSideBar.general") }}</li>
+    <li class="text-base-content/60 px-3 py-2 text-xs font-semibold tracking-wide">
+      {{ t("components.courseSideBar.general") }}
+    </li>
 
     <li
       v-for="{ name, path } in generalNavs"
@@ -41,7 +44,11 @@ const adminNavs = (session.isAdmin || session.isTeacher || session.isTA)
     </li>
 
     <template v-if="adminNavs.length">
-      <li class="mt-3 px-3 pt-2 text-xs text-base-content/60 border-t border-base-300 font-semibold tracking-wide">{{ t("components.courseSideBar.admin") }}</li>
+      <li
+        class="text-base-content/60 border-base-300 mt-3 border-t px-3 pt-2 text-xs font-semibold tracking-wide"
+      >
+        {{ t("components.courseSideBar.admin") }}
+      </li>
       <li
         v-for="{ name, path } in adminNavs"
         :class="[
@@ -53,7 +60,7 @@ const adminNavs = (session.isAdmin || session.isTeacher || session.isTA)
     </template>
   </ul>
   <div v-else class="w-full overflow-scroll">
-    <div class="tabs mx-auto w-max items-center flex">
+    <div class="tabs mx-auto flex w-max items-center">
       <template v-for="{ name, path } in generalNavs">
         <a
           class="tab-bordered tab h-10 w-32"
@@ -64,7 +71,7 @@ const adminNavs = (session.isAdmin || session.isTeacher || session.isTA)
       </template>
 
       <template v-if="adminNavs.length">
-        <span class="mx-2 self-center text-xs text-base-content/50">|</span>
+        <span class="text-base-content/50 mx-2 self-center text-xs">|</span>
         <template v-for="{ name, path } in adminNavs">
           <a
             class="tab-bordered tab h-8 w-28 text-sm"

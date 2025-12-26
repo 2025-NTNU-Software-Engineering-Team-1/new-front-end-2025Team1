@@ -552,7 +552,7 @@ onBeforeUnmount(() => {
   />
 
   <!-- 右下角聊天區（整個一起 scale） -->
-  <div class="fixed bottom-6 right-6 z-50 origin-bottom-right" :style="{ transform: `scale(${chatScale})` }">
+  <div class="fixed right-6 bottom-6 z-50 origin-bottom-right" :style="{ transform: `scale(${chatScale})` }">
     <!-- 開啟按鈕 -->
     <button
       v-if="showTrigger && !isOpen"
@@ -629,7 +629,7 @@ onBeforeUnmount(() => {
           <!-- 訊息區 -->
           <main
             ref="chatBodyEl"
-            class="flex-1 space-y-3 overflow-y-auto bg-gradient-to-b from-indigo-50/30 to-purple-50/30 px-5 pb-6 pt-3"
+            class="flex-1 space-y-3 overflow-y-auto bg-gradient-to-b from-indigo-50/30 to-purple-50/30 px-5 pt-3 pb-6"
           >
             <div
               v-for="msg in messages"
@@ -647,7 +647,7 @@ onBeforeUnmount(() => {
                     <div v-if="msg.phase === 'thinking'" class="typing-dots">
                       <span></span><span></span><span></span>
                     </div>
-                    <div v-else-if="msg.phase === 'typing'" class="whitespace-pre-wrap leading-relaxed">
+                    <div v-else-if="msg.phase === 'typing'" class="leading-relaxed whitespace-pre-wrap">
                       {{ msg.displayText ?? "" }}
                     </div>
                     <div v-else class="markdown-body ai-msg leading-relaxed">
@@ -715,7 +715,7 @@ onBeforeUnmount(() => {
             <textarea
               v-model="draft"
               rows="2"
-              class="flex-1 resize-none rounded-2xl border border-white/40 bg-white/50 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-300"
+              class="flex-1 resize-none rounded-2xl border border-white/40 bg-white/50 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-500 focus:ring-2 focus:ring-purple-300 focus:outline-none"
               placeholder="輸入訊息…（Enter 送出，Shift+Enter 換行）"
               @keydown.enter.exact.prevent="send"
               @keydown.enter.shift.stop

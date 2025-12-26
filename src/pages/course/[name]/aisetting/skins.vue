@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
-import { useRoute } from "vue-router";
+import { ref, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import api, { type VtuberSkinInfo } from "@/models/api";
 
-const route = useRoute();
 const { t } = useI18n();
 
 // State

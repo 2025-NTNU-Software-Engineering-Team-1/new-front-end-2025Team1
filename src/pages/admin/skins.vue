@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useTitle } from "@vueuse/core";
-import api, { type VtuberSkinInfo, type EmotionMappings } from "@/models/api";
+import api, { type VtuberSkinInfo } from "@/models/api";
 
 useTitle("Admin - AI Skins | Normal OJ");
 const { t } = useI18n();
@@ -159,7 +159,7 @@ const toggleVisibility = async (skin: VtuberSkinInfo) => {
 };
 
 // Delete skin
-const deleteSkin = async (skinId: string, skinName: string) => {
+const deleteSkin = async (skinId: string) => {
   if (!confirm(t("skinSelector.delete.confirm"))) return;
   try {
     await api.VtuberSkin.delete(skinId);
@@ -352,7 +352,7 @@ onMounted(() => {
                 <button
                   v-if="!skin.is_builtin"
                   class="btn btn-sm btn-error btn-ghost"
-                  @click="deleteSkin(skin.skin_id, skin.name)"
+                  @click="deleteSkin(skin.skin_id)"
                 >
                   {{ $t("admin.skins.delete") }}
                 </button>

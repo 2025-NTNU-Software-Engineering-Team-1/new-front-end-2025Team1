@@ -1192,8 +1192,14 @@ onBeforeUnmount(() => {
                       <i-uil-times-circle class="text-error hidden text-lg group-hover:block" />
                     </div>
                     <div class="flex-1 overflow-hidden">
-                      <div class="text-base-content group-hover:text-error truncate text-sm font-semibold">
-                        {{ key.key_name }}
+                      <div class="flex items-center gap-2">
+                        <span class="text-base-content group-hover:text-error truncate text-sm font-semibold">
+                          {{ key.key_name }}
+                        </span>
+                        <span v-if="key.is_active" class="badge badge-success badge-xs font-mono"
+                          >Active</span
+                        >
+                        <span v-else class="badge badge-error badge-xs font-mono">Inactive</span>
                       </div>
                       <div class="mt-0.5 truncate text-xs text-gray-400">
                         {{ key.masked_value }} ({{ key.created_by }})

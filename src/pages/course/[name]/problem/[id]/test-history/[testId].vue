@@ -68,12 +68,15 @@ const {
   isLoading: CELoading,
   execute: fetchCEOutput,
 } = useAxios<{ stderr: string; stdout: string }>(
-  `/test-history/${route.params.id}/${route.params.testId}/output/0/0`,
+  `/trial-submission/${route.params.testId}/output/0/0`,
   fetcher,
   {
     immediate: false,
   },
 );
+
+// Flag to prevent multiple CE output fetch calls
+const ceFetched = ref(false);
 
 // Fetch trial submission data (used for both initial load and polling)
 async function fetchTrialSubmission() {
@@ -204,8 +207,9 @@ watchEffect(() => {
         console.log("Judging finished. Polling stopped.", { finalStatus: testResult.value.status });
         pause();
       }
-      // Fetch CE output if compile error
-      if (testResult.value.status === SUBMISSION_STATUS_CODE.COMPILE_ERROR) {
+      // Fetch CE output if compile error (only once)
+      if (testResult.value.status === SUBMISSION_STATUS_CODE.COMPILE_ERROR && !ceFetched.value) {
+        ceFetched.value = true;
         fetchCEOutput();
       }
     }

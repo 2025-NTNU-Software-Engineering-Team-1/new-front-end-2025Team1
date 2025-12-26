@@ -347,7 +347,7 @@ async function test() {
 
     // Prepare code zip file
     const codeWriter = new ZipWriter(new BlobWriter("application/zip"));
-    await codeWriter.add(`main${LANGUAGE_EXTENSION[form.lang.value]}`, new TextReader(form.code));
+    await codeWriter.add(`main${LANGUAGE_EXTENSION[form.lang]}`, new TextReader(form.code));
     const codeBlob = await codeWriter.close();
 
     // API 3: Upload code and optional custom testcases

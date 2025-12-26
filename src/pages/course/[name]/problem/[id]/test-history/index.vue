@@ -35,6 +35,7 @@ type TestHistoryItem = {
   score: number;
   lang: string;
   timestamp: number;
+  type: "public" | "custom";
 };
 
 const testHistory = ref<TestHistoryItem[]>([]);
@@ -75,6 +76,7 @@ onMounted(async () => {
           score: item.score,
           lang: LANG[item.language_type] || "Unknown",
           timestamp: Number(item.timestamp),
+          type: item.use_default_case === false ? "custom" : "public",
         })) || [];
       console.log("Loaded trial history:", testHistory.value);
     } else {
@@ -194,6 +196,7 @@ async function deleteTrialSubmission(id: string | number, event: Event) {
                 <thead>
                   <tr>
                     <th>{{ t("course.problem.test.historyModal.table.id") }}</th>
+                    <th>Type</th>
                     <th>PID</th>
                     <th>{{ t("course.problem.test.historyModal.table.result") }}</th>
                     <th>{{ t("course.problem.test.historyModal.table.score") }}</th>
@@ -216,6 +219,16 @@ async function deleteTrialSubmission(id: string | number, event: Event) {
                       >
                         {{ item.id }}
                       </router-link>
+                    </td>
+                    <td>
+                      <span
+                        :class="[
+                          'badge badge-sm',
+                          item.type === 'public' ? 'badge-info' : 'badge-warning',
+                        ]"
+                      >
+                        {{ item.type }}
+                      </span>
                     </td>
                     <td>{{ item.pid }}</td>
                     <td><judge-status :status="item.result" /></td>

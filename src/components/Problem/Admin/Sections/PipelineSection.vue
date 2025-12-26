@@ -1,5 +1,4 @@
 <script setup lang="ts">
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // ==========================================
 // Imports
 // ==========================================
@@ -13,11 +12,90 @@ import MultiStringInput from "../Controls/MultiStringInput.vue";
 // Utils & API
 import api from "@/models/api";
 import { assertFileSizeOK } from "@/utils/checkFileSize";
+
 const { t } = useI18n();
 
+// ==========================================
+// [CONFIG] Type Definitions (Locally Defined)
+// ==========================================
+
+// 1. Define Static Analysis API response structure
+interface StaticAnalysisApiResponse {
+  data: {
+    librarySymbols: {
+      imports: string[];
+      headers: string[];
+      functions: string[];
+    };
+  };
+}
+
+// 2. Define AI Checker Key API response structure
+interface AiKey {
+  id: number | string;
+  key_name: string;
+  is_active: boolean;
+}
+
+interface AiCheckerApiResponse {
+  data: {
+    keys?: AiKey[]; // Handle potential nested structure
+    data?: {
+      keys: AiKey[];
+    };
+  };
+  keys?: AiKey[]; // Handle direct keys return
+}
+
+// 3. Define Vuelidate validation object structure (replacing inject<any>)
+interface ValidationErrors {
+  $message: string;
+}
+interface ValidationField {
+  $error: boolean;
+  $touch: () => void;
+  $errors: ValidationErrors[];
+}
+interface ValidationState {
+  assets?: {
+    makefileZip?: ValidationField;
+    teacherFile?: ValidationField;
+    customCheckerPy?: ValidationField;
+    scorePy?: ValidationField;
+  };
+}
+
+// 4. Define Extended Config type (handling legacy fields like fopen/fwrite)
+// This allows safe access to legacy properties without using 'any'
+interface LegacyConfigProps {
+  allowRead?: boolean;
+  allowWrite?: boolean;
+  allow_read?: boolean; // snake_case support
+  allow_write?: boolean;
+  fopen?: boolean; // legacy
+  fwrite?: boolean; // legacy
+  resourceData?: boolean; // Added this to fix the "Unexpected any" error
+  assetPaths?: Record<string, string>;
+  aiChecker?: {
+    enabled: boolean;
+    apiKeyId?: string;
+    model: string;
+  };
+}
+
+// Extend the unknown config with our legacy props using intersection type
+type ExtendedProblemConfig = LegacyConfigProps & Record<string, unknown>;
+
+// 5. Library Restrictions types
+type LibMode = "whitelist" | "blacklist";
+type LibSection = "syntax" | "imports" | "headers" | "functions";
+
+// ==========================================
 // AI Checker state
+// ==========================================
 const aiCheckerApiKeys = ref<{ id: string; key_name: string }[]>([]);
 const isFetchingAiKeys = ref(false);
+
 // ==========================================
 // [CONFIG] Console Debug Mode
 // ==========================================
@@ -63,7 +141,7 @@ const logger = {
 // Injection & Setup
 // ==========================================
 const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
-const v$ = inject<any>("v$"); // Inject validation object
+const v$ = inject<ValidationState>("v$"); // Use defined ValidationState
 const route = useRoute();
 
 if (!problem || !problem.value) {
@@ -79,10 +157,13 @@ if (!problem || !problem.value) {
  * Ensures the pipeline object structure exists and populates defaults if missing.
  */
 function ensurePipeline() {
+  // Safe casting: use 'unknown' first to avoid overlap errors
+  const config = (problem.value.config || {}) as unknown as ExtendedProblemConfig;
+
   if (!problem.value.pipeline) {
     problem.value.pipeline = {
-      allowRead: Boolean(problem.value.config?.allowRead ?? (problem.value.config as any)?.fopen ?? false),
-      allowWrite: Boolean(problem.value.config?.allowWrite ?? (problem.value.config as any)?.fwrite ?? false),
+      allowRead: Boolean(config.allowRead ?? config.fopen ?? false),
+      allowWrite: Boolean(config.allowWrite ?? config.fwrite ?? false),
       executionMode: "general",
       customChecker: false,
       teacherFirst: false,
@@ -98,19 +179,15 @@ function ensurePipeline() {
   } else {
     // Backfill missing file permission settings
     if (problem.value.pipeline.allowRead === undefined || problem.value.pipeline.allowRead === null) {
-      problem.value.pipeline.allowRead = Boolean(
-        problem.value.config?.allowRead ?? (problem.value.config as any)?.fopen ?? false,
-      );
+      problem.value.pipeline.allowRead = Boolean(config.allowRead ?? config.fopen ?? false);
     }
     if (problem.value.pipeline.allowWrite === undefined || problem.value.pipeline.allowWrite === null) {
-      problem.value.pipeline.allowWrite = Boolean(
-        problem.value.config?.allowWrite ?? (problem.value.config as any)?.fwrite ?? false,
-      );
+      problem.value.pipeline.allowWrite = Boolean(config.allowWrite ?? config.fwrite ?? false);
     }
 
     // Ensure static analysis structure
-    const libs = problem.value.pipeline.staticAnalysis?.libraryRestrictions;
-    if (!libs) {
+    const staticAnalysis = problem.value.pipeline.staticAnalysis;
+    if (!staticAnalysis || !staticAnalysis.libraryRestrictions) {
       problem.value.pipeline.staticAnalysis = {
         libraryRestrictions: {
           enabled: false,
@@ -119,12 +196,21 @@ function ensurePipeline() {
         },
       };
     } else {
-      // Ensure deep structure for whitelist/blacklist
-      ["whitelist", "blacklist"].forEach((key) => {
-        if (!(libs as any)[key]) (libs as any)[key] = {};
-        ["syntax", "imports", "headers", "functions"].forEach((f) => {
-          if (!(libs as any)[key][f]) (libs as any)[key][f] = [];
-        });
+      const libs = staticAnalysis.libraryRestrictions;
+      // Ensure deep structure for whitelist/blacklist using Strict Types
+      const modes: LibMode[] = ["whitelist", "blacklist"];
+      const sections: LibSection[] = ["syntax", "imports", "headers", "functions"];
+
+      modes.forEach((mode) => {
+        if (!libs[mode]) {
+          libs[mode] = { syntax: [], imports: [], headers: [], functions: [] };
+        }
+        const currentModeObj = libs[mode];
+        if (currentModeObj) {
+          sections.forEach((f) => {
+            if (!currentModeObj[f]) currentModeObj[f] = [];
+          });
+        }
       });
     }
   }
@@ -137,7 +223,8 @@ function ensurePipeline() {
 function initPipelineValues() {
   ensurePipeline();
   const pipe = problem.value.pipeline!;
-  const cfg = (problem.value.config as any) || {};
+  // Safe casting for legacy field access
+  const cfg = (problem.value.config || {}) as unknown as ExtendedProblemConfig;
 
   // Prioritize existing pipeline values, fallback to config (legacy keys: fopen, fwrite)
   const backendAllowRead = pipe.allowRead ?? cfg.allowRead ?? cfg.allow_read ?? cfg.fopen ?? false;
@@ -166,14 +253,20 @@ const allowReadToggle = computed({
     ensurePipeline();
     problem.value.pipeline!.allowRead = Boolean(val);
 
-    // When closing allowRead, cascade disable allowWrite and resourceData
+    // When closing allowRead, cascade disable allowWrite
     if (!val) {
       // Mark as forcibly closed ONLY if allowWrite was originally active
       if (problem.value.pipeline!.allowWrite) {
         allowWriteForceClosed.value = true;
       }
       problem.value.pipeline!.allowWrite = false;
-      problem.value.config.resourceData = false;
+
+      // Handle potential resourceData property on config
+      const cfg = problem.value.config as unknown as ExtendedProblemConfig;
+      if ("resourceData" in cfg) {
+        // Fixed: No longer using 'as any' because resourceData is in the type definition
+        cfg.resourceData = false;
+      }
     } else {
       // When opening allowRead, clear the force closed flag
       allowWriteForceClosed.value = false;
@@ -218,8 +311,12 @@ async function fetchStaticAnalysisOptions() {
   let functions: string[] = [];
 
   try {
-    const resp = await api.Problem.getStaticAnalysisOptions();
-    const libs = (resp && resp.data && (resp.data as any).librarySymbols) || {};
+    // Double casting unknown -> Target Type for safety
+    const resp = (await api.Problem.getStaticAnalysisOptions()) as unknown as StaticAnalysisApiResponse;
+
+    // Safe access response structure
+    const libs = resp?.data?.librarySymbols || {};
+
     imports = Array.isArray(libs.imports) ? libs.imports : [];
     headers = Array.isArray(libs.headers) ? libs.headers : [];
     functions = Array.isArray(libs.functions) ? libs.functions : [];
@@ -240,23 +337,24 @@ async function fetchStaticAnalysisOptions() {
 // ==========================================
 // Section: Mode Switching (White/Blacklist)
 // ==========================================
-const syntaxMode = ref<"whitelist" | "blacklist">("blacklist");
-const libraryMode = ref<"whitelist" | "blacklist">("blacklist"); // Combined: imports + headers + functions
+const syntaxMode = ref<LibMode>("blacklist");
+const libraryMode = ref<LibMode>("blacklist"); // Combined: imports + headers + functions
 
 // Watchers: Clear the opposite list when mode switches
 watch(syntaxMode, (newMode) => {
-  const oppositeMode = newMode === "whitelist" ? "blacklist" : "whitelist";
+  const oppositeMode: LibMode = newMode === "whitelist" ? "blacklist" : "whitelist";
   if (problem.value.pipeline?.staticAnalysis?.libraryRestrictions?.[oppositeMode]) {
-    problem.value.pipeline.staticAnalysis.libraryRestrictions[oppositeMode].syntax = [];
+    problem.value.pipeline.staticAnalysis.libraryRestrictions[oppositeMode]!.syntax = [];
   }
 });
 
 watch(libraryMode, (newMode) => {
-  const oppositeMode = newMode === "whitelist" ? "blacklist" : "whitelist";
+  const oppositeMode: LibMode = newMode === "whitelist" ? "blacklist" : "whitelist";
   if (problem.value.pipeline?.staticAnalysis?.libraryRestrictions?.[oppositeMode]) {
-    problem.value.pipeline.staticAnalysis.libraryRestrictions[oppositeMode].imports = [];
-    problem.value.pipeline.staticAnalysis.libraryRestrictions[oppositeMode].headers = [];
-    problem.value.pipeline.staticAnalysis.libraryRestrictions[oppositeMode].functions = [];
+    const restrictions = problem.value.pipeline.staticAnalysis.libraryRestrictions[oppositeMode]!;
+    restrictions.imports = [];
+    restrictions.headers = [];
+    restrictions.functions = [];
   }
 });
 
@@ -316,7 +414,9 @@ function toggleItem(arr: string[], item: string) {
  * Respects MAX_ITEMS_LIMIT
  */
 function selectAllItems(section: LibSection, mode: LibMode) {
-  const currentArr = problem.value.pipeline!.staticAnalysis!.libraryRestrictions![mode]![section] || [];
+  ensurePipeline();
+  const restrictions = problem.value.pipeline!.staticAnalysis!.libraryRestrictions![mode]!;
+  const currentArr = restrictions[section] || [];
   const backendOpts = getBackendOptions(section);
 
   // Combine current items with backend options, removing duplicates
@@ -325,13 +425,10 @@ function selectAllItems(section: LibSection, mode: LibMode) {
 
   // Apply limit
   if (newArr.length > MAX_ITEMS_LIMIT) {
-    problem.value.pipeline!.staticAnalysis!.libraryRestrictions![mode]![section] = newArr.slice(
-      0,
-      MAX_ITEMS_LIMIT,
-    );
+    restrictions[section] = newArr.slice(0, MAX_ITEMS_LIMIT);
     logger.warn("Limit reached", `Selected items truncated to ${MAX_ITEMS_LIMIT}.`);
   } else {
-    problem.value.pipeline!.staticAnalysis!.libraryRestrictions![mode]![section] = newArr;
+    restrictions[section] = newArr;
   }
 }
 
@@ -339,7 +436,10 @@ function selectAllItems(section: LibSection, mode: LibMode) {
  * Clear All Items in a section
  */
 function clearAllItems(section: LibSection, mode: LibMode) {
-  problem.value.pipeline!.staticAnalysis!.libraryRestrictions![mode]![section] = [];
+  ensurePipeline();
+  if (problem.value.pipeline?.staticAnalysis?.libraryRestrictions?.[mode]) {
+    problem.value.pipeline.staticAnalysis.libraryRestrictions[mode]![section] = [];
+  }
 }
 
 /**
@@ -347,14 +447,16 @@ function clearAllItems(section: LibSection, mode: LibMode) {
  * INTERCEPTS the v-model update to enforce limits.
  */
 function handleManualUpdate(section: LibSection, mode: LibMode, newVal: string[]) {
-  const currentArr = problem.value.pipeline!.staticAnalysis!.libraryRestrictions![mode]![section] || [];
+  ensurePipeline();
+  const restrictions = problem.value.pipeline!.staticAnalysis!.libraryRestrictions![mode]!;
+  const currentArr = restrictions[section] || [];
 
   if (newVal.length < currentArr.length) {
     // Allowed: Deletion
-    problem.value.pipeline!.staticAnalysis!.libraryRestrictions![mode]![section] = newVal;
+    restrictions[section] = newVal;
   } else if (newVal.length <= MAX_ITEMS_LIMIT) {
     // Allowed: Addition within limit
-    problem.value.pipeline!.staticAnalysis!.libraryRestrictions![mode]![section] = newVal;
+    restrictions[section] = newVal;
   } else {
     logger.warn("Limit reached", `Blocked manual input. Limit: ${MAX_ITEMS_LIMIT}`);
   }
@@ -383,9 +485,6 @@ function isTeacherFileAllowed(file: File | null): boolean {
   const name = file.name.toLowerCase();
   return allowed.some((ext) => name.endsWith(ext));
 }
-
-type LibSection = "syntax" | "imports" | "headers" | "functions";
-type LibMode = "whitelist" | "blacklist";
 
 function getLibList(section: LibSection, mode: LibMode): string[] {
   ensurePipeline();
@@ -424,16 +523,21 @@ function getCandidates(section: LibSection, mode: LibMode) {
 }
 
 // Asset Helper
-const assetPaths = computed<Record<string, string>>(
-  () => ((problem.value.config as any)?.assetPaths as Record<string, string>) || {},
-);
+const assetPaths = computed<Record<string, string>>(() => {
+  // Safe casting for assetPaths access
+  const cfg = (problem.value.config || {}) as unknown as ExtendedProblemConfig;
+  return cfg.assetPaths || {};
+});
 
 const hasAsset = (key: string) => Boolean(assetPaths.value && assetPaths.value[key]);
 const assetDownloadUrl = (key: string) =>
   assetPaths.value && assetPaths.value[key] ? `/api/problem/${route.params.id}/asset/${key}/download` : null;
 
 // Ensure pipeline object exists at script end (safety check)
-problem.value.pipeline = problem.value.pipeline || ({} as any);
+// Check if pipeline is null to trigger initialization
+if (!problem.value.pipeline) {
+  ensurePipeline();
+}
 
 // ==========================================
 // Lifecycle Hooks
@@ -451,12 +555,21 @@ async function fetchAiCheckerKeys() {
 
   isFetchingAiKeys.value = true;
   try {
-    const res = await api.AIVTuber.getCourseKeys(courseName);
-    const resData = res?.data as any;
-    const data = resData?.data?.keys || resData?.keys || [];
+    const res = (await api.AIVTuber.getCourseKeys(courseName)) as unknown as AiCheckerApiResponse;
+
+    // Compatibility handling for different API response structures
+    let data: AiKey[] = [];
+    if (res?.data?.keys) {
+      data = res.data.keys;
+    } else if (res?.data?.data?.keys) {
+      data = res.data.data.keys;
+    } else if (res?.keys) {
+      data = res.keys;
+    }
+
     aiCheckerApiKeys.value = data
-      .filter((k: any) => k.is_active)
-      .map((k: any) => ({
+      .filter((k) => k.is_active)
+      .map((k) => ({
         id: String(k.id),
         key_name: k.key_name,
       }));
@@ -470,9 +583,11 @@ async function fetchAiCheckerKeys() {
 
 // Ensure aiChecker config exists
 function ensureAiCheckerConfig() {
-  if (!problem.value.config) return;
-  if (!problem.value.config.aiChecker) {
-    problem.value.config.aiChecker = {
+  // Safe casting
+  const config = problem.value.config as unknown as ExtendedProblemConfig;
+  if (!config) return;
+  if (!config.aiChecker) {
+    config.aiChecker = {
       enabled: false,
       apiKeyId: undefined,
       model: "gemini-2.5-flash",
@@ -482,7 +597,10 @@ function ensureAiCheckerConfig() {
 
 // Watch for AI Checker toggle to ensure config exists
 watch(
-  () => problem.value.config?.aiChecker?.enabled,
+  () => {
+    const config = problem.value.config as unknown as ExtendedProblemConfig;
+    return config?.aiChecker?.enabled;
+  },
   (enabled) => {
     if (enabled) {
       ensureAiCheckerConfig();
@@ -568,17 +686,32 @@ watch(
             <div class="relative rounded border border-gray-500 p-2">
               <div
                 v-if="!allowImports"
-                class="absolute inset-0 z-20 flex flex-col items-center justify-center rounded-lg border border-white/10 bg-gray-900/60 backdrop-blur-[2px]"
+                class="tech-lock-overlay absolute inset-0 z-20 flex flex-col items-center justify-center overflow-hidden rounded"
               >
-                <div class="flex flex-col items-center p-4 text-center">
-                  <div
-                    class="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-yellow-500/20 to-orange-500/20 ring-1 ring-white/20"
-                  >
-                    <i-uil-lock-alt class="text-2xl text-yellow-400" />
+                <div
+                  class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"
+                ></div>
+
+                <div class="relative z-10 flex flex-col items-center p-4 text-center">
+                  <div class="relative mb-3 flex h-14 w-14 items-center justify-center">
+                    <div class="absolute inset-0 animate-ping rounded-full bg-yellow-500/20"></div>
+                    <div
+                      class="relative flex h-full w-full items-center justify-center rounded-full border border-yellow-500/30 bg-gradient-to-br from-gray-800 to-black shadow-[0_0_15px_rgba(234,179,8,0.3)]"
+                    >
+                      <i-uil-lock-alt class="text-2xl text-yellow-400 drop-shadow-md" />
+                    </div>
                   </div>
-                  <h6 class="mb-1 text-sm font-bold tracking-wide text-white">Access Locked</h6>
-                  <p class="px-2 text-xs leading-relaxed text-gray-300">
-                    {{ t("course.problems.enablePythonHint") || "Enable Python Language to unlock imports." }}
+
+                  <h6 class="mb-1 text-sm font-bold uppercase tracking-[0.2em] text-white drop-shadow-lg">
+                    System Locked
+                  </h6>
+                  <div
+                    class="mb-2 h-px w-16 bg-gradient-to-r from-transparent via-yellow-500/50 to-transparent"
+                  ></div>
+
+                  <p class="max-w-[200px] px-2 font-mono text-xs leading-relaxed text-gray-300">
+                    <span class="mr-1 text-yellow-500/80">>></span>
+                    {{ t("course.problems.enablePythonHint") || "Enable Python to unlock." }}
                   </p>
                 </div>
               </div>
@@ -652,17 +785,32 @@ watch(
             <div class="relative rounded border border-gray-500 p-2">
               <div
                 v-if="!allowHeaders"
-                class="absolute inset-0 z-20 flex flex-col items-center justify-center rounded-lg border border-white/10 bg-gray-900/60 backdrop-blur-[2px]"
+                class="tech-lock-overlay absolute inset-0 z-20 flex flex-col items-center justify-center overflow-hidden rounded"
               >
-                <div class="flex flex-col items-center p-4 text-center">
-                  <div
-                    class="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-yellow-500/20 to-orange-500/20 ring-1 ring-white/20"
-                  >
-                    <i-uil-lock-alt class="text-2xl text-yellow-400" />
+                <div
+                  class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"
+                ></div>
+
+                <div class="relative z-10 flex flex-col items-center p-4 text-center">
+                  <div class="relative mb-3 flex h-14 w-14 items-center justify-center">
+                    <div class="absolute inset-0 animate-ping rounded-full bg-blue-500/20"></div>
+                    <div
+                      class="relative flex h-full w-full items-center justify-center rounded-full border border-blue-500/30 bg-gradient-to-br from-gray-800 to-black shadow-[0_0_15px_rgba(59,130,246,0.3)]"
+                    >
+                      <i-uil-lock-alt class="text-2xl text-blue-400 drop-shadow-md" />
+                    </div>
                   </div>
-                  <h6 class="mb-1 text-sm font-bold tracking-wide text-white">Access Locked</h6>
-                  <p class="px-2 text-xs leading-relaxed text-gray-300">
-                    {{ t("course.problems.enableCppHint") || "Enable C/C++ Language to unlock headers." }}
+
+                  <h6 class="mb-1 text-sm font-bold uppercase tracking-[0.2em] text-white drop-shadow-lg">
+                    Access Denied
+                  </h6>
+                  <div
+                    class="mb-2 h-px w-16 bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"
+                  ></div>
+
+                  <p class="max-w-[200px] px-2 font-mono text-xs leading-relaxed text-gray-300">
+                    <span class="mr-1 text-blue-500/80">>></span>
+                    {{ t("course.problems.enableCppHint") || "Enable C/C++ to unlock." }}
                   </p>
                 </div>
               </div>
@@ -891,7 +1039,7 @@ watch(
               type="radio"
               class="radio"
               value="general"
-              v-model="problem.pipeline!.executionMode as any"
+              v-model="problem.pipeline!.executionMode as 'general' | 'functionOnly' | 'interactive'"
             />
             <span class="label-text">{{ t("course.problems.executionModeGeneral") }}</span>
           </label>
@@ -900,7 +1048,7 @@ watch(
               type="radio"
               class="radio"
               value="functionOnly"
-              v-model="problem.pipeline!.executionMode as any"
+              v-model="problem.pipeline!.executionMode as 'general' | 'functionOnly' | 'interactive'"
             />
             <span class="label-text">{{ t("course.problems.executionModeFuncitonOnly") }}</span>
           </label>
@@ -909,7 +1057,7 @@ watch(
               type="radio"
               class="radio"
               value="interactive"
-              v-model="problem.pipeline!.executionMode as any"
+              v-model="problem.pipeline!.executionMode as 'general' | 'functionOnly' | 'interactive'"
             />
             <span class="label-text">{{ t("course.problems.executionModeInteractive") }}</span>
           </label>
@@ -1120,10 +1268,12 @@ watch(
                   :checked="problem.config?.aiChecker?.enabled || false"
                   @change="
                     (e: Event) => {
-                      if (!problem.config!.aiChecker) {
-                        problem.config!.aiChecker = { enabled: false, model: 'gemini-2.5-flash' };
+                      // Safe casting
+                      const config = problem.config as unknown as ExtendedProblemConfig;
+                      if (!config.aiChecker) {
+                        config.aiChecker = { enabled: false, model: 'gemini-2.5-flash' };
                       }
-                      problem.config!.aiChecker!.enabled = (e.target as HTMLInputElement).checked;
+                      config.aiChecker.enabled = (e.target as HTMLInputElement).checked;
                     }
                   "
                 />
@@ -1137,7 +1287,7 @@ watch(
                 </label>
                 <select
                   class="select-bordered select select-sm"
-                  v-model="problem.config!.aiChecker!.apiKeyId"
+                  v-model="(problem.config as unknown as ExtendedProblemConfig).aiChecker!.apiKeyId"
                 >
                   <option disabled :value="undefined">{{ t("course.problems.aiCheckerSelectKey") }}</option>
                   <option v-for="key in aiCheckerApiKeys" :key="key.id" :value="key.id">
@@ -1153,7 +1303,10 @@ watch(
                 <label class="label">
                   <span class="label-text">{{ t("course.problems.aiCheckerModel") }}</span>
                 </label>
-                <select class="select-bordered select select-sm" v-model="problem.config!.aiChecker!.model">
+                <select
+                  class="select-bordered select select-sm"
+                  v-model="(problem.config as unknown as ExtendedProblemConfig).aiChecker!.model"
+                >
                   <option value="gemini-2.5-flash-lite">gemini 2.5 flash lite</option>
                   <option value="gemini-2.5-flash">gemini 2.5 flash</option>
                   <option value="gemini-2.5-pro">gemini 2.5 pro</option>
@@ -1177,7 +1330,7 @@ watch(
         <div class="flex items-center gap-4">
           <label class="label cursor-pointer justify-start gap-x-4">
             <span class="label-text">{{ t("course.problems.customScoringScript") }}</span>
-            <input type="checkbox" class="toggle" v-model="(problem as any).pipeline.scoringScript.custom" />
+            <input type="checkbox" class="toggle" v-model="problem.pipeline!.scoringScript!.custom" />
           </label>
           <div class="flex items-center gap-2">
             <div v-if="hasAsset('scoring_script') || problem.assets?.scorePy" class="flex items-center gap-2">
@@ -1200,7 +1353,7 @@ watch(
           </div>
         </div>
 
-        <div v-if="(problem as any).pipeline.scoringScript?.custom" class="flex flex-col gap-x-2">
+        <div v-if="problem.pipeline!.scoringScript?.custom" class="flex flex-col gap-x-2">
           <div class="flex items-center gap-x-2">
             <span class="pl-1 text-sm opacity-80">{{ t("course.problems.uploadCustomScorer") }}</span>
             <input
@@ -1232,7 +1385,7 @@ watch(
 </template>
 
 <style scoped>
-/* 黑白名單切換器 */
+/* Mode Switcher */
 .mode-switcher {
   display: flex;
   align-items: center;
@@ -1321,5 +1474,55 @@ watch(
     padding: 5px 12px;
     font-size: 0.7rem;
   }
+}
+
+/* ==========================================
+   Tech Lock Overlay Animation
+   ========================================== */
+
+.tech-lock-overlay {
+  /* Dark semi-transparent background */
+  background-color: rgba(15, 23, 42, 0.85);
+  /* Frosted glass effect */
+  backdrop-filter: blur(4px);
+  /* Border with gradient glow */
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+
+  /* Diagonal Stripes Pattern */
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.03) 0px,
+    rgba(255, 255, 255, 0.03) 2px,
+    transparent 2px,
+    transparent 12px
+  );
+
+  /* Size of the pattern block */
+  background-size: 20px 20px;
+
+  /* Animation for moving stripes */
+  animation: stripes-move 20s linear infinite;
+}
+
+/* Keyframes to move the background pattern */
+@keyframes stripes-move {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 40px 40px; /* Moves diagonally */
+  }
+}
+
+/* Optional: Slight hover effect to make it interactive */
+.tech-lock-overlay:hover {
+  background-color: rgba(15, 23, 42, 0.9);
+  transition: background-color 0.3s ease;
+}
+
+.tech-lock-overlay:hover i-uil-lock-alt {
+  transform: scale(1.1);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 </style>

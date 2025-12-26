@@ -1104,8 +1104,11 @@ onBeforeUnmount(() => {
         v-if="problem.config!.acceptedFormat === 'zip'"
         class="mt-3 flex items-center gap-2 rounded border border-gray-400 p-3"
       >
-        <span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
-          :data-tip="hover.maxZipSize">{{ t("course.problems.maxZipSize") }}</span>
+        <span
+          class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+          :data-tip="hover.maxZipSize"
+          >{{ t("course.problems.maxZipSize") }}</span
+        >
         <input
           type="number"
           class="input-bordered input input-sm w-28 text-center"

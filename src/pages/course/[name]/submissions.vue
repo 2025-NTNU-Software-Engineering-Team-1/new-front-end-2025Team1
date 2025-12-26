@@ -19,13 +19,12 @@ const session = useSession();
 
 useTitle(`Submissions - ${route.params.name} | Normal OJ`);
 
-// url is the single source of truth
-// 1. grab query parameters from url, store into local states used by inputs
-// 2. when related states changed, replace url with new query parameters
-// 3. when url changed, fetch new data with new query parameters
+// Utility: remove empty values from an object (for query string)
 function removeEmpty(obj: object) {
   return Object.fromEntries(Object.entries(obj).filter(([, v]) => v != null && v !== ""));
 }
+
+// Computed: parse query from URL for pagination and filters
 const routeQuery = computed<{
   page: number;
   filter: SubmissionListFilter;
@@ -38,6 +37,8 @@ const routeQuery = computed<{
     username: route.query.username as string,
   },
 }));
+
+// Change page (updates URL)
 function mutatePage(newPage: number) {
   router.replace({
     query: {
@@ -46,6 +47,8 @@ function mutatePage(newPage: number) {
     },
   });
 }
+
+// Change filter (updates URL)
 function mutateFilter(newFilter: Partial<SubmissionListFilter>) {
   router.replace({
     query: {
@@ -57,6 +60,8 @@ function mutateFilter(newFilter: Partial<SubmissionListFilter>) {
     },
   });
 }
+
+// Build submissions API URL
 const getSubmissionsUrl = computed(() => {
   const query: SubmissionListQuery = {
     ...routeQuery.value.filter,
@@ -67,6 +72,8 @@ const getSubmissionsUrl = computed(() => {
   const qs = queryString.stringify(query, { skipNull: true, skipEmptyString: true });
   return `/submission?${qs}`;
 });
+
+// Fetch submissions using VueUse + Axios
 const { execute, data, error, isLoading } = useAxios<GetSubmissionListResponse>(fetcher);
 watch(
   getSubmissionsUrl,
@@ -75,73 +82,65 @@ watch(
   },
   { immediate: true },
 );
+
 const submissions = computed(() => data.value?.submissions);
 const submissionCount = computed(() => data.value?.submissionCount);
 const maxPage = computed(() => {
   return submissionCount.value ? Math.ceil(submissionCount.value / 10) : 1;
 });
 
-// Only show loading skeleton on initial load, not on background refreshes
-// This prevents FOUC when polling for pending submissions
+// Only show loading skeleton on first load
 const isInitialLoading = computed(() => {
   return isLoading.value && data.value == null;
 });
 
-// Check if there are any pending submissions that need auto-refresh
+// Check if any submissions are pending
 const hasPendingSubmissions = computed(() => {
   return submissions.value?.some((sub) => sub.status === SUBMISSION_STATUS_CODE.PENDING) ?? false;
 });
 
-// Auto-refresh polling: refresh list every 2 seconds (similar to detail page)
-// Always execute refresh, then check if we should stop in watchEffect
+// Polling: auto-refresh every 2 seconds if there are pending submissions
 const { pause, resume, isActive } = useIntervalFn(
   () => {
     if (submissions.value != null && !isLoading.value) {
-      // Add cache-busting timestamp to ensure fresh data
       const url = `${getSubmissionsUrl.value}${getSubmissionsUrl.value.includes("?") ? "&" : "?"}_t=${Date.now()}`;
       execute(url);
     }
   },
   2000,
   { immediate: false },
-); // Don't start immediately, wait for data
+);
 
-// Control polling based on pending submissions
+// Start/stop polling based on pending submissions
 watchEffect(() => {
   if (submissions.value != null) {
     if (hasPendingSubmissions.value) {
-      // Ensure polling is active when there are pending submissions
-      if (!isActive.value) {
-        resume();
-      }
+      if (!isActive.value) resume();
     } else {
-      // Stop polling when no pending submissions
-      if (isActive.value) {
-        pause();
-      }
+      if (isActive.value) pause();
     }
   }
 });
 
-// Refresh when page is activated (e.g., returning from detail page)
+// Refresh data when page is activated (e.g., after returning from detail page)
 onActivated(() => {
   if (!isLoading.value) {
-    // Add cache-busting timestamp to ensure fresh data
     const url = `${getSubmissionsUrl.value}${getSubmissionsUrl.value.includes("?") ? "&" : "?"}_t=${Date.now()}`;
     execute(url);
   }
-  // Ensure polling is active if there are pending submissions
   if (hasPendingSubmissions.value && !isActive.value) {
     resume();
   }
 });
 
+// Problem selection and meta info
 const {
   problemSelections,
   problemId2Meta,
   error: fetchProblemError,
 } = useProblemSelection(route.params.name as string);
 
+// Filter options for status, language, username
 const submissionStatusCodes = Object.entries(SUBMISSION_STATUS_REPR).map(([statusCode, { label }]) => ({
   text: label,
   value: statusCode,
@@ -152,11 +151,13 @@ const languageTypes = LANGUAGE_OPTIONS.map(({ text, value }) => ({
 }));
 const searchUsername = ref("");
 
+// Clipboard copy logic
 const { copy, copied, isSupported } = useClipboard();
 function copySubmissionLink(path: string) {
   copy(new URL(path, window.location.origin).href);
 }
 
+// Download all submissions as a JSON file
 async function downloadAllSubmissions() {
   const query: SubmissionListQuery = {
     ...routeQuery.value.filter,
@@ -167,7 +168,6 @@ async function downloadAllSubmissions() {
   const qs = queryString.stringify(query, { skipNull: true, skipEmptyString: true });
   const url = `/submission?${qs}`;
   const { data } = await fetcher.get<GetSubmissionListResponse>(url);
-  // download as json file
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   const urlBlob = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -177,20 +177,17 @@ async function downloadAllSubmissions() {
   URL.revokeObjectURL(urlBlob);
 }
 
-// Rejudge All functionality
+// Rejudge all submissions matching current filter
 const isRejudgeAllLoading = ref(false);
 async function rejudgeAll() {
-  // Get all submissions matching current filter
   const query: SubmissionListQuery = {
     ...routeQuery.value.filter,
     offset: 0,
-    count: -1, // Get all
+    count: -1,
     course: route.params.name as string,
   };
   const qs = queryString.stringify(query, { skipNull: true, skipEmptyString: true });
   const url = `/submission?${qs}`;
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let allSubmissions: any[] = [];
   try {
     const { data } = await fetcher.get<GetSubmissionListResponse>(url);
@@ -200,36 +197,26 @@ async function rejudgeAll() {
     alert("Failed to fetch submissions. Please try again.");
     return;
   }
-
   if (allSubmissions.length === 0) {
     alert("No submissions found matching the current filter.");
     return;
   }
-
-  // Warn if more than 20 submissions
   if (allSubmissions.length > 20) {
     const confirmed = confirm(
       `Warning: You are about to rejudge ${allSubmissions.length} submissions.\n\n` +
         `This may take a long time and put significant load on the system.\n\n` +
         `Are you sure you want to continue?`,
     );
-    if (!confirmed) {
-      return;
-    }
+    if (!confirmed) return;
   } else {
     const confirmed = confirm(`Are you sure you want to rejudge ${allSubmissions.length} submission(s)?`);
-    if (!confirmed) {
-      return;
-    }
+    if (!confirmed) return;
   }
-
   isRejudgeAllLoading.value = true;
   let successCount = 0;
   let failedCount = 0;
   let skippedCount = 0;
-
   try {
-    // Rejudge each submission individually
     for (const submission of allSubmissions) {
       try {
         // Skip if never judged or recently sent
@@ -238,7 +225,6 @@ async function rejudgeAll() {
           continue;
         }
         if (submission.status === -1) {
-          // Check if recently sent (within 60 seconds)
           const submissionTime = new Date(submission.timestamp).getTime();
           const now = Date.now();
           if (now - submissionTime < 60000) {
@@ -246,7 +232,6 @@ async function rejudgeAll() {
             continue;
           }
         }
-
         await api.Submission.rejudge(submission.submissionId);
         successCount++;
       } catch (err) {
@@ -254,12 +239,10 @@ async function rejudgeAll() {
         failedCount++;
       }
     }
-
     console.log(
       `Rejudge completed. Success: ${successCount}, Failed: ${failedCount}, Skipped: ${skippedCount}`,
     );
-    // Reload the list
-    router.go(0);
+    router.go(0); // Reload the list
   } catch (err) {
     console.error("Rejudge all failed:", err);
   } finally {
@@ -267,18 +250,15 @@ async function rejudgeAll() {
   }
 }
 
-// Delete functionality
+// Delete submission by ID
 const deletingIds = ref<Set<string>>(new Set());
 async function deleteSubmission(id: string) {
-  if (!confirm(`Are you sure you want to delete submission ${id}?`)) {
-    return;
-  }
+  if (!confirm(`Are you sure you want to delete submission ${id}?`)) return;
   deletingIds.value.add(id);
   try {
     const response = await api.Submission.delete(id);
     if (response.data?.ok) {
-      // Reload the list
-      execute(getSubmissionsUrl.value);
+      execute(getSubmissionsUrl.value); // Reload the list
     }
   } catch (err) {
     console.error("Delete failed:", err);
@@ -295,49 +275,11 @@ async function deleteSubmission(id: string) {
         <div class="card-title justify-between">
           {{ $t("course.submissions.text") }}
 
-          <div v-if="session.isAdmin" class="flex items-center justify-between gap-4">
-            <button
-              :class="['btn btn-warning btn-sm', isRejudgeAllLoading && 'loading']"
-              :disabled="isRejudgeAllLoading"
-              @click="rejudgeAll"
-            >
-              <i-uil-repeat class="mr-1" /> Rejudge All
-            </button>
-            <div class="tooltip tooltip-bottom" data-tip="Download submissions json file">
-              <button class="btn btn-sm" @click="downloadAllSubmissions">
-                <i-uil-file-download class="h-5 w-5" />
-              </button>
-            </div>
-            <input
-              v-model="searchUsername"
-              type="text"
-              placeholder="Username (exact match)"
-              class="input-bordered input w-full max-w-xs"
-              @keydown.enter="mutateFilter({ username: searchUsername })"
-            />
-          </div>
-          <div v-if="session.isTeacher" class="flex items-center justify-between gap-4">
-            <button
-              :class="['btn btn-warning btn-sm', isRejudgeAllLoading && 'loading']"
-              :disabled="isRejudgeAllLoading"
-              @click="rejudgeAll"
-            >
-              <i-uil-repeat class="mr-1" /> Rejudge All
-            </button>
-            <div class="tooltip tooltip-bottom" data-tip="Download submissions json file">
-              <button class="btn btn-sm" @click="downloadAllSubmissions">
-                <i-uil-file-download class="h-5 w-5" />
-              </button>
-            </div>
-            <input
-              v-model="searchUsername"
-              type="text"
-              placeholder="Username (exact match)"
-              class="input-bordered input w-full max-w-xs"
-              @keydown.enter="mutateFilter({ username: searchUsername })"
-            />
-          </div>
-          <div v-if="session.isTA" class="flex items-center justify-between gap-4">
+          <!-- Admin/Teacher/TA actions: rejudge, download, search -->
+          <div
+            v-if="session.isAdmin || session.isTeacher || session.isTA"
+            class="flex items-center justify-between gap-4"
+          >
             <button
               :class="['btn btn-warning btn-sm', isRejudgeAllLoading && 'loading']"
               :disabled="isRejudgeAllLoading"
@@ -361,6 +303,7 @@ async function deleteSubmission(id: string) {
         </div>
 
         <div class="my-2" />
+        <!-- Filters -->
         <div class="mb-4 flex items-end gap-x-4">
           <select
             :value="routeQuery.filter.problemId"
@@ -370,7 +313,6 @@ async function deleteSubmission(id: string) {
             <option value="" selected>{{ $t("course.submissions.problem") }}</option>
             <option v-for="{ text, value } in problemSelections" :value="value">{{ text }}</option>
           </select>
-
           <select
             :value="routeQuery.filter.status"
             class="select-bordered select w-full flex-1"
@@ -379,7 +321,6 @@ async function deleteSubmission(id: string) {
             <option value="" selected>{{ $t("course.submissions.status") }}</option>
             <option v-for="{ text, value } in submissionStatusCodes" :value="value">{{ text }}</option>
           </select>
-
           <select
             :value="routeQuery.filter.languageType"
             class="select-bordered select w-full flex-1"
@@ -388,7 +329,6 @@ async function deleteSubmission(id: string) {
             <option value="" selected>{{ $t("course.submissions.lang") }}</option>
             <option v-for="{ text, value } in languageTypes" :value="value">{{ text }}</option>
           </select>
-
           <div
             v-show="
               routeQuery.filter.problemId != null ||
@@ -430,8 +370,9 @@ async function deleteSubmission(id: string) {
               </thead>
               <tbody>
                 <tr v-for="submission in submissions" :key="submission.submissionId" class="hover">
-                  <td>
+                  <td class="overflow-visible">
                     <div class="flex items-center">
+                      <!-- Tooltip for submission id -->
                       <div class="tooltip tooltip-bottom" data-tip="show details">
                         <router-link
                           :to="`/course/${$route.params.name}/submission/${submission.submissionId}`"
@@ -519,3 +460,20 @@ async function deleteSubmission(id: string) {
     </div>
   </div>
 </template>
+
+<style>
+/* Ensure DaisyUI tooltip is always on top of all layers (z-index only) */
+.tooltip:before,
+.tooltip:after {
+  z-index: 2147483647 !important;
+}
+
+/* Make sure table and all parents don't hide overflowing tooltip */
+.table,
+.table *,
+.card,
+.card-body,
+.card-container {
+  overflow: visible !important;
+}
+</style>

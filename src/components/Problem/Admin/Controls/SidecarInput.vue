@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref ,computed} from "vue";
+import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { hover_zh } from "../../Hovers/hover-zh-tw";
 import { hover_en } from "../../Hovers/hover-en";
@@ -23,7 +23,7 @@ const newName = ref("");
 const newImage = ref("");
 const newArgs = ref("");
 const newEnv = ref("");
-const { t,locale } = useI18n();
+const { t, locale } = useI18n();
 const hover = computed(() => {
   return locale.value === "en" ? hover_en : hover_zh;
 });
@@ -144,8 +144,11 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
         <div class="space-y-3">
           <div class="form-control">
             <label class="label py-0">
-              <span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
-                :data-tip="hover.sideCarName">{{ t("course.problems.sideCarName") }}</span>
+              <span
+                class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+                :data-tip="hover.sideCarName"
+                >{{ t("course.problems.sideCarName") }}</span
+              >
             </label>
             <input
               placeholder="e.g. mysql"
@@ -156,8 +159,11 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
           </div>
           <div class="form-control">
             <label class="label py-0">
-              <span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
-                :data-tip="hover.sideCarArgs">{{ t("course.problems.sideCarArgs") }}</span>
+              <span
+                class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+                :data-tip="hover.sideCarArgs"
+                >{{ t("course.problems.sideCarArgs") }}</span
+              >
               <span class="label-text-alt opacity-60">{{ t("course.problems.sideCarCommaSeparated") }}</span>
             </label>
             <textarea
@@ -171,8 +177,11 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
         <div class="space-y-3">
           <div class="form-control">
             <label class="label py-0">
-              <span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
-                :data-tip="hover.sideCarImage">{{ t("course.problems.sideCarImage") }}</span>
+              <span
+                class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+                :data-tip="hover.sideCarImage"
+                >{{ t("course.problems.sideCarImage") }}</span
+              >
             </label>
             <input
               placeholder="e.g. mysql:8.0"
@@ -181,11 +190,14 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
               @keydown.enter.prevent="add"
             />
           </div>
-          
+
           <div class="form-control">
             <label class="label py-0">
-              <span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
-                :data-tip="hover.sideCarEnv">{{ t("course.problems.sideCarEnv") }}</span>
+              <span
+                class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+                :data-tip="hover.sideCarEnv"
+                >{{ t("course.problems.sideCarEnv") }}</span
+              >
               <span class="label-text-alt opacity-60">{{ t("course.problems.sideCarKEYVALUEPerLine") }}</span>
             </label>
             <textarea

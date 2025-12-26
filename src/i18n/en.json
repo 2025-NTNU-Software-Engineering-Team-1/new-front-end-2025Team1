@@ -394,7 +394,10 @@
       "selectedKeysTitle": "Selected Keys ({count})  - Click items below to remove",
       "anyFile":"Any File",
       "enableCppHint":"Enable C/C++ to unlock."
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
     },
     "submissions": {
       "text": "Submissions",

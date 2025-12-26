@@ -275,7 +275,7 @@ onMounted(() => {
     <div class="mb-6 flex items-center justify-between">
       <h1 class="text-2xl font-bold">{{ $t("admin.skins.title") }}</h1>
       <button class="btn btn-primary btn-sm" @click="openUpload">
-        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
         </svg>
         {{ $t("skinSelector.upload.button") }}
@@ -313,7 +313,7 @@ onMounted(() => {
         <tbody>
           <tr v-for="skin in skins" :key="skin.skin_id">
             <td>
-              <div class="h-12 w-12 overflow-hidden rounded-lg bg-base-200">
+              <div class="bg-base-200 h-12 w-12 overflow-hidden rounded-lg">
                 <img
                   v-if="skin.thumbnail_path"
                   :src="skin.thumbnail_path"
@@ -324,7 +324,7 @@ onMounted(() => {
               </div>
             </td>
             <td class="font-medium">
-               <div class="truncate max-w-[150px]">{{ skin.name }}</div>
+              <div class="max-w-[150px] truncate">{{ skin.name }}</div>
             </td>
             <td class="hidden md:table-cell">{{ skin.uploaded_by ?? "-" }}</td>
             <td class="hidden md:table-cell">{{ formatSize(skin.file_size) }}</td>
@@ -425,7 +425,7 @@ onMounted(() => {
     <div v-if="showUpload" class="modal modal-open">
       <div class="modal-box" @paste="onUploadThumbnailPaste" tabindex="0">
         <h3 class="text-lg font-bold">{{ $t("skinSelector.upload.title") }}</h3>
-        
+
         <div class="form-control mt-4">
           <label class="label">
             <span class="label-text">{{ $t("skinSelector.upload.name") }}</span>
@@ -459,15 +459,20 @@ onMounted(() => {
             <span class="label-text-alt">({{ $t("skinSelector.upload.optional") }})</span>
           </label>
           <div class="flex items-center gap-4">
-             <div class="h-16 w-16 overflow-hidden rounded-lg bg-base-200">
-                <img
-                  v-if="uploadThumbnailPreview"
-                  :src="uploadThumbnailPreview"
-                  class="h-full w-full object-cover"
-                />
-                <span v-else class="flex h-full items-center justify-center text-2xl">🎭</span>
-             </div>
-             <input type="file" accept="image/*" class="file-input file-input-bordered file-input-sm w-full max-w-xs" @change="onUploadThumbnailChange" />
+            <div class="bg-base-200 h-16 w-16 overflow-hidden rounded-lg">
+              <img
+                v-if="uploadThumbnailPreview"
+                :src="uploadThumbnailPreview"
+                class="h-full w-full object-cover"
+              />
+              <span v-else class="flex h-full items-center justify-center text-2xl">🎭</span>
+            </div>
+            <input
+              type="file"
+              accept="image/*"
+              class="file-input file-input-bordered file-input-sm w-full max-w-xs"
+              @change="onUploadThumbnailChange"
+            />
           </div>
           <label class="label">
             <span class="label-text-alt">{{ $t("skinSelector.upload.thumbnailHint") }}</span>
@@ -475,7 +480,7 @@ onMounted(() => {
         </div>
 
         <div class="form-control mt-4">
-           <label class="label">
+          <label class="label">
             <span class="label-text">{{ $t("skinSelector.upload.emotions") }}</span>
             <span class="label-text-alt">({{ $t("skinSelector.upload.optional") }})</span>
           </label>
@@ -483,9 +488,9 @@ onMounted(() => {
             v-model="uploadEmotions"
             class="textarea textarea-bordered font-mono text-xs"
             rows="3"
-            :placeholder='`{"smile": "F05", "unhappy": "F03", ...}`'
+            :placeholder="`{&quot;smile&quot;: &quot;F05&quot;, &quot;unhappy&quot;: &quot;F03&quot;, ...}`"
           ></textarea>
-           <label class="label">
+          <label class="label">
             <span class="label-text-alt">{{ $t("skinSelector.upload.emotionsHint") }}</span>
           </label>
         </div>
@@ -497,8 +502,8 @@ onMounted(() => {
         <div class="modal-action">
           <button class="btn" @click="closeUpload">{{ $t("skinSelector.upload.cancel") }}</button>
           <button class="btn btn-primary" :disabled="uploading || !uploadFile" @click="uploadSkin">
-             <span v-if="uploading" class="loading loading-spinner loading-xs"></span>
-             {{ $t("skinSelector.upload.submit") }}
+            <span v-if="uploading" class="loading loading-spinner loading-xs"></span>
+            {{ $t("skinSelector.upload.submit") }}
           </button>
         </div>
       </div>

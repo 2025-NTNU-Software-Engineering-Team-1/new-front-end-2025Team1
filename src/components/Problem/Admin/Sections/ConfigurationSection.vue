@@ -1538,7 +1538,7 @@ onBeforeUnmount(() => {
               "
             />
           </div>
-          <div class="mt-1 pl-1 text-xs opacity-70">{{ t("course.problems.allowedlan") }}</div>
+          <div class="mt-1 pl-1 text-xs opacity-70">Any File</div>
           <label v-if="v$?.assets?.trialModeACFiles?.$error" class="label">
             <span class="label-text-alt text-error">{{
               v$.assets.trialModeACFiles.$errors[0]?.$message

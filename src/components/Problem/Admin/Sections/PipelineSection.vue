@@ -703,7 +703,7 @@ watch(
                   </div>
 
                   <h6 class="mb-1 text-sm font-bold uppercase tracking-[0.2em] text-white drop-shadow-lg">
-                    {{t("course.problems.systemLocked")}}
+                    {{ t("course.problems.systemLocked") }}
                   </h6>
                   <div
                     class="mb-2 h-px w-16 bg-gradient-to-r from-transparent via-yellow-500/50 to-transparent"
@@ -723,13 +723,13 @@ watch(
                     class="btn btn-xs btn-ghost h-5 min-h-0 px-1 text-[10px]"
                     @click="selectAllItems('imports', libraryMode)"
                   >
-                    {{t("course.problems.all")}}
+                    {{ t("course.problems.all") }}
                   </button>
                   <button
                     class="btn btn-xs btn-ghost text-error h-5 min-h-0 px-1 text-[10px]"
                     @click="clearAllItems('imports', libraryMode)"
                   >
-                    {{t("course.problems.clear")}}
+                    {{ t("course.problems.clear") }}
                   </button>
                 </div>
               </div>
@@ -802,7 +802,7 @@ watch(
                   </div>
 
                   <h6 class="mb-1 text-sm font-bold uppercase tracking-[0.2em] text-white drop-shadow-lg">
-                    {{t("course.problems.accessDenied")}}
+                    {{ t("course.problems.accessDenied") }}
                   </h6>
                   <div
                     class="mb-2 h-px w-16 bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"
@@ -822,13 +822,13 @@ watch(
                     class="btn btn-xs btn-ghost h-5 min-h-0 px-1 text-[10px]"
                     @click="selectAllItems('headers', libraryMode)"
                   >
-                    {{t("course.problems.all")}}
+                    {{ t("course.problems.all") }}
                   </button>
                   <button
                     class="btn btn-xs btn-ghost text-error h-5 min-h-0 px-1 text-[10px]"
                     @click="clearAllItems('headers', libraryMode)"
                   >
-                    {{t("course.problems.clear")}}
+                    {{ t("course.problems.clear") }}
                   </button>
                 </div>
               </div>
@@ -889,13 +889,13 @@ watch(
                     class="btn btn-xs btn-ghost h-5 min-h-0 px-1 text-[10px]"
                     @click="selectAllItems('functions', libraryMode)"
                   >
-                    {{t("course.problems.all")}}
+                    {{ t("course.problems.all") }}
                   </button>
                   <button
                     class="btn btn-xs btn-ghost text-error h-5 min-h-0 px-1 text-[10px]"
                     @click="clearAllItems('functions', libraryMode)"
                   >
-                    {{t("course.problems.clear")}}
+                    {{ t("course.problems.clear") }}
                   </button>
                 </div>
               </div>
@@ -1315,7 +1315,7 @@ watch(
             </div>
           </div>
         </div>
-        <div v-else class="pl-1 text-xs opacity-70 pt-2">
+        <div v-else class="pl-1 pt-2 text-xs opacity-70">
           {{
             problem.pipeline!.executionMode === "interactive"
               ? t("course.problems.uploadCustomCheckerWarning")
@@ -1378,7 +1378,9 @@ watch(
             <span class="label-text-alt text-error">{{ v$.assets.scorePy.$errors[0]?.$message }}</span>
           </label>
         </div>
-        <div v-else class="pl-1 text-xs opacity-70 pt-2">{{ t("course.problems.uploadCustomScorerInfo") }}</div>
+        <div v-else class="pl-1 pt-2 text-xs opacity-70">
+          {{ t("course.problems.uploadCustomScorerInfo") }}
+        </div>
       </div>
     </div>
   </div>

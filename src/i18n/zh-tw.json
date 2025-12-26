@@ -341,10 +341,10 @@
       "editProblem": "編輯題目:",
       "enablePythonHint": "請先啟用 Python 語言才能使用此功能",
       "systemLocked": "系統已鎖定",
-      "all":"全部",
-      "clear":"清除",
-      "accessDenied":"存取被拒絕",
-      "limitReached":"已達上限"
+      "all": "全部",
+      "clear": "清除",
+      "accessDenied": "存取被拒絕",
+      "limitReached": "已達上限"
     },
     "submissions": {
       "text": "繳交狀態",

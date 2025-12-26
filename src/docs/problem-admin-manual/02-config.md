@@ -1,131 +1,72 @@
-# Configuration Guide
+# Configuration Settings Manual
 
-This section covers: Allowed Languages, Tags, Quota, Accepted Format, AI VTuber, Trial Mode, Network & Sidecars, and Artifact Collection.
-
----
-
-## Allowed Languages
-
-- Example supported languages: C / C++ / Python (stored as a bitmask internally)
-- This affects:
-  - Which languages students can submit in
-  - Allowed file extensions for AI VTuber AC files and Trial AC files (e.g. `.c`, `.cpp`, `.py`)
+This section explains the configuration settings for problems, including submission rules, Trial Mode, AI VTuber, Network settings, and Artifact Collection.
 
 ---
 
-## Tags
+## 1. General Submission Rules
 
-- Enter multiple tags separated by commas (e.g. `dp,math,greedy`)
-- The system will auto-trim and remove empty entries
+### Allowed Languages
+Specifies the programming languages (e.g., C, C++, Python) that students can use for submission. This setting determines the language options available to students and the accepted file extensions for AI VTuber and Trial Mode. Internally, these are stored using a bitmask.
 
----
+### Tags
+Used to categorize problems. Multiple tags should be separated by commas (e.g., `dp,math,greedy`). The system automatically trims whitespace and removes empty strings.
 
-## Quota
+### Quota
+Limits the number of times a student can submit a solution.
+* `-1`: Unlimited submissions.
+* `1 to 500`: Specific submission limit.
 
-- `-1`: Unlimited
-- `1 ~ 500`: Limit on the number of submissions
-
----
-
-## Accepted Format (code / zip)
-
-### code
-
-- Students submit a single source file (typical OJ behavior)
-
-### zip
-
-- Students submit a zip archive
-- You can set `Max Zip Size (MB)` (range 1~1000, default 50)
+### Accepted Format
+* **Code**: Students submit a single source file.
+* **Zip**: Students upload a zip archive. You can set a `Max Zip Size (MB)` between 1 and 1000 (default is 50).
 
 ---
 
-## Trial Mode
+## 2. Trial Mode
 
-When Trial Mode is enabled, extra features appear on testing/trial pages (e.g., uploading example AC files, limiting trial count).
+Enabling Trial Mode provides a testing interface for students to verify their code before final submission.
 
-### Trial Max Number
-
-- `-1`: Unlimited
-- `1 ~ 500`: Limit on trial runs
-
-### Result Visible / Downloadable
-
-- `Result Visible`: Allows viewing of stdout/stderr and output details (backend-dependent)
-- `Result Downloadable`: Allows downloading of output files (backend-dependent)
-
-### Upload Public Test Data (.zip)
-
-- **The zip must contain only `.in` files**
-- File size is checked on the frontend (current UI shows ≤ 1GB)
-
-### Upload AC Files (Trial)
-
-- Must upload at least one AC file when Trial Mode is enabled
-- File extensions are determined by Allowed Languages (e.g. `.c`, `.cpp`, `.py`)
+* **Trial Max Number**: Limits test attempts. Use `-1` for unlimited or `1 to 500` for a specific limit.
+* **Visibility & Downloads**: Configure whether students can view stdout/stderr or download output files.
+* **Public Test Data (.zip)**: Upload a zip containing only `.in` files for public testing. The file size limit is 1GB.
+* **AC Files (Trial)**: At least one correct reference file (AC file) must be uploaded if Trial Mode is enabled.
 
 ---
 
-## AI VTuber
+## 3. AI VTuber (AI Assistant)
 
-### Frontend validation when enabling
+### Frontend Verification
+When enabled, the system verifies that:
+1. At least one API Key is selected.
+2. At least one AC file is uploaded as a reference for the AI.
 
-When enabling AI VTuber, frontend validation checks that:
-
-- At least one API Key is selected
-- At least one AC file is uploaded
-
-### AI Model
-
-- The UI allows choosing available models (e.g. Gemini, depending on platform)
-
-### Upload AC Files (AI VTuber)
-
-- File extensions follow Allowed Languages
-- Purpose: provide reference AC program files for the AI
-
-### API Keys
-
-- API keys are retrieved per course and marked Active / Inactive
-- You can search by key name and the UI will auto-scroll to the match
-- A help icon shows suggested key counts and tips
+### Model & API Keys
+* **AI Model**: Select available models (e.g., Gemini) from the UI.
+* **API Keys**: Provided by the Course. You can search by Key Name to auto-scroll to specific entries. Hover over the help icon to see the recommended number of keys.
 
 ---
 
-## Network & Sidecars
+## 4. Network & Sidecars
 
-### Network Access Model (Whitelist / Blacklist)
+### Network Access Model
+* **Whitelist**: Blocks all traffic except for the specified IPs/URLs.
+* **Blacklist**: Allows all traffic except for the specified IPs/URLs.
+* **IP / URL List**: Add entries using the multi-input component.
 
-- **Whitelist**: Only IPs/URLs on the list are allowed; all others are blocked
-- **Blacklist**: Only IPs/URLs on the list are blocked; all others are allowed
+### Sidecars (Sandbox Environment)
+Auxiliary containers (e.g., DB, Cache, or Local Judge Helpers) can be added by defining the image name, environment variables, and arguments.
 
-### IP / URL List
-
-- Use the multi-entry input to add items
-- Ensure formatting is correct (e.g. IP: `8.8.8.8`; URL: `example.com`)
-
-### Sidecars (Sandbox environment)
-
-- You can add sidecar containers (image, name, env, args, etc.)
-- Use case: provide auxiliary services for testing such as DB, cache, or local judge helpers
-
-### Dockerfiles.zip (custom environments)
-
-When a zip is uploaded, the frontend checks:
-
-1. The zip must contain at least one `Dockerfile`
-2. Each Dockerfile must follow the structure `environment_folder/Dockerfile` (e.g. `python311/Dockerfile`)
-3. The frontend will parse and present the `environment_folder` list and allow removing environments
-
-> If the structure is invalid, the upload is rejected and the selection is cleared.
+### Dockerfiles.zip (Custom Environments)
+When uploading custom environment configurations, the following structure is required:
+1. The zip must contain at least one `Dockerfile`.
+2. Each file must follow the path: `environment_folder/Dockerfile` (e.g., `python311/Dockerfile`).
+3. The system will parse and list the detected environments for user confirmation.
 
 ---
 
-## Artifact Collection
+## 5. Artifact Collection
 
-Select which artifact types should be retained or made available for download:
-
-- `Compiled Binary`: the compiled binary file
-- `Student Artifact (zip)`: the student's submitted zip
-
-This setting is stored in `config.artifactCollection`.
+Select which files should be preserved or made available for download after execution:
+* **Compiled Binary**: The binary file generated after compilation.
+* **Student Artifact (zip)**: The original zip archive submitted by the student.

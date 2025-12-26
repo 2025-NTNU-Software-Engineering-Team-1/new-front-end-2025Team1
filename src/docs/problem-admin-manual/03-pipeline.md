@@ -1,88 +1,57 @@
 # Pipeline (Evaluation Flow) Guide
 
-This section covers File Access, Execution Mode, Library Restrictions, Custom Checker, Custom Scoring Script, and related topics.
+This section covers the configuration of the evaluation environment, including file access permissions, execution modes, static analysis restrictions, and custom logic scripts.
 
 ---
 
-## File Access (Allow Read / Allow Write)
+## 1. File Access (Read / Write)
 
-### Allow Read
+File access controls the program's ability to interact with the file system.
 
-- Allows the program to read files (e.g. `fopen` / `open`)
-- **Student Resource Data** requires Allow Read to be enabled; Teacher Resource Data is not restricted
-
-### Allow Write
-
-- Allows the program to write files
-- **Allow Write depends on Allow Read**:
-  - If Allow Read is disabled, Allow Write will be forced off
-  - The UI will show a warning when applicable
+- **Allow Read**: Required for the program to perform read operations. **Student Resource Data** will only be accessible if this is enabled. Teacher Resource Data remains accessible regardless of this setting.
+- **Allow Write**: Enables file writing operations.
+- **Dependency**: "Allow Write" is dependent on "Allow Read." If read access is disabled, write access is automatically revoked, and a warning will be displayed in the UI.
 
 ---
 
-## Library Restrictions (Static analysis restrictions)
+## 2. Library Restrictions
 
-> Different languages support different types of restrictions:
->
-> - Python supports Imports restrictions
-> - C/C++ supports Headers restrictions
+Static analysis is used to restrict the resources a program can utilize based on the language:
 
-### Enabled
+- **Language Support**: Python uses Import restrictions, while C/C++ uses Header restrictions.
+- **Filtering Modes**: Each category can be toggled between two modes:
+  - **Whitelist**: Only items in the list are permitted.
+  - **Blacklist**: Items in the list are strictly forbidden.
+- **Note**: Switching between Whitelist and Blacklist will clear the current list to prevent configuration errors.
 
-When enabled, you can configure four categories:
-
-1. Syntax Restrictions
-2. Imports Restrictions (Python)
-3. Headers Restrictions (C/C++)
-4. Functions Restrictions
-
-Each category can be toggled between **Whitelist** (only allow items in the list) and **Blacklist** (disallow items in the list). Switching between modes clears the opposite list to avoid mixed usage.
+Categories include: Syntax, Imports (Python), Headers (C/C++), and Functions.
 
 ---
 
-## Execution Mode
+## 3. Execution Mode
 
-### General
+| Mode              | Use Case                                    | Prerequisites                                              |
+| :---------------- | :------------------------------------------ | :--------------------------------------------------------- |
+| **General**       | Standard algorithmic problems.              | None.                                                      |
+| **Function Only** | Problems requiring custom build/link logic. | Must upload `Makefile.zip`.                                |
+| **Interactive**   | Programs interacting with a judge process.  | Requires Teacher Code. Optional "Teacher First" execution. |
 
-- Standard mode suitable for most problems
-
-### Function Only
-
-- Requires uploading `Makefile.zip`
-- Use case: build/link in a specific way (backend pipeline determines exact behavior)
-
-### Interactive
-
-- Interactive problem mode
-- Typically requires uploading Teacher Code (Teacher_file)
-- Optionally select Teacher First (run teacher first, then student; backend-dependent)
-
-> Note: Custom Checker is disabled in Interactive mode (UI will lock the option).
+> **System Note**: Custom Checker is automatically disabled and locked when Interactive mode is selected.
 
 ---
 
-## Custom Checker
+## 4. Custom Logic Scripts
 
-- When enabled, you must upload `Custom_Checker.py` (or have it pre-registered on the backend)
-- Used to programmatically compare student outputs (behavior depends on backend implementation)
+### Custom Checker
 
-Frontend validation:
+Used to programmatically evaluate student outputs. If enabled, the user must either upload a `Custom_Checker.py` or utilize a pre-registered backend script.
 
-- If Custom Checker is enabled, there must be an uploaded file or an existing checker on the backend
+### Custom Scoring Script
 
----
-
-## Custom Scoring Script
-
-- When enabled, you must upload `Custom_Scorer.py` (or rely on a backend-provided script)
-- Used to customize problem scoring rules (backend-dependent)
-
-Frontend validation:
-
-- If enabled, there must be an uploaded file or an existing scoring script on the backend
+Used to define non-standard scoring rules. Similar to the checker, an uploaded script or backend default is required when this feature is active.
 
 ---
 
-## Upload Size Limits
+## 5. Upload Size Limits
 
-All upload fields are checked client-side via `assertFileSizeOK()`. If a file exceeds limits, the selection will be cleared and an error will be shown (refer to project-specific limits).
+To ensure performance, all file upload fields undergo client-side validation. If a file exceeds the defined limit, the selection will be cleared, and an error alert will be triggered immediately.

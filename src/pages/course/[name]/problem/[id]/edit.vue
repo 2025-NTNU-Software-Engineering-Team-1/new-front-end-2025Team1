@@ -509,7 +509,7 @@ const mockProblemMeta = {
                   class="bg-info text-info-content pointer-events-none absolute right-full z-10 mr-3 w-max max-w-[200px] rounded-lg px-3 py-2 text-sm font-bold shadow-lg"
                 >
                   <div
-                    class="bg-info absolute -right-1 top-1/2 h-3 w-3 -translate-y-1/2 rotate-45 transform"
+                    class="bg-info absolute top-1/2 -right-1 h-3 w-3 -translate-y-1/2 rotate-45 transform"
                   ></div>
                   👋 Click here for Manual!
                 </div>
@@ -565,7 +565,7 @@ const mockProblemMeta = {
                 <input v-model="openJSON" type="checkbox" class="toggle" />
               </div>
 
-              <pre v-if="openJSON" class="bg-base-200 whitespace-pre-wrap rounded p-2"
+              <pre v-if="openJSON" class="bg-base-200 rounded p-2 whitespace-pre-wrap"
                 >{{ JSON.stringify(edittingProblem, null, 2) }}
               </pre>
 

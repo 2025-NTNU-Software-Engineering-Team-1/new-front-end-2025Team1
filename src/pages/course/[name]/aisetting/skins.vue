@@ -404,7 +404,7 @@ onMounted(() => {
         class="modal-box relative flex max-w-2xl items-center justify-center overflow-visible border-none bg-transparent p-0 shadow-none"
       >
         <button
-          class="btn btn-sm btn-circle bg-base-100 text-base-content absolute right-2 top-2 z-10"
+          class="btn btn-sm btn-circle bg-base-100 text-base-content absolute top-2 right-2 z-10"
           @click="closePreview"
         >
           ✕

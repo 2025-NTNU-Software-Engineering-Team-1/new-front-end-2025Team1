@@ -6,6 +6,7 @@ import { required, maxLength, between, helpers } from "@vuelidate/validators";
 import { containsInvisible } from "@/utils/validators";
 import { useI18n } from "vue-i18n";
 
+// [NOTE] Assuming icons are imported globally or via unplugin-icons.
 import DescriptionSection from "./Sections/DescriptionSection.vue";
 import ConfigurationSection from "./Sections/ConfigurationSection.vue";
 import PipelineSection from "./Sections/PipelineSection.vue";
@@ -168,11 +169,6 @@ defineExpose({ isLoading, errorMsg });
 // ==========================================
 // Section: Data Normalization
 // ==========================================
-
-/**
- * Dual-version compatible normalize function for library restrictions.
- * Handles both legacy array format and new object format.
- */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalizeLibraryRestrictions(raw: any) {
   const base = {
@@ -182,7 +178,6 @@ function normalizeLibraryRestrictions(raw: any) {
   };
   if (!raw) return base;
 
-  // Check if it's the new structure (contains internal keys)
   const isNewStructure =
     typeof raw.whitelist === "object" &&
     raw.whitelist !== null &&
@@ -190,7 +185,6 @@ function normalizeLibraryRestrictions(raw: any) {
     Array.isArray(raw.blacklist.syntax);
 
   if (isNewStructure) {
-    // Preserve all fields but ensure keys exist
     return {
       enabled: !!raw.enabled,
       whitelist: {
@@ -208,7 +202,6 @@ function normalizeLibraryRestrictions(raw: any) {
     };
   }
 
-  // Legacy format: whitelist/blacklist are direct arrays (usually syntax)
   logger.warn("Legacy LibraryRestrictions format detected, normalizing...");
   const asArr = (v: unknown) => (Array.isArray(v) ? v : []);
   return {
@@ -228,10 +221,6 @@ function normalizeLibraryRestrictions(raw: any) {
   };
 }
 
-/**
- * Auto-correct form structure on initialization.
- * Runs only once to avoid resetting user edits during hot-reload.
- */
 function initFormStructure() {
   logger.group("Init Form Structure");
   if (!problem.value) {
@@ -240,7 +229,6 @@ function initFormStructure() {
     return;
   }
 
-  // Ensure pipeline and staticAnalysis exist
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if (!problem.value.pipeline) problem.value.pipeline = {} as any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -249,12 +237,10 @@ function initFormStructure() {
   const staticAnalysis = (problem.value.pipeline.staticAnalysis ??= {} as any) as any;
   const libs = staticAnalysis.libraryRestrictions;
 
-  // Normalize Library Restrictions
   if (!libs || typeof libs !== "object") {
     logger.log("Initializing Library Restrictions (Empty)");
     staticAnalysis.libraryRestrictions = normalizeLibraryRestrictions(null);
   } else {
-    // logger.log("Normalizing existing Library Restrictions");
     staticAnalysis.libraryRestrictions = normalizeLibraryRestrictions(libs);
   }
 
@@ -265,8 +251,6 @@ function initFormStructure() {
 onMounted(() => {
   initFormStructure();
 });
-
-//
 
 function hasRemoteAsset(key: string): boolean {
   const paths = (problem.value.config as { assetPaths?: Record<string, unknown> })?.assetPaths;
@@ -345,9 +329,6 @@ const rules = {
       },
     ),
 
-    // ==========================================
-    // [NEW] Network & Sidecars Validation
-    // ==========================================
     network_ips: helpers.withMessage(
       `Invalid IP configuration: Max ${MAX_LIST_SIZE} items, format must be 0-255.0-255.0-255.0-255`,
       () => {
@@ -381,14 +362,12 @@ const rules = {
           if (sc.name.length > MAX_CHAR_LENGTH) return false;
           if (sc.image.length > MAX_CHAR_LENGTH) return false;
 
-          // Args check
           if (Array.isArray(sc.args)) {
             if (sc.args.some((arg: string) => arg.length > MAX_CHAR_LENGTH)) return false;
           } else if (typeof sc.args === "string") {
             if (sc.args.length > MAX_CHAR_LENGTH) return false;
           }
 
-          // Env check
           if (sc.env) {
             const envStr = typeof sc.env === "string" ? sc.env : JSON.stringify(sc.env);
             if (envStr.length > MAX_CHAR_LENGTH) return false;
@@ -408,7 +387,6 @@ const rules = {
         const hasURL = (nar?.external?.url?.length ?? 0) > 0;
         const hasSidecars = (nar?.sidecars?.length ?? 0) > 0;
 
-        // Docker check: New upload OR Remote existing
         const hasDocker =
           !!problem.value.assets?.dockerfilesZip ||
           hasRemoteAsset("network_dockerfile") ||
@@ -428,28 +406,13 @@ const rules = {
   },
 
   assets: {
-    /*
-    aiVTuberACFiles: {
-      requiredWhenVtuber: helpers.withMessage(
-        "AI VTuber is enabled: please upload at least one AC file.",
-        () => {
-          const cfg = problem.value.config;
-          if (!cfg?.aiVTuber) return true;
-          return (problem.value.assets?.aiVTuberACFiles?.length ?? 0) > 0;
-        },
-      ),
-    },
-    */
-
     trialModeACFiles: {
       requiredWhenTrial: helpers.withMessage("Trial Mode is enabled: please upload the AC file.", () => {
         const cfg = problem.value.config;
         if (!cfg?.trialMode) return true;
-        // Check if already uploaded via assetPaths
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const assetPaths = (cfg as any)?.assetPaths || {};
         if (assetPaths["ac_code"]) return true;
-        // Check if new file is being uploaded
         return (problem.value.assets?.trialModeACFiles?.length ?? 0) > 0;
       }),
     },
@@ -460,11 +423,9 @@ const rules = {
         () => {
           const cfg = problem.value.config;
           if (!cfg?.trialMode) return true;
-          // Check if already uploaded via assetPaths
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const assetPaths = (cfg as any)?.assetPaths || {};
           if (assetPaths["public_testdata"]) return true;
-          // Check if new file is being uploaded
           return !!problem.value.assets?.trialModePublicTestDataZip;
         },
       ),
@@ -482,7 +443,7 @@ const rules = {
         },
         () => {
           const file = problem.value.assets?.teacherFile;
-          if (!file) return true; // Allow null/undefined
+          if (!file) return true; 
           if (problem.value.pipeline?.executionMode !== "interactive") return true;
           const exts = getAllowedFileExtensions(problem.value.allowedLanguage);
           const fileName = file.name.toLowerCase();
@@ -543,15 +504,6 @@ const rules = {
       requiredWhenNetworkEnabled: helpers.withMessage(
         "Network & Sidecars is enabled: please upload dockerfiles.zip",
         () => {
-          // This rule is now partially redundant due to 'network_global' check above,
-          // but kept as a specific pointer to the file input if everything else is empty.
-          // We relax this specific check slightly to defer to network_global,
-          // OR we keep it strict only if it's the *only* intended config.
-          // For safety, let's keep the existing logic but ensure it doesn't conflict.
-          // Actually, based on new requirements: Dockerfile is NOT mandatory if IP/URL/Sidecar exists.
-          // So we should REMOVE or MODIFY this rule.
-          // Since the user asked to "fix" based on limits, I will modify this to be consistent
-          // with the "4-choose-1" logic.
           return true; // Delegated to config.network_global
         },
       ),
@@ -564,22 +516,15 @@ const rules = {
   },
 };
 
-// ==========================================
-// Section: Vuelidate & Methods
-// ==========================================
 const v$ = useVuelidate(rules, problem);
-
-// Provide v$ to child components (e.g., PipelineSection)
 provide("v$", v$);
 
 function update<K extends keyof ProblemForm>(key: K, value: ProblemForm[K]) {
-  // logger.log(`Update Field: ${String(key)}`, value); // Optional: verbose logging
   emits("update", key, value);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if ((v$.value as any)[key]) (v$.value as any)[key].$touch?.();
 }
 
-//
 async function openAndScroll(panel: PanelKey) {
   openPanels[panel] = true;
   await nextTick();
@@ -617,7 +562,6 @@ async function submit() {
       block: "start",
     });
 
-    // Debug: Log invalid fields
     if (DEBUG_MODE) {
       logger.warn(
         "Invalid Fields:",
@@ -631,34 +575,46 @@ async function submit() {
 </script>
 
 <template>
-  <div v-if="errorMsg" class="alert alert-error shadow-lg">
-    <div>
-      <i-uil-times-circle />
-      <span>{{ errorMsg }}</span>
+  <Transition name="slide-fade">
+    <div v-if="errorMsg" class="mb-4 flex items-start gap-3 rounded-lg border border-error/20 bg-error/10 p-4 shadow-sm">
+      <div class="mt-0.5 text-error">
+        <i-uil-times-circle class="h-5 w-5" />
+      </div>
+      <div class="text-sm font-medium text-error-content/90">
+        {{ errorMsg }}
+      </div>
     </div>
-  </div>
+  </Transition>
 
   <div class="grid grid-cols-2 gap-y-4">
     <div class="form-control w-full max-w-xs">
       <label class="label">
-        <span class="label-text">{{ t("course.problems.problemName") }}</span>
+        <span class="label-text font-medium">{{ t("course.problems.problemName") }}</span>
       </label>
 
       <input
         type="text"
-        :class="['input-bordered input w-full max-w-xs', v$.problemName.$error && 'input-error']"
+        :class="[
+          'input input-bordered w-full max-w-xs transition-colors',
+          v$.problemName.$error ? 'input-error focus:border-error focus:ring-1 focus:ring-error' : 'focus:border-primary focus:ring-1 focus:ring-primary',
+        ]"
         :value="problem.problemName"
         @input="update('problemName', ($event.target as HTMLInputElement).value)"
       />
 
-      <label v-show="v$.problemName.$error" class="label">
-        <span class="label-text-alt text-error" v-text="v$.problemName.$errors[0]?.$message" />
-      </label>
+      <div class="min-h-[20px]">
+        <Transition name="fade">
+          <div v-if="v$.problemName.$error" class="mt-1 flex items-center gap-1.5 text-xs text-error">
+            <i-uil-exclamation-circle class="h-3.5 w-3.5 flex-shrink-0" />
+            <span class="font-medium">{{ v$.problemName.$errors[0]?.$message }}</span>
+          </div>
+        </Transition>
+      </div>
     </div>
 
     <div class="form-control">
       <label class="label cursor-pointer justify-start gap-x-4">
-        <span class="label-text">{{ t("components.problem.forms.hiddenToggle") }}</span>
+        <span class="label-text font-medium">{{ t("components.problem.forms.hiddenToggle") }}</span>
         <input
           type="checkbox"
           class="toggle toggle-success"
@@ -670,67 +626,62 @@ async function submit() {
   </div>
 
   <div ref="sectionRefs.desc" class="mt-4 flex flex-col gap-3">
-    <div class="collapse-arrow rounded-box bg-base-200 collapse">
+    <div class="collapse-arrow collapse rounded-box bg-base-200 shadow-sm border border-base-300">
       <input type="checkbox" class="peer" v-model="openPanels.desc" />
       <div
-        class="collapse-title flex min-h-0 items-center py-2 text-base font-semibold"
-        style="height: 2.5rem; min-height: 2.5rem"
+        class="collapse-title flex min-h-0 items-center py-3 text-base font-semibold text-base-content"
       >
         {{ t("course.problems.setDescription") }}
       </div>
-      <div class="collapse-content peer-checked:pt-4">
+      <div class="collapse-content peer-checked:pt-2">
         <DescriptionSection :v$="v$" @update="update" />
       </div>
     </div>
 
-    <div ref="sectionRefs.config" class="collapse-arrow rounded-box bg-base-200 collapse">
+    <div ref="sectionRefs.config" class="collapse-arrow collapse rounded-box bg-base-200 shadow-sm border border-base-300">
       <input type="checkbox" class="peer" v-model="openPanels.config" />
       <div
-        class="collapse-title flex min-h-0 items-center py-2 text-base font-semibold"
-        style="height: 2.5rem; min-height: 2.5rem"
+        class="collapse-title flex min-h-0 items-center py-3 text-base font-semibold text-base-content"
       >
         {{ t("course.problems.setConfiguration") }}
       </div>
-      <div class="collapse-content peer-checked:pt-4">
+      <div class="collapse-content peer-checked:pt-2">
         <ConfigurationSection />
       </div>
     </div>
 
-    <div ref="sectionRefs.pipeline" class="collapse-arrow rounded-box bg-base-200 collapse">
+    <div ref="sectionRefs.pipeline" class="collapse-arrow collapse rounded-box bg-base-200 shadow-sm border border-base-300">
       <input type="checkbox" class="peer" v-model="openPanels.pipeline" />
       <div
-        class="collapse-title flex min-h-0 items-center py-2 text-base font-semibold"
-        style="height: 2.5rem; min-height: 2.5rem"
+        class="collapse-title flex min-h-0 items-center py-3 text-base font-semibold text-base-content"
       >
         {{ t("course.problems.setPipelines") }}
       </div>
-      <div class="collapse-content peer-checked:pt-4">
+      <div class="collapse-content peer-checked:pt-2">
         <PipelineSection />
       </div>
     </div>
 
-    <div ref="sectionRefs.testdata" class="collapse-arrow rounded-box bg-base-200 collapse">
+    <div ref="sectionRefs.testdata" class="collapse-arrow collapse rounded-box bg-base-200 shadow-sm border border-base-300">
       <input type="checkbox" class="peer" v-model="openPanels.testdata" />
       <div
-        class="collapse-title flex min-h-0 items-center py-2 text-base font-semibold"
-        style="height: 2.5rem; min-height: 2.5rem"
+        class="collapse-title flex min-h-0 items-center py-3 text-base font-semibold text-base-content"
       >
         {{ t("course.problems.setTestData") }}
       </div>
-      <div class="collapse-content peer-checked:pt-4">
+      <div class="collapse-content peer-checked:pt-2">
         <TestDataSection :v$="v$ as any" />
       </div>
     </div>
 
-    <div ref="sectionRefs.resdata" class="collapse-arrow rounded-box bg-base-200 collapse">
+    <div ref="sectionRefs.resdata" class="collapse-arrow collapse rounded-box bg-base-200 shadow-sm border border-base-300">
       <input type="checkbox" class="peer" v-model="openPanels.resdata" />
       <div
-        class="collapse-title flex min-h-0 items-center py-2 text-base font-semibold"
-        style="height: 2.5rem; min-height: 2.5rem"
+        class="collapse-title flex min-h-0 items-center py-3 text-base font-semibold text-base-content"
       >
         {{ t("course.problems.setResourceData") }}
       </div>
-      <div class="collapse-content peer-checked:pt-4">
+      <div class="collapse-content peer-checked:pt-2">
         <div class="flex flex-col gap-4">
           <ResourceDataSection variant="student" />
           <ResourceDataSection variant="teacher" />
@@ -739,24 +690,52 @@ async function submit() {
     </div>
   </div>
 
-  <div v-if="v$.$error" class="alert alert-error mt-3">
-    <div class="flex flex-col gap-2">
-      <div class="font-semibold">{{ t("course.problems.submissionBlocked") }}</div>
+  <Transition name="slide-up">
+    <div v-if="v$.$error" class="mt-6 rounded-xl border-l-4 border-l-error border-y border-r border-y-base-300 border-r-base-300 bg-base-100 p-5 shadow-md">
+      <div class="flex items-start gap-4">
+        <div class="rounded-full bg-error/10 p-2 text-error">
+           <i-uil-exclamation-triangle class="h-6 w-6" />
+        </div>
+        <div class="flex-1">
+          <h3 class="text-lg font-bold text-base-content">
+            {{ t("course.problems.submissionBlocked") }}
+          </h3>
+          <p class="text-sm text-base-content/70">
+            Please resolve the following issues before submitting:
+          </p>
 
-      <ul class="list-disc pl-5 text-sm">
-        <li v-for="(e, idx) in errorSummary" :key="idx">
-          <button type="button" class="link link-hover" @click="openAndScroll(e.panel)">
-            {{ e.message }}
-          </button>
-          <span class="opacity-70"> ({{ e.path }})</span>
-        </li>
-      </ul>
+          <div class="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
+            <button
+              v-for="(e, idx) in errorSummary"
+              :key="idx"
+              type="button"
+              class="group flex items-start justify-between rounded-lg border border-transparent bg-base-200 px-3 py-2 text-left text-sm transition-all hover:border-error/30 hover:bg-error/5 hover:shadow-sm"
+              @click="openAndScroll(e.panel)"
+            >
+              <div class="flex items-start gap-2 w-full">
+                 <span class="badge badge-error badge-xs badge-outline shrink-0 mt-0.5">
+                  {{ e.path }}
+                </span>
+                <span class="break-words font-medium text-base-content group-hover:text-error">
+                  {{ e.message }}
+                </span>
+              </div>
+              
+              <i-uil-arrow-right class="ml-2 mt-0.5 h-4 w-4 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 text-error" />
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
+  </Transition>
 
-  <div class="mt-6 flex justify-end">
-    <button :class="['btn btn-success', isLoading && 'loading']" @click="submit">
-      <i-uil-file-upload-alt class="mr-1 lg:h-5 lg:w-5" /> {{ t("course.members.submit") }}
+  <div class="mt-8 flex justify-end border-t border-base-200 pt-6">
+    <button 
+      :class="['btn btn-success gap-2 px-6 font-bold text-white shadow-md transition-transform active:scale-95', isLoading && 'loading']" 
+      @click="submit"
+    >
+      <i-uil-file-upload-alt class="h-5 w-5" /> 
+      {{ t("course.members.submit") }}
     </button>
   </div>
 </template>
@@ -782,5 +761,42 @@ async function submit() {
 
 :deep(.collapse-arrow > input[type="checkbox"]:checked ~ .collapse-title)::after {
   transform: translateY(-50%) rotate(90deg) !important;
+}
+
+/* Vue Transitions */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+.slide-fade-leave-active {
+  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+}
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateY(-10px);
+  opacity: 0;
+}
+
+.slide-up-enter-active {
+  transition: all 0.4s ease-out;
+}
+.slide-up-leave-active {
+  transition: all 0.3s ease-in;
+}
+.slide-up-enter-from {
+  transform: translateY(20px);
+  opacity: 0;
+}
+.slide-up-leave-to {
+  transform: translateY(10px);
+  opacity: 0;
 }
 </style>

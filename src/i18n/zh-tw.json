@@ -285,7 +285,7 @@
       "customChecker": "自定義檢查器 ",
       "uploadCustomChecker": "上傳 Custom_Checker.py",
       "uploadCustomCheckerInfo": "啟用後可上傳 Custom_Checker.py",
-      "uploadCustomCheckerWarning": "Custom Checker disabled in Interactive mode.",
+      "uploadCustomCheckerWarning": "互動模式中不支援自定義批改程序",
       "aiCheckerEnable": "啟用 AI",
       "aiCheckerApiKey": "API Key",
       "aiCheckerModel": "Model",
@@ -369,8 +369,8 @@
       "dropToActivate":"拖放至此以啟用",
       "active":"啟用中",
       "inactive":"停用中",
-      "selectedKeysTitle": "已選取的金鑰 ({count}) - 點擊下方項目以移除"
-
+      "selectedKeysTitle": "已選取的金鑰 ({count}) - 點擊下方項目以移除",
+       "enableCppHint":"啟用 C/C++ 以解鎖"
     },
     "submissions": {
       "text": "繳交狀態",

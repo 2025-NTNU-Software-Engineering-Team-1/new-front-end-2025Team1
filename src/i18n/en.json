@@ -385,8 +385,8 @@
       "dropToActivate":"Drop to Activate",
       "active":"Active",
       "inactive":"Inactive",
-      "selectedKeysTitle": "Selected Keys ({count})  - Click items below to remove"
-    
+      "selectedKeysTitle": "Selected Keys ({count})  - Click items below to remove",
+      "enableCppHint":"Enable C/C++ to unlock."
     },
     "submissions": {
       "text": "Submissions",

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import { useI18n } from "vue-i18n";
 
 interface Sidecar {
   name: string;
@@ -20,6 +21,7 @@ const newName = ref("");
 const newImage = ref("");
 const newArgs = ref("");
 const newEnv = ref("");
+const { t } = useI18n();
 
 // Track which sidecar is being edited
 const editingIndex = ref<number | null>(null);
@@ -137,7 +139,7 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
         <div class="space-y-3">
           <div class="form-control">
             <label class="label py-0">
-              <span class="label-text">Name</span>
+              <span class="label-text">{{t("course.problems.sideCarName")}}</span>
             </label>
             <input
               placeholder="e.g. mysql"
@@ -148,7 +150,7 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
           </div>
           <div class="form-control">
             <label class="label py-0">
-              <span class="label-text">Image</span>
+              <span class="label-text">{{t("course.problems.sideCarImage")}}</span>
             </label>
             <input
               placeholder="e.g. mysql:8.0"
@@ -162,8 +164,8 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
         <div class="space-y-3">
           <div class="form-control">
             <label class="label py-0">
-              <span class="label-text">Args</span>
-              <span class="label-text-alt opacity-60">comma-separated</span>
+              <span class="label-text">{{t("course.problems.sideCarArgs")}}</span>
+              <span class="label-text-alt opacity-60">{{t("course.problems.sideCarCommaSeparated")}}</span>
             </label>
             <input
               placeholder="--port=3306, --host=0.0.0.0"
@@ -173,8 +175,8 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
           </div>
           <div class="form-control">
             <label class="label py-0">
-              <span class="label-text">Env</span>
-              <span class="label-text-alt opacity-60">KEY=VALUE per line</span>
+              <span class="label-text">{{t("course.problems.sideCarEnv")}}</span>
+              <span class="label-text-alt opacity-60">{{t("course.problems.sideCarKEYVALUEPerLine")}}</span>
             </label>
             <textarea
               placeholder="MYSQL_ROOT_PASSWORD=secret&#10;MYSQL_DATABASE=testdb"
@@ -186,7 +188,7 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
       </div>
       <!-- Add Button -->
       <div class="mt-4 flex justify-end">
-        <button class="btn btn-sm btn-primary" @click="add">Add Sidecar</button>
+        <button class="btn btn-sm btn-primary" @click="add">{{t("course.problems.addSidecar")}}</button>
       </div>
     </div>
 
@@ -194,11 +196,11 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
       <table class="table-sm table w-full">
         <thead class="bg-base-200">
           <tr>
-            <th class="w-[15%] py-3">Name</th>
-            <th class="w-[25%] py-3">Image</th>
-            <th class="w-[25%] py-3">Args</th>
-            <th class="w-[25%] py-3">Env</th>
-            <th class="w-16 py-3 text-center">Action</th>
+            <th class="w-[15%] py-3">{{ t("course.problems.sideCarName") }}</th>
+            <th class="w-[25%] py-3">{{ t("course.problems.sideCarImage") }}</th>
+            <th class="w-[25%] py-3">{{ t("course.problems.sideCarArgs") }}</th>
+            <th class="w-[25%] py-3">{{ t("course.problems.sideCarEnv") }}</th>
+            <th class="w-16 py-3 text-center">{{ t("course.problems.sideCarAction") }}</th>
           </tr>
         </thead>
 
@@ -212,7 +214,7 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
               </td>
               <td class="py-1 font-mono text-xs opacity-70">
                 <span v-if="sidecar.env && Object.keys(sidecar.env).length > 0">
-                  {{ Object.keys(sidecar.env).length }} vars
+                  {{ Object.keys(sidecar.env).length }} {{t("course.problems.sideCarvars")}}
                 </span>
                 <span v-else>-</span>
               </td>
@@ -236,7 +238,7 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
               <td colspan="5" class="p-2">
                 <div class="grid grid-cols-1 gap-2 md:grid-cols-2">
                   <div class="form-control">
-                    <label class="label py-0"><span class="label-text-alt">Args</span></label>
+                    <label class="label py-0"><span class="label-text-alt">{{ t("course.problems.sideCarArgs") }}</span></label>
                     <input
                       class="input-bordered input input-sm"
                       v-model="editArgs"
@@ -244,7 +246,7 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
                     />
                   </div>
                   <div class="form-control">
-                    <label class="label py-0"><span class="label-text-alt">Env (KEY=VALUE)</span></label>
+                    <label class="label py-0"><span class="label-text-alt">{{ t("course.problems.sideCar_EnvKEYVALUE") }}</span></label>
                     <textarea
                       class="textarea-bordered textarea textarea-sm h-16 text-xs"
                       v-model="editEnv"
@@ -257,7 +259,7 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
           </template>
 
           <tr v-if="modelValue.length === 0">
-            <td colspan="5" class="py-2 text-center text-sm opacity-70">No sidecars configured.</td>
+            <td colspan="5" class="py-2 text-center text-sm opacity-70">{{ t("course.problems.noSidecarsConfigured") }}</td>
           </tr>
         </tbody>
       </table>

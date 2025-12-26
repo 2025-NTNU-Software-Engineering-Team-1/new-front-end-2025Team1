@@ -360,7 +360,29 @@
       "all": "All",
       "clear": "Clear",
       "accessDenied": "Access Denied",
-      "limitReached": "Limit Reached"
+      "limitReached": "Limit Reached",
+      "whenNetworkEnabled":"When Network Access is enabled, at least one of IP, URL, Sidecars, or Dockerfiles must be configured.",
+      "sideCarName":"Name",
+      "sideCarImage":"Image",
+      "sideCarArgs":"Args",
+      "sideCarEnv":"Env",
+      "sideCarCommaSeparated":"comma-separated",
+      "sideCarKEYVALUEPerLine":"KEY=VALUE per line",
+      "addSidecar":"Add Sidecar",
+      "sideCarAction":"Action",
+      "sideCarvars":"vars",
+      "sideCar_EnvKEYVALUE":"Env (KEY=VALUE)",
+      "noSidecarsConfigured":"No sidecars configured.",
+      "tokenDisplay": "Token: input * {input} ; output * {output}",
+      "creatorInfo": "Creator: {name} // {value}",
+      "requestCount": "Number of requests: {count}",
+      "keyNameLabel": "Key: {name}",
+      "dropToDeactivate":"Drop to Deactivate",
+      "dropToActivate":"Drop to Activate",
+      "active":"Active",
+      "inactive":"Inactive",
+      "selectedKeysTitle": "Selected Keys ({count})  - Click items below to remove"
+    
     },
     "submissions": {
       "text": "Submissions",
@@ -866,16 +888,7 @@
     },
     "dashboard": {
       "row-count": "Row Count: {n}",
-      "search-name": "Search Name"
-    },
-    "unknown-error-occurred": "Unknown error occurred :(",
-    "tab": {
-      "dashboard": "Dashboard",
-      "user": "User",
-      "loginRecords": "Login Records",
-      "skins": "AI Skins"
-    },
-    "dashboard": {
+      "search-name": "Search Name",
       "usercount": {
         "title": "User Overview",
         "count": "Count",
@@ -896,7 +909,7 @@
       "totalSkins": "Total Skins",
       "totalSize": "Total Size",
       "thumbnail": "Thumbnail",
-      "name": "Name",
+      "name": "comma-separated",
       "uploadedBy": "Uploaded By",
       "size": "Size",
       "type": "Type",

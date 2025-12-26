@@ -548,7 +548,7 @@ const networkErrors = computed(() => {
 
   if (!hasIP && !hasURL && !hasSidecars && !hasDocker) {
     errors.global.push(
-      "When Network Access is enabled, at least one of IP, URL, Sidecars, or Dockerfiles must be configured.",
+      t("problem.configuration.whenNetworkEnabled"),
     );
   }
 
@@ -1163,7 +1163,7 @@ onBeforeUnmount(() => {
               >
                 <div class="flex items-center gap-2">
                   <span class="text-info text-xs font-bold">
-                    Selected Keys ({{ selectedKeyObjects.length }}) - Click items below to remove
+                    {{ t("course.problems.selectedKeysTitle", { count: selectedKeyObjects.length }) }}
                   </span>
                 </div>
                 <svg
@@ -1197,9 +1197,9 @@ onBeforeUnmount(() => {
                           {{ key.key_name }}
                         </span>
                         <span v-if="key.is_active" class="badge badge-success badge-xs font-mono"
-                          >Active</span
+                          >{{t("course.problems.active")}}</span
                         >
-                        <span v-else class="badge badge-error badge-xs font-mono">Inactive</span>
+                        <span v-else class="badge badge-error badge-xs font-mono">{{t("course.problems.inactive")}}</span>
                       </div>
                       <div class="mt-0.5 truncate text-xs text-gray-400">
                         {{ key.masked_value }} ({{ key.created_by }})
@@ -1255,7 +1255,7 @@ onBeforeUnmount(() => {
                     <span class="badge badge-info badge-sm">{{ apiKeys.active.length }}</span>
                   </div>
                   <span v-if="isDragging" class="text-info animate-pulse text-xs font-bold">
-                    Drop to Activate
+                   {{t("course.problems.dropToActivate")}}
                   </span>
                 </button>
 
@@ -1276,15 +1276,15 @@ onBeforeUnmount(() => {
                         v-model="selectedKeys"
                       />
                       <div class="flex-1">
-                        <div class="truncate text-sm font-semibold">Key: {{ key.key_name }}</div>
+                        <div class="truncate text-sm font-semibold">{{ t("course.problems.keyNameLabel", { name: key.key_name }) }}</div>
                         <div class="mt-1 text-xs text-gray-400">
-                          Creator: {{ key.created_by }} // {{ key.masked_value }}
+                          {{ t("course.problems.creatorInfo", { name: key.created_by, value: key.masked_value }) }}
                         </div>
                         <div class="mt-1 text-xs text-gray-400">
-                          Number of Requests: {{ key.request_count }}
+                          {{ t("course.problems.requestCount", { count: key.request_count }) }}
                         </div>
                         <div class="mt-1 text-xs text-gray-400">
-                          Token: input*{{ key.input_token }} ; output*{{ key.output_token }}
+                          {{ t("course.problems.tokenDisplay", { input: key.input_token, output: key.output_token }) }}
                         </div>
                       </div>
                     </label>
@@ -1320,7 +1320,7 @@ onBeforeUnmount(() => {
                     <span class="badge badge-error badge-sm">{{ apiKeys.inactive.length }}</span>
                   </div>
                   <span v-if="isDragging" class="text-error animate-pulse text-xs font-bold">
-                    Drop to Deactivate
+                    {{t("course.problems.dropToDeactivate")}}
                   </span>
                 </button>
 
@@ -1341,15 +1341,15 @@ onBeforeUnmount(() => {
                         v-model="selectedKeys"
                       />
                       <div class="flex-1">
-                        <div class="truncate text-sm font-semibold">Key: {{ key.key_name }}</div>
+                        <div class="truncate text-sm font-semibold">{{ t("course.problems.keyNameLabel", { name: key.key_name }) }}</div>
                         <div class="mt-1 text-xs text-gray-400">
-                          Creator: {{ key.created_by }} // {{ key.masked_value }}
+                          {{ t("course.problems.creatorInfo", { name: key.created_by, value: key.masked_value }) }}
                         </div>
                         <div class="mt-1 text-xs text-gray-400">
-                          Number of Requests: {{ key.request_count }}
+                          {{ t("course.problems.requestCount", { count: key.request_count }) }}
                         </div>
                         <div class="mt-1 text-xs text-gray-400">
-                          Token: input*{{ key.input_token }} ; output*{{ key.output_token }}
+                          {{ t("course.problems.tokenDisplay", { input: key.input_token, output: key.output_token }) }}
                         </div>
                       </div>
                     </label>
@@ -1428,7 +1428,7 @@ onBeforeUnmount(() => {
                 v-if="hasAsset('public_testdata') || problem.assets?.trialModePublicTestDataZip"
                 class="flex items-center gap-2"
               >
-                <span class="badge badge-outline badge-success text-xs">Uploaded</span>
+                <span class="badge badge-outline badge-success text-xs">{{ t("course.problems.uploaded") }}</span>
                 <a
                   v-if="hasAsset('public_testdata')"
                   :href="assetDownloadUrl('public_testdata') || '#'"

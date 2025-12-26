@@ -1285,16 +1285,44 @@ watch(
                 <label class="label">
                   <span class="label-text">{{ t("course.problems.aiCheckerApiKey") }}</span>
                 </label>
+<<<<<<< Updated upstream
                 <div class="dropdown dropdown-bottom w-full ">
                   <div tabindex="0" role="button" class="select select-bordered select-sm flex items-center justify-between w-full bg-base-100">
+=======
+                <div class="dropdown dropdown-bottom w-full">
+                  <div
+                    tabindex="0"
+                    role="button"
+                    class="select select-bordered select-sm flex w-full items-center justify-between bg-white"
+                  >
+>>>>>>> Stashed changes
                     <span class="truncate">
-                      {{ aiCheckerApiKeys.find(k => k.id === (problem.config as any).aiChecker?.apiKeyId)?.key_name || t("course.problems.aiCheckerSelectKey") }}
+                      {{
+                        aiCheckerApiKeys.find((k) => k.id === (problem.config as any).aiChecker?.apiKeyId)
+                          ?.key_name || t("course.problems.aiCheckerSelectKey")
+                      }}
                     </span>
                   </div>
+<<<<<<< Updated upstream
                   <ul tabindex="0" class="dropdown-content z-[100] menu p-2 shadow-lg bg-base-100 rounded-box w-full border border-base-300 mt-1 left-0">
                     <li class="disabled px-4 py-2 text-xs opacity-50">{{ t("course.problems.aiCheckerSelectKey") }}</li>
                     <li v-for="key in aiCheckerApiKeys" :key="key.id">
                       <a class="hover:bg-base-200 active:bg-primary active:text-primary-content" @click="(problem.config as any).aiChecker!.apiKeyId = key.id">{{ key.key_name }}</a>
+=======
+                  <ul
+                    tabindex="0"
+                    class="dropdown-content menu rounded-box left-0 z-[100] mt-1 w-full border border-gray-300 bg-white p-2 shadow-lg"
+                  >
+                    <li class="disabled px-4 py-2 text-xs opacity-50">
+                      {{ t("course.problems.aiCheckerSelectKey") }}
+                    </li>
+                    <li v-for="key in aiCheckerApiKeys" :key="key.id">
+                      <a
+                        class="text-gray-700 active:bg-gray-100"
+                        @click="(problem.config as any).aiChecker!.apiKeyId = key.id"
+                        >{{ key.key_name }}</a
+                      >
+>>>>>>> Stashed changes
                     </li>
                   </ul>
                 </div>
@@ -1303,10 +1331,11 @@ watch(
                 </label>
               </div>
 
-              <div class="form-control ">
+              <div class="form-control">
                 <label class="label">
                   <span class="label-text">{{ t("course.problems.aiCheckerModel") }}</span>
                 </label>
+<<<<<<< Updated upstream
                 <div class="dropdown dropdown-bottom w-full ">
                   <div tabindex="0" role="button" class="select select-bordered select-sm flex items-center justify-between w-full bg-base-100">
                       <span>{{ (problem.config as any).aiChecker?.model || 'Select Model' }}</span>
@@ -1315,6 +1344,35 @@ watch(
                     <li><a @click="(problem.config as any).aiChecker!.model = 'gemini-2.5-flash-lite'">gemini 2.5 flash lite</a></li>
                     <li><a @click="(problem.config as any).aiChecker!.model = 'gemini-2.5-flash'">gemini 2.5 flash</a></li>
                     <li><a @click="(problem.config as any).aiChecker!.model = 'gemini-2.5-pro'">gemini 2.5 pro</a></li>
+=======
+                <div class="dropdown dropdown-bottom w-full">
+                  <div
+                    tabindex="0"
+                    role="button"
+                    class="select select-bordered select-sm flex w-full items-center justify-between bg-white"
+                  >
+                    <span>{{ (problem.config as any).aiChecker?.model || "Select Model" }}</span>
+                  </div>
+                  <ul
+                    tabindex="0"
+                    class="dropdown-content menu rounded-box left-0 z-[100] mt-1 w-full bg-white p-2 shadow"
+                  >
+                    <li>
+                      <a @click="(problem.config as any).aiChecker!.model = 'gemini-2.5-flash-lite'"
+                        >gemini 2.5 flash lite</a
+                      >
+                    </li>
+                    <li>
+                      <a @click="(problem.config as any).aiChecker!.model = 'gemini-2.5-flash'"
+                        >gemini 2.5 flash</a
+                      >
+                    </li>
+                    <li>
+                      <a @click="(problem.config as any).aiChecker!.model = 'gemini-2.5-pro'"
+                        >gemini 2.5 pro</a
+                      >
+                    </li>
+>>>>>>> Stashed changes
                   </ul>
                 </div>
               </div>

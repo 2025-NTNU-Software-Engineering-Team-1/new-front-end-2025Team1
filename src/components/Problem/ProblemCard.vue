@@ -5,11 +5,29 @@ import { useSession } from "@/stores/session";
 import api from "@/models/api";
 import { isQuotaUnlimited, LANGUAGE_OPTIONS } from "@/constants";
 
-// UI state for expanding/collapsing sections
+/* =========================================
+   [NEW] Image Assets Import
+   ========================================= */
+import angelImg from "@/assets/angel-mascot.png";
+import devilImg from "@/assets/devil-mascot.png";
+
+/* =========================================
+   [CONFIG] Mascot Positioning
+   Adjust these values to move the mascot.
+   'right': Larger % or px moves it left (towards center).
+   'top': Negative px moves it up (outside the box).
+   ========================================= */
+const MASCOT_POSITION = {
+  right: "10%", // Changed from -right-6 to 10% to be more centered
+  top: "-110px", // Adjust vertical height
+};
+
+/* =========================================
+   UI State Management
+   ========================================= */
 const isLanguagesExpanded = ref(false);
 const isLibraryExpanded = ref(true);
 const isNetworkExpanded = ref(true);
-
 const areRestrictionsVisible = ref(false);
 
 interface Props {
@@ -22,7 +40,9 @@ const props = withDefaults(defineProps<Props>(), {
 
 const session = useSession();
 
-// Basic problem statistics
+/* =========================================
+   Basic Problem Data & Statistics
+   ========================================= */
 const submitCount = computed(() => (props.problem as any).submitCount ?? 0);
 const highScore = computed(() => (props.problem as any).highScore ?? 0);
 const subtasks = computed(() => {
@@ -30,109 +50,171 @@ const subtasks = computed(() => {
   return p.testCase ?? p.testCaseInfo?.tasks ?? [];
 });
 
-// Download test data
 function downloadTestCase(problemId: number) {
   window.location.assign(api.Problem.getTestCaseUrl(problemId));
 }
 
-/* ===== Allowed Languages Logic ===== */
-// Calculates which languages are allowed based on the bitmask
+/* =========================================
+   Language & Config Parsers
+   ========================================= */
 const allowedLangTexts = computed(() =>
   LANGUAGE_OPTIONS.filter(({ mask }) => (props.problem.allowedLanguage & mask) !== 0).map(({ text }) =>
     text.toUpperCase(),
   ),
 );
-// Helper flags for specific language features
 const hasPython = computed(() => !!(props.problem.allowedLanguage & 4));
 const hasCOrCpp = computed(() => !!(props.problem.allowedLanguage & 3));
 
-/* ====== Library Restriction Logic ====== */
 const lib = computed(() => (props.problem as any).pipeline?.staticAnalysis?.libraryRestrictions);
+const isNetworkEnabled = computed(() => (props.problem as any).config?.networkAccessEnabled ?? false);
+const netRestriction = computed(() => (props.problem as any).config?.networkAccessRestriction);
 
-// Helper to determine whitelist/blacklist mode for library sections
-function pickSectionMode(sectionSet: any) {
-  if (!sectionSet) return { mode: "none", items: [] };
-  const wl = (sectionSet.whitelist ?? []).length ?? 0;
-  const bl = (sectionSet.blacklist ?? []).length ?? 0;
-  const mode = wl >= bl ? "whitelist" : "blacklist";
-  const items = sectionSet[mode] ?? [];
+/* =========================================
+   Data Helper: Calculate List Counts
+   ========================================= */
+function sumArrays(...arrays: (string[] | undefined)[]) {
+  return arrays.reduce((sum, arr) => sum + (arr?.length || 0), 0);
+}
+
+/* =========================================
+   Logic: Blacklist & Whitelist Counters
+   ========================================= */
+const blacklistCount = computed(() => {
+  let count = 0;
+  const l = lib.value;
+
+  if (l?.enabled) {
+    const syntaxWl = l.whitelist?.syntax?.length || 0;
+    const syntaxBl = l.blacklist?.syntax?.length || 0;
+    if (syntaxWl === 0 && syntaxBl > 0) {
+      count += syntaxBl;
+    }
+
+    const trioWlCount = sumArrays(l.whitelist?.imports, l.whitelist?.headers, l.whitelist?.functions);
+    if (trioWlCount === 0) {
+      const trioBlCount = sumArrays(l.blacklist?.imports, l.blacklist?.headers, l.blacklist?.functions);
+      count += trioBlCount;
+    }
+  }
+
+  if (isNetworkEnabled.value) {
+    const ext = netRestriction.value?.external;
+    const isWhiteMode = ext?.model === "White";
+
+    if (!isWhiteMode) {
+      count += (ext?.ip?.length || 0) + (ext?.url?.length || 0);
+    }
+  }
+
+  return count;
+});
+
+const whitelistCount = computed(() => {
+  let count = 0;
+  const l = lib.value;
+
+  if (l?.enabled) {
+    if ((l.whitelist?.syntax?.length || 0) > 0) {
+      count += l.whitelist.syntax.length;
+    }
+    const trioWlCount = sumArrays(l.whitelist?.imports, l.whitelist?.headers, l.whitelist?.functions);
+    if (trioWlCount > 0) {
+      count += trioWlCount;
+    }
+  }
+
+  if (isNetworkEnabled.value) {
+    const ext = netRestriction.value?.external;
+    if (ext?.model === "White") {
+      count += (ext?.ip?.length || 0) + (ext?.url?.length || 0);
+    }
+  }
+
+  return count;
+});
+
+/* =========================================
+   Logic: Mascot State Decision
+   ========================================= */
+const mascotState = computed(() => {
+  const THRESHOLD_BL_HIGH = 10;
+  const THRESHOLD_WL_LOW = 5;
+
+  const isHighBlacklist = blacklistCount.value > THRESHOLD_BL_HIGH;
+  const isLowWhitelist = whitelistCount.value > 0 && whitelistCount.value < THRESHOLD_WL_LOW;
+
+  // Updated to return image source objects. Label property removed as it is no longer used in template.
+  if (isHighBlacklist && isLowWhitelist) {
+    return { type: "super-devil", imgSrc: devilImg };
+  } else if (isHighBlacklist || isLowWhitelist) {
+    return { type: "devil", imgSrc: devilImg };
+  } else {
+    return { type: "angel", imgSrc: angelImg };
+  }
+});
+
+/* =========================================
+   UI Helpers: Library Display List
+   ========================================= */
+function pickSectionMode(sectionSet: { whitelist?: string[]; blacklist?: string[] }) {
+  const wl = sectionSet.whitelist?.length || 0;
+  const bl = sectionSet.blacklist?.length || 0;
+
+  if (wl === 0 && bl === 0) return { mode: "none", items: [] };
+
+  const mode = wl > 0 ? "whitelist" : "blacklist";
+  const items = (mode === "whitelist" ? sectionSet.whitelist : sectionSet.blacklist) || [];
   return { mode, items };
 }
 
-// Construct the list of library restrictions (Syntax, Imports, etc.)
 const libraryEntries = computed(() => {
   if (!lib.value || !lib.value.enabled) return [];
   const libs = lib.value;
+
   return [
     {
       label: "Syntax",
-      ...pickSectionMode({
-        whitelist: libs.whitelist.syntax,
-        blacklist: libs.blacklist.syntax,
-      }),
+      ...pickSectionMode({ whitelist: libs.whitelist?.syntax, blacklist: libs.blacklist?.syntax }),
       disabled: false,
     },
     {
       label: "Imports",
-      ...pickSectionMode({
-        whitelist: libs.whitelist.imports,
-        blacklist: libs.blacklist.imports,
-      }),
+      ...pickSectionMode({ whitelist: libs.whitelist?.imports, blacklist: libs.blacklist?.imports }),
       disabled: !hasPython.value,
     },
     {
       label: "Headers",
-      ...pickSectionMode({
-        whitelist: libs.whitelist.headers,
-        blacklist: libs.blacklist.headers,
-      }),
+      ...pickSectionMode({ whitelist: libs.whitelist?.headers, blacklist: libs.blacklist?.headers }),
       disabled: !hasCOrCpp.value,
     },
     {
       label: "Functions",
-      ...pickSectionMode({
-        whitelist: libs.whitelist.functions,
-        blacklist: libs.blacklist.functions,
-      }),
+      ...pickSectionMode({ whitelist: libs.whitelist?.functions, blacklist: libs.blacklist?.functions }),
       disabled: false,
     },
   ];
 });
 
-/* ====== Network Restriction Logic (Updated) ====== */
-
-// Check if network access is globally enabled in config
-const isNetworkEnabled = computed(() => (props.problem as any).config?.networkAccessEnabled ?? false);
-// Access the raw network restriction object
-const netRestriction = computed(() => (props.problem as any).config?.networkAccessRestriction);
-
-// Process External Network Rules (IPs/URLs)
-const externalConfig = computed(() => {
-  // If disabled or no external config exists, return null
-  if (!isNetworkEnabled.value || !netRestriction.value?.external) return null;
-
-  const ext = netRestriction.value.external;
-  // Map "Black"/"White" model to UI friendly keys
-  const mode = ext.model === "White" ? "whitelist" : "blacklist";
-  const ips = ext.ip || [];
-  const urls = ext.url || [];
-
-  return { mode, ips, urls };
-});
-
-// Process Sidecar Services
-const sidecarList = computed(() => {
-  if (!isNetworkEnabled.value || !netRestriction.value?.sidecars) return [];
-  return netRestriction.value.sidecars;
-});
-
-/* ====== Statistical Counts ====== */
+/* =========================================
+   Legacy Counters & Reminders
+   ========================================= */
 const libraryItemsCount = computed(() => {
   if (!lib.value?.enabled) return 0;
   return libraryEntries.value.reduce((sum, entry) => sum + (entry.items?.length || 0), 0);
 });
 
-// Updated count logic: Sum of Sidecars + IPs + URLs
+const sidecarList = computed(() => {
+  if (!isNetworkEnabled.value || !netRestriction.value?.sidecars) return [];
+  return netRestriction.value.sidecars;
+});
+
+const externalConfig = computed(() => {
+  if (!isNetworkEnabled.value || !netRestriction.value?.external) return null;
+  const ext = netRestriction.value.external;
+  const mode = ext.model === "White" ? "whitelist" : "blacklist";
+  return { mode, ips: ext.ip || [], urls: ext.url || [] };
+});
+
 const networkItemsCount = computed(() => {
   if (!isNetworkEnabled.value) return 0;
   let count = sidecarList.value.length;
@@ -142,10 +224,7 @@ const networkItemsCount = computed(() => {
   return count;
 });
 
-/* ====== Reminder / Notification Logic ====== */
 const isReminderDismissed = ref(false);
-
-// Total active restrictions (Library + Network items)
 const totalRestrictionsCount = computed(() => {
   const libCount = lib.value?.enabled ? libraryItemsCount.value : 0;
   const netCount = isNetworkEnabled.value ? networkItemsCount.value : 0;
@@ -161,11 +240,8 @@ function dismissReminder(event?: Event) {
   isReminderDismissed.value = true;
 }
 
-// Auto-dismiss reminder when the panel is opened
 watch(areRestrictionsVisible, (newVal) => {
-  if (newVal) {
-    isReminderDismissed.value = true;
-  }
+  if (newVal) isReminderDismissed.value = true;
 });
 </script>
 
@@ -325,6 +401,46 @@ watch(areRestrictionsVisible, (newVal) => {
               </div>
             </div>
 
+            <transition name="fly-away">
+              <div
+                v-if="areRestrictionsVisible"
+                class="pointer-events-none absolute z-20 flex flex-col items-center"
+                :style="{ right: MASCOT_POSITION.right, top: MASCOT_POSITION.top }"
+              >
+                <div class="transition-transform duration-500 ease-out">
+                  <div
+                    v-if="mascotState.type === 'super-devil'"
+                    class="flex items-center -space-x-6 md:-space-x-8"
+                  >
+                    <img
+                      :src="mascotState.imgSrc"
+                      class="z-0 h-24 w-24 origin-bottom-right -rotate-12 object-contain opacity-80 drop-shadow-[0_0_10px_rgba(239,68,68,0.4)] filter md:h-28 md:w-28"
+                    />
+                    <img
+                      :src="mascotState.imgSrc"
+                      class="z-10 -mt-8 h-32 w-32 scale-110 object-contain drop-shadow-[0_0_20px_rgba(220,38,38,0.8)] filter md:h-40 md:w-40"
+                    />
+                    <img
+                      :src="mascotState.imgSrc"
+                      class="z-0 h-24 w-24 origin-bottom-left rotate-12 object-contain opacity-80 drop-shadow-[0_0_10px_rgba(239,68,68,0.4)] filter md:h-28 md:w-28"
+                    />
+                  </div>
+
+                  <div v-else>
+                    <img
+                      :src="mascotState.imgSrc"
+                      class="h-32 w-32 object-contain filter transition-all duration-500 md:h-40 md:w-40"
+                      :class="
+                        mascotState.type === 'devil'
+                          ? 'drop-shadow-[0_0_15px_rgba(239,68,68,0.6)] hover:drop-shadow-[0_0_25px_rgba(239,68,68,0.9)]'
+                          : 'drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] hover:drop-shadow-[0_0_25px_rgba(59,130,246,0.8)]'
+                      "
+                    />
+                  </div>
+                </div>
+              </div>
+            </transition>
+
             <transition name="drop" mode="out-in">
               <div
                 v-if="areRestrictionsVisible"
@@ -373,7 +489,7 @@ watch(areRestrictionsVisible, (newVal) => {
                     >
                       <div class="bg-secondary h-6 w-1 rounded-full"></div>
                       <span class="text-base-content/80 text-lg font-bold uppercase tracking-wide"
-                        >Library Analysis</span
+                        >Static Analysis</span
                       >
                       <span
                         v-if="lib?.enabled"
@@ -616,6 +732,7 @@ watch(areRestrictionsVisible, (newVal) => {
 </template>
 
 <style scoped>
+/* Standard Fade Transition */
 .fade-enter-active,
 .fade-leave-active {
   transition:
@@ -629,6 +746,7 @@ watch(areRestrictionsVisible, (newVal) => {
   transform: translateY(-5px);
 }
 
+/* Drop Down Expand Transition */
 .drop-enter-active {
   animation: dropDown 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -646,6 +764,34 @@ watch(areRestrictionsVisible, (newVal) => {
     opacity: 1;
     transform: translateY(0) scale(1);
     max-height: 2000px;
+  }
+}
+
+/* Mascot Fly Away Animation */
+.fly-away-enter-active {
+  /* Bouncy pop-in effect */
+  animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.fly-away-leave-active {
+  /* Smooth exit */
+  transition: all 0.7s ease-in;
+}
+
+.fly-away-leave-to {
+  opacity: 0;
+  /* Moves up and right, rotates slightly, scales down */
+  transform: translate(60px, -100px) rotate(15deg) scale(0.7);
+}
+
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0) translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
 </style>

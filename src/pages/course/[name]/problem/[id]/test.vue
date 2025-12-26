@@ -358,7 +358,7 @@ async function submitCode() {
                     <label class="label cursor-pointer justify-start gap-3 py-1">
                       <input
                         type="radio"
-                        class="radio radio-sm border-white checked:bg-white checked:border-white [--chkfg:black] transition-all"
+                        class="radio radio-sm border-white transition-all [--chkfg:black] checked:border-white checked:bg-white"
                         :value="true"
                         v-model="useDefaultTestcases"
                       />
@@ -367,7 +367,7 @@ async function submitCode() {
                     <label class="label cursor-pointer justify-start gap-3 py-1">
                       <input
                         type="radio"
-                        class="radio radio-sm border-white checked:bg-white checked:border-white [--chkfg:black] transition-all"
+                        class="radio radio-sm border-white transition-all [--chkfg:black] checked:border-white checked:bg-white"
                         :value="false"
                         v-model="useDefaultTestcases"
                       />

@@ -1,8 +1,13 @@
 <script setup lang="ts">
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { inject, Ref } from "vue";
+import { inject, Ref, computed} from "vue";
 import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { hover_zh } from "../../Hovers/hover-zh-tw";
+import { hover_en } from "../../Hovers/hover-en";
+const { t,locale } = useI18n();
+const hover = computed(() => {
+  return locale.value === "en" ? hover_en : hover_zh;
+});
 
 defineProps<{ v$: any }>();
 defineEmits<{
@@ -15,7 +20,9 @@ const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
 <template>
   <div class="form-control w-full">
     <label class="label"
-      ><span class="label-text">{{ t("course.problems.descriptionProblem") }}</span></label
+      ><span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
+        :data-tip="hover.tags">
+        {{ t("course.problems.descriptionProblem") }}</span></label
     >
     <textarea
       :class="['textarea-bordered textarea h-24', v$.description.description.$error && 'textarea-error']"

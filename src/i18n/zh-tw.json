@@ -299,7 +299,7 @@
       "uploadFile": "上傳 Makefile.zip",
       "upload": "上傳",
       "notNotUploaded": "未上傳",
-      "ineractiveTeacherFirst": "老師端程式優先執行",
+      "interactiveTeacherFirst": "老師端程式優先執行",
       "interactiveUploadTeacherCode": "上傳老師端程式碼",
       "customChecker": "自定義檢查器 ",
       "uploadCustomChecker": "上傳 Custom_Checker.py",
@@ -388,7 +388,8 @@
       "dropToActivate": "拖放至此以啟用",
       "active": "啟用中",
       "inactive": "停用中",
-      "selectedKeysTitle": "已選取的金鑰 ({count}) - 點擊下方項目以移除"
+      "selectedKeysTitle": "已選取的金鑰 ({count}) - 點擊下方項目以移除",
+      "anyFile":"任何檔案"
     },
     "submissions": {
       "text": "繳交狀態",

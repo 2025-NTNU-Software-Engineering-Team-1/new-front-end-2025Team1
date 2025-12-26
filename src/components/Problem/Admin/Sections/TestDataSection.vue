@@ -8,6 +8,8 @@ import { useRoute } from "vue-router";
 import { ZipReader, BlobReader } from "@zip.js/zip.js";
 import { assertFileSizeOK } from "@/utils/checkFileSize";
 import { useI18n } from "vue-i18n";
+import { hover_zh } from "../../Hovers/hover-zh-tw";
+import { hover_en } from "../../Hovers/hover-en";
 
 // ==========================================
 // Props & Injection
@@ -17,7 +19,10 @@ defineProps<{ v$: any }>();
 const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
 const route = useRoute();
 const isDrag = ref(false);
-const { t } = useI18n();
+const { t,locale } = useI18n();
+const hover = computed(() => {
+  return locale.value === "en" ? hover_en : hover_zh;
+});
 // ==========================================
 // [CONFIG] Console Debug Mode
 // ==========================================
@@ -241,7 +246,8 @@ watch(
 
     <div class="mt-2 overflow-hidden rounded-lg">
       <div class="grid grid-cols-5">
-        <div class="bg-base-300 col-span-1 flex items-center justify-center text-sm">
+        <div class="bg-base-300 col-span-1 flex items-center justify-center text-sm flex items-center gap-1 tooltip tooltip-bottom cursor-help"
+            :data-tip="hover.setDataZipFile">
           {{ t("course.problems.zipFile") }}
         </div>
 

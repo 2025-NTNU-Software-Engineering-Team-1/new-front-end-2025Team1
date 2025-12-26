@@ -301,7 +301,7 @@
       "uploadFile": "Upload Makefile.zip",
       "upload": "Upload",
       "notNotUploaded": "Not Uploaded",
-      "ineractiveTeacherFirst": "Teacher First",
+      "interactiveTeacherFirst": "Teacher First",
       "interactiveUploadTeacherCode": "Upload Teacher Code",
       "customChecker": "Custom Checker",
       "uploadCustomChecker": "Upload Custom_Checker.py",
@@ -390,7 +390,8 @@
       "dropToActivate": "Drop to Activate",
       "active": "Active",
       "inactive": "Inactive",
-      "selectedKeysTitle": "Selected Keys ({count})  - Click items below to remove"
+      "selectedKeysTitle": "Selected Keys ({count})  - Click items below to remove",
+      "anyFile":"Any File"
     },
     "submissions": {
       "text": "Submissions",

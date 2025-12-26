@@ -8,6 +8,8 @@ import { useRoute } from "vue-router";
 import { ZipReader, BlobReader } from "@zip.js/zip.js";
 import { assertFileSizeOK } from "@/utils/checkFileSize";
 import { useI18n } from "vue-i18n";
+import { hover_zh } from "../../Hovers/hover-zh-tw";
+import { hover_en } from "../../Hovers/hover-en";
 
 // ==========================================
 // [CONFIG] Console Debug Mode
@@ -54,7 +56,10 @@ const props = withDefaults(defineProps<{ variant?: "student" | "teacher" }>(), {
 const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
 const route = useRoute();
 const isDrag = ref(false);
-const { t } = useI18n();
+const { t,locale } = useI18n();
+const hover = computed(() => {
+  return locale.value === "en" ? hover_en : hover_zh;
+});
 // Safety Check
 if (!problem || !problem.value) {
   logger.error("Problem injection failed");
@@ -270,7 +275,8 @@ watch(
 <template>
   <div class="form-control col-span-2">
     <div class="flex flex-wrap items-center gap-3">
-      <span class="label-text">{{ labelText }}</span>
+      <span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
+        :data-tip=" (hover as any)[labelText ||'']|| hover.setResourceData">{{ labelText }}</span>
       <label class="label cursor-pointer justify-start gap-x-2">
         <span class="label-text">{{ t("course.problems.enable") }}</span>
         <input
@@ -317,7 +323,8 @@ watch(
 
     <div class="mt-2 overflow-hidden rounded-lg">
       <div class="grid grid-cols-5 pb-4">
-        <div class="bg-base-300 col-span-1 flex items-center justify-center rounded-l-lg text-sm">
+        <div class="bg-base-300 col-span-1 flex items-center justify-center rounded-l-lg text-sm flex items-center gap-1 tooltip tooltip-bottom cursor-help"
+          :data-tip="(hover as any)[`${labelText}_zip`]">
           {{ t("course.problems.zipFile") }}
         </div>
         <div

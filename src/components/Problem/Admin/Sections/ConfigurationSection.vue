@@ -6,7 +6,8 @@
 import { inject, Ref, ref, reactive, watch, computed, onMounted, onBeforeUnmount } from "vue";
 import { useRoute } from "vue-router";
 import { ZipReader, BlobReader } from "@zip.js/zip.js";
-
+import { hover_zh } from "../../Hovers/hover-zh-tw";
+import { hover_en } from "../../Hovers/hover-en";
 // Components
 import LanguageMultiSelect from "../../Forms/LanguageMultiSelect.vue";
 import MultiStringInput from "../Controls/MultiStringInput.vue";
@@ -18,7 +19,10 @@ import { fetcher } from "@/models/api";
 import api from "@/models/api";
 
 import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+const { t, locale  } = useI18n();
+const hover = computed(() => {
+  return locale.value === "en" ? hover_en : hover_zh;
+});
 
 // ==========================================
 // [CONFIG] Console Debug Mode
@@ -1023,10 +1027,9 @@ onBeforeUnmount(() => {
   <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
     <div class="form-control rounded-lg border border-gray-400 p-4">
       <label class="label"
-        ><span class="label-text"
-          >{{ t("course.problems.allowedLanguages")
-          }}<span class="text-error ml-1" aria-hidden="true">*</span></span
-        ></label
+        ><span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
+          :data-tip="hover.allowedLanguages">
+          {{ t("course.problems.allowedLanguages") }}</span></label
       >
       <LanguageMultiSelect
         :model-value="problem.allowedLanguage"
@@ -1036,7 +1039,9 @@ onBeforeUnmount(() => {
 
     <div class="form-control rounded-lg border border-gray-400 p-4">
       <label class="label">
-        <span class="label-text">{{ t("course.problems.tags") }}</span>
+        <span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
+          :data-tip="hover.tags">
+          {{ t("course.problems.tags") }}</span>
       </label>
 
       <input type="text" class="input-bordered input" v-model.lazy="tagsString" placeholder="tag1, tag 2" />
@@ -1048,9 +1053,11 @@ onBeforeUnmount(() => {
 
     <div class="form-control rounded-lg border border-gray-400 p-4">
       <label class="label"
-        ><span class="label-text"
-          >{{ t("course.problems.quota") }}<span class="text-error ml-1" aria-hidden="true">*</span></span
-        ></label
+        >
+        ><span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
+          :data-tip="hover.quota">
+        {{ t("course.problems.quota") }}</span></label
+
       >
       <input
         type="number"
@@ -1112,7 +1119,8 @@ onBeforeUnmount(() => {
     <div class="col-span-2 rounded-lg border border-gray-400 p-4">
       <div class="flex items-center gap-4">
         <label class="label cursor-pointer justify-start gap-x-4">
-          <span class="label-text">{{ t("course.problems.aiTA") }}</span>
+          <span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
+            :data-tip="hover.aiTA">{{ t("course.problems.aiTA") }}</span>
           <input type="checkbox" class="toggle" v-model="problem.config!.aiVTuber" />
         </label>
       </div>
@@ -1126,7 +1134,8 @@ onBeforeUnmount(() => {
             <div class="flex flex-wrap items-center gap-x-8 gap-y-4">
               <div class="flex min-w-[260px] flex-1 items-center gap-3">
                 <label class="label mb-0 w-28">
-                  <span class="label-text">{{ t("course.problems.aiModel") }}</span>
+                  <span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
+                    :data-tip="hover.aiModel">{{ t("course.problems.aiModel") }}</span>
                 </label>
                 <select
                   class="select-bordered select select-sm flex-1"
@@ -1164,7 +1173,8 @@ onBeforeUnmount(() => {
           <div class="form-control">
             <div class="mb-2 flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <label class="label-text">{{ t("course.problems.selectAPIKeys") }}</label>
+                <label class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
+                  :data-tip="hover.selectAPIKeys">{{ t("course.problems.selectAPIKeys") }}</label>
 
                 <div v-if="selectedKeyStats.total > 0" class="ml-2 flex items-center gap-2">
                   <div class="badge badge-neutral badge-sm">
@@ -1314,7 +1324,8 @@ onBeforeUnmount(() => {
                     >
                       <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                     </svg>
-                    <span class="label-text">{{ t("course.problems.activeAiKeys") }}</span>
+                    <span class="label-text flex items-center gap-1 tooltip tooltip-bottom cursor-help"
+                      :data-tip="hover.activeAiKeys">{{ t("course.problems.activeAiKeys") }}</span>
                     <span class="badge badge-info badge-sm">{{ apiKeys.active.length }}</span>
                   </div>
                   <span v-if="isDragging" class="text-info animate-pulse text-xs font-bold">
@@ -1391,7 +1402,8 @@ onBeforeUnmount(() => {
                     >
                       <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                     </svg>
-                    <span class="label-text">{{ t("course.problems.inactiveAiKeys") }}</span>
+                    <span class="label-text flex items-center gap-1 tooltip tooltip-bottom cursor-help"
+                      :data-tip="hover.inactiveAiKeys">{{ t("course.problems.inactiveAiKeys") }}</span>
                     <span class="badge badge-error badge-sm">{{ apiKeys.inactive.length }}</span>
                   </div>
                   <span v-if="isDragging" class="text-error animate-pulse text-xs font-bold">
@@ -1453,14 +1465,16 @@ onBeforeUnmount(() => {
 
     <div class="form-control col-span-2 rounded-lg border border-gray-400 p-4">
       <label class="label ml-1 cursor-pointer justify-start gap-x-4">
-        <span class="label-text">{{ t("course.problems.trialMode") }}</span>
+        <span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
+          :data-tip="hover.trialMode">{{ t("course.problems.trialMode") }}</span>
         <input type="checkbox" class="toggle" v-model="problem.config!.trialMode" />
       </label>
       <div v-if="problem.config!.trialMode" class="mt-3 space-y-4">
         <div class="flex flex-wrap items-start gap-x-8 gap-y-4">
           <div class="form-control w-full max-w-xs">
             <label class="label">
-              <span class="label-text">{{ t("course.problems.trialMaxNumber") }}</span>
+              <span class="label-text flex items-center gap-1 tooltip tooltip-bottom cursor-help"
+                :data-tup="hover.trialMaxNumber">{{ t("course.problems.trialMaxNumber") }}</span>
             </label>
             <input
               type="number"
@@ -1481,7 +1495,8 @@ onBeforeUnmount(() => {
 
           <div class="form-control">
             <label class="label cursor-pointer justify-start gap-x-4">
-              <span class="label-text">{{ t("course.problems.resultVisible") }}</span>
+              <span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
+                :data-tip="hover.resultVisible">{{ t("course.problems.resultVisible") }}</span>
               <input
                 type="checkbox"
                 class="toggle toggle-success toggle-sm"
@@ -1493,7 +1508,8 @@ onBeforeUnmount(() => {
 
           <div class="form-control">
             <label class="label cursor-pointer justify-start gap-x-4">
-              <span class="label-text">{{ t("course.problems.resultDownloadable") }}</span>
+              <span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
+                :data-tip="hover.resultDownloadable">{{ t("course.problems.resultDownloadable") }}</span>
               <input
                 type="checkbox"
                 class="toggle toggle-success toggle-sm"
@@ -1509,7 +1525,8 @@ onBeforeUnmount(() => {
 
         <div class="rounded-lg border border-gray-500 p-4">
           <div class="flex items-center gap-4">
-            <span class="label-text">{{ t("course.problems.uploadPublicTestData") }}</span>
+            <span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
+              :data-tip="hover.uploadPublicTestData">{{ t("course.problems.uploadPublicTestData") }}</span>
             <div class="flex items-center gap-2">
               <div
                 v-if="hasAsset('public_testdata') || problem.assets?.trialModePublicTestDataZip"
@@ -1581,7 +1598,8 @@ onBeforeUnmount(() => {
 
         <div class="rounded-lg border border-gray-500 p-4">
           <div class="flex items-center gap-4">
-            <span class="label-text">{{ t("course.problems.uploadACFiles") }}</span>
+            <span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
+              :data-tip="hover.uploadACFiles">{{ t("course.problems.uploadACFiles") }}</span>
             <div class="flex items-center gap-2">
               <div
                 v-if="
@@ -1627,7 +1645,7 @@ onBeforeUnmount(() => {
               "
             />
           </div>
-          <div class="mt-1 pl-1 text-xs opacity-70">Any File</div>
+          <div class="mt-1 pl-1 text-xs opacity-70">{{t("course.problems.anyFile")}}</div>
           <label v-if="v$?.assets?.trialModeACFiles?.$error" class="label">
             <span class="label-text-alt text-error">{{
               v$.assets.trialModeACFiles.$errors[0]?.$message
@@ -1640,7 +1658,8 @@ onBeforeUnmount(() => {
     <div class="form-control col-span-2 rounded-lg border border-gray-400 p-4">
       <div class="flex items-center gap-4">
         <label class="label ml-1 cursor-pointer justify-start gap-x-4">
-          <span class="label-text">{{ t("course.problems.networkSidecars") }}</span>
+          <span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
+            :data-tip="hover.networkSidecars">{{ t("course.problems.networkSidecars") }}</span>
           <input type="checkbox" class="toggle" v-model="problem.config!.networkAccessEnabled" />
         </label>
       </div>
@@ -1671,14 +1690,16 @@ onBeforeUnmount(() => {
 
           <div class="overflow-hidden rounded-lg border border-gray-500">
             <div class="bg-base-300 px-4 py-2">
-              <span class="text-base-content font-medium">{{
+              <span class="text-base-content font-medium flex items-center gap-1 tooltip tooltip-bottom cursor-help"
+                :data-tip="hover.networkAccessRestriction">{{
                 t("course.problems.networkAccessRestriction")
               }}</span>
             </div>
             <div class="p-4">
               <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div class="col-span-1 flex items-center gap-4 md:col-span-2">
-                  <span class="label-text">{{ t("course.problems.networkAccessModel") }}</span>
+                  <span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
+                    :data-tip="hover.networkAccessModel">{{ t("course.problems.networkAccessModel") }}</span>
                   <div class="mode-switcher">
                     <div class="mode-switcher-container">
                       <div
@@ -1718,7 +1739,8 @@ onBeforeUnmount(() => {
 
                 <div>
                   <label class="label"
-                    ><span class="label-text">{{ t("course.problems.networkAccessIPList") }}</span></label
+                    ><span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
+                      :data-tip="hover.networkAccessIPList">{{ t("course.problems.networkAccessIPList") }}</span></label
                   >
                   <MultiStringInput
                     v-model="problem.config!.networkAccessRestriction!.external!.ip"
@@ -1736,7 +1758,8 @@ onBeforeUnmount(() => {
 
                 <div>
                   <label class="label"
-                    ><span class="label-text">{{ t("course.problems.networkAccessURLList") }}</span></label
+                    ><span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
+                      :data-tip="hover.networkAccessURLList">{{ t("course.problems.networkAccessURLList") }}</span></label
                   >
                   <MultiStringInput
                     v-model="problem.config!.networkAccessRestriction!.external!.url"
@@ -1757,12 +1780,14 @@ onBeforeUnmount(() => {
 
           <div class="overflow-hidden rounded-lg border border-gray-500">
             <div class="bg-base-300 px-4 py-2">
-              <span class="text-base-content font-medium">{{ t("course.problems.SandboxEnvironment") }}</span>
+              <span class="text-base-content font-medium flex items-center gap-1 tooltip tooltip-bottom cursor-help"
+                :data-tip="hover.SandboxEnvironment">{{ t("course.problems.SandboxEnvironment") }}</span>
             </div>
             <div class="space-y-4 p-4">
               <div class="border-base-content/30 rounded-lg border p-4">
                 <div class="mb-3">
-                  <span class="label-text font-medium">{{ t("course.problems.Sidecars") }}</span>
+                  <span class="label-text font-medium flex items-center gap-1 tooltip tooltip-top cursor-help"
+                    :data-tip="hover.Sidecars">{{ t("course.problems.Sidecars") }}</span>
                 </div>
                 <SidecarInput v-model="problem.config!.networkAccessRestriction!.sidecars" />
                 <div
@@ -1775,7 +1800,8 @@ onBeforeUnmount(() => {
 
               <div class="border-base-content/30 rounded-lg border p-4">
                 <div class="flex items-center gap-3">
-                  <span class="label-text">{{ t("course.problems.dockerFiles") }}</span>
+                  <span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
+                    :data-tip="hover.dockerFiles">{{ t("course.problems.dockerFiles") }}</span>
                   <div class="flex items-center gap-2">
                     <div v-if="hasAsset('network_dockerfile')" class="flex items-center gap-2">
                       <span class="badge badge-success badge-outline text-xs">{{
@@ -1880,17 +1906,20 @@ onBeforeUnmount(() => {
 
     <div class="form-control col-span-1 rounded-lg border border-gray-400 p-4 md:col-span-2">
       <label class="label"
-        ><span class="label-text">{{ t("course.problems.ArtifactCollection") }}</span></label
+        ><span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
+          :data-tip="hover.ArtifactCollection">{{ t("course.problems.ArtifactCollection") }}</span></label
       >
       <div class="flex gap-4">
         <label class="label cursor-pointer gap-2">
           <input type="checkbox" class="checkbox" v-model="artifactCompiledBinary" />
-          <span class="label-text">{{ t("course.problems.CompiledBinary") }}</span>
+          <span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
+            :data-tip="hover.CompiledBinary">{{ t("course.problems.CompiledBinary") }}</span>
         </label>
 
         <label class="label cursor-pointer gap-2">
           <input type="checkbox" class="checkbox" v-model="artifactZip" />
-          <span class="label-text">{{ t("course.problems.StudentArtifact") }}</span>
+          <span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
+            :data-tip="hover.StudentArtifact">{{ t("course.problems.StudentArtifact") }}</span>
         </label>
       </div>
     </div>

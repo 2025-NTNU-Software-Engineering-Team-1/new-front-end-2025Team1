@@ -124,6 +124,7 @@ function normalizeConfig(config?: LegacyProblemConfigExtra): ProblemConfigExtra 
         ...(config?.networkAccessRestriction?.external || {}),
       },
     },
+    assetPaths: config?.assetPaths || {},
   };
   const nar = merged.networkAccessRestriction!;
   if (!Array.isArray(nar.sidecars)) nar.sidecars = [];
@@ -311,6 +312,12 @@ watch(
     logger.group("Initialize Problem Data");
     // Cast to the temporary interface instead of 'any'
     const np: RawProblemResponse = newProblem as RawProblemResponse;
+
+    console.log("[DEBUG] API response (problem):", newProblem);
+
+    console.log("[DEBUG] API config:", np.config);
+    console.log("[DEBUG] API config.assetPaths:", np.config?.assetPaths);
+
     const testCases = normalizeTestCases(np.testCase ?? np.testCaseInfo);
 
     edittingProblem.value = {
@@ -331,6 +338,9 @@ watch(
       ),
       assets: normalizeAssets(np.assets),
     } as ProblemForm;
+
+    console.log("[DEBUG] normalizeConfig(newProblem.config):", normalizeConfig(newProblem.config));
+    console.log("[DEBUG] edittingProblem.value.config.assetPaths:", edittingProblem.value.config.assetPaths);
 
     // Safety fallback for allowRead/Write
     const cfg = edittingProblem.value.config;

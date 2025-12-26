@@ -354,7 +354,13 @@
       "delete": "Delete",
       "discardChanges": "Discard Changes",
       "preview": "Preview",
-      "editProblem": "Edit Problem:"
+      "editProblem": "Edit Problem:",
+      "enablePythonHint": "Python language must be enabled to use this feature",
+      "systemLocked": "System Locked",
+      "all":"All",
+      "clear":"Clear",
+      "accessDenied":"Access Denied",
+      "limitReached":"Limit Reached"
     },
     "submissions": {
       "text": "Submissions",

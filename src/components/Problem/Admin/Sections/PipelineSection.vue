@@ -703,7 +703,7 @@ watch(
                   </div>
 
                   <h6 class="mb-1 text-sm font-bold uppercase tracking-[0.2em] text-white drop-shadow-lg">
-                    System Locked
+                    {{t("course.problems.systemLocked")}}
                   </h6>
                   <div
                     class="mb-2 h-px w-16 bg-gradient-to-r from-transparent via-yellow-500/50 to-transparent"
@@ -723,13 +723,13 @@ watch(
                     class="btn btn-xs btn-ghost h-5 min-h-0 px-1 text-[10px]"
                     @click="selectAllItems('imports', libraryMode)"
                   >
-                    All
+                    {{t("course.problems.all")}}
                   </button>
                   <button
                     class="btn btn-xs btn-ghost text-error h-5 min-h-0 px-1 text-[10px]"
                     @click="clearAllItems('imports', libraryMode)"
                   >
-                    Clear
+                    {{t("course.problems.clear")}}
                   </button>
                 </div>
               </div>
@@ -802,7 +802,7 @@ watch(
                   </div>
 
                   <h6 class="mb-1 text-sm font-bold uppercase tracking-[0.2em] text-white drop-shadow-lg">
-                    Access Denied
+                    {{t("course.problems.accessDenied")}}
                   </h6>
                   <div
                     class="mb-2 h-px w-16 bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"
@@ -822,13 +822,13 @@ watch(
                     class="btn btn-xs btn-ghost h-5 min-h-0 px-1 text-[10px]"
                     @click="selectAllItems('headers', libraryMode)"
                   >
-                    All
+                    {{t("course.problems.all")}}
                   </button>
                   <button
                     class="btn btn-xs btn-ghost text-error h-5 min-h-0 px-1 text-[10px]"
                     @click="clearAllItems('headers', libraryMode)"
                   >
-                    Clear
+                    {{t("course.problems.clear")}}
                   </button>
                 </div>
               </div>
@@ -889,13 +889,13 @@ watch(
                     class="btn btn-xs btn-ghost h-5 min-h-0 px-1 text-[10px]"
                     @click="selectAllItems('functions', libraryMode)"
                   >
-                    All
+                    {{t("course.problems.all")}}
                   </button>
                   <button
                     class="btn btn-xs btn-ghost text-error h-5 min-h-0 px-1 text-[10px]"
                     @click="clearAllItems('functions', libraryMode)"
                   >
-                    Clear
+                    {{t("course.problems.clear")}}
                   </button>
                 </div>
               </div>
@@ -1231,7 +1231,7 @@ watch(
         </div>
 
         <div v-if="problem.pipeline!.customChecker" class="flex flex-col gap-x-2">
-          <div class="flex items-center gap-x-2">
+          <div class="flex items-center gap-x-2 pt-4">
             <span class="pl-1 text-sm opacity-80">{{ t("course.problems.uploadCustomChecker") }}</span>
             <input
               type="file"
@@ -1315,7 +1315,7 @@ watch(
             </div>
           </div>
         </div>
-        <div v-else class="pl-1 text-xs opacity-70">
+        <div v-else class="pl-1 text-xs opacity-70 pt-2">
           {{
             problem.pipeline!.executionMode === "interactive"
               ? t("course.problems.uploadCustomCheckerWarning")
@@ -1354,7 +1354,7 @@ watch(
         </div>
 
         <div v-if="problem.pipeline!.scoringScript?.custom" class="flex flex-col gap-x-2">
-          <div class="flex items-center gap-x-2">
+          <div class="flex items-center gap-x-2 pt-4">
             <span class="pl-1 text-sm opacity-80">{{ t("course.problems.uploadCustomScorer") }}</span>
             <input
               type="file"
@@ -1378,7 +1378,7 @@ watch(
             <span class="label-text-alt text-error">{{ v$.assets.scorePy.$errors[0]?.$message }}</span>
           </label>
         </div>
-        <div v-else class="pl-1 text-xs opacity-70">{{ t("course.problems.uploadCustomScorerInfo") }}</div>
+        <div v-else class="pl-1 text-xs opacity-70 pt-2">{{ t("course.problems.uploadCustomScorerInfo") }}</div>
       </div>
     </div>
   </div>
@@ -1420,7 +1420,7 @@ watch(
 
 .mode-switcher-slider.slider-blacklist {
   transform: translateX(calc(100% + 3px));
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  background: linear-gradient(135deg, #ee5454 0%, #e04545 100%);
   box-shadow:
     0 2px 8px rgba(239, 68, 68, 0.4),
     0 0 20px rgba(239, 68, 68, 0.2);
@@ -1524,5 +1524,17 @@ watch(
 .tech-lock-overlay:hover i-uil-lock-alt {
   transform: scale(1.1);
   transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+:deep(.badge-error) {
+  background-color: #e04545 !important;
+  border-color: #e04545 !important;
+  color: #ffffff !important;
+}
+
+:deep(.btn-error) {
+  background-color: #e04545 !important;
+  border-color: #e04545 !important;
+  color: #ffffff !important;
 }
 </style>

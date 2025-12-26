@@ -217,7 +217,7 @@ watch(
 <template>
   <div class="form-control col-span-2">
     <label class="label">
-      <span class="label-text">{{ t("course.problems.testDataZip") }}</span>
+      <span class="label-text">{{ t("course.problems.testDataZip") }}<span class="text-error ml-1" aria-hidden="true">*</span></span>
       <div class="flex items-center gap-2">
         <span v-if="hasBackendTestcase" class="badge badge-outline badge-success text-xs">
           Current: {{ currentTaskLabel }}

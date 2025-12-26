@@ -594,7 +594,7 @@ async function submit() {
   <div class="grid grid-cols-2 gap-y-4">
     <div class="form-control w-full max-w-xs">
       <label class="label">
-        <span class="label-text font-medium">{{ t("course.problems.problemName") }}</span>
+        <span class="label-text font-medium">{{ t("course.problems.problemName") }}<span class="text-error ml-1" aria-hidden="true">*</span></span>
       </label>
 
       <input

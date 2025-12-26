@@ -989,7 +989,7 @@ onBeforeUnmount(() => {
   <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
     <div class="form-control rounded-lg border border-gray-400 p-4">
       <label class="label"
-        ><span class="label-text">{{ t("course.problems.allowedLanguages") }}</span></label
+        ><span class="label-text">{{ t("course.problems.allowedLanguages") }}<span class="text-error ml-1" aria-hidden="true">*</span></span></label
       >
       <LanguageMultiSelect
         :model-value="problem.allowedLanguage"
@@ -1011,7 +1011,7 @@ onBeforeUnmount(() => {
 
     <div class="form-control rounded-lg border border-gray-400 p-4">
       <label class="label"
-        ><span class="label-text">{{ t("course.problems.quota") }}</span></label
+        ><span class="label-text">{{ t("course.problems.quota") }}<span class="text-error ml-1" aria-hidden="true">*</span></span></label
       >
       <input
         type="number"
@@ -1032,7 +1032,7 @@ onBeforeUnmount(() => {
 
     <div class="form-control rounded-lg border border-gray-400 p-4">
       <label class="label"
-        ><span class="label-text">{{ t("course.problems.acceptedFormat") }}</span></label
+        ><span class="label-text">{{ t("course.problems.acceptedFormat") }}<span class="text-error ml-1" aria-hidden="true">*</span></span></label
       >
       <div class="mt-2 flex flex-wrap items-center gap-6">
         <label class="label cursor-pointer gap-2">

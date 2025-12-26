@@ -462,6 +462,14 @@
         "description": "這个提交的編譯後可執行檔無法取得。這可能是佇啟用產物收集功能之前建立的提交。你敢欲 Rejudge 這个提交來產生編譯後的可執行檔？",
         "cancel": "取消",
         "rejudge": "Rejudge"
+      },
+      "rejudgeError": {
+        "title": "Rejudge 失敗",
+        "close": "關閉"
+      },
+      "deleteError": {
+        "title": "刪除失敗",
+        "close": "關閉"
       }
     },
     "members": {

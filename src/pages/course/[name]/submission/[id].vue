@@ -173,6 +173,9 @@ watchEffect(() => {
 });
 
 const isRejudgeLoading = ref(false);
+const rejudgeErrorModal = ref<HTMLDialogElement | null>(null);
+const rejudgeErrorMessage = ref<string>("");
+
 async function rejudge() {
   logger.group("Rejudge Process");
   isRejudgeLoading.value = true;
@@ -181,15 +184,34 @@ async function rejudge() {
     await api.Submission.rejudge(route.params.id as string);
     logger.success("Rejudge request sent. Reloading page...");
     router.go(0);
-  } catch (error) {
-    logger.error("Rejudge Failed", error);
+  } catch (err: unknown) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const axiosErr = err as any;
+    logger.error("Rejudge Failed", axiosErr);
+    
+    // Handle 403 Forbidden error
+    const statusCode = axiosErr?.response?.status;
+    if (statusCode === 403) {
+      rejudgeErrorMessage.value = axiosErr?.response?.data?.message || "You do not have permission to rejudge this submission.";
+    } else {
+      rejudgeErrorMessage.value = axiosErr?.response?.data?.message || axiosErr?.message || "An error occurred while rejudging.";
+    }
+    rejudgeErrorModal.value?.showModal();
   } finally {
     isRejudgeLoading.value = false;
     logger.groupEnd();
   }
 }
 
+function closeRejudgeErrorModal() {
+  rejudgeErrorModal.value?.close();
+  rejudgeErrorMessage.value = "";
+}
+
 const isDeleteLoading = ref(false);
+const deleteErrorModal = ref<HTMLDialogElement | null>(null);
+const deleteErrorMessage = ref<string>("");
+
 async function deleteSubmission() {
   if (!confirm("Are you sure you want to delete this submission?")) {
     return;
@@ -201,11 +223,22 @@ async function deleteSubmission() {
       // Navigate back to submissions list
       router.push(`/course/${route.params.name}/submissions`);
     }
-  } catch (error) {
-    console.error("Delete failed:", error);
+  } catch (err: unknown) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const axiosErr = err as any;
+    logger.error("Delete Failed", axiosErr);
+    
+    // Extract error message from the response
+    deleteErrorMessage.value = axiosErr?.response?.data?.message || axiosErr?.message || "Failed to delete submission.";
+    deleteErrorModal.value?.showModal();
   } finally {
     isDeleteLoading.value = false;
   }
+}
+
+function closeDeleteErrorModal() {
+  deleteErrorModal.value?.close();
+  deleteErrorMessage.value = "";
 }
 
 // Download artifact (files provided by backend)
@@ -948,6 +981,48 @@ watch(submission, (val) => {
         <button class="btn btn-warning" @click="confirmRejudgeForBinary" :disabled="isRejudgeLoading">
           <i-uil-repeat class="mr-1" />
           {{ $t("course.submission.binaryNotFound.rejudge") }}
+        </button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </dialog>
+
+  <!-- Rejudge Error Modal -->
+  <dialog ref="rejudgeErrorModal" class="modal">
+    <div class="modal-box">
+      <h3 class="text-lg font-bold">
+        <i-uil-exclamation-circle class="text-error mr-2" />
+        {{ $t("course.submission.rejudgeError.title") }}
+      </h3>
+
+      <p class="py-4">{{ rejudgeErrorMessage }}</p>
+
+      <div class="modal-action">
+        <button class="btn" @click="closeRejudgeErrorModal">
+          {{ $t("course.submission.rejudgeError.close") }}
+        </button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </dialog>
+
+  <!-- Delete Error Modal -->
+  <dialog ref="deleteErrorModal" class="modal">
+    <div class="modal-box">
+      <h3 class="text-lg font-bold">
+        <i-uil-exclamation-circle class="text-error mr-2" />
+        {{ $t("course.submission.deleteError.title") }}
+      </h3>
+
+      <p class="py-4">{{ deleteErrorMessage }}</p>
+
+      <div class="modal-action">
+        <button class="btn" @click="closeDeleteErrorModal">
+          {{ $t("course.submission.deleteError.close") }}
         </button>
       </div>
     </div>

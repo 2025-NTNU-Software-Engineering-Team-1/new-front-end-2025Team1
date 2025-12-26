@@ -496,6 +496,14 @@
         "description": "The compiled binary for this submission is not available. This may happen for submissions created before artifact collection was enabled. Would you like to rejudge this submission to generate the compiled binary?",
         "cancel": "Cancel",
         "rejudge": "Rejudge"
+      },
+      "rejudgeError": {
+        "title": "Rejudge Failed",
+        "close": "Close"
+      },
+      "deleteError": {
+        "title": "Delete Failed",
+        "close": "Close"
       }
     },
     "members": {

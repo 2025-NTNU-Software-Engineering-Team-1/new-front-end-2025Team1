@@ -5,6 +5,7 @@ import { useSession } from "@/stores/session";
 import api from "@/models/api";
 import { isQuotaUnlimited, LANGUAGE_OPTIONS } from "@/constants";
 
+// UI state for expanding/collapsing sections
 const isLanguagesExpanded = ref(false);
 const isLibraryExpanded = ref(true);
 const isNetworkExpanded = ref(true);
@@ -21,6 +22,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const session = useSession();
 
+// Basic problem statistics
 const submitCount = computed(() => (props.problem as any).submitCount ?? 0);
 const highScore = computed(() => (props.problem as any).highScore ?? 0);
 const subtasks = computed(() => {
@@ -33,17 +35,21 @@ function downloadTestCase(problemId: number) {
   window.location.assign(api.Problem.getTestCaseUrl(problemId));
 }
 
-/* ===== Allowed Languages ===== */
+/* ===== Allowed Languages Logic ===== */
+// Calculates which languages are allowed based on the bitmask
 const allowedLangTexts = computed(() =>
   LANGUAGE_OPTIONS.filter(({ mask }) => (props.problem.allowedLanguage & mask) !== 0).map(({ text }) =>
     text.toUpperCase(),
   ),
 );
+// Helper flags for specific language features
 const hasPython = computed(() => !!(props.problem.allowedLanguage & 4));
 const hasCOrCpp = computed(() => !!(props.problem.allowedLanguage & 3));
 
-/* ====== Library Restriction ====== */
+/* ====== Library Restriction Logic ====== */
 const lib = computed(() => (props.problem as any).pipeline?.staticAnalysis?.libraryRestrictions);
+
+// Helper to determine whitelist/blacklist mode for library sections
 function pickSectionMode(sectionSet: any) {
   if (!sectionSet) return { mode: "none", items: [] };
   const wl = (sectionSet.whitelist ?? []).length ?? 0;
@@ -53,6 +59,7 @@ function pickSectionMode(sectionSet: any) {
   return { mode, items };
 }
 
+// Construct the list of library restrictions (Syntax, Imports, etc.)
 const libraryEntries = computed(() => {
   if (!lib.value || !lib.value.enabled) return [];
   const libs = lib.value;
@@ -92,34 +99,56 @@ const libraryEntries = computed(() => {
   ];
 });
 
-/* ====== Network Restriction ====== */
-const net = computed(() => (props.problem as any).config?.networkAccessRestriction);
-function pickNetMode(obj?: any) {
-  if (!obj) return { mode: "none", items: [] };
-  const wl = obj.whitelist?.length ?? 0;
-  const bl = obj.blacklist?.length ?? 0;
-  const mode = wl >= bl ? "whitelist" : "blacklist";
-  const items = obj[mode] ?? [];
-  return { mode, items };
-}
-const networkSections = computed(() => {
-  if (!net.value?.enabled) return [];
-  return [
-    {
-      label: "Firewall Extranet",
-      ...pickNetMode(net.value.firewallExtranet),
-    },
-    { label: "Connect With Local", ...pickNetMode(net.value.connectWithLocal) },
-  ];
+/* ====== Network Restriction Logic (Updated) ====== */
+
+// Check if network access is globally enabled in config
+const isNetworkEnabled = computed(() => (props.problem as any).config?.networkAccessEnabled ?? false);
+// Access the raw network restriction object
+const netRestriction = computed(() => (props.problem as any).config?.networkAccessRestriction);
+
+// Process External Network Rules (IPs/URLs)
+const externalConfig = computed(() => {
+  // If disabled or no external config exists, return null
+  if (!isNetworkEnabled.value || !netRestriction.value?.external) return null;
+
+  const ext = netRestriction.value.external;
+  // Map "Black"/"White" model to UI friendly keys
+  const mode = ext.model === "White" ? "whitelist" : "blacklist";
+  const ips = ext.ip || [];
+  const urls = ext.url || [];
+
+  return { mode, ips, urls };
 });
 
-/* ====== Reminder Logic (New) ====== */
+// Process Sidecar Services
+const sidecarList = computed(() => {
+  if (!isNetworkEnabled.value || !netRestriction.value?.sidecars) return [];
+  return netRestriction.value.sidecars;
+});
+
+/* ====== Statistical Counts ====== */
+const libraryItemsCount = computed(() => {
+  if (!lib.value?.enabled) return 0;
+  return libraryEntries.value.reduce((sum, entry) => sum + (entry.items?.length || 0), 0);
+});
+
+// Updated count logic: Sum of Sidecars + IPs + URLs
+const networkItemsCount = computed(() => {
+  if (!isNetworkEnabled.value) return 0;
+  let count = sidecarList.value.length;
+  if (externalConfig.value) {
+    count += (externalConfig.value.ips?.length || 0) + (externalConfig.value.urls?.length || 0);
+  }
+  return count;
+});
+
+/* ====== Reminder / Notification Logic ====== */
 const isReminderDismissed = ref(false);
 
-// exclude Language
+// Total active restrictions (Library + Network items)
 const totalRestrictionsCount = computed(() => {
   const libCount = lib.value?.enabled ? libraryItemsCount.value : 0;
-  const netCount = net.value?.enabled ? networkItemsCount.value : 0;
+  const netCount = isNetworkEnabled.value ? networkItemsCount.value : 0;
   return libCount + netCount;
 });
 
@@ -132,21 +161,11 @@ function dismissReminder(event?: Event) {
   isReminderDismissed.value = true;
 }
 
+// Auto-dismiss reminder when the panel is opened
 watch(areRestrictionsVisible, (newVal) => {
   if (newVal) {
     isReminderDismissed.value = true;
   }
-});
-
-// Statistical data
-const libraryItemsCount = computed(() => {
-  if (!lib.value?.enabled) return 0;
-  return libraryEntries.value.reduce((sum, entry) => sum + (entry.items?.length || 0), 0);
-});
-
-const networkItemsCount = computed(() => {
-  if (!net.value?.enabled) return 0;
-  return networkSections.value.reduce((sum, section) => sum + (section.items?.length || 0), 0);
 });
 </script>
 
@@ -292,9 +311,7 @@ const networkItemsCount = computed(() => {
                       class="badge badge-error shadow-error/40 gap-1 p-3 text-xs font-bold text-white shadow-lg"
                     >
                       <span>{{ totalRestrictionsCount }}</span>
-
                       <div class="h-3 w-[1px] bg-white/30"></div>
-
                       <div
                         class="flex h-4 w-4 items-center justify-center rounded-full transition-colors hover:bg-white/20"
                         @click="dismissReminder"
@@ -378,7 +395,6 @@ const networkItemsCount = computed(() => {
                         >
                           <div class="flex items-center justify-between">
                             <span class="text-base-content/90 text-sm font-bold">{{ s.label }}</span>
-
                             <div
                               class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider"
                             >
@@ -434,7 +450,7 @@ const networkItemsCount = computed(() => {
                         >Network Access</span
                       >
                       <span
-                        v-if="net?.enabled"
+                        v-if="isNetworkEnabled"
                         class="bg-base-300 text-base-content/60 rounded px-2 py-1 font-mono text-xs"
                       >
                         {{ networkItemsCount }}
@@ -443,58 +459,128 @@ const networkItemsCount = computed(() => {
                     </div>
 
                     <transition name="fade">
-                      <div v-show="isNetworkExpanded && net?.enabled" class="space-y-3">
+                      <div v-show="isNetworkExpanded && isNetworkEnabled" class="space-y-4">
                         <div
-                          v-for="(s, idx) in networkSections"
-                          :key="s.label"
+                          v-if="externalConfig"
                           class="border-base-content/5 bg-base-100/60 hover:bg-base-100 hover:border-base-content/20 relative flex flex-col gap-3 rounded-xl border p-4 transition-all hover:shadow-sm"
-                          :style="{ animationDelay: `${idx * 0.1}s` }"
                         >
                           <div class="flex items-center justify-between">
-                            <span class="text-base-content/90 text-sm font-bold">{{ s.label }}</span>
+                            <span class="text-base-content/90 text-sm font-bold">External Connections</span>
 
                             <div
                               class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider"
                             >
-                              <template v-if="s.mode === 'whitelist'">
+                              <template v-if="externalConfig.mode === 'whitelist'">
                                 <span
                                   class="bg-success h-2 w-2 animate-pulse rounded-full shadow-[0_0_8px_rgba(var(--su),0.6)]"
                                 ></span>
-                                <span class="text-success">Allowed Only</span>
+                                <span class="text-success">Whitelist (Allowed Only)</span>
                               </template>
-                              <template v-else-if="s.mode === 'blacklist'">
+                              <template v-else>
                                 <span
                                   class="bg-error h-2 w-2 rounded-full shadow-[0_0_8px_rgba(var(--er),0.6)]"
                                 ></span>
-                                <span class="text-error">Blocked</span>
-                              </template>
-                              <template v-else>
-                                <span class="bg-base-300 h-2 w-2 rounded-full"></span>
-                                <span class="text-base-content/40">Unrestricted</span>
+                                <span class="text-error">Blacklist (Blocked)</span>
                               </template>
                             </div>
                           </div>
 
-                          <div
-                            v-if="s.items?.length"
-                            class="border-base-content/10 flex flex-wrap gap-2 border-l-2 pl-3"
-                          >
-                            <span
-                              v-for="sym in s.items"
-                              :key="sym"
-                              class="bg-base-200/50 text-base-content/80 hover:text-primary hover:bg-base-200 inline-flex select-none items-center rounded px-2 py-1 font-mono text-xs transition-colors"
+                          <div class="flex flex-col gap-1">
+                            <span class="text-base-content/50 text-xs font-bold uppercase">IP Addresses</span>
+                            <div v-if="externalConfig.ips.length" class="flex flex-wrap gap-2">
+                              <span
+                                v-for="ip in externalConfig.ips"
+                                :key="ip"
+                                class="bg-base-200/50 text-base-content/80 hover:text-primary inline-flex select-none items-center rounded px-2 py-1 font-mono text-xs transition-colors"
+                              >
+                                {{ ip }}
+                              </span>
+                            </div>
+                            <div v-else class="text-base-content/30 text-xs italic">
+                              No specific IPs defined
+                            </div>
+                          </div>
+
+                          <div class="mt-2 flex flex-col gap-1">
+                            <span class="text-base-content/50 text-xs font-bold uppercase"
+                              >URLs / Domains</span
                             >
-                              {{ sym }}
-                            </span>
+                            <div v-if="externalConfig.urls.length" class="flex flex-wrap gap-2">
+                              <span
+                                v-for="url in externalConfig.urls"
+                                :key="url"
+                                class="bg-base-200/50 text-base-content/80 hover:text-primary inline-flex h-auto select-none items-center break-all rounded px-2 py-1 text-left font-mono text-xs transition-colors"
+                              >
+                                {{ url }}
+                              </span>
+                            </div>
+                            <div v-else class="text-base-content/30 text-xs italic">
+                              No specific URLs defined
+                            </div>
                           </div>
-                          <div v-else class="text-base-content/30 pl-3 text-xs italic">
-                            No specific rules defined
+                        </div>
+
+                        <div v-if="sidecarList.length > 0">
+                          <div
+                            class="text-base-content/40 mb-2 pl-1 text-xs font-bold uppercase tracking-widest"
+                          >
+                            Sidecar Services
                           </div>
+
+                          <div class="grid gap-3">
+                            <div
+                              v-for="(car, idx) in sidecarList"
+                              :key="idx"
+                              class="border-base-content/5 bg-base-100/60 hover:bg-base-100 hover:border-info/30 flex flex-col gap-2 rounded-xl border p-3 transition-all"
+                            >
+                              <div class="flex items-center gap-2">
+                                <div
+                                  class="bg-info/10 text-info flex h-8 w-8 min-w-[2rem] items-center justify-center rounded-lg"
+                                >
+                                  <span class="text-lg">📦</span>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                  <div class="text-base-content/90 break-all text-sm font-bold">
+                                    {{ car.name }}
+                                  </div>
+                                  <div class="text-base-content/50 break-all font-mono text-xs">
+                                    Image: {{ car.image }}
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div
+                                v-if="car.args && car.args.length"
+                                class="border-base-content/5 mt-1 border-t pt-2"
+                              >
+                                <div class="flex flex-wrap gap-1">
+                                  <span class="text-base-content/40 mr-1 self-center text-[10px] uppercase"
+                                    >Args:</span
+                                  >
+                                  <span
+                                    v-for="(arg, argIdx) in car.args"
+                                    :key="argIdx"
+                                    class="bg-base-200 text-base-content/70 h-auto break-all rounded px-1.5 py-0.5 text-left font-mono text-[10px]"
+                                  >
+                                    {{ arg }}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div
+                          v-if="!externalConfig && sidecarList.length === 0"
+                          class="text-base-content/40 pl-4 text-sm italic"
+                        >
+                          Network access is enabled, but no specific restrictions or sidecars are configured.
                         </div>
                       </div>
                     </transition>
-                    <div v-if="!net?.enabled" class="text-base-content/40 pl-4 text-sm italic">
-                      No network restrictions active.
+
+                    <div v-if="!isNetworkEnabled" class="text-base-content/40 pl-4 text-sm italic">
+                      Network access is completely disabled.
                     </div>
                   </div>
                 </div>

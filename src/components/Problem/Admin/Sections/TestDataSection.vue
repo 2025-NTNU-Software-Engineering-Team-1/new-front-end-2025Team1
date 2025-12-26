@@ -19,7 +19,7 @@ defineProps<{ v$: any }>();
 const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
 const route = useRoute();
 const isDrag = ref(false);
-const { t,locale } = useI18n();
+const { t, locale } = useI18n();
 const hover = computed(() => {
   return locale.value === "en" ? hover_en : hover_zh;
 });
@@ -246,8 +246,10 @@ watch(
 
     <div class="mt-2 overflow-hidden rounded-lg">
       <div class="grid grid-cols-5">
-        <div class="bg-base-300 col-span-1 flex items-center justify-center text-sm flex items-center gap-1 tooltip tooltip-bottom cursor-help"
-            :data-tip="hover.setDataZipFile">
+        <div
+          class="bg-base-300 tooltip tooltip-bottom col-span-1 flex cursor-help items-center justify-center gap-1 text-sm"
+          :data-tip="hover.setDataZipFile"
+        >
           {{ t("course.problems.zipFile") }}
         </div>
 

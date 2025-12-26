@@ -188,13 +188,15 @@ async function rejudge() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const axiosErr = err as any;
     logger.error("Rejudge Failed", axiosErr);
-    
+
     // Handle 403 Forbidden error
     const statusCode = axiosErr?.response?.status;
     if (statusCode === 403) {
-      rejudgeErrorMessage.value = axiosErr?.response?.data?.message || "You do not have permission to rejudge this submission.";
+      rejudgeErrorMessage.value =
+        axiosErr?.response?.data?.message || "You do not have permission to rejudge this submission.";
     } else {
-      rejudgeErrorMessage.value = axiosErr?.response?.data?.message || axiosErr?.message || "An error occurred while rejudging.";
+      rejudgeErrorMessage.value =
+        axiosErr?.response?.data?.message || axiosErr?.message || "An error occurred while rejudging.";
     }
     rejudgeErrorModal.value?.showModal();
   } finally {
@@ -227,9 +229,10 @@ async function deleteSubmission() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const axiosErr = err as any;
     logger.error("Delete Failed", axiosErr);
-    
+
     // Extract error message from the response
-    deleteErrorMessage.value = axiosErr?.response?.data?.message || axiosErr?.message || "Failed to delete submission.";
+    deleteErrorMessage.value =
+      axiosErr?.response?.data?.message || axiosErr?.message || "Failed to delete submission.";
     deleteErrorModal.value?.showModal();
   } finally {
     isDeleteLoading.value = false;

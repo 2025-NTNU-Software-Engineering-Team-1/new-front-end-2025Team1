@@ -15,7 +15,7 @@ import MultiStringInput from "../Controls/MultiStringInput.vue";
 import api from "@/models/api";
 import { assertFileSizeOK } from "@/utils/checkFileSize";
 
-const { t,locale } = useI18n();
+const { t, locale } = useI18n();
 const hover = computed(() => {
   return locale.value === "en" ? hover_en : hover_zh;
 });
@@ -620,8 +620,11 @@ watch(
   <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
     <div class="col-span-2 rounded-lg border border-gray-400 p-4">
       <label class="label"
-        ><span class="label-text font-semibold flex items-center gap-1 tooltip tooltip-top cursor-help"
-          :data-tip="hover.fileAccess">{{ t("course.problems.fileAccess") }}</span></label
+        ><span
+          class="label-text tooltip tooltip-top flex cursor-help items-center gap-1 font-semibold"
+          :data-tip="hover.fileAccess"
+          >{{ t("course.problems.fileAccess") }}</span
+        ></label
       >
       <div class="flex flex-wrap gap-6">
         <div class="form-control">
@@ -651,8 +654,11 @@ watch(
 
     <div class="form-control col-span-2 rounded-lg border border-gray-400 p-4">
       <label class="label cursor-pointer justify-start gap-x-4">
-        <span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
-          :data-tip="hover.libraryRestrictionsGroup1">{{ t("course.problems.libraryRestrictionsGroup") }}</span>
+        <span
+          class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+          :data-tip="hover.libraryRestrictionsGroup1"
+          >{{ t("course.problems.libraryRestrictionsGroup") }}</span
+        >
         <input
           type="checkbox"
           class="toggle"
@@ -663,8 +669,10 @@ watch(
       <div v-if="problem.pipeline!.staticAnalysis!.libraryRestrictions!.enabled" class="mt-3 space-y-4">
         <div class="rounded-lg border border-gray-400 p-3">
           <div class="mb-3 flex items-center justify-between">
-            <h4 class="text font-medium flex items-center gap-1 tooltip tooltip-top cursor-help"
-              :data-tip="hover.libraryRestrictionsGroup2">
+            <h4
+              class="text tooltip tooltip-top flex cursor-help items-center gap-1 font-medium"
+              :data-tip="hover.libraryRestrictionsGroup2"
+            >
               {{ t("course.problems.libraryRestrictionsGroup") || "Library Restrictions" }}
             </h4>
             <div class="mode-switcher">
@@ -726,8 +734,12 @@ watch(
               </div>
 
               <div class="mb-2 flex items-center justify-between">
-                <h5 class="text-sm font-medium flex items-center gap-1 tooltip tooltip-top cursor-help"
-                  :data-tip="hover.importsRestrictions">{{ t("course.problems.importsRestrictions") }}</h5>
+                <h5
+                  class="tooltip tooltip-top flex cursor-help items-center gap-1 text-sm font-medium"
+                  :data-tip="hover.importsRestrictions"
+                >
+                  {{ t("course.problems.importsRestrictions") }}
+                </h5>
                 <div class="flex gap-1" v-if="allowImports">
                   <button
                     class="btn btn-xs btn-ghost h-5 min-h-0 px-1 text-[10px]"
@@ -826,8 +838,12 @@ watch(
               </div>
 
               <div class="mb-2 flex items-center justify-between">
-                <h5 class="text-sm font-medium flex items-center gap-1 tooltip tooltip-top cursor-help"
-                  :data-tip="hover.headersRestrictions">{{ t("course.problems.headersRestrictions") }}</h5>
+                <h5
+                  class="tooltip tooltip-top flex cursor-help items-center gap-1 text-sm font-medium"
+                  :data-tip="hover.headersRestrictions"
+                >
+                  {{ t("course.problems.headersRestrictions") }}
+                </h5>
                 <div class="flex gap-1" v-if="allowHeaders">
                   <button
                     class="btn btn-xs btn-ghost h-5 min-h-0 px-1 text-[10px]"
@@ -894,8 +910,12 @@ watch(
 
             <div class="relative rounded border border-gray-500 p-2">
               <div class="mb-2 flex items-center justify-between">
-                <h5 class="text-sm font-medium flex items-center gap-1 tooltip tooltip-top cursor-help"
-                  :data-tip="hover.functionsRestrictions">{{ t("course.problems.functionsRestrictions") }}</h5>
+                <h5
+                  class="tooltip tooltip-top flex cursor-help items-center gap-1 text-sm font-medium"
+                  :data-tip="hover.functionsRestrictions"
+                >
+                  {{ t("course.problems.functionsRestrictions") }}
+                </h5>
                 <div class="flex gap-1">
                   <button
                     class="btn btn-xs btn-ghost h-5 min-h-0 px-1 text-[10px]"
@@ -968,8 +988,12 @@ watch(
 
         <div class="rounded-lg border border-gray-400 p-3">
           <div class="mb-3 flex items-center justify-between">
-            <h4 class="text font-medium flex items-center gap-1 tooltip tooltip-top cursor-help"
-              :data-tip="hover.syntaxRestrictions">{{ t("course.problems.syntaxRestrictions") }}</h4>
+            <h4
+              class="text tooltip tooltip-top flex cursor-help items-center gap-1 font-medium"
+              :data-tip="hover.syntaxRestrictions"
+            >
+              {{ t("course.problems.syntaxRestrictions") }}
+            </h4>
             <div class="mode-switcher">
               <div class="mode-switcher-container">
                 <div
@@ -1043,8 +1067,11 @@ watch(
     <div class="form-control col-span-1 md:col-span-2">
       <div class="rounded-lg border border-gray-400 p-4">
         <label class="label mb-2">
-          <span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
-            :data-tip="hover.executionMode">{{ t("course.problems.executionMode") }}</span>
+          <span
+            class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+            :data-tip="hover.executionMode"
+            >{{ t("course.problems.executionMode") }}</span
+          >
         </label>
 
         <div class="mb-4 flex flex-wrap gap-6">
@@ -1055,8 +1082,11 @@ watch(
               value="general"
               v-model="problem.pipeline!.executionMode as 'general' | 'functionOnly' | 'interactive'"
             />
-            <span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
-              :data-tip="hover.executionModeGeneral">{{ t("course.problems.executionModeGeneral") }}</span>
+            <span
+              class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+              :data-tip="hover.executionModeGeneral"
+              >{{ t("course.problems.executionModeGeneral") }}</span
+            >
           </label>
           <label class="label cursor-pointer gap-2">
             <input
@@ -1065,8 +1095,11 @@ watch(
               value="functionOnly"
               v-model="problem.pipeline!.executionMode as 'general' | 'functionOnly' | 'interactive'"
             />
-            <span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
-              :data-tip="hover.executionModeFuncitonOnly">{{ t("course.problems.executionModeFuncitonOnly") }}</span>
+            <span
+              class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+              :data-tip="hover.executionModeFuncitonOnly"
+              >{{ t("course.problems.executionModeFuncitonOnly") }}</span
+            >
           </label>
           <label class="label cursor-pointer gap-2">
             <input
@@ -1075,8 +1108,11 @@ watch(
               value="interactive"
               v-model="problem.pipeline!.executionMode as 'general' | 'functionOnly' | 'interactive'"
             />
-            <span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
-              :data-tip="hover.executionModeInteractive">{{ t("course.problems.executionModeInteractive") }}</span>
+            <span
+              class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+              :data-tip="hover.executionModeInteractive"
+              >{{ t("course.problems.executionModeInteractive") }}</span
+            >
           </label>
         </div>
 
@@ -1087,8 +1123,11 @@ watch(
           <div class="form-control">
             <div class="flex flex-wrap items-center gap-4">
               <label class="label mb-0 cursor-pointer justify-start gap-x-2">
-                <span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
-                  :data-tip="hover.uploadFile">{{ t("course.problems.uploadFile") }}</span>
+                <span
+                  class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+                  :data-tip="hover.uploadFile"
+                  >{{ t("course.problems.uploadFile") }}</span
+                >
               </label>
               <div class="flex items-center gap-2">
                 <div
@@ -1143,18 +1182,20 @@ watch(
           <div class="form-control">
             <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
               <label class="label mb-0 cursor-pointer justify-start gap-x-2">
-                <span class="label-text flex items-center gap-1 flex items-center gap-1 tooltip tooltip-top cursor-help"
-                  :data-tip="hover.interactiveTeacherFirsts">{{
-                    t("course.problems.interactiveTeacherFirst")
-                }}</span>
+                <span
+                  class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+                  :data-tip="hover.interactiveTeacherFirsts"
+                  >{{ t("course.problems.interactiveTeacherFirst") }}</span
+                >
                 <input type="checkbox" class="toggle toggle-sm" v-model="problem.pipeline!.teacherFirst" />
               </label>
 
               <div class="flex items-center gap-x-2">
-                <span class="text-sm opacity-80 flex items-center gap-1 tooltip tooltip-top cursor-help"
-                  :data-tip="hover.interactiveUploadTeacherCode">{{
-                  t("course.problems.interactiveUploadTeacherCode")
-                }}</span>
+                <span
+                  class="tooltip tooltip-top flex cursor-help items-center gap-1 text-sm opacity-80"
+                  :data-tip="hover.interactiveUploadTeacherCode"
+                  >{{ t("course.problems.interactiveUploadTeacherCode") }}</span
+                >
                 <div class="flex items-center gap-2">
                   <div
                     v-if="hasAsset('teacher_file') || problem.assets?.teacherFile"
@@ -1211,8 +1252,11 @@ watch(
         <div class="flex items-center gap-4">
           <label class="label cursor-pointer justify-start gap-x-4">
             <span class="label-text flex items-center gap-1">
-              <span class="flex items-center gap-1 tooltip tooltip-top cursor-help"
-                :data-tip="hover.customChecker">{{ t("course.problems.customChecker") }}</span>
+              <span
+                class="tooltip tooltip-top flex cursor-help items-center gap-1"
+                :data-tip="hover.customChecker"
+                >{{ t("course.problems.customChecker") }}</span
+              >
               <i-uil-lock-alt
                 v-if="problem.pipeline!.executionMode === 'interactive'"
                 class="text-error"
@@ -1252,12 +1296,15 @@ watch(
         </div>
 
         <div v-if="problem.pipeline!.customChecker" class="flex flex-col gap-x-2">
-          <div class="flex items-center gap-x-2 pt-4 ">
-            <span class="pl-1 text-sm opacity-80 flex items-center gap-1 tooltip tooltip-top cursor-help"
-              :data-tip="hover.uploadCustomChecker">{{ t("course.problems.uploadCustomChecker") }}</span>
+          <div class="flex items-center gap-x-2 pt-4">
+            <span
+              class="tooltip tooltip-top flex cursor-help items-center gap-1 pl-1 text-sm opacity-80"
+              :data-tip="hover.uploadCustomChecker"
+              >{{ t("course.problems.uploadCustomChecker") }}</span
+            >
             <input
-              type="file"  
-              accept=".py"  
+              type="file"
+              accept=".py"
               class="file-input-bordered file-input file-input-sm w-56"
               :class="{ 'input-error': v$?.assets?.customCheckerPy?.$error }"
               :disabled="problem.pipeline!.executionMode === 'interactive'"
@@ -1392,8 +1439,11 @@ watch(
       <div class="rounded-lg border border-gray-400 p-4">
         <div class="flex items-center gap-4">
           <label class="label cursor-pointer justify-start gap-x-4">
-            <span class="label-text flex items-center gap-1 tooltip tooltip-top cursor-help"
-              :data-tip="hover.customScoringScript">{{ t("course.problems.customScoringScript") }}</span>
+            <span
+              class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+              :data-tip="hover.customScoringScript"
+              >{{ t("course.problems.customScoringScript") }}</span
+            >
             <input type="checkbox" class="toggle" v-model="problem.pipeline!.scoringScript!.custom" />
           </label>
           <div class="flex items-center gap-2">
@@ -1419,8 +1469,11 @@ watch(
 
         <div v-if="problem.pipeline!.scoringScript?.custom" class="flex flex-col gap-x-2">
           <div class="flex items-center gap-x-2 pt-4">
-            <span class="pl-1 text-sm opacity-80 flex items-center gap-1 tooltip tooltip-top cursor-help"
-              :data-tip="hover.uploadCustomScorer">{{ t("course.problems.uploadCustomScorer") }}</span>
+            <span
+              class="tooltip tooltip-top flex cursor-help items-center gap-1 pl-1 text-sm opacity-80"
+              :data-tip="hover.uploadCustomScorer"
+              >{{ t("course.problems.uploadCustomScorer") }}</span
+            >
             <input
               type="file"
               accept=".py"

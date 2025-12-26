@@ -227,6 +227,7 @@
       }
     },
     "problems": {
+      "tasks": "Tasks",
       "Preview": "Preview",
       "text": "Problems",
       "id": "ID",
@@ -391,7 +392,7 @@
       "active": "Active",
       "inactive": "Inactive",
       "selectedKeysTitle": "Selected Keys ({count})  - Click items below to remove",
-      "anyFile":"Any File"
+      "anyFile": "Any File"
     },
     "submissions": {
       "text": "Submissions",

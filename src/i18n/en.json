@@ -851,6 +851,17 @@
       "row-count": "Row Count: {n}",
       "search-name": "Search Name"
     },
+    "unknown-error-occurred": "An unknown error occurred :(",
+    "tab": {
+      "dashboard": "Dashboard",
+      "user": "User",
+      "loginRecords": "Login Records",
+      "skins": "AI Skins"
+    },
+    "dashboard": {
+      "row-count": "Row Count: {n}",
+      "search-name": "Search Name"
+    },
     "unknown-error-occurred": "Unknown error occurred :(",
     "tab": {
       "dashboard": "Dashboard",

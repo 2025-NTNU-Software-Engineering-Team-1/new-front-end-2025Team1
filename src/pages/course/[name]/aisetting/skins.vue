@@ -20,6 +20,99 @@ const editThumbnail = ref<File | null>(null);
 const thumbnailPreview = ref<string | null>(null);
 const saving = ref(false);
 
+// Upload modal state
+const showUpload = ref(false);
+const uploadName = ref("");
+const uploadFile = ref<File | null>(null);
+const uploadThumbnail = ref<File | null>(null);
+const uploadThumbnailPreview = ref<string | null>(null);
+const uploadEmotions = ref("");
+const uploadError = ref<string | null>(null);
+const uploading = ref(false);
+
+const openUpload = () => {
+  showUpload.value = true;
+  uploadName.value = "";
+  uploadFile.value = null;
+  uploadThumbnail.value = null;
+  uploadThumbnailPreview.value = null;
+  uploadEmotions.value = "";
+  uploadError.value = null;
+};
+
+const closeUpload = () => {
+  showUpload.value = false;
+  if (uploadThumbnailPreview.value) {
+    URL.revokeObjectURL(uploadThumbnailPreview.value);
+    uploadThumbnailPreview.value = null;
+  }
+};
+
+const onUploadFileChange = (e: Event) => {
+  const target = e.target as HTMLInputElement;
+  uploadFile.value = target.files?.[0] ?? null;
+  uploadError.value = null;
+};
+
+const onUploadThumbnailChange = (e: Event) => {
+  const target = e.target as HTMLInputElement;
+  const file = target.files?.[0];
+  if (file && file.type.startsWith("image/")) {
+    uploadThumbnail.value = file;
+    uploadThumbnailPreview.value = URL.createObjectURL(file);
+  }
+};
+
+const onUploadThumbnailPaste = (e: ClipboardEvent) => {
+  const items = e.clipboardData?.items;
+  if (!items) return;
+  for (const item of items) {
+    if (item.type.startsWith("image/")) {
+      const file = item.getAsFile();
+      if (file) {
+        uploadThumbnail.value = file;
+        uploadThumbnailPreview.value = URL.createObjectURL(file);
+        e.preventDefault();
+        break;
+      }
+    }
+  }
+};
+
+const uploadSkin = async () => {
+  if (!uploadFile.value) {
+    uploadError.value = t("skinSelector.upload.errorFile");
+    return;
+  }
+
+  uploading.value = true;
+  uploadError.value = null;
+
+  try {
+    const formData = new FormData();
+    formData.append("file", uploadFile.value);
+    if (uploadName.value.trim()) {
+      formData.append("name", uploadName.value.trim());
+    }
+    if (uploadEmotions.value.trim()) {
+      formData.append("emotion_mappings", uploadEmotions.value.trim());
+    }
+    if (uploadThumbnail.value) {
+      formData.append("thumbnail", uploadThumbnail.value);
+    }
+
+    await api.VtuberSkin.upload(formData);
+    closeUpload();
+    await loadSkins();
+  } catch (e: unknown) {
+    const err = e as { response?: { data?: { message?: string } } };
+    uploadError.value = err.response?.data?.message ?? t("skinSelector.upload.errorFile");
+    console.error("[Course Skins] uploadSkin error:", e);
+  } finally {
+    uploading.value = false;
+  }
+};
+
 // Load skins
 const loadSkins = async () => {
   loading.value = true;
@@ -156,7 +249,15 @@ onMounted(() => {
 
 <template>
   <div>
-    <h2 class="mb-4 text-lg font-bold">{{ $t("admin.skins.title") }}</h2>
+    <div class="mb-4 flex items-center justify-between">
+      <h2 class="text-lg font-bold">{{ $t("admin.skins.title") }}</h2>
+      <button class="btn btn-primary btn-sm" @click="openUpload">
+        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        {{ $t("skinSelector.upload.button") }}
+      </button>
+    </div>
 
     <!-- Loading -->
     <div v-if="loading" class="py-8 text-center">
@@ -173,8 +274,8 @@ onMounted(() => {
           <tr>
             <th>{{ $t("admin.skins.thumbnail") }}</th>
             <th>{{ $t("admin.skins.name") }}</th>
-            <th>{{ $t("admin.skins.uploadedBy") }}</th>
-            <th>{{ $t("admin.skins.size") }}</th>
+            <th class="hidden md:table-cell">{{ $t("admin.skins.uploadedBy") }}</th>
+            <th class="hidden md:table-cell">{{ $t("admin.skins.size") }}</th>
             <th>{{ $t("admin.skins.type") }}</th>
             <th>{{ $t("admin.skins.actions") }}</th>
           </tr>
@@ -192,36 +293,39 @@ onMounted(() => {
                 <span v-else class="flex h-full items-center justify-center text-lg">🎭</span>
               </div>
             </td>
-            <td class="font-medium">{{ skin.name }}</td>
-            <td>{{ skin.uploaded_by ?? "-" }}</td>
-            <td>{{ formatSize(skin.file_size) }}</td>
+            <td class="font-medium">
+              <div class="truncate max-w-[150px]">{{ skin.name }}</div>
+            </td>
+            <td class="hidden md:table-cell">{{ skin.uploaded_by ?? "-" }}</td>
+            <td class="hidden md:table-cell">{{ formatSize(skin.file_size) }}</td>
             <td>
               <span v-if="skin.is_builtin" class="badge badge-primary badge-sm">
                 {{ $t("skinSelector.builtin") }}
               </span>
-              <span v-else-if="skin.is_public" class="badge badge-success badge-sm">
-                {{ $t("admin.skins.public") }}
-              </span>
-              <span v-else class="badge badge-ghost badge-sm">
-                {{ $t("admin.skins.private") }}
-              </span>
+              <div v-else class="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  class="toggle toggle-xs toggle-success"
+                  :checked="skin.is_public"
+                  @change="toggleVisibility(skin)"
+                />
+                <span class="text-xs" :class="skin.is_public ? 'text-success' : 'text-base-content/70'">
+                  {{ skin.is_public ? $t("admin.skins.public") : $t("admin.skins.private") }}
+                </span>
+              </div>
             </td>
             <td>
-              <div class="flex gap-1">
+              <div class="flex gap-2">
                 <button
                   v-if="!skin.is_builtin"
-                  class="btn btn-xs"
-                  :class="skin.is_public ? 'btn-warning' : 'btn-success'"
-                  @click="toggleVisibility(skin)"
+                  class="btn btn-sm btn-ghost"
+                  @click="openEdit(skin)"
                 >
-                  {{ skin.is_public ? $t("admin.skins.setPrivate") : $t("admin.skins.setPublic") }}
-                </button>
-                <button v-if="!skin.is_builtin" class="btn btn-xs btn-ghost" @click="openEdit(skin)">
                   {{ $t("admin.skins.edit") }}
                 </button>
                 <button
                   v-if="!skin.is_builtin"
-                  class="btn btn-xs btn-error btn-ghost"
+                  class="btn btn-sm btn-error btn-ghost"
                   @click="deleteSkin(skin.skin_id)"
                 >
                   {{ $t("admin.skins.delete") }}
@@ -293,6 +397,89 @@ onMounted(() => {
         </div>
       </div>
       <div class="modal-backdrop" @click="closeEdit"></div>
+    </div>
+    <!-- Upload Modal -->
+    <div v-if="showUpload" class="modal modal-open">
+      <div class="modal-box" @paste="onUploadThumbnailPaste" tabindex="0">
+        <h3 class="text-lg font-bold">{{ $t("skinSelector.upload.title") }}</h3>
+        
+        <div class="form-control mt-4">
+          <label class="label">
+            <span class="label-text">{{ $t("skinSelector.upload.name") }}</span>
+          </label>
+          <input
+            v-model="uploadName"
+            type="text"
+            :placeholder="$t('skinSelector.upload.namePlaceholder')"
+            class="input input-bordered input-sm w-full"
+          />
+        </div>
+
+        <div class="form-control mt-4">
+          <label class="label">
+            <span class="label-text">{{ $t("skinSelector.upload.file") }}</span>
+          </label>
+          <input
+            type="file"
+            accept=".zip"
+            class="file-input file-input-bordered file-input-sm w-full"
+            @change="onUploadFileChange"
+          />
+          <label class="label">
+            <span class="label-text-alt">{{ $t("skinSelector.upload.hint") }}</span>
+          </label>
+        </div>
+
+        <div class="form-control mt-4">
+          <label class="label">
+            <span class="label-text">{{ $t("skinSelector.upload.thumbnail") }}</span>
+            <span class="label-text-alt">({{ $t("skinSelector.upload.optional") }})</span>
+          </label>
+          <div class="flex items-center gap-4">
+             <div class="h-16 w-16 overflow-hidden rounded-lg bg-base-200">
+                <img
+                  v-if="uploadThumbnailPreview"
+                  :src="uploadThumbnailPreview"
+                  class="h-full w-full object-cover"
+                />
+                <span v-else class="flex h-full items-center justify-center text-2xl">🎭</span>
+             </div>
+             <input type="file" accept="image/*" class="file-input file-input-bordered file-input-sm w-full max-w-xs" @change="onUploadThumbnailChange" />
+          </div>
+          <label class="label">
+            <span class="label-text-alt">{{ $t("skinSelector.upload.thumbnailHint") }}</span>
+          </label>
+        </div>
+
+        <div class="form-control mt-4">
+           <label class="label">
+            <span class="label-text">{{ $t("skinSelector.upload.emotions") }}</span>
+            <span class="label-text-alt">({{ $t("skinSelector.upload.optional") }})</span>
+          </label>
+          <textarea
+            v-model="uploadEmotions"
+            class="textarea textarea-bordered font-mono text-xs"
+            rows="3"
+            :placeholder='`{"smile": "F05", "unhappy": "F03", ...}`'
+          ></textarea>
+           <label class="label">
+            <span class="label-text-alt">{{ $t("skinSelector.upload.emotionsHint") }}</span>
+          </label>
+        </div>
+
+        <div v-if="uploadError" class="alert alert-error mt-4 text-sm">
+          {{ uploadError }}
+        </div>
+
+        <div class="modal-action">
+          <button class="btn btn-sm" @click="closeUpload">{{ $t("skinSelector.upload.cancel") }}</button>
+          <button class="btn btn-sm btn-primary" :disabled="uploading || !uploadFile" @click="uploadSkin">
+             <span v-if="uploading" class="loading loading-spinner loading-xs"></span>
+             {{ $t("skinSelector.upload.submit") }}
+          </button>
+        </div>
+      </div>
+      <div class="modal-backdrop" @click="closeUpload"></div>
     </div>
   </div>
 </template>

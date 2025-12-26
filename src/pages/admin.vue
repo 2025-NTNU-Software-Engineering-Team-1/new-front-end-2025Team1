@@ -15,6 +15,7 @@ const tabs = [
   { text: t("admin.tab.dashboard"), value: "/admin/dashboard" },
   { text: t("admin.tab.user"), value: "/admin/user" },
   { text: t("admin.tab.loginRecords"), value: "/admin/login-records" },
+  { text: t("admin.tab.skins"), value: "/admin/skins" },
 ];
 watchEffect(() => {
   if (!tabs.some((d) => d.value === route.path)) {

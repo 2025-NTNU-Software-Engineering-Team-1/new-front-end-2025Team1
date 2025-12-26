@@ -442,19 +442,16 @@ const rules = {
     */
 
     trialModeACFiles: {
-      requiredWhenTrial: helpers.withMessage(
-        "Trial Mode is enabled: please upload at least one AC file.",
-        () => {
-          const cfg = problem.value.config;
-          if (!cfg?.trialMode) return true;
-          // Check if already uploaded via assetPaths
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const assetPaths = (cfg as any)?.assetPaths || {};
-          if (assetPaths["ac_code"]) return true;
-          // Check if new file is being uploaded
-          return (problem.value.assets?.trialModeACFiles?.length ?? 0) > 0;
-        },
-      ),
+      requiredWhenTrial: helpers.withMessage("Trial Mode is enabled: please upload the AC file.", () => {
+        const cfg = problem.value.config;
+        if (!cfg?.trialMode) return true;
+        // Check if already uploaded via assetPaths
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const assetPaths = (cfg as any)?.assetPaths || {};
+        if (assetPaths["ac_code"]) return true;
+        // Check if new file is being uploaded
+        return (problem.value.assets?.trialModeACFiles?.length ?? 0) > 0;
+      }),
     },
 
     trialModePublicTestDataZip: {

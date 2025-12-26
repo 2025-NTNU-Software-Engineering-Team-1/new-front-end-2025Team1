@@ -92,11 +92,9 @@ const onUploadThumbnailChange = (e: Event) => {
 const onUploadThumbnailPaste = (e: ClipboardEvent) => {
   const items = e.clipboardData?.items;
   if (!items) return;
-
-  // FIX: Use standard for-loop instead of for...of
-  // Reason: 'DataTransferItemList' is not iterable in strict TS/older lib configurations.
   for (let i = 0; i < items.length; i++) {
-    const item = items[i];
+    const item = (items as unknown as Record<number, DataTransferItem>)[i];
+    if (!item) continue;
     if (item.type.startsWith("image/")) {
       const file = item.getAsFile();
       if (file) {
@@ -222,10 +220,9 @@ const onThumbnailChange = (e: Event) => {
 const onThumbnailPaste = (e: ClipboardEvent) => {
   const items = e.clipboardData?.items;
   if (!items) return;
-
-  // FIX: Use standard for-loop to iterate through DataTransferItemList
   for (let i = 0; i < items.length; i++) {
-    const item = items[i];
+    const item = (items as unknown as Record<number, DataTransferItem>)[i];
+    if (!item) continue;
     if (item.type.startsWith("image/")) {
       const file = item.getAsFile();
       if (file) {

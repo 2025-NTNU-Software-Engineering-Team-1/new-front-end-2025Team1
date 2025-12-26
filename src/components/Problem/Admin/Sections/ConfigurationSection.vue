@@ -38,6 +38,9 @@ const MAX_DOCKER_SIZE_BYTES = 1024 * 1024 * 1024; // 1GB
 const IP_REGEX =
   /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
 
+// AC file
+const acFileError = ref("");
+
 // ==========================================
 // Logger Utility
 // ==========================================
@@ -1670,30 +1673,58 @@ onBeforeUnmount(() => {
               }}</span>
             </div>
           </div>
+
           <div class="mt-3 flex items-center gap-2">
             <input
               type="file"
               multiple
+              accept=".py,.c,.cpp"
               class="file-input-bordered file-input file-input-sm w-56"
-              :class="{ 'input-error': v$?.assets?.trialModeACFiles?.$error }"
+              :class="{ 'input-error': v$?.assets?.trialModeACFiles?.$error || acFileError }"
               @change="
                 (e: Event) => {
                   const inputEl = e.target as HTMLInputElement;
                   const files = Array.from(inputEl.files || []) as File[];
-                  // Only check size
-                  const valid = files.filter((f) => assertFileSizeOK(f, 'AC File'));
+
+                  // Reset error message
+                  acFileError = '';
+
+                  // Filter: Check both file size AND file extension
+                  const valid = files.filter((f) => {
+                    const isSizeOk = assertFileSizeOK(f, 'AC File');
+                    // Check extension (case insensitive)
+                    const isExtOk = /\.(py|c|cpp)$/i.test(f.name);
+                    return isSizeOk && isExtOk;
+                  });
+
+                  // If files were dropped due to extension, set error message for UI
+                  if (files.length > 0 && valid.length < files.length) {
+                    acFileError = 'Some files were ignored. Only .py, .c, .cpp are allowed.';
+                    // Optional: clear input if you want to force re-selection,
+                    // but keeping valid files is usually better UX.
+                  }
+
                   problem.assets!.trialModeACFiles = valid;
-                  if (valid.length === 0) inputEl.value = '';
+
+                  // If no valid files remain, clear the input value completely
+                  if (valid.length === 0) {
+                    inputEl.value = '';
+                  }
+
                   v$?.assets?.trialModeACFiles?.$touch();
                 }
               "
             />
           </div>
-          <div class="mt-1 pl-1 text-xs opacity-70">{{ t("course.problems.anyFile") }}</div>
-          <label v-if="v$?.assets?.trialModeACFiles?.$error" class="label">
-            <span class="label-text-alt text-error">{{
-              v$.assets.trialModeACFiles.$errors[0]?.$message
-            }}</span>
+          <div class="mt-1 pl-1 text-xs opacity-70">{{ t("course.problems.ACFile") }}</div>
+
+          <label v-if="v$?.assets?.trialModeACFiles?.$error || acFileError" class="label">
+            <span v-if="v$?.assets?.trialModeACFiles?.$error" class="label-text-alt text-error">
+              {{ v$.assets.trialModeACFiles.$errors[0]?.$message }}
+            </span>
+            <span v-else-if="acFileError" class="label-text-alt text-error">
+              {{ acFileError }}
+            </span>
           </label>
         </div>
       </div>

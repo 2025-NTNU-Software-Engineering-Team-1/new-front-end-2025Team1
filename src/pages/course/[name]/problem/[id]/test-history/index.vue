@@ -222,10 +222,7 @@ async function deleteTrialSubmission(id: string | number, event: Event) {
                     </td>
                     <td>
                       <span
-                        :class="[
-                          'badge badge-sm',
-                          item.type === 'public' ? 'badge-info' : 'badge-warning',
-                        ]"
+                        :class="['badge badge-sm', item.type === 'public' ? 'badge-info' : 'badge-warning']"
                       >
                         {{ item.type }}
                       </span>

@@ -392,12 +392,8 @@
       "active": "Active",
       "inactive": "Inactive",
       "selectedKeysTitle": "Selected Keys ({count})  - Click items below to remove",
-      "anyFile":"Any File",
-      "enableCppHint":"Enable C/C++ to unlock."
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
+      "ACFile": "Only allowed: .py, .c, or .cpp",
+      "enableCppHint": "Enable C/C++ to unlock."
     },
     "submissions": {
       "text": "Submissions",

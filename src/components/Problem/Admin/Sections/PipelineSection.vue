@@ -412,7 +412,44 @@ watch(libraryMode, (newMode) => {
   }
 });
 
-const defaultSyntaxOptions = ["while", "for", "recursive"];
+// Syntax options - fetched from API (Python 130+ / C++ 66+ types)
+const syntaxOptions = ref<{
+  python: { common: string[]; all: string[]; allSet: Set<string> };
+  cpp: { common: string[]; all: string[]; allSet: Set<string> };
+}>({
+  python: { common: ["while", "for", "recursive"], all: [], allSet: new Set() },
+  cpp: { common: ["while", "for", "recursive"], all: [], allSet: new Set() },
+});
+
+// Get syntax options based on current language
+const currentSyntaxOptions = computed(() => {
+  const lang = problem.value.allowedLanguage;
+  // Python = 4, C = 1, C++ = 2
+  if (lang & 4) return syntaxOptions.value.python;
+  if (lang & 3) return syntaxOptions.value.cpp;
+  return syntaxOptions.value.python; // default to Python
+});
+
+// Validate syntax value against current language's valid set
+function validateSyntaxValue(value: string): boolean {
+  const validSet = currentSyntaxOptions.value.allSet;
+  if (validSet.size === 0) return true; // Not loaded yet, allow all
+  return validSet.has(value.toLowerCase());
+}
+
+// Warning message for invalid syntax values (auto-dismiss after 5 seconds)
+const syntaxWarningMessage = ref<string>("");
+let syntaxWarningTimer: ReturnType<typeof setTimeout> | null = null;
+
+function showSyntaxWarning(invalidValues: string[]) {
+  if (syntaxWarningTimer) {
+    clearTimeout(syntaxWarningTimer);
+  }
+  syntaxWarningMessage.value = `不合法的語法值已被過濾: ${invalidValues.join(", ")}`;
+  syntaxWarningTimer = setTimeout(() => {
+    syntaxWarningMessage.value = "";
+  }, 5000);
+}
 
 // ==========================================
 // Section: Language Permissions
@@ -498,19 +535,30 @@ function clearAllItems(section: LibSection, mode: LibMode) {
 
 /**
  * Handles manual updates from MultiStringInput.
- * INTERCEPTS the v-model update to enforce limits.
+ * INTERCEPTS the v-model update to enforce limits and validate syntax values.
  */
 function handleManualUpdate(section: LibSection, mode: LibMode, newVal: string[]) {
   ensurePipeline();
   const restrictions = problem.value.pipeline!.staticAnalysis!.libraryRestrictions![mode]!;
   const currentArr = restrictions[section] || [];
 
-  if (newVal.length < currentArr.length) {
+  // Validate syntax values - auto-filter invalid ones and show warning
+  let filteredVal = newVal;
+  if (section === "syntax" && currentSyntaxOptions.value.allSet.size > 0) {
+    const invalid = newVal.filter((v) => !validateSyntaxValue(v));
+    if (invalid.length > 0) {
+      logger.warn("Invalid syntax values filtered", invalid.join(", "));
+      showSyntaxWarning(invalid);
+      filteredVal = newVal.filter((v) => validateSyntaxValue(v));
+    }
+  }
+
+  if (filteredVal.length < currentArr.length) {
     // Allowed: Deletion
-    restrictions[section] = newVal;
-  } else if (newVal.length <= MAX_ITEMS_LIMIT) {
+    restrictions[section] = filteredVal;
+  } else if (filteredVal.length <= MAX_ITEMS_LIMIT) {
     // Allowed: Addition within limit
-    restrictions[section] = newVal;
+    restrictions[section] = filteredVal;
   } else {
     logger.warn("Limit reached", `Blocked manual input. Limit: ${MAX_ITEMS_LIMIT}`);
   }
@@ -552,7 +600,7 @@ function setLibList(section: LibSection, mode: LibMode, next: string[]) {
 }
 
 function getBackendOptions(section: LibSection): string[] {
-  if (section === "syntax") return defaultSyntaxOptions;
+  if (section === "syntax") return currentSyntaxOptions.value.common;
   if (section === "imports") return libraryOptions.value.imports || [];
   if (section === "headers") return libraryOptions.value.headers || [];
   return libraryOptions.value.functions || [];
@@ -598,9 +646,37 @@ if (!problem.value.pipeline) {
 // ==========================================
 onMounted(async () => {
   initPipelineValues();
-  await fetchStaticAnalysisOptions();
-  await fetchAiCheckerKeys();
+  await Promise.all([fetchStaticAnalysisOptions(), fetchSyntaxOptions(), fetchAiCheckerKeys()]);
 });
+
+// Fetch syntax options from API (Python 130+ / C++ 66+ types)
+async function fetchSyntaxOptions() {
+  try {
+    const res = await api.Problem.getSyntaxOptions();
+    const data = res.data as {
+      python: { common: string[]; all: string[]; categories: Record<string, string[]> };
+      cpp: { common: string[]; all: string[]; categories: Record<string, string[]> };
+    };
+    syntaxOptions.value = {
+      python: {
+        common: data.python.common,
+        all: data.python.all,
+        allSet: new Set(data.python.all.map((s) => s.toLowerCase())),
+      },
+      cpp: {
+        common: data.cpp.common,
+        all: data.cpp.all,
+        allSet: new Set(data.cpp.all.map((s) => s.toLowerCase())),
+      },
+    };
+    logger.success("Syntax options loaded", {
+      python: data.python.all.length,
+      cpp: data.cpp.all.length,
+    });
+  } catch (err) {
+    logger.warn("Failed to fetch syntax options, using defaults", err);
+  }
+}
 
 // Fetch AI API Keys for AI Checker
 async function fetchAiCheckerKeys() {
@@ -1068,7 +1144,7 @@ watch(
 
           <div class="mt-2 flex flex-wrap gap-2">
             <button
-              v-for="opt in defaultSyntaxOptions"
+              v-for="opt in currentSyntaxOptions.common"
               :key="`syntax-${opt}`"
               class="btn btn-xs"
               :class="
@@ -1107,6 +1183,28 @@ watch(
                 MAX_ITEMS_LIMIT
               "
             />
+          </div>
+
+          <!-- Warning message for invalid syntax values -->
+          <div
+            v-if="syntaxWarningMessage"
+            class="alert alert-warning mt-2 py-2 text-sm shadow-md"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
+            </svg>
+            <span>{{ syntaxWarningMessage }}</span>
+            <button class="btn btn-ghost btn-xs" @click="syntaxWarningMessage = ''">✕</button>
           </div>
         </div>
       </div>

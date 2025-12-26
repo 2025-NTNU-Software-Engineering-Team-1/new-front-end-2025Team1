@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted, computed, watchEffect } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useTitle } from "@vueuse/core";
+import { useTitle, useIntervalFn, useDocumentVisibility } from "@vueuse/core";
 import api from "@/models/api";
 import { useI18n } from "vue-i18n";
 import dayjs from "dayjs";
@@ -97,18 +97,82 @@ function mapStatusToCode(status: string): SubmissionStatusCodes {
     AC: SUBMISSION_STATUS_CODE.ACCEPTED,
     WA: SUBMISSION_STATUS_CODE.WRONG_ANSWER,
     CE: SUBMISSION_STATUS_CODE.COMPILE_ERROR,
+    AE: SUBMISSION_STATUS_CODE.ANALYSIS_ERROR,
     TLE: SUBMISSION_STATUS_CODE.TIME_LIMIT_EXCEED,
     MLE: SUBMISSION_STATUS_CODE.MEMORY_LIMIT_EXCEED,
     RE: SUBMISSION_STATUS_CODE.RUNTIME_ERROR,
     JE: SUBMISSION_STATUS_CODE.JUDGE_ERROR,
     OLE: SUBMISSION_STATUS_CODE.OUTPUT_LIMIT_EXCEED,
     Pending: SUBMISSION_STATUS_CODE.PENDING,
+    Judging: SUBMISSION_STATUS_CODE.PENDING, // 評測中也顯示為 Pending
     err: SUBMISSION_STATUS_CODE.JUDGE_ERROR,
     Error: SUBMISSION_STATUS_CODE.JUDGE_ERROR,
     ERROR: SUBMISSION_STATUS_CODE.JUDGE_ERROR,
   };
-  return statusMap[status] ?? SUBMISSION_STATUS_CODE.JUDGE_ERROR;
+  return statusMap[status] ?? SUBMISSION_STATUS_CODE.PENDING; // 預設為 Pending 而非 JE
 }
+
+// Auto-refresh: Check if any items are pending
+const hasPendingItems = computed(() =>
+  testHistory.value.some((item) => item.result === SUBMISSION_STATUS_CODE.PENDING)
+);
+
+// Document visibility for pause/resume polling
+const visibility = useDocumentVisibility();
+
+// Fetch history data (reusable for polling)
+async function fetchHistory() {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const response: any = await api.TrialSubmission.getTrialHistory(Number(route.params.id));
+    if (response.status === "ok") {
+      testHistory.value =
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        response.data?.history?.map((item: any) => ({
+          id: item.trial_submission_id,
+          pid: item.problem_Id,
+          result: mapStatusToCode(item.status),
+          score: item.score,
+          lang: LANG[item.language_type] || "Unknown",
+          timestamp: Number(item.timestamp),
+          type: item.use_default_case === false ? "custom" : "public",
+        })) || [];
+    }
+  } catch (err) {
+    console.error("Polling error:", err);
+  }
+}
+
+// Auto-refresh polling (every 3 seconds when there are pending items and page is visible)
+const { pause, resume, isActive } = useIntervalFn(
+  () => {
+    if (hasPendingItems.value && visibility.value === "visible") {
+      fetchHistory();
+    }
+  },
+  3000,
+  { immediate: false }
+);
+
+// Watch for pending items and auto start/stop polling
+watchEffect(() => {
+  if (hasPendingItems.value && visibility.value === "visible") {
+    if (!isActive.value) {
+      console.log("Starting polling - pending items detected");
+      resume();
+    }
+  } else {
+    if (isActive.value) {
+      console.log("Stopping polling - no pending items or page hidden");
+      pause();
+    }
+  }
+});
+
+// Cleanup on unmount
+onUnmounted(() => {
+  pause();
+});
 
 function viewTestDetail(testId: string | number) {
   const targetPath = `/course/${route.params.name}/problem/${route.params.id}/test-history/${testId}`;
@@ -196,7 +260,7 @@ async function deleteTrialSubmission(id: string | number, event: Event) {
                 <thead>
                   <tr>
                     <th>{{ t("course.problem.test.historyModal.table.id") }}</th>
-                    <th>Type</th>
+                    <th class="text-center">Type</th>
                     <th>PID</th>
                     <th>{{ t("course.problem.test.historyModal.table.result") }}</th>
                     <th>{{ t("course.problem.test.historyModal.table.score") }}</th>
@@ -220,14 +284,14 @@ async function deleteTrialSubmission(id: string | number, event: Event) {
                         {{ item.id }}
                       </router-link>
                     </td>
-                    <td>
+                    <td class="text-center">
                       <span
                         :class="[
-                          'badge badge-sm',
+                          'badge badge-sm badge-outline w-16',
                           item.type === 'public' ? 'badge-info' : 'badge-warning',
                         ]"
                       >
-                        {{ item.type }}
+                        {{ item.type === 'public' ? 'Public' : 'Custom' }}
                       </span>
                     </td>
                     <td>{{ item.pid }}</td>

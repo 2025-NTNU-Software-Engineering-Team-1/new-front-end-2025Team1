@@ -63,10 +63,10 @@ const isLoading = ref(false);
 const canRejudge = ref(false);
 
 const {
-  data: CEOutput,
-  error: CEError,
-  isLoading: CELoading,
-  execute: fetchCEOutput,
+  data: errorOutput,
+  error: errorOutputError,
+  isLoading: errorOutputLoading,
+  execute: fetchErrorOutput,
 } = useAxios<{ stderr: string; stdout: string }>(
   `/trial-submission/${route.params.testId}/output/0/0`,
   fetcher,
@@ -75,8 +75,8 @@ const {
   },
 );
 
-// Flag to prevent multiple CE output fetch calls
-const ceFetched = ref(false);
+// Flag to prevent multiple error output fetch calls
+const errorOutputFetched = ref(false);
 
 // Fetch trial submission data (used for both initial load and polling)
 async function fetchTrialSubmission() {
@@ -174,6 +174,7 @@ function mapStatusToCode(status: string): SubmissionStatusCodes {
     AC: SUBMISSION_STATUS_CODE.ACCEPTED,
     WA: SUBMISSION_STATUS_CODE.WRONG_ANSWER,
     CE: SUBMISSION_STATUS_CODE.COMPILE_ERROR,
+    AE: SUBMISSION_STATUS_CODE.ANALYSIS_ERROR,
     TLE: SUBMISSION_STATUS_CODE.TIME_LIMIT_EXCEED,
     MLE: SUBMISSION_STATUS_CODE.MEMORY_LIMIT_EXCEED,
     RE: SUBMISSION_STATUS_CODE.RUNTIME_ERROR,
@@ -196,6 +197,21 @@ const { pause, isActive } = useIntervalFn(() => {
 }, 2000);
 
 const expandTasks = ref<boolean[]>([]);
+const showErrorOutput = computed(() => {
+  const status = testResult.value?.status;
+  return (
+    status === SUBMISSION_STATUS_CODE.COMPILE_ERROR ||
+    status === SUBMISSION_STATUS_CODE.ANALYSIS_ERROR ||
+    status === SUBMISSION_STATUS_CODE.JUDGE_ERROR
+  );
+});
+const errorTitle = computed(() =>
+  testResult.value?.status === SUBMISSION_STATUS_CODE.JUDGE_ERROR
+    ? "Judge Error"
+    : testResult.value?.status === SUBMISSION_STATUS_CODE.ANALYSIS_ERROR
+      ? "Analysis Error"
+      : "Compilation Error",
+);
 watchEffect(() => {
   if (testResult.value != null) {
     if (testResult.value.tasks) {
@@ -207,10 +223,15 @@ watchEffect(() => {
         console.log("Judging finished. Polling stopped.", { finalStatus: testResult.value.status });
         pause();
       }
-      // Fetch CE output if compile error (only once)
-      if (testResult.value.status === SUBMISSION_STATUS_CODE.COMPILE_ERROR && !ceFetched.value) {
-        ceFetched.value = true;
-        fetchCEOutput();
+      // Fetch error output for CE/JE (only once)
+      if (
+        (testResult.value.status === SUBMISSION_STATUS_CODE.COMPILE_ERROR ||
+          testResult.value.status === SUBMISSION_STATUS_CODE.ANALYSIS_ERROR ||
+          testResult.value.status === SUBMISSION_STATUS_CODE.JUDGE_ERROR) &&
+        !errorOutputFetched.value
+      ) {
+        errorOutputFetched.value = true;
+        fetchErrorOutput();
       }
     }
   }
@@ -480,20 +501,44 @@ function downloadModalJson() {
 
 // Rejudge functionality (follows normal submission pattern)
 const isRejudgeLoading = ref(false);
+const rejudgeErrorModal = ref<HTMLDialogElement | null>(null);
+const rejudgeErrorMessage = ref<string>("");
+
 async function rejudge() {
   isRejudgeLoading.value = true;
   try {
     await api.TrialSubmission.rejudge(String(route.params.testId));
     router.go(0);
-  } catch (err) {
-    console.error("Rejudge failed:", err);
+  } catch (err: unknown) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const axiosErr = err as any;
+    console.error("Rejudge failed:", axiosErr);
+
+    // Extract error message and show modal
+    const statusCode = axiosErr?.response?.status;
+    if (statusCode === 403) {
+      rejudgeErrorMessage.value =
+        axiosErr?.response?.data?.message || "You do not have permission to rejudge this trial submission.";
+    } else {
+      rejudgeErrorMessage.value =
+        axiosErr?.response?.data?.message || axiosErr?.message || "An error occurred while rejudging.";
+    }
+    rejudgeErrorModal.value?.showModal();
   } finally {
     isRejudgeLoading.value = false;
   }
 }
 
+function closeRejudgeErrorModal() {
+  rejudgeErrorModal.value?.close();
+  rejudgeErrorMessage.value = "";
+}
+
 // Delete functionality
 const isDeleteLoading = ref(false);
+const deleteErrorModal = ref<HTMLDialogElement | null>(null);
+const deleteErrorMessage = ref<string>("");
+
 async function deleteTrialSubmission() {
   if (!confirm("Are you sure you want to delete this trial submission?")) {
     return;
@@ -508,10 +553,22 @@ async function deleteTrialSubmission() {
       router.push(`/course/${route.params.name}/problem/${route.params.id}/test-history`);
     }
   } catch (err: unknown) {
-    console.error("Delete failed:", err);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const axiosErr = err as any;
+    console.error("Delete failed:", axiosErr);
+
+    // Extract error message and show modal
+    deleteErrorMessage.value =
+      axiosErr?.response?.data?.message || axiosErr?.message || "Failed to delete trial submission.";
+    deleteErrorModal.value?.showModal();
   } finally {
     isDeleteLoading.value = false;
   }
+}
+
+function closeDeleteErrorModal() {
+  deleteErrorModal.value?.close();
+  deleteErrorMessage.value = "";
 }
 </script>
 
@@ -610,16 +667,16 @@ async function deleteTrialSubmission() {
 
             <div class="my-4" />
 
-            <div v-if="testResult?.status === SUBMISSION_STATUS_CODE.COMPILE_ERROR">
+            <div v-if="showErrorOutput">
               <div class="card-title md:text-xl lg:text-2xl">
                 <i-uil-exclamation-circle class="text-error mr-2" />
-                Compilation Error
+                {{ errorTitle }}
               </div>
               <div class="my-4" />
-              <ui-spinner v-if="CELoading" class="mr-3 h-6 w-6" />
-              <div v-else-if="CEError">unable to get error messages from server 😢</div>
-              <div v-else-if="CEOutput">
-                <code-editor v-model="CEOutput.stderr" readonly />
+              <ui-spinner v-if="errorOutputLoading" class="mr-3 h-6 w-6" />
+              <div v-else-if="errorOutputError">unable to get error messages from server 😢</div>
+              <div v-else-if="errorOutput">
+                <code-editor v-model="errorOutput.stderr" readonly />
               </div>
             </div>
 
@@ -941,6 +998,40 @@ async function deleteTrialSubmission() {
           </button>
         </div>
         <button class="btn" @click="closeCaseOutputModal">Close</button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </dialog>
+
+  <!-- Rejudge Error Modal -->
+  <dialog ref="rejudgeErrorModal" class="modal">
+    <div class="modal-box">
+      <h3 class="text-lg font-bold text-error">
+        <i-uil-exclamation-triangle class="mr-2 inline" />
+        Rejudge Failed
+      </h3>
+      <p class="py-4">{{ rejudgeErrorMessage }}</p>
+      <div class="modal-action">
+        <button class="btn" @click="closeRejudgeErrorModal">Close</button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </dialog>
+
+  <!-- Delete Error Modal -->
+  <dialog ref="deleteErrorModal" class="modal">
+    <div class="modal-box">
+      <h3 class="text-lg font-bold text-error">
+        <i-uil-exclamation-triangle class="mr-2 inline" />
+        Delete Failed
+      </h3>
+      <p class="py-4">{{ deleteErrorMessage }}</p>
+      <div class="modal-action">
+        <button class="btn" @click="closeDeleteErrorModal">Close</button>
       </div>
     </div>
     <form method="dialog" class="modal-backdrop">

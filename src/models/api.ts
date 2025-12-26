@@ -71,6 +71,14 @@ const Problem = {
     fetcher.get<{ librarySymbols: { imports: string[]; headers: string[]; functions: string[] } }>(
       `/problem/static-analysis/options`,
     ),
+
+  // syntax options for static analysis (Python 130+ / C++ 66+ types)
+  getSyntaxOptions: () =>
+    fetcher.get<{
+      python: { common: string[]; all: string[]; categories: Record<string, string[]> };
+      cpp: { common: string[]; all: string[]; categories: Record<string, string[]> };
+    }>(`/problem/syntax-options`),
+
   // get a problem detail
   get: (id: string | number) => fetcher.get<Problem>(`/problem/view/${id}`),
 };

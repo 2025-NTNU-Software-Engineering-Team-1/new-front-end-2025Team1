@@ -20,9 +20,7 @@ const courseCode = ref<string | null>(null);
 const courseCodeLoading = ref(false);
 const courseCodeError = ref("");
 
-const canManageCode = computed(() => 
-  session.isAdmin || session.isTeacher || session.isTA
-);
+const canManageCode = computed(() => session.isAdmin || session.isTeacher || session.isTA);
 
 async function fetchCourseCode() {
   if (!canManageCode.value) return;
@@ -87,7 +85,12 @@ const sortBy = ref<MemberTableColumn>(
 watch(sortBy, () => {
   router.replace({ query: { sort: sortBy.value || MemberTableColumn.USERNAME } });
 });
-const { data, error, isLoading, execute: refetchMembers } = useAxios<Course>(`/course/${route.params.name}`, fetcher);
+const {
+  data,
+  error,
+  isLoading,
+  execute: refetchMembers,
+} = useAxios<Course>(`/course/${route.params.name}`, fetcher);
 
 // Get teacher username for comparison
 const teacherUsername = computed(() => data.value?.teacher?.username || "");
@@ -335,19 +338,23 @@ async function submit() {
         </div>
 
         <!-- Course Code Management Section -->
-        <div v-if="canManageCode" class="mb-4 border-base-300 border rounded-lg p-4 bg-base-200/50">
-          <h3 class="font-semibold mb-3">{{ $t("course.members.courseCode.title") }}</h3>
-          
+        <div v-if="canManageCode" class="border-base-300 bg-base-200/50 mb-4 rounded-lg border p-4">
+          <h3 class="mb-3 font-semibold">{{ $t("course.members.courseCode.title") }}</h3>
+
           <div v-if="courseCodeLoading" class="flex items-center gap-2">
             <span class="loading loading-spinner loading-sm"></span>
             <span class="text-sm opacity-70">{{ $t("course.members.courseCode.loading") }}</span>
           </div>
 
-          <div v-else-if="courseCode" class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+          <div v-else-if="courseCode" class="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
             <div class="flex items-center gap-2">
               <span class="text-sm opacity-70">{{ $t("course.members.courseCode.current") }}</span>
-              <code class="bg-base-300 px-3 py-1 rounded font-mono text-lg">{{ courseCode }}</code>
-              <button class="btn btn-sm btn-ghost" @click="copyCourseCode" :title="$t('course.members.courseCode.copy')">
+              <code class="bg-base-300 rounded px-3 py-1 font-mono text-lg">{{ courseCode }}</code>
+              <button
+                class="btn btn-sm btn-ghost"
+                @click="copyCourseCode"
+                :title="$t('course.members.courseCode.copy')"
+              >
                 <i-uil-copy />
               </button>
             </div>
@@ -361,7 +368,7 @@ async function submit() {
             </div>
           </div>
 
-          <div v-else class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+          <div v-else class="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
             <span class="text-sm opacity-70">{{ $t("course.members.courseCode.none") }}</span>
             <button class="btn btn-sm btn-primary" @click="generateCourseCode">
               <i-uil-plus /> {{ $t("course.members.courseCode.generate") }}
@@ -426,12 +433,20 @@ async function submit() {
                           class="select select-bordered select-sm w-24"
                           :value="getCourseRole(member)"
                           :disabled="roleChangeLoading === member.username"
-                          @change="changeMemberRole(member.username, ($event.target as HTMLSelectElement).value as 'student' | 'ta')"
+                          @change="
+                            changeMemberRole(
+                              member.username,
+                              ($event.target as HTMLSelectElement).value as 'student' | 'ta',
+                            )
+                          "
                         >
                           <option value="student">{{ $t("course.members.roleStudent") }}</option>
                           <option value="ta">{{ $t("course.members.roleTA") }}</option>
                         </select>
-                        <span v-if="roleChangeLoading === member.username" class="loading loading-spinner loading-sm"></span>
+                        <span
+                          v-if="roleChangeLoading === member.username"
+                          class="loading loading-spinner loading-sm"
+                        ></span>
                       </div>
                     </template>
                   </td>
@@ -442,7 +457,6 @@ async function submit() {
         </data-status-wrapper>
       </div>
     </div>
-
 
     <input v-model="isOpen" type="checkbox" id="my-modal" class="modal-toggle" />
     <div class="modal">

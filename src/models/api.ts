@@ -331,8 +331,7 @@ const Course = {
     fetcher.get<{ data: { course_code: string | null } }>(`/course/${courseName}/code`),
   generateCode: (courseName: string) =>
     fetcher.post<{ data: { course_code: string } }>(`/course/${courseName}/code`),
-  removeCode: (courseName: string) =>
-    fetcher.delete<{ message: string }>(`/course/${courseName}/code`),
+  removeCode: (courseName: string) => fetcher.delete<{ message: string }>(`/course/${courseName}/code`),
   // Member role management (for teachers only, not TAs)
   changeMemberRole: (courseName: string, username: string, role: "student" | "ta") =>
     fetcher.put<{ message: string; data: { username: string; new_role: string } }>(

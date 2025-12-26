@@ -308,7 +308,55 @@ const libraryOptions = ref({
 });
 
 // Fetch options from backend
-const pythonPresets = ["math", "random", "os", "sys", "time", "re", "json", "numpy", "pandas", "matplotlib"];
+const pythonPresets = [
+  // ===== Core programming / DSA =====
+  "math", // math
+  "random", // randomness
+  "itertools", // iterators
+  "functools", // functional utils
+  "operator", // operator funcs
+  "collections", // data structures
+  "heapq", // priority queue
+  "bisect", // binary search
+  "string", // string utils
+  "statistics", // basic stats
+
+  // ===== Timing / analysis =====
+  "time", // timing
+
+  // ===== Text / parsing =====
+  "re", // regex
+
+  // ===== Data format =====
+  "json", // JSON IO
+  "csv", // CSV IO
+
+  // ===== Numerical / data =====
+  "numpy", // numerical array
+  "pandas", // dataframe
+
+  // ===== Visualization =====
+  "matplotlib.pyplot", // plotting
+
+  // ===== Machine learning (intro) =====
+  "sklearn", // ML framework
+  "sklearn.model_selection", // data split
+  "sklearn.metrics", // evaluation
+  "sklearn.linear_model", // linear models
+  "sklearn.neighbors", // k-NN
+  "sklearn.tree", // decision trees
+
+  // ===== System programming (intro) =====
+  "os", // OS interface
+  "sys", // interpreter access
+  "pathlib", // filesystem paths
+  "subprocess", // process execution (limited)
+
+  // ===== Language utilities =====
+  "typing", // type hints
+  "dataclasses", // structured data
+];
+
 async function fetchStaticAnalysisOptions() {
   logger.group("Fetch Static Analysis Options");
   let imports: string[] = [];

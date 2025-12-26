@@ -75,9 +75,9 @@ async function handleJoinCourse() {
       </div>
 
       <!-- Join by Course Code Section -->
-      <div class="my-4 border-base-300 border rounded-lg p-4 bg-base-200/50">
-        <h3 class="font-semibold mb-3">{{ $t("courses.index.join.title") }}</h3>
-        <div class="flex flex-col sm:flex-row gap-2">
+      <div class="border-base-300 bg-base-200/50 my-4 rounded-lg border p-4">
+        <h3 class="mb-3 font-semibold">{{ $t("courses.index.join.title") }}</h3>
+        <div class="flex flex-col gap-2 sm:flex-row">
           <input
             v-model="courseCode"
             type="text"

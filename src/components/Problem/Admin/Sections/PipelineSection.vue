@@ -705,7 +705,7 @@ watch(
         <span
           class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
           :data-tip="hover.libraryRestrictionsGroup1"
-          >{{ t("course.problems.libraryRestrictionsGroup") }}</span
+          >{{ t("course.problems.staticAnalysisGroup") }}</span
         >
         <input
           type="checkbox"
@@ -721,7 +721,7 @@ watch(
               class="text tooltip tooltip-top flex cursor-help items-center gap-1 font-medium"
               :data-tip="hover.libraryRestrictionsGroup2"
             >
-              {{ t("course.problems.libraryRestrictionsGroup") || "Library Restrictions" }}
+              {{ t("course.problems.staticAnalysisGroup") || "Library Restrictions" }}
             </h4>
             <div class="mode-switcher">
               <div class="mode-switcher-container">

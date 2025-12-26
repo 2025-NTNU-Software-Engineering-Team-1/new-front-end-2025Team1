@@ -284,7 +284,7 @@
       "fileAccessAllowedRead": "Allowed Read",
       "fileAccessAllowedWrite": "Allowed Write",
       "allowWriteWarning": "Allow Write requires Allow Read.",
-      "libraryRestrictionsGroup": "Library Restrictions",
+      "staticAnalysisGroup": "Static Analysis",
       "syntaxRestrictions": "Syntax Restrictions",
       "restrictionBlack": "Black List",
       "restrictionWhite": "White List",

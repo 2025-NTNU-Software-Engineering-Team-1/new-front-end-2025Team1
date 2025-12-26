@@ -322,7 +322,7 @@ watch(
       config: normalizeConfig(newProblem.config),
       pipeline: normalizePipeline(
         (() => {
-          const basePipe = np.pipeline || np.pipelineConf || np.pipeline_conf || np.config?.pipeline;
+          const basePipe = np.pipeline || np.pipelineConf || np.pipeline_conf;
           const cfg = np.config;
           if (basePipe && cfg) return { ...basePipe, config: cfg };
           return basePipe || { config: cfg };

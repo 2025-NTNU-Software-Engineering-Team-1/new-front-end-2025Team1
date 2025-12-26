@@ -112,25 +112,24 @@ async function switchPage(id: string) {
 </script>
 
 <template>
-  <button type="button" class="btn btn-sm lg:btn-md btn-outline" @click.stop="openManual">
+  <button
+    type="button"
+    class="btn btn-sm lg:btn-md border-2 border-black bg-white text-black transition-colors hover:bg-black hover:text-white dark:border-zinc-400 dark:bg-zinc-800 dark:text-white dark:hover:bg-white dark:hover:text-black"
+    @click.stop="openManual"
+  >
     {{ t("components.problem.manual.open") }}
   </button>
 
   <teleport to="body">
     <div v-if="open" class="fixed inset-0 z-[9999]">
-      <!-- Backdrop layer (click to close) -->
       <div class="absolute inset-0 bg-black/60" @click="closeManual" />
 
-      <!-- Modal wrapper -->
       <div class="absolute inset-0 flex items-center justify-center p-4">
-        <!-- Modal box -->
         <div class="bg-base-100 w-full max-w-6xl overflow-hidden rounded-lg shadow-2xl">
-          <!-- Header -->
           <div class="border-base-300 flex items-center justify-between border-b px-4 py-3">
             <div class="flex items-center gap-4">
               <div class="text-lg font-bold">{{ t("components.problem.manual.title") }}</div>
 
-              <!-- Language toggle -->
               <div class="btn-group btn-group-sm">
                 <button
                   type="button"
@@ -154,14 +153,7 @@ async function switchPage(id: string) {
             <button type="button" class="btn btn-sm btn-circle" @click="closeManual">✕</button>
           </div>
 
-          <!-- Body: left navigation + right content
-               Key detail:
-               - We must set min-h-0 on grid container and grid items to allow the inner overflow areas
-                 to actually scroll (CSS grid/flex default min-height:auto can block scrolling).
-               - The grid container has a fixed height (75vh), and each side has its own scroll.
-          -->
           <div class="grid h-[75vh] min-h-0 grid-cols-12 overflow-hidden">
-            <!-- Left: navigation (scrollable) -->
             <aside class="border-base-300 bg-base-200/50 col-span-3 min-h-0 border-r">
               <div class="h-full min-h-0 overflow-y-auto p-2">
                 <button
@@ -177,7 +169,6 @@ async function switchPage(id: string) {
               </div>
             </aside>
 
-            <!-- Right: content (scrollable per page) -->
             <main class="col-span-9 min-h-0 min-w-0">
               <div ref="contentRef" class="h-full min-h-0 overflow-y-auto overscroll-contain px-5 py-4">
                 <template v-if="activePage">
@@ -190,7 +181,6 @@ async function switchPage(id: string) {
             </main>
           </div>
 
-          <!-- Footer -->
           <div class="border-base-300 flex justify-end border-t px-4 py-3">
             <button type="button" class="btn" @click="closeManual">
               {{ t("components.problem.manual.close") }}

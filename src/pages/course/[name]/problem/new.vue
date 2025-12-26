@@ -2,13 +2,24 @@
 // ==========================================
 // Imports
 // ==========================================
-import { ref, provide, Ref, onMounted } from "vue"; // Added onMounted
+import { ref, provide, Ref, onMounted, nextTick } from "vue";
 import { useTitle } from "@vueuse/core";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import api from "@/models/api";
 import AdminProblemForm from "@/components/Problem/Admin/AdminProblemForm.vue";
 import AdminManualModal from "@/components/Problem/Admin/AdminManualModal.vue";
+
+// ==========================================
+// [CONFIG] Animation Settings (Ultra-Fast)
+// ==========================================
+const ANIM_CONFIG = {
+  START_DELAY: 100, // Start almost immediately
+  FLIGHT_DURATION: 350, // Dash speed (0.35s)
+  IMPACT_VISIBLE_MS: 800, // Cracks show for 0.8s
+  HINT_DELAY_MS: 100, // Hint appears shortly after landing
+  HINT_VISIBLE_MS: 3500, // Hint stay duration
+};
 
 // ==========================================
 // [CONFIG] Console Debug Mode
@@ -54,7 +65,7 @@ useTitle(`New Problem - ${route.params.name} | Normal OJ`);
 
 const formElement = ref<InstanceType<typeof AdminProblemForm>>();
 
-// Initialize newProblem state
+// Initialize newProblem state with explicit ProblemForm type to avoid 'any'
 const newProblem = ref<ProblemForm>({
   problemName: "",
   description: {
@@ -78,7 +89,6 @@ const newProblem = ref<ProblemForm>({
   },
   canViewStdout: true,
   defaultCode: "",
-  // === CONFIG ===
   config: {
     trialMode: false,
     maxNumberOfTrial: -1,
@@ -94,15 +104,10 @@ const newProblem = ref<ProblemForm>({
     networkAccessEnabled: false,
     networkAccessRestriction: {
       sidecars: [],
-      external: {
-        model: "Black",
-        ip: [],
-        url: [],
-      },
+      external: { model: "Black", ip: [], url: [] },
     },
     artifactCollection: [],
   },
-  // === PIPELINE ===
   pipeline: {
     allowRead: false,
     allowWrite: false,
@@ -118,11 +123,9 @@ const newProblem = ref<ProblemForm>({
     },
     scoringScript: { custom: false },
   },
-  // === ASSETS ===
   assets: {
     trialModePublicTestDataZip: null,
     trialModeACFiles: null,
-    // aiVTuberACFiles: null, // Legacy field, kept for reference if needed
     customCheckerPy: null,
     makefileZip: null,
     teacherFile: null,
@@ -139,24 +142,66 @@ function update<K extends keyof ProblemForm>(key: K, value: ProblemForm[K]) {
   newProblem.value[key] = value;
 }
 
-// Provide state to child components
 provide<Ref<ProblemForm>>("problem", newProblem);
 
 // ==========================================
-// UX / Animation Logic (New)
+// [ANIMATION] Superhero Landing Logic
 // ==========================================
-const showManualHint = ref(false);
+const manualButtonWrapper = ref<HTMLElement | null>(null);
+const animState = ref({
+  spotlight: true,
+  flying: false,
+  impact: false,
+  hint: false,
+  style: {
+    "--start-x": "0px",
+    "--start-y": "0px",
+    "--flight-time": `${ANIM_CONFIG.FLIGHT_DURATION}ms`,
+  } as Record<string, string>,
+});
 
-onMounted(() => {
-  // Trigger the hint animation slightly after mount
-  setTimeout(() => {
-    showManualHint.value = true;
-  }, 500);
+onMounted(async () => {
+  await nextTick();
 
-  // Auto-hide the hint after 6 seconds to avoid annoyance
+  // 1. Calculate flight trajectory from screen center to button wrapper
+  if (manualButtonWrapper.value) {
+    const rect = manualButtonWrapper.value.getBoundingClientRect();
+    const deltaX = window.innerWidth / 2 - (rect.left + rect.width / 2);
+    const deltaY = window.innerHeight / 2 - (rect.top + rect.height / 2);
+    animState.value.style["--start-x"] = `${deltaX}px`;
+    animState.value.style["--start-y"] = `${deltaY}px`;
+  }
+
+  // 2. Timeline Logic
+  const landTime = ANIM_CONFIG.START_DELAY + ANIM_CONFIG.FLIGHT_DURATION * 0.95;
+  const cracksEndTime = landTime + ANIM_CONFIG.IMPACT_VISIBLE_MS;
+  const hintStartTime = landTime + ANIM_CONFIG.HINT_DELAY_MS;
+
+  // Step A: Trigger Flying animation
   setTimeout(() => {
-    showManualHint.value = false;
-  }, 6500);
+    animState.value.flying = true;
+  }, ANIM_CONFIG.START_DELAY);
+
+  // Step B: Trigger Impact visual (Cracks appear)
+  setTimeout(() => {
+    animState.value.impact = true;
+  }, landTime);
+
+  // Step C: Clear cracks (Instantly)
+  setTimeout(() => {
+    animState.value.impact = false;
+  }, cracksEndTime);
+
+  // Step D: Fade out spotlight and show the hint bubble
+  setTimeout(() => {
+    animState.value.spotlight = false;
+    animState.value.hint = true;
+  }, hintStartTime);
+
+  // Step E: Auto-hide the hint bubble
+  setTimeout(() => {
+    animState.value.hint = false;
+  }, hintStartTime + ANIM_CONFIG.HINT_VISIBLE_MS);
 });
 
 // ==========================================
@@ -172,7 +217,7 @@ async function submit() {
     // Step 1: Create Problem Metadata
     logger.log("Step 1: Creating Problem Metadata...", newProblem.value);
     const res = await api.Problem.create({ ...newProblem.value });
-    const { problemId } = res.data;
+    const { problemId } = res.data as { problemId: number };
 
     if (!problemId) throw new Error("API did not return a problemId");
     logger.success("Problem Created", problemId);
@@ -196,57 +241,55 @@ async function submit() {
     );
     logger.log("Step 2: Metadata prepared", { config: cfg, pipeline: pipe });
 
-    // Step 3: Append Assets
+    // Step 3: Append Assets (Strict null/undefined checks)
     const assets = newProblem.value.assets;
     const attachedFiles: string[] = [];
 
-    // --- [New] Trial Mode Assets ---
-    if (assets?.trialModePublicTestDataZip) {
-      fd.append("public_testdata.zip", assets.trialModePublicTestDataZip);
-      attachedFiles.push("public_testdata.zip");
-    }
-
-    if (assets?.trialModeACFiles && assets.trialModeACFiles.length > 0) {
-      assets.trialModeACFiles.forEach((f) => fd.append("ac_code", f));
-      attachedFiles.push(`ac_code (${assets.trialModeACFiles.length})`);
-    }
-
-    // --- Standard Assets ---
-    if (assets?.testdataZip) {
-      fd.append("case", assets.testdataZip);
-      attachedFiles.push("case");
-    }
-    if (assets?.customCheckerPy) {
-      fd.append("custom_checker.py", assets.customCheckerPy);
-      attachedFiles.push("custom_checker.py");
-    }
-    if (assets?.makefileZip) {
-      fd.append("makefile.zip", assets.makefileZip);
-      attachedFiles.push("makefile.zip");
-    }
-    if (assets?.teacherFile) {
-      fd.append("Teacher_file", assets.teacherFile);
-      attachedFiles.push("Teacher_file");
-    }
-    if (assets?.scorePy) {
-      fd.append("score.py", assets.scorePy);
-      attachedFiles.push("score.py");
-    }
-    if (assets?.dockerfilesZip) {
-      fd.append("dockerfiles.zip", assets.dockerfilesZip);
-      attachedFiles.push("dockerfiles.zip");
-    }
-    if (assets?.localServiceZip) {
-      fd.append("local_service.zip", assets.localServiceZip);
-      attachedFiles.push("local_service.zip");
-    }
-    if (assets?.resourceDataZip) {
-      fd.append("resource_data.zip", assets.resourceDataZip);
-      attachedFiles.push("resource_data.zip");
-    }
-    if (assets?.resourceDataTeacherZip) {
-      fd.append("resource_data_teacher.zip", assets.resourceDataTeacherZip);
-      attachedFiles.push("resource_data_teacher.zip");
+    if (assets) {
+      if (assets.trialModePublicTestDataZip) {
+        fd.append("public_testdata.zip", assets.trialModePublicTestDataZip);
+        attachedFiles.push("public_testdata.zip");
+      }
+      if (assets.trialModeACFiles && assets.trialModeACFiles.length > 0) {
+        assets.trialModeACFiles.forEach((f) => fd.append("ac_code", f));
+        attachedFiles.push(`ac_code (${assets.trialModeACFiles.length})`);
+      }
+      if (assets.testdataZip) {
+        fd.append("case", assets.testdataZip);
+        attachedFiles.push("case");
+      }
+      if (assets.customCheckerPy) {
+        fd.append("custom_checker.py", assets.customCheckerPy);
+        attachedFiles.push("custom_checker.py");
+      }
+      if (assets.makefileZip) {
+        fd.append("makefile.zip", assets.makefileZip);
+        attachedFiles.push("makefile.zip");
+      }
+      if (assets.teacherFile) {
+        fd.append("Teacher_file", assets.teacherFile);
+        attachedFiles.push("Teacher_file");
+      }
+      if (assets.scorePy) {
+        fd.append("score.py", assets.scorePy);
+        attachedFiles.push("score.py");
+      }
+      if (assets.dockerfilesZip) {
+        fd.append("dockerfiles.zip", assets.dockerfilesZip);
+        attachedFiles.push("dockerfiles.zip");
+      }
+      if (assets.localServiceZip) {
+        fd.append("local_service.zip", assets.localServiceZip);
+        attachedFiles.push("local_service.zip");
+      }
+      if (assets.resourceDataZip) {
+        fd.append("resource_data.zip", assets.resourceDataZip);
+        attachedFiles.push("resource_data.zip");
+      }
+      if (assets.resourceDataTeacherZip) {
+        fd.append("resource_data_teacher.zip", assets.resourceDataTeacherZip);
+        attachedFiles.push("resource_data_teacher.zip");
+      }
     }
 
     logger.log("Step 3: Files attached", attachedFiles);
@@ -254,22 +297,20 @@ async function submit() {
     // Step 4: Upload All Assets
     logger.log("Step 4: Uploading Assets V2...");
     await api.Problem.uploadAssetsV2(problemId, fd);
-
     logger.success("All assets uploaded successfully");
 
-    // Redirect
     router.push(`/course/${route.params.name}/problem/${problemId}`);
   } catch (error) {
     logger.error("Submission Failed", error);
-
-    formElement.value.errorMsg =
-      axios.isAxiosError(error) && error.response?.data?.message
-        ? error.response.data.message
-        : "Unknown error occurred :(";
-
+    if (formElement.value) {
+      formElement.value.errorMsg =
+        axios.isAxiosError(error) && error.response?.data?.message
+          ? (error.response.data.message as string)
+          : "Unknown error occurred :(";
+    }
     throw error;
   } finally {
-    formElement.value.isLoading = false;
+    if (formElement.value) formElement.value.isLoading = false;
     logger.groupEnd();
   }
 }
@@ -289,33 +330,59 @@ const openJSON = ref(false);
 </script>
 
 <template>
-  <div class="card-container">
+  <div class="card-container relative isolate">
+    <div
+      class="pointer-events-none fixed inset-0 z-40 bg-black/80 transition-opacity duration-300"
+      :class="animState.spotlight ? 'opacity-100' : 'opacity-0'"
+    />
+
     <div class="card min-w-full">
       <div class="card-body">
         <div class="card-title mb-3 justify-between">
           New Problem
 
-          <div class="relative flex items-center">
+          <div
+            ref="manualButtonWrapper"
+            class="relative z-50 flex items-center justify-center"
+            :style="animState.style"
+          >
+            <div
+              class="pointer-events-none absolute left-1/2 top-1/2 z-[-1] h-[280px] w-[280px]"
+              :class="animState.impact ? 'block opacity-70' : 'hidden opacity-0'"
+              style="transform: translate(-50%, -50%)"
+            >
+              <svg
+                viewBox="0 0 200 200"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                class="h-full w-full text-black dark:text-white"
+              >
+                <path
+                  d="M100 100 L20 40 M100 100 L160 20 M100 100 L180 80 M100 100 L190 140 M100 100 L130 190 M100 100 L60 180 M100 100 L10 130"
+                />
+              </svg>
+            </div>
+
             <Transition
-              enter-active-class="transition ease-out duration-300"
-              enter-from-class="opacity-0 translate-y-2"
-              enter-to-class="opacity-100 translate-y-0"
-              leave-active-class="transition ease-in duration-300"
-              leave-from-class="opacity-100"
+              enter-active-class="transition duration-200"
+              enter-from-class="opacity-0 scale-90"
+              enter-to-class="opacity-100 scale-100"
+              leave-active-class="transition duration-150"
               leave-to-class="opacity-0"
             >
               <div
-                v-if="showManualHint"
-                class="bg-info text-info-content pointer-events-none absolute right-full z-10 mr-3 w-max max-w-[200px] rounded-lg px-3 py-2 text-sm font-bold shadow-lg"
+                v-if="animState.hint"
+                class="animate-bounce-horizontal absolute right-full z-50 mr-4 w-max rounded bg-black px-3 py-2 text-sm font-bold text-white shadow-lg dark:bg-white dark:text-black"
               >
                 <div
-                  class="bg-info absolute top-1/2 -right-1 h-3 w-3 -translate-y-1/2 rotate-45 transform"
+                  class="bg-info absolute -right-1 top-1/2 h-3 w-3 -translate-y-1/2 rotate-45 transform"
                 ></div>
                 👋 Click here for Manual!
               </div>
             </Transition>
 
-            <div :class="{ 'animate-pulse': showManualHint }">
+            <div class="opacity-0" :class="{ 'dash-fly-anim': animState.flying }">
               <AdminManualModal />
             </div>
           </div>
@@ -324,7 +391,6 @@ const openJSON = ref(false);
         <admin-problem-form ref="formElement" @update="update" @submit="submit" />
 
         <div class="divider" />
-
         <div class="card-title mb-3">
           Preview
           <input v-model="openPreview" type="checkbox" class="toggle" />
@@ -341,9 +407,43 @@ const openJSON = ref(false);
           JSON
           <input v-model="openJSON" type="checkbox" class="toggle" />
         </div>
-        <pre v-if="openJSON">{{ JSON.stringify(newProblem, null, 2) }}</pre>
+        <pre v-if="openJSON" class="bg-base-200 rounded p-2">{{ JSON.stringify(newProblem, null, 2) }}</pre>
         <div class="mb-[50%]" />
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+/* High-Speed Dash Animation */
+@keyframes dash-fly {
+  0% {
+    transform: translate(var(--start-x), var(--start-y)) scale(2.5);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+}
+
+.dash-fly-anim {
+  animation: dash-fly var(--flight-time) cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  position: relative;
+  z-index: 60;
+}
+
+/* Horizontal bouncing for tooltip */
+@keyframes bounce-h {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-4px);
+  }
+}
+.animate-bounce-horizontal {
+  animation: bounce-h 0.6s infinite;
+}
+</style>

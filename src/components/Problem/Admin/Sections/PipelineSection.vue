@@ -304,6 +304,7 @@ const libraryOptions = ref({
 });
 
 // Fetch options from backend
+const pythonPresets = ["math", "random", "os", "sys", "time", "re", "json", "numpy", "pandas", "matplotlib"];
 async function fetchStaticAnalysisOptions() {
   logger.group("Fetch Static Analysis Options");
   let imports: string[] = [];
@@ -316,8 +317,8 @@ async function fetchStaticAnalysisOptions() {
 
     // Safe access response structure
     const libs = resp?.data?.librarySymbols || {};
-
-    imports = Array.isArray(libs.imports) ? libs.imports : [];
+    const backendImports = Array.isArray(libs.imports) ? libs.imports : [];
+    imports = Array.from(new Set([...pythonPresets, ...backendImports]));
     headers = Array.isArray(libs.headers) ? libs.headers : [];
     functions = Array.isArray(libs.functions) ? libs.functions : [];
 
@@ -327,6 +328,7 @@ async function fetchStaticAnalysisOptions() {
       functions: functions.length,
     });
   } catch (err) {
+    imports = [...pythonPresets];
     logger.warn("StaticAnalysisOptions fetch failed, using empty lists:", err);
   } finally {
     libraryOptions.value = { imports, headers, functions };

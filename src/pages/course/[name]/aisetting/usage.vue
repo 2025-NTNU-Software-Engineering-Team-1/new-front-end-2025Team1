@@ -485,7 +485,7 @@ onMounted(fetchUsage);
                       :class="{ 'btn-primary': chartType === 'bubble' }"
                       @click="chartType = 'bubble'"
                     >
-                      {{ t("course.aisetting.usage.PackedBubble") }}
+                      {{ t("course.aisetting.usage.packedBubble") }}
                     </button>
                   </div>
                 </div>

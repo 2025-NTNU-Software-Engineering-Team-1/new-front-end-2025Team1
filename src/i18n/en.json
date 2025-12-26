@@ -182,7 +182,11 @@
           "download": "open and download file",
           "noTestcasesToDownload": "No testcases available to download. Please upload testcases first.",
           "emptyTestcaseFile": "Testcase file is empty and cannot be downloaded.",
-          "downloadFailed": "Failed to download testcases. Please try again later."
+          "downloadFailed": "Failed to download testcases. Please try again later.",
+          "publicTestcases": "Public Testcases",
+          "viewPublic": "View Public",
+          "viewCustom": "View Custom",
+          "noPreview": "Select a case to preview"
         },
         "testcaseType": {
           "label": "Test Data Type",

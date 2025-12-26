@@ -570,7 +570,7 @@ watch(areRestrictionsVisible, (newVal) => {
                       @click="isLibraryExpanded = !isLibraryExpanded"
                     >
                       <div class="bg-secondary h-6 w-1 rounded-full"></div>
-                      <span class="text-base-content/80 text-lg font-bold uppercase tracking-wide"
+                      <span class="text-base-content/80 text-lg font-bold tracking-wide uppercase"
                         >Static Analysis</span
                       >
                       <span
@@ -689,7 +689,7 @@ watch(areRestrictionsVisible, (newVal) => {
                               <span
                                 v-for="ip in externalConfig.ips"
                                 :key="ip"
-                                class="bg-base-200/50 text-base-content/80 hover:text-primary inline-flex select-none items-center rounded px-2 py-1 font-mono text-xs transition-colors"
+                                class="bg-base-200/50 text-base-content/80 hover:text-primary inline-flex items-center rounded px-2 py-1 font-mono text-xs transition-colors select-none"
                               >
                                 {{ ip }}
                               </span>
@@ -707,7 +707,7 @@ watch(areRestrictionsVisible, (newVal) => {
                               <span
                                 v-for="url in externalConfig.urls"
                                 :key="url"
-                                class="bg-base-200/50 text-base-content/80 hover:text-primary inline-flex h-auto select-none items-center break-all rounded px-2 py-1 text-left font-mono text-xs transition-colors"
+                                class="bg-base-200/50 text-base-content/80 hover:text-primary inline-flex h-auto items-center rounded px-2 py-1 text-left font-mono text-xs break-all transition-colors select-none"
                               >
                                 {{ url }}
                               </span>
@@ -720,7 +720,7 @@ watch(areRestrictionsVisible, (newVal) => {
 
                         <div v-if="sidecarList.length > 0">
                           <div
-                            class="text-base-content/40 mb-2 pl-1 text-xs font-bold uppercase tracking-widest"
+                            class="text-base-content/40 mb-2 pl-1 text-xs font-bold tracking-widest uppercase"
                           >
                             Sidecar Services
                           </div>
@@ -738,10 +738,10 @@ watch(areRestrictionsVisible, (newVal) => {
                                   <span class="text-lg">📦</span>
                                 </div>
                                 <div class="min-w-0 flex-1">
-                                  <div class="text-base-content/90 break-all text-sm font-bold">
+                                  <div class="text-base-content/90 text-sm font-bold break-all">
                                     {{ car.name }}
                                   </div>
-                                  <div class="text-base-content/50 break-all font-mono text-xs">
+                                  <div class="text-base-content/50 font-mono text-xs break-all">
                                     Image: {{ car.image }}
                                   </div>
                                 </div>
@@ -758,7 +758,7 @@ watch(areRestrictionsVisible, (newVal) => {
                                   <span
                                     v-for="(arg, argIdx) in car.args"
                                     :key="argIdx"
-                                    class="bg-base-200 text-base-content/70 h-auto break-all rounded px-1.5 py-0.5 text-left font-mono text-[10px]"
+                                    class="bg-base-200 text-base-content/70 h-auto rounded px-1.5 py-0.5 text-left font-mono text-[10px] break-all"
                                   >
                                     {{ arg }}
                                   </span>

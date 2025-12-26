@@ -124,6 +124,20 @@
           "placeholder": "在此貼上程式碼",
           "testInputPlaceholder": "在此輸入測試資料"
         },
+        "topic": {
+          "dec": "描述",
+          "input": "輸入",
+          "output": "輸出",
+          "hint": "提示",
+          "sample": {
+            "id": "#",
+            "input": "輸入",
+            "output": "輸出"
+          },
+          "noContent": "無內容",
+          "expand": "展開",
+          "collapse": "收起"
+        },
         "lang": {
           "text": "語言",
           "select": "選擇語言"
@@ -167,7 +181,11 @@
           "saveError": "儲存測資設定時發生錯誤",
           "noTestcasesToDownload": "沒有可下載的測資檔案，請先上傳測資",
           "emptyTestcaseFile": "測資檔案為空，無法下載",
-          "downloadFailed": "下載測資失敗，請稍後再試"
+          "downloadFailed": "下載測資失敗，請稍後再試",
+          "publicTestcases": "公開測資",
+          "viewPublic": "查看公開",
+          "viewCustom": "查看自訂",
+          "noPreview": "請選擇一個測資以預覽"
         },
         "testcaseType": {
           "label": "測資類型",

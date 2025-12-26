@@ -173,9 +173,12 @@ async function loadPublicTestcasePreview() {
   try {
     const resp = await api.TrialSubmission.getPublicTestCases(Number(route.params.id));
 
-    // Guard access to resp.data and avoid optional chaining on a type assertion
-    const top = asRecord(resp) ?? (resp && asRecord((resp as unknown as { data?: unknown }).data));
+    // Normalize possible response shapes and extract array field safely
+    // Prefer resp.data when present (Axios-like responses) to avoid missing the payload
+    const top = (resp && asRecord((resp as unknown as { data?: unknown }).data)) ?? asRecord(resp);
+    // Debug: log response shape when no cases found (helps diagnose backend shape differences)
     const rawCasesUnknown = getArrayField(top, ["Trial_Cases", "trial_cases", "TrialCases", "trialCases"]);
+    if (!rawCasesUnknown) console.debug("loadPublicTestcasePreview: no Trial_Cases found on response", resp);
     const items = (rawCasesUnknown ?? []) as RawPublicCase[];
 
     const files: Array<{ name: string; content: string }> = [];
@@ -194,7 +197,6 @@ async function loadPublicTestcasePreview() {
         itRec["Output_Content"] ??
         itRec["outputContent"] ??
         "") as string;
-
       const content = `--- Input ---\n${input}\n\n--- Output ---\n${output}`;
       files.push({ name, content });
     });
@@ -205,6 +207,7 @@ async function loadPublicTestcasePreview() {
     publicTestcaseFiles.value = files;
   } catch (err) {
     console.error("Failed to load public testcases:", err);
+    // Show detailed backend message if available (typed to avoid `any`)
     const backendMessage =
       (err as unknown as { response?: { data?: { message?: string } }; message?: string })?.response?.data
         ?.message ||
@@ -286,6 +289,9 @@ const rules = {
   lang: { betweenValue: helpers.withMessage(t("course.problem.submit.err.lang"), between(0, 3)) },
 };
 const v$ = useVuelidate(rules, form);
+
+// Template-friendly alias to avoid Volar template type errors
+const v = computed(() => v$.value) as unknown as (typeof v$)["value"];
 
 const LANGUAGE_EXTENSION = [".c", ".cpp", ".py"];
 const langOptions = computed<LangOption[]>(() => {
@@ -512,16 +518,16 @@ async function submitCode() {
                     }}</span>
                   </div>
                   <select
-                    v-model="v$.lang.$model"
-                    :class="['select-bordered select w-full', v$.lang.$error && 'input-error']"
+                    v-model="v.lang.$model"
+                    :class="['select-bordered select w-full', v.lang.$error && 'input-error']"
                   >
                     <option :value="-1" disabled hidden>{{ t("course.problem.test.lang.select") }}</option>
                     <option v-for="lang in langOptions" :key="lang.value" :value="lang.value">
                       {{ lang.text }}
                     </option>
                   </select>
-                  <label class="label" v-show="v$.lang.$error">
-                    <span class="label-text-alt text-error">{{ v$.lang.$errors[0]?.$message }}</span>
+                  <label class="label" v-show="v.lang.$error">
+                    <span class="label-text-alt text-error">{{ v.lang.$errors[0]?.$message }}</span>
                   </label>
                 </label>
 
@@ -536,7 +542,7 @@ async function submitCode() {
                     <label class="label cursor-pointer justify-start gap-3 py-1">
                       <input
                         type="radio"
-                        class="radio radio-sm border-white transition-all [--chkfg:black] checked:border-white checked:bg-white"
+                        class="radio radio-primary radio-sm"
                         :value="true"
                         v-model="useDefaultTestcases"
                       />
@@ -552,7 +558,7 @@ async function submitCode() {
                     <label class="label cursor-pointer justify-start gap-3 py-1">
                       <input
                         type="radio"
-                        class="radio radio-sm border-white transition-all [--chkfg:black] checked:border-white checked:bg-white"
+                        class="radio radio-primary radio-sm"
                         :value="false"
                         v-model="useDefaultTestcases"
                       />
@@ -688,8 +694,8 @@ async function submitCode() {
                 class="h-96"
                 :placeholder="t('course.problem.test.card.placeholder')"
               />
-              <label class="label" v-show="v$.code.$error">
-                <span class="label-text-alt text-error">{{ v$.code.$errors[0]?.$message }}</span>
+              <label class="label" v-show="v.code.$error">
+                <span class="label-text-alt text-error">{{ v.code.$errors[0]?.$message }}</span>
               </label>
             </div>
 

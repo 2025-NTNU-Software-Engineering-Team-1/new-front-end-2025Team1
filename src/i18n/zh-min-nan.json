@@ -124,6 +124,20 @@
           "placeholder": "佇遮貼上程式碼",
           "testInputPlaceholder": "佇遮輸入測試資料"
         },
+        "topic": {
+          "dec": "說明",
+          "input": "輸入",
+          "output": "輸出",
+          "hint": "提示",
+          "sample": {
+            "id": "#",
+            "input": "輸入",
+            "output": "輸出"
+          },
+          "noContent": "無內容",
+          "expand": "展開",
+          "collapse": "收起"
+        },
         "lang": {
           "text": "語言",
           "select": "選擇語言"

@@ -220,14 +220,20 @@ const isAllSelected = computed({
           <div class="flex items-center gap-3">
             <!-- Status Badge & Download -->
             <div class="flex items-center gap-2">
-              <span v-if="testcaseFiles.length > 0" class="badge badge-success badge-outline text-xs">
+              <span
+                v-if="testcaseFiles.length > 0"
+                class="badge badge-success badge-outline inline-flex h-10 min-w-[72px] items-center justify-center px-3 py-0 text-sm whitespace-nowrap"
+              >
                 {{ t("course.problems.uploaded") }}
               </span>
-              <span v-else class="badge badge-outline h-auto py-1 text-center text-xs opacity-70">
+              <span
+                v-else
+                class="badge badge-outline inline-flex h-10 min-w-[90px] items-center justify-center px-3 py-0 text-center text-sm whitespace-nowrap opacity-70"
+              >
                 {{ t("course.problems.notUploaded") }}
               </span>
               <!-- Download Button -->
-              <button v-if="testcaseFiles.length > 0" class="btn btn-xs" @click="downloadTestcases">
+              <button v-if="testcaseFiles.length > 0" class="btn btn-s mr-2" @click="downloadTestcases">
                 {{ t("course.problems.download") }}
               </button>
             </div>

@@ -20,7 +20,7 @@ const buf = ref("");
 // - 'text-sm': Small text (14px)
 // - 'text-base': Normal text (16px)
 // Current setting: tight padding + extra small text
-const badgeStyle = "px-1.5 py-0.5 text-xs";
+const badgeStyle = "px-1.5 py-0.5 text-xs"; 
 // ---------------------
 
 // Add a new item to the list
@@ -58,7 +58,15 @@ function remove(i: number) {
       <div
         v-for="(s, i) in modelValue"
         :key="s"
-        class="badge h-auto min-h-0 gap-1 whitespace-normal break-all text-left"
+        class="
+          badge 
+          h-auto 
+          min-h-0
+          gap-1
+          whitespace-normal 
+          break-all 
+          text-left
+        "
         :class="[badgeClass || 'badge-info', badgeStyle]"
       >
         <span>{{ s }}</span>

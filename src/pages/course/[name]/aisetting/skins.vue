@@ -5,12 +5,32 @@ import api, { type VtuberSkinInfo } from "@/models/api";
 
 const { t } = useI18n();
 
-// State
+// =========================================
+// State Management
+// =========================================
 const skins = ref<VtuberSkinInfo[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
 
-// Edit modal state
+// --- Image Preview State ---
+// Stores the URL of the image currently being previewed
+const previewImageUrl = ref<string | null>(null);
+
+// Open the preview modal with the specific image URL
+const openPreview = (url: string | undefined) => {
+  if (url) {
+    previewImageUrl.value = url;
+  }
+};
+
+// Close the preview modal
+const closePreview = () => {
+  previewImageUrl.value = null;
+};
+
+// =========================================
+// Edit Modal State
+// =========================================
 const editingSkin = ref<VtuberSkinInfo | null>(null);
 const editName = ref("");
 const editEmotions = ref("");
@@ -18,7 +38,9 @@ const editThumbnail = ref<File | null>(null);
 const thumbnailPreview = ref<string | null>(null);
 const saving = ref(false);
 
-// Upload modal state
+// =========================================
+// Upload Modal State
+// =========================================
 const showUpload = ref(false);
 const uploadName = ref("");
 const uploadFile = ref<File | null>(null);
@@ -28,8 +50,13 @@ const uploadEmotions = ref("");
 const uploadError = ref<string | null>(null);
 const uploading = ref(false);
 
+// =========================================
+// Upload Logic
+// =========================================
+
 const openUpload = () => {
   showUpload.value = true;
+  // Reset form
   uploadName.value = "";
   uploadFile.value = null;
   uploadThumbnail.value = null;
@@ -61,17 +88,22 @@ const onUploadThumbnailChange = (e: Event) => {
   }
 };
 
+// Handle pasting image into upload modal
 const onUploadThumbnailPaste = (e: ClipboardEvent) => {
   const items = e.clipboardData?.items;
   if (!items) return;
-  for (const item of items) {
+
+  // FIX: Use standard for-loop instead of for...of
+  // Reason: 'DataTransferItemList' is not iterable in strict TS/older lib configurations.
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
     if (item.type.startsWith("image/")) {
       const file = item.getAsFile();
       if (file) {
         uploadThumbnail.value = file;
         uploadThumbnailPreview.value = URL.createObjectURL(file);
-        e.preventDefault();
-        break;
+        e.preventDefault(); // Prevent default paste behavior
+        break; // Only take the first image found
       }
     }
   }
@@ -111,11 +143,16 @@ const uploadSkin = async () => {
   }
 };
 
-// Load skins
+// =========================================
+// Data Loading & Management
+// =========================================
+
+// Load skins list from API
 const loadSkins = async () => {
   loading.value = true;
   error.value = null;
   try {
+    // Standard list call without limit param
     const res = await api.VtuberSkin.list();
     skins.value = Array.isArray(res.data) ? res.data : (res.data?.data ?? []);
   } catch (e) {
@@ -126,7 +163,7 @@ const loadSkins = async () => {
   }
 };
 
-// Delete skin
+// Delete a skin
 const deleteSkin = async (skinId: string) => {
   if (!confirm(t("skinSelector.delete.confirm"))) return;
   try {
@@ -138,12 +175,17 @@ const deleteSkin = async (skinId: string) => {
   }
 };
 
-// Open edit modal
+// =========================================
+// Edit Logic
+// =========================================
+
+// Open edit modal and populate data
 const openEdit = async (skin: VtuberSkinInfo) => {
   editingSkin.value = skin;
   editName.value = skin.name;
 
   try {
+    // Fetch detailed info to get emotion mappings
     const res = await api.VtuberSkin.get(skin.skin_id);
     const detail = Array.isArray(res.data) ? undefined : (res.data?.data ?? res.data);
     if (detail?.emotion_mappings) {
@@ -159,7 +201,6 @@ const openEdit = async (skin: VtuberSkinInfo) => {
   thumbnailPreview.value = null;
 };
 
-// Close edit modal
 const closeEdit = () => {
   editingSkin.value = null;
   if (thumbnailPreview.value) {
@@ -168,7 +209,6 @@ const closeEdit = () => {
   }
 };
 
-// Handle thumbnail file
 const onThumbnailChange = (e: Event) => {
   const target = e.target as HTMLInputElement;
   const file = target.files?.[0];
@@ -178,11 +218,14 @@ const onThumbnailChange = (e: Event) => {
   }
 };
 
-// Handle paste
+// Handle pasting image into edit modal
 const onThumbnailPaste = (e: ClipboardEvent) => {
   const items = e.clipboardData?.items;
   if (!items) return;
-  for (const item of items) {
+
+  // FIX: Use standard for-loop to iterate through DataTransferItemList
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
     if (item.type.startsWith("image/")) {
       const file = item.getAsFile();
       if (file) {
@@ -195,7 +238,7 @@ const onThumbnailPaste = (e: ClipboardEvent) => {
   }
 };
 
-// Save edit
+// Save changes to existing skin
 const saveEdit = async () => {
   if (!editingSkin.value) return;
   saving.value = true;
@@ -222,14 +265,18 @@ const saveEdit = async () => {
   }
 };
 
-// Format file size
+// =========================================
+// Utility Functions
+// =========================================
+
+// Format file size for display
 const formatSize = (bytes: number) => {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 };
 
-// Toggle public/private
+// Toggle public/private status
 const toggleVisibility = async (skin: VtuberSkinInfo) => {
   try {
     const newIsPublic = !skin.is_public;
@@ -240,6 +287,7 @@ const toggleVisibility = async (skin: VtuberSkinInfo) => {
   }
 };
 
+// Initial load
 onMounted(() => {
   loadSkins();
 });
@@ -257,15 +305,12 @@ onMounted(() => {
       </button>
     </div>
 
-    <!-- Loading -->
     <div v-if="loading" class="py-8 text-center">
       <span class="loading loading-spinner loading-lg"></span>
     </div>
 
-    <!-- Error -->
     <div v-else-if="error" class="alert alert-error">{{ error }}</div>
 
-    <!-- Skins Table -->
     <div v-else class="overflow-x-auto">
       <table class="table w-full">
         <thead>
@@ -314,6 +359,27 @@ onMounted(() => {
             </td>
             <td>
               <div class="flex gap-2">
+                <button
+                  v-if="skin.thumbnail_path"
+                  class="btn btn-sm btn-ghost"
+                  @click="openPreview(skin.thumbnail_path)"
+                  title="Preview"
+                >
+                  <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                    />
+                  </svg>
+                </button>
                 <button v-if="!skin.is_builtin" class="btn btn-sm btn-ghost" @click="openEdit(skin)">
                   {{ $t("admin.skins.edit") }}
                 </button>
@@ -335,7 +401,24 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- Edit Modal -->
+    <div v-if="previewImageUrl" class="modal modal-open">
+      <div
+        class="modal-box relative flex max-w-2xl items-center justify-center overflow-visible border-none bg-transparent p-0 shadow-none"
+      >
+        <button
+          class="btn btn-sm btn-circle bg-base-100 text-base-content absolute right-2 top-2 z-10"
+          @click="closePreview"
+        >
+          ✕
+        </button>
+        <img
+          :src="previewImageUrl"
+          class="bg-base-100 max-h-[80vh] w-auto rounded-lg object-contain shadow-2xl"
+          alt="Preview"
+        />
+      </div>
+      <div class="modal-backdrop bg-black/80" @click="closePreview"></div>
+    </div>
     <div v-if="editingSkin" class="modal modal-open">
       <div class="modal-box" @paste="onThumbnailPaste" tabindex="0">
         <h3 class="text-lg font-bold">{{ $t("admin.skins.editTitle") }}</h3>
@@ -392,7 +475,6 @@ onMounted(() => {
       </div>
       <div class="modal-backdrop" @click="closeEdit"></div>
     </div>
-    <!-- Upload Modal -->
     <div v-if="showUpload" class="modal modal-open">
       <div class="modal-box" @paste="onUploadThumbnailPaste" tabindex="0">
         <h3 class="text-lg font-bold">{{ $t("skinSelector.upload.title") }}</h3>

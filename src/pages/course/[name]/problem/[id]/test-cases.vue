@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useTitle } from "@vueuse/core";
 // api import removed - not currently used
@@ -189,6 +189,23 @@ async function downloadTestcases() {
     alert(t("course.problem.test.testcaseModal.downloadFailed"));
   }
 }
+
+// Computed property for "Select All" functionality
+const isAllSelected = computed({
+  get: () => {
+    // Return true only if files exist and all of them are selected
+    return testcaseFiles.value.length > 0 && selectedTestcases.value.length === testcaseFiles.value.length;
+  },
+  set: (val: boolean) => {
+    if (val) {
+      // If checked, select all file names
+      selectedTestcases.value = testcaseFiles.value.map((f) => f.name);
+    } else {
+      // If unchecked, clear the selection
+      selectedTestcases.value = [];
+    }
+  },
+});
 </script>
 
 <template>
@@ -227,7 +244,15 @@ async function downloadTestcases() {
         <!-- Files and Preview section -->
         <div class="grid grid-cols-2 gap-4">
           <div class="rounded border p-4">
-            <h4 class="mb-2 font-semibold">{{ t("course.problem.test.testcaseModal.files") }}</h4>
+            <h4 class="mb-2 flex items-center gap-2 font-semibold">
+              <input
+                type="checkbox"
+                class="checkbox checkbox-sm"
+                v-model="isAllSelected"
+                :disabled="testcaseFiles.length === 0"
+              />
+              <span>{{ t("course.problem.test.testcaseModal.files") }}</span>
+            </h4>
             <div class="flex flex-col gap-2">
               <label
                 v-for="file in testcaseFiles"

@@ -1286,15 +1286,15 @@ watch(
                   <span class="label-text">{{ t("course.problems.aiCheckerApiKey") }}</span>
                 </label>
                 <div class="dropdown dropdown-bottom w-full ">
-                  <div tabindex="0" role="button" class="select select-bordered select-sm flex items-center justify-between w-full bg-white">
+                  <div tabindex="0" role="button" class="select select-bordered select-sm flex items-center justify-between w-full bg-base-100">
                     <span class="truncate">
                       {{ aiCheckerApiKeys.find(k => k.id === (problem.config as any).aiChecker?.apiKeyId)?.key_name || t("course.problems.aiCheckerSelectKey") }}
                     </span>
                   </div>
-                  <ul tabindex="0" class="dropdown-content z-[100] menu p-2 shadow-lg bg-white rounded-box w-full border border-gray-300 mt-1 left-0">
+                  <ul tabindex="0" class="dropdown-content z-[100] menu p-2 shadow-lg bg-base-100 rounded-box w-full border border-base-300 mt-1 left-0">
                     <li class="disabled px-4 py-2 text-xs opacity-50">{{ t("course.problems.aiCheckerSelectKey") }}</li>
                     <li v-for="key in aiCheckerApiKeys" :key="key.id">
-                      <a class="text-gray-700 active:bg-gray-100" @click="(problem.config as any).aiChecker!.apiKeyId = key.id">{{ key.key_name }}</a>
+                      <a class="hover:bg-base-200 active:bg-primary active:text-primary-content" @click="(problem.config as any).aiChecker!.apiKeyId = key.id">{{ key.key_name }}</a>
                     </li>
                   </ul>
                 </div>
@@ -1308,10 +1308,10 @@ watch(
                   <span class="label-text">{{ t("course.problems.aiCheckerModel") }}</span>
                 </label>
                 <div class="dropdown dropdown-bottom w-full ">
-                  <div tabindex="0" role="button" class="select select-bordered select-sm flex items-center justify-between w-full bg-white">
+                  <div tabindex="0" role="button" class="select select-bordered select-sm flex items-center justify-between w-full bg-base-100">
                       <span>{{ (problem.config as any).aiChecker?.model || 'Select Model' }}</span>
                   </div>
-                  <ul tabindex="0" class="dropdown-content z-[100] menu p-2 shadow bg-white rounded-box w-full  mt-1 left-0">
+                  <ul tabindex="0" class="dropdown-content z-[100] menu p-2 shadow bg-base-100 rounded-box w-full border border-base-300  mt-1 left-0">
                     <li><a @click="(problem.config as any).aiChecker!.model = 'gemini-2.5-flash-lite'">gemini 2.5 flash lite</a></li>
                     <li><a @click="(problem.config as any).aiChecker!.model = 'gemini-2.5-flash'">gemini 2.5 flash</a></li>
                     <li><a @click="(problem.config as any).aiChecker!.model = 'gemini-2.5-pro'">gemini 2.5 pro</a></li>

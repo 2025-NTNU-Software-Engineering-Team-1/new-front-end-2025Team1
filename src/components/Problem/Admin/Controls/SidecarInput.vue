@@ -160,9 +160,9 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
                 :data-tip="hover.sideCarArgs">{{ t("course.problems.sideCarArgs") }}</span>
               <span class="label-text-alt opacity-60">{{ t("course.problems.sideCarCommaSeparated") }}</span>
             </label>
-            <input
+            <textarea
               placeholder="--port=3306, --host=0.0.0.0"
-              class="input input-bordered input-sm w-full"
+              class="textarea textarea-bordered textarea-sm h-16 w-full text-xs"
               v-model="newArgs"
             />
           </div>

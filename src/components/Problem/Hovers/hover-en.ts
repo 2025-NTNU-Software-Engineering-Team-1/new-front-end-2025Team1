@@ -30,7 +30,6 @@ export const hover_en = {
   sideCarImage:"test",
   sideCarArgs:"test",
   sideCarEnv:"test",
->>>>>>> 151797c4 (Args/Image 換位置  hover修正)
   //pipeline
   fileAccess: "test",
   libraryRestrictionsGroup1: "test",

@@ -1,4 +1,4 @@
-# Problem Management Manual (Overview)
+# Problem Management Manual
 
 This document provides guidance for the "Create Problem" and "Edit Problem" pages. It serves as a static reference for administrative operations.
 

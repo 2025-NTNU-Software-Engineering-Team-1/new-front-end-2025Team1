@@ -31,6 +31,11 @@ watchEffect(() => {
             :class="['tab-bordered tab', route.path.endsWith('/usage') && 'tab-active']"
             >{{ t("course.aisetting.usagePage") }}</router-link
           >
+          <router-link
+            :to="`/course/${route.params.name}/aisetting/skins`"
+            :class="['tab-bordered tab', route.path.endsWith('/skins') && 'tab-active']"
+            >{{ t("course.aisetting.skinsPage") }}</router-link
+          >
         </div>
 
         <router-view />

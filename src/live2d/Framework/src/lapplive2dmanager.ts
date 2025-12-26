@@ -253,8 +253,9 @@ export class LAppLive2DManager {
 
     LAppPal.printMessage("[APP] changeScene: " + index);
 
-    const modelPath: string = "/live2d/hiyori_pro_zh/runtime/";
-    const modelJsonName: string = "hiyori_pro_t11.model3.json";
+    // Use dynamic getter functions for skin support
+    const modelPath: string = LAppDefine.getResourcesPath();
+    const modelJsonName: string = LAppDefine.getModelJsonName();
 
     this.releaseAllModel();
 
@@ -265,6 +266,14 @@ export class LAppLive2DManager {
     model.loadAssets(modelPath, modelJsonName);
 
     this._models.pushBack(model);
+  }
+
+  /**
+   * Reload the model with current skin configuration
+   * Call this after setSkinConfig() to apply new skin
+   */
+  public reloadModel(): void {
+    this.changeScene(this._sceneIndex);
   }
 
   /**

@@ -35,8 +35,44 @@ export const ViewLogicalMaxRight = 2.0;
 export const ViewLogicalMaxBottom = -2.0;
 export const ViewLogicalMaxTop = 2.0;
 
-// 相対パス
-export const ResourcesPath = "/live2d/hiyori_pro_zh/runtime/";
+// 相対パス - Dynamic skin support
+// Default built-in skin
+let _resourcesPath = "/live2d/hiyori_pro_zh/runtime/";
+let _modelJsonName = "hiyori_pro_t11.model3.json";
+
+// Getter functions for dynamic access
+export const getResourcesPath = (): string => _resourcesPath;
+export const getModelJsonName = (): string => _modelJsonName;
+
+// Legacy exports for compatibility (use getters in new code)
+export const ResourcesPath = _resourcesPath;
+export const ModelJsonName = _modelJsonName;
+
+/**
+ * Set skin configuration dynamically
+ * @param resourcesPath - Path to skin resources folder
+ * @param modelJsonName - Name of the model3.json file
+ */
+export const setSkinConfig = (resourcesPath: string, modelJsonName: string): void => {
+  _resourcesPath = resourcesPath;
+  _modelJsonName = modelJsonName;
+};
+
+/**
+ * Get current skin configuration
+ */
+export const getSkinConfig = (): { resourcesPath: string; modelJsonName: string } => ({
+  resourcesPath: _resourcesPath,
+  modelJsonName: _modelJsonName,
+});
+
+/**
+ * Reset to default built-in skin
+ */
+export const resetToDefaultSkin = (): void => {
+  _resourcesPath = "/live2d/hiyori_pro_zh/runtime/";
+  _modelJsonName = "hiyori_pro_t11.model3.json";
+};
 
 // モデルの後ろにある背景の画像ファイル
 export const BackImageName = "";
@@ -51,8 +87,7 @@ export const PowerImageName = "";
 // モデルを配置したディレクトリ名の配列
 // ディレクトリ名とmodel3.jsonの名前を一致させておくこと
 
-export const ModelJsonName: string = "hiyori_pro_t11.model3.json";
-export const ModelDir: string[] = ["."]; // 其實沒用，但防止程式� �錯
+export const ModelDir: string[] = ["."]; // 其實沒用，但防止程式出錯
 export const ModelDirSize: number = ModelDir.length;
 
 // 外部定義ファイル（json）と合わせる

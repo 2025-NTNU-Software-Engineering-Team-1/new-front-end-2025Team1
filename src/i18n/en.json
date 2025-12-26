@@ -392,12 +392,8 @@
       "active": "Active",
       "inactive": "Inactive",
       "selectedKeysTitle": "Selected Keys ({count})  - Click items below to remove",
-<<<<<<< HEAD
-      "anyFile": "Any File"
-=======
-      "anyFile":"Any File",
-      "enableCppHint":"Enable C/C++ to unlock."
->>>>>>> 151797c4 (Args/Image 換位置  hover修正)
+      "anyFile": "Any File",
+      "enableCppHint": "Enable C/C++ to unlock."
     },
     "submissions": {
       "text": "Submissions",

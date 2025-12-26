@@ -3,6 +3,8 @@ import tm from "markdown-it-texmath";
 import markdownIt from "markdown-it";
 import katex from "katex";
 import hljs from "highlight.js";
+import anchor from "markdown-it-anchor";
+import slugify from "./slugify";
 
 const md = markdownIt({
   html: false,
@@ -12,11 +14,16 @@ const md = markdownIt({
     }
     return str;
   },
-}).use(tm, {
-  engine: katex,
-  delimiters: "dollars",
-  katexOptions: { macros: { "\\RR": "\\mathbb{R}" } },
-});
+})
+  .use(tm, {
+    engine: katex,
+    delimiters: "dollars",
+    katexOptions: { macros: { "\\RR": "\\mathbb{R}" } },
+  })
+  .use(anchor, {
+    permalink: false,
+    slugify: slugify, // Use custom slugify
+  });
 
 export default function renderMarkdown(markdown: string): string {
   return DOMPurify.sanitize(md.render(markdown));

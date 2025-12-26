@@ -3,115 +3,219 @@
  * AdminManualModal.vue
  *
  * A front-end only, read-only manual modal that supports:
- * - Multiple markdown pages
- * - Left sidebar navigation to switch pages
- * - Independent scroll per page (scroll position is remembered)
- * - Wheel scrolling inside each page content area
- * - ESC / backdrop click to close
- *
- * Notes:
- * - This implementation intentionally does NOT use <dialog> to avoid CSS/layout issues
- *   where the backdrop appears but the modal box becomes invisible in some layouts.
+ * - Grouped markdown pages (Categories -> Pages)
+ * - 3-column layout (Sitemap | TOC | Content) for Desktop
+ * - Drawer layout for Mobile (Content + Menu Button -> Drawer(Sitemap/TOC))
  */
 
 import { computed, nextTick, onBeforeUnmount, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import MarkdownRenderer from "@/components/MarkdownRenderer.vue";
-import { PROBLEM_ADMIN_MANUAL_PAGES, PROBLEM_ADMIN_MANUAL_PAGES_ZH } from "@/docs/problem-admin-manual/index";
+import slugify from "@/utils/slugify";
+import {
+  PROBLEM_ADMIN_MANUAL_CATEGORIES,
+  PROBLEM_ADMIN_MANUAL_CATEGORIES_ZH,
+} from "@/docs/problem-admin-manual/index";
 
 const open = ref(false);
 const lang = ref<"en" | "zh">("en");
 
-// pages switches between EN/ZH content
-const pages = computed(() =>
-  lang.value === "en" ? PROBLEM_ADMIN_MANUAL_PAGES : PROBLEM_ADMIN_MANUAL_PAGES_ZH,
+// Data Source
+const categories = computed(() =>
+  lang.value === "en" ? PROBLEM_ADMIN_MANUAL_CATEGORIES : PROBLEM_ADMIN_MANUAL_CATEGORIES_ZH,
 );
 
 const { t, locale } = useI18n();
 
-const activeId = ref(pages.value[0]?.id ?? "basic");
+// Static Title Map to ensure UI updates instantly with local lang switch
+const titles = {
+  en: "Problem Management Manual",
+  zh: "題目管理使用說明",
+};
 
-// The scrollable content container on the right side
+// Selection State
+const activeCategoryId = ref(categories.value[0]?.id ?? "general");
+const activePageId = ref(categories.value[0]?.pages[0]?.id ?? "basic");
+
+// Mobile Drawer State
+const mobileDrawerOpen = ref(false);
+const mobileTab = ref<"sitemap" | "toc">("sitemap");
+
+// DOM Refs
 const contentRef = ref<HTMLElement | null>(null);
 
-// Remember scrollTop per (lang + page) combination
+// Scroll Memory
 const scrollMemory = new Map<string, number>();
 
-// The currently active manual page object (from selected language)
-const activePage = computed(() => pages.value.find((p) => p.id === activeId.value));
+// Helpers
+const activeCategory = computed(() => categories.value.find((c) => c.id === activeCategoryId.value));
+const activePage = computed(() => activeCategory.value?.pages.find((p) => p.id === activePageId.value));
+
+// TOC State
+const activeTocId = ref<string>("");
+
+// TOC Generation
+const tableOfContents = computed(() => {
+  if (!activePage.value?.md) return [];
+  const headers: { level: number; text: string; id: string; parentId?: string }[] = [];
+  const regex = /^(#{2,3})\s+(.*)$/gm;
+  let match;
+  let lastH2Id = "";
+
+  while ((match = regex.exec(activePage.value.md)) !== null) {
+    const level = match[1].length;
+    const text = match[2].trim();
+    const id = slugify(text); // Use shared slugify
+
+    if (level === 2) {
+      lastH2Id = id;
+      headers.push({ level, text, id });
+    } else if (level === 3) {
+      headers.push({ level, text, id, parentId: lastH2Id });
+    }
+  }
+  return headers;
+});
+
+// Actions
+function setLang(newLang: "en" | "zh") {
+  if (lang.value === newLang) return;
+  lang.value = newLang;
+  validateSelection();
+  // Also reset TOC
+  activeTocId.value = "";
+  // Reset scroll for the new content if needed, but validateSelection might keep us on a similar page if IDs match (they might not across langs).
+  // Actually, IDs might be shared (e.g. 'basic').
+  saveScroll(); // save old lang scroll? maybe not needed if we want independent memory.
+  restoreScroll();
+}
 
 function openManual() {
-  // Default manual language to system locale: English -> en, otherwise zh
+  // Sync with global locale initially, but allow independent switch later
   lang.value = locale.value === "english" ? "en" : "zh";
-
-  // Ensure activeId exists for the selected language, fallback to first page
-  if (!pages.value.find((p) => p.id === activeId.value)) {
-    activeId.value = pages.value[0]?.id ?? activeId.value;
-  }
-
-  // Restore per-language scroll position after DOM update
-  nextTick(() => {
-    if (contentRef.value)
-      contentRef.value.scrollTop = scrollMemory.get(`${lang.value}:${activeId.value}`) ?? 0;
-  });
-
+  validateSelection();
+  restoreScroll();
   open.value = true;
 }
 
 function closeManual() {
   open.value = false;
+  mobileDrawerOpen.value = false;
 }
 
-// Close on ESC key
-function onKeydown(e: KeyboardEvent) {
-  if (e.key === "Escape") closeManual();
-}
+// Local Localization Strings
+// Since we want the manual UI to switch independent of global site
+const uiText = computed(() => ({
+  onThisPage: lang.value === "zh" ? "本頁目錄" : "ON THIS PAGE",
+  noSections: lang.value === "zh" ? "無章節" : "No sections",
+  pageNotFound: lang.value === "zh" ? "找不到頁面" : "Page not found",
+  open: lang.value === "zh" ? "開啟說明" : "Open Manual",
+  menu: lang.value === "zh" ? "選單" : "Menu",
+  contents: lang.value === "zh" ? "目錄" : "Contents",
+}));
 
-window.addEventListener("keydown", onKeydown);
-
-onBeforeUnmount(() => {
-  window.removeEventListener("keydown", onKeydown);
-});
-
-// Prevent background scrolling while the modal is open
-watch(open, (v) => {
-  document.body.style.overflow = v ? "hidden" : "";
-});
-
-// Change language: remember current scroll, switch lang, restore scroll for target page
-function setLang(l: "en" | "zh") {
-  if (lang.value === l) return;
-  if (contentRef.value) scrollMemory.set(`${lang.value}:${activeId.value}`, contentRef.value.scrollTop);
-
-  lang.value = l;
-
-  // if activeId doesn't exist in the new language, fallback to first page
-  if (!pages.value.find((p) => p.id === activeId.value)) {
-    activeId.value = pages.value[0]?.id ?? activeId.value;
+function scrollToId(id: string) {
+  if (window.innerWidth < 1024) {
+    mobileDrawerOpen.value = false;
   }
-
+  
   nextTick(() => {
-    if (contentRef.value)
-      contentRef.value.scrollTop = scrollMemory.get(`${lang.value}:${activeId.value}`) ?? 0;
+    // Escape standard ID characters if needed using CSS.escape or just getElementById
+    const el = document.getElementById(id);
+    if (el && contentRef.value) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      activeTocId.value = id; // Optimistically set active
+    }
   });
 }
 
-// Switch page:
-// 1) Save current page scrollTop (per-language key)
-// 2) Change active page id
-// 3) Wait for DOM update
-// 4) Restore new page scrollTop (or 0 if never visited)
-async function switchPage(id: string) {
-  if (contentRef.value) scrollMemory.set(`${lang.value}:${activeId.value}`, contentRef.value.scrollTop);
-
-  activeId.value = id;
-  await nextTick();
-
-  if (contentRef.value) contentRef.value.scrollTop = scrollMemory.get(`${lang.value}:${id}`) ?? 0;
+// Navigation
+function switchCategory(catId: string) {
+  // If clicking same category, do nothing? Or maybe toggle? current behavior is fine.
+  if (activeCategoryId.value === catId) return;
+  
+  activeCategoryId.value = catId;
+  const cat = categories.value.find((c) => c.id === catId);
+  if (cat && cat.pages.length > 0) {
+    switchPage(cat.pages[0].id);
+  }
 }
+
+async function switchPage(pageId: string) {
+  if (activePageId.value === pageId) return;
+  
+  // Find which category this page belongs to
+  const parentCat = categories.value.find(c => c.pages.some(p => p.id === pageId));
+  if (parentCat && parentCat.id !== activeCategoryId.value) {
+     activeCategoryId.value = parentCat.id;
+  }
+
+  saveScroll();
+  activePageId.value = pageId;
+  await nextTick();
+  restoreScroll();
+  // Reset TOC active state on page switch
+  activeTocId.value = "";
+}
+
+// Mobile specific
+function toggleDrawer() {
+  mobileDrawerOpen.value = !mobileDrawerOpen.value;
+}
+
+// Scroll Persistence
+function saveScroll() {
+  if (contentRef.value) {
+    scrollMemory.set(`${lang.value}:${activePageId.value}`, contentRef.value.scrollTop);
+  }
+}
+
+function restoreScroll() {
+  nextTick(() => {
+    if (contentRef.value) {
+      contentRef.value.scrollTop = scrollMemory.get(`${lang.value}:${activePageId.value}`) ?? 0;
+    }
+  });
+}
+
+function validateSelection() {
+  // 1. Check if activeCategoryId exists in current 'categories'
+  const catExists = categories.value.find((c) => c.id === activeCategoryId.value);
+  if (!catExists) {
+    // Fallback to first category
+    activeCategoryId.value = categories.value[0]?.id ?? "general";
+  }
+
+  // 2. Refresh 'activeCategory' ref implicitly by using the updated ID
+  const validCat = categories.value.find((c) => c.id === activeCategoryId.value);
+  
+  // 3. Check if activePageId exists in validCat
+  if (validCat) {
+     const pageExists = validCat.pages.find(p => p.id === activePageId.value);
+     if (!pageExists) {
+         // Fallback to first page
+         activePageId.value = validCat.pages[0]?.id ?? "basic";
+     }
+  }
+}
+
+// Keys & Watchers
+function onKeydown(e: KeyboardEvent) {
+  if (e.key === "Escape") closeManual();
+}
+window.addEventListener("keydown", onKeydown);
+onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown));
+watch(open, (v) => (document.body.style.overflow = v ? "hidden" : ""));
+
+// Simple Scroll Spy logic (Optional, can be improved with IntersectionObserver)
+// For now, we manually update activeTocId on click. 
+// Implementing full IntersectionObserver is strictly better but might be overkill if 'auto-collapse' just implies 'initially collapsed'.
+// User said: "Expected... jump, and auto-folding". 
+// I will implement auto-folding logic: Show H2 regardless, Show H3 ONLY if H2 is active or H3 is active.
 </script>
 
 <template>
+  <!-- Trigger Button -->
   <button
     type="button"
     class="btn btn-sm lg:btn-md border-2 border-black bg-white text-black transition-colors hover:bg-black hover:text-white dark:border-zinc-400 dark:bg-zinc-800 dark:text-white dark:hover:bg-white dark:hover:text-black"
@@ -121,72 +225,189 @@ async function switchPage(id: string) {
   </button>
 
   <teleport to="body">
-    <div v-if="open" class="fixed inset-0 z-[9999]">
+    <div v-if="open" class="fixed inset-0 z-[9999] flex items-center justify-center p-0 lg:p-4">
+      <!-- Backdrop -->
       <div class="absolute inset-0 bg-black/60" @click="closeManual" />
 
-      <div class="absolute inset-0 flex items-center justify-center p-4">
-        <div class="bg-base-100 w-full max-w-6xl overflow-hidden rounded-lg shadow-2xl">
-          <div class="border-base-300 flex items-center justify-between border-b px-4 py-3">
-            <div class="flex items-center gap-4">
-              <div class="text-lg font-bold">{{ t("components.problem.manual.title") }}</div>
-
-              <div class="btn-group btn-group-sm">
-                <button
-                  type="button"
-                  class="btn btn-sm"
-                  :class="lang === 'en' ? 'btn-active' : ''"
-                  @click="setLang('en')"
-                >
-                  EN
-                </button>
-                <button
-                  type="button"
-                  class="btn btn-sm"
-                  :class="lang === 'zh' ? 'btn-active' : ''"
-                  @click="setLang('zh')"
-                >
-                  中文
-                </button>
-              </div>
+      <!-- Main Container -->
+      <div class="bg-base-100 flex h-full w-full flex-col overflow-hidden shadow-2xl relative z-10 lg:h-[85vh] lg:max-w-7xl lg:rounded-xl">
+        
+        <!-- Header -->
+        <div class="border-base-300 flex items-center justify-between border-b px-4 py-3 lg:px-6 lg:py-4">
+          <div class="flex items-center gap-4">
+            <!-- Use local title map so it flips instantly with button -->
+            <h2 class="text-xl lg:text-3xl font-bold">{{ titles[lang] }}</h2>
+            
+            <!-- Language Switcher -->
+            <div class="join hidden lg:flex">
+                <button type="button" class="join-item btn btn-sm" :class="lang === 'en' ? 'btn-active btn-neutral' : ''" @click="setLang('en')">EN</button>
+                <button type="button" class="join-item btn btn-sm" :class="lang === 'zh' ? 'btn-active btn-neutral' : ''" @click="setLang('zh')">中文</button>
             </div>
-
-            <button type="button" class="btn btn-sm btn-circle" @click="closeManual">✕</button>
+            <!-- Mobile Lang Switcher (Simple Toggle) -->
+            <button 
+              type="button" 
+              class="btn btn-sm lg:hidden font-bold" 
+              @click="setLang(lang === 'en' ? 'zh' : 'en')"
+            >
+              {{ lang === 'en' ? 'EN' : '中' }}
+            </button>
           </div>
 
-          <div class="grid h-[75vh] min-h-0 grid-cols-12 overflow-hidden">
-            <aside class="border-base-300 bg-base-200/50 col-span-3 min-h-0 border-r">
-              <div class="h-full min-h-0 overflow-y-auto p-2">
-                <button
-                  v-for="p in pages"
-                  :key="p.id"
-                  type="button"
-                  class="btn btn-ghost btn-sm w-full justify-start"
-                  :class="p.id === activeId ? 'btn-active' : ''"
-                  @click="switchPage(p.id)"
-                >
-                  {{ p.title }}
-                </button>
-              </div>
-            </aside>
-
-            <main class="col-span-9 min-h-0 min-w-0">
-              <div ref="contentRef" class="h-full min-h-0 overflow-y-auto overscroll-contain px-5 py-4">
-                <template v-if="activePage">
-                  <MarkdownRenderer :md="activePage.md" />
-                </template>
-                <template v-else>
-                  <div class="opacity-70">{{ t("components.problem.manual.pageNotFound") }}</div>
-                </template>
-              </div>
-            </main>
-          </div>
-
-          <div class="border-base-300 flex justify-end border-t px-4 py-3">
-            <button type="button" class="btn" @click="closeManual">
-              {{ t("components.problem.manual.close") }}
+          <div class="flex items-center gap-2">
+            <!-- Mobile Menu Toggle -->
+            <button class="btn btn-square btn-ghost lg:hidden" @click="toggleDrawer">
+               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+            </button>
+            <!-- Close Button -->
+            <button type="button" class="btn btn-ghost btn-circle" @click="closeManual">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
           </div>
         </div>
+
+        <!-- Body Grid -->
+        <div class="flex flex-1 min-h-0 relative">
+          
+          <!-- Desktop Column 1: Sitemap -->
+          <!-- Reduced width to 1/6 (approx 16.6%) or min 200px seems fine, let's try fixed width for stability w-64 is 256px -->
+          <aside class="hidden lg:flex flex-col w-56 border-r border-base-300 bg-base-200/50 overflow-y-auto">
+             <div class="p-6">
+                <!-- Increased font size for sitemap -->
+                <!-- Removed opacity on Category Title for better contrast -->
+                <!-- Added key to force re-render if lang changes stuck -->
+                <div :key="lang">
+                  <template v-for="cat in categories" :key="cat.id">
+                     <div class="mb-8">
+                        <div class="text-base font-extrabold uppercase tracking-widest mb-3 px-2 text-base-content/70">{{ cat.title }}</div>
+                        <div class="space-y-1">
+                           <button
+                              v-for="p in cat.pages"
+                              :key="p.id"
+                              class="btn btn-ghost w-full justify-start font-normal text-lg capitalize"
+                              :class="p.id === activePageId ? 'btn-active' : ''"
+                              @click="switchPage(p.id)"
+                           >
+                              {{ p.title }}
+                           </button>
+                        </div>
+                     </div>
+                  </template>
+                </div>
+             </div>
+          </aside>
+
+          <!-- Desktop Column 2: TOC -->
+          <aside class="hidden lg:flex flex-col w-64 border-r border-base-300 bg-base-100 overflow-y-auto">
+              <div class="p-6 sticky top-0">
+                  <div class="text-xs font-bold opacity-60 uppercase tracking-wider mb-4">{{ uiText.onThisPage }}</div>
+                  <nav class="space-y-1">
+                      <template v-for="h in tableOfContents" :key="h.id">
+                          <button
+                            class="block w-full text-left py-1.5 px-3 rounded hover:bg-base-200 transition-colors truncate"
+                            :class="[
+                               h.level === 3 ? 'pl-8 text-sm text-base-content/70' : 'pl-3 text-base font-medium',
+                               activeTocId === h.id ? 'bg-base-300 text-base-content font-bold' : ''
+                            ]"
+                            @click="scrollToId(h.id)"
+                          >
+                             {{ h.text }}
+                          </button>
+                      </template>
+                      
+                      <div v-if="tableOfContents.length === 0" class="text-xs opacity-50 italic px-2">
+                        {{ uiText.noSections }}
+                      </div>
+                  </nav>
+              </div>
+          </aside>
+
+          <!-- Desktop/Mobile Content -->
+          <main class="flex-1 overflow-y-auto bg-base-100 scroll-smooth pb-20 lg:pb-0" ref="contentRef">
+              <div class="max-w-4xl mx-auto px-4 py-8 lg:px-12 lg:py-12">
+                 <!-- Breadcrumbs Mobile -->
+                 <div class="text-sm breadcrumbs lg:hidden mb-4 opacity-50">
+                    <ul>
+                      <li>{{ activeCategory?.title }}</li>
+                      <li>{{ activePage?.title }}</li>
+                    </ul>
+                 </div>
+
+                 <template v-if="activePage">
+                    <!-- Title -->
+                    <h1 class="text-3xl lg:text-5xl font-extrabold mb-10 tracking-tight">{{ activePage.title }}</h1>
+                    <MarkdownRenderer :md="activePage.md" :preserve-whitespace="false" />
+                 </template>
+                 <div v-else class="text-center opacity-50 mt-10">{{ uiText.pageNotFound }}</div>
+                 
+                 <div class="h-32 lg:hidden"></div>
+              </div>
+          </main>
+
+          <!-- Mobile Drawer (Slide Over) -->
+          <div v-if="mobileDrawerOpen" class="absolute inset-0 z-50 flex lg:hidden">
+             <!-- Drawer Overlay -->
+             <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="toggleDrawer" />
+             
+             <!-- Drawer Content -->
+             <div class="relative w-4/5 max-w-sm bg-base-100 h-full shadow-2xl flex flex-col transition-transform">
+                <!-- Mobile Tabs -->
+                <div class="tabs tabs-boxed m-2 bg-base-200 p-1">
+                   <a class="tab tab-lg flex-1 text-lg font-bold" :class="{ 'tab-active': mobileTab === 'sitemap' }" @click="mobileTab = 'sitemap'">{{ uiText.menu }}</a>
+                   <a class="tab tab-lg flex-1 text-lg font-bold" :class="{ 'tab-active': mobileTab === 'toc' }" @click="mobileTab = 'toc'">{{ uiText.contents }}</a>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-4">
+                   <!-- Tab: Sitemap -->
+                   <div v-if="mobileTab === 'sitemap'" class="space-y-8">
+                      <template v-for="cat in categories" :key="cat.id">
+                        <div>
+                           <div class="text-sm font-extrabold uppercase tracking-widest mb-3 px-2 text-base-content">{{ cat.title }}</div>
+                           <ul class="menu bg-base-200 rounded-box w-full">
+                              <li v-for="p in cat.pages" :key="p.id">
+                                 <a 
+                                   class="py-3 text-lg font-medium"
+                                   :class="{ 'active': p.id === activePageId }"
+                                   @click="switchPage(p.id); toggleDrawer()"
+                                 >
+                                   {{ p.title }}
+                                 </a>
+                              </li>
+                           </ul>
+                        </div>
+                      </template>
+                   </div>
+                   
+                   <!-- Tab: TOC -->
+                   <div v-if="mobileTab === 'toc'">
+                      <div class="text-sm font-bold opacity-60 uppercase tracking-wider mb-4 px-2">{{ uiText.onThisPage }}</div>
+                      <div class="space-y-2">
+                          <template v-for="h in tableOfContents" :key="h.id">
+                             <button
+                               class="block w-full text-left py-4 px-4 rounded-xl bg-base-200 hover:bg-base-300 transition-colors"
+                               :class="h.level === 3 ? 'pl-8 text-base opacity-90' : 'text-lg font-bold'"
+                               @click="scrollToId(h.id); toggleDrawer()"
+                             >
+                                {{ h.text }}
+                             </button>
+                          </template>
+                      </div>
+                      <div v-if="tableOfContents.length === 0" class="text-base opacity-50 italic text-center py-8">
+                        {{ uiText.noSections }}
+                      </div>
+                   </div>
+                </div>
+
+                <!-- Drawer Footer: Language Switch -->
+                <div class="p-4 border-t border-base-300 bg-base-200/50">
+                    <button class="btn btn-outline w-full font-bold text-lg" @click="setLang(lang === 'en' ? 'zh' : 'en')">
+                       Change Language to {{ lang === 'en' ? '中文' : 'English' }}
+                    </button>
+                </div>
+             </div>
+          </div>
+
+        </div>
+
       </div>
     </div>
   </teleport>

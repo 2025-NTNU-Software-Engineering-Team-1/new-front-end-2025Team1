@@ -159,7 +159,9 @@ const maxPage = computed(() => {
                   </td>
                   <td>
                     {{ problemName }}
-                    <span v-if="aiVTuber || hasAiVtuber(problemId)" class="badge badge-secondary ml-2"
+                    <span
+                      v-if="aiVTuber || hasAiVtuber(problemId)"
+                      class="ml-2 inline-flex items-center rounded-full bg-gradient-to-r from-purple-400 to-indigo-400 px-2 py-0.5 text-xs font-medium text-white"
                       >AI-TA</span
                     >
                   </td>

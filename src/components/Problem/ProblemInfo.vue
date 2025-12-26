@@ -27,7 +27,11 @@ defineProps<Props>();
       <div class="flex flex-col">
         <div class="flex items-center gap-2">
           <span class="text-lg font-bold">{{ problemName }}</span>
-          <span v-if="aiVtuber" class="badge badge-secondary">AI-TA</span>
+          <span
+            v-if="aiVtuber"
+            class="inline-flex items-center rounded-full bg-gradient-to-r from-purple-400 to-indigo-400 px-2 py-0.5 text-xs font-medium text-white"
+            >AI-TA</span
+          >
         </div>
         <span class="text-sm font-light"> ID: {{ id }}</span>
       </div>

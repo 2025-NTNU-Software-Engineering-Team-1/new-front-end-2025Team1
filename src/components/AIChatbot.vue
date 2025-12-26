@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { ref, nextTick, onBeforeUnmount } from "vue";
+import { ref, nextTick, onBeforeUnmount, onMounted } from "vue";
 import { LAppDelegate } from "@/live2d/Framework/src/lappdelegate";
+import { setSkinConfig } from "@/live2d/Framework/src/lappdefine";
 import api from "@/models/api";
 import MarkdownRenderer from "./MarkdownRenderer.vue";
+import SkinSelector from "./SkinSelector.vue";
 
 // ------- Props：從外層傳進來課程 / 題目 / 使用者資訊 -------
 const props = defineProps<{
@@ -91,6 +93,64 @@ const currentExpression = ref<string | null>(null);
 
 const chatScale = ref(1.15);
 
+// ====== 皮膚選擇 ======
+const showSkinSelector = ref(false);
+const currentSkinId = ref("builtin_hiyori");
+const avatarPath = ref("/live2d/hiyori_avatar.png");
+
+// Emotion mappings for current skin
+const currentEmotionMappings = ref<Record<string, string | null>>({
+  smile: "F05",
+  unhappy: "F03",
+  tired: "F08",
+  surprised: "F06",
+});
+
+const openSkinSelector = () => {
+  showSkinSelector.value = true;
+};
+
+const onSkinChanged = async (skinId: string) => {
+  currentSkinId.value = skinId;
+  // Update avatar thumbnail and emotion mappings
+  try {
+    const res = await api.VtuberSkin.get(skinId);
+    const skin = Array.isArray(res.data) ? undefined : (res.data?.data ?? res.data);
+    if (skin) {
+      if (skin.thumbnail_path) {
+        avatarPath.value = skin.thumbnail_path;
+      }
+      // Update emotion mappings
+      currentEmotionMappings.value = skin.emotion_mappings ?? {};
+    }
+  } catch {
+    // Ignore
+  }
+};
+
+// Load user's skin preference on mount
+const loadSkinPreference = async () => {
+  try {
+    const res = await api.VtuberSkin.getPreference();
+    const data = Array.isArray(res.data) ? undefined : (res.data?.data ?? res.data);
+    const skinId = data?.selected_skin_id ?? "builtin_hiyori";
+    currentSkinId.value = skinId;
+
+    if (skinId !== "builtin_hiyori") {
+      const skinRes = await api.VtuberSkin.get(skinId);
+      const skin = Array.isArray(skinRes.data) ? undefined : (skinRes.data?.data ?? skinRes.data);
+      if (skin) {
+        avatarPath.value = skin.thumbnail_path ?? "/live2d/hiyori_avatar.png";
+        // Load emotion mappings
+        currentEmotionMappings.value = skin.emotion_mappings ?? {};
+        setSkinConfig(skin.model_path, skin.model_json_name);
+      }
+    }
+  } catch (e) {
+    console.warn("[AIChatbot] loadSkinPreference error:", e);
+  }
+};
+
 // 聊天紀錄：一開始不要� �設訊息，等 history 載入
 let nextId = 1;
 const messages = ref<ChatMessage[]>([]);
@@ -131,22 +191,11 @@ const setDefaultExpression = () => {
   }
 };
 
-// emotion → expression ID 對應
+// emotion → expression ID 對應 (使用動態映射)
 const emotionToExpressionId = (emotion?: string): string | null => {
   if (!emotion) return null;
-
-  switch (emotion) {
-    case "smile":
-      return "F05";
-    case "unhappy":
-      return "F03";
-    case "tired":
-      return "F08";
-    case "surprised":
-      return "F06";
-    default:
-      return null;
-  }
+  const mappings = currentEmotionMappings.value;
+  return mappings[emotion] ?? null;
 };
 
 const applyEmotion = (emotion?: string) => {
@@ -474,6 +523,11 @@ const onAfterLeave = () => {
   showTrigger.value = true;
 };
 
+// Initialize skin preference on mount
+onMounted(() => {
+  loadSkinPreference();
+});
+
 onBeforeUnmount(() => {
   isOpen.value = false;
   showTrigger.value = false;
@@ -544,8 +598,12 @@ onBeforeUnmount(() => {
             class="flex items-center justify-between bg-gradient-to-r from-purple-400 to-indigo-400 px-5 py-3 text-white shadow-md"
           >
             <div class="flex items-center gap-2">
-              <div class="h-9 w-9 overflow-hidden rounded-full border border-white/70 shadow">
-                <img src="/live2d/hiyori_avatar.png" class="h-full w-full object-cover" />
+              <div
+                class="h-9 w-9 cursor-pointer overflow-hidden rounded-full border border-white/70 shadow transition-transform hover:scale-110 hover:ring-2 hover:ring-white/50"
+                title="點擊更換外觀"
+                @click="openSkinSelector"
+              >
+                <img :src="avatarPath" class="h-full w-full object-cover" />
               </div>
               <p class="text-xs opacity-80">AI 助教</p>
             </div>
@@ -684,6 +742,14 @@ onBeforeUnmount(() => {
       </div>
     </Transition>
   </div>
+
+  <!-- Skin Selector Modal -->
+  <SkinSelector
+    v-model:visible="showSkinSelector"
+    :current-skin-id="currentSkinId"
+    :current-username="props.username"
+    @skin-changed="onSkinChanged"
+  />
 </template>
 
 <style scoped>

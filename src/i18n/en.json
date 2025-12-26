@@ -40,6 +40,7 @@
     "aisetting": {
       "setupPage": "Set Up",
       "usagePage": "Usage",
+      "skinsPage": "Skin Management",
       "setup": {
         "title": "AI Management – Set Up",
         "subtitleNewKey": "Add New API Key (Gemini)",
@@ -854,7 +855,8 @@
     "tab": {
       "dashboard": "Dashboard",
       "user": "User",
-      "loginRecords": "Login Records"
+      "loginRecords": "Login Records",
+      "skins": "AI Skins"
     },
     "dashboard": {
       "usercount": {
@@ -870,6 +872,26 @@
         "problem": "Problem Count",
         "submission": "Submission Count"
       }
+    },
+    "skins": {
+      "title": "AI Skin Management",
+      "storageStats": "Storage Statistics",
+      "totalSkins": "Total Skins",
+      "totalSize": "Total Size",
+      "thumbnail": "Thumbnail",
+      "name": "Name",
+      "uploadedBy": "Uploaded By",
+      "size": "Size",
+      "type": "Type",
+      "actions": "Actions",
+      "public": "Public",
+      "private": "Private",
+      "edit": "Edit",
+      "delete": "Delete",
+      "setPublic": "Set Public",
+      "setPrivate": "Set Private",
+      "editTitle": "Edit Skin",
+      "save": "Save"
     }
   },
   "errorCode": {
@@ -997,5 +1019,40 @@
     "download": "Download CSV",
     "noRecords": "No login records",
     "rowCount": "{n} record(s)"
+  },
+  "skinSelector": {
+    "title": "Choose AI Assistant Appearance",
+    "close": "Close",
+    "loadError": "Failed to load skin list",
+    "builtin": "Built-in",
+    "default": "Default",
+    "upload": {
+      "button": "Upload Custom Skin",
+      "title": "Upload Custom Skin",
+      "name": "Skin Name",
+      "namePlaceholder": "Optional, defaults to filename",
+      "file": "Live2D Model (ZIP)",
+      "hint": "Zip files exported from Live2D Cubism Editor directly, keep original structure (max 50 MB)",
+      "emotions": "Emotion Mappings",
+      "optional": "Optional",
+      "emotionsHint": "Find expression IDs from model3.json Expressions, format: {\"smile\": \"F05\", ...}",
+      "thumbnail": "Thumbnail",
+      "thumbnailHint": "Ctrl+V to paste or choose file",
+      "chooseFile": "Choose File",
+      "submit": "Upload",
+      "uploading": "Uploading...",
+      "cancel": "Cancel",
+      "errorZip": "Please upload a ZIP file",
+      "errorSize": "File size cannot exceed 50 MB",
+      "errorFile": "Please select a file"
+    },
+    "delete": {
+      "confirm": "Are you sure you want to delete this skin?",
+      "error": "Delete failed"
+    },
+    "switch": {
+      "error": "Failed to switch skin"
+    },
+    "clickToChange": "Click to change appearance"
   }
 }

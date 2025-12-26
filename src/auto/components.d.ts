@@ -109,6 +109,7 @@ declare module 'vue' {
     SkeletonCard: typeof import('./../components/SkeletonCard.vue')['default']
     SkeletonPost: typeof import('./../components/SkeletonPost.vue')['default']
     SkeletonTable: typeof import('./../components/SkeletonTable.vue')['default']
+    SkinSelector: typeof import('./../components/SkinSelector.vue')['default']
     SystemAnnouncements: typeof import('./../components/SystemAnnouncements.vue')['default']
     TestDataSection: typeof import('./../components/Problem/Admin/Sections/TestDataSection.vue')['default']
     TopBar: typeof import('./../components/TopBar.vue')['default']

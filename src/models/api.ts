@@ -478,6 +478,82 @@ const Chatbot = {
     }>("/ai/chatbot/history", { params }),
 };
 
+// VtuberSkin types
+export type VtuberSkinInfo = {
+  skin_id: string;
+  name: string;
+  thumbnail_path: string | null;
+  is_builtin: boolean;
+  is_public: boolean;
+  uploaded_by: string | null;
+  file_size: number;
+};
+
+export type EmotionMappings = {
+  smile?: string | null;
+  unhappy?: string | null;
+  tired?: string | null;
+  surprised?: string | null;
+};
+
+export type VtuberSkinDetail = VtuberSkinInfo & {
+  model_path: string;
+  model_json_name: string;
+  emotion_mappings: EmotionMappings;
+};
+
+const VtuberSkin = {
+  // Get all available skins
+  list: () =>
+    fetcher.get<{ data: VtuberSkinInfo[] }>("/ai/skins"),
+
+  // Upload a new skin
+  upload: (formData: FormData) =>
+    fetcher.post<{ message: string; data: { skin_id: string; name: string } }>("/ai/skins", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }),
+
+  // Get skin details
+  get: (skinId: string) =>
+    fetcher.get<{ data: VtuberSkinDetail }>(`/ai/skins/${skinId}`),
+
+  // Delete a skin
+  delete: (skinId: string) =>
+    fetcher.delete<{ message: string }>(`/ai/skins/${skinId}`),
+
+  // Get user preference
+  getPreference: () =>
+    fetcher.get<{ data: { selected_skin_id: string } }>("/ai/user-preference"),
+
+  // Set user preference
+  setPreference: (skinId: string) =>
+    fetcher.put<{ message: string }>("/ai/user-preference", { skin_id: skinId }),
+
+  // Get storage stats (admin only)
+  getStorageStats: () =>
+    fetcher.get<{
+      data: {
+        total_size: number;
+        total_count: number;
+        per_user: { username: string; size: number; count: number }[];
+      };
+    }>("/ai/storage-stats"),
+
+  // Update emotion mappings
+  updateEmotions: (skinId: string, mappings: EmotionMappings) =>
+    fetcher.put<{ message: string }>(`/ai/skins/${skinId}/emotions`, { mappings }),
+
+  // Update skin (name, thumbnail, emotion_mappings)
+  update: (skinId: string, formData: FormData) =>
+    fetcher.put<{ message: string }>(`/ai/skins/${skinId}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }),
+
+  // Toggle public/private visibility (teachers/admins only)
+  updateVisibility: (skinId: string, isPublic: boolean) =>
+    fetcher.patch<{ message: string }>(`/ai/skins/${skinId}/visibility`, { is_public: isPublic }),
+};
+
 export default {
   Auth,
   Problem,
@@ -493,4 +569,5 @@ export default {
   Chatbot,
   AIVTuber,
   CourseAPIUsage,
+  VtuberSkin,
 };

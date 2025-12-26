@@ -40,6 +40,7 @@
     "aisetting": {
       "setupPage": "設置",
       "usagePage": "用量",
+      "skinsPage": "皮膚管理",
       "setup": {
         "title": "AI 管理 - 設定",
         "subtitleNewKey": "新增金鑰資訊 (Gemini)",
@@ -838,7 +839,8 @@
     "tab": {
       "dashboard": "儀表板",
       "user": "使用者",
-      "loginRecords": "登入紀錄"
+      "loginRecords": "登入紀錄",
+      "skins": "AI 皮膚"
     },
     "dashboard": {
       "usercount": {
@@ -854,6 +856,26 @@
         "problem": "題目數量",
         "submission": "提交數量"
       }
+    },
+    "skins": {
+      "title": "AI 皮膚管理",
+      "storageStats": "儲存統計",
+      "totalSkins": "皮膚總數",
+      "totalSize": "總容量",
+      "thumbnail": "縮圖",
+      "name": "名稱",
+      "uploadedBy": "上傳者",
+      "size": "大細",
+      "type": "類型",
+      "actions": "操作",
+      "public": "公開",
+      "private": "私人",
+      "edit": "編輯",
+      "delete": "刪除",
+      "setPublic": "設做公開",
+      "setPrivate": "設做私人",
+      "editTitle": "編輯皮膚",
+      "save": "儲存"
     }
   },
   "errorCode": {
@@ -981,5 +1003,40 @@
     "download": "下載 CSV",
     "noRecords": "無登入紀錄",
     "rowCount": "攏總有 {n} 筆紀錄"
+  },
+  "skinSelector": {
+    "title": "揀 AI 助教外觀",
+    "close": "關閉",
+    "loadError": "無法度載入皮膚列表",
+    "builtin": "內建",
+    "default": "預設",
+    "upload": {
+      "button": "上傳自訂皮膚",
+      "title": "上傳自訂皮膚",
+      "name": "皮膚名稱",
+      "namePlaceholder": "選填，預設使用檔名",
+      "file": "Live2D 模型 (ZIP)",
+      "hint": "請直接壓縮 Live2D Cubism Editor 匯出 ê 檔案，原本結構毋免改（上限 50 MB）",
+      "emotions": "表情映射",
+      "optional": "選填",
+      "emotionsHint": "對 model3.json 的 Expressions 揣著表情 ID，格式：{\"smile\": \"F05\", ...}",
+      "thumbnail": "縮圖",
+      "thumbnailHint": "Ctrl+V 貼或揀檔案",
+      "chooseFile": "揀檔案",
+      "submit": "上傳",
+      "uploading": "當咧上傳...",
+      "cancel": "取消",
+      "errorZip": "請上傳 ZIP 檔案",
+      "errorSize": "檔案大細袂當超過 50 MB",
+      "errorFile": "請揀一个檔案"
+    },
+    "delete": {
+      "confirm": "確定欲刪除這个皮膚無？",
+      "error": "刪除失敗"
+    },
+    "switch": {
+      "error": "換皮膚失敗"
+    },
+    "clickToChange": "點來換外觀"
   }
 }

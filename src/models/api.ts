@@ -504,8 +504,7 @@ export type VtuberSkinDetail = VtuberSkinInfo & {
 
 const VtuberSkin = {
   // Get all available skins
-  list: () =>
-    fetcher.get<{ data: VtuberSkinInfo[] }>("/ai/skins"),
+  list: () => fetcher.get<{ data: VtuberSkinInfo[] }>("/ai/skins"),
 
   // Upload a new skin
   upload: (formData: FormData) =>
@@ -514,16 +513,13 @@ const VtuberSkin = {
     }),
 
   // Get skin details
-  get: (skinId: string) =>
-    fetcher.get<{ data: VtuberSkinDetail }>(`/ai/skins/${skinId}`),
+  get: (skinId: string) => fetcher.get<{ data: VtuberSkinDetail }>(`/ai/skins/${skinId}`),
 
   // Delete a skin
-  delete: (skinId: string) =>
-    fetcher.delete<{ message: string }>(`/ai/skins/${skinId}`),
+  delete: (skinId: string) => fetcher.delete<{ message: string }>(`/ai/skins/${skinId}`),
 
   // Get user preference
-  getPreference: () =>
-    fetcher.get<{ data: { selected_skin_id: string } }>("/ai/user-preference"),
+  getPreference: () => fetcher.get<{ data: { selected_skin_id: string } }>("/ai/user-preference"),
 
   // Set user preference
   setPreference: (skinId: string) =>

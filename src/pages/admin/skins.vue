@@ -34,7 +34,7 @@ const loadSkins = async () => {
   try {
     const res = await api.VtuberSkin.list();
     skins.value = Array.isArray(res.data) ? res.data : (res.data?.data ?? []);
-    
+
     // Also load storage stats
     try {
       const statsRes = await api.VtuberSkin.getStorageStats();
@@ -66,7 +66,7 @@ const deleteSkin = async (skinId: string, skinName: string) => {
 const openEdit = async (skin: VtuberSkinInfo) => {
   editingSkin.value = skin;
   editName.value = skin.name;
-  
+
   // Fetch full details to get emotion_mappings
   try {
     const res = await api.VtuberSkin.get(skin.skin_id);
@@ -79,7 +79,7 @@ const openEdit = async (skin: VtuberSkinInfo) => {
   } catch {
     editEmotions.value = "";
   }
-  
+
   editThumbnail.value = null;
   thumbnailPreview.value = null;
 };
@@ -138,7 +138,7 @@ const saveEdit = async () => {
     if (editThumbnail.value) {
       formData.append("thumbnail", editThumbnail.value);
     }
-    
+
     await api.VtuberSkin.update(editingSkin.value.skin_id, formData);
     closeEdit();
     await loadSkins();
@@ -167,7 +167,7 @@ onMounted(() => {
     <h1 class="mb-6 text-2xl font-bold">{{ $t("admin.skins.title") }}</h1>
 
     <!-- Storage Stats -->
-    <div v-if="storageStats" class="mb-6 rounded-lg bg-base-200 p-4">
+    <div v-if="storageStats" class="bg-base-200 mb-6 rounded-lg p-4">
       <h2 class="mb-2 font-semibold">{{ $t("admin.skins.storageStats") }}</h2>
       <p>{{ $t("admin.skins.totalSkins") }}: {{ storageStats.total_count }}</p>
       <p>{{ $t("admin.skins.totalSize") }}: {{ formatSize(storageStats.total_size) }}</p>
@@ -223,11 +223,7 @@ onMounted(() => {
             </td>
             <td>
               <div class="flex gap-2">
-                <button
-                  v-if="!skin.is_builtin"
-                  class="btn btn-sm btn-ghost"
-                  @click="openEdit(skin)"
-                >
+                <button v-if="!skin.is_builtin" class="btn btn-sm btn-ghost" @click="openEdit(skin)">
                   {{ $t("admin.skins.edit") }}
                 </button>
                 <button
@@ -248,7 +244,7 @@ onMounted(() => {
     <div v-if="editingSkin" class="modal modal-open">
       <div class="modal-box" @paste="onThumbnailPaste" tabindex="0">
         <h3 class="text-lg font-bold">{{ $t("admin.skins.editTitle") }}</h3>
-        
+
         <div class="form-control mt-4">
           <label class="label">
             <span class="label-text">{{ $t("skinSelector.upload.name") }}</span>
@@ -264,7 +260,7 @@ onMounted(() => {
             v-model="editEmotions"
             rows="4"
             class="textarea textarea-bordered font-mono text-xs"
-            :placeholder='`{"smile": "F05", "unhappy": "F03", ...}`'
+            :placeholder="`{&quot;smile&quot;: &quot;F05&quot;, &quot;unhappy&quot;: &quot;F03&quot;, ...}`"
           />
         </div>
 
@@ -282,7 +278,12 @@ onMounted(() => {
               />
               <span v-else class="flex h-full items-center justify-center text-2xl">🎭</span>
             </div>
-            <input type="file" accept="image/*" class="file-input file-input-sm" @change="onThumbnailChange" />
+            <input
+              type="file"
+              accept="image/*"
+              class="file-input file-input-sm"
+              @change="onThumbnailChange"
+            />
           </div>
           <p class="mt-1 text-xs text-gray-500">{{ $t("skinSelector.upload.thumbnailHint") }}</p>
         </div>

@@ -12,6 +12,10 @@ const { t } = useI18n();
 // [CONFIG] Console Debug Mode
 // 1 = Enable Logs, 0 = Disable Logs
 const DEBUG_MODE = 1;
+
+// [CONFIG] Maximum number of keys allowed
+// Defined strictly as 100 per user request
+const MAX_KEY_LIMIT = 100;
 // ==========================================
 
 // --- Logger Utility ---
@@ -150,6 +154,15 @@ async function fetchKeys() {
 // === Action: Add New Key ===
 async function addKey() {
   logger.group("Action: Add Key");
+
+  // [NEW] 0. Quantity Limit Check
+  // Ensure the user cannot exceed 100 keys.
+  if (apiKeys.value.length >= MAX_KEY_LIMIT) {
+    errorMsg.value = `Limit reached: You cannot add more than ${MAX_KEY_LIMIT} keys.`;
+    logger.error("Validation Error", "Max key limit reached (100)");
+    logger.groupEnd();
+    return;
+  }
 
   // 1. Basic Empty Check
   if (!newKey.value.name.trim() || !newKey.value.value.trim()) {
@@ -308,7 +321,6 @@ onMounted(fetchKeys);
       <div class="card-body">
         <div class="card-title mb-4">{{ t("course.aisetting.setup.title") }}</div>
 
-        <!-- Toast notifications - fixed position at bottom right -->
         <div class="toast toast-end toast-bottom z-50">
           <div v-if="errorMsg" class="alert alert-error px-4 py-2 text-sm">
             <i-uil-times-circle class="h-4 w-4" />
@@ -320,12 +332,10 @@ onMounted(fetchKeys);
           </div>
         </div>
 
-        <!-- Add New Key Section -->
         <div class="border-base-300 bg-base-200/30 dark:bg-base-200/10 mb-8 rounded-lg border p-5">
           <h3 class="mb-4 text-lg font-semibold">{{ t("course.aisetting.setup.subtitleNewKey") }}</h3>
 
           <div class="grid gap-4 md:grid-cols-3">
-            <!-- Key Name Input - Editable -->
             <div class="form-control">
               <label class="label pb-1">
                 <span class="label-text text-sm font-medium">{{
@@ -341,7 +351,6 @@ onMounted(fetchKeys);
               />
             </div>
 
-            <!-- API Key Value Input - Editable -->
             <div class="form-control">
               <label class="label pb-1">
                 <span class="label-text text-sm font-medium">{{
@@ -357,7 +366,6 @@ onMounted(fetchKeys);
               />
             </div>
 
-            <!-- Created By - Read-only with gray background -->
             <div class="form-control">
               <label class="label pb-1">
                 <span class="label-text text-sm font-medium">{{
@@ -390,7 +398,6 @@ onMounted(fetchKeys);
           </div>
         </div>
 
-        <!-- Existing Keys Section -->
         <div class="border-base-300 rounded-lg border p-5">
           <h3 class="mb-4 text-lg font-semibold">{{ t("course.aisetting.setup.subtitleExistingKey") }}</h3>
 
@@ -408,7 +415,6 @@ onMounted(fetchKeys);
               :key="k.id"
               class="border-base-300 bg-base-100 dark:bg-base-200/20 grid grid-cols-1 gap-4 rounded-lg border p-4 md:grid-cols-12 md:items-end"
             >
-              <!-- Key Name - Editable -->
               <div class="md:col-span-3">
                 <label class="label pb-1">
                   <span class="label-text text-xs opacity-70">{{
@@ -423,7 +429,6 @@ onMounted(fetchKeys);
                 />
               </div>
 
-              <!-- Masked Value - Read-only with gray background -->
               <div class="md:col-span-3">
                 <label class="label pb-1">
                   <span class="label-text text-xs opacity-70">{{
@@ -437,7 +442,6 @@ onMounted(fetchKeys);
                 </div>
               </div>
 
-              <!-- Created By - Read-only with gray background -->
               <div class="md:col-span-2">
                 <label class="label pb-1">
                   <span class="label-text text-xs opacity-70">{{
@@ -452,7 +456,6 @@ onMounted(fetchKeys);
                 />
               </div>
 
-              <!-- Active Toggle -->
               <div class="md:col-span-2">
                 <label class="label pb-1">
                   <span class="label-text text-xs opacity-70">{{
@@ -469,7 +472,6 @@ onMounted(fetchKeys);
                 </div>
               </div>
 
-              <!-- Action Buttons -->
               <div class="flex justify-end gap-2 md:col-span-2">
                 <button class="btn btn-success btn-sm" @click="updateKey(k)">
                   {{ t("course.aisetting.setup.display.save") }}

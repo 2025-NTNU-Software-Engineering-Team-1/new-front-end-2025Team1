@@ -51,7 +51,7 @@ const deleteSkin = async (skinId: string) => {
 const openEdit = async (skin: VtuberSkinInfo) => {
   editingSkin.value = skin;
   editName.value = skin.name;
-  
+
   try {
     const res = await api.VtuberSkin.get(skin.skin_id);
     const detail = Array.isArray(res.data) ? undefined : (res.data?.data ?? res.data);
@@ -63,7 +63,7 @@ const openEdit = async (skin: VtuberSkinInfo) => {
   } catch {
     editEmotions.value = "";
   }
-  
+
   editThumbnail.value = null;
   thumbnailPreview.value = null;
 };
@@ -119,7 +119,7 @@ const saveEdit = async () => {
     if (editThumbnail.value) {
       formData.append("thumbnail", editThumbnail.value);
     }
-    
+
     await api.VtuberSkin.update(editingSkin.value.skin_id, formData);
     closeEdit();
     await loadSkins();
@@ -159,7 +159,7 @@ onMounted(() => {
     <h2 class="mb-4 text-lg font-bold">{{ $t("admin.skins.title") }}</h2>
 
     <!-- Loading -->
-    <div v-if="loading" class="text-center py-8">
+    <div v-if="loading" class="py-8 text-center">
       <span class="loading loading-spinner loading-lg"></span>
     </div>
 
@@ -182,7 +182,7 @@ onMounted(() => {
         <tbody>
           <tr v-for="skin in skins" :key="skin.skin_id">
             <td>
-              <div class="h-10 w-10 overflow-hidden rounded-lg bg-base-200">
+              <div class="bg-base-200 h-10 w-10 overflow-hidden rounded-lg">
                 <img
                   v-if="skin.thumbnail_path"
                   :src="skin.thumbnail_path"
@@ -216,11 +216,7 @@ onMounted(() => {
                 >
                   {{ skin.is_public ? $t("admin.skins.setPrivate") : $t("admin.skins.setPublic") }}
                 </button>
-                <button
-                  v-if="!skin.is_builtin"
-                  class="btn btn-xs btn-ghost"
-                  @click="openEdit(skin)"
-                >
+                <button v-if="!skin.is_builtin" class="btn btn-xs btn-ghost" @click="openEdit(skin)">
                   {{ $t("admin.skins.edit") }}
                 </button>
                 <button
@@ -235,7 +231,7 @@ onMounted(() => {
           </tr>
         </tbody>
       </table>
-      
+
       <div v-if="skins.length === 0" class="py-8 text-center text-gray-500">
         {{ $t("admin.skins.noSkins") }}
       </div>
@@ -245,7 +241,7 @@ onMounted(() => {
     <div v-if="editingSkin" class="modal modal-open">
       <div class="modal-box" @paste="onThumbnailPaste" tabindex="0">
         <h3 class="text-lg font-bold">{{ $t("admin.skins.editTitle") }}</h3>
-        
+
         <div class="form-control mt-4">
           <label class="label">
             <span class="label-text">{{ $t("skinSelector.upload.name") }}</span>
@@ -261,7 +257,7 @@ onMounted(() => {
             v-model="editEmotions"
             rows="3"
             class="textarea textarea-bordered font-mono text-xs"
-            :placeholder='`{"smile": "F05", "unhappy": "F03", ...}`'
+            :placeholder="`{&quot;smile&quot;: &quot;F05&quot;, &quot;unhappy&quot;: &quot;F03&quot;, ...}`"
           />
         </div>
 
@@ -270,7 +266,7 @@ onMounted(() => {
             <span class="label-text">{{ $t("skinSelector.upload.thumbnail") }}</span>
           </label>
           <div class="flex items-center gap-3">
-            <div class="h-12 w-12 overflow-hidden rounded-lg bg-base-200">
+            <div class="bg-base-200 h-12 w-12 overflow-hidden rounded-lg">
               <img
                 v-if="thumbnailPreview || editingSkin.thumbnail_path"
                 :src="thumbnailPreview || editingSkin.thumbnail_path || ''"
@@ -279,7 +275,12 @@ onMounted(() => {
               />
               <span v-else class="flex h-full items-center justify-center text-lg">🎭</span>
             </div>
-            <input type="file" accept="image/*" class="file-input file-input-sm file-input-bordered" @change="onThumbnailChange" />
+            <input
+              type="file"
+              accept="image/*"
+              class="file-input file-input-sm file-input-bordered"
+              @change="onThumbnailChange"
+            />
           </div>
         </div>
 

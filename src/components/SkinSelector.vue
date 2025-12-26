@@ -95,8 +95,24 @@ const selectSkin = async (skinId: string) => {
     // Reload Live2D model
     try {
       const app = LAppDelegate.getInstance();
-      if (app && (app as unknown as { _subdelegates: { at: (i: number) => { getLive2DManager: () => { reloadModel?: () => void } | null } | null, getSize: () => number } })._subdelegates?.getSize() > 0) {
-        const subdelegate = (app as unknown as { _subdelegates: { at: (i: number) => { getLive2DManager: () => { reloadModel?: () => void } | null } | null } })._subdelegates.at(0);
+      if (
+        app &&
+        (
+          app as unknown as {
+            _subdelegates: {
+              at: (i: number) => { getLive2DManager: () => { reloadModel?: () => void } | null } | null;
+              getSize: () => number;
+            };
+          }
+        )._subdelegates?.getSize() > 0
+      ) {
+        const subdelegate = (
+          app as unknown as {
+            _subdelegates: {
+              at: (i: number) => { getLive2DManager: () => { reloadModel?: () => void } | null } | null;
+            };
+          }
+        )._subdelegates.at(0);
         if (subdelegate) {
           const manager = subdelegate.getLive2DManager();
           if (manager?.reloadModel) {
@@ -151,7 +167,7 @@ const onThumbnailChange = (e: Event) => {
 const onThumbnailPaste = (e: ClipboardEvent) => {
   const items = e.clipboardData?.items;
   if (!items) return;
-  
+
   for (const item of items) {
     if (item.type.startsWith("image/")) {
       const file = item.getAsFile();
@@ -239,7 +255,7 @@ const deleteSkin = async (skinId: string) => {
 const openEditSkin = async (skin: VtuberSkinInfo) => {
   editingSkin.value = skin;
   editName.value = skin.name;
-  
+
   try {
     const res = await api.VtuberSkin.get(skin.skin_id);
     const detail = Array.isArray(res.data) ? undefined : (res.data?.data ?? res.data);
@@ -251,7 +267,7 @@ const openEditSkin = async (skin: VtuberSkinInfo) => {
   } catch {
     editEmotions.value = "";
   }
-  
+
   editThumbnail.value = null;
   editThumbnailPreview.value = null;
 };
@@ -307,7 +323,7 @@ const saveEditSkin = async () => {
     if (editThumbnail.value) {
       formData.append("thumbnail", editThumbnail.value);
     }
-    
+
     await api.VtuberSkin.update(editingSkin.value.skin_id, formData);
     closeEditSkin();
     await loadSkins();
@@ -370,7 +386,12 @@ watch(
             <h2 class="text-lg font-bold">🎨 {{ $t("skinSelector.title") }}</h2>
             <button class="rounded-full p-1 hover:bg-white/20" @click="close">
               <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </header>
@@ -384,7 +405,9 @@ watch(
 
             <!-- Loading -->
             <div v-if="loading" class="flex items-center justify-center py-12">
-              <div class="h-8 w-8 animate-spin rounded-full border-4 border-purple-500 border-t-transparent"></div>
+              <div
+                class="h-8 w-8 animate-spin rounded-full border-4 border-purple-500 border-t-transparent"
+              ></div>
             </div>
 
             <!-- Skin Grid -->
@@ -401,7 +424,9 @@ watch(
                 @click="selectSkin(skin.skin_id)"
               >
                 <!-- Thumbnail -->
-                <div class="aspect-square bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-gray-700 dark:to-gray-600">
+                <div
+                  class="aspect-square bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-gray-700 dark:to-gray-600"
+                >
                   <img
                     v-if="skin.thumbnail_path"
                     :src="skin.thumbnail_path"
@@ -426,7 +451,12 @@ watch(
                   class="absolute right-2 top-2 rounded-full bg-purple-500 p-1"
                 >
                   <svg class="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"
+                    />
                   </svg>
                 </div>
 
@@ -445,7 +475,7 @@ watch(
                     />
                   </svg>
                 </button>
-                
+
                 <!-- Edit button (only for own skins) -->
                 <button
                   v-if="canEditSkin(skin)"
@@ -453,19 +483,31 @@ watch(
                   @click.stop="openEditSkin(skin)"
                 >
                   <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                    />
                   </svg>
                 </button>
               </div>
             </div>
 
             <!-- Upload Form -->
-            <div v-if="showUploadForm" class="mt-6 rounded-xl border border-dashed border-purple-300 bg-purple-50 p-4 dark:border-purple-700 dark:bg-purple-900/20">
-              <h3 class="mb-3 font-medium text-purple-700 dark:text-purple-300">{{ $t("skinSelector.upload.title") }}</h3>
+            <div
+              v-if="showUploadForm"
+              class="mt-6 rounded-xl border border-dashed border-purple-300 bg-purple-50 p-4 dark:border-purple-700 dark:bg-purple-900/20"
+            >
+              <h3 class="mb-3 font-medium text-purple-700 dark:text-purple-300">
+                {{ $t("skinSelector.upload.title") }}
+              </h3>
 
               <div class="space-y-3">
                 <div>
-                  <label class="mb-1 block text-sm text-gray-600 dark:text-gray-400">{{ $t("skinSelector.upload.name") }}</label>
+                  <label class="mb-1 block text-sm text-gray-600 dark:text-gray-400">{{
+                    $t("skinSelector.upload.name")
+                  }}</label>
                   <input
                     v-model="uploadName"
                     type="text"
@@ -475,7 +517,9 @@ watch(
                 </div>
 
                 <div>
-                  <label class="mb-1 block text-sm text-gray-600 dark:text-gray-400">{{ $t("skinSelector.upload.file") }}</label>
+                  <label class="mb-1 block text-sm text-gray-600 dark:text-gray-400">{{
+                    $t("skinSelector.upload.file")
+                  }}</label>
                   <input
                     type="file"
                     accept=".zip"
@@ -504,20 +548,22 @@ watch(
                         @click="clearThumbnail"
                       >
                         <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"
+                          />
                         </svg>
                       </button>
                     </div>
                     <div v-else class="text-center">
                       <p class="mb-2 text-xs text-gray-500">{{ $t("skinSelector.upload.thumbnailHint") }}</p>
-                      <label class="cursor-pointer rounded-lg bg-purple-100 px-3 py-1.5 text-xs text-purple-700 hover:bg-purple-200 dark:bg-purple-900/40 dark:text-purple-300 dark:hover:bg-purple-900/60">
+                      <label
+                        class="cursor-pointer rounded-lg bg-purple-100 px-3 py-1.5 text-xs text-purple-700 hover:bg-purple-200 dark:bg-purple-900/40 dark:text-purple-300 dark:hover:bg-purple-900/60"
+                      >
                         {{ $t("skinSelector.upload.chooseFile") }}
-                        <input
-                          type="file"
-                          accept="image/*"
-                          class="hidden"
-                          @change="onThumbnailChange"
-                        />
+                        <input type="file" accept="image/*" class="hidden" @change="onThumbnailChange" />
                       </label>
                     </div>
                   </div>
@@ -533,7 +579,7 @@ watch(
                     v-model="uploadEmotions"
                     rows="3"
                     class="w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-xs dark:border-gray-600 dark:bg-gray-700"
-                    :placeholder='`{"smile": "F05", "unhappy": "F03", "tired": "F08", "surprised": "F06"}`'
+                    :placeholder="`{&quot;smile&quot;: &quot;F05&quot;, &quot;unhappy&quot;: &quot;F03&quot;, &quot;tired&quot;: &quot;F08&quot;, &quot;surprised&quot;: &quot;F06&quot;}`"
                   />
                   <p class="mt-1 text-xs text-gray-400">{{ $t("skinSelector.upload.emotionsHint") }}</p>
                 </div>
@@ -561,14 +607,21 @@ watch(
           </div>
 
           <!-- Footer -->
-          <footer class="flex items-center justify-between border-t border-gray-200 px-6 py-4 dark:border-gray-700">
+          <footer
+            class="flex items-center justify-between border-t border-gray-200 px-6 py-4 dark:border-gray-700"
+          >
             <button
               v-if="!showUploadForm"
               class="flex items-center gap-2 rounded-lg bg-gradient-to-r from-purple-500 to-indigo-500 px-4 py-2 text-white hover:from-purple-600 hover:to-indigo-600"
               @click="showUploadForm = true"
             >
               <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                />
               </svg>
               {{ $t("skinSelector.upload.button") }}
             </button>
@@ -594,7 +647,7 @@ watch(
       >
         <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-800">
           <h3 class="mb-4 text-lg font-bold dark:text-white">{{ $t("admin.skins.editTitle") }}</h3>
-          
+
           <div class="space-y-4">
             <div>
               <label class="mb-1 block text-sm text-gray-600 dark:text-gray-400">
@@ -621,7 +674,9 @@ watch(
                   />
                   <span v-else class="flex h-full items-center justify-center text-lg">🎭</span>
                 </div>
-                <label class="cursor-pointer rounded-lg bg-purple-100 px-3 py-1.5 text-xs text-purple-700 hover:bg-purple-200 dark:bg-purple-900/40 dark:text-purple-300">
+                <label
+                  class="cursor-pointer rounded-lg bg-purple-100 px-3 py-1.5 text-xs text-purple-700 hover:bg-purple-200 dark:bg-purple-900/40 dark:text-purple-300"
+                >
                   {{ $t("skinSelector.upload.chooseFile") }}
                   <input type="file" accept="image/*" class="hidden" @change="onEditThumbnailChange" />
                 </label>
@@ -636,7 +691,7 @@ watch(
                 v-model="editEmotions"
                 rows="3"
                 class="w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-xs dark:border-gray-600 dark:bg-gray-700"
-                :placeholder='`{"smile": "F05", "unhappy": "F03", ...}`'
+                :placeholder="`{&quot;smile&quot;: &quot;F05&quot;, &quot;unhappy&quot;: &quot;F03&quot;, ...}`"
               />
             </div>
 
@@ -652,7 +707,10 @@ watch(
                 :disabled="saving"
                 @click="saveEditSkin"
               >
-                <span v-if="saving" class="mr-1 inline-block h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+                <span
+                  v-if="saving"
+                  class="mr-1 inline-block h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent"
+                ></span>
                 {{ $t("admin.skins.save") }}
               </button>
             </div>

@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { ref, watch, provide, Ref } from "vue";
+// ==========================================
+// Imports
+// ==========================================
+import { ref, watch, provide, Ref, onMounted } from "vue"; // Added onMounted
 import { useTitle } from "@vueuse/core";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import { useRoute, useRouter } from "vue-router";
@@ -8,6 +11,7 @@ import axios, { type AxiosError } from "axios";
 import AdminProblemForm from "@/components/Problem/Admin/AdminProblemForm.vue";
 import AdminManualModal from "@/components/Problem/Admin/AdminManualModal.vue";
 import { useI18n } from "vue-i18n";
+
 // ==========================================
 // [CONFIG] Console Debug Mode
 // ==========================================
@@ -211,6 +215,23 @@ function normalizeAssets(raw: any): ProblemAssets {
   // if (raw?.aiVTuberFiles && !raw.aiVTuberACFiles) raw.aiVTuberACFiles = raw.aiVTuberFiles;
   return { ...base, ...(raw || {}) };
 }
+
+// ==========================================
+// UX / Animation Logic (New)
+// ==========================================
+const showManualHint = ref(false);
+
+onMounted(() => {
+  // Trigger the hint animation slightly after mount
+  setTimeout(() => {
+    showManualHint.value = true;
+  }, 500);
+
+  // Auto-hide the hint after 6 seconds to avoid annoyance
+  setTimeout(() => {
+    showManualHint.value = false;
+  }, 6500);
+});
 
 // ==========================================
 // Data Fetching & Initialization
@@ -473,8 +494,32 @@ const mockProblemMeta = {
       <div class="card-body">
         <div class="card-title mb-3 justify-between">
           {{ t("course.problems.editProblem") }}{{ $route.params.id }} - {{ edittingProblem?.problemName }}
-          <div class="flex gap-x-3">
-            <AdminManualModal />
+          <div class="flex items-center gap-x-3">
+            <div class="relative flex items-center">
+              <Transition
+                enter-active-class="transition ease-out duration-300"
+                enter-from-class="opacity-0 translate-y-2"
+                enter-to-class="opacity-100 translate-y-0"
+                leave-active-class="transition ease-in duration-300"
+                leave-from-class="opacity-100"
+                leave-to-class="opacity-0"
+              >
+                <div
+                  v-if="showManualHint"
+                  class="bg-info text-info-content pointer-events-none absolute right-full z-10 mr-3 w-max max-w-[200px] rounded-lg px-3 py-2 text-sm font-bold shadow-lg"
+                >
+                  <div
+                    class="bg-info absolute -right-1 top-1/2 h-3 w-3 -translate-y-1/2 rotate-45 transform"
+                  ></div>
+                  👋 Click here for Manual!
+                </div>
+              </Transition>
+
+              <div :class="{ 'animate-pulse': showManualHint }">
+                <AdminManualModal />
+              </div>
+            </div>
+
             <button
               :class="['btn btn-error btn-outline btn-sm lg:btn-md', formElement?.isLoading && 'loading']"
               @click="delete_"

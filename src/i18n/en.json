@@ -529,7 +529,27 @@
       "optionRole": "Role",
       "tableUsername": "username",
       "tableDisplayedName": "displayed_name",
-      "tableRole": "role"
+      "tableRole": "role",
+      "courseCode": {
+        "title": "Course Code",
+        "loading": "Loading...",
+        "current": "Current code:",
+        "none": "No course code set",
+        "copy": "Copy",
+        "generate": "Generate Code",
+        "regenerate": "Regenerate",
+        "remove": "Remove",
+        "errorFetch": "Failed to fetch course code",
+        "errorGenerate": "Failed to generate course code",
+        "errorRemove": "Failed to remove course code"
+      },
+      "tableCourseRole": "Course Role",
+      "roleTeacher": "Teacher",
+      "roleStudent": "Student",
+      "roleTA": "TA",
+      "roleChange": {
+        "error": "Failed to change role"
+      }
     }
   },
   "courses": {
@@ -539,7 +559,18 @@
         "course": "Course",
         "teacher": "Teacher"
       },
-      "new": "New"
+      "new": "New",
+      "join": {
+        "title": "Join by Course Code",
+        "placeholder": "Enter course code",
+        "button": "Join",
+        "success": "Successfully joined course: {course}",
+        "errorEmpty": "Please enter a course code",
+        "errorInvalid": "Invalid course code",
+        "errorAlreadyIn": "You are already in this course",
+        "errorForbidden": "Cannot join course this way",
+        "errorGeneric": "Failed to join course"
+      }
     },
     "new": {
       "title": "New Course",

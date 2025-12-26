@@ -324,6 +324,21 @@ const Homework = {
 
 const Course = {
   create: (body: CourseForm) => fetcher.post("/course", body),
+  join: (body: { course_code: string }) =>
+    fetcher.post<{ message: string; data: { course: string } }>("/course/join", body),
+  // Course code management (for teachers)
+  getCode: (courseName: string) =>
+    fetcher.get<{ data: { course_code: string | null } }>(`/course/${courseName}/code`),
+  generateCode: (courseName: string) =>
+    fetcher.post<{ data: { course_code: string } }>(`/course/${courseName}/code`),
+  removeCode: (courseName: string) =>
+    fetcher.delete<{ message: string }>(`/course/${courseName}/code`),
+  // Member role management (for teachers only, not TAs)
+  changeMemberRole: (courseName: string, username: string, role: "student" | "ta") =>
+    fetcher.put<{ message: string; data: { username: string; new_role: string } }>(
+      `/course/${courseName}/member/${username}/role`,
+      { role },
+    ),
 };
 
 const User = {

@@ -527,7 +527,27 @@
       "optionRole": "角色",
       "tableUsername": "使用者名稱",
       "tableDisplayedName": "顯示名稱",
-      "tableRole": "角色"
+      "tableRole": "角色",
+      "courseCode": {
+        "title": "課程代號",
+        "loading": "載入中...",
+        "current": "目前代號：",
+        "none": "尚未設定課程代號",
+        "copy": "複製",
+        "generate": "產生代號",
+        "regenerate": "重新產生",
+        "remove": "移除",
+        "errorFetch": "無法取得課程代號",
+        "errorGenerate": "無法產生課程代號",
+        "errorRemove": "無法移除課程代號"
+      },
+      "tableCourseRole": "課程角色",
+      "roleTeacher": "教師",
+      "roleStudent": "學生",
+      "roleTA": "助教",
+      "roleChange": {
+        "error": "角色變更失敗"
+      }
     }
   },
   "courses": {
@@ -537,7 +557,18 @@
         "course": "課程",
         "teacher": "教師"
       },
-      "new": "新增"
+      "new": "新增",
+      "join": {
+        "title": "透過課程代號加入",
+        "placeholder": "輸入課程代號",
+        "button": "加入",
+        "success": "成功加入課程：{course}",
+        "errorEmpty": "請輸入課程代號",
+        "errorInvalid": "無效的課程代號",
+        "errorAlreadyIn": "您已在此課程中",
+        "errorForbidden": "無法透過此方式加入課程",
+        "errorGeneric": "加入課程時發生錯誤"
+      }
     },
     "new": {
       "title": "新增課程",

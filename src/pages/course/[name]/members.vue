@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useAxios } from "@vueuse/integrations/useAxios";
-import { computed, ref, watch } from "vue";
+import { computed, ref, watch, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import api, { fetcher } from "@/models/api";
 import { ROLE } from "@/constants";
@@ -11,9 +11,69 @@ import { useI18n } from "vue-i18n";
 const route = useRoute();
 const router = useRouter();
 const session = useSession();
-useI18n();
+const { t } = useI18n();
 
 useTitle(`Members - ${route.params.name} | Normal OJ`);
+
+// Course code management
+const courseCode = ref<string | null>(null);
+const courseCodeLoading = ref(false);
+const courseCodeError = ref("");
+
+const canManageCode = computed(() => 
+  session.isAdmin || session.isTeacher || session.isTA
+);
+
+async function fetchCourseCode() {
+  if (!canManageCode.value) return;
+  courseCodeLoading.value = true;
+  courseCodeError.value = "";
+  try {
+    const response = await api.Course.getCode(route.params.name as string);
+    courseCode.value = response.data.course_code;
+  } catch {
+    courseCodeError.value = t("course.members.courseCode.errorFetch");
+  } finally {
+    courseCodeLoading.value = false;
+  }
+}
+
+async function generateCourseCode() {
+  courseCodeLoading.value = true;
+  courseCodeError.value = "";
+  try {
+    const response = await api.Course.generateCode(route.params.name as string);
+    courseCode.value = response.data.course_code;
+  } catch {
+    courseCodeError.value = t("course.members.courseCode.errorGenerate");
+  } finally {
+    courseCodeLoading.value = false;
+  }
+}
+
+async function removeCourseCode() {
+  courseCodeLoading.value = true;
+  courseCodeError.value = "";
+  try {
+    await api.Course.removeCode(route.params.name as string);
+    courseCode.value = null;
+  } catch {
+    courseCodeError.value = t("course.members.courseCode.errorRemove");
+  } finally {
+    courseCodeLoading.value = false;
+  }
+}
+
+function copyCourseCode() {
+  if (courseCode.value) {
+    navigator.clipboard.writeText(courseCode.value);
+  }
+}
+
+onMounted(() => {
+  fetchCourseCode();
+});
+
 enum MemberTableColumn {
   USERNAME = "username",
   DISPLAYED_NAME = "displayedName",
@@ -27,7 +87,19 @@ const sortBy = ref<MemberTableColumn>(
 watch(sortBy, () => {
   router.replace({ query: { sort: sortBy.value || MemberTableColumn.USERNAME } });
 });
-const { data, error, isLoading } = useAxios<Course>(`/course/${route.params.name}`, fetcher);
+const { data, error, isLoading, execute: refetchMembers } = useAxios<Course>(`/course/${route.params.name}`, fetcher);
+
+// Get teacher username for comparison
+const teacherUsername = computed(() => data.value?.teacher?.username || "");
+
+// Check if user is course teacher (not just MODIFY permission, specifically teacher)
+const canChangeRoles = computed(() => {
+  // Only course teacher or admin can change roles (not TAs)
+  if (session.isAdmin) return true;
+  if (!data.value) return false;
+  return data.value.teacher?.username === session.username;
+});
+
 const members = computed(() => {
   if (!data.value) return [];
   return [data.value.teacher, ...data.value.students, ...data.value.TAs].sort((a, b) => {
@@ -40,6 +112,33 @@ const members = computed(() => {
     }
   });
 });
+
+// Role change functionality
+const roleChangeLoading = ref<string | null>(null); // username being changed
+const roleChangeError = ref("");
+
+// Determine member's course role (student, ta, teacher)
+function getCourseRole(member: UserInfo): "teacher" | "ta" | "student" {
+  if (!data.value) return "student";
+  if (member.username === data.value.teacher?.username) return "teacher";
+  if (data.value.TAs?.some((ta) => ta.username === member.username)) return "ta";
+  return "student";
+}
+
+async function changeMemberRole(username: string, newRole: "student" | "ta") {
+  roleChangeLoading.value = username;
+  roleChangeError.value = "";
+  try {
+    await api.Course.changeMemberRole(route.params.name as string, username, newRole);
+    // Refetch members to get updated data
+    await refetchMembers();
+  } catch (err: unknown) {
+    const axiosError = err as AxiosError<{ message: string }>;
+    roleChangeError.value = axiosError.response?.data?.message || t("course.members.roleChange.error");
+  } finally {
+    roleChangeLoading.value = null;
+  }
+}
 
 const rolesCanCreateCourse = [UserRole.Admin];
 
@@ -235,6 +334,46 @@ async function submit() {
           </label>
         </div>
 
+        <!-- Course Code Management Section -->
+        <div v-if="canManageCode" class="mb-4 border-base-300 border rounded-lg p-4 bg-base-200/50">
+          <h3 class="font-semibold mb-3">{{ $t("course.members.courseCode.title") }}</h3>
+          
+          <div v-if="courseCodeLoading" class="flex items-center gap-2">
+            <span class="loading loading-spinner loading-sm"></span>
+            <span class="text-sm opacity-70">{{ $t("course.members.courseCode.loading") }}</span>
+          </div>
+
+          <div v-else-if="courseCode" class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+            <div class="flex items-center gap-2">
+              <span class="text-sm opacity-70">{{ $t("course.members.courseCode.current") }}</span>
+              <code class="bg-base-300 px-3 py-1 rounded font-mono text-lg">{{ courseCode }}</code>
+              <button class="btn btn-sm btn-ghost" @click="copyCourseCode" :title="$t('course.members.courseCode.copy')">
+                <i-uil-copy />
+              </button>
+            </div>
+            <div class="flex gap-2">
+              <button class="btn btn-sm btn-primary" @click="generateCourseCode">
+                <i-uil-refresh /> {{ $t("course.members.courseCode.regenerate") }}
+              </button>
+              <button class="btn btn-sm btn-error btn-outline" @click="removeCourseCode">
+                <i-uil-trash-alt /> {{ $t("course.members.courseCode.remove") }}
+              </button>
+            </div>
+          </div>
+
+          <div v-else class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+            <span class="text-sm opacity-70">{{ $t("course.members.courseCode.none") }}</span>
+            <button class="btn btn-sm btn-primary" @click="generateCourseCode">
+              <i-uil-plus /> {{ $t("course.members.courseCode.generate") }}
+            </button>
+          </div>
+
+          <div v-if="courseCodeError" class="alert alert-error mt-2 py-2">
+            <i-uil-exclamation-triangle />
+            <span>{{ courseCodeError }}</span>
+          </div>
+        </div>
+
         <div class="mb-4">
           <div class="form-control w-full max-w-xs">
             <label class="label">
@@ -254,19 +393,48 @@ async function submit() {
             <skeleton-table :col="3" :row="5" />
           </template>
           <template #data>
+            <!-- Role change error message -->
+            <div v-if="roleChangeError" class="alert alert-error mb-4 py-2">
+              <i-uil-exclamation-triangle />
+              <span>{{ roleChangeError }}</span>
+              <button class="btn btn-sm btn-ghost" @click="roleChangeError = ''">×</button>
+            </div>
+
             <table class="table w-full">
               <thead>
                 <tr>
                   <th>{{ $t("course.members.tableUsername") }}</th>
                   <th>{{ $t("course.members.tableDisplayedName") }}</th>
                   <th>{{ $t("course.members.tableRole") }}</th>
+                  <th v-if="canChangeRoles">{{ $t("course.members.tableCourseRole") }}</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="{ username, displayedName, role } in members" :key="username" class="hover">
-                  <td>{{ username }}</td>
-                  <td>{{ displayedName }}</td>
-                  <td>{{ ROLE[role] }}</td>
+                <tr v-for="member in members" :key="member.username" class="hover">
+                  <td>{{ member.username }}</td>
+                  <td>{{ member.displayedName }}</td>
+                  <td>{{ ROLE[member.role] }}</td>
+                  <td v-if="canChangeRoles">
+                    <!-- Teacher cannot be changed -->
+                    <template v-if="getCourseRole(member) === 'teacher'">
+                      <span class="badge badge-primary">{{ $t("course.members.roleTeacher") }}</span>
+                    </template>
+                    <!-- Student or TA can be changed -->
+                    <template v-else>
+                      <div class="flex items-center gap-2">
+                        <select
+                          class="select select-bordered select-sm w-24"
+                          :value="getCourseRole(member)"
+                          :disabled="roleChangeLoading === member.username"
+                          @change="changeMemberRole(member.username, ($event.target as HTMLSelectElement).value as 'student' | 'ta')"
+                        >
+                          <option value="student">{{ $t("course.members.roleStudent") }}</option>
+                          <option value="ta">{{ $t("course.members.roleTA") }}</option>
+                        </select>
+                        <span v-if="roleChangeLoading === member.username" class="loading loading-spinner loading-sm"></span>
+                      </div>
+                    </template>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -274,6 +442,7 @@ async function submit() {
         </data-status-wrapper>
       </div>
     </div>
+
 
     <input v-model="isOpen" type="checkbox" id="my-modal" class="modal-toggle" />
     <div class="modal">

@@ -223,7 +223,7 @@ const isAllSelected = computed({
               <span v-if="testcaseFiles.length > 0" class="badge badge-success badge-outline text-xs">
                 {{ t("course.problems.uploaded") }}
               </span>
-              <span v-else class="badge badge-outline text-xs opacity-70">
+              <span v-else class="badge badge-outline h-auto py-1 text-center text-xs opacity-70">
                 {{ t("course.problems.notUploaded") }}
               </span>
               <!-- Download Button -->

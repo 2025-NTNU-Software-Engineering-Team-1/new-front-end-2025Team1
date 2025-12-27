@@ -73,6 +73,10 @@ const publicTestcaseLoading = ref(false);
 const publicTestcaseError = ref("");
 
 const selectedPreviewFileIndex = ref(0);
+const backendTrialSubmissionCount = computed<number | null>(() => {
+  const count = problemData.value?.trialSubmissionCount;
+  return typeof count === "number" ? count : null;
+});
 const trialQuotaLimit = computed<number | null>(() => {
   const dbLimit = problemData.value?.trialSubmissionQuota;
   if (typeof dbLimit === "number") return dbLimit;
@@ -92,6 +96,12 @@ const trialQuotaRemaining = computed<number | null>(() => {
 async function loadTrialQuotaUsage() {
   if (trialQuotaLimit.value == null || trialQuotaUnlimited.value) {
     trialSubmissionCount.value = null;
+    trialQuotaLoading.value = false;
+    return;
+  }
+  if (backendTrialSubmissionCount.value != null) {
+    trialSubmissionCount.value = backendTrialSubmissionCount.value;
+    trialQuotaLoading.value = false;
     return;
   }
   trialQuotaLoading.value = true;
@@ -109,6 +119,15 @@ async function loadTrialQuotaUsage() {
     trialQuotaLoading.value = false;
   }
 }
+
+watch(
+  backendTrialSubmissionCount,
+  (count) => {
+    if (count == null) return;
+    trialSubmissionCount.value = count;
+  },
+  { immediate: true },
+);
 
 watch(
   trialQuotaLimit,

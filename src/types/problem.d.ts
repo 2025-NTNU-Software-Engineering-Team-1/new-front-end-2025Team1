@@ -34,6 +34,7 @@ interface ProblemForm {
   allowedLanguage: number;
   quota: number;
   trialSubmissionQuota?: number;
+  trialSubmissionCount?: number;
   type: ProblemType;
   status: ProblemStatus;
   testCaseInfo: {

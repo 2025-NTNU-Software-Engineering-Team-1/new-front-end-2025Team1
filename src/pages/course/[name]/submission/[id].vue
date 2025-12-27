@@ -11,6 +11,8 @@ import { useTitle } from "@vueuse/core";
 import type { AxiosError } from "axios";
 import AIChatbot from "@/components/AIChatbot.vue";
 
+// hello
+
 // ==========================================
 // [CONFIG] Console Debug Mode
 // ==========================================

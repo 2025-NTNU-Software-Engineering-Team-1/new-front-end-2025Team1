@@ -946,7 +946,7 @@ function closeDeleteErrorModal() {
               <span class="label-text font-semibold">JSON Data</span>
             </label>
             <div class="bg-base-200 rounded p-4">
-              <pre class="font-mono text-sm whitespace-pre-wrap">{{ currentDetailData.jsonData }}</pre>
+              <pre class="whitespace-pre-wrap font-mono text-sm">{{ currentDetailData.jsonData }}</pre>
             </div>
           </div>
         </div>

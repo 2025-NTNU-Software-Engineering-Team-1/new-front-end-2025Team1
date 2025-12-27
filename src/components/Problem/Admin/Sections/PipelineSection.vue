@@ -847,7 +847,7 @@ watch(
                     </div>
                   </div>
 
-                  <h6 class="mb-1 text-sm font-bold tracking-[0.2em] text-white uppercase drop-shadow-lg">
+                  <h6 class="mb-1 text-sm font-bold uppercase tracking-[0.2em] text-white drop-shadow-lg">
                     {{ t("course.problems.systemLocked") }}
                   </h6>
                   <div
@@ -951,7 +951,7 @@ watch(
                     </div>
                   </div>
 
-                  <h6 class="mb-1 text-sm font-bold tracking-[0.2em] text-white uppercase drop-shadow-lg">
+                  <h6 class="mb-1 text-sm font-bold uppercase tracking-[0.2em] text-white drop-shadow-lg">
                     {{ t("course.problems.accessDenied") }}
                   </h6>
                   <div
@@ -1628,7 +1628,7 @@ watch(
             </div>
           </div>
         </div>
-        <div v-else class="pt-2 pl-1 text-xs opacity-70">
+        <div v-else class="pl-1 pt-2 text-xs opacity-70">
           {{
             problem.pipeline!.executionMode === "interactive"
               ? t("course.problems.uploadCustomCheckerWarning")
@@ -1700,7 +1700,7 @@ watch(
             <span class="label-text-alt text-error">{{ v$.assets.scorePy.$errors[0]?.$message }}</span>
           </label>
         </div>
-        <div v-else class="pt-2 pl-1 text-xs opacity-70">
+        <div v-else class="pl-1 pt-2 text-xs opacity-70">
           {{ t("course.problems.uploadCustomScorerInfo") }}
         </div>
       </div>

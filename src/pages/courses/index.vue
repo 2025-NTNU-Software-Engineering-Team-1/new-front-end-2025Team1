@@ -131,7 +131,7 @@ async function handleJoinCourse() {
               >
                 <td
                   :class="{
-                    'max-w-[16rem] min-w-[14rem] whitespace-pre-wrap': !isDesktop,
+                    'min-w-[14rem] max-w-[16rem] whitespace-pre-wrap': !isDesktop,
                   }"
                 >
                   <div class="flex items-center gap-3">

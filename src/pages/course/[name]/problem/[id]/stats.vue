@@ -14,6 +14,7 @@ import { useRoute } from "vue-router";
 import { fetcher } from "@/models/api";
 import { useTitle } from "@vueuse/core";
 import { useI18n } from "vue-i18n";
+import type { AxiosError } from "axios";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -107,7 +108,7 @@ const barOption = computed(() => ({
 
         <div class="my-2" />
 
-        <data-status-wrapper :error="error" :is-loading="isLoading">
+        <data-status-wrapper :error="error as AxiosError" :is-loading="isLoading">
           <template #loading>
             <skeleton-card />
           </template>
@@ -179,7 +180,7 @@ const barOption = computed(() => ({
         </div>
         <div class="my-1" />
         <skeleton-table v-if="isLoading" :col="4" :row="10" />
-        <table v-else class="table table-compact w-full">
+        <table v-else class="table-compact table w-full">
           <thead>
             <tr>
               <th>{{ t("course.problem.stats.table.runtimeRank.id") }}</th>
@@ -205,7 +206,7 @@ const barOption = computed(() => ({
         </div>
         <div class="my-1" />
         <skeleton-table v-if="isLoading" :col="4" :row="10" />
-        <table v-else class="table table-compact w-full">
+        <table v-else class="table-compact table w-full">
           <thead>
             <tr>
               <th>{{ t("course.problem.stats.table.memoryRank.id") }}</th>

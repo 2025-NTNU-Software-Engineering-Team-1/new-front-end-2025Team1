@@ -5,5 +5,6 @@
   "trailingComma": "all",
   "semi": true,
   "singleQuote": false,
-  "plugins": ["./node_modules/prettier-plugin-tailwindcss/dist/index.js"]
+  "endOfLine": "lf",
+  "plugins": ["prettier-plugin-tailwindcss"]
 }

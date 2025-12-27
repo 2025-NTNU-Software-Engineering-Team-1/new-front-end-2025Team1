@@ -22,7 +22,7 @@ watchEffect(() => {
 <template>
   <Listbox v-model="selectedLangs" multiple>
     <div class="relative mt-1">
-      <ListboxButton class="input input-bordered w-full max-w-xs text-left">
+      <ListboxButton class="input-bordered input w-full max-w-xs text-left">
         <span class="block truncate">{{ readableLang }}</span>
         <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
           <i-uil-angle-down class="h-5 w-5 text-gray-400" aria-hidden="true" />
@@ -35,7 +35,7 @@ watchEffect(() => {
         leave-to-class="opacity-0"
       >
         <ListboxOptions
-          class="absolute mt-1 max-h-80 w-full overflow-auto rounded-md bg-base-100 py-1 text-base shadow-lg sm:text-sm"
+          class="bg-base-100 absolute z-10 mt-1 max-h-80 w-full overflow-auto rounded-md py-1 text-base shadow-lg sm:text-sm"
         >
           <ListboxOption
             v-slot="{ active, selected }"
@@ -44,13 +44,13 @@ watchEffect(() => {
             :value="mask"
             as="template"
           >
-            <li :class="[active && 'bg-base-300', 'cursor- default relative select-none py-2 pl-10 pr-4']">
+            <li :class="[active && 'bg-base-300', 'relative cursor-default py-2 pr-4 pl-10 select-none']">
               <span :class="[selected ? 'font-medium' : 'font-normal', 'block truncate']">
                 {{ text }}
               </span>
               <span
                 v-if="selected"
-                class="absolute inset-y-0 left-0 flex items-center pl-3 text-base-content"
+                class="text-base-content absolute inset-y-0 left-0 flex items-center pl-3"
               >
                 <i-uil-check class="h-5 w-5" aria-hidden="true" />
               </span>

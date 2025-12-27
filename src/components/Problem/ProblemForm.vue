@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, inject, Ref } from "vue";
 import useVuelidate from "@vuelidate/core";
-import { required, maxLength, minValue, between, helpers } from "@vuelidate/validators";
+import { required, maxLength, between, helpers } from "@vuelidate/validators";
 import { ZipReader, BlobReader } from "@zip.js/zip.js";
 
 // TODO: handling error when `problem` or `problem.value` is undefined
@@ -41,7 +41,13 @@ const rules = {
   courses: {},
   tags: { itemMaxLength: (v: string[]) => v.every((d) => d.length <= 16) },
   allowedLanguage: { required, between: between(1, 7) },
-  quota: { required, minValue: minValue(-1) },
+  quota: {
+    required,
+    validRange: helpers.withMessage(
+      "Quota must be -1 (unlimited) or between 1 and 500",
+      (v: number) => v === -1 || (v >= 1 && v <= 500),
+    ),
+  },
   type: {},
   status: {},
   testCaseInfo: {
@@ -125,7 +131,7 @@ watch(
       </label>
       <input
         type="text"
-        :class="['input input-bordered w-full max-w-xs', v$.problemName.$error && 'input-error']"
+        :class="['input-bordered input w-full max-w-xs', v$.problemName.$error && 'input-error']"
         :value="problem.problemName"
         @input="update('problemName', ($event.target as HTMLInputElement).value)"
       />
@@ -153,7 +159,7 @@ watch(
       </label>
       <input
         type="text"
-        :class="['input input-bordered w-full max-w-xs', v$.quota.$error && 'input-error']"
+        :class="['input-bordered input w-full max-w-xs', v$.quota.$error && 'input-error']"
         :value="problem.quota"
         @input="update('quota', Number(($event.target as HTMLInputElement).value))"
       />
@@ -170,7 +176,7 @@ watch(
       </label>
       <input
         type="text"
-        :class="['input input-bordered w-full max-w-xs', v$.tags.$error && 'input-error']"
+        :class="['input-bordered input w-full max-w-xs', v$.tags.$error && 'input-error']"
         :value="problem.tags.join(',')"
         @input="update('tags', ($event.target as HTMLInputElement).value.split(','))"
       />
@@ -186,7 +192,7 @@ watch(
         <span class="label-text">{{ $t("components.problem.forms.type") }}</span>
       </label>
       <select
-        class="select select-bordered w-full max-w-xs"
+        class="select-bordered select w-full max-w-xs"
         :value="problem.type"
         @input="update('type', Number(($event.target as HTMLSelectElement).value) as 0 | 1 | 2)"
       >
@@ -219,13 +225,13 @@ watch(
           }}</label>
         </label>
         <div
-          :class="['textarea textarea-bordered w-full p-4', isDrag ? 'border-accent' : '']"
+          :class="['textarea-bordered textarea w-full p-4', isDrag ? 'border-accent' : '']"
           @drop.prevent="$emit('update:testdata', $event.dataTransfer!.files![0])"
           @dragover.prevent="isDrag = true"
           @dragleave="isDrag = false"
         >
           <template v-if="!testdata">
-            <span class="mb-6 mr-6 text-sm">{{ $t("components.problem.forms.dropFile") }}</span>
+            <span class="mr-6 mb-6 text-sm">{{ $t("components.problem.forms.dropFile") }}</span>
             <input
               type="file"
               id="file-uploader"
@@ -243,12 +249,13 @@ watch(
           </template>
         </div>
       </div>
-
-      <label
-        class="label text-error"
-        v-show="v$.testCaseInfo.tasks.$error"
-        v-text="v$.testCaseInfo.tasks.$errors[0]?.$message"
-      />
+      <template v-if="v$ && v$.testCaseInfo && v$.testCaseInfo.tasks">
+        <label
+          class="label text-error"
+          v-show="v$.testCaseInfo.tasks.$error"
+          v-text="v$.testCaseInfo.tasks.$errors[0]?.$message ?? ''"
+        />
+      </template>
       <template v-for="(no, i) in problem.testCaseInfo.tasks.length">
         <div class="col-span-2">
           <div class="font-semibold">{{ $t("components.problem.forms.subtask", { no }) }}</div>
@@ -259,7 +266,7 @@ watch(
               </label>
               <input
                 type="text"
-                class="input input-bordered w-full max-w-xs"
+                class="input-bordered input w-full max-w-xs"
                 :value="problem.testCaseInfo.tasks[i].caseCount"
                 readonly
               />
@@ -271,7 +278,7 @@ watch(
               </label>
               <input
                 type="text"
-                class="input input-bordered w-full max-w-xs"
+                class="input-bordered input w-full max-w-xs"
                 :value="problem.testCaseInfo.tasks[i].taskScore"
                 @input="
                   update('testCaseInfo', {
@@ -295,7 +302,7 @@ watch(
               </label>
               <input
                 type="text"
-                class="input input-bordered w-full max-w-xs"
+                class="input-bordered input w-full max-w-xs"
                 :value="problem.testCaseInfo.tasks[i].memoryLimit"
                 @input="
                   update('testCaseInfo', {
@@ -319,7 +326,7 @@ watch(
               </label>
               <input
                 type="text"
-                class="input input-bordered w-full max-w-xs"
+                class="input-bordered input w-full max-w-xs"
                 :value="problem.testCaseInfo.tasks[i].timeLimit"
                 @input="
                   update('testCaseInfo', {

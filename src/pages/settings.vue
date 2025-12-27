@@ -31,10 +31,10 @@ watchEffect(() => {
           <label class="label">
             <span class="label-text">Language:</span>
           </label>
-          <select v-model="locale" class="select select-bordered">
+          <select v-model="locale" class="select-bordered select">
             <option value="english">English</option>
             <option value="chinese">繁體中文</option>
-            <!-- <option value="taiwanese">台灣話</option> -->
+            <option value="taiwanese">台灣話</option>
           </select>
           <label class="label">
             <span class="label-text-alt">{{ t("settings.selectLang") }}</span>

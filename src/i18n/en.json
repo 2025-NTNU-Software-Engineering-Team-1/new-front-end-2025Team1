@@ -1,4 +1,12 @@
 {
+  "general": {
+    "back": "Back",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm"
+  },
   "settings": {
     "title": "Settings",
     "selectLang": "Select your preferred language"
@@ -35,6 +43,101 @@
       "new": {
         "title": "New Homework",
         "preview": "Preview"
+      },
+      "stats": {
+        "pageTitle": "Homework Stats",
+        "title": "Stats",
+        "scoreboard": "Scoreboard",
+        "sortBy": "Sort By",
+        "username": "Username",
+        "sumDesc": "Sum in descending",
+        "sumAsc": "Sum in ascending",
+        "begin": "Begin",
+        "end": "End",
+        "fetch": "Fetch",
+        "export": "Export",
+        "tries": "tries",
+        "table": {
+          "user": "User",
+          "avg": "Avg",
+          "sum": "Sum"
+        }
+      }
+    },
+    "courseSideBar": {
+      "admin": "Admin",
+      "members": "Members",
+      "settings": "Settings",
+      "aiManagement": "AI Management",
+      "loginRecords": "Login Records"
+    },
+    "settings": {
+      "title": "Course Settings",
+      "generalInfo": "General Info",
+      "appearance": "Appearance",
+      "preview": "Preview",
+      "previewDesc": "This is how the course icon will look.",
+      "courseColor": "Course Color",
+      "courseEmoji": "Course Emoji",
+      "courseName": "Course Name",
+      "teacher": "Teacher",
+      "save": "Save",
+      "saved": "Settings saved successfully.",
+      "presets": "Presets",
+      "standard": "Standard Colors",
+      "morandi": "Morandi Colors",
+      "custom": "Custom",
+      "emojiPlaceholder": "Type or paste any emoji here.",
+      "teacherReadOnly": "Course owner cannot be changed here."
+    },
+    "aisetting": {
+      "setupPage": "Set Up",
+      "usagePage": "Usage",
+      "skinsPage": "Skin Management",
+      "setup": {
+        "title": "AI Management – Set Up",
+        "subtitleNewKey": "Add New API Key (Gemini)",
+        "subtitleExistingKey": "Existing Key",
+        "input": {
+          "name": "Key Name *",
+          "value": "API Key Value *",
+          "addKey": "Add Key"
+        },
+        "display": {
+          "noKey": "No keys yet.",
+          "keyName": "Key Name",
+          "masked": "Key (masked)",
+          "createdBy": "Created By",
+          "active": "Active",
+          "save": "Save",
+          "delete": "Delete"
+        }
+      },
+      "usage": {
+        "title": "API Usage ({name})",
+        "totalUsage": "Total Token Usage：",
+        "cycleUsage": "1-Day Cycle Usage",
+        "totalCycleUsage": "Current Cycle Total",
+        "cycleTokenUsed": "Cycle Used",
+        "sinceReset": "since {time}",
+        "cycleTooltip": "Usage since last reset. The system resets cycle counters every 24 hours to manage API rate limits.",
+        "cycleExpired": "Cycle exceeded 24h, will update on next AI call",
+        "used_by_summary": "Used by {count} problems • Token",
+        "created_by_summary": "• Created by {name}",
+        "rank": "Rank",
+        "problemName": "Problem Name",
+        "tokenUsed": "Token Used",
+        "noData": "No API key usage data.",
+        "problemUsageAnalysis": "Problem Usage Analysis",
+        "clickToCollapse": "Click to Collapse",
+        "clickToExpand": "Click to Expand",
+        "barChart": "Bar Chart",
+        "packedBubble": "Packed Bubble",
+        "dragBubbleStoPlayPhysics": "* Drag bubbles to play physics",
+        "keyUsageBreakdown": "Key Usage Breakdown",
+        "Average": "Average",
+        "tokensProblem": "tokens / problem",
+        "totalTokens": "Total Tokens"
       }
     },
     "problem": {
@@ -58,6 +161,160 @@
           "select": "Select language"
         },
         "text": "Submit"
+      },
+      "test": {
+        "uploadZip": "Upload your solution (.zip)",
+        "err": {
+          "code": "Please paste your source code to test.",
+          "lang": "Please select the programming language.",
+          "msg": "Oops! Something went wrong when testing the code. Try again later.",
+          "trialModeNotEnabled": "Trial mode is not enabled for this problem. Please contact the instructor to enable it.",
+          "trialQuotaExceeded": "Trial submission quota exceeded for this problem.",
+          "permissionDenied": "You do not have permission to use the trial feature for this problem.",
+          "zip": "Please upload your solution (.zip) to test."
+        },
+        "card": {
+          "title": "Test problem #",
+          "code": "Source Code",
+          "testInput": "Test Input",
+          "placeholder": "Paste your code here",
+          "testInputPlaceholder": "Enter your test input here"
+        },
+        "topic": {
+          "dec": "description",
+          "input": "input",
+          "output": "output",
+          "hint": "hint",
+          "sample": {
+            "id": "#",
+            "input": "input",
+            "output": "output"
+          },
+          "noContent": "no content",
+          "expand": "open",
+          "collapse": "close"
+        },
+        "lang": {
+          "text": "Language",
+          "select": "Select language"
+        },
+        "text": "Run Test",
+        "submit": "Submit",
+        "history": "History",
+        "testcase": "Testcase",
+        "run": "Run",
+        "trialQuota": "Trial Quota",
+        "back": "Back",
+        "submitModal": {
+          "title": "Submit Confirmation",
+          "message": "Are you sure you want to submit this code for grading?",
+          "cancel": "Cancel",
+          "confirm": "Yes, Submit"
+        },
+        "historyModal": {
+          "title": "Test History",
+          "table": {
+            "id": "ID",
+            "result": "Result",
+            "score": "Score",
+            "time": "Time"
+          },
+          "detail": "Details",
+          "close": "Close"
+        },
+        "testcaseModal": {
+          "title": "Testcase Settings",
+          "useDefault": "Use default testcases",
+          "customTestcases": "Custom Testcase Settings",
+          "files": "Files",
+          "preview": "Preview",
+          "cancel": "Cancel",
+          "save": "Save Changes",
+          "saveSuccess": "Test case settings saved successfully",
+          "saveError": "Failed to save test case",
+          "confirm": "This upload will overwrite the current list of test cases. Continue?",
+          "alert": "Please select at least one test case file.",
+          "pdfNotice": "click the link below to download",
+          "unsupported": "Unsupported file type: {ext}",
+          "download": "open and download file",
+          "noTestcasesToDownload": "No testcases available to download. Please upload testcases first.",
+          "emptyTestcaseFile": "Testcase file is empty and cannot be downloaded.",
+          "downloadFailed": "Failed to download testcases. Please try again later.",
+          "publicTestcases": "Public Testcases",
+          "viewPublic": "View Public",
+          "viewCustom": "View Custom",
+          "noPreview": "Select a case to preview"
+        },
+        "testcaseType": {
+          "label": "Test Data Type",
+          "public": "Public Test Cases",
+          "custom": "Custom Test Cases",
+          "viewPublic": "View",
+          "viewCustom": "View",
+          "viewPublicTitle": "Public Test Cases Preview",
+          "viewCustomTitle": "Custom Test Cases Preview",
+          "notConfigured": "Not configured"
+        },
+        "trialHistory": {
+          "delete": "Delete",
+          "close": "Close",
+          "backToList": "Back to List",
+          "backToProblem": "Back to Problem",
+          "type": "Type",
+          "public": "Public",
+          "custom": "Custom",
+          "overall": "Overall",
+          "actions": "Actions",
+          "runtime": "Runtime",
+          "memory": "Memory",
+          "score": "Score",
+          "status": "Status",
+          "time": "Time",
+          "user": "User",
+          "problem": "Problem",
+          "ip": "IP Address",
+          "task": "Task {index}",
+          "generalInfo": "General Information",
+          "testDetails": "Test Details",
+          "sourceCode": "Source Code",
+          "saReport": "Static Analysis Report",
+          "showTestCases": "Show Test Cases",
+          "hideTestCases": "Hide Test Cases",
+          "viewDetails": "View Details",
+          "viewDetailedOutput": "View Detailed Output",
+          "downloadResult": "Download Result",
+          "downloadAllResults": "Download All Results",
+          "downloadReport": "Download report",
+          "downloadJson": "Download JSON",
+          "copy": "Copy",
+          "copied": "Copied!",
+          "caseOutput": "Case Output",
+          "input": "Input",
+          "expectedOutput": "Expected Output (Answer)",
+          "stdout": "Standard Output (stdout)",
+          "stderr": "Standard Error (stderr)",
+          "artifactFiles": "Artifact Files",
+          "prevCase": "Previous Case",
+          "nextCase": "Next Case",
+          "empty": "Empty",
+          "inputNotAvailable": "Input data not available.",
+          "expectedNotAvailable": "Expected output not available.",
+          "fileNotExist": "{file} file does not exist.",
+          "binaryNoPreview": "Binary file content cannot be previewed.",
+          "rejudgeAllConfirm": "Are you sure you want to rejudge ALL trial submissions for problem {id}?",
+          "deleteConfirm": "Are you sure you want to delete trial submission {id}?",
+          "deleteConfirmCurrent": "Are you sure you want to delete this trial submission?",
+          "deleteFailed": "Delete Failed",
+          "rejudgeFailed": "Rejudge Failed",
+          "rejudgePermissionDenied": "You do not have permission to rejudge this trial submission.",
+          "rejudgeError": "An error occurred while rejudging.",
+          "loadArtifactError": "Failed to load artifact files",
+          "fetchErrorMessagesFailed": "unable to get error messages from server 😢",
+          "loading": "Loading test results...",
+          "saPassed": "SA Passed",
+          "saFailed": "SA Failed",
+          "saSkipped": "SA Skipped"
+        }
       },
       "stats": {
         "pieTitle": "Submission Result",
@@ -88,13 +345,174 @@
       }
     },
     "problems": {
+      "tasks": "Tasks",
+      "Preview": "Preview",
       "text": "Problems",
       "id": "ID",
       "name": "Name",
       "tags": "Tags",
       "quota": "Quota",
       "new": "New",
-      "status": "Hidden"
+      "status": "Hidden",
+      "allowedLanguages": "Allowed Languages",
+      "acceptedFormat": "Accepted Format",
+      "code": "Code",
+      "zip": "Zip",
+      "maxZipSize": "Max ZIP Size (MB)",
+      "maxZipSizeDefault": "(default 50 MB)",
+      "aiTA": "AI TA",
+      "aiModel": "AI (Gemini) Model",
+      "aiMaxToken": "Maximum Token Usage (per student)",
+      "uploadACFiles": "Upload AC files",
+      "selectAPIKeys": "Select API Keys",
+      "aiKeyTotal": "Total: {total}",
+      "aiKeyActive": "Active: {stats}",
+      "aiKeyInactive": "Inactive: {stats}",
+      "aiKeyFetchingSuggestion": "Fetching suggestion...",
+      "aiKeySuggestionStudentCount": "Student count:",
+      "aiKeySuggestionSuggestedKeys": "Suggested keys:",
+      "aiKeySuggestionReason": "Reason:",
+      "aiKeySearch": "Search",
+      "aiKeyLoadingKeys": "Loading keys...",
+      "activeAiKeys": "active keys",
+      "inactiveAiKeys": "inactive keys",
+      "trialMode": "Trial Mode",
+      "trialMaxNumber": "Max Number of Trial",
+      "resultVisible": "Result Visible",
+      "allowViewingExecutionOutput": "Allow viewing execution output.",
+      "resultDownloadable": "Result Downloadable",
+      "allowDownloadingOutputFiles": "Allow downloading output files.",
+      "uploadPublicTestData": "Upload Public Test Data (.zip)",
+      "networkAccessRestriction": "Network Access Restriction (External)",
+      "networkAccessModel": "Access Model:",
+      "networkAccessWhitelist": "Whitelist",
+      "networkAccessBlacklist": "Blacklist",
+      "networkAccessIPList": "IP List",
+      "networkAccessURLList": "URL List",
+      "SandboxEnvironment": "Sandbox Environment (Sidecars & Dockerfiles)",
+      "dockerFiles": "Dockerfiles",
+      "uploaded": "Uploaded",
+      "notUploaded": "Not Uploaded",
+      "download": "Download",
+      "uploadDockerFilesZip": "Upload dockerfiles.zip",
+      "ArtifactCollection": "Artifact Collection (Optional)",
+      "CompiledBinary": "Compiled Binary",
+      "StudentArtifact": "Student Artifact (Zip)",
+      "fileAccess": "File Access",
+      "fileAccessAllowedRead": "Allowed Read",
+      "fileAccessAllowedWrite": "Allowed Write",
+      "allowWriteWarning": "Allow Write requires Allow Read.",
+      "staticAnalysisGroup": "Static Analysis",
+      "syntaxRestrictions": "Syntax Restrictions",
+      "restrictionBlack": "Black List",
+      "restrictionWhite": "White List",
+      "restrictionDisabled": "Imports Restrictions Disabled",
+      "restrictionDisabledInfo": "Python language must be enabled to use this feature",
+      "importsRestrictions": "Imports Restrictions",
+      "headersRestrictions": "Headers Restrictions",
+      "headersRestrictionDisabled": "Headers Restrictions Disabled",
+      "headersRestrictionInfo": "C/C++ language must be enabled to use this feature",
+      "functionsRestrictions": "Functions Restrictions",
+      "executionMode": "Execution Mode",
+      "executionModeGeneral": "General",
+      "executionModeFuncitonOnly": "Function-Only",
+      "executionModeInteractive": "Interactive",
+      "uploadFile": "Upload Makefile.zip",
+      "upload": "Upload",
+      "notNotUploaded": "Not Uploaded",
+      "interactiveTeacherFirst": "Teacher First",
+      "interactiveUploadTeacherCode": "Upload Teacher Code",
+      "customChecker": "Custom Checker",
+      "uploadCustomChecker": "Upload Custom_Checker.py",
+      "uploadCustomCheckerInfo": "Enable to upload Custom_Checker.py",
+      "uploadCustomCheckerWarning": "Custom Checker disabled in Interactive mode.",
+      "aiCheckerEnable": "Enable AI",
+      "aiCheckerApiKey": "API Key",
+      "aiCheckerModel": "Model",
+      "aiCheckerSelectKey": "Select API Key",
+      "customScoringScript": "Custom Scoring Script",
+      "uploadCustomScorer": "Upload Custom_Scorer.py",
+      "uploadCustomScorerInfo": "Enable to upload Custom_Scorer.py",
+      "placeholderSyntax": "Add syntax keyword",
+      "placeholderImport": "Add import",
+      "placeholderHeader": "Add header",
+      "placeholderFunction": "Add function",
+      "descriptionProblem": "Description of problem",
+      "descriptionInput": "Description of Input",
+      "descriptionOutput": "Description of Output",
+      "exampleInput": "Examples - Input {no}",
+      "exampleOutput": "Examples - Output {no}",
+      "AddSample": "Add Sample",
+      "RemoveLast": "Remove last",
+      "hint": "Hint",
+      "testDataZip": "Test Data Zip",
+      "zipFile": "zip file",
+      "downloadCurrent": "Download Current",
+      "dropFileHere": "Drop a zip file here",
+      "cases": "Cases",
+      "score": "Score",
+      "memoryLimit": "Memory Limit (KB)",
+      "timeLimit": "Time Limit (ms)",
+      "setResourceDataTeacher": "Set ResourceData (Teacher)",
+      "setResourceDataStudent": "Set ResourceData (Student)",
+      "enable": "Enable",
+      "allowReadToUse": "Enable Allow Read to use Resource Data.",
+      "uploadTestDataFirst": "Upload TestData first",
+      "allowReadRequired": "Allow Read required",
+      "prefixMismatch": "ResourceData filename prefix mismatch: {base}. It does not follow the testcase structure.",
+      "countMismatch": "ResourceData file count does not match the testcase count. Please ensure each case has a corresponding resource.",
+      "task": "task(s)",
+      "current": "Current:",
+      "EnablefirstThenUpload": "Enable first, then upload",
+      "EnableAllowReadfirst": "Enable Allow Read first",
+      "problemName": "Problem name",
+      "setDescription": "Set Description",
+      "setConfiguration": "Set Configuration",
+      "setPipelines": "Set Pipeline",
+      "setTestData": "Set Test Data",
+      "setResourceData": "Set Resource Data",
+      "submissionBlocked": "Submission blocked. Please fix the following:",
+      "commaSeparated": "Comma separated",
+      "meansUnlimited": "-1 means unlimited",
+      "allowedlan": "Allowed: .c, .cpp, .py",
+      "networkSidecars": "Network & Sidecars",
+      "onlyAllowSpecificInfo": "Only allow specific IPs/URLs. Block everything else.",
+      "blockSpecificInfo": "Block specific IPs/URLs. Allow everything else.",
+      "Sidecars": "Sidecars",
+      "delete": "Delete",
+      "discardChanges": "Discard Changes",
+      "preview": "Preview",
+      "editProblem": "Edit Problem:",
+      "enablePythonHint": "Python language must be enabled to use this feature",
+      "systemLocked": "System Locked",
+      "all": "All",
+      "clear": "Clear",
+      "accessDenied": "Access Denied",
+      "limitReached": "Limit Reached",
+      "whenNetworkEnabled": "When Network Access is enabled, at least one of IP, URL, Sidecars, or Dockerfiles must be configured.",
+      "sideCarName": "Name",
+      "sideCarImage": "Image",
+      "sideCarArgs": "Args",
+      "sideCarEnv": "Env",
+      "sideCarCommaSeparated": "comma-separated",
+      "sideCarKEYVALUEPerLine": "KEY=VALUE per line",
+      "addSidecar": "Add Sidecar",
+      "sideCarAction": "Action",
+      "sideCarvars": "vars",
+      "sideCar_EnvKEYVALUE": "Env (KEY=VALUE)",
+      "noSidecarsConfigured": "No sidecars configured.",
+      "tokenDisplay": "Token: input * {input} ; output * {output}",
+      "creatorInfo": "Creator: {name} // {value}",
+      "requestCount": "Number of requests: {count}",
+      "keyNameLabel": "Key: {name}",
+      "dropToDeactivate": "Drop to Deactivate",
+      "dropToActivate": "Drop to Activate",
+      "active": "Active",
+      "inactive": "Inactive",
+      "selectedKeysTitle": "Selected Keys ({count})  - Click items below to remove",
+      "ACFile": "Only allowed: .py, .c, or .cpp",
+      "enableCppHint": "Enable C/C++ to unlock.",
+      "interActive": "Only allowed: .py, .c, or .cpp"
     },
     "submissions": {
       "text": "Submissions",
@@ -102,6 +520,7 @@
       "status": "Status",
       "lang": "Language",
       "clear": "Clear",
+      "search-name": "Search Name (exact match)",
       "table": {
         "id": "id",
         "pid": "pid",
@@ -150,6 +569,64 @@
       },
       "compile_error": {
         "title": "Compile Error Messages"
+      },
+      "scoreEdit": {
+        "titleTotal": "Edit Total Score",
+        "titleTask": "Edit Task {index} Score",
+        "description": "Manually adjust the submission score.",
+        "scoreRangeTotal": "Score range: 0 - 100",
+        "scoreRangeTask": "Score range: 0 - {max}",
+        "scoreRangeTaskNoLimit": "Score range: 0 (no limit)",
+        "autoUpdate": "Manual update will update homework grade automatically",
+        "recordSaved": "A modification record will be saved",
+        "totalScoreWarning": "Note: Modifying total score will not change individual task scores. The total may differ from the sum of task scores.",
+        "newScore": "New Score",
+        "reason": "Reason (optional)",
+        "reasonPlaceholder": "Why are you changing this score?",
+        "cancel": "Cancel",
+        "submit": "Submit"
+      },
+      "scoreHistory": {
+        "title": "Score Modification History",
+        "show": "Show",
+        "hide": "Hide",
+        "records": "{count} record(s)",
+        "noRecords": "No score modifications recorded.",
+        "modifier": "Modifier",
+        "time": "Time",
+        "target": "Target",
+        "before": "Before",
+        "after": "After",
+        "reason": "Reason",
+        "totalScore": "Total Score",
+        "task": "Task {index}"
+      },
+      "caseOutput": {
+        "title": "Case Artifact",
+        "viewTitle": "View Artifact",
+        "stdout": "Standard Output (stdout)",
+        "stderr": "Standard Error (stderr)",
+        "noStdout": "No output file",
+        "emptyStdout": "(empty output)",
+        "noStderr": "No error output file",
+        "emptyStderr": "(empty error output)",
+        "artifactFiles": "Artifact Files",
+        "binaryFile": "Binary file: {fileName} (cannot preview)",
+        "close": "Close"
+      },
+      "binaryNotFound": {
+        "title": "Compiled Binary Not Found",
+        "description": "The compiled binary for this submission is not available. This may happen for submissions created before artifact collection was enabled. Would you like to rejudge this submission to generate the compiled binary?",
+        "cancel": "Cancel",
+        "rejudge": "Rejudge"
+      },
+      "rejudgeError": {
+        "title": "Rejudge Failed",
+        "close": "Close"
+      },
+      "deleteError": {
+        "title": "Delete Failed",
+        "close": "Close"
       }
     },
     "members": {
@@ -164,7 +641,54 @@
         "caution": "Note that if we find a user with the same username or email in the database, the user will still be added into course, BUT other information will not be update UNLESS you check the checkbox below."
       },
       "forceUpdate": "Force update existing users' data",
-      "standardizeUsername": "Standardize Username (uppercase)"
+      "standardizeUsername": "Standardize Username (uppercase)",
+      "csvFiles": "CSV Files",
+      "csvUpload": "CSV File Upload",
+      "csvUploadInfo": "Drag and drop file here or click to select",
+      "manualInput": "Manual Input",
+      "optionUsername": "Username",
+      "optionDisplayName": "Display Name",
+      "optionRole": "Role",
+      "tableUsername": "username",
+      "tableDisplayedName": "displayed_name",
+      "tableRole": "role",
+      "courseCode": {
+        "title": "Course Code",
+        "loading": "Loading...",
+        "current": "Current code:",
+        "none": "No course code set",
+        "copy": "Copy",
+        "generate": "Generate Code",
+        "regenerate": "Regenerate",
+        "remove": "Remove",
+        "errorFetch": "Failed to fetch course code",
+        "errorGenerate": "Failed to generate course code",
+        "errorRemove": "Failed to remove course code"
+      },
+      "tableCourseRole": "Course Role",
+      "roleTeacher": "Teacher",
+      "roleStudent": "Student",
+      "roleTA": "TA",
+      "roleChange": {
+        "error": "Failed to change role"
+      },
+      "tableActions": "Actions",
+      "removeMember": "Remove member",
+      "removeConfirmTitle": "Remove Member",
+      "confirmRemove": "Are you sure you want to remove {username} from this course? This action cannot be undone.",
+      "confirmButton": "Confirm Remove",
+      "removeError": "Failed to remove member",
+      "errors": {
+        "needAtLeastOne": "Please fill in at least one user with username, email and password",
+        "invalidRoleForUser": "Invalid role \"{role}\" for user \"{username}\". Allowed: 0=Admin,1=Teacher,2=Student,3=TA",
+        "invalidRoleOnLine": "Invalid role \"{val}\" on CSV line {line}. Allowed: 0=Admin,1=Teacher,2=Student,3=TA",
+        "duplicatesInInput": "Duplicate entries in input: {details}",
+        "duplicatesInCSV": "CSV contains duplicates: {details}",
+        "dupUsernames": "Duplicate usernames:",
+        "dupEmails": "Duplicate emails:",
+        "skippedEntries": "The following users were not created because username or email already exists: {users}",
+        "unknown-error-occurred": "Unknown error occurred :("
+      }
     }
   },
   "courses": {
@@ -174,7 +698,18 @@
         "course": "Course",
         "teacher": "Teacher"
       },
-      "new": "New"
+      "new": "New",
+      "join": {
+        "title": "Join by Course Code",
+        "placeholder": "Enter course code",
+        "button": "Join",
+        "success": "Successfully joined course: {course}",
+        "errorEmpty": "Please enter a course code",
+        "errorInvalid": "Invalid course code",
+        "errorAlreadyIn": "You are already in this course",
+        "errorForbidden": "Cannot join course this way",
+        "errorGeneric": "Failed to join course"
+      }
     },
     "new": {
       "title": "New Course",
@@ -189,7 +724,178 @@
       "back": "Back"
     }
   },
+  "discussion": {
+    "placeholder": "Search discussions...",
+    "post": "Post",
+    "hot": "Hot",
+    "new": "New",
+    "solved": "Solved",
+    "closed": "Closed",
+    "noPosts": "No posts yet",
+    "noSearchResults": "No posts found matching your search",
+    "create": {
+      "title": "Create Post",
+      "problem": "Problem",
+      "problemPlaceholder": "Select a problem",
+      "category": "Category",
+      "generalDiscussion": "general discussion",
+      "question": "question/help",
+      "solutionSharing": "solution sharing",
+      "bugReport": "bug report",
+      "suggestions": "suggestions",
+      "language": "Language",
+      "none": "none",
+      "titleLabel": "Title",
+      "titlePlaceholder": "Enter title",
+      "contentLabel": "Content",
+      "contentPlaceholder": "Write your post content here...",
+      "contentHint": "Support Markdown syntax ",
+      "contentIncluded": "Code included",
+      "submit": "Post",
+      "cancel": "Cancel",
+      "submit_post_err": {
+        "title_required": "Title cannot be empty.",
+        "content_required": "Content cannot be empty.",
+        "problem_required": "Please select a problem.",
+        "contentallowed": "This problem does not allow sharing code, please remove the code content before posting.",
+        "contains_invisible": "Title contains invisible or control characters. Please remove them.",
+        "submit_processing": "Posting, please wait..."
+      }
+    },
+    "contentallowed": {
+      "role": "Role: {userRole} | Students cannot share code before the deadline",
+      "allowed": "This problem allows sharing code",
+      "not_allowed": "This problem does not allow sharing code",
+      "deadline": "Deadline: {deadline}"
+    },
+    "courseSideBar": {
+      "admin": "Admin",
+      "members": "Members",
+      "settings": "Settings",
+      "aiManagement": "AI Management",
+      "loginRecords": "Login Records"
+    },
+    "settings": {
+      "title": "Course Settings",
+      "generalInfo": "General Info",
+      "appearance": "Appearance",
+      "preview": "Preview",
+      "previewDesc": "This is how the course icon will look.",
+      "courseColor": "Course Color",
+      "courseEmoji": "Course Emoji",
+      "courseName": "Course Name",
+      "teacher": "Teacher",
+      "save": "Save",
+      "saved": "Settings saved successfully."
+    },
+    "err": {
+      "err": "Retry loading the post.",
+      "err_unknown": "An unknown error occurred. Please try again later.",
+      "err_failed_load": "Failed to load the post.",
+      "err_failed_find": "Failed to find the post.",
+      "err_failed_reply": "Failed to reply to the post.",
+      "err_network": "Network error. ",
+      "err_problems_list": "Failed to load problems list.",
+      "err_failed_create": "Failed to create post, please check if it contains code.",
+      "err_failed_search": "Failed to search posts"
+    },
+    "detail": {
+      "by": "By",
+      "comments": "Comments",
+      "noComments": "(No real comments — this is mock data.)",
+      "notFound": "Post not found.",
+      "mockContent": "This is mock content for post {id}. Replace with real API data later.",
+      "solved": "Solved",
+      "closed": "Closed",
+      "closed_msg": "This post is closed. You cannot add new comments.",
+      "reply": {
+        "title": "Add a Comment",
+        "placeholder": "Write a comment...",
+        "submit": "Submit",
+        "cancel": "Cancel",
+        "no_comments": "This post has no comments yet. Be the first to comment!",
+        "replyto_comment": "Replying to comment",
+        "post_reply": "Post Comment",
+        "start": "Start Discussion"
+      }
+    },
+    "card": {
+      "likes": "{count} likes",
+      "comments": "{count} comments",
+      "views": "{count} views"
+    },
+    "problems": {
+      "title": "Problems",
+      "selectProblem": "Select a problem to view discussions",
+      "discussionCount": "{count} discussions",
+      "noDiscussions": "No discussions yet",
+      "backToProblems": "Back to Problems",
+      "backToDiscussion": "Back to Discussion"
+    },
+    "component": {
+      "pin": {
+        "action_Is_Pinned": "Unpin",
+        "action_Not_Pinned": "Pin Post",
+        "status_Is_Pinned": "Post unpinned",
+        "status_Not_Pinned": "Post pinned",
+        "info_Is_Pinned": "Are you sure you want to unpin this post?",
+        "info_Not_Pinned": "Are you sure you want to pin this post?"
+      },
+      "solve": {
+        "action_Is_Solved": "Mark as Unsolved",
+        "status_Is_Solved": "Marked as Unsolved",
+        "info_Is_Solved": "Are you sure you want to mark this post as unsolved?",
+        "action_Not_Solved": "Mark as Solved",
+        "status_Not_Solved": "Marked as Solved",
+        "info_Not_Solved": "Are you sure you want to mark this post as solved?"
+      },
+      "post_action": {
+        "close_title": "Close Post",
+        "close_info": "After closing, you will no longer be able to reply to this post. Are you sure you want to close it?",
+        "close_status": "Post closed",
+        "delete_title": "Delete Post",
+        "delete_info": "After deletion, the post cannot be recovered. Are you sure you want to delete it?",
+        "delete_status": "Post deleted"
+      },
+      "is_pinned": "Pin",
+      "not_pinned": "Unpin",
+      "close": "Close Discussion",
+      "delete": "Delete Post",
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "reply": {
+        "reply": "Reply",
+        "edit": "Edit",
+        "delete": "Delete",
+        "delete_reply": "Delete Reply",
+        "delete_reply_info": "Are you sure you want to delete this reply? This action cannot be undone.",
+        "delete_confirm": "Confirm Delete"
+      },
+      "time": {
+        "just_now": "just now",
+        "minute_ago": "minutes ago",
+        "hour_ago": "hours ago",
+        "day_ago": "days ago",
+        "today": "today",
+        "yesterday": "yesterday"
+      }
+    }
+  },
   "components": {
+    "validation": {
+      "not_blank": "Name Cannot be empty or whitespace",
+      "contains_invisible": "Contains invisible or control characters"
+    },
+    "studentDashboard": {
+      "welcome": "Here is what's happening in your courses.",
+      "upcomingDeadlines": "Upcoming Deadlines",
+      "noPendingHomework": "No pending homework",
+      "noPendingHomeworkDesc": "Great job! You have no upcoming deadlines.",
+      "myCourses": "My Courses",
+      "viewAllCourses": "View All Courses",
+      "noCourses": "You have not joined any courses yet.",
+      "joinCourse": "Join a Course"
+    },
     "ann": {
       "form": {
         "titleField": "Title",
@@ -210,6 +916,10 @@
         "dueField": "Due",
         "descField": "Description",
         "submit": "Submit"
+      },
+      "validation": {
+        "not_blank": "Name cannot be empty or whitespace",
+        "contains_invisible": "Contains invisible or control characters"
       },
       "card": {
         "statusLabel": {
@@ -285,6 +995,7 @@
         "quota": "Quota",
         "score": "Score",
         "submit": "Submit",
+        "test": "Test",
         "stats": "Stats",
         "desc": "Description",
         "input": "Input",
@@ -311,14 +1022,26 @@
         "tags": "Tags",
         "quota": "Quota",
         "unlimited": "unlimited"
+      },
+      "manual": {
+        "open": "Manual",
+        "title": "Problem Admin Manual",
+        "close": "Close",
+        "pageNotFound": "Page not found."
       }
     },
     "courseSideBar": {
+      "general": "General",
+      "admin": "Management",
       "ann": "Announcements",
       "hw": "Homeworks",
       "problems": "Problems",
       "submissions": "Submissions",
-      "members": "Members"
+      "discussion": "Discussion",
+      "members": "Members",
+      "aisetting": "AI Setting",
+      "loginRecords": "Login Record",
+      "settings": "Settings"
     },
     "systemAnn": {
       "ann": "Announcements",
@@ -371,16 +1094,21 @@
       "student": "Student",
       "teacher": "Teacher",
       "admin": "Admin",
+      "ta": "TA",
       "select-role": "Select Role",
       "row-count": "Row Count: {n}",
       "search-name": "Search Name"
     },
-    "unknown-error-occurred": "Unknown error occurred :(",
+    "unknown-error-occurred": "An unknown error occurred :(",
     "tab": {
       "dashboard": "Dashboard",
-      "user": "User"
+      "user": "User",
+      "loginRecords": "Login Records",
+      "skins": "AI Skins"
     },
     "dashboard": {
+      "row-count": "Row Count: {n}",
+      "search-name": "Search Name",
       "usercount": {
         "title": "User Overview",
         "count": "Count",
@@ -394,7 +1122,30 @@
         "problem": "Problem Count",
         "submission": "Submission Count"
       }
+    },
+    "skins": {
+      "title": "AI Skin Management",
+      "storageStats": "Storage Statistics",
+      "totalSkins": "Total Skins",
+      "totalSize": "Total Size",
+      "thumbnail": "Thumbnail",
+      "name": "comma-separated",
+      "uploadedBy": "Uploaded By",
+      "size": "Size",
+      "type": "Type",
+      "actions": "Actions",
+      "public": "Public",
+      "private": "Private",
+      "edit": "Edit",
+      "delete": "Delete",
+      "setPublic": "Set Public",
+      "setPrivate": "Set Private",
+      "editTitle": "Edit Skin",
+      "save": "Save"
     }
+  },
+  "common": {
+    "close": "Close"
   },
   "errorCode": {
     "ERR001": "Login Failed: Your username/email or password is incorrect.",
@@ -442,7 +1193,8 @@
     "menu": {
       "accountInfo": "Account Information",
       "user_information": "User Information",
-      "api_token": "API Token"
+      "api_token": "API Token",
+      "login_records": "Login Records"
     },
     "breadcrumb": {
       "profile": "Profile"
@@ -475,6 +1227,7 @@
         "name_label": "Name",
         "name_placeholder": "My new key",
         "name_required_alert": "Please remember to name your token",
+        "name_contains_invisible": "Token name contains invisible or control characters. Please remove them.",
         "scope_label": "Scope",
         "date_label": "Date",
         "cancel": "Cancel",
@@ -501,6 +1254,97 @@
         "token_info": "Token information",
         "deactivate": "Deactivate"
       }
+    }
+  },
+  "loginRecords": {
+    "title": "Login Records",
+    "table": {
+      "username": "Username",
+      "ipAddress": "IP Address",
+      "success": "Status",
+      "timestamp": "Time"
+    },
+    "status": {
+      "success": "Success",
+      "failed": "Failed"
+    },
+    "refresh": "Refresh",
+    "download": "Download CSV",
+    "noRecords": "No login records",
+    "rowCount": "{n} record(s)"
+  },
+  "skinSelector": {
+    "title": "Choose AI Assistant Appearance",
+    "close": "Close",
+    "loadError": "Failed to load skin list",
+    "builtin": "Built-in",
+    "default": "Default",
+    "upload": {
+      "button": "Upload Custom Skin",
+      "title": "Upload Custom Skin",
+      "name": "Skin Name",
+      "namePlaceholder": "Optional, defaults to filename",
+      "file": "Live2D Model (ZIP)",
+      "hint": "Zip files exported from Live2D Cubism Editor directly, keep original structure (max 50 MB)",
+      "emotions": "Emotion Mappings",
+      "optional": "Optional",
+      "emotionsHint": "Find expression IDs from model3.json Expressions, format: {'{\"}'}smile{'\"'}: {'\"'}F05{'\"'}, ...{'}'}",
+      "thumbnail": "Thumbnail",
+      "thumbnailHint": "Ctrl+V to paste or choose file",
+      "chooseFile": "Choose File",
+      "submit": "Upload",
+      "uploading": "Uploading...",
+      "cancel": "Cancel",
+      "errorZip": "Please upload a ZIP file",
+      "errorSize": "File size cannot exceed 50 MB",
+      "errorFile": "Please select a file"
+    },
+    "delete": {
+      "confirm": "Are you sure you want to delete this skin?",
+      "error": "Delete failed"
+    },
+    "switch": {
+      "error": "Failed to switch skin"
+    },
+    "clickToChange": "Click to change appearance",
+    "voice": "Voice",
+    "preview": "Preview"
+  },
+  "aiChatbot": {
+    "title": "AI TA",
+    "open": "Open AI assistant chat",
+    "avatarTooltip": "Click to change appearance",
+    "explain": "Explain this problem",
+    "resetHistory": "Clear chat history",
+    "placeholder": "Type a message… (Enter to send, Shift+Enter for newline)",
+    "tts": {
+      "play": "Play audio",
+      "stop": "Stop playback"
+    },
+    "error": {
+      "noResponse": "The AI didn't return a response. Please try again in a moment.",
+      "unavailable": "The AI assistant can't respond right now. Please try again shortly."
+    },
+    "testcaseGenerator": {
+      "title": "AI Test Case Generator",
+      "button": "Generate Test Case",
+      "hint": "Describe what kind of test case you want",
+      "hintPlaceholder": "e.g., edge case with maximum input, empty input, etc.",
+      "generate": "Generate",
+      "generating": "Generating...",
+      "input": "Input",
+      "expectedOutput": "Expected Output",
+      "explanation": "Explanation",
+      "copy": "Copy",
+      "copied": "Copied!",
+      "useInTrial": "Use in Trial",
+      "error": "Failed to generate test case. Please try again.",
+      "noApiKey": "AI is not configured for this problem.",
+      "quotaExceeded": "API quota exceeded. Please try again later.",
+      "generated": "Generated {count} test cases",
+      "selectToUse": "Select to add to custom testcases",
+      "testcase": "Test Case",
+      "useSelected": "Add {count} selected"
     }
   }
 }

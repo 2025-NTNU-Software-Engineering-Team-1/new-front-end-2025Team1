@@ -4,11 +4,13 @@ import { SUBMISSION_STATUS_REPR } from "@/constants";
 interface Props {
   status: SubmissionStatusCodes;
 }
-defineProps<Props>();
+const props = defineProps<Props>();
 </script>
 
 <template>
-  <span :style="{ color: SUBMISSION_STATUS_REPR[status].color }">
-    {{ SUBMISSION_STATUS_REPR[status].label }}
+  <span
+    :style="{ color: (SUBMISSION_STATUS_REPR as any)[props.status as unknown as number]?.color ?? '#666666' }"
+  >
+    {{ (SUBMISSION_STATUS_REPR as any)[props.status as unknown as number]?.label ?? "Unknown" }}
   </span>
 </template>

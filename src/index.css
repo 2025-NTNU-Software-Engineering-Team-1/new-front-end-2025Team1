@@ -1,7 +1,81 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap");
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@plugin "daisyui";
 
+@theme {
+  /* Tailwind 4 theme config if needed */
+  --font-sans: "Noto Sans TC", "Microsoft JhengHei", "Heiti TC", sans-serif;
+}
+
+/* Light Theme Overrides */
+:root,
+[data-theme="light"] {
+  --color-primary: hsl(207, 94%, 20%);
+  --color-primary-content: hsl(0 0% 100%);
+
+  --color-base-100: hsl(0 0% 100%);
+  --color-base-200: hsl(200 20% 90%);
+  --color-base-300: hsl(200 20% 80%);
+  --color-base-content: hsl(207 100% 20%);
+
+  --color-secondary: hsl(205 89% 30%);
+  --color-accent: hsl(180 100% 50%);
+  --color-neutral: hsl(200 20% 20%);
+  --color-info: hsl(200 100% 50%);
+  --color-success: hsl(150 100% 40%);
+  --color-warning: hsl(40 100% 50%);
+  --color-error: hsl(0 100% 50%);
+}
+
+/* Dark Theme Overrides */
+[data-theme="dark"] {
+  /* Brighter primary for headings/links on dark background */
+  --color-primary: hsl(207, 94%, 20%);
+  --color-primary-content: hsl(0 0% 100%);
+
+  --color-base-100: hsl(220 15% 15%);
+  /* Dark gray background */
+  --color-base-200: hsl(220 15% 10%);
+  /* Darker background */
+  --color-base-300: hsl(220 15% 5%);
+  /* Even darker */
+  --color-base-content: hsl(220 15% 90%);
+  /* Light text */
+
+  --color-secondary: hsl(205 89% 30%);
+  --color-accent: hsl(180 100% 50%);
+  /* Make neutral slightly lighter so icons / muted text are clearer */
+  --color-neutral: hsl(200 18% 26%);
+
+  /* Reset table headers for dark mode to match base-200 */
+  --color-table-header: var(--color-base-200);
+}
+
+/* Global Table Styling Override for DaisyUI 5 */
+.table:not(.table-zebra) :where(thead, tfoot) {
+  background-color: var(--color-base-200);
+  color: var(--color-base-content);
+}
+
+.table :where(thead, tfoot) tr {
+  background-color: transparent;
+  /* Let container background shine through or set explicitly */
+}
+
+/* Ensure header cells specifically get the color if DaisyUI overrides them */
+.table :where(th, td) {
+  border-bottom-color: var(--color-base-200);
+}
+
+.table thead {
+  background-color: var(--color-base-200);
+  color: var(--color-base-content);
+  font-size: 1rem;
+  /* Increase font size slightly as requested before */
+}
+
+/* Fix mobile table if needed */
 .card-container {
   @apply flex w-full justify-center;
 }
@@ -17,6 +91,54 @@
 
 /* For IE, Edge and Firefox */
 .scrollbar-hide {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+/* Restore Table Rounded Corners */
+.table,
+.overflow-x-auto,
+.card {
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+/* Restore Table Hover Effect */
+.table tr.hover:hover,
+.table tr.hover:hover th,
+.table tr.hover:hover td {
+  background-color: var(--color-base-300) !important;
+}
+
+/* Custom Sidebar Active Color */
+.sidebar-active {
+  background-color: #26568c !important;
+  color: white !important;
+}
+
+/* Fix DaisyUI 5 form-control layout - ensure vertical stacking */
+.form-control {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-control > .label {
+  padding-bottom: 0.25rem;
+}
+
+.form-control > textarea,
+.form-control > input,
+.form-control > select {
+  width: 100%;
+}
+
+/* Fix DaisyUI collapse-title alignment and padding */
+.collapse-title {
+  display: flex !important;
+  align-items: center !important;
+  padding-top: 0.75rem !important;
+  padding-bottom: 0.75rem !important;
+  min-height: 0 !important;
 }

@@ -3,6 +3,7 @@ import { useTitle } from "@vueuse/core";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import { useRoute } from "vue-router";
 import { fetcher } from "@/models/api";
+import type { AxiosError } from "axios";
 
 const route = useRoute();
 useTitle(`Announcement - ${route.params.id} - ${route.params.name} | Normal OJ`);
@@ -15,7 +16,7 @@ const {
 
 <template>
   <div class="mx-auto flex max-w-7xl gap-8 p-4">
-    <data-status-wrapper :error="error" :is-loading="isLoading">
+    <data-status-wrapper :error="error as AxiosError" :is-loading="isLoading">
       <template #loading>
         <skeleton-card />
       </template>

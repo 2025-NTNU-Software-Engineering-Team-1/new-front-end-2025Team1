@@ -6,7 +6,10 @@ export const LANGUAGE_OPTIONS: LangOption[] = [
   { value: 2, text: "py", mask: 4 },
 ];
 
-export const ROLE = ["Admin", "Teacher", "Student"];
+export const ROLE = ["Admin", "Teacher", "Student", "TA"];
+
+export const MAX_UPLOAD_SIZE_MB = 1024; // 1 GB
+export const MAX_UPLOAD_SIZE_BYTES = MAX_UPLOAD_SIZE_MB * 1024 * 1024;
 
 // keyof SUBMISSION_STATUS_REPR please refer to '@/types/submission.d.ts'
 export const SUBMISSION_STATUS_REPR = {
@@ -46,6 +49,10 @@ export const SUBMISSION_STATUS_REPR = {
     label: "Output Limit Exceed",
     color: "#BF360C",
   },
+  [8]: {
+    label: "Analysis Error",
+    color: "#FF5722",
+  },
 } as const;
 
 export const SUBMISSION_STATUS_CODE = {
@@ -58,6 +65,7 @@ export const SUBMISSION_STATUS_CODE = {
   RUNTIME_ERROR: 5,
   JUDGE_ERROR: 6,
   OUTPUT_LIMIT_EXCEED: 7,
+  ANALYSIS_ERROR: 8,
 } as const;
 
 export const LOCAL_STORAGE_KEY = {

@@ -1,4 +1,5 @@
 declare enum SubmissionStatusCodes {
+  WAITING = -2,
   PENDING = -1,
   ACCEPTED = 0,
   WRONG_ANSWER = 1,
@@ -8,6 +9,7 @@ declare enum SubmissionStatusCodes {
   RUNTIME_ERROR = 5,
   JUDGE_ERROR = 6,
   OUTPUT_LIMIT_EXCEED = 7,
+  ANALYSIS_ERROR = 8,
 }
 
 interface Case {
@@ -43,6 +45,10 @@ type SubmissionList = SubmissionListItem[];
 interface Submission extends SubmissionListItem {
   code: string;
   tasks: Task[];
+  saStatus?: number | null;
+  saMessage?: string;
+  saReport?: string;
+  saReportPath?: string;
 }
 
 interface GetSubmissionListResponse {

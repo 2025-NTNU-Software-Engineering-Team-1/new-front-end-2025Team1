@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useTitle } from "@vueuse/core";
+import { useI18n } from "vue-i18n";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import { computed, watch, ref, watchEffect } from "vue";
 import { useRoute } from "vue-router";
@@ -13,9 +14,11 @@ import { CanvasRenderer } from "echarts/renderers";
 import { fetcher } from "@/models/api";
 import { useTheme } from "@/stores/theme";
 import dayjs from "dayjs";
+import type { AxiosError } from "axios";
 
 const route = useRoute();
-useTitle(`Homework Stats - ${route.params.id} - ${route.params.name} | Normal OJ`);
+const { t } = useI18n();
+useTitle(`${t("course.hw.stats.pageTitle")} - ${route.params.id} - ${route.params.name} | Normal OJ`);
 const theme = useTheme();
 use([CanvasRenderer, LabelLayout, GridComponent, BarChart]);
 
@@ -34,10 +37,10 @@ watchEffect(() => {
   scoreboardEnd.value = hw.value.end;
 });
 const startDateTime = computed(
-  () => scoreboardBegin.value && dayjs(scoreboardBegin.value * 1000).format("YYYY-MM-DD\THH:mm"),
+  () => scoreboardBegin.value && dayjs(scoreboardBegin.value * 1000).format("YYYY-MM-DDTHH:mm"),
 );
 const endDateTime = computed(
-  () => scoreboardEnd.value && dayjs(scoreboardEnd.value * 1000).format("YYYY-MM-DD\THH:mm"),
+  () => scoreboardEnd.value && dayjs(scoreboardEnd.value * 1000).format("YYYY-MM-DDTHH:mm"),
 );
 function setScoreboardBegin(event: Event) {
   scoreboardBegin.value = dayjs((event.target as HTMLInputElement).value).valueOf() / 1000;
@@ -156,7 +159,7 @@ function exportCSV() {
   <div class="p-2 pb-40">
     <div class="card min-w-full">
       <div class="card-body">
-        <div class="card-title">Stats - {{ hw && hw.name }}</div>
+        <div class="card-title">{{ t("course.hw.stats.title") }} - {{ hw && hw.name }}</div>
 
         <div class="flex">
           <v-chart
@@ -167,37 +170,37 @@ function exportCSV() {
           />
         </div>
 
-        <div class="card-title">Scoreboard</div>
+        <div class="card-title">{{ t("course.hw.stats.scoreboard") }}</div>
 
         <div class="mb-4 flex items-end gap-x-4">
           <div class="form-control w-full max-w-xs">
             <label class="label">
-              <span class="label-text">Sort By</span>
+              <span class="label-text">{{ t("course.hw.stats.sortBy") }}</span>
             </label>
-            <select v-model="sortBy" class="select select-bordered w-full max-w-xs">
-              <option :value="Columns.USERNAME">Username</option>
-              <option :value="Columns.SUM_DESC">Sum in descending</option>
-              <option :value="Columns.SUM_ASC">Sum in ascending</option>
+            <select v-model="sortBy" class="select-bordered select w-full max-w-xs">
+              <option :value="Columns.USERNAME">{{ t("course.hw.stats.username") }}</option>
+              <option :value="Columns.SUM_DESC">{{ t("course.hw.stats.sumDesc") }}</option>
+              <option :value="Columns.SUM_ASC">{{ t("course.hw.stats.sumAsc") }}</option>
             </select>
           </div>
           <div class="form-control w-full max-w-xs">
             <label class="label">
-              <span class="label-text">Begin</span>
+              <span class="label-text">{{ t("course.hw.stats.begin") }}</span>
             </label>
             <input
               type="datetime-local"
-              class="input input-bordered w-full max-w-xs"
+              class="input-bordered input w-full max-w-xs"
               :value="startDateTime"
               @change="setScoreboardBegin"
             />
           </div>
           <div class="form-control w-full max-w-xs">
             <label class="label">
-              <span class="label-text">End</span>
+              <span class="label-text">{{ t("course.hw.stats.end") }}</span>
             </label>
             <input
               type="datetime-local"
-              class="input input-bordered w-full max-w-xs"
+              class="input-bordered input w-full max-w-xs"
               :value="endDateTime"
               @change="setScoreboardEnd"
             />
@@ -206,12 +209,12 @@ function exportCSV() {
             :class="['btn', isScoreboardFetching && 'loading']"
             @click="() => execute(getScoreboardUrl)"
           >
-            Fetch
+            {{ t("course.hw.stats.fetch") }}
           </button>
-          <button class="btn" @click="() => exportCSV()">Export</button>
+          <button class="btn" @click="() => exportCSV()">{{ t("course.hw.stats.export") }}</button>
         </div>
         <data-status-wrapper
-          :error="hwError || scoreboardError"
+          :error="(hwError || scoreboardError) as AxiosError"
           :is-loading="isHWFetching || isScoreboardFetching"
         >
           <template #loading>
@@ -221,10 +224,10 @@ function exportCSV() {
             <table class="table">
               <thead>
                 <tr>
-                  <th>user</th>
+                  <th>{{ t("course.hw.stats.table.user") }}</th>
                   <th class="text-center" v-for="pid in pids" :key="pid">{{ pid }}</th>
-                  <th class="text-center">avg</th>
-                  <th class="text-center">sum</th>
+                  <th class="text-center">{{ t("course.hw.stats.table.avg") }}</th>
+                  <th class="text-center">{{ t("course.hw.stats.table.sum") }}</th>
                 </tr>
               </thead>
               <tbody class="font-mono">
@@ -236,7 +239,7 @@ function exportCSV() {
                       :class="['flex h-full flex-col px-4 py-2 text-center', getCellColor(row[`${pid}`])]"
                     >
                       <div class="text-md">{{ row[`${pid}`].max }}</div>
-                      <div class="text-xs">{{ row[`${pid}`].count }} tries</div>
+                      <div class="text-xs">{{ row[`${pid}`].count }} {{ t("course.hw.stats.tries") }}</div>
                     </div>
                   </td>
                   <td class="text-center">{{ row.avg.toFixed(2) }}</td>

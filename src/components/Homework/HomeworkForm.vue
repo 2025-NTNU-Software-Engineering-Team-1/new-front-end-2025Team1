@@ -2,6 +2,9 @@
 import { toRef, computed, ref } from "vue";
 import useVuelidate from "@vuelidate/core";
 import { required, maxLength, minValue, helpers } from "@vuelidate/validators";
+import { containsInvisible } from "@/utils/validators";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 import dayjs from "dayjs";
 
 interface Props {
@@ -13,8 +16,13 @@ const isLoading = ref(false);
 const errorMsg = ref("");
 defineExpose({ isLoading, errorMsg });
 
+const noInvisible = helpers.withMessage(
+  () => t("components.hw.validation.contains_invisible"),
+  (value: unknown) => typeof value !== "string" || !containsInvisible(value),
+);
+
 const rules = {
-  name: { required, maxLength: maxLength(64) },
+  name: { required, maxLength: maxLength(64), noInvisible },
   markdown: { maxLength: maxLength(10000) },
   problemIds: { required },
   start: { required },
@@ -33,11 +41,13 @@ const emit = defineEmits<{
   (e: "submit"): void;
 }>();
 
-const startDateTime = computed(() => dayjs(props.form.start * 1000).format("YYYY-MM-DD\THH:mm"));
-const endDateTime = computed(() => dayjs(props.form.end * 1000).format("YYYY-MM-DD\THH:mm"));
+const startDateTime = computed(() => dayjs(props.form.start * 1000).format("YYYY-MM-DDTHH:mm"));
+const endDateTime = computed(() => dayjs(props.form.end * 1000).format("YYYY-MM-DDTHH:mm"));
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function handleStartDateTimeInput(event: any) {
   updateForm("start", dayjs(event.target.value).valueOf() / 1000);
 }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function handleEndDateTimeInput(event: any) {
   updateForm("end", dayjs(event.target.value).valueOf() / 1000);
 }
@@ -68,7 +78,7 @@ async function submit() {
       </label>
       <input
         type="text"
-        :class="['input input-bordered w-full max-w-xs', v$.name.$error && 'input-error']"
+        :class="['input-bordered input w-full max-w-xs', v$.name.$error && 'input-error']"
         :value="form.name"
         @input="updateForm('name', ($event.target as HTMLInputElement).value)"
       />
@@ -97,7 +107,7 @@ async function submit() {
       </label>
       <input
         type="datetime-local"
-        class="input input-bordered w-full max-w-xs"
+        class="input-bordered input w-full max-w-xs"
         :value="startDateTime"
         @change="handleStartDateTimeInput"
       />
@@ -112,7 +122,7 @@ async function submit() {
       </label>
       <input
         type="datetime-local"
-        class="input input-bordered w-full max-w-xs"
+        class="input-bordered input w-full max-w-xs"
         :value="endDateTime"
         @change="handleEndDateTimeInput"
       />
@@ -126,7 +136,7 @@ async function submit() {
         <span class="label-text">{{ $t("components.hw.form.descField") }}</span>
       </label>
       <textarea
-        class="textarea textarea-bordered h-24"
+        class="textarea-bordered textarea h-24"
         :value="form.markdown"
         @input="updateForm('markdown', ($event.target as HTMLTextAreaElement).value)"
       />

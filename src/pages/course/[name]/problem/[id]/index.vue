@@ -3,20 +3,35 @@ import { useAxios } from "@vueuse/integrations/useAxios";
 import { useRoute } from "vue-router";
 import { fetcher } from "@/models/api";
 import { useTitle } from "@vueuse/core";
+import { useSession } from "@/stores/session";
+import AIChatbot from "@/components/AIChatbot.vue";
+import type { AxiosError } from "axios";
 
 const route = useRoute();
+const session = useSession();
+
 useTitle(`Problem - ${route.params.id} - ${route.params.name} | Normal OJ`);
+// Ensure the generic type <Problem> is correct based on your API model
 const { data: problem, error, isLoading } = useAxios<Problem>(`/problem/view/${route.params.id}`, fetcher);
 </script>
 
 <template>
   <div class="card-container pb-40">
-    <data-status-wrapper :error="error" :is-loading="isLoading">
+    <data-status-wrapper :error="error as AxiosError" :is-loading="isLoading">
       <template #loading>
         <skeleton-card />
       </template>
       <template #data>
-        <problem-card v-if="problem" :problem="problem" />
+        <problem-card v-if="problem" :problem="problem as any" />
+
+        <AIChatbot
+          v-if="problem && Boolean(problem.config?.aiVTuber)"
+          :course-id="route.params.name as string"
+          :course-name="route.params.name as string"
+          :problem-id="route.params.id as string"
+          :current-code="''"
+          :username="session.username"
+        />
       </template>
     </data-status-wrapper>
   </div>

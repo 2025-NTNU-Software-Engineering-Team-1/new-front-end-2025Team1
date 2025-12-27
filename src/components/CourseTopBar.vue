@@ -8,7 +8,11 @@ const announcementsPage = { path: `/course/${route.params.name}/announcements`, 
 const homeworksPage = { path: `/course/${route.params.name}/homeworks`, text: "Homeworks" };
 const problemsPage = { path: `/course/${route.params.name}/problems`, text: "Problems" };
 const submissionsPage = { path: `/course/${route.params.name}/submissions`, text: "Submissions" };
-const membersPage = { path: `/course/${route.params.name}/members`, text: "Members" };
+
+//const membersPage = { path: `/course/${route.params.name}/members`, text: "Members" };
+
+const discussionPage = { path: `/course/${route.params.name}/discussion`, text: "Discussion" };
+const aiSettingPage = { path: `/course/${route.params.name}/aisetting`, text: "AI Setting" };
 const items: ComputedRef<{ [k: string | symbol]: { path: null | string; text: string }[] }> = computed(
   () => ({
     "course-name-announcements": [{ path: null, text: "Announcements" }],
@@ -20,7 +24,7 @@ const items: ComputedRef<{ [k: string | symbol]: { path: null | string; text: st
     "course-name-homeworks-id-edit": [homeworksPage, { path: null, text: `Edit ${route.params.id}` }],
     "course-name-homeworks-id-stats": [homeworksPage, { path: null, text: `Stats of ${route.params.id}` }],
     "course-name-problems": [{ path: null, text: "Problems" }],
-    "course-name-problems-new": [problemsPage, { path: null, text: "New Problem" }],
+    "course-name-problems-new": [problemsPage, { path: null, text: "New" }],
     "course-name-problem-id": [problemsPage, { path: null, text: `${route.params.id}` }],
     "course-name-problem-id-edit": [problemsPage, { path: null, text: `Edit ${route.params.id}` }],
     "course-name-problem-id-stats": [
@@ -39,9 +43,72 @@ const items: ComputedRef<{ [k: string | symbol]: { path: null | string; text: st
       },
       { path: null, text: "Submit" },
     ],
+    "course-name-problem-id-test": [
+      problemsPage,
+      {
+        path: `/course/${route.params.name}/problem/${route.params.id}`,
+        text: `${route.params.id}`,
+      },
+      { path: null, text: "Test" },
+    ],
+    "course-name-problem-id-test-cases": [
+      problemsPage,
+      {
+        path: `/course/${route.params.name}/problem/${route.params.id}`,
+        text: `${route.params.id}`,
+      },
+      {
+        path: `/course/${route.params.name}/problem/${route.params.id}/test`,
+        text: "Test",
+      },
+      { path: null, text: "Test Cases" },
+    ],
+    "course-name-problem-id-test-history": [
+      problemsPage,
+      {
+        path: `/course/${route.params.name}/problem/${route.params.id}`,
+        text: `${route.params.id}`,
+      },
+      {
+        path: `/course/${route.params.name}/problem/${route.params.id}/test`,
+        text: "Test",
+      },
+      { path: null, text: "Test History" },
+    ],
+    "course-name-problem-id-test-history-testId": [
+      problemsPage,
+      {
+        path: `/course/${route.params.name}/problem/${route.params.id}`,
+        text: `${route.params.id}`,
+      },
+      {
+        path: `/course/${route.params.name}/problem/${route.params.id}/test`,
+        text: "Test",
+      },
+      {
+        path: `/course/${route.params.name}/problem/${route.params.id}/test-history`,
+        text: "Test History",
+      },
+      { path: null, text: `${route.params.testId}` },
+    ],
     "course-name-submissions": [{ path: null, text: "Submissions" }],
     "course-name-submission-id": [submissionsPage, { path: null, text: `${route.params.id}` }],
     "course-name-members": [{ path: null, text: "Members" }],
+    "course-name-discussion": [{ path: null, text: "Discussion" }],
+    "course-name-discussion-Post": [discussionPage, { path: null, text: "New Post" }],
+    "course-name-discussion-Problems": [discussionPage, { path: null, text: "Problems" }],
+    "course-name-discussion-problem-problemId": [
+      discussionPage,
+      { path: `/course/${route.params.name}/discussion/Problems`, text: "Problems" },
+      { path: null, text: `Problem ${route.params.problemId}` },
+    ],
+    "course-name-discussion-id": [discussionPage, { path: null, text: `Post ${route.params.id}` }],
+    "course-name-aisetting": [{ path: null, text: "AI Setting" }],
+    "course-name-aisetting-setup": [aiSettingPage, { path: null, text: "Setup" }],
+    "course-name-aisetting-usage": [aiSettingPage, { path: null, text: "Usage" }],
+    "course-name-aisetting-skins": [aiSettingPage, { path: null, text: "Skin Management" }],
+    "course-name-login-records": [{ path: null, text: "Login Records" }],
+    "course-name-problem-new": [problemsPage, { path: null, text: "New" }],
   }),
 );
 </script>

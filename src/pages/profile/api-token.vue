@@ -8,34 +8,48 @@ import { useSession } from "@/stores/session";
 import { formatTime } from "@/utils/formatTime";
 import { VueDatePicker } from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
+import "./vue-datepicker-override.css";
+import PatManualModal from "@/components/Profile/PatManualModal.vue";
+import { containsInvisible } from "@/utils/validators";
 
 const { t } = useI18n();
 const session = useSession();
 
-// 主要資料與函式
-const allTokens = ref<APIToken[]>([]); // 從後端取得的原始資料
-const isLoading = ref(true);
-const searchQuery = ref(""); // 搜尋框的文字
+// DatePicker configuration: Always show on top (disable flip modifier)
+const datePickerPlacement = "top";
+const datePickerPopperOptions = {
+  modifiers: [
+    {
+      name: "flip",
+      enabled: false,
+    },
+  ],
+};
 
-// 篩選後的 Token 列表
+// --- Main Data & State ---
+const allTokens = ref<APIToken[]>([]); // Raw data from backend
+const isLoading = ref(true);
+const searchQuery = ref(""); // Search input text
+
+// --- Computed: Filtered Token List ---
 const filteredTokens = computed(() => {
   if (!searchQuery.value) {
     return allTokens.value;
   }
+  // Filter tokens by name (case-insensitive)
   return allTokens.value.filter((token) =>
     token.Name.toLowerCase().includes(searchQuery.value.toLowerCase()),
   );
 });
 
-// 後端串接點 (1/5) 取得所有 API Token
+// --- Lifecycle: Backend Integration Point (1/5) - Fetch All Tokens ---
 onMounted(async () => {
-  // 真實 API 請求
   try {
     isLoading.value = true;
     const response = await api.APIToken.getAll();
     allTokens.value = response.data.Tokens;
   } catch (error) {
-    console.error("無法取得 API Token 列表:", error);
+    console.error("Failed to fetch API Token list:", error);
   } finally {
     isLoading.value = false;
   }
@@ -43,46 +57,58 @@ onMounted(async () => {
   await getScopeOptions();
 });
 
+// Helper: Determine badge class based on status
 const getStatusClass = (status: string) => {
   if (status === "Active") return "badge-success";
   return "badge-ghost";
 };
 
+// --- Scope Options ---
 const scopeOptions = ref<string[]>([]);
-// 後端串接點 (2/5) - 取得可用的 Scope 選項
+
+// Backend Integration Point (2/5) - Fetch Available Scopes
 async function getScopeOptions() {
   try {
     const response = await api.APIToken.getScopes();
     scopeOptions.value = response.data.Scope;
   } catch (error) {
-    console.error("無法取得 Scope 選項:", error);
+    console.error("Failed to fetch Scope options:", error);
+    // Fallback options
     scopeOptions.value = ["Read-only", "Read/Write", "Admin", "None"];
   }
 }
 
-// 新增 Token
+// --- Create Token Logic ---
 const isCreateModalOpen = ref(false);
 const newApiTokenForm = reactive({ name: "", scopes: ["Read-only"], date: "" });
 
 function openCreateModal() {
+  // Reset form
   newApiTokenForm.name = "";
   newApiTokenForm.scopes = ["Read-only"];
   newApiTokenForm.date = "";
   isCreateModalOpen.value = true;
 }
 
-// 新增成功
+// Success Modal State
 const isSuccessModalOpen = ref(false);
 const newSecretKey = ref("");
 const { copy, copied, isSupported } = useClipboard({ source: newSecretKey });
 
-// 後端串接點 (3/5) - 新增 API Token
+// Backend Integration Point (3/5) - Create API Token
 async function handleCreate() {
+  // Validation
   if (!newApiTokenForm.name.trim()) {
     alert(t("profile.apiToken.create_modal.name_required_alert"));
     return;
   }
-  console.log("正在建立新的 Token:", newApiTokenForm);
+  if (containsInvisible(newApiTokenForm.name)) {
+    alert(t("profile.apiToken.create_modal.name_contains_invisible"));
+    return;
+  }
+
+  // Debug log for creation attempt
+  console.log("Creating new Token with data:", newApiTokenForm);
 
   try {
     const response = await api.APIToken.create({
@@ -95,34 +121,44 @@ async function handleCreate() {
       newSecretKey.value = response.data.Token;
       isCreateModalOpen.value = false;
       isSuccessModalOpen.value = true;
+
+      // Refresh list
       const tokenListResponse = await api.APIToken.getAll();
       allTokens.value = tokenListResponse.data.Tokens;
     } else {
-      alert(`建立失敗: ${response.data.Message}`);
+      alert(`Create failed: ${response.data.Message}`);
     }
   } catch (error) {
-    console.error("建立 API Token 失敗:", error);
-    alert("建立失敗，請查看 console");
+    console.error("API Token creation failed:", error);
+    alert("Creation failed, please check console.");
   }
 }
 
-// 編輯 Token
+// --- Edit Token Logic ---
 const isEditModalOpen = ref(false);
 const editingToken = ref<APIToken | null>(null);
 const editApiTokenForm = reactive({ name: "", scopes: [] as string[], date: "" });
 
 function openEditModal(token: APIToken) {
   editingToken.value = token;
+  // Populate form with existing data
   editApiTokenForm.name = token.Name;
   editApiTokenForm.scopes = [...token.Scope];
   editApiTokenForm.date = token.Due_Time;
   isEditModalOpen.value = true;
 }
 
-// 後端串接點 (4/5) - 編輯 API Token
+// Backend Integration Point (4/5) - Update API Token
 async function handleUpdate() {
   if (!editingToken.value) return;
-  console.log("正在更新 Token:", editingToken.value?.ID, "新資料:", editApiTokenForm);
+
+  if (containsInvisible(editApiTokenForm.name)) {
+    alert(t("profile.apiToken.edit_modal.name_contains_invisible"));
+    return;
+  }
+
+  // Debug log for update attempt
+  console.log("Updating Token ID:", editingToken.value?.ID, "New Data:", editApiTokenForm);
 
   try {
     const response = await api.APIToken.edit(editingToken.value.ID, {
@@ -132,20 +168,22 @@ async function handleUpdate() {
         Scope: editApiTokenForm.scopes,
       },
     });
+
     if (response.data.Type === "OK") {
       isEditModalOpen.value = false;
+      // Refresh list
       const tokenListResponse = await api.APIToken.getAll();
       allTokens.value = tokenListResponse.data.Tokens;
     } else {
-      alert(`更新失敗: ${response.data.Message}`);
+      alert(`Update failed: ${response.data.Message}`);
     }
   } catch (error) {
-    console.error("更新 API Token 失敗:", error);
-    alert("更新失敗，請查看 console");
+    console.error("API Token update failed:", error);
+    alert("Update failed, please check console.");
   }
 }
 
-// Scope 加減
+// --- Helper: Add/Remove Scopes in Form ---
 function addScope(form: "create" | "edit") {
   const targetForm = form === "create" ? newApiTokenForm : editApiTokenForm;
   targetForm.scopes.push("Read-only");
@@ -158,7 +196,7 @@ function removeScope(index: number, form: "create" | "edit") {
   }
 }
 
-// 查看 Scope 彈窗
+// --- View Scope Logic ---
 const isViewScopeModalOpen = ref(false);
 const viewingScopes = ref<string[]>([]);
 
@@ -167,7 +205,7 @@ function openViewScopeModal(token: APIToken) {
   isViewScopeModalOpen.value = true;
 }
 
-// 停用 Token
+// --- Deactivate Token Logic ---
 const isDeactivateModalOpen = ref(false);
 
 function openDeactivateModal(token: APIToken) {
@@ -175,23 +213,26 @@ function openDeactivateModal(token: APIToken) {
   isDeactivateModalOpen.value = true;
 }
 
-// 後端串接點 (5/5) - 停用 API Token
+// Backend Integration Point (5/5) - Deactivate API Token
 async function handleDeactivate() {
   if (!editingToken.value) return;
-  console.log("正在停用 Token:", editingToken.value?.ID);
+
+  // Debug log for deactivation
+  console.log("Deactivating Token ID:", editingToken.value?.ID);
 
   try {
     const response = await api.APIToken.deactivate(editingToken.value.ID);
     if (response.data.Type === "OK") {
       isDeactivateModalOpen.value = false;
+      // Refresh list
       const tokenListResponse = await api.APIToken.getAll();
       allTokens.value = tokenListResponse.data.Tokens;
     } else {
-      alert(`停用失敗: ${response.data.Message}`);
+      alert(`Deactivation failed: ${response.data.Message}`);
     }
   } catch (error) {
-    console.error("停用 API Token 失敗:", error);
-    alert("停用失敗，請查看 console");
+    console.error("API Token deactivation failed:", error);
+    alert("Deactivation failed, please check console.");
   }
 }
 </script>
@@ -202,23 +243,28 @@ async function handleDeactivate() {
       <div class="card-body">
         <div class="flex flex-wrap items-center justify-between gap-2">
           <h2 class="card-title text-2xl">{{ t("profile.apiToken.title") }}</h2>
-          <button class="btn btn-primary" @click="openCreateModal">
-            <i-uil-plus class="mr-2 h-5 w-5" />
-            {{ t("profile.apiToken.create_new_key") }}
-          </button>
+          <div class="flex items-center gap-2">
+            <PatManualModal />
+            <button class="btn btn-primary" @click="openCreateModal">
+              <i-uil-plus class="mr-2 h-5 w-5" />
+              {{ t("profile.apiToken.create_new_key") }}
+            </button>
+          </div>
         </div>
-        <p class="mt-4 text-sm text-base-content/70">
+        <p class="text-base-content/70 mt-4 text-sm">
           {{ t("profile.apiToken.description") }}
         </p>
+
         <div class="form-control mt-4">
-          <div class="input-group">
+          <div class="join w-full">
             <input
               type="text"
               v-model="searchQuery"
               :placeholder="t('profile.apiToken.search_placeholder')"
-              class="input input-bordered w-full"
+              class="input input-bordered join-item w-full"
             />
-            <button class="btn btn-square" aria-label="Search">
+
+            <button class="btn btn-square join-item" aria-label="Search">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 class="h-6 w-6"
@@ -299,15 +345,14 @@ async function handleDeactivate() {
     </div>
   </div>
 
-  <!-- 創建 Token 彈窗 -->
   <ui-dialog v-model="isCreateModalOpen">
     <template #title>
-      <div class="rounded-t-box -m-6 bg-primary p-6 text-primary-content">
+      <div class="rounded-t-box bg-primary text-primary-content -m-6 p-6">
         {{ t("profile.apiToken.create_modal.title") }}
       </div>
     </template>
     <template #content>
-      <div class="-m-6 bg-primary p-6 pt-0 text-primary-content">
+      <div class="bg-primary text-primary-content -m-6 p-6 pt-0">
         <div class="space-y-4">
           <div class="form-control w-full">
             <label class="label"
@@ -330,7 +375,7 @@ async function handleDeactivate() {
             >
             <div class="flex items-center gap-2">
               <select
-                class="select flex-grow bg-base-200 text-base-content"
+                class="select bg-base-200 text-base-content flex-grow"
                 v-model="newApiTokenForm.scopes[index]"
               >
                 <option v-for="option in scopeOptions" :key="option" :value="option">{{ option }}</option>
@@ -360,6 +405,10 @@ async function handleDeactivate() {
               format="yyyy-MM-dd HH:mm"
               time-picker-inline
               enable-time-picker
+              :teleport="'body'"
+              :auto-position="false"
+              :placement="datePickerPlacement"
+              :popper-options="datePickerPopperOptions"
             />
           </div>
         </div>
@@ -367,7 +416,7 @@ async function handleDeactivate() {
           <button class="btn btn-link text-primary-content" @click="isCreateModalOpen = false">
             {{ t("profile.apiToken.create_modal.cancel") }}
           </button>
-          <button class="btn btn-link font-bold text-primary-content" @click="handleCreate">
+          <button class="btn btn-link text-primary-content font-bold" @click="handleCreate">
             {{ t("profile.apiToken.create_modal.create") }}
           </button>
         </div>
@@ -375,15 +424,14 @@ async function handleDeactivate() {
     </template>
   </ui-dialog>
 
-  <!-- 編輯 Token 的彈窗 -->
   <ui-dialog v-model="isEditModalOpen">
     <template #title>
-      <div class="rounded-t-box -m-6 bg-primary p-6 text-primary-content">
+      <div class="rounded-t-box bg-primary text-primary-content -m-6 p-6">
         {{ t("profile.apiToken.edit_modal.title") }}
       </div>
     </template>
     <template #content>
-      <div class="-m-6 bg-primary p-6 pt-0 text-primary-content">
+      <div class="bg-primary text-primary-content -m-6 p-6 pt-0">
         <div class="space-y-4">
           <div class="form-control w-full">
             <label class="label"
@@ -391,7 +439,7 @@ async function handleDeactivate() {
                 t("profile.apiToken.edit_modal.original_info")
               }}</span></label
             >
-            <div class="rounded bg-base-300/20 p-2 font-mono text-sm">
+            <div class="bg-base-300/20 rounded p-2 font-mono text-sm">
               {Name: "{{ editingToken?.Name }}"; Scope: {{ editingToken?.Scope.join(", ") }}}
             </div>
           </div>
@@ -411,7 +459,7 @@ async function handleDeactivate() {
             >
             <div class="flex items-center gap-2">
               <select
-                class="select flex-grow bg-base-200 text-base-content"
+                class="select bg-base-200 text-base-content flex-grow"
                 v-model="editApiTokenForm.scopes[index]"
               >
                 <option v-for="option in scopeOptions" :key="option" :value="option">{{ option }}</option>
@@ -441,6 +489,10 @@ async function handleDeactivate() {
               format="yyyy-MM-dd HH:mm"
               time-picker-inline
               enable-time-picker
+              :teleport="'body'"
+              :auto-position="false"
+              :placement="datePickerPlacement"
+              :popper-options="datePickerPopperOptions"
             />
           </div>
         </div>
@@ -448,7 +500,7 @@ async function handleDeactivate() {
           <button class="btn btn-link text-primary-content" @click="isEditModalOpen = false">
             {{ t("profile.apiToken.create_modal.cancel") }}
           </button>
-          <button class="btn btn-link font-bold text-primary-content" @click="handleUpdate">
+          <button class="btn btn-link text-primary-content font-bold" @click="handleUpdate">
             {{ t("profile.apiToken.edit_modal.update") }}
           </button>
         </div>
@@ -456,7 +508,6 @@ async function handleDeactivate() {
     </template>
   </ui-dialog>
 
-  <!-- 創建成功後顯示的彈窗 -->
   <ui-dialog v-model="isSuccessModalOpen">
     <template #content>
       <div class="flex flex-col items-center gap-4 text-center">
@@ -465,11 +516,11 @@ async function handleDeactivate() {
           {{ t("profile.apiToken.success_modal.warning") }}
           <i-uil-exclamation-triangle class="text-warning" />
         </h3>
-        <p class="text-sm font-semibold text-warning">
+        <p class="text-warning text-sm font-semibold">
           {{ t("profile.apiToken.success_modal.message") }}
         </p>
         <div class="input-group w-full max-w-xs">
-          <input type="text" :value="newSecretKey" readonly class="input input-bordered w-full" />
+          <input type="text" :value="newSecretKey" readonly class="input-bordered input w-full" />
           <button v-if="isSupported" class="btn" @click="copy()">
             {{
               copied ? t("profile.apiToken.success_modal.copied") : t("profile.apiToken.success_modal.copy")
@@ -483,27 +534,26 @@ async function handleDeactivate() {
     </template>
   </ui-dialog>
 
-  <!-- 查看 Scope 的彈出視窗 -->
   <ui-dialog v-model="isViewScopeModalOpen">
     <template #title>
-      <div class="rounded-t-box -m-6 bg-primary p-6 text-primary-content">
+      <div class="rounded-t-box bg-primary text-primary-content -m-6 p-6">
         {{ t("profile.apiToken.view_scope_modal.title") }}
       </div>
     </template>
     <template #content>
-      <div class="-m-6 bg-primary p-6 pt-0 text-primary-content">
+      <div class="bg-primary text-primary-content -m-6 p-6 pt-0">
         <div class="space-y-2">
           <label class="label"
             ><span class="label-text text-primary-content">{{
               t("profile.apiToken.create_modal.scope_label")
             }}</span></label
           >
-          <div v-for="scope in viewingScopes" :key="scope" class="rounded bg-base-200 p-3 text-base-content">
+          <div v-for="scope in viewingScopes" :key="scope" class="bg-base-200 text-base-content rounded p-3">
             {{ scope }}
           </div>
         </div>
         <div class="modal-action">
-          <button class="btn btn-link font-bold text-primary-content" @click="isViewScopeModalOpen = false">
+          <button class="btn btn-link text-primary-content font-bold" @click="isViewScopeModalOpen = false">
             {{ t("profile.apiToken.success_modal.ok") }}
           </button>
         </div>
@@ -511,22 +561,21 @@ async function handleDeactivate() {
     </template>
   </ui-dialog>
 
-  <!-- 停用 Token 的確認彈窗 -->
   <ui-dialog v-model="isDeactivateModalOpen">
     <template #title>
-      <div class="rounded-t-box -m-6 bg-primary p-6 text-primary-content">
+      <div class="rounded-t-box bg-primary text-primary-content -m-6 p-6">
         {{ t("profile.apiToken.deactivate_modal.title") }}
       </div>
     </template>
     <template #content>
-      <div class="-m-6 bg-primary p-6 pt-0 text-primary-content">
+      <div class="bg-primary text-primary-content -m-6 p-6 pt-0">
         <div class="form-control w-full">
           <label class="label"
             ><span class="label-text text-primary-content/70">{{
               t("profile.apiToken.deactivate_modal.token_info")
             }}</span></label
           >
-          <div class="rounded bg-base-300/20 p-2 text-left font-mono text-sm">
+          <div class="bg-base-300/20 rounded p-2 text-left font-mono text-sm">
             {Name: "{{ editingToken?.Name }}"; Scope: {{ editingToken?.Scope.join(", ") }}}
           </div>
         </div>
@@ -534,7 +583,7 @@ async function handleDeactivate() {
           <button class="btn btn-link text-primary-content" @click="isDeactivateModalOpen = false">
             {{ t("profile.apiToken.create_modal.cancel") }}
           </button>
-          <button class="btn btn-link font-bold text-error" @click="handleDeactivate">
+          <button class="btn btn-link text-error font-bold" @click="handleDeactivate">
             {{ t("profile.apiToken.deactivate_modal.deactivate") }}
           </button>
         </div>

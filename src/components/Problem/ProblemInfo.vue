@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { defineProps } from "vue";
 import { PROBLEM_STATUS } from "@/constants";
 
 interface Props {
@@ -11,20 +10,33 @@ interface Props {
   tags: string[];
   visible: ProblemStatus;
   isAdmin: boolean;
+  isTeacher?: boolean;
+  isTA?: boolean;
+  // indicates whether AI-TA (aiVTuber) is enabled
+  aiVtuber?: boolean;
+  // indicates whether trial history is available for this problem
+  hasTrialHistory?: boolean;
 }
 defineProps<Props>();
 </script>
 
 <template>
-  <div class="collapse collapse-arrow rounded-box bg-base-200">
+  <div class="collapse-arrow rounded-box bg-base-200 collapse">
     <input type="checkbox" class="peer" />
     <div class="collapse-title bg-base-200 text-base">
       <div class="flex flex-col">
-        <span class="text-lg font-bold">{{ problemName }}</span>
+        <div class="flex items-center gap-2">
+          <span class="text-lg font-bold">{{ problemName }}</span>
+          <span
+            v-if="aiVtuber"
+            class="inline-flex items-center rounded-full bg-gradient-to-r from-purple-400 to-indigo-400 px-2 py-0.5 text-xs font-medium text-white"
+            >AI-TA</span
+          >
+        </div>
         <span class="text-sm font-light"> ID: {{ id }}</span>
       </div>
     </div>
-    <div class="collapse-content flex flex-col gap-2 bg-base-300">
+    <div class="collapse-content bg-base-300 flex flex-col gap-2">
       <div class="mt-3 flex flex-col">
         <div class="flex gap-1">
           <div v-for="tag in tags" :key="tag" class="badge badge-info">
@@ -45,7 +57,21 @@ defineProps<Props>();
             <template v-else> {{ quotaRemaining }} / {{ quotaLimit }} </template>
           </div>
         </div>
-        <div v-if="isAdmin" class="stat">
+        <div v-if="hasTrialHistory" class="stat">
+          <div class="stat-figure text-base-content">
+            <i-uil-history class="h-6 w-6" />
+          </div>
+          <div class="stat-title text-sm">Test History</div>
+          <div class="stat-value text-lg">
+            <router-link
+              class="btn btn-ghost btn-sm"
+              :to="`/course/${$route.params.name}/problem/${id}/test-history?from=problems`"
+            >
+              <i-uil-history class="h-5 w-5" /> View
+            </router-link>
+          </div>
+        </div>
+        <div v-if="isAdmin || isTeacher || isTA" class="stat">
           <div class="stat-figure text-base-content">
             <i-uil-eye class="h-6 w-6" />
           </div>
@@ -54,7 +80,7 @@ defineProps<Props>();
             {{ visible === PROBLEM_STATUS.VISIBLE ? "Public" : "Hidden" }}
           </div>
         </div>
-        <div v-if="isAdmin" class="stat">
+        <div v-if="isAdmin || isTeacher || isTA" class="stat">
           <div class="stat-figure text-base-content">
             <i-uil-monitor class="h-6 w-6" />
           </div>
@@ -62,7 +88,7 @@ defineProps<Props>();
           <div class="stat-value text-lg">
             <div class="tooltip" data-tip="Stats">
               <router-link
-                class="btn btn-circle btn-ghost btn-sm mr-1"
+                class="btn btn-ghost btn-sm btn-circle mr-1"
                 :to="`/course/${$route.params.name}/problem/${id}/stats`"
               >
                 <i-uil-chart-line class="lg:h-5 lg:w-5" />
@@ -70,7 +96,7 @@ defineProps<Props>();
             </div>
             <div class="tooltip" data-tip="Copycat">
               <router-link
-                class="btn btn-circle btn-ghost btn-sm mr-1"
+                class="btn btn-ghost btn-sm btn-circle mr-1"
                 :to="`/course/${$route.params.name}/problem/${id}/copycat`"
               >
                 <i-uil-file-exclamation-alt class="lg:h-5 lg:w-5" />
@@ -78,7 +104,7 @@ defineProps<Props>();
             </div>
             <div class="tooltip" data-tip="Edit">
               <router-link
-                class="btn btn-circle btn-ghost btn-sm"
+                class="btn btn-ghost btn-sm btn-circle"
                 :to="`/course/${$route.params.name}/problem/${id}/edit`"
               >
                 <i-uil-edit class="lg:h-5 lg:w-5" />

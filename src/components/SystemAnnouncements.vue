@@ -3,6 +3,7 @@ import { useSession } from "@/stores/session";
 import { formatTime } from "@/utils/formatTime";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import { fetcher } from "@/models/api";
+import { AxiosError } from "axios";
 
 import useInteractions from "@/composables/useInteractions";
 
@@ -14,17 +15,20 @@ const { data: announcements, error, isLoading } = useAxios<AnnouncementList>("/a
 </script>
 
 <template>
-  <div class="card-container">
-    <div v-if="isDesktop" class="card min-w-full">
-      <div class="card-body">
-        <div class="card-title mb-3">{{ $t("components.systemAnn.ann") }}</div>
-        <div class="my-2" />
+  <div v-if="isDesktop" class="card min-w-full">
+    <div class="card-body">
+      <div class="card-title mb-3 flex items-center gap-2">
+        <i-uil-megaphone />
+        {{ $t("components.systemAnn.ann") }}
+      </div>
+      <div class="my-2" />
 
-        <data-status-wrapper :error="error" :is-loading="isLoading">
-          <template #loading>
-            <skeleton-table :col="3" :row="5" />
-          </template>
-          <template #data>
+      <data-status-wrapper :error="error as AxiosError" :is-loading="isLoading">
+        <template #loading>
+          <skeleton-table :col="3" :row="5" />
+        </template>
+        <template #data>
+          <div class="max-h-[30rem] overflow-y-auto">
             <table class="table w-full">
               <thead>
                 <tr>
@@ -36,7 +40,10 @@ const { data: announcements, error, isLoading } = useAxios<AnnouncementList>("/a
               <tbody>
                 <tr v-for="{ title, createTime, annId } in announcements" :key="annId" class="hover">
                   <td>
-                    <router-link :to="`/announcements/${annId}`" class="link link-hover">
+                    <router-link
+                      :to="`/announcements/${annId}`"
+                      class="text-base-content/80 dark:text-base-content/80 visited:text-base-content/80 dark:visited:text-base-content/80 block min-w-0 break-words whitespace-normal hover:underline"
+                    >
                       {{ title }}
                     </router-link>
                   </td>
@@ -44,7 +51,7 @@ const { data: announcements, error, isLoading } = useAxios<AnnouncementList>("/a
                   <td v-if="session.isAdmin">
                     <div class="tooltip" data-tip="Edit">
                       <router-link
-                        class="btn btn-circle btn-ghost btn-sm"
+                        class="btn btn-ghost btn-sm btn-circle"
                         :to="`/course/Public/announcements/${annId}/edit`"
                       >
                         <i-uil-edit class="lg:h-5 lg:w-5" />
@@ -54,50 +61,56 @@ const { data: announcements, error, isLoading } = useAxios<AnnouncementList>("/a
                 </tr>
               </tbody>
             </table>
-          </template>
-        </data-status-wrapper>
-      </div>
+          </div>
+        </template>
+      </data-status-wrapper>
     </div>
-    <div v-else class="card min-w-full">
-      <div class="card-body">
-        <data-status-wrapper :error="error" :is-loading="isLoading">
-          <template #loading>
-            <skeleton-table :col="1" :row="5" />
-          </template>
-          <template #data>
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>{{ $t("components.systemAnn.ann") }}</th>
-                  <th v-if="session.isAdmin"></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="{ title, createTime, annId } in announcements" :key="annId" class="hover">
-                  <td class="min-w-[10rem] max-w-[12rem] truncate">
-                    <router-link :to="`/announcements/${annId}`" class="link link-hover max-w-full text-lg">
+  </div>
+  <div v-else class="space-y-4">
+    <h2 class="text-base-content flex items-center gap-2 px-1 text-xl font-bold">
+      <i-uil-megaphone />
+      {{ $t("components.systemAnn.ann") }}
+    </h2>
+
+    <data-status-wrapper :error="error as AxiosError | undefined" :is-loading="isLoading">
+      <template #loading>
+        <div class="skeleton mb-3 h-20 w-full rounded-xl" v-for="i in 3" :key="i"></div>
+      </template>
+      <template #data>
+        <div class="scrollbar-thin flex max-h-[30rem] flex-col gap-3 overflow-y-auto p-1">
+          <div
+            v-for="{ title, createTime, annId } in announcements"
+            :key="annId"
+            class="card bg-base-100 border-base-200 border shadow-sm"
+          >
+            <div class="card-body p-4">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0 flex-1">
+                  <h3 class="text-lg leading-snug font-bold">
+                    <router-link
+                      :to="`/announcements/${annId}`"
+                      class="hover:text-primary block transition-colors hover:underline"
+                    >
                       {{ title }}
                     </router-link>
-                    <br />
-                    <!-- we can't use flex if we want to truncate the text -->
-                    <span class="text-sm">{{ formatTime(createTime) }}</span>
-                  </td>
-                  <td v-if="session.isAdmin">
-                    <div class="tooltip" data-tip="Edit">
-                      <router-link
-                        class="btn btn-circle btn-ghost btn-sm"
-                        :to="`/course/Public/announcements/${annId}/edit`"
-                      >
-                        <i-uil-edit class="lg:h-5 lg:w-5" />
-                      </router-link>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </template>
-        </data-status-wrapper>
-      </div>
-    </div>
+                  </h3>
+                  <div class="text-base-content/60 mt-1 text-xs">
+                    {{ formatTime(createTime) }}
+                  </div>
+                </div>
+                <div v-if="session.isAdmin" class="shrink-0">
+                  <router-link
+                    class="btn btn-ghost btn-xs btn-circle"
+                    :to="`/course/Public/announcements/${annId}/edit`"
+                  >
+                    <i-uil-edit />
+                  </router-link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+    </data-status-wrapper>
   </div>
 </template>

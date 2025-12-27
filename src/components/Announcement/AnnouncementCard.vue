@@ -11,8 +11,17 @@ defineProps<Props>();
   <div class="card-container">
     <div class="card min-w-full">
       <div class="card-body">
-        <div class="card-title mb-8">{{ announcement.title }}</div>
-        <markdown-renderer :md="announcement.markdown" />
+        <div class="card-title mb-8 flex w-full items-start gap-2">
+          <span v-if="announcement.pinned" class="shrink-0 text-xl" title="置頂">📌</span>
+          <span
+            class="text-base-content/80 dark:text-base-content/80 block min-w-0 flex-1 text-2xl font-bold break-all whitespace-normal"
+          >
+            {{ announcement.title }}
+          </span>
+        </div>
+        <div class="w-full overflow-x-hidden break-all">
+          <markdown-renderer :md="announcement.markdown" />
+        </div>
 
         <div class="mt-4 flex items-center gap-2 text-sm">
           {{ $t("components.ann.card.lastUpdate", { time: formatTime(announcement.updateTime) }) }}

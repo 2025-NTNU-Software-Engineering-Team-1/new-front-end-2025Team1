@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import useVuelidate from "@vuelidate/core";
-import { required, maxLength } from "@vuelidate/validators";
+import { required, maxLength, helpers } from "@vuelidate/validators";
 
 interface Props {
   value: Announcement | AnnouncementForm;
@@ -11,10 +11,25 @@ const isLoading = ref(false);
 const errorMsg = ref("");
 defineExpose({ isLoading, errorMsg });
 
+import { containsInvisible } from "@/utils/validators";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
+
+const notBlank = helpers.withMessage(
+  () => t("components.validation.not_blank"),
+  (value: unknown) => typeof value === "string" && value.trim().length > 0,
+);
+const noInvisible = helpers.withMessage(
+  () => t("components.validation.contains_invisible"),
+  (value: unknown) => typeof value !== "string" || !containsInvisible(value),
+);
+
 const rules = {
-  title: { required, maxLength: maxLength(64) },
+  title: { required, notBlank, noInvisible, maxLength: maxLength(64) },
+  // Allow markdown to contain invisible characters (authors may paste content), only enforce length
   markdown: { maxLength: maxLength(100000) },
-  pinned: { required },
+  // pinned is a boolean (true/false). Do NOT use `required` here because `required` treats `false` as invalid.
+  pinned: {},
 };
 const v$ = useVuelidate(rules, props.value);
 
@@ -49,7 +64,7 @@ async function submit() {
       </label>
       <input
         type="text"
-        :class="['input input-bordered w-full max-w-xs', v$.title.$error && 'input-error']"
+        :class="['input-bordered input w-full max-w-xs', v$.title.$error && 'input-error']"
         :value="value.title"
         @input="updateForm('title', ($event.target as HTMLInputElement).value)"
       />
@@ -75,7 +90,7 @@ async function submit() {
         <span class="label-text">{{ $t("components.ann.form.descField") }}</span>
       </label>
       <textarea
-        :class="['textarea textarea-bordered h-24', v$.markdown.$error && 'textarea-error']"
+        :class="['textarea-bordered textarea h-24', v$.markdown.$error && 'textarea-error']"
         :value="value.markdown"
         @input="updateForm('markdown', ($event.target as HTMLTextAreaElement).value)"
       />

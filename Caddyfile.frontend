@@ -1,0 +1,17 @@
+:80 {
+    root * /srv
+
+    # Block source files for security (belt and suspenders)
+    @blocked {
+        path /src/* *.ts *.vue *.tsx *.jsx
+    }
+    respond @blocked 404
+
+    # Enable gzip compression
+    encode gzip
+
+    # SPA fallback: try file, then index.html
+    try_files {path} /index.html
+
+    file_server
+}

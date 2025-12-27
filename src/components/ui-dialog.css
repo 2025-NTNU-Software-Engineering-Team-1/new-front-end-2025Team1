@@ -1,0 +1,16 @@
+/*
+  Custom style for ui-dialog modal overlay to support light/dark mode.
+*/
+
+.ui-dialog-overlay {
+  /* Use a CSS variable for overlay color, fallback to rgba for safety */
+  background-color: var(--dialog-overlay-bg, rgba(0, 0, 0, 0.25));
+}
+
+:root,
+[data-theme="light"] {
+  --dialog-overlay-bg: rgba(200, 210, 220, 0.5); /* light bluish/grayish overlay */
+}
+[data-theme="dark"] {
+  --dialog-overlay-bg: rgba(0, 0, 0, 0.25); /* dark overlay */
+}

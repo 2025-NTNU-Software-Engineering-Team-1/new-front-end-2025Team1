@@ -12,6 +12,7 @@ export enum UserRole {
   Admin = 0,
   Teacher = 1,
   Student = 2,
+  TA = 3,
 }
 
 export const useSession = defineStore("session", {
@@ -28,6 +29,12 @@ export const useSession = defineStore("session", {
   getters: {
     isAdmin(state) {
       return state.role === UserRole.Admin;
+    },
+    isTeacher(state) {
+      return state.role === UserRole.Teacher;
+    },
+    isTA(state) {
+      return state.role === UserRole.TA;
     },
     isNotValidated(state) {
       return state.state === SessionState.NotValidated;
@@ -49,7 +56,11 @@ export const useSession = defineStore("session", {
         this.bio = bio;
         this.role = role;
         this.email = email;
-        this.state = SessionState.IsLogin;
+        if (role === UserRole.Guest) {
+          this.state = SessionState.IsNotLogin;
+        } else {
+          this.state = SessionState.IsLogin;
+        }
       } catch {
         this.$reset();
         this.state = SessionState.IsNotLogin;

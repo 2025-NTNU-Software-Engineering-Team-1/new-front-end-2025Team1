@@ -5,7 +5,7 @@ import { useTitle } from "@vueuse/core";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import { useRoute, useRouter } from "vue-router";
 import api, { fetcher } from "@/models/api";
-import axios from "axios";
+import axios, { type AxiosError } from "axios";
 import AnnouncementForm from "@/components/Announcement/AnnouncementForm.vue";
 
 const route = useRoute();
@@ -94,7 +94,7 @@ function discard() {
           Edit Announcement
           <div class="flex gap-x-3">
             <button
-              :class="['btn btn-outline btn-error btn-sm lg:btn-md', formElement?.isLoading && 'loading']"
+              :class="['btn btn-error btn-outline btn-sm lg:btn-md', formElement?.isLoading && 'loading']"
               @click="delete_"
             >
               <i-uil-trash-alt class="mr-1 lg:h-5 lg:w-5" /> Delete
@@ -108,7 +108,7 @@ function discard() {
           </div>
         </div>
 
-        <data-status-wrapper :error="fetchError" :is-loading="isFetching">
+        <data-status-wrapper :error="fetchError as AxiosError" :is-loading="isFetching">
           <template #loading>
             <skeleton-card />
           </template>

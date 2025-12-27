@@ -14,6 +14,8 @@ const tab = useStorage(LOCAL_STORAGE_KEY.ADMIN_TAB, "/admin/user");
 const tabs = [
   { text: t("admin.tab.dashboard"), value: "/admin/dashboard" },
   { text: t("admin.tab.user"), value: "/admin/user" },
+  { text: t("admin.tab.loginRecords"), value: "/admin/login-records" },
+  { text: t("admin.tab.skins"), value: "/admin/skins" },
 ];
 watchEffect(() => {
   if (!tabs.some((d) => d.value === route.path)) {
@@ -37,7 +39,7 @@ watchEffect(() => {
           <router-link
             v-for="tab in tabs"
             :key="tab.value"
-            :class="['tab tab-bordered', $route.path === tab.value && 'tab-active']"
+            :class="['tab-bordered tab', $route.path === tab.value && 'tab-active']"
             :to="tab.value"
             >{{ tab.text }}</router-link
           >

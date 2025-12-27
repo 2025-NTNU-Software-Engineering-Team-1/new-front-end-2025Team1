@@ -4,7 +4,7 @@ import { useTitle } from "@vueuse/core";
 import { useRoute, useRouter } from "vue-router";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import api, { fetcher } from "@/models/api";
-import axios from "axios";
+import axios, { type AxiosError } from "axios";
 import { useProblemSelection } from "@/composables/useProblemSelection";
 import HomeworkForm from "@/components/Homework/HomeworkForm.vue";
 
@@ -95,7 +95,7 @@ function discard() {
           Edit homework: {{ edittingHomework?.name }}
           <div class="flex gap-x-3">
             <button
-              :class="['btn btn-outline btn-error btn-sm lg:btn-md', formElement?.isLoading && 'loading']"
+              :class="['btn btn-error btn-outline btn-sm lg:btn-md', formElement?.isLoading && 'loading']"
               @click="delete_"
             >
               <i-uil-trash-alt class="mr-1 lg:h-5 lg:w-5" /> Delete
@@ -110,7 +110,7 @@ function discard() {
         </div>
 
         <data-status-wrapper
-          :error="fetchError || fetchProblemError"
+          :error="(fetchError || fetchProblemError) as AxiosError"
           :is-loading="isFetching || isFetchingProblem"
         >
           <template #loading>

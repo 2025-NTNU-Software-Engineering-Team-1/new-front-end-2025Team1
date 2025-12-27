@@ -3,6 +3,7 @@ import { useTitle } from "@vueuse/core";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import { useRoute } from "vue-router";
 import { fetcher } from "@/models/api";
+import type { AxiosError } from "axios";
 
 const route = useRoute();
 
@@ -20,7 +21,7 @@ const {
       <i-uil-left-arrow-to-left class="mr-1" /> {{ $t("ann.id.back") }}
     </router-link>
 
-    <data-status-wrapper :error="error" :is-loading="isLoading">
+    <data-status-wrapper :error="error as AxiosError" :is-loading="isLoading">
       <template #loading>
         <skeleton-card />
       </template>

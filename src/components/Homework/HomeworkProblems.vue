@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useSession } from "@/stores/session";
+import { useSession, UserRole } from "@/stores/session";
 import { useI18n } from "vue-i18n";
 import type { ProblemId2Meta } from "@/composables/useProblemSelection";
 import { isQuotaUnlimited } from "@/constants";
@@ -9,14 +9,45 @@ interface Props {
   problems: ProblemId2Meta;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
 
 const { t } = useI18n();
 const session = useSession();
+
+/**
+ * Get the score for a specific problem in the homework.
+ * Handles different studentStatus structures:
+ * - For admin/teacher (role < 2): studentStatus is { username: { pid: { score } } }
+ * - For student (role >= 2): studentStatus is { pid: { score } } (already filtered to current user)
+ */
+function getScore(pid: number): number | string {
+  const studentStatus = props.homework.studentStatus;
+  if (!studentStatus) return "-";
+
+  const pidStr = pid.toString();
+
+  // Check if user is admin or teacher (role < 2)
+  if (session.role < UserRole.Student) {
+    // Admin/Teacher: studentStatus is nested by username
+    const userStatus = studentStatus[session.username];
+    if (userStatus && userStatus[pidStr]) {
+      return userStatus[pidStr].score ?? "-";
+    }
+  } else {
+    // Student: studentStatus is directly the user's status (pid -> status)
+    // The backend already returns only this user's status
+    const problemStatus = (studentStatus as Record<string, { score?: number }>)[pidStr];
+    if (problemStatus) {
+      return problemStatus.score ?? "-";
+    }
+  }
+
+  return "-";
+}
 </script>
 
 <template>
-  <table class="table table-compact mt-2 w-full">
+  <table class="table-compact mt-2 table w-full">
     <thead>
       <tr>
         <th>{{ t("components.hw.card.problems.id") }}</th>
@@ -48,12 +79,7 @@ const session = useSession();
           <span v-else>{{ problems[pid.toString()].quota }}</span>
         </td>
         <td>
-          {{
-            (
-              homework.studentStatus[session.username] &&
-              homework.studentStatus[session.username][pid.toString()]
-            )?.score || "-"
-          }}
+          {{ getScore(pid) }}
         </td>
         <td>
           <div class="tooltip" data-tip="Stats">

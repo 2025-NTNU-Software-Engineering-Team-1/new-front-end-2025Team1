@@ -502,11 +502,15 @@ const Chatbot = {
       data: { text: string; emotion?: string }[];
     }>("/ai/chatbot/ask", body),
 
-  // 取得歷史紀錄：GET /ai/chatbot/history?course_id=...&username=...
+  // 取得歷史紀錄：GET /ai/chatbot/history?course_name=...&username=...
   getHistory: (params: { course_name: string; username: string }) =>
     fetcher.get<{
       data: { role: string; text: string }[];
     }>("/ai/chatbot/history", { params }),
+
+  // 清除對話紀錄：DELETE /ai/chatbot/history?course_name=...
+  resetHistory: (params: { course_name: string }) =>
+    fetcher.delete<{ message: string }>("/ai/chatbot/history", { params }),
 };
 
 // VtuberSkin types

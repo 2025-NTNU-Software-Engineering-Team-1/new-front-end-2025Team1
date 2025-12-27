@@ -184,7 +184,7 @@ function viewTestDetail(testId: string | number) {
 const isRejudgeAllLoading = ref(false);
 async function rejudgeAll() {
   const problemId = Number(route.params.id);
-  if (!confirm(`Are you sure you want to rejudge ALL trial submissions for problem ${problemId}?`)) {
+  if (!confirm(t("course.problem.test.trialHistory.rejudgeAllConfirm", { id: String(problemId) }))) {
     return;
   }
   isRejudgeAllLoading.value = true;
@@ -208,7 +208,7 @@ const deleteErrorMessage = ref<string>("");
 async function deleteTrialSubmission(id: string | number, event: Event) {
   event.stopPropagation(); // Prevent row click navigation
 
-  if (!confirm(`Are you sure you want to delete trial submission ${id}?`)) {
+  if (!confirm(t("course.problem.test.trialHistory.deleteConfirm", { id: String(id) }))) {
     return;
   }
 
@@ -274,7 +274,7 @@ function closeDeleteErrorModal() {
                 <thead>
                   <tr>
                     <th>{{ t("course.problem.test.historyModal.table.id") }}</th>
-                    <th class="text-center">Type</th>
+                    <th class="text-center">{{ t("course.problem.test.trialHistory.type") }}</th>
                     <th>PID</th>
                     <th>{{ t("course.problem.test.historyModal.table.result") }}</th>
                     <th>{{ t("course.problem.test.historyModal.table.score") }}</th>
@@ -302,7 +302,7 @@ function closeDeleteErrorModal() {
                       <span
                         :class="['badge badge-sm', item.type === 'public' ? 'badge-info' : 'badge-warning']"
                       >
-                        {{ item.type === "public" ? "Public" : "Custom" }}
+                        {{ item.type === "public" ? t("course.problem.test.trialHistory.public") : t("course.problem.test.trialHistory.custom") }}
                       </span>
                     </td>
                     <td>{{ item.pid }}</td>
@@ -337,11 +337,11 @@ function closeDeleteErrorModal() {
     <div class="modal-box">
       <h3 class="text-error text-lg font-bold">
         <i-uil-exclamation-triangle class="mr-2 inline" />
-        Delete Failed
+        {{ t("course.problem.test.trialHistory.deleteFailed") }}
       </h3>
       <p class="py-4">{{ deleteErrorMessage }}</p>
       <div class="modal-action">
-        <button class="btn" @click="closeDeleteErrorModal">Close</button>
+        <button class="btn" @click="closeDeleteErrorModal">{{ t("course.problem.test.trialHistory.close") }}</button>
       </div>
     </div>
     <form method="dialog" class="modal-backdrop">

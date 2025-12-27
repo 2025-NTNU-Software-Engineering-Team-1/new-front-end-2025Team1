@@ -17,7 +17,7 @@ import "katex/dist/katex.min.css";
 import type { AxiosError } from "axios";
 import { useSession } from "@/stores/session";
 import AIChatbot from "@/components/AIChatbot.vue";
-import AITestcaseModal from "@/components/AITestcaseModal.vue";
+
 
 const md = new MarkdownIt({
   html: true,
@@ -73,7 +73,7 @@ const hasCustomTestcases = ref(false); // Track if custom testcases exist
 // Unified preview modal state (public or custom)
 const showTestcasePreviewModal = ref(false);
 const previewMode = ref<"custom" | "public">("custom");
-const showAITestcaseModal = ref(false);
+
 
 // custom
 const customTestcaseFiles = ref<Array<{ name: string; content: string }>>([]);
@@ -801,10 +801,7 @@ async function submitCode() {
 
                   <!-- Action Buttons - Normal size to match Submit button -->
                   <div class="flex gap-2">
-                    <button class="btn btn-outline gap-1.5" @click="showAITestcaseModal = true">
-                      <i-uil-robot class="h-5 w-5" />
-                      {{ t("aiChatbot.testcaseGenerator.button") }}
-                    </button>
+
                     <router-link
                       class="btn btn-outline gap-1.5"
                       :to="`/course/${route.params.name}/problem/${route.params.id}/test-history`"
@@ -1007,16 +1004,6 @@ async function submitCode() {
       :username="session.username"
     />
 
-    <AITestcaseModal
-      v-if="showAITestcaseModal"
-      :problem-id="route.params.id as string"
-      :course-name="route.params.name as string"
-      @close="showAITestcaseModal = false"
-      @use-testcase="
-        (input: string) => {
-          /* TODO: Use generated testcase */ console.log('Generated input:', input);
-        }
-      "
-    />
+
   </div>
 </template>

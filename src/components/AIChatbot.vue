@@ -17,7 +17,7 @@ const props = defineProps<{
   username: string;
 }>();
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 type ChatMessage = {
   id: number;
@@ -497,6 +497,7 @@ const requestAiReply = async (userText: string) => {
       current_code: props.currentCode ?? "",
       course_name: props.courseName ?? "",
       problem_id: String(props.problemId ?? ""),
+      language: locale.value,
     });
 
     const data = extractPayload(res);
@@ -576,6 +577,17 @@ const send = () => {
 const sendExplain = () => {
   if (isAwaitingReply.value) return;
   pushUserMessage(t("aiChatbot.explain"));
+};
+
+const resetHistory = async () => {
+  if (isAwaitingReply.value) return;
+  try {
+    await api.Chatbot.resetHistory({ course_name: props.courseName });
+    messages.value = [];
+    nextId = 1;
+  } catch (e) {
+    console.error("[AIChat] reset history error:", e);
+  }
 };
 
 // ====== Live2D 初始化 ======
@@ -752,6 +764,28 @@ onBeforeUnmount(() => {
               </div>
             </div>
 
+            <div class="flex items-center gap-1">
+              <!-- Reset History Button -->
+              <button
+                class="chat-icon-btn flex h-8 w-8 items-center justify-center rounded-full bg-white/10 hover:bg-white/20"
+                :title="t('aiChatbot.resetHistory')"
+                :disabled="isAwaitingReply"
+                @click="resetHistory"
+              >
+                <svg
+                  class="h-4 w-4 text-white"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                  <path d="M3 3v5h5" />
+                </svg>
+              </button>
+
             <button
               class="chat-icon-btn flex h-8 w-8 items-center justify-center rounded-full bg-white/10 hover:bg-white/20"
               @click="closeChat"
@@ -768,6 +802,7 @@ onBeforeUnmount(() => {
                 <path d="M6 6l12 12M18 6L6 18" />
               </svg>
             </button>
+            </div>
           </header>
 
           <!-- 訊息區 -->

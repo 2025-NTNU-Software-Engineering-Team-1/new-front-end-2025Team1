@@ -2,9 +2,9 @@
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useTitle } from "@vueuse/core";
-// api import removed - not currently used
 import { useI18n } from "vue-i18n";
 import { ZipReader, BlobReader, TextWriter, ZipWriter, BlobWriter, TextReader } from "@zip.js/zip.js";
+import AITestcaseModal from "@/components/AITestcaseModal.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -18,6 +18,7 @@ const selectedTestcaseContent = ref("");
 const isLoading = ref(false);
 const saveSuccess = ref(false);
 const saveError = ref(false);
+const showAITestcaseModal = ref(false);
 
 // Load existing custom testcases from localStorage
 onMounted(() => {
@@ -206,6 +207,27 @@ const isAllSelected = computed({
     }
   },
 });
+
+// Handle AI-generated testcases (only .in files, trial mode doesn't need .out)
+// Format: XXYY.in where XX=task, YY=case. Start from 0000.
+function handleAITestcase(inputs: string[]) {
+  // Find the next available starting number
+  const existingNums = testcaseFiles.value
+    .filter(f => f.name.endsWith('.in'))
+    .map(f => parseInt(f.name.replace('.in', ''), 10))
+    .filter(n => !isNaN(n));
+  
+  let nextNum = 0;
+  if (existingNums.length > 0) {
+    nextNum = Math.max(...existingNums) + 1;
+  }
+  
+  for (let i = 0; i < inputs.length; i++) {
+    const fileNum = String(nextNum + i).padStart(4, '0');
+    testcaseFiles.value.push({ name: `${fileNum}.in`, content: inputs[i] });
+    selectedTestcases.value.push(`${fileNum}.in`);
+  }
+}
 </script>
 
 <template>
@@ -244,6 +266,14 @@ const isAllSelected = computed({
               accept=".zip"
               @change="handleTestcaseUpload"
             />
+            <!-- AI Generate Button -->
+            <button
+              class="btn btn-outline gap-1.5"
+              @click="showAITestcaseModal = true"
+            >
+              <i-uil-robot class="h-5 w-5" />
+              {{ t("aiChatbot.testcaseGenerator.button") }}
+            </button>
           </div>
         </div>
 
@@ -331,5 +361,17 @@ const isAllSelected = computed({
         </div>
       </div>
     </div>
+
+    <!-- AI Testcase Generator Modal -->
+    <AITestcaseModal
+      v-if="showAITestcaseModal"
+      :problem-id="route.params.id as string"
+      :course-name="route.params.name as string"
+      @close="showAITestcaseModal = false"
+      @use-testcases="(inputs: string[]) => {
+        handleAITestcase(inputs);
+        showAITestcaseModal = false;
+      }"
+    />
   </div>
 </template>

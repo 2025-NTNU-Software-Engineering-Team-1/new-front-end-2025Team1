@@ -384,7 +384,8 @@ watch(open, (v) => (document.body.style.overflow = v ? "hidden" : ""));
                 <h1 class="mb-10 text-3xl font-extrabold tracking-tight lg:text-5xl">
                   {{ activePage.title }}
                 </h1>
-                <MarkdownRenderer :md="activePage.md" :preserve-whitespace="false" />
+                <!-- Filter out the first # H1 from the markdown content to avoid duplication with the title above -->
+                <MarkdownRenderer :md="activePage.md.replace(/^#\s+.+$/m, '')" :preserve-whitespace="false" />
               </template>
               <div v-else class="mt-10 text-center opacity-50">{{ uiText.pageNotFound }}</div>
 

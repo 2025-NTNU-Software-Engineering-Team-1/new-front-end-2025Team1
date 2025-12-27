@@ -1,12 +1,12 @@
-# 概述 (Overview)
+# 概述
 
-Personal Access Token (PAT) 1允許你在不使用帳號密碼的情況下存取 Normal-OJ API。它們非常適合用於：
+Personal Access Token (PAT) 允許你在不使用帳號密碼的情況下存取 Normal-OJ API。它們非常適合用於：
 
 - **自動化腳本**：CI/CD pipelines 或自動化測試
 - **第三方整合**：外部工具存取你的資料
 - **長期存取**：Token 可設定過期時間
 
-## 如何使用 (How to Use)
+## 如何使用
 
 PAT 必須透過 HTTP Header `Authorization` 進行傳遞。
 
@@ -15,6 +15,9 @@ PAT 必須透過 HTTP Header `Authorization` 進行傳遞。
 ```http
 Authorization: Bearer <YOUR_PAT_TOKEN>
 ```
+
+> [!IMPORTANT]
+> 所有 API 請求路徑皆必須加上 `/api` 前綴。例如存取題目列表時，請使用 `/api/problem`，而非 `/problem`。
 
 **cURL 範例：**
 
@@ -37,7 +40,7 @@ print(response.json())
 
 ---
 
-## 權限範圍 (Scopes)
+## 權限範圍
 
 PAT 的權限受限於 **Scopes**。在建立 PAT 時，你必須選擇該 Token 允許執行的操作。如果你嘗試存取未授權的 API，將會收到 `403 Forbidden` 錯誤。
 
@@ -60,7 +63,7 @@ PAT 的權限受限於 **Scopes**。在建立 PAT 時，你必須選擇該 Token
 
 ---
 
-## 安全最佳實踐 (Security Best Practices)
+## 安全最佳實踐
 
 - **最小權限原則**：只勾選你目前需要的 Scopes。
 - **設定過期時間**：避免使用永久有效的 Token。

@@ -17,6 +17,9 @@ GET /api/endpoint
 Authorization: Bearer <YOUR_PAT_TOKEN>
 ```
 
+> [!IMPORTANT]
+> All API requests must be prefixed with `/api`. For example, to access problems, use `/api/problem`, not `/problem`.
+
 ### Example with cURL
 
 ```bash

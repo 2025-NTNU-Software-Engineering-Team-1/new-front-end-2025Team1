@@ -1059,7 +1059,7 @@ onBeforeUnmount(() => {
           class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
           :data-tip="hover.allowedLanguages"
         >
-          {{ t("course.problems.allowedLanguages") }}</span
+          {{ t("course.problems.allowedLanguages") }}<span class="text-error ml-1" aria-hidden="true">*</span></span
         ></label
       >
       <LanguageMultiSelect
@@ -1217,7 +1217,7 @@ onBeforeUnmount(() => {
                 <label
                   class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
                   :data-tip="hover.selectAPIKeys"
-                  >{{ t("course.problems.selectAPIKeys") }}</label
+                  >{{ t("course.problems.selectAPIKeys") }}<span class="text-error ml-1" aria-hidden="true">*</span></label
                 >
 
                 <div v-if="selectedKeyStats.total > 0" class="ml-2 flex items-center gap-2">
@@ -1590,7 +1590,7 @@ onBeforeUnmount(() => {
             <span
               class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
               :data-tip="hover.uploadPublicTestData"
-              >{{ t("course.problems.uploadPublicTestData") }}</span
+              >{{ t("course.problems.uploadPublicTestData") }}<span class="text-error ml-1" aria-hidden="true">*</span></span
             >
             <div class="flex items-center gap-2">
               <div
@@ -1666,7 +1666,7 @@ onBeforeUnmount(() => {
             <span
               class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
               :data-tip="hover.uploadACFiles"
-              >{{ t("course.problems.uploadACFiles") }}</span
+              >{{ t("course.problems.uploadACFiles") }}<span class="text-error ml-1" aria-hidden="true">*</span></span
             >
             <div class="flex items-center gap-2">
               <div

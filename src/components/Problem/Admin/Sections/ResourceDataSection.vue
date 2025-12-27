@@ -330,7 +330,7 @@ watch(
           class="bg-base-300 tooltip tooltip-bottom col-span-1 flex cursor-help items-center justify-center gap-1 rounded-l-lg text-sm"
           :data-tip="(hover as any)[`${labelText}_zip`]"
         >
-          {{ t("course.problems.zipFile") }}
+          {{ t("course.problems.zipFile") }}<span class="text-error ml-1" aria-hidden="true">*</span>
         </div>
         <div
           class="textarea-bordered bg-base-100 col-span-4 flex flex-col p-4"

@@ -778,15 +778,8 @@ async function submit() {
   </Transition>
 
   <div class="border-base-200 mt-8 flex justify-end border-t pt-6">
-    <button
-      :class="[
-        'btn btn-success gap-2 px-6 font-bold text-white shadow-md transition-transform active:scale-95',
-        isLoading && 'loading',
-      ]"
-      @click="submit"
-    >
-      <i-uil-file-upload-alt class="h-5 w-5" />
-      {{ t("course.members.submit") }}
+    <button :class="['btn', isLoading && 'loading']" @click="submit">
+      <i-uil-file-upload-alt class="mr-1 h-5 w-5" /> {{ t("course.members.submit") }}
     </button>
   </div>
 </template>

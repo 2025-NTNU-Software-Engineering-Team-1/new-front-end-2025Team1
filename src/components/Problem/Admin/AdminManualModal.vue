@@ -43,6 +43,18 @@ const mobileTab = ref<"sitemap" | "toc">("sitemap");
 
 // DOM Refs
 const contentRef = ref<HTMLElement | null>(null);
+const sitemapRef = ref<HTMLElement | null>(null);
+const tocRef = ref<HTMLElement | null>(null);
+const sitemapWidth = ref(224);
+const minSitemapWidth = 180;
+const maxSitemapWidth = 360;
+const tocWidth = ref(256);
+const minTocWidth = 180;
+const maxTocWidth = 400;
+const sitemapStartLeft = ref(0);
+const tocStartLeft = ref(0);
+const resizingSitemap = ref(false);
+const resizingToc = ref(false);
 
 // Scroll Memory
 const scrollMemory = new Map<string, number>();
@@ -162,6 +174,56 @@ async function switchPage(pageId: string) {
 // Mobile specific
 function toggleDrawer() {
   mobileDrawerOpen.value = !mobileDrawerOpen.value;
+}
+
+// Sitemap Resizer (desktop)
+function onSitemapMouseMove(e: MouseEvent) {
+  if (!resizingSitemap.value) return;
+  const newWidth = Math.min(
+    Math.max(e.clientX - sitemapStartLeft.value, minSitemapWidth),
+    maxSitemapWidth,
+  );
+  sitemapWidth.value = newWidth;
+}
+
+function stopSitemapResize() {
+  resizingSitemap.value = false;
+  window.removeEventListener("mousemove", onSitemapMouseMove);
+  window.removeEventListener("mouseup", stopSitemapResize);
+}
+
+function startSitemapResize(e: MouseEvent) {
+  if (window.innerWidth < 1024) return;
+  if (!sitemapRef.value) return;
+  sitemapStartLeft.value = sitemapRef.value.getBoundingClientRect().left;
+  resizingSitemap.value = true;
+  window.addEventListener("mousemove", onSitemapMouseMove);
+  window.addEventListener("mouseup", stopSitemapResize);
+  e.preventDefault();
+}
+
+// TOC Resizer (desktop)
+function onTocMouseMove(e: MouseEvent) {
+  if (!resizingToc.value) return;
+  const newWidth = Math.min(Math.max(e.clientX - tocStartLeft.value, minTocWidth), maxTocWidth);
+  tocWidth.value = newWidth;
+}
+
+function stopTocResize() {
+  resizingToc.value = false;
+  window.removeEventListener("mousemove", onTocMouseMove);
+  window.removeEventListener("mouseup", stopTocResize);
+}
+
+function startTocResize(e: MouseEvent) {
+  // Only on desktop
+  if (window.innerWidth < 1024) return;
+  if (!tocRef.value) return;
+  tocStartLeft.value = tocRef.value.getBoundingClientRect().left;
+  resizingToc.value = true;
+  window.addEventListener("mousemove", onTocMouseMove);
+  window.addEventListener("mouseup", stopTocResize);
+  e.preventDefault();
 }
 
 // Scroll Persistence
@@ -311,7 +373,11 @@ watch(open, (v) => (document.body.style.overflow = v ? "hidden" : ""));
         <div class="relative flex min-h-0 flex-1">
           <!-- Desktop Column 1: Sitemap -->
           <!-- Reduced width to 1/6 (approx 16.6%) or min 200px seems fine, let's try fixed width for stability w-64 is 256px -->
-          <aside class="border-base-300 bg-base-200/50 hidden w-56 flex-col overflow-y-auto border-r lg:flex">
+          <aside
+            ref="sitemapRef"
+            class="border-base-300 bg-base-200/50 hidden flex-col overflow-y-auto border-r lg:flex"
+            :style="{ width: `${sitemapWidth}px` }"
+          >
             <div class="p-6">
               <!-- Increased font size for sitemap -->
               <!-- Removed opacity on Category Title for better contrast -->
@@ -340,9 +406,23 @@ watch(open, (v) => (document.body.style.overflow = v ? "hidden" : ""));
               </div>
             </div>
           </aside>
+          <div
+            class="toc-resizer hidden lg:block"
+            @mousedown="startSitemapResize"
+            role="separator"
+            aria-label="Resize navigation"
+            :aria-valuemin="minSitemapWidth"
+            :aria-valuemax="maxSitemapWidth"
+            :aria-valuenow="sitemapWidth"
+            tabindex="0"
+          ></div>
 
-          <!-- Desktop Column 2: TOC -->
-          <aside class="border-base-300 bg-base-100 hidden w-64 flex-col overflow-y-auto border-r lg:flex">
+          <!-- Desktop Column 2: TOC (resizable) -->
+          <aside
+            ref="tocRef"
+            class="border-base-300 bg-base-100 hidden flex-col overflow-y-auto border-r lg:flex"
+            :style="{ width: `${tocWidth}px` }"
+          >
             <div class="sticky top-0 p-6">
               <div class="mb-4 text-xs font-bold uppercase tracking-wider opacity-60">
                 {{ uiText.onThisPage }}
@@ -367,6 +447,16 @@ watch(open, (v) => (document.body.style.overflow = v ? "hidden" : ""));
               </nav>
             </div>
           </aside>
+          <div
+            class="toc-resizer hidden lg:block"
+            @mousedown="startTocResize"
+            role="separator"
+            aria-label="Resize table of contents"
+            :aria-valuemin="minTocWidth"
+            :aria-valuemax="maxTocWidth"
+            :aria-valuenow="tocWidth"
+            tabindex="0"
+          ></div>
 
           <!-- Desktop/Mobile Content -->
           <main class="bg-base-100 flex-1 overflow-y-auto scroll-smooth pb-20 lg:pb-0" ref="contentRef">
@@ -490,3 +580,17 @@ watch(open, (v) => (document.body.style.overflow = v ? "hidden" : ""));
     </div>
   </teleport>
 </template>
+
+<style scoped>
+.toc-resizer {
+  width: 8px;
+  cursor: col-resize;
+  background: transparent;
+  transition: background-color 0.15s ease;
+}
+
+.toc-resizer:hover,
+.toc-resizer:active {
+  background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.08), transparent);
+}
+</style>

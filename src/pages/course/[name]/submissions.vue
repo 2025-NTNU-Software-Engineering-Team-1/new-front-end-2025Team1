@@ -179,6 +179,14 @@ async function downloadAllSubmissions() {
 
 // Rejudge all submissions matching current filter
 const isRejudgeAllLoading = ref(false);
+const rejudgeAllModal = ref<HTMLDialogElement | null>(null);
+const rejudgeCount = ref(0);
+
+async function confirmRejudgeAll() {
+  rejudgeAllModal.value?.close();
+  await rejudgeAll();
+}
+
 async function rejudgeAll() {
   const query: SubmissionListQuery = {
     ...routeQuery.value.filter,
@@ -298,8 +306,10 @@ async function prepareDeleteAll() {
 async function confirmDeleteAll() {
   isDeleteAllLoading.value = true;
   try {
+    const filter = routeQuery.value.filter;
     const result = await api.Submission.deleteAll({
-      ...routeQuery.value.filter,
+      ...filter,
+      problemId: filter.problemId ? parseInt(filter.problemId, 10) : undefined,
       course: route.params.name as string,
     });
     alert(`Deleted ${result.data.deleted} submissions. Skipped: ${result.data.skipped}`);

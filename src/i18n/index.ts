@@ -8,7 +8,7 @@ export const config = {
   locale: localStorage.getItem("locale") || "english",
   fallbackLocale: {
     taiwanese: ["chinese"],
-    default: "english",
+    default: ["english"],
   },
   messages: {
     chinese,

@@ -111,6 +111,38 @@ function deriveStatusFromTasks(tasks?: Task[]): SubmissionStatusCodes | null {
   return worst;
 }
 
+// ==========================================
+// Artifact Drag-to-Scroll Logic
+// ==========================================
+const artifactContainer = ref<HTMLElement | null>(null);
+let isDown = false;
+let startX = 0;
+let scrollLeft = 0;
+
+function startDrag(e: MouseEvent) {
+  if (!artifactContainer.value) return;
+  isDown = true;
+  artifactContainer.value.classList.add("cursor-grabbing");
+  artifactContainer.value.classList.remove("cursor-grab");
+  startX = e.pageX - artifactContainer.value.offsetLeft;
+  scrollLeft = artifactContainer.value.scrollLeft;
+}
+
+function stopDrag() {
+  if (!artifactContainer.value) return;
+  isDown = false;
+  artifactContainer.value.classList.remove("cursor-grabbing");
+  artifactContainer.value.classList.add("cursor-grab");
+}
+
+function onDrag(e: MouseEvent) {
+  if (!isDown || !artifactContainer.value) return;
+  e.preventDefault();
+  const x = e.pageX - artifactContainer.value.offsetLeft;
+  const walk = (x - startX) * 2;
+  artifactContainer.value.scrollLeft = scrollLeft - walk;
+}
+
 // Main Submission Data
 const {
   data: submission,
@@ -1191,27 +1223,39 @@ watch(submission, (val) => {
               <span class="label-text text-base font-semibold">{{
                 $t("course.submission.caseOutput.artifactFiles")
               }}</span>
+              <span class="label-text-alt ml-2 text-gray-500">(Drag to scroll)</span>
             </label>
-            <div class="mt-2 space-y-4">
+
+            <div
+              ref="artifactContainer"
+              class="scrollbar-hide mt-2 flex cursor-grab select-none gap-4 overflow-x-auto pb-4"
+              @mousedown="startDrag"
+              @mouseleave="stopDrag"
+              @mouseup="stopDrag"
+              @mousemove="onDrag"
+            >
               <div
                 v-for="(file, fileName) in caseOutputData.files"
                 :key="fileName"
-                class="border-base-300 rounded-lg border p-4"
+                class="border-base-300 bg-base-100 flex h-[500px] min-w-[350px] max-w-[600px] flex-shrink-0 flex-col overflow-hidden rounded-lg border p-4"
               >
                 <!-- File Header -->
-                <div class="mb-3 flex items-center gap-2">
+                <div class="mb-3 flex flex-shrink-0 items-center gap-2">
                   <i :class="getFileIconClass(file.extension)" class="h-5 w-5" />
-                  <span class="font-medium">{{ fileName }}</span>
-                  <span class="badge badge-sm">{{ file.extension || "no ext" }}</span>
+                  <span class="truncate font-medium" :title="String(fileName)">{{ fileName }}</span>
+                  <span class="badge badge-sm flex-shrink-0">{{ file.extension || "no ext" }}</span>
                 </div>
-
+                <div class="flex-grow overflow-y-auto pr-2"></div>
                 <!-- Image Files -->
-                <div v-if="file.type === 'image'" class="bg-base-100 flex justify-center rounded p-4">
+                <div
+                  v-if="file.type === 'image'"
+                  class="bg-base-100 flex h-full items-center justify-center rounded p-4"
+                >
                   <img
                     :src="`data:${file.mimeType || 'image/png'};base64,${file.content}`"
                     :alt="String(fileName)"
-                    style="max-width: 100%; max-height: 70vh; min-width: 200px; min-height: 200px"
-                    class="border-base-300 rounded border object-contain shadow-sm"
+                    class="max-h-full max-w-full rounded object-contain shadow-sm"
+                    draggable="false"
                   />
                 </div>
 
@@ -1221,12 +1265,16 @@ watch(submission, (val) => {
                 </div>
 
                 <!-- Text Files (including code files) -->
-                <div v-else-if="file.type === 'text'" class="mt-2">
-                  <code-editor v-model="file.content" readonly />
+                <div v-else-if="file.type === 'text'" class="mt-2 h-full">
+                  <code-editor v-model="file.content" readonly class="h-full" />
                 </div>
 
                 <!-- Binary Files (not images) -->
-                <div v-else class="text-base-content/60 py-2 italic">
+                <div
+                  v-else
+                  class="text-base-content/60 flex h-full flex-col items-center justify-center py-10 text-center italic"
+                >
+                  <i-uil-file-block-alt class="mb-2 text-4xl" />
                   {{ $t("course.submission.caseOutput.binaryFile", { fileName }) }}
                 </div>
               </div>

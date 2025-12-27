@@ -38,11 +38,7 @@ const { data: announcements, error, isLoading } = useAxios<AnnouncementList>("/a
                 </tr>
               </thead>
               <tbody>
-                <tr
-                  v-for="{ title, createTime, annId } in announcements"
-                  :key="annId"
-                  class="hover"
-                >
+                <tr v-for="{ title, createTime, annId } in announcements" :key="annId" class="hover">
                   <td>
                     <router-link
                       :to="`/announcements/${annId}`"
@@ -81,7 +77,7 @@ const { data: announcements, error, isLoading } = useAxios<AnnouncementList>("/a
         <div class="skeleton mb-3 h-20 w-full rounded-xl" v-for="i in 3" :key="i"></div>
       </template>
       <template #data>
-        <div class="max-h-[30rem] scrollbar-thin flex flex-col gap-3 overflow-y-auto p-1">
+        <div class="scrollbar-thin flex max-h-[30rem] flex-col gap-3 overflow-y-auto p-1">
           <div
             v-for="{ title, createTime, annId } in announcements"
             :key="annId"

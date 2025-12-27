@@ -179,10 +179,7 @@ function toggleDrawer() {
 // Sitemap Resizer (desktop)
 function onSitemapMouseMove(e: MouseEvent) {
   if (!resizingSitemap.value) return;
-  const newWidth = Math.min(
-    Math.max(e.clientX - sitemapStartLeft.value, minSitemapWidth),
-    maxSitemapWidth,
-  );
+  const newWidth = Math.min(Math.max(e.clientX - sitemapStartLeft.value, minSitemapWidth), maxSitemapWidth);
   sitemapWidth.value = newWidth;
 }
 

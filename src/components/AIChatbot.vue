@@ -99,6 +99,7 @@ const chatScale = ref(1.15);
 const showSkinSelector = ref(false);
 const currentSkinId = ref("builtin_hiyori");
 const avatarPath = ref("/live2d/hiyori_avatar.png");
+const maxChars = 1000;
 
 // Emotion mappings for current skin
 const currentEmotionMappings = ref<Record<string, string | null>>({
@@ -772,6 +773,7 @@ onBeforeUnmount(() => {
               rows="2"
               class="flex-1 resize-none rounded-2xl border border-white/40 bg-white/50 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-500 focus:ring-2 focus:ring-purple-300 focus:outline-none"
               :placeholder="t('aiChatbot.placeholder')"
+              :maxlength="maxChars"
               @keydown.enter.exact.prevent="send"
               @keydown.enter.shift.stop
             />

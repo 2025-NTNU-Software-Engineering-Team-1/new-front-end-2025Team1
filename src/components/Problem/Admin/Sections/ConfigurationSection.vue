@@ -464,10 +464,8 @@ function removeDockerEnv(index: number) {
 }
 
 // ==========================================
-// Network & Sidecar Validation Logic
+// Network & Sidecar Validation Logic (修正版)
 // ==========================================
-// This computed property scans the current configuration and returns arrays of error messages.
-// This can be used in the template to display errors under the respective fields.
 const networkErrors = computed(() => {
   const errors: Record<string, string[]> = {
     global: [],
@@ -477,86 +475,50 @@ const networkErrors = computed(() => {
     docker: [],
   };
 
-  const nar = problem.value.config?.networkAccessRestriction;
-  const isEnabled = problem.value.config?.networkAccessEnabled;
+  const cfg = problem.value.config;
+  if (!cfg?.networkAccessEnabled) return errors;
 
-  // Only validate if Network Access is enabled
-  if (!isEnabled || !nar) return errors;
+  const nar = cfg.networkAccessRestriction;
+  const model = nar?.external?.model || "Black";
+  const ips = nar?.external?.ip || [];
+  const urls = nar?.external?.url || [];
+  const sidecars = nar?.sidecars || [];
 
-  // 1. IP Validation
-  const ips = nar.external?.ip || [];
-  if (ips.length > MAX_LIST_SIZE) {
-    errors.ip.push(`IP count exceeds limit of ${MAX_LIST_SIZE} (Current: ${ips.length})`);
-  }
-  ips.forEach((ip, idx) => {
+  // === IP 檢查 ===
+  ips.forEach((ip, i) => {
     if (!IP_REGEX.test(ip)) {
-      errors.ip.push(`IP #${idx + 1} format invalid. Must be 0-255.0-255.0-255.0-255`);
+      errors.ip.push(`IP #${i + 1} 格式錯誤 (0-255.0-255.0-255.0-255)`);
     }
   });
 
-  // 2. URL Validation
-  const urls = nar.external?.url || [];
-  if (urls.length > MAX_LIST_SIZE) {
-    errors.url.push(`URL count exceeds limit of ${MAX_LIST_SIZE} (Current: ${urls.length})`);
-  }
-  urls.forEach((url, idx) => {
+  // === URL 檢查 ===
+  urls.forEach((url, i) => {
     if (url.length > MAX_CHAR_LENGTH) {
-      errors.url.push(`URL #${idx + 1} length exceeds ${MAX_CHAR_LENGTH} characters`);
+      errors.url.push(`URL #${i + 1} 長度超過 ${MAX_CHAR_LENGTH}`);
     }
   });
 
-  // 3. Sidecars Validation
-  const sidecars = nar.sidecars || [];
-  if (sidecars.length > MAX_LIST_SIZE) {
-    errors.sidecars.push(`Sidecar count exceeds limit of ${MAX_LIST_SIZE} (Current: ${sidecars.length})`);
+  // === UX 提示：空白清單時 ===
+  if (model === "Black" && ips.length === 0 && urls.length === 0) {
+    errors.global.push("※ 未設定任何封鎖項，外網預設全開（Black list 模式）。");
   }
-  sidecars.forEach((sc: any, idx) => {
-    // Required fields check
-    if (!sc.name || !sc.image) {
-      errors.sidecars.push(`Sidecar #${idx + 1} is missing Name or Image`);
-    }
+  if (model === "White" && ips.length === 0 && urls.length === 0) {
+    errors.global.push("※ 未設定允許項，外網預設全關（White list 模式）。");
+  }
 
-    // Length check helper
-    const checkLen = (val: any, field: string) => {
-      if (typeof val === "string" && val.length > MAX_CHAR_LENGTH) {
-        errors.sidecars.push(`Sidecar #${idx + 1} field '${field}' exceeds ${MAX_CHAR_LENGTH} characters`);
-      }
-    };
+  // === Sidecar 檢查 ===
+  sidecars.forEach((sc: any, idx: number) => {
+    const hasAny =
+      !!sc.name?.trim() ||
+      !!sc.image?.trim() ||
+      (Array.isArray(sc.args) && sc.args.some((a: string) => !!a.trim())) ||
+      (typeof sc.args === "string" && sc.args.trim() !== "") ||
+      (typeof sc.env === "string" ? sc.env.trim() !== "" : sc.env && Object.keys(sc.env).length > 0);
 
-    checkLen(sc.name, "Name");
-    checkLen(sc.image, "Image");
-
-    // Check args (string or array of strings)
-    if (Array.isArray(sc.args)) {
-      sc.args.forEach((arg: string) => checkLen(arg, "Args"));
-    } else if (typeof sc.args === "string") {
-      checkLen(sc.args, "Args");
-    }
-
-    // Check env (assuming stringified or value check)
-    if (sc.env) {
-      // If env is stored as object, check stringified length, or if string check directly
-      const envStr = typeof sc.env === "string" ? sc.env : JSON.stringify(sc.env);
-      if (envStr.length > MAX_CHAR_LENGTH) {
-        errors.sidecars.push(`Sidecar #${idx + 1} 'Env' configuration exceeds ${MAX_CHAR_LENGTH} characters`);
-      }
+    if (hasAny && (!sc.name || !sc.image)) {
+      errors.sidecars.push(`Sidecar #${idx + 1}：若有任一欄位輸入，Name 與 Image 必填。`);
     }
   });
-
-  // 4. Global "At Least One" Check
-  // Check if at least one configuration exists among IP, URL, Sidecars, or Dockerfiles
-  const hasIP = ips.length > 0;
-  const hasURL = urls.length > 0;
-  const hasSidecars = sidecars.length > 0;
-  // For Docker, we check either the detected list (from an upload attempt) or if the asset key exists in config
-  const hasDocker =
-    detectedDockerEnvs.value.length > 0 ||
-    problem.value.assets?.dockerfilesZip ||
-    hasAsset("network_dockerfile");
-
-  if (!hasIP && !hasURL && !hasSidecars && !hasDocker) {
-    errors.global.push(t("course.problems.whenNetworkEnabled"));
-  }
 
   return errors;
 });

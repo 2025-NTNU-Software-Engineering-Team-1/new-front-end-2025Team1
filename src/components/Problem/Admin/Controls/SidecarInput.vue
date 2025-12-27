@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { hover_zh } from "../../Hovers/hover-zh-tw";
 import { hover_en } from "../../Hovers/hover-en";
@@ -10,6 +10,9 @@ interface Sidecar {
   env?: Record<string, string>;
   args?: string[];
 }
+
+const MAX_SIDECARS = 10;
+const tooManyError = ref("");
 
 const props = defineProps<{
   modelValue: Sidecar[];
@@ -23,6 +26,8 @@ const newName = ref("");
 const newImage = ref("");
 const newArgs = ref("");
 const newEnv = ref("");
+const errorMessage = ref("");
+
 const { t, locale } = useI18n();
 const hover = computed(() => {
   return locale.value === "en" ? hover_en : hover_zh;
@@ -68,13 +73,31 @@ function argsToString(args: string[] | undefined): string {
   return args.join(", ");
 }
 
+watch([newName, newImage, newArgs, newEnv], () => {
+  const hasAny = !!newArgs.value.trim() || !!newEnv.value.trim();
+
+  if (hasAny && (!newName.value.trim() || !newImage.value.trim())) {
+    errorMessage.value = "若輸入 Args 或 Env，Name 與 Image 為必填。";
+  } else {
+    errorMessage.value = "";
+  }
+});
+
 function add() {
   const name = newName.value.trim();
   const image = newImage.value.trim();
 
+  tooManyError.value = "";
+
+  if (props.modelValue.length >= MAX_SIDECARS) {
+    tooManyError.value = `最多只能設定 ${MAX_SIDECARS} 個 Sidecar`;
+    return;
+  }
+
   if (!name || !image) return;
 
   if (props.modelValue.some((s) => s.name === name)) {
+    tooManyError.value = `Sidecar "${name}" 已存在`;
     return;
   }
 
@@ -82,7 +105,6 @@ function add() {
   const args = parseArgsString(newArgs.value);
 
   const newList = [...props.modelValue, { name, image, env, args }];
-
   emit("update:modelValue", newList);
 
   newName.value = "";
@@ -95,18 +117,14 @@ function remove(index: number) {
   const newList = [...props.modelValue];
   newList.splice(index, 1);
   emit("update:modelValue", newList);
-  if (editingIndex.value === index) {
-    editingIndex.value = null;
-  }
+  if (editingIndex.value === index) editingIndex.value = null;
 }
 
 function toggleEdit(index: number) {
   if (editingIndex.value === index) {
-    // Commit changes when closing edit
     commitEdit();
     editingIndex.value = null;
   } else {
-    // Initialize edit buffers with current values
     const sidecar = props.modelValue[index];
     editArgs.value = argsToString(sidecar.args);
     editEnv.value = envToString(sidecar.env);
@@ -114,7 +132,6 @@ function toggleEdit(index: number) {
   }
 }
 
-// Local buffers for editing
 const editArgs = ref("");
 const editEnv = ref("");
 
@@ -131,7 +148,6 @@ function commitEdit() {
 }
 
 const getSidecarArgs = (sidecar: Sidecar) => argsToString(sidecar.args);
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
 </script>
 
@@ -154,6 +170,7 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
               placeholder="e.g. mysql"
               class="input input-bordered input-sm w-full"
               v-model="newName"
+              maxlength="2048"
               @keydown.enter.prevent="add"
             />
           </div>
@@ -164,7 +181,9 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
                 :data-tip="hover.sideCarArgs"
                 >{{ t("course.problems.sideCarArgs") }}</span
               >
-              <span class="label-text-alt opacity-60">{{ t("course.problems.sideCarCommaSeparated") }}</span>
+              <span class="label-text-alt opacity-60">
+                {{ t("course.problems.sideCarCommaSeparated") }}
+              </span>
             </label>
             <textarea
               placeholder="--port=3306, --host=0.0.0.0"
@@ -173,6 +192,7 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
             />
           </div>
         </div>
+
         <!-- Right Column: Image & Env -->
         <div class="space-y-3">
           <div class="form-control">
@@ -187,6 +207,7 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
               placeholder="e.g. mysql:8.0"
               class="input input-bordered input-sm w-full"
               v-model="newImage"
+              maxlength="2048"
               @keydown.enter.prevent="add"
             />
           </div>
@@ -198,7 +219,9 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
                 :data-tip="hover.sideCarEnv"
                 >{{ t("course.problems.sideCarEnv") }}</span
               >
-              <span class="label-text-alt opacity-60">{{ t("course.problems.sideCarKEYVALUEPerLine") }}</span>
+              <span class="label-text-alt opacity-60">
+                {{ t("course.problems.sideCarKEYVALUEPerLine") }}
+              </span>
             </label>
             <textarea
               placeholder="MYSQL_ROOT_PASSWORD=secret&#10;MYSQL_DATABASE=testdb"
@@ -208,12 +231,37 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
           </div>
         </div>
       </div>
+
+      <transition name="fade">
+        <div
+          v-if="errorMessage"
+          class="bg-error/10 text-error mt-2 flex items-center gap-2 rounded p-2 text-sm"
+        >
+          <i-uil-exclamation-circle class="h-4 w-4" />
+          <span>{{ errorMessage }}</span>
+        </div>
+      </transition>
+
       <!-- Add Button -->
-      <div class="mt-4 flex justify-end">
-        <button class="btn btn-sm btn-primary" @click="add">{{ t("course.problems.addSidecar") }}</button>
+      <div class="mt-4 flex flex-col items-end gap-2">
+        <transition name="fade">
+          <div v-if="tooManyError" class="bg-error/10 text-error flex items-center gap-1 rounded p-2 text-sm">
+            <i-uil-exclamation-circle class="h-4 w-4" />
+            <span>{{ tooManyError }}</span>
+          </div>
+        </transition>
+
+        <button
+          class="btn btn-sm btn-primary"
+          :disabled="props.modelValue.length >= MAX_SIDECARS"
+          @click="add"
+        >
+          {{ t("course.problems.addSidecar") }}
+        </button>
       </div>
     </div>
 
+    <!-- Sidecar Table -->
     <div class="border-base-content/30 overflow-x-auto rounded-lg border">
       <table class="table-sm table w-full">
         <thead class="bg-base-200">
@@ -231,9 +279,7 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
             <tr class="hover">
               <td class="py-1 font-mono text-sm font-bold">{{ sidecar.name }}</td>
               <td class="py-1 font-mono text-sm opacity-80">{{ sidecar.image }}</td>
-              <td class="py-1 font-mono text-xs opacity-70">
-                {{ getSidecarArgs(sidecar) || "-" }}
-              </td>
+              <td class="py-1 font-mono text-xs opacity-70">{{ getSidecarArgs(sidecar) || "-" }}</td>
               <td class="py-1 font-mono text-xs opacity-70">
                 <span v-if="sidecar.env && Object.keys(sidecar.env).length > 0">
                   {{ Object.keys(sidecar.env).length }} {{ t("course.problems.sideCarvars") }}
@@ -255,29 +301,30 @@ const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
                 </button>
               </td>
             </tr>
-            <!-- Inline edit row -->
+
+            <!-- Inline edit -->
             <tr v-if="editingIndex === idx" class="bg-base-200">
               <td colspan="5" class="p-2">
                 <div class="grid grid-cols-1 gap-2 md:grid-cols-2">
                   <div class="form-control">
-                    <label class="label py-0"
-                      ><span class="label-text-alt">{{ t("course.problems.sideCarArgs") }}</span></label
-                    >
+                    <label class="label py-0">
+                      <span class="label-text-alt">{{ t("course.problems.sideCarArgs") }}</span>
+                    </label>
                     <input
                       class="input-bordered input input-sm"
                       v-model="editArgs"
+                      maxlength="2048"
                       placeholder="--port=3306, --host=0.0.0.0"
                     />
                   </div>
                   <div class="form-control">
-                    <label class="label py-0"
-                      ><span class="label-text-alt">{{
-                        t("course.problems.sideCar_EnvKEYVALUE")
-                      }}</span></label
-                    >
+                    <label class="label py-0">
+                      <span class="label-text-alt">{{ t("course.problems.sideCar_EnvKEYVALUE") }}</span>
+                    </label>
                     <textarea
                       class="textarea-bordered textarea textarea-sm h-16 text-xs"
                       v-model="editEnv"
+                      maxlength="2048"
                       placeholder="KEY=VALUE"
                     />
                   </div>

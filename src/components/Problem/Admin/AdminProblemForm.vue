@@ -383,25 +383,7 @@ const rules = {
         });
       },
     ),
-    network_global: helpers.withMessage(
-      "Network Access Enabled: Must configure at least one IP, URL, Sidecar, or Dockerfile (upload or existing).",
-      () => {
-        const cfg = problem.value.config;
-        if (!cfg?.networkAccessEnabled) return true;
-        const nar = cfg.networkAccessRestriction;
-
-        const hasIP = (nar?.external?.ip?.length ?? 0) > 0;
-        const hasURL = (nar?.external?.url?.length ?? 0) > 0;
-        const hasSidecars = (nar?.sidecars?.length ?? 0) > 0;
-
-        const hasDocker =
-          !!problem.value.assets?.dockerfilesZip ||
-          hasRemoteAsset("network_dockerfile") ||
-          hasRemoteAsset("dockerfiles");
-
-        return hasIP || hasURL || hasSidecars || hasDocker;
-      },
-    ),
+    network_global: helpers.withMessage("", () => true),
   },
 
   pipeline: {

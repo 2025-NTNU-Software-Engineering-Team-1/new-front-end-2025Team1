@@ -448,7 +448,7 @@ onMounted(fetchUsage);
             class="card border-base-200 bg-base-100 mb-8 border shadow-sm transition-all"
           >
             <div
-              class="hover:bg-base-200/50 flex cursor-pointer items-center justify-between rounded-t-lg p-4 transition-colors select-none"
+              class="hover:bg-base-200/50 flex cursor-pointer select-none items-center justify-between rounded-t-lg p-4 transition-colors"
               @click="isChartExpanded = !isChartExpanded"
             >
               <div class="text-base-content/80 flex items-center gap-3 font-bold">
@@ -494,7 +494,7 @@ onMounted(fetchUsage);
                   <v-chart class="h-full w-full" :option="chartOption" :key="chartType" autoresize />
                   <div
                     v-if="chartType === 'bubble'"
-                    class="text-base-content/40 bg-base-100/80 absolute right-2 bottom-2 rounded px-2 py-1 text-xs"
+                    class="text-base-content/40 bg-base-100/80 absolute bottom-2 right-2 rounded px-2 py-1 text-xs"
                   >
                     {{ t("course.aisetting.usage.dragBubbleStoPlayPhysics") }}
                   </div>
@@ -503,7 +503,7 @@ onMounted(fetchUsage);
             </transition>
           </div>
 
-          <div v-if="data?.keys.length" class="mt-8 mb-4 flex items-center gap-3 px-1">
+          <div v-if="data?.keys.length" class="mb-4 mt-8 flex items-center gap-3 px-1">
             <span class="text-2xl">🔑</span>
             <h3 class="text-base-content/80 text-lg font-bold">
               {{ t("course.aisetting.usage.keyUsageBreakdown") }}
@@ -518,7 +518,7 @@ onMounted(fetchUsage);
               class="border-base-200 bg-base-100 mb-6 rounded-lg border p-4 shadow"
             >
               <div
-                class="flex cursor-pointer flex-wrap items-center justify-between gap-3 select-none"
+                class="flex cursor-pointer select-none flex-wrap items-center justify-between gap-3"
                 @click="toggleExpand(String(keyItem.id))"
               >
                 <div class="flex items-center gap-2 text-lg font-semibold">

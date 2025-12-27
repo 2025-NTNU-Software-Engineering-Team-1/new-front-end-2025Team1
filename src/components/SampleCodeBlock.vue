@@ -16,7 +16,7 @@ const { copy, copied, isSupported } = useClipboard();
     <pre class="rounded bg-zinc-800 px-4 py-2 text-white"><code>{{ code }}</code></pre>
     <button
       v-if="isSupported"
-      class="btn btn-info btn-xs absolute top-1 right-1 hidden group-hover:inline-block"
+      class="btn btn-info btn-xs absolute right-1 top-1 hidden group-hover:inline-block"
       @click="copy(code)"
     >
       {{ copied ? "Copied!" : "Copy" }}

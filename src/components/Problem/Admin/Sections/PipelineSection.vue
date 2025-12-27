@@ -245,6 +245,245 @@ function initPipelineValues() {
 }
 
 // ==========================================
+// [CONFIG] Function Categories Definition
+// ==========================================
+const FUNCTION_CATEGORIES_MAP: Record<string, string[]> = {
+  "Python Built-ins": [
+    "print",
+    "input",
+    "eval",
+    "exec",
+    "open",
+    "compile",
+    "sorted",
+    "reversed",
+    "enumerate",
+    "zip",
+    "map",
+    "filter",
+    "range",
+    "len",
+    "sum",
+    "min",
+    "max",
+    "abs",
+    "round",
+    "pow",
+    "type",
+    "isinstance",
+    "issubclass",
+    "hasattr",
+    "getattr",
+    "setattr",
+    "delattr",
+    "callable",
+    "hash",
+    "id",
+    "repr",
+    "str",
+    "int",
+    "float",
+    "bool",
+    "list",
+    "dict",
+    "set",
+    "tuple",
+    "frozenset",
+    "bytes",
+    "bytearray",
+    "memoryview",
+    "ord",
+    "chr",
+    "bin",
+    "oct",
+    "hex",
+    "format",
+    "vars",
+    "dir",
+    "globals",
+    "locals",
+    "help",
+    "__import__",
+    "breakpoint",
+    "exit",
+    "quit",
+  ],
+  "C I/O": [
+    "printf",
+    "scanf",
+    "fprintf",
+    "fscanf",
+    "sprintf",
+    "sscanf",
+    "snprintf",
+    "vprintf",
+    "vfprintf",
+    "vsprintf",
+    "vsnprintf",
+    "fopen",
+    "fclose",
+    "fread",
+    "fwrite",
+    "fgets",
+    "fputs",
+    "fgetc",
+    "fputc",
+    "getc",
+    "putc",
+    "getchar",
+    "putchar",
+    "fseek",
+    "ftell",
+    "rewind",
+    "fflush",
+    "feof",
+    "ferror",
+  ],
+  "C String": [
+    "strlen",
+    "strcpy",
+    "strncpy",
+    "strcat",
+    "strncat",
+    "strcmp",
+    "strncmp",
+    "strchr",
+    "strrchr",
+    "strstr",
+    "strtok",
+    "memcpy",
+    "memmove",
+    "memset",
+    "memcmp",
+    "memchr",
+  ],
+  "C Memory": ["malloc", "calloc", "realloc", "free"],
+  "C Math": [
+    "sqrt",
+    "cbrt",
+    "exp",
+    "log",
+    "log10",
+    "log2",
+    "sin",
+    "cos",
+    "tan",
+    "asin",
+    "acos",
+    "atan",
+    "atan2",
+    "sinh",
+    "cosh",
+    "tanh",
+    "ceil",
+    "floor",
+    "trunc",
+    "fabs",
+    "fmod",
+    "remainder",
+    "fmax",
+    "fmin",
+  ],
+  "C Utility": [
+    "atoi",
+    "atof",
+    "atol",
+    "strtol",
+    "strtod",
+    "strtoul",
+    "rand",
+    "srand",
+    "qsort",
+    "bsearch",
+    "abort",
+    "atexit",
+    "system",
+    "getenv",
+    "setenv",
+  ],
+  "C++ STL Algorithms": [
+    "sort",
+    "stable_sort",
+    "partial_sort",
+    "nth_element",
+    "find",
+    "find_if",
+    "find_if_not",
+    "count",
+    "count_if",
+    "search",
+    "binary_search",
+    "lower_bound",
+    "upper_bound",
+    "equal_range",
+    "merge",
+    "includes",
+    "copy",
+    "copy_if",
+    "copy_n",
+    "move",
+    "swap",
+    "fill",
+    "fill_n",
+    "transform",
+    "replace",
+    "replace_if",
+    "remove",
+    "remove_if",
+    "unique",
+    "reverse",
+    "rotate",
+    "shuffle",
+    "random_shuffle",
+    "is_sorted",
+    "is_partitioned",
+    "partition",
+    "stable_partition",
+    "min_element",
+    "max_element",
+    "minmax",
+    "minmax_element",
+    "accumulate",
+    "inner_product",
+    "adjacent_difference",
+    "partial_sum",
+    "iota",
+    "gcd",
+    "lcm",
+  ],
+  "C++ Container Methods": [
+    "push_back",
+    "pop_back",
+    "push_front",
+    "pop_front",
+    "push",
+    "pop",
+    "top",
+    "front",
+    "back",
+    "insert",
+    "erase",
+    "clear",
+    "empty",
+    "size",
+    "capacity",
+    "resize",
+    "reserve",
+    "shrink_to_fit",
+    "begin",
+    "end",
+    "rbegin",
+    "rend",
+    "cbegin",
+    "cend",
+    "emplace",
+    "emplace_back",
+    "emplace_front",
+  ],
+  "C++ I/O": ["cout", "cin", "cerr", "clog", "endl", "flush", "getline", "get", "put", "read", "write"],
+};
+
+// ==========================================
 // Section: File Permissions (Read/Write)
 // ==========================================
 
@@ -253,7 +492,6 @@ const allowWriteForceClosed = ref(false);
 
 /**
  * Toggle for Allow Read.
- * Logic: Allow Write & Resource Data depend on Allow Read.
  */
 const allowReadToggle = computed({
   get: () => Boolean(problem.value.pipeline?.allowRead),
@@ -263,20 +501,16 @@ const allowReadToggle = computed({
 
     // When closing allowRead, cascade disable allowWrite
     if (!val) {
-      // Mark as forcibly closed ONLY if allowWrite was originally active
       if (problem.value.pipeline!.allowWrite) {
         allowWriteForceClosed.value = true;
       }
       problem.value.pipeline!.allowWrite = false;
 
-      // Handle potential resourceData property on config
       const cfg = problem.value.config as unknown as ExtendedProblemConfig;
       if ("resourceData" in cfg) {
-        // Fixed: No longer using 'as any' because resourceData is in the type definition
         cfg.resourceData = false;
       }
     } else {
-      // When opening allowRead, clear the force closed flag
       allowWriteForceClosed.value = false;
     }
   },
@@ -289,17 +523,13 @@ const allowWriteToggle = computed({
   get: () => Boolean(problem.value.pipeline?.allowWrite && allowReadToggle.value),
   set: (val: boolean) => {
     ensurePipeline();
-    // allowWrite can only be true if allowRead is also true
     problem.value.pipeline!.allowWrite = Boolean(val && allowReadToggle.value);
-
-    // Manual operation clears the force closed flag
     allowWriteForceClosed.value = false;
   },
 });
 
 // Computed properties for UI warnings
 const allowWriteWarning = computed(() => (!allowReadToggle.value ? "Allow Write requires Allow Read." : ""));
-// Show red if forcibly closed, otherwise gray
 const allowWriteWarningError = computed(() => allowWriteForceClosed.value);
 
 // ==========================================
@@ -313,52 +543,35 @@ const libraryOptions = ref({
 
 // Fetch options from backend
 const pythonPresets = [
-  // ===== Core programming / DSA =====
-  "math", // math
-  "random", // randomness
-  "itertools", // iterators
-  "functools", // functional utils
-  "operator", // operator funcs
-  "collections", // data structures
-  "heapq", // priority queue
-  "bisect", // binary search
-  "string", // string utils
-  "statistics", // basic stats
-
-  // ===== Timing / analysis =====
-  "time", // timing
-
-  // ===== Text / parsing =====
-  "re", // regex
-
-  // ===== Data format =====
-  "json", // JSON IO
-  "csv", // CSV IO
-
-  // ===== Numerical / data =====
-  "numpy", // numerical array
-  "pandas", // dataframe
-
-  // ===== Visualization =====
-  "matplotlib.pyplot", // plotting
-
-  // ===== Machine learning (intro) =====
-  "sklearn", // ML framework
-  "sklearn.model_selection", // data split
-  "sklearn.metrics", // evaluation
-  "sklearn.linear_model", // linear models
-  "sklearn.neighbors", // k-NN
-  "sklearn.tree", // decision trees
-
-  // ===== System programming (intro) =====
-  "os", // OS interface
-  "sys", // interpreter access
-  "pathlib", // filesystem paths
-  "subprocess", // process execution (limited)
-
-  // ===== Language utilities =====
-  "typing", // type hints
-  "dataclasses", // structured data
+  "math",
+  "random",
+  "itertools",
+  "functools",
+  "operator",
+  "collections",
+  "heapq",
+  "bisect",
+  "string",
+  "statistics",
+  "time",
+  "re",
+  "json",
+  "csv",
+  "numpy",
+  "pandas",
+  "matplotlib.pyplot",
+  "sklearn",
+  "sklearn.model_selection",
+  "sklearn.metrics",
+  "sklearn.linear_model",
+  "sklearn.neighbors",
+  "sklearn.tree",
+  "os",
+  "sys",
+  "pathlib",
+  "subprocess",
+  "typing",
+  "dataclasses",
 ];
 
 async function fetchStaticAnalysisOptions() {
@@ -368,10 +581,7 @@ async function fetchStaticAnalysisOptions() {
   let functions: string[] = [];
 
   try {
-    // Double casting unknown -> Target Type for safety
     const resp = (await api.Problem.getStaticAnalysisOptions()) as unknown as StaticAnalysisApiResponse;
-
-    // Safe access response structure
     const libs = resp?.data?.librarySymbols || {};
     const backendImports = Array.isArray(libs.imports) ? libs.imports : [];
     imports = Array.from(new Set([...pythonPresets, ...backendImports]));
@@ -393,12 +603,115 @@ async function fetchStaticAnalysisOptions() {
 }
 
 // ==========================================
+// Section: Function Categorization & Tabs
+// ==========================================
+
+// 1. Language Filter State
+type LangFilter = "All" | "Python" | "C" | "CPP";
+const activeLanguageFilter = ref<LangFilter>("All");
+
+// 2. Active Category Tab State
+const activeFunctionCategory = ref("");
+
+// 3. Computed: Filter Categories based on Language AND Backend Options
+const functionGroups = computed(() => {
+  const backendFunctionsSet = new Set(libraryOptions.value.functions || []);
+  const groups: { name: string; items: string[]; lang: LangFilter }[] = [];
+  const categorizedItems = new Set<string>();
+
+  // Helper to detect language from category name
+  const getLangFromCategory = (name: string): LangFilter => {
+    if (name.startsWith("Python")) return "Python";
+    if (name.startsWith("C++")) return "CPP";
+    if (name.startsWith("C ")) return "C";
+    return "All"; // Fallback
+  };
+
+  // Iterate map and build groups
+  for (const [categoryName, items] of Object.entries(FUNCTION_CATEGORIES_MAP)) {
+    // 1. Filter by Language Toggle
+    const catLang = getLangFromCategory(categoryName);
+    if (activeLanguageFilter.value !== "All" && activeLanguageFilter.value !== catLang) {
+      continue;
+    }
+
+    // 2. Filter items by Backend Availability
+    const validItems = items.filter((item) => backendFunctionsSet.has(item));
+
+    if (validItems.length > 0) {
+      groups.push({ name: categoryName, items: validItems, lang: catLang });
+      validItems.forEach((i) => categorizedItems.add(i));
+    }
+  }
+
+  // Handle "Others" (Only show if Language is All or matches broadly)
+  const otherItems = (libraryOptions.value.functions || []).filter((item) => !categorizedItems.has(item));
+
+  if (otherItems.length > 0 && activeLanguageFilter.value === "All") {
+    groups.push({ name: "Others / Uncategorized", items: otherItems, lang: "All" });
+  }
+
+  return groups;
+});
+
+// Watcher to reset active tab when groups change (e.g., switching language)
+watch(
+  functionGroups,
+  (newGroups) => {
+    if (newGroups.length > 0) {
+      // If current active category is no longer visible, switch to first available
+      const exists = newGroups.find((g) => g.name === activeFunctionCategory.value);
+      if (!exists) {
+        activeFunctionCategory.value = newGroups[0].name;
+      }
+    } else {
+      activeFunctionCategory.value = "";
+    }
+  },
+  { immediate: true },
+);
+
+// Computed to get the items of the currently active tab
+const activeGroupData = computed(() => {
+  return functionGroups.value.find((g) => g.name === activeFunctionCategory.value) || { name: "", items: [] };
+});
+
+/**
+ * Select all items within a specific category group.
+ */
+function selectCategoryItems(categoryItems: string[], mode: LibMode) {
+  ensurePipeline();
+  const restrictions = problem.value.pipeline!.staticAnalysis!.libraryRestrictions![mode]!;
+  const currentArr = restrictions.functions || [];
+  const resultSet = new Set(currentArr);
+  categoryItems.forEach((item) => resultSet.add(item));
+  const newArr = Array.from(resultSet);
+
+  if (newArr.length > MAX_ITEMS_LIMIT) {
+    restrictions.functions = newArr.slice(0, MAX_ITEMS_LIMIT);
+    logger.warn("Limit reached", `Category selection truncated.`);
+  } else {
+    restrictions.functions = newArr;
+  }
+}
+
+/**
+ * Clear all items belonging to a specific category group.
+ */
+function clearCategoryItems(categoryItems: string[], mode: LibMode) {
+  ensurePipeline();
+  const restrictions = problem.value.pipeline!.staticAnalysis!.libraryRestrictions![mode]!;
+  const currentArr = restrictions.functions || [];
+  const categorySet = new Set(categoryItems);
+  restrictions.functions = currentArr.filter((item) => !categorySet.has(item));
+}
+
+// ==========================================
 // Section: Mode Switching (White/Blacklist)
 // ==========================================
 const syntaxMode = ref<LibMode>("blacklist");
-const libraryMode = ref<LibMode>("blacklist"); // Combined: imports + headers + functions
+const libraryMode = ref<LibMode>("blacklist");
 
-// Watchers: Clear the opposite list when mode switches
 watch(syntaxMode, (newMode) => {
   const oppositeMode: LibMode = newMode === "whitelist" ? "blacklist" : "whitelist";
   if (problem.value.pipeline?.staticAnalysis?.libraryRestrictions?.[oppositeMode]) {
@@ -416,7 +729,7 @@ watch(libraryMode, (newMode) => {
   }
 });
 
-// Syntax options - fetched from API (Python 130+ / C++ 66+ types)
+// Syntax options
 const syntaxOptions = ref<{
   python: { common: string[]; all: string[]; allSet: Set<string> };
   cpp: { common: string[]; all: string[]; allSet: Set<string> };
@@ -428,20 +741,19 @@ const syntaxOptions = ref<{
 // Get syntax options based on current language
 const currentSyntaxOptions = computed(() => {
   const lang = problem.value.allowedLanguage;
-  // Python = 4, C = 1, C++ = 2
   if (lang & 4) return syntaxOptions.value.python;
   if (lang & 3) return syntaxOptions.value.cpp;
-  return syntaxOptions.value.python; // default to Python
+  return syntaxOptions.value.python;
 });
 
-// Validate syntax value against current language's valid set
+// Validate syntax value
 function validateSyntaxValue(value: string): boolean {
   const validSet = currentSyntaxOptions.value.allSet;
-  if (validSet.size === 0) return true; // Not loaded yet, allow all
+  if (validSet.size === 0) return true;
   return validSet.has(value.toLowerCase());
 }
 
-// Warning message for invalid syntax values (auto-dismiss after 5 seconds)
+// Warning message
 const syntaxWarningMessage = ref<string>("");
 let syntaxWarningTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -458,9 +770,8 @@ function showSyntaxWarning(invalidValues: string[]) {
 // ==========================================
 // Section: Language Permissions
 // ==========================================
-// Bitmask: 1=C, 2=CPP, 4=Python
-const allowImports = ref(false); // for Python
-const allowHeaders = ref(false); // for C/C++
+const allowImports = ref(false);
+const allowHeaders = ref(false);
 
 watch(
   () => problem.value.allowedLanguage,
@@ -488,9 +799,6 @@ watch(
 // Section: Helpers
 // ==========================================
 
-/**
- * Toggles an item in the array via Button Click.
- */
 function toggleItem(arr: string[], item: string) {
   const idx = arr.indexOf(item);
   if (idx >= 0) {
@@ -504,21 +812,14 @@ function toggleItem(arr: string[], item: string) {
   }
 }
 
-/**
- * Select All Items from backend options
- * Respects MAX_ITEMS_LIMIT
- */
 function selectAllItems(section: LibSection, mode: LibMode) {
   ensurePipeline();
   const restrictions = problem.value.pipeline!.staticAnalysis!.libraryRestrictions![mode]!;
   const currentArr = restrictions[section] || [];
   const backendOpts = getBackendOptions(section);
-
-  // Combine current items with backend options, removing duplicates
   const combined = new Set([...currentArr, ...backendOpts]);
   const newArr = Array.from(combined);
 
-  // Apply limit
   if (newArr.length > MAX_ITEMS_LIMIT) {
     restrictions[section] = newArr.slice(0, MAX_ITEMS_LIMIT);
     logger.warn("Limit reached", `Selected items truncated to ${MAX_ITEMS_LIMIT}.`);
@@ -527,9 +828,6 @@ function selectAllItems(section: LibSection, mode: LibMode) {
   }
 }
 
-/**
- * Clear All Items in a section
- */
 function clearAllItems(section: LibSection, mode: LibMode) {
   ensurePipeline();
   if (problem.value.pipeline?.staticAnalysis?.libraryRestrictions?.[mode]) {
@@ -537,31 +835,23 @@ function clearAllItems(section: LibSection, mode: LibMode) {
   }
 }
 
-/**
- * Handles manual updates from MultiStringInput.
- * INTERCEPTS the v-model update to enforce limits and validate syntax values.
- */
 function handleManualUpdate(section: LibSection, mode: LibMode, newVal: string[]) {
   ensurePipeline();
   const restrictions = problem.value.pipeline!.staticAnalysis!.libraryRestrictions![mode]!;
   const currentArr = restrictions[section] || [];
 
-  // Validate syntax values - auto-filter invalid ones and show warning
   let filteredVal = newVal;
   if (section === "syntax" && currentSyntaxOptions.value.allSet.size > 0) {
     const invalid = newVal.filter((v) => !validateSyntaxValue(v));
     if (invalid.length > 0) {
-      logger.warn("Invalid syntax values filtered", invalid.join(", "));
       showSyntaxWarning(invalid);
       filteredVal = newVal.filter((v) => validateSyntaxValue(v));
     }
   }
 
   if (filteredVal.length < currentArr.length) {
-    // Allowed: Deletion
     restrictions[section] = filteredVal;
   } else if (filteredVal.length <= MAX_ITEMS_LIMIT) {
-    // Allowed: Addition within limit
     restrictions[section] = filteredVal;
   } else {
     logger.warn("Limit reached", `Blocked manual input. Limit: ${MAX_ITEMS_LIMIT}`);
@@ -610,27 +900,8 @@ function getBackendOptions(section: LibSection): string[] {
   return libraryOptions.value.functions || [];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function selectAllBackend(section: LibSection, mode: LibMode) {
-  const current = getLibList(section, mode);
-  const backend = getBackendOptions(section);
-  setLibList(section, mode, [...current, ...backend]);
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function clearSection(section: LibSection, mode: LibMode) {
-  setLibList(section, mode, []);
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function getCandidates(section: LibSection, mode: LibMode) {
-  const selected = new Set(getLibList(section, mode));
-  return getBackendOptions(section).filter((x) => !selected.has(x));
-}
-
 // Asset Helper
 const assetPaths = computed<Record<string, string>>(() => {
-  // Safe casting for assetPaths access
   const cfg = (problem.value.config || {}) as unknown as ExtendedProblemConfig;
   return cfg.assetPaths || {};
 });
@@ -639,8 +910,6 @@ const hasAsset = (key: string) => Boolean(assetPaths.value && assetPaths.value[k
 const assetDownloadUrl = (key: string) =>
   assetPaths.value && assetPaths.value[key] ? `/api/problem/${route.params.id}/asset/${key}/download` : null;
 
-// Ensure pipeline object exists at script end (safety check)
-// Check if pipeline is null to trigger initialization
 if (!problem.value.pipeline) {
   ensurePipeline();
 }
@@ -653,7 +922,6 @@ onMounted(async () => {
   await Promise.all([fetchStaticAnalysisOptions(), fetchSyntaxOptions(), fetchAiCheckerKeys()]);
 });
 
-// Fetch syntax options from API (Python 130+ / C++ 66+ types)
 async function fetchSyntaxOptions() {
   try {
     const res = await api.Problem.getSyntaxOptions();
@@ -682,7 +950,6 @@ async function fetchSyntaxOptions() {
   }
 }
 
-// Fetch AI API Keys for AI Checker
 async function fetchAiCheckerKeys() {
   const courseName = typeof route.params.name === "string" ? route.params.name : route.params.name?.[0];
   if (!courseName) return;
@@ -690,8 +957,6 @@ async function fetchAiCheckerKeys() {
   isFetchingAiKeys.value = true;
   try {
     const res = (await api.AIVTuber.getCourseKeys(courseName)) as unknown as AiCheckerApiResponse;
-
-    // Compatibility handling for different API response structures
     let data: AiKey[] = [];
     if (res?.data?.keys) {
       data = res.data.keys;
@@ -715,9 +980,7 @@ async function fetchAiCheckerKeys() {
   }
 }
 
-// Ensure aiChecker config exists
 function ensureAiCheckerConfig() {
-  // Safe casting
   const config = problem.value.config as unknown as ExtendedProblemConfig;
   if (!config) return;
   if (!config.aiChecker) {
@@ -729,7 +992,6 @@ function ensureAiCheckerConfig() {
   }
 }
 
-// Watch for AI Checker toggle to ensure config exists
 watch(
   () => {
     const config = problem.value.config as unknown as ExtendedProblemConfig;
@@ -847,7 +1109,7 @@ watch(
                     </div>
                   </div>
 
-                  <h6 class="mb-1 text-sm font-bold tracking-[0.2em] text-white uppercase drop-shadow-lg">
+                  <h6 class="mb-1 text-sm font-bold uppercase tracking-[0.2em] text-white drop-shadow-lg">
                     {{ t("course.problems.systemLocked") }}
                   </h6>
                   <div
@@ -951,7 +1213,7 @@ watch(
                     </div>
                   </div>
 
-                  <h6 class="mb-1 text-sm font-bold tracking-[0.2em] text-white uppercase drop-shadow-lg">
+                  <h6 class="mb-1 text-sm font-bold uppercase tracking-[0.2em] text-white drop-shadow-lg">
                     {{ t("course.problems.accessDenied") }}
                   </h6>
                   <div
@@ -1036,7 +1298,7 @@ watch(
               </div>
             </div>
 
-            <div class="relative min-h-[16rem] rounded border border-gray-500 p-2">
+            <div class="relative flex min-h-[26rem] flex-col rounded border border-gray-500 p-2">
               <div class="mb-2 flex items-center justify-between">
                 <h5
                   class="tooltip tooltip-right flex cursor-help items-center gap-1 text-sm font-medium"
@@ -1044,54 +1306,144 @@ watch(
                 >
                   {{ t("course.problems.functionsRestrictions") }}
                 </h5>
+
                 <div class="flex gap-1">
                   <button
                     class="btn btn-xs btn-ghost h-5 min-h-0 px-1 text-[10px]"
                     @click="selectAllItems('functions', libraryMode)"
                   >
-                    {{ t("course.problems.all") }}
+                    + All (Global)
                   </button>
                   <button
                     class="btn btn-xs btn-ghost text-error h-5 min-h-0 px-1 text-[10px]"
                     @click="clearAllItems('functions', libraryMode)"
                   >
-                    {{ t("course.problems.clear") }}
+                    {{ t("course.problems.clear") }} (All)
                   </button>
                 </div>
               </div>
 
-              <div class="flex flex-wrap gap-1">
-                <button
-                  v-for="opt in libraryOptions.functions"
-                  :key="`func-${opt}`"
-                  class="btn btn-xs"
-                  :class="
-                    problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.functions.includes(
-                      opt,
-                    )
-                      ? libraryMode === 'whitelist'
-                        ? 'btn-info'
-                        : 'btn-error'
-                      : ''
-                  "
-                  :disabled="
-                    !problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.functions.includes(
-                      opt,
-                    ) &&
-                    problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.functions.length >=
-                      MAX_ITEMS_LIMIT
-                  "
-                  @click="
-                    toggleItem(
-                      problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.functions,
-                      opt,
-                    )
-                  "
-                >
-                  {{ opt }}
-                </button>
+              <div class="mb-3 flex justify-center">
+                <div class="join border-base-content/20 rounded-btn border shadow-sm">
+                  <input
+                    class="join-item btn btn-xs px-4"
+                    type="radio"
+                    name="langOptions"
+                    aria-label="All"
+                    :checked="activeLanguageFilter === 'All'"
+                    @click="activeLanguageFilter = 'All'"
+                  />
+                  <input
+                    class="join-item btn btn-xs px-4"
+                    type="radio"
+                    name="langOptions"
+                    aria-label="Python"
+                    :checked="activeLanguageFilter === 'Python'"
+                    @click="activeLanguageFilter = 'Python'"
+                  />
+                  <input
+                    class="join-item btn btn-xs px-4"
+                    type="radio"
+                    name="langOptions"
+                    aria-label="C"
+                    :checked="activeLanguageFilter === 'C'"
+                    @click="activeLanguageFilter = 'C'"
+                  />
+                  <input
+                    class="join-item btn btn-xs px-4"
+                    type="radio"
+                    name="langOptions"
+                    aria-label="C++"
+                    :checked="activeLanguageFilter === 'CPP'"
+                    @click="activeLanguageFilter = 'CPP'"
+                  />
+                </div>
               </div>
-              <div class="mt-2">
+
+              <div class="mb-2 w-full px-1">
+                <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 sm:justify-start">
+                  <a
+                    v-for="group in functionGroups"
+                    :key="group.name"
+                    class="tab tab-bordered tab-sm whitespace-nowrap px-1 transition-all duration-200"
+                    :class="{
+                      'tab-active border-primary text-primary font-bold':
+                        activeFunctionCategory === group.name,
+                      'hover:border-base-content/40 border-transparent':
+                        activeFunctionCategory !== group.name,
+                    }"
+                    @click="activeFunctionCategory = group.name"
+                  >
+                    {{ group.name }}
+                  </a>
+
+                  <span v-if="functionGroups.length === 0" class="py-2 text-xs opacity-50">
+                    No categories available for this language.
+                  </span>
+                </div>
+              </div>
+
+              <div
+                class="custom-scrollbar border-base-content/10 bg-base-200/30 mb-3 min-h-[12rem] flex-1 overflow-y-auto rounded-lg border p-2"
+              >
+                <div
+                  v-if="activeGroupData.name"
+                  class="border-base-content/10 bg-base-200 sticky top-0 z-10 mb-2 flex items-center justify-between border-b pb-1 opacity-95"
+                >
+                  <span class="text-xs font-bold opacity-70">{{ activeGroupData.name }}</span>
+                  <div class="flex gap-1">
+                    <button
+                      class="btn btn-xs btn-ghost hover:bg-base-300 h-5 min-h-0 px-2 text-[10px]"
+                      @click="selectCategoryItems(activeGroupData.items, libraryMode)"
+                    >
+                      + All
+                    </button>
+                    <button
+                      class="btn btn-xs btn-ghost text-error hover:bg-base-300 h-5 min-h-0 px-2 text-[10px]"
+                      @click="clearCategoryItems(activeGroupData.items, libraryMode)"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+
+                <div class="flex flex-wrap content-start gap-1">
+                  <button
+                    v-for="opt in activeGroupData.items"
+                    :key="`func-${opt}`"
+                    class="btn btn-xs"
+                    :class="
+                      problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.functions.includes(
+                        opt,
+                      )
+                        ? libraryMode === 'whitelist'
+                          ? 'btn-info'
+                          : 'btn-error'
+                        : ''
+                    "
+                    :disabled="
+                      !problem.pipeline!.staticAnalysis!.libraryRestrictions![
+                        libraryMode
+                      ]!.functions.includes(opt) &&
+                      problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.functions.length >=
+                        MAX_ITEMS_LIMIT
+                    "
+                    @click="
+                      toggleItem(
+                        problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.functions,
+                        opt,
+                      )
+                    "
+                  >
+                    {{ opt }}
+                  </button>
+                </div>
+              </div>
+
+              <div class="mt-auto border-t border-gray-600 pt-2">
+                <label class="label pb-1 pt-0">
+                  <span class="label-text-alt text-gray-400">Search / Add Custom Functions</span>
+                </label>
                 <MultiStringInput
                   :model-value="
                     problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.functions
@@ -1207,7 +1559,6 @@ watch(
             />
           </div>
 
-          <!-- Warning message for invalid syntax values -->
           <div v-if="syntaxWarningMessage" class="alert alert-warning mt-2 py-2 text-sm shadow-md">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -1628,7 +1979,7 @@ watch(
             </div>
           </div>
         </div>
-        <div v-else class="pt-2 pl-1 text-xs opacity-70">
+        <div v-else class="pl-1 pt-2 text-xs opacity-70">
           {{
             problem.pipeline!.executionMode === "interactive"
               ? t("course.problems.uploadCustomCheckerWarning")
@@ -1700,7 +2051,7 @@ watch(
             <span class="label-text-alt text-error">{{ v$.assets.scorePy.$errors[0]?.$message }}</span>
           </label>
         </div>
-        <div v-else class="pt-2 pl-1 text-xs opacity-70">
+        <div v-else class="pl-1 pt-2 text-xs opacity-70">
           {{ t("course.problems.uploadCustomScorerInfo") }}
         </div>
       </div>
@@ -1860,5 +2211,56 @@ watch(
   background-color: #e04545 !important;
   border-color: #e04545 !important;
   color: #ffffff !important;
+}
+
+/* ==========================================
+   Scrollbar Customization
+   ========================================== */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ==========================================
+   Scrollbar Customization (Horizontal & Vertical)
+   ========================================== */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
 }
 </style>

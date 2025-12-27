@@ -834,7 +834,7 @@ onMounted(async () => {
     <Transition name="slide-up">
       <div
         v-if="v$.$error"
-        class="border-l-error border-y-base-300 border-r-base-300 bg-base-100 mt-4 rounded-xl border-y border-r border-l-4 p-5 shadow-sm"
+        class="border-l-error border-y-base-300 border-r-base-300 bg-base-100 mt-4 rounded-xl border-y border-l-4 border-r p-5 shadow-sm"
       >
         <h3 class="text-error mb-2 flex items-center gap-2 font-bold">
           <i-uil-exclamation-triangle /> Detailed Error Log
@@ -851,7 +851,7 @@ onMounted(async () => {
               <span class="badge badge-error badge-outline text-[10px]">{{ e.path }}</span>
               <span class="text-base-content/70 group-hover:text-error">[{{ e.panel }}]</span>
             </div>
-            <div class="text-base-content group-hover:text-error font-medium break-words">
+            <div class="text-base-content group-hover:text-error break-words font-medium">
               {{ e.message }}
             </div>
           </button>
@@ -862,9 +862,9 @@ onMounted(async () => {
 
   <!-- Footer Action Bar -->
   <div
-    class="bg-base-100/90 border-base-300 fixed right-0 bottom-0 left-0 z-40 border-t p-4 shadow-[0_-8px_20px_rgba(0,0,0,0.1)] backdrop-blur-md"
+    class="bg-base-100/90 border-base-300 fixed bottom-0 left-0 right-0 z-40 border-t p-4 shadow-[0_-8px_20px_rgba(0,0,0,0.1)] backdrop-blur-md"
   >
-    <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 md:flex-row">
+    <div class="flex w-full flex-col items-center justify-between gap-4 px-6 md:flex-row">
       <div class="flex w-full items-center justify-center gap-3 md:w-auto md:justify-start">
         <!-- 🕒 Before first submit -->
         <template v-if="!hasSubmitted">
@@ -872,8 +872,8 @@ onMounted(async () => {
             <i-uil-hourglass class="h-6 w-6" />
           </div>
           <div class="flex flex-col">
-            <span class="text-base-content/80 text-sm font-bold">Waiting for edit and submit</span>
-            <span class="text-base-content/50 text-xs">Please complete the form before submitting</span>
+            <span class="text-base-content text-sm font-bold">Waiting for edit and submit</span>
+            <span class="text-base-content/70 text-xs">Please complete the form before submitting</span>
           </div>
         </template>
 
@@ -886,7 +886,7 @@ onMounted(async () => {
             <span class="text-error text-sm font-bold">Submission Blocked</span>
             <button
               @click="errorSummary.length > 0 && openAndScroll(errorSummary[0].panel)"
-              class="link link-hover text-base-content/70 hover:text-error text-left text-xs"
+              class="link link-hover text-base-content/90 hover:text-error text-left text-xs"
             >
               Fix {{ errorSummary.length }} issues found
             </button>
@@ -900,7 +900,7 @@ onMounted(async () => {
           </div>
           <div class="flex flex-col">
             <span class="text-success text-sm font-bold">Ready to Submit</span>
-            <span class="text-base-content/60 text-xs">All required fields are valid</span>
+            <span class="text-base-content/80 text-xs">All required fields are valid</span>
           </div>
         </template>
       </div>

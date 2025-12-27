@@ -583,6 +583,17 @@
       "roleTA": "助教",
       "roleChange": {
         "error": "角色變更失敗"
+      },
+      "errors": {
+        "needAtLeastOne": "請至少填寫一名使用者（username、email、password）",
+        "invalidRoleForUser": "使用者 \"{username}\" 的 role \"{role}\" 無效。允許：0=Admin,1=Teacher,2=Student,3=TA",
+        "invalidRoleOnLine": "CSV 第 {line} 行 role \"{val}\" 無效。允許：0=Admin,1=Teacher,2=Student,3=TA",
+        "duplicatesInInput": "輸入中有重複：{details}",
+        "duplicatesInCSV": "CSV 檔案中發現重複：{details}",
+        "dupUsernames": "重複使用者名稱：",
+        "dupEmails": "重複 Email：",
+        "skippedEntries": "以下使用者未建立，因為使用者名稱或 Email 已存在：{users}",
+        "unknown-error-occurred": "發生未知錯誤 :("
       }
     }
   },

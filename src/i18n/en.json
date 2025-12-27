@@ -585,6 +585,17 @@
       "roleTA": "TA",
       "roleChange": {
         "error": "Failed to change role"
+      },
+      "errors": {
+        "needAtLeastOne": "Please fill in at least one user with username, email and password",
+        "invalidRoleForUser": "Invalid role \"{role}\" for user \"{username}\". Allowed: 0=Admin,1=Teacher,2=Student,3=TA",
+        "invalidRoleOnLine": "Invalid role \"{val}\" on CSV line {line}. Allowed: 0=Admin,1=Teacher,2=Student,3=TA",
+        "duplicatesInInput": "Duplicate entries in input: {details}",
+        "duplicatesInCSV": "CSV contains duplicates: {details}",
+        "dupUsernames": "Duplicate usernames:",
+        "dupEmails": "Duplicate emails:",
+        "skippedEntries": "The following users were not created because username or email already exists: {users}",
+        "unknown-error-occurred": "Unknown error occurred :("
       }
     }
   },

@@ -236,6 +236,55 @@ const standardizeUsername = (csv: string): string => {
   return [header, ...bodyString].join("\n");
 };
 
+// Validate duplicate usernames/emails in CSV content
+function findDuplicatesInCSV(csv: string) {
+  const rows = csv.split("\n").filter((r) => r.trim() !== "");
+  if (rows.length < 2) return { username: [], email: [] };
+  const headerCols = rows[0].split(",").map((h) => h.trim());
+  const usernameIdx = headerCols.findIndex((h) => h === "username");
+  const emailIdx = headerCols.findIndex((h) => h === "email");
+
+  const usernameCount: Record<string, number> = {};
+  const emailCount: Record<string, number> = {};
+
+  for (let i = 1; i < rows.length; i++) {
+    const cols = rows[i].split(",");
+    if (usernameIdx >= 0) {
+      const u = (cols[usernameIdx] || "").trim();
+      if (u) usernameCount[u] = (usernameCount[u] || 0) + 1;
+    }
+    if (emailIdx >= 0) {
+      const e = (cols[emailIdx] || "").trim();
+      if (e) emailCount[e] = (emailCount[e] || 0) + 1;
+    }
+  }
+
+  const dupUsernames = Object.keys(usernameCount).filter((k) => usernameCount[k] > 1);
+  const dupEmails = Object.keys(emailCount).filter((k) => emailCount[k] > 1);
+  return { username: dupUsernames, email: dupEmails };
+}
+
+function findDuplicatesInManual() {
+  const usernameCount: Record<string, number> = {};
+  const emailCount: Record<string, number> = {};
+  for (const u of manualUsers.value) {
+    const username = (u.username || "").trim();
+    const email = (u.email || "").trim();
+    if (username) usernameCount[username] = (usernameCount[username] || 0) + 1;
+    if (email) emailCount[email] = (emailCount[email] || 0) + 1;
+  }
+  const dupUsernames = Object.keys(usernameCount).filter((k) => usernameCount[k] > 1);
+  const dupEmails = Object.keys(emailCount).filter((k) => emailCount[k] > 1);
+  return { username: dupUsernames, email: dupEmails };
+}
+
+function formatDuplicateMessage(dups: { username: string[]; email: string[] }) {
+  const parts: string[] = [];
+  if (dups.username.length) parts.push(`${t('course.members.errors.dupUsernames')} ${dups.username.join(', ')}`);
+  if (dups.email.length) parts.push(`${t('course.members.errors.dupEmails')} ${dups.email.join(', ')}`);
+  return parts.join('；');
+}
+
 watch(newMembers, () => {
   if (!newMembers.value) return;
   const reader = new FileReader();
@@ -268,7 +317,7 @@ async function submit() {
     // Validate that we have at least one valid user
     const lines = csvData.split("\n");
     if (lines.length < 2) {
-      errorMsg.value = "Please fill in at least one user with username, email and password";
+      errorMsg.value = t('course.members.errors.needAtLeastOne');
       return;
     }
   }
@@ -278,13 +327,25 @@ async function submit() {
     for (const u of manualUsers.value) {
       if (!u.username.trim() || !u.email.trim() || !u.password.trim()) continue; // skip empty rows
       if (!isValidRole(u.role)) {
-        errorMsg.value = `Invalid role "${u.role}" for user "${u.username}". Allowed: 0=Admin,1=Teacher,2=Student,3=TA`;
+        errorMsg.value = t('course.members.errors.invalidRoleForUser', {
+          role: u.role,
+          username: u.username,
+        });
         return;
       }
     }
+
+    // Check for duplicates in manual input
+    const d = findDuplicatesInManual();
+    if (d.username.length || d.email.length) {
+      errorMsg.value = t('course.members.errors.duplicatesInInput', {
+        details: formatDuplicateMessage(d),
+      });
+      return;
+    }
   } else {
     // CSV mode: if role column present, validate values
-    const rows = csvData.split("\n");
+    const rows = csvData.split("\n").filter((r) => r.trim() !== "");
     const headerCols = rows[0].split(",").map((h) => h.trim());
     const roleIdx = headerCols.findIndex((h) => h === "role");
     if (roleIdx >= 0) {
@@ -293,29 +354,55 @@ async function submit() {
         const val = (cols[roleIdx] || "").trim();
         if (!val) continue; // optional
         if (!/^[0-3]$/.test(val)) {
-          errorMsg.value = `Invalid role "${val}" on CSV line ${i + 1}. Allowed: 0=Admin,1=Teacher,2=Student,3=TA`;
+          errorMsg.value = t('course.members.errors.invalidRoleOnLine', {
+            val,
+            line: i + 1,
+          });
           return;
         }
       }
+    }
+
+    // Check for duplicates in CSV file (username/email)
+    const dup = findDuplicatesInCSV(csvData);
+    if (dup.username.length || dup.email.length) {
+      errorMsg.value = t('course.members.errors.duplicatesInCSV', {
+        details: formatDuplicateMessage(dup),
+      });
+      return;
     }
   }
 
   isProcessingSignup.value = true;
 
   try {
-    await api.Auth.batchSignup({
+    const res = await api.Auth.batchSignup({
       newUsers: csvData,
       force: forceUpdate.value,
       course: route.params.name as string,
     });
+
+    // If backend returned skipped entries (duplicates), show them as an error message
+    const skipped = (res as any)?.data?.skipped ?? (res as any)?.skipped;
+    if (skipped && skipped.length > 0) {
+      const skippedStr = skipped
+        .map((s: any) => `${s.username || ''}${s.email ? ` (${s.email})` : ''}`)
+        .join(', ');
+      errorMsg.value = t('course.members.errors.skippedEntries', {
+        users: skippedStr,
+      });
+      return;
+    }
+
     router.go(0);
   } catch (error) {
     if (axios.isAxiosError(error) && error.response?.data?.message) {
       errorMsg.value = error.response.data.message;
     } else {
-      errorMsg.value = "Unknown error occurred :(";
+      errorMsg.value = t('course.members.errors.unknown-error-occurred');
     }
-    throw error;
+    // don't rethrow to keep UI stable; error is shown in the modal
+    return;
   } finally {
     isProcessingSignup.value = false;
   }

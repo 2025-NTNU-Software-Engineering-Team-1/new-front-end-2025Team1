@@ -663,7 +663,9 @@ watch(areRestrictionsVisible, (newVal) => {
                           class="border-base-content/5 bg-base-100/60 hover:bg-base-100 hover:border-base-content/20 relative flex flex-col gap-3 rounded-xl border p-4 transition-all hover:shadow-sm"
                         >
                           <div class="flex items-center justify-between">
-                            <span class="text-base-content/90 text-sm font-bold">External Connections</span>
+                            <span class="text-base-content/90 text-sm font-bold"
+                              >🔗 External Connections</span
+                            >
 
                             <div
                               class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider"
@@ -725,17 +727,31 @@ watch(areRestrictionsVisible, (newVal) => {
                             Sidecar Services
                           </div>
 
-                          <div class="grid gap-3">
+                          <div
+                            class="grid gap-3"
+                            :class="{
+                              'max-h-[400px] overflow-y-auto pr-2': sidecarList.length > 5,
+                            }"
+                          >
                             <div
                               v-for="(car, idx) in sidecarList"
                               :key="idx"
-                              class="border-base-content/5 bg-base-100/60 hover:bg-base-100 hover:border-info/30 flex flex-col gap-2 rounded-xl border p-3 transition-all"
+                              class="border-base-content/5 bg-base-100/60 hover:bg-base-100 hover:border-info/30 group relative flex flex-col gap-2 overflow-hidden rounded-xl border p-3 transition-all"
                             >
-                              <div class="flex items-center gap-2">
+                              <div
+                                class="animate-signal-move pointer-events-none absolute inset-0 z-0 opacity-0"
+                                :style="{ animationDelay: `${idx * 0.5}s` }"
+                              >
+                                <div
+                                  class="via-info/10 h-full w-1/2 -skew-x-12 bg-gradient-to-r from-transparent to-transparent"
+                                ></div>
+                              </div>
+
+                              <div class="relative z-10 flex items-center gap-2">
                                 <div
                                   class="bg-info/10 text-info flex h-8 w-8 min-w-[2rem] items-center justify-center rounded-lg"
                                 >
-                                  <span class="text-lg">📦</span>
+                                  <span class="text-lg">💻</span>
                                 </div>
                                 <div class="min-w-0 flex-1">
                                   <div class="text-base-content/90 break-all text-sm font-bold">
@@ -749,7 +765,7 @@ watch(areRestrictionsVisible, (newVal) => {
 
                               <div
                                 v-if="car.args && car.args.length"
-                                class="border-base-content/5 mt-1 border-t pt-2"
+                                class="border-base-content/5 relative z-10 mt-1 border-t pt-2"
                               >
                                 <div class="flex flex-wrap gap-1">
                                   <span class="text-base-content/40 mr-1 self-center text-[10px] uppercase"
@@ -875,5 +891,26 @@ watch(areRestrictionsVisible, (newVal) => {
     opacity: 1;
     transform: scale(1) translateY(0);
   }
+}
+
+@keyframes signalMove {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(200%);
+    opacity: 0;
+  }
+}
+
+.animate-signal-move {
+  /* Runs infinitely every 3 seconds.
+    ease-in-out makes it smooth.
+  */
+  animation: signalMove 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 </style>

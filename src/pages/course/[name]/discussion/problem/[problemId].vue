@@ -264,6 +264,7 @@ onMounted(async () => {
             <input
               v-model="query"
               :placeholder="t('discussion.placeholder')"
+              maxlength="50"
               class="input-bordered input w-full pr-10"
               @keyup.enter="handleSearch"
             />

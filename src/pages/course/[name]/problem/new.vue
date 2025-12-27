@@ -105,7 +105,7 @@ const newProblem = ref<ProblemForm>({
     networkAccessEnabled: false,
     networkAccessRestriction: {
       sidecars: [],
-      external: { model: "Black", ip: [], url: [] },
+      external: { model: "White", ip: [], url: [] },
     },
     artifactCollection: [],
   },

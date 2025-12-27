@@ -280,7 +280,7 @@ function ensureConfig() {
       networkAccessRestriction: {
         sidecars: [],
         external: {
-          model: "Black",
+          model: "White",
           ip: [],
           url: [],
         },

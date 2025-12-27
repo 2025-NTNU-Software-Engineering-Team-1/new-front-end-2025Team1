@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, nextTick } from "vue";
 import { useI18n } from "vue-i18n";
 import { hover_zh } from "../../Hovers/hover-zh-tw";
 import { hover_en } from "../../Hovers/hover-en";
 
+// ==========================================
+// Type Definitions
+// ==========================================
 interface Sidecar {
   name: string;
   image: string;
@@ -11,6 +14,9 @@ interface Sidecar {
   args?: string[];
 }
 
+// ==========================================
+// Constants & Props
+// ==========================================
 const MAX_SIDECARS = 10;
 const tooManyError = ref("");
 
@@ -22,20 +28,60 @@ const emit = defineEmits<{
   (e: "update:modelValue", v: Sidecar[]): void;
 }>();
 
+// ==========================================
+// State: New Sidecar Form
+// ==========================================
 const newName = ref("");
 const newImage = ref("");
 const newArgs = ref("");
 const newEnv = ref("");
 const errorMessage = ref("");
 
+// ==========================================
+// Localization
+// ==========================================
 const { t, locale } = useI18n();
 const hover = computed(() => {
   return locale.value === "en" ? hover_en : hover_zh;
 });
 
+// ==========================================
+// State: Editing
+// ==========================================
 // Track which sidecar is being edited
 const editingIndex = ref<number | null>(null);
+const editArgs = ref("");
+const editEnv = ref("");
 
+// ==========================================
+// Helper: Auto Resize Textarea
+// ==========================================
+/**
+ * Automatically adjusts the height of a textarea based on its content (scrollHeight).
+ * Used for Args and Env inputs to allow wrapping and expansion.
+ */
+const autoResize = (event: Event) => {
+  const target = event.target as HTMLTextAreaElement;
+  target.style.height = "auto"; // Reset height to recalculate
+  target.style.height = `${target.scrollHeight}px`; // Set to scroll height
+};
+
+/**
+ * Trigger resize programmatically (e.g., when entering edit mode)
+ */
+const triggerResizeOnEdit = async () => {
+  await nextTick();
+  const textareas = document.querySelectorAll(".auto-resize-textarea");
+  textareas.forEach((el) => {
+    const target = el as HTMLTextAreaElement;
+    target.style.height = "auto";
+    target.style.height = `${target.scrollHeight}px`;
+  });
+};
+
+// ==========================================
+// Logic: Parsing & Formatting
+// ==========================================
 function parseEnvString(envStr: string): Record<string, string> {
   const result: Record<string, string> = {};
   if (!envStr.trim()) return result;
@@ -73,16 +119,24 @@ function argsToString(args: string[] | undefined): string {
   return args.join(", ");
 }
 
+const getSidecarArgs = (sidecar: Sidecar) => argsToString(sidecar.args);
+
+// ==========================================
+// Logic: Watchers & Validation
+// ==========================================
 watch([newName, newImage, newArgs, newEnv], () => {
   const hasAny = !!newArgs.value.trim() || !!newEnv.value.trim();
 
   if (hasAny && (!newName.value.trim() || !newImage.value.trim())) {
-    errorMessage.value = "若輸入 Args 或 Env，Name 與 Image 為必填。";
+    errorMessage.value = "If you enter Args or Env, Name and Image are required fields.";
   } else {
     errorMessage.value = "";
   }
 });
 
+// ==========================================
+// Logic: CRUD Operations
+// ==========================================
 function add() {
   const name = newName.value.trim();
   const image = newImage.value.trim();
@@ -90,14 +144,14 @@ function add() {
   tooManyError.value = "";
 
   if (props.modelValue.length >= MAX_SIDECARS) {
-    tooManyError.value = `最多只能設定 ${MAX_SIDECARS} 個 Sidecar`;
+    tooManyError.value = `A maximum of ${MAX_SIDECARS} Sidecars can be set.`;
     return;
   }
 
   if (!name || !image) return;
 
   if (props.modelValue.some((s) => s.name === name)) {
-    tooManyError.value = `Sidecar "${name}" 已存在`;
+    tooManyError.value = `Sidecar "${name}" Existing`;
     return;
   }
 
@@ -111,6 +165,10 @@ function add() {
   newImage.value = "";
   newArgs.value = "";
   newEnv.value = "";
+
+  // Reset heights of add form textareas
+  const addFormTextareas = document.querySelectorAll(".add-form-textarea");
+  addFormTextareas.forEach((el) => ((el as HTMLElement).style.height = "auto"));
 }
 
 function remove(index: number) {
@@ -129,11 +187,9 @@ function toggleEdit(index: number) {
     editArgs.value = argsToString(sidecar.args);
     editEnv.value = envToString(sidecar.env);
     editingIndex.value = index;
+    triggerResizeOnEdit();
   }
 }
-
-const editArgs = ref("");
-const editEnv = ref("");
 
 function commitEdit() {
   if (editingIndex.value === null) return;
@@ -146,17 +202,12 @@ function commitEdit() {
   };
   emit("update:modelValue", newList);
 }
-
-const getSidecarArgs = (sidecar: Sidecar) => argsToString(sidecar.args);
-
 </script>
 
 <template>
   <div>
-    <!-- Add New Sidecar Form -->
     <div class="border-base-content/30 bg-base-200 mb-4 rounded-lg border p-4">
       <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <!-- Left Column: Name & Args -->
         <div class="space-y-3">
           <div class="form-control">
             <label class="label py-0">
@@ -186,14 +237,16 @@ const getSidecarArgs = (sidecar: Sidecar) => argsToString(sidecar.args);
               </span>
             </label>
             <textarea
+              rows="1"
               placeholder="--port=3306, --host=0.0.0.0"
-              class="textarea textarea-bordered textarea-sm h-16 w-full text-xs"
+              class="add-form-textarea textarea textarea-bordered textarea-sm w-full resize-none overflow-hidden break-all text-xs leading-normal"
               v-model="newArgs"
+              @input="autoResize"
+              @focus="autoResize"
             />
           </div>
         </div>
 
-        <!-- Right Column: Image & Env -->
         <div class="space-y-3">
           <div class="form-control">
             <label class="label py-0">
@@ -224,9 +277,12 @@ const getSidecarArgs = (sidecar: Sidecar) => argsToString(sidecar.args);
               </span>
             </label>
             <textarea
+              rows="1"
               placeholder="MYSQL_ROOT_PASSWORD=secret&#10;MYSQL_DATABASE=testdb"
-              class="textarea textarea-bordered textarea-sm h-16 w-full text-xs"
+              class="add-form-textarea textarea textarea-bordered textarea-sm w-full resize-none overflow-hidden break-all text-xs leading-normal"
               v-model="newEnv"
+              @input="autoResize"
+              @focus="autoResize"
             />
           </div>
         </div>
@@ -242,7 +298,6 @@ const getSidecarArgs = (sidecar: Sidecar) => argsToString(sidecar.args);
         </div>
       </transition>
 
-      <!-- Add Button -->
       <div class="mt-4 flex flex-col items-end gap-2">
         <transition name="fade">
           <div v-if="tooManyError" class="bg-error/10 text-error flex items-center gap-1 rounded p-2 text-sm">
@@ -261,9 +316,8 @@ const getSidecarArgs = (sidecar: Sidecar) => argsToString(sidecar.args);
       </div>
     </div>
 
-    <!-- Sidecar Table -->
     <div class="border-base-content/30 overflow-x-auto rounded-lg border">
-      <table class="table-sm table w-full">
+      <table class="table-sm table w-full table-fixed">
         <thead class="bg-base-200">
           <tr>
             <th class="w-[15%] py-3">{{ t("course.problems.sideCarName") }}</th>
@@ -276,13 +330,20 @@ const getSidecarArgs = (sidecar: Sidecar) => argsToString(sidecar.args);
 
         <tbody>
           <template v-for="(sidecar, idx) in modelValue" :key="idx">
-            <tr class="hover">
-              <td class="py-1 font-mono text-sm font-bold">{{ sidecar.name }}</td>
-              <td class="py-1 font-mono text-sm opacity-80">{{ sidecar.image }}</td>
-              <td class="py-1 font-mono text-xs opacity-70">{{ getSidecarArgs(sidecar) || "-" }}</td>
-              <td class="py-1 font-mono text-xs opacity-70">
+            <tr class="hover align-top">
+              <td class="whitespace-normal break-all py-1 font-mono text-sm font-bold">
+                {{ sidecar.name }}
+              </td>
+              <td class="whitespace-normal break-all py-1 font-mono text-sm opacity-80">
+                {{ sidecar.image }}
+              </td>
+              <td class="whitespace-pre-wrap break-all py-1 font-mono text-xs opacity-70">
+                {{ getSidecarArgs(sidecar) || "-" }}
+              </td>
+              <td class="whitespace-normal break-all py-1 font-mono text-xs opacity-70">
                 <span v-if="sidecar.env && Object.keys(sidecar.env).length > 0">
-                  {{ Object.keys(sidecar.env).length }} {{ t("course.problems.sideCarvars") }}
+                  {{ Object.keys(sidecar.env).length }}
+                  {{ t("course.problems.sideCarvars") }}
                 </span>
                 <span v-else>-</span>
               </td>
@@ -302,7 +363,6 @@ const getSidecarArgs = (sidecar: Sidecar) => argsToString(sidecar.args);
               </td>
             </tr>
 
-            <!-- Inline edit -->
             <tr v-if="editingIndex === idx" class="bg-base-200">
               <td colspan="5" class="p-2">
                 <div class="grid grid-cols-1 gap-2 md:grid-cols-2">
@@ -310,11 +370,14 @@ const getSidecarArgs = (sidecar: Sidecar) => argsToString(sidecar.args);
                     <label class="label py-0">
                       <span class="label-text-alt">{{ t("course.problems.sideCarArgs") }}</span>
                     </label>
-                    <input
-                      class="input-bordered input input-sm"
+                    <textarea
+                      rows="1"
+                      class="auto-resize-textarea textarea textarea-bordered textarea-sm w-full resize-none overflow-hidden break-all leading-normal"
                       v-model="editArgs"
                       maxlength="2048"
                       placeholder="--port=3306, --host=0.0.0.0"
+                      @input="autoResize"
+                      @focus="autoResize"
                     />
                   </div>
                   <div class="form-control">
@@ -322,10 +385,13 @@ const getSidecarArgs = (sidecar: Sidecar) => argsToString(sidecar.args);
                       <span class="label-text-alt">{{ t("course.problems.sideCar_EnvKEYVALUE") }}</span>
                     </label>
                     <textarea
-                      class="textarea-bordered textarea textarea-sm h-16 text-xs"
+                      rows="1"
+                      class="auto-resize-textarea textarea textarea-bordered textarea-sm w-full resize-none overflow-hidden break-all leading-normal"
                       v-model="editEnv"
                       maxlength="2048"
                       placeholder="KEY=VALUE"
+                      @input="autoResize"
+                      @focus="autoResize"
                     />
                   </div>
                 </div>

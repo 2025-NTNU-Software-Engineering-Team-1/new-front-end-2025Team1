@@ -8,6 +8,7 @@ import api, { fetcher } from "@/models/api";
 import { useSession } from "@/stores/session";
 import { useTitle } from "@vueuse/core";
 import dayjs from "dayjs";
+import type { AxiosError } from "axios";
 
 const session = useSession();
 const route = useRoute();
@@ -46,6 +47,8 @@ type TestResult = {
     displayedName: string;
   };
   status: SubmissionStatusCodes;
+  saStatus?: number | null;
+  saMessage?: string | null;
   runTime: number;
   memoryUsage: number;
   score: number;
@@ -75,6 +78,17 @@ const {
   },
 );
 
+// Static Analysis Report
+const {
+  data: SAReport,
+  error: SAError,
+  isLoading: SALoading,
+  execute: fetchSAReport,
+} = useAxios<{ report: string; reportUrl?: string }>("", fetcher, { immediate: false });
+
+// Problem data, used to determine static analysis config
+const { data: problem, execute: fetchProblem } = useAxios<Problem>("", fetcher, { immediate: false });
+
 // Flag to prevent multiple error output fetch calls
 const errorOutputFetched = ref(false);
 
@@ -91,6 +105,8 @@ async function fetchTrialSubmission() {
       displayedName: session.displayedName || "Unknown",
     },
     status: mapStatusToCode(response.data.status),
+    saStatus: response.data.saStatus ?? response.data.sa_status ?? null,
+    saMessage: response.data.saMessage ?? response.data.sa_message ?? null,
     runTime: Math.max(...(response.data.tasks?.map((t) => t.exec_time) ?? [0])),
     memoryUsage: Math.max(...(response.data.tasks?.map((t) => t.memory_usage) ?? [0])),
     score: response.data.score,
@@ -205,6 +221,14 @@ const showErrorOutput = computed(() => {
     status === SUBMISSION_STATUS_CODE.JUDGE_ERROR
   );
 });
+const saStatusBadge = computed(() => {
+  if (!testResult.value || testResult.value.status === SUBMISSION_STATUS_CODE.PENDING) return null;
+  const status = testResult.value.saStatus;
+  if (status === 0) return { label: "SA Passed", className: "badge-success" };
+  if (status === 1) return { label: "SA Failed", className: "badge-error" };
+  if (status === null) return { label: "SA Skipped", className: "badge-ghost" };
+  return null;
+});
 const errorTitle = computed(() =>
   testResult.value?.status === SUBMISSION_STATUS_CODE.JUDGE_ERROR
     ? "Judge Error"
@@ -233,6 +257,22 @@ watchEffect(() => {
         errorOutputFetched.value = true;
         fetchErrorOutput();
       }
+    }
+  }
+});
+
+watchEffect(() => {
+  if (!problem.value) {
+    fetchProblem(`/problem/view/${route.params.id}`);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const prob = problem.value as any;
+  const hasStaticAnalysis = prob?.pipeline?.staticAnalysis?.libraryRestrictions?.enabled === true;
+
+  if (hasStaticAnalysis && testResult.value) {
+    if (!SALoading.value && !SAReport.value) {
+      fetchSAReport(`/trial-submission/${route.params.testId}/static-analysis`);
     }
   }
 });
@@ -799,6 +839,41 @@ function closeDeleteErrorModal() {
             </div>
             <div class="my-1" />
             <code-editor v-model="testResult.code" readonly />
+          </div>
+        </div>
+
+        <div class="my-6" />
+
+        <div class="card min-w-full rounded-none">
+          <div class="card-body p-0">
+            <div class="flex items-center gap-3">
+              <div class="card-title md:text-xl lg:text-2xl">Static Analysis Report</div>
+              <span v-if="saStatusBadge" :class="['badge', saStatusBadge.className]">
+                {{ saStatusBadge.label }}
+              </span>
+            </div>
+            <div class="my-1" />
+
+            <data-status-wrapper :error="SAError as AxiosError" :is-loading="SALoading">
+              <template #loading>
+                <ui-spinner />
+              </template>
+              <template #data>
+                <div class="flex flex-col gap-2">
+                  <div class="flex items-center gap-2" v-if="SAReport?.reportUrl">
+                    <a class="btn btn-sm" :href="SAReport.reportUrl" target="_blank" rel="noopener">
+                      <i-uil-file-download class="mr-1" /> Download report
+                    </a>
+                  </div>
+                  <div v-if="SAReport?.report && SAReport.report.trim()">
+                    <code-editor v-model="SAReport!.report" readonly />
+                  </div>
+                  <div v-else>
+                    <span class="italic opacity-70">Empty</span>
+                  </div>
+                </div>
+              </template>
+            </data-status-wrapper>
           </div>
         </div>
       </div>

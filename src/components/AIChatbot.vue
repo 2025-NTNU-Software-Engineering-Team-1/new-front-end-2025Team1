@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, nextTick, onBeforeUnmount, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import { LAppDelegate } from "@/live2d/Framework/src/lappdelegate";
 import { setSkinConfig } from "@/live2d/Framework/src/lappdefine";
 import api from "@/models/api";
@@ -15,6 +16,8 @@ const props = defineProps<{
   currentCode: string;
   username: string;
 }>();
+
+const { t } = useI18n();
 
 type ChatMessage = {
   id: number;
@@ -411,7 +414,7 @@ const requestAiReply = async (userText: string) => {
     messages.value = messages.value.filter((m) => m.id !== thinkingId);
 
     if (!data.length) {
-      await typeAiMessage("AI 沒有回傳內容，請稍後再試");
+      await typeAiMessage(t("aiChatbot.error.noResponse"));
       setLive2DTalking(false);
       setDefaultExpression();
       return;
@@ -428,7 +431,7 @@ const requestAiReply = async (userText: string) => {
 
     const mergedText = parts.join("\n\n").trim();
 
-    await typeAiMessage(mergedText || "AI 沒有回傳內容，請稍後再試", emotion);
+    await typeAiMessage(mergedText || t("aiChatbot.error.noResponse"), emotion);
 
     setLive2DTalking(false);
     setDefaultExpression();
@@ -439,14 +442,14 @@ const requestAiReply = async (userText: string) => {
     if (idx !== -1) {
       messages.value[idx].phase = "done";
       messages.value[idx].from = "ai";
-      messages.value[idx].text = "AI 助教暫時無法回應，請稍後再試。";
-      messages.value[idx].displayText = "AI 助教暫時無法回應，請稍後再試。";
+      messages.value[idx].text = t("aiChatbot.error.unavailable");
+      messages.value[idx].displayText = t("aiChatbot.error.unavailable");
     } else {
       messages.value.push({
         id: nextId++,
         from: "ai",
-        text: "AI 助教暫時無法回應，請稍後再試。",
-        displayText: "AI 助教暫時無法回應，請稍後再試。",
+        text: t("aiChatbot.error.unavailable"),
+        displayText: t("aiChatbot.error.unavailable"),
         phase: "done",
       });
     }
@@ -482,7 +485,7 @@ const send = () => {
 
 const sendExplain = () => {
   if (isAwaitingReply.value) return;
-  pushUserMessage("解釋這題");
+  pushUserMessage(t("aiChatbot.explain"));
 };
 
 // ====== Live2D 初始化 ======
@@ -565,7 +568,7 @@ onBeforeUnmount(() => {
       v-if="showTrigger && !isOpen"
       class="chat-icon-btn chat-holo relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-purple-400 to-indigo-400 shadow-lg"
       @click.stop="openChat"
-      aria-label="開啟助教聊天"
+      :aria-label="t('aiChatbot.open')"
     >
       <svg
         class="relative z-[1] h-8 w-8 text-white"
@@ -607,12 +610,12 @@ onBeforeUnmount(() => {
             <div class="flex items-center gap-2">
               <div
                 class="h-9 w-9 cursor-pointer overflow-hidden rounded-full border border-white/70 shadow transition-transform hover:scale-110 hover:ring-2 hover:ring-white/50"
-                title="點擊更換外觀"
+                :title="t('aiChatbot.avatarTooltip')"
                 @click="openSkinSelector"
               >
                 <img :src="avatarPath" class="h-full w-full object-cover" />
               </div>
-              <p class="text-xs opacity-80">AI 助教</p>
+              <p class="text-xs opacity-80">{{ t("aiChatbot.title") }}</p>
 
               <!-- Voice Selector -->
               <div class="ml-2 flex items-center">
@@ -683,7 +686,11 @@ onBeforeUnmount(() => {
                     :class="{ 'animate-pulse': ttsLoading && speakingMsgId === msg.id }"
                     @click="speakText(msg.id, String(msg.text ?? ''))"
                     :title="
-                      ttsLoading ? ttsLoadingStatus : speakingMsgId === msg.id ? '停止朗讀' : '播放語音'
+                      ttsLoading
+                        ? ttsLoadingStatus
+                        : speakingMsgId === msg.id
+                          ? t('aiChatbot.tts.stop')
+                          : t('aiChatbot.tts.play')
                     "
                     :disabled="ttsLoading && speakingMsgId !== msg.id"
                   >
@@ -758,13 +765,13 @@ onBeforeUnmount(() => {
               :disabled="isAwaitingReply"
               @click="sendExplain"
             >
-              解釋這題
+              {{ t("aiChatbot.explain") }}
             </button>
             <textarea
               v-model="draft"
               rows="2"
               class="flex-1 resize-none rounded-2xl border border-white/40 bg-white/50 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-500 focus:ring-2 focus:ring-purple-300 focus:outline-none"
-              placeholder="輸入訊息…（Enter 送出，Shift+Enter 換行）"
+              :placeholder="t('aiChatbot.placeholder')"
               @keydown.enter.exact.prevent="send"
               @keydown.enter.shift.stop
             />

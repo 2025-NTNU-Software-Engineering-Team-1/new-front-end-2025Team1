@@ -1219,5 +1219,20 @@
     "clickToChange": "Click to change appearance",
     "voice": "Voice",
     "preview": "Preview"
+  },
+  "aiChatbot": {
+    "title": "AI TA",
+    "open": "Open AI assistant chat",
+    "avatarTooltip": "Click to change appearance",
+    "explain": "Explain this problem",
+    "placeholder": "Type a message… (Enter to send, Shift+Enter for newline)",
+    "tts": {
+      "play": "Play audio",
+      "stop": "Stop playback"
+    },
+    "error": {
+      "noResponse": "The AI didn't return a response. Please try again in a moment.",
+      "unavailable": "The AI assistant can't respond right now. Please try again shortly."
+    }
   }
 }

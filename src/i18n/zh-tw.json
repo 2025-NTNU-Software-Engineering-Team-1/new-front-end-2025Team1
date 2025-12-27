@@ -1214,5 +1214,20 @@
     "clickToChange": "點擊更換外觀",
     "voice": "語音 (Voice)",
     "preview": "試聽"
+  },
+  "aiChatbot": {
+    "title": "AI 助教",
+    "open": "開啟助教聊天",
+    "avatarTooltip": "點擊更換外觀",
+    "explain": "解釋這題",
+    "placeholder": "輸入訊息…（Enter 送出，Shift+Enter 換行）",
+    "tts": {
+      "play": "播放語音",
+      "stop": "停止朗讀"
+    },
+    "error": {
+      "noResponse": "AI 沒有回傳內容，請稍後再試。",
+      "unavailable": "AI 助教暫時無法回應，請稍後再試。"
+    }
   }
 }

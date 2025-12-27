@@ -152,7 +152,6 @@ const manualButtonWrapper = ref<HTMLElement | null>(null);
 const animState = ref({
   spotlight: true,
   flying: false,
-  impact: false,
   hint: false,
   style: {
     "--start-x": "0px",
@@ -183,15 +182,7 @@ onMounted(async () => {
     animState.value.flying = true;
   }, ANIM_CONFIG.START_DELAY);
 
-  // Step B: Trigger Impact visual (Cracks appear)
-  setTimeout(() => {
-    animState.value.impact = true;
-  }, landTime);
-
-  // Step C: Clear cracks (Instantly)
-  setTimeout(() => {
-    animState.value.impact = false;
-  }, cracksEndTime);
+  
 
   // Step D: Fade out spotlight and show the hint bubble
   setTimeout(() => {
@@ -347,23 +338,7 @@ const openJSON = ref(false);
             class="relative z-50 flex items-center justify-center"
             :style="animState.style"
           >
-            <div
-              class="pointer-events-none absolute left-1/2 top-1/2 z-[-1] h-[280px] w-[280px]"
-              :class="animState.impact ? 'block opacity-70' : 'hidden opacity-0'"
-              style="transform: translate(-50%, -50%)"
-            >
-              <svg
-                viewBox="0 0 200 200"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2.5"
-                class="h-full w-full text-black dark:text-white"
-              >
-                <path
-                  d="M100 100 L20 40 M100 100 L160 20 M100 100 L180 80 M100 100 L190 140 M100 100 L130 190 M100 100 L60 180 M100 100 L10 130"
-                />
-              </svg>
-            </div>
+            
 
             <Transition
               enter-active-class="transition duration-200"

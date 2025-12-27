@@ -149,7 +149,7 @@ async function submit() {
 
     // [Constraint Check] Code Mode
     if (acceptedFormat.value === "code") {
-      const maxGB = 1;
+      const maxGB = 0.5;
       const codeBytes = new Blob([form.code], { type: "text/plain" }).size;
       const maxBytes = maxGB * 1024 * 1024 * 1024;
 

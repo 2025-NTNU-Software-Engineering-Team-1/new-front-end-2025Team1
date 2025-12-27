@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, ref, Ref, onMounted, provide } from "vue";
+import { inject, ref, Ref, onMounted, provide, watch } from "vue";
 import { nextTick, reactive, computed } from "vue";
 import useVuelidate from "@vuelidate/core";
 import { required, maxLength, between, helpers } from "@vuelidate/validators";
@@ -53,6 +53,36 @@ const openPanels = reactive({
   testdata: false,
   resdata: false,
 });
+
+// [FIX] Tooltip Overflow Issue
+// Delay overflow:visible to allow animation to complete
+const panelOverflow = reactive({
+  desc: false,
+  config: false,
+  pipeline: false,
+  testdata: false,
+  resdata: false,
+});
+
+watch(
+  () => openPanels,
+  (newVal: typeof openPanels) => {
+    (Object.keys(newVal) as PanelKey[]).forEach((key) => {
+      if (newVal[key]) {
+        setTimeout(() => {
+          // Check if still open
+          if (openPanels[key]) {
+            panelOverflow[key] = true;
+          }
+        }, 350); // Slightly longer than transition
+      } else {
+        panelOverflow[key] = false;
+      }
+    });
+  },
+  { deep: true },
+);
+
 const { t, locale } = useI18n();
 const hover = computed(() => {
   return locale.value === "english" ? hover_en : hover_zh;
@@ -633,15 +663,18 @@ async function submit() {
   </div>
 
   <div ref="sectionRefs.desc" class="mt-4 flex flex-col gap-3">
-    <div class="collapse-arrow rounded-box bg-base-200 border-base-300 collapse border shadow-sm">
+    <div
+      class="collapse-arrow rounded-box bg-base-200 border-base-300 collapse border shadow-sm"
+      :class="{ '!overflow-visible': panelOverflow.desc }"
+    >
       <input type="checkbox" class="peer" v-model="openPanels.desc" />
       <div
-        class="collapse-title text-base-content tooltip tooltip-top flex min-h-0 cursor-help items-center gap-1 py-3 text-base font-semibold"
+        class="collapse-title text-base-content tooltip tooltip-right flex min-h-0 cursor-help items-center gap-1 py-3 text-base font-semibold"
         :data-tip="hover.setDescription"
       >
         {{ t("course.problems.setDescription") }}
       </div>
-      <div class="collapse-content peer-checked:pt-2">
+      <div class="collapse-content peer-checked:pt-2" :class="{ '!overflow-visible': panelOverflow.desc }">
         <DescriptionSection :v$="v$" @update="update" />
       </div>
     </div>
@@ -649,15 +682,16 @@ async function submit() {
     <div
       ref="sectionRefs.config"
       class="collapse-arrow rounded-box bg-base-200 border-base-300 collapse border shadow-sm"
+      :class="{ '!overflow-visible': panelOverflow.config }"
     >
       <input type="checkbox" class="peer" v-model="openPanels.config" />
       <div
-        class="collapse-title text-base-content tooltip tooltip-top flex min-h-0 cursor-help items-center gap-1 py-3 text-base font-semibold"
+        class="collapse-title text-base-content tooltip tooltip-right flex min-h-0 cursor-help items-center gap-1 py-3 text-base font-semibold"
         :data-tip="hover.setConfiguration"
       >
         {{ t("course.problems.setConfiguration") }}
       </div>
-      <div class="collapse-content peer-checked:pt-2">
+      <div class="collapse-content peer-checked:pt-2" :class="{ '!overflow-visible': panelOverflow.config }">
         <ConfigurationSection />
       </div>
     </div>
@@ -665,15 +699,19 @@ async function submit() {
     <div
       ref="sectionRefs.pipeline"
       class="collapse-arrow rounded-box bg-base-200 border-base-300 collapse border shadow-sm"
+      :class="{ '!overflow-visible': panelOverflow.pipeline }"
     >
       <input type="checkbox" class="peer" v-model="openPanels.pipeline" />
       <div
-        class="collapse-title text-base-content tooltip tooltip-top flex min-h-0 cursor-help items-center gap-1 py-3 text-base font-semibold"
+        class="collapse-title text-base-content tooltip tooltip-right flex min-h-0 cursor-help items-center gap-1 py-3 text-base font-semibold"
         :data-tip="hover.setPipelines"
       >
         {{ t("course.problems.setPipelines") }}
       </div>
-      <div class="collapse-content peer-checked:pt-2">
+      <div
+        class="collapse-content peer-checked:pt-2"
+        :class="{ '!overflow-visible': panelOverflow.pipeline }"
+      >
         <PipelineSection />
       </div>
     </div>
@@ -681,15 +719,19 @@ async function submit() {
     <div
       ref="sectionRefs.testdata"
       class="collapse-arrow rounded-box bg-base-200 border-base-300 collapse border shadow-sm"
+      :class="{ '!overflow-visible': panelOverflow.testdata }"
     >
       <input type="checkbox" class="peer" v-model="openPanels.testdata" />
       <div
-        class="collapse-title text-base-content tooltip tooltip-top flex min-h-0 cursor-help items-center gap-1 py-3 text-base font-semibold"
+        class="collapse-title text-base-content tooltip tooltip-right flex min-h-0 cursor-help items-center gap-1 py-3 text-base font-semibold"
         :data-tip="hover.setTestData"
       >
         {{ t("course.problems.setTestData") }}
       </div>
-      <div class="collapse-content peer-checked:pt-2">
+      <div
+        class="collapse-content peer-checked:pt-2"
+        :class="{ '!overflow-visible': panelOverflow.testdata }"
+      >
         <TestDataSection :v$="v$ as any" />
       </div>
     </div>
@@ -697,15 +739,16 @@ async function submit() {
     <div
       ref="sectionRefs.resdata"
       class="collapse-arrow rounded-box bg-base-200 border-base-300 collapse border shadow-sm"
+      :class="{ '!overflow-visible': panelOverflow.resdata }"
     >
       <input type="checkbox" class="peer" v-model="openPanels.resdata" />
       <div
-        class="collapse-title text-base-content tooltip tooltip-top flex min-h-0 cursor-help items-center gap-1 py-3 text-base font-semibold"
+        class="collapse-title text-base-content tooltip tooltip-right flex min-h-0 cursor-help items-center gap-1 py-3 text-base font-semibold"
         :data-tip="hover.setResourceData"
       >
         {{ t("course.problems.setResourceData") }}
       </div>
-      <div class="collapse-content peer-checked:pt-2">
+      <div class="collapse-content peer-checked:pt-2" :class="{ '!overflow-visible': panelOverflow.resdata }">
         <div class="flex flex-col gap-4">
           <ResourceDataSection variant="student" />
           <ResourceDataSection variant="teacher" />

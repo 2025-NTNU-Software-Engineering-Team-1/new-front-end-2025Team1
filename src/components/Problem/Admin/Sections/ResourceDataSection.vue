@@ -276,7 +276,7 @@ watch(
   <div class="form-control col-span-2">
     <div class="flex flex-wrap items-center gap-3">
       <span
-        class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+        class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
         :data-tip="(hover as any)[labelText || ''] || hover.setResourceData"
         >{{ labelText }}</span
       >
@@ -327,7 +327,7 @@ watch(
     <div class="mt-2 overflow-hidden rounded-lg">
       <div class="grid grid-cols-5 pb-4">
         <div
-          class="bg-base-300 tooltip tooltip-bottom col-span-1 flex cursor-help items-center justify-center gap-1 rounded-l-lg text-sm"
+          class="bg-base-300 tooltip tooltip-right col-span-1 flex cursor-help items-center justify-center gap-1 rounded-l-lg text-sm"
           :data-tip="(hover as any)[`${labelText}_zip`]"
         >
           {{ t("course.problems.zipFile") }}<span class="text-error ml-1" aria-hidden="true">*</span>

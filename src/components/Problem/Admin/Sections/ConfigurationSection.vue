@@ -1021,7 +1021,7 @@ onBeforeUnmount(() => {
     <div class="form-control rounded-lg border border-gray-400 p-4">
       <label class="label"
         ><span
-          class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+          class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
           :data-tip="hover.allowedLanguages"
         >
           {{ t("course.problems.allowedLanguages")
@@ -1037,7 +1037,7 @@ onBeforeUnmount(() => {
     <div class="form-control rounded-lg border border-gray-400 p-4">
       <label class="label">
         <span
-          class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+          class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
           :data-tip="hover.tags"
         >
           {{ t("course.problems.tags") }}</span
@@ -1054,7 +1054,7 @@ onBeforeUnmount(() => {
     <div class="form-control rounded-lg border border-gray-400 p-4">
       <label class="label">
         <span
-          class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+          class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
           :data-tip="hover.quota"
         >
           {{ t("course.problems.quota") }}</span
@@ -1099,7 +1099,7 @@ onBeforeUnmount(() => {
         class="mt-3 flex items-center gap-2 rounded border border-gray-400 p-3"
       >
         <span
-          class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+          class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
           :data-tip="hover.maxZipSize"
           >{{ t("course.problems.maxZipSize") }}</span
         >
@@ -1121,7 +1121,7 @@ onBeforeUnmount(() => {
       <div class="flex items-center gap-4">
         <label class="label cursor-pointer justify-start gap-x-4">
           <span
-            class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+            class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
             :data-tip="hover.aiTA"
             >{{ t("course.problems.aiTA") }}</span
           >
@@ -1139,7 +1139,7 @@ onBeforeUnmount(() => {
               <div class="flex min-w-[260px] flex-1 items-center gap-3">
                 <label class="label mb-0 w-28">
                   <span
-                    class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+                    class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
                     :data-tip="hover.aiModel"
                     >{{ t("course.problems.aiModel") }}</span
                   >
@@ -1181,7 +1181,7 @@ onBeforeUnmount(() => {
             <div class="mb-2 flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <label
-                  class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+                  class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
                   :data-tip="hover.selectAPIKeys"
                   >{{ t("course.problems.selectAPIKeys")
                   }}<span class="text-error ml-1" aria-hidden="true">*</span></label
@@ -1336,7 +1336,7 @@ onBeforeUnmount(() => {
                       <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                     </svg>
                     <span
-                      class="label-text tooltip tooltip-bottom flex cursor-help items-center gap-1"
+                      class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
                       :data-tip="hover.activeAiKeys"
                       >{{ t("course.problems.activeAiKeys") }}</span
                     >
@@ -1417,7 +1417,7 @@ onBeforeUnmount(() => {
                       <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                     </svg>
                     <span
-                      class="label-text tooltip tooltip-bottom flex cursor-help items-center gap-1"
+                      class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
                       :data-tip="hover.inactiveAiKeys"
                       >{{ t("course.problems.inactiveAiKeys") }}</span
                     >
@@ -1483,7 +1483,7 @@ onBeforeUnmount(() => {
     <div class="form-control col-span-2 rounded-lg border border-gray-400 p-4">
       <label class="label ml-1 cursor-pointer justify-start gap-x-4">
         <span
-          class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+          class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
           :data-tip="hover.trialMode"
           >{{ t("course.problems.trialMode") }}</span
         >
@@ -1494,8 +1494,8 @@ onBeforeUnmount(() => {
           <div class="form-control w-full max-w-xs">
             <label class="label">
               <span
-                class="label-text tooltip tooltip-bottom flex cursor-help items-center gap-1"
-                :data-tup="hover.trialMaxNumber"
+                class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
+                :data-tip="hover.trialMaxNumber"
                 >{{ t("course.problems.trialMaxNumber") }}</span
               >
             </label>
@@ -1519,7 +1519,7 @@ onBeforeUnmount(() => {
           <div class="form-control">
             <label class="label cursor-pointer justify-start gap-x-4">
               <span
-                class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+                class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
                 :data-tip="hover.resultVisible"
                 >{{ t("course.problems.resultVisible") }}</span
               >
@@ -1535,7 +1535,7 @@ onBeforeUnmount(() => {
           <div class="form-control">
             <label class="label cursor-pointer justify-start gap-x-4">
               <span
-                class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+                class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
                 :data-tip="hover.resultDownloadable"
                 >{{ t("course.problems.resultDownloadable") }}</span
               >
@@ -1555,7 +1555,7 @@ onBeforeUnmount(() => {
         <div class="rounded-lg border border-gray-500 p-4">
           <div class="flex items-center gap-4">
             <span
-              class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+              class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
               :data-tip="hover.uploadPublicTestData"
               >{{ t("course.problems.uploadPublicTestData")
               }}<span class="text-error ml-1" aria-hidden="true">*</span></span
@@ -1632,7 +1632,7 @@ onBeforeUnmount(() => {
         <div class="rounded-lg border border-gray-500 p-4">
           <div class="flex items-center gap-4">
             <span
-              class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+              class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
               :data-tip="hover.uploadACFiles"
               >{{ t("course.problems.uploadACFiles")
               }}<span class="text-error ml-1" aria-hidden="true">*</span></span
@@ -1724,7 +1724,7 @@ onBeforeUnmount(() => {
       <div class="flex items-center gap-4">
         <label class="label ml-1 cursor-pointer justify-start gap-x-4">
           <span
-            class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+            class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
             :data-tip="hover.networkSidecars"
             >{{ t("course.problems.networkSidecars") }}</span
           >
@@ -1759,7 +1759,7 @@ onBeforeUnmount(() => {
           <div class="overflow-hidden rounded-lg border border-gray-500">
             <div class="bg-base-300 px-4 py-2">
               <span
-                class="text-base-content tooltip tooltip-bottom flex cursor-help items-center gap-1 font-medium"
+                class="text-base-content tooltip tooltip-bottom z-50 flex cursor-help items-center gap-1 font-medium"
                 :data-tip="hover.networkAccessRestriction"
                 >{{ t("course.problems.networkAccessRestriction") }}</span
               >
@@ -1768,7 +1768,7 @@ onBeforeUnmount(() => {
               <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div class="col-span-1 flex items-center gap-4 md:col-span-2">
                   <span
-                    class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+                    class="label-text tooltip tooltip-right z-50 flex cursor-help items-center gap-1"
                     :data-tip="hover.networkAccessModel"
                     >{{ t("course.problems.networkAccessModel") }}</span
                   >
@@ -1812,7 +1812,7 @@ onBeforeUnmount(() => {
                 <div>
                   <label class="label"
                     ><span
-                      class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+                      class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
                       :data-tip="hover.networkAccessIPList"
                       >{{ t("course.problems.networkAccessIPList") }}</span
                     ></label
@@ -1834,7 +1834,7 @@ onBeforeUnmount(() => {
                 <div>
                   <label class="label"
                     ><span
-                      class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+                      class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
                       :data-tip="hover.networkAccessURLList"
                       >{{ t("course.problems.networkAccessURLList") }}</span
                     ></label
@@ -1885,7 +1885,7 @@ onBeforeUnmount(() => {
               <div class="border-base-content/30 rounded-lg border p-4">
                 <div class="flex items-center gap-3">
                   <span
-                    class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+                    class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
                     :data-tip="hover.dockerFiles"
                     >{{ t("course.problems.dockerFiles") }}</span
                   >
@@ -1994,7 +1994,7 @@ onBeforeUnmount(() => {
     <div class="form-control col-span-1 rounded-lg border border-gray-400 p-4 md:col-span-2">
       <label class="label"
         ><span
-          class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+          class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
           :data-tip="hover.ArtifactCollection"
           >{{ t("course.problems.ArtifactCollection") }}</span
         ></label
@@ -2003,7 +2003,7 @@ onBeforeUnmount(() => {
         <label class="label cursor-pointer gap-2">
           <input type="checkbox" class="checkbox" v-model="artifactCompiledBinary" />
           <span
-            class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+            class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
             :data-tip="hover.CompiledBinary"
             >{{ t("course.problems.CompiledBinary") }}</span
           >
@@ -2012,7 +2012,7 @@ onBeforeUnmount(() => {
         <label class="label cursor-pointer gap-2">
           <input type="checkbox" class="checkbox" v-model="artifactZip" />
           <span
-            class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+            class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
             :data-tip="hover.StudentArtifact"
             >{{ t("course.problems.StudentArtifact") }}</span
           >

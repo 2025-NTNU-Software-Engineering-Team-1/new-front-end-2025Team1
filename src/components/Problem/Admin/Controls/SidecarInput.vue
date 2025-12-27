@@ -42,7 +42,7 @@ const errorMessage = ref("");
 // ==========================================
 const { t, locale } = useI18n();
 const hover = computed(() => {
-  return locale.value === "en" ? hover_en : hover_zh;
+  return locale.value === "english" ? hover_en : hover_zh;
 });
 
 // ==========================================
@@ -212,7 +212,7 @@ function commitEdit() {
           <div class="form-control">
             <label class="label py-0">
               <span
-                class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+                class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
                 :data-tip="hover.sideCarName"
                 >{{ t("course.problems.sideCarName") }}</span
               >
@@ -228,7 +228,7 @@ function commitEdit() {
           <div class="form-control">
             <label class="label py-0">
               <span
-                class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+                class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
                 :data-tip="hover.sideCarArgs"
                 >{{ t("course.problems.sideCarArgs") }}</span
               >
@@ -251,7 +251,7 @@ function commitEdit() {
           <div class="form-control">
             <label class="label py-0">
               <span
-                class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+                class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
                 :data-tip="hover.sideCarImage"
                 >{{ t("course.problems.sideCarImage") }}</span
               >
@@ -268,7 +268,7 @@ function commitEdit() {
           <div class="form-control">
             <label class="label py-0">
               <span
-                class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+                class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
                 :data-tip="hover.sideCarEnv"
                 >{{ t("course.problems.sideCarEnv") }}</span
               >

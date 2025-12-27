@@ -293,7 +293,7 @@ watch(
     <div class="mt-2 overflow-hidden rounded-lg">
       <div class="grid grid-cols-5">
         <div
-          class="bg-base-300 tooltip tooltip-bottom col-span-1 flex cursor-help items-center justify-center gap-1 text-sm"
+          class="bg-base-300 tooltip tooltip-right col-span-1 flex cursor-help items-center justify-center gap-1 text-sm"
           :data-tip="hover.setDataZipFile"
         >
           {{ t("course.problems.zipFile") }}

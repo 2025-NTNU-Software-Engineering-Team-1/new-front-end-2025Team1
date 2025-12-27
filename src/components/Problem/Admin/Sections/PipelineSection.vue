@@ -749,7 +749,7 @@ watch(
     <div class="col-span-2 rounded-lg border border-gray-400 p-4">
       <label class="label"
         ><span
-          class="label-text tooltip tooltip-top flex cursor-help items-center gap-1 font-semibold"
+          class="label-text tooltip tooltip-right flex cursor-help items-center gap-1 font-semibold"
           :data-tip="hover.fileAccess"
           >{{ t("course.problems.fileAccess") }}</span
         ></label
@@ -783,7 +783,7 @@ watch(
     <div class="form-control col-span-2 rounded-lg border border-gray-400 p-4">
       <label class="label cursor-pointer justify-start gap-x-4">
         <span
-          class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+          class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
           :data-tip="hover.libraryRestrictionsGroup1"
           >{{ t("course.problems.staticAnalysisGroup") }}</span
         >
@@ -798,7 +798,7 @@ watch(
         <div class="rounded-lg border border-gray-400 p-3">
           <div class="mb-3 flex items-center justify-between">
             <h4
-              class="text tooltip tooltip-top flex cursor-help items-center gap-1 font-medium"
+              class="text tooltip tooltip-right flex cursor-help items-center gap-1 font-medium"
               :data-tip="hover.libraryRestrictionsGroup2"
             >
               {{ t("course.problems.staticAnalysisGroup") || "Library Restrictions" }}
@@ -863,7 +863,7 @@ watch(
 
               <div class="mb-2 flex items-center justify-between">
                 <h5
-                  class="tooltip tooltip-top flex cursor-help items-center gap-1 text-sm font-medium"
+                  class="tooltip tooltip-right flex cursor-help items-center gap-1 text-sm font-medium"
                   :data-tip="hover.importsRestrictions"
                 >
                   {{ t("course.problems.importsRestrictions") }}
@@ -967,7 +967,7 @@ watch(
 
               <div class="mb-2 flex items-center justify-between">
                 <h5
-                  class="tooltip tooltip-top flex cursor-help items-center gap-1 text-sm font-medium"
+                  class="tooltip tooltip-right flex cursor-help items-center gap-1 text-sm font-medium"
                   :data-tip="hover.headersRestrictions"
                 >
                   {{ t("course.problems.headersRestrictions") }}
@@ -1039,7 +1039,7 @@ watch(
             <div class="relative min-h-[16rem] rounded border border-gray-500 p-2">
               <div class="mb-2 flex items-center justify-between">
                 <h5
-                  class="tooltip tooltip-top flex cursor-help items-center gap-1 text-sm font-medium"
+                  class="tooltip tooltip-right flex cursor-help items-center gap-1 text-sm font-medium"
                   :data-tip="hover.functionsRestrictions"
                 >
                   {{ t("course.problems.functionsRestrictions") }}
@@ -1118,7 +1118,7 @@ watch(
           <div class="mb-3 flex items-center justify-between">
             <div class="flex items-center gap-4">
               <h4
-                class="text tooltip tooltip-top flex cursor-help items-center gap-1 font-medium"
+                class="text tooltip tooltip-right flex cursor-help items-center gap-1 font-medium"
                 :data-tip="hover.syntaxRestrictions"
               >
                 {{ t("course.problems.syntaxRestrictions") }}
@@ -1233,7 +1233,7 @@ watch(
       <div class="rounded-lg border border-gray-400 p-4">
         <label class="label mb-2">
           <span
-            class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+            class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
             :data-tip="hover.executionMode"
             >{{ t("course.problems.executionMode") }}</span
           >
@@ -1248,7 +1248,7 @@ watch(
               v-model="problem.pipeline!.executionMode as 'general' | 'functionOnly' | 'interactive'"
             />
             <span
-              class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+              class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
               :data-tip="hover.executionModeGeneral"
               >{{ t("course.problems.executionModeGeneral") }}</span
             >
@@ -1261,7 +1261,7 @@ watch(
               v-model="problem.pipeline!.executionMode as 'general' | 'functionOnly' | 'interactive'"
             />
             <span
-              class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+              class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
               :data-tip="hover.executionModeFuncitonOnly"
               >{{ t("course.problems.executionModeFuncitonOnly") }}</span
             >
@@ -1274,7 +1274,7 @@ watch(
               v-model="problem.pipeline!.executionMode as 'general' | 'functionOnly' | 'interactive'"
             />
             <span
-              class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+              class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
               :data-tip="hover.executionModeInteractive"
               >{{ t("course.problems.executionModeInteractive") }}</span
             >
@@ -1289,7 +1289,7 @@ watch(
             <div class="flex flex-wrap items-center gap-4">
               <label class="label mb-0 cursor-pointer justify-start gap-x-2">
                 <span
-                  class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+                  class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
                   :data-tip="hover.uploadFile"
                   >{{ t("course.problems.uploadFile")
                   }}<span class="text-error ml-1" aria-hidden="true">*</span></span
@@ -1349,7 +1349,7 @@ watch(
             <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
               <label class="label mb-0 cursor-pointer justify-start gap-x-2">
                 <span
-                  class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+                  class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
                   :data-tip="hover.interactiveTeacherFirsts"
                   >{{ t("course.problems.interactiveTeacherFirst") }}</span
                 >
@@ -1358,7 +1358,7 @@ watch(
 
               <div class="flex items-center gap-x-2">
                 <span
-                  class="tooltip tooltip-top flex cursor-help items-center gap-1 text-sm opacity-80"
+                  class="tooltip tooltip-right flex cursor-help items-center gap-1 text-sm opacity-80"
                   :data-tip="hover.interactiveUploadTeacherCode"
                   >{{ t("course.problems.interactiveUploadTeacherCode")
                   }}<span class="text-error ml-1" aria-hidden="true">*</span></span
@@ -1452,7 +1452,7 @@ watch(
           <label class="label cursor-pointer justify-start gap-x-4">
             <span class="label-text flex items-center gap-1">
               <span
-                class="tooltip tooltip-top flex cursor-help items-center gap-1"
+                class="tooltip tooltip-right flex cursor-help items-center gap-1"
                 :data-tip="hover.customChecker"
                 >{{ t("course.problems.customChecker") }}</span
               >
@@ -1497,7 +1497,7 @@ watch(
         <div v-if="problem.pipeline!.customChecker" class="flex flex-col gap-x-2">
           <div class="flex items-center gap-x-2 pt-4">
             <span
-              class="tooltip tooltip-top flex cursor-help items-center gap-1 pl-1 text-sm opacity-80"
+              class="tooltip tooltip-right flex cursor-help items-center gap-1 pl-1 text-sm opacity-80"
               :data-tip="hover.uploadCustomChecker"
               >{{ t("course.problems.uploadCustomChecker")
               }}<span class="text-error ml-1" aria-hidden="true">*</span></span
@@ -1530,7 +1530,7 @@ watch(
           <div class="bg-base-200/50 mt-4 rounded-lg border border-gray-500 p-4">
             <div class="flex items-center gap-4">
               <label
-                class="label tooltip tooltip-top flex cursor-help cursor-pointer items-center justify-start gap-1 gap-x-4"
+                class="label tooltip tooltip-right flex cursor-help cursor-pointer items-center justify-start gap-1 gap-x-4"
                 :data-tip="hover.aiCheckerEnable"
               >
                 <span class="label-text">{{ t("course.problems.aiCheckerEnable") }}</span>
@@ -1643,7 +1643,7 @@ watch(
         <div class="flex items-center gap-4">
           <label class="label cursor-pointer justify-start gap-x-4">
             <span
-              class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+              class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
               :data-tip="hover.customScoringScript"
               >{{ t("course.problems.customScoringScript") }}</span
             >
@@ -1673,7 +1673,7 @@ watch(
         <div v-if="problem.pipeline!.scoringScript?.custom" class="flex flex-col gap-x-2">
           <div class="flex items-center gap-x-2 pt-4">
             <span
-              class="tooltip tooltip-top flex cursor-help items-center gap-1 pl-1 text-sm opacity-80"
+              class="tooltip tooltip-right flex cursor-help items-center gap-1 pl-1 text-sm opacity-80"
               :data-tip="hover.uploadCustomScorer"
               >{{ t("course.problems.uploadCustomScorer")
               }}<span class="text-error ml-1" aria-hidden="true">*</span></span

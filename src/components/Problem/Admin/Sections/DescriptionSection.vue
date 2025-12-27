@@ -21,7 +21,7 @@ const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
   <div class="form-control w-full">
     <label class="label"
       ><span
-        class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
+        class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
         :data-tip="hover.tags"
       >
         {{ t("course.problems.descriptionProblem") }}</span

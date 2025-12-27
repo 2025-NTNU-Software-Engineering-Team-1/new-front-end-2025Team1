@@ -586,6 +586,12 @@
       "roleChange": {
         "error": "角色變更失敗"
       },
+      "tableActions": "操作",
+      "removeMember": "移除成員",
+      "removeConfirmTitle": "移除成員",
+      "confirmRemove": "確定要將 {username} 從課程中移除嗎？此操作無法復原。",
+      "confirmButton": "確認移除",
+      "removeError": "移除成員失敗",
       "errors": {
         "needAtLeastOne": "請至少填寫一名使用者（username、email、password）",
         "invalidRoleForUser": "使用者 \"{username}\" 的 role \"{role}\" 無效。允許：0=Admin,1=Teacher,2=Student,3=TA",

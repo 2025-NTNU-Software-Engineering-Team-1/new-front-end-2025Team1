@@ -128,17 +128,41 @@ const roleChangeError = ref("");
 
 const editingUser = ref<string | null>(null);
 async function handleRoleChange(member: any, newRole: "student" | "ta") {
-  const oldRole = member.role;
-  const newRoleNumber = newRole === "ta" ? 3 : 2;
   editingUser.value = null;
-  member.role = newRoleNumber;
+
+  if (!data.value) return;
+
+  // Store original state for potential rollback
+  const originalStudents = [...(data.value.students || [])];
+  const originalTAs = [...(data.value.TAs || [])];
+
+  // Move member between arrays based on new role
+  if (newRole === "ta") {
+    // Move from students to TAs
+    const studentIndex = data.value.students?.findIndex((s) => s.username === member.username);
+    if (studentIndex !== undefined && studentIndex >= 0) {
+      const [movedMember] = data.value.students!.splice(studentIndex, 1);
+      data.value.TAs = data.value.TAs || [];
+      data.value.TAs.push(movedMember);
+    }
+  } else {
+    // Move from TAs to students
+    const taIndex = data.value.TAs?.findIndex((ta) => ta.username === member.username);
+    if (taIndex !== undefined && taIndex >= 0) {
+      const [movedMember] = data.value.TAs!.splice(taIndex, 1);
+      data.value.students = data.value.students || [];
+      data.value.students.push(movedMember);
+    }
+  }
+
   try {
-    // 3. 呼叫你原本的 API 函式
     await changeMemberRole(member.username, newRole);
   } catch (err) {
-    // 如果 API 真的失敗且不是 404 的話，可以在這裡還原（選做）
-    // member.role = oldRole;
-    console.warn("API 報錯 (404)，但介面維持新狀態");
+    // Rollback on error - restore original arrays
+    if (data.value) {
+      data.value.students = originalStudents;
+      data.value.TAs = originalTAs;
+    }
   }
 }
 
@@ -155,13 +179,52 @@ async function changeMemberRole(username: string, newRole: "student" | "ta") {
   roleChangeError.value = "";
   try {
     await api.Course.changeMemberRole(route.params.name as string, username, newRole);
-    // Refetch members to get updated data
-    await refetchMembers();
+    // Don't refetch - we've already updated the local state optimistically
   } catch (err: unknown) {
     const axiosError = err as AxiosError<{ message: string }>;
     roleChangeError.value = axiosError.response?.data?.message || t("course.members.roleChange.error");
+    // Rethrow so caller can handle rollback
+    throw err;
   } finally {
     roleChangeLoading.value = null;
+  }
+}
+
+// Member removal functionality
+const removingMember = ref<string | null>(null);
+const removeError = ref("");
+
+// Confirm dialog state
+const showRemoveConfirmDialog = ref(false);
+const memberToRemove = ref<any>(null);
+
+function openRemoveConfirmDialog(member: any) {
+  memberToRemove.value = member;
+  showRemoveConfirmDialog.value = true;
+}
+
+function closeRemoveConfirmDialog() {
+  showRemoveConfirmDialog.value = false;
+  memberToRemove.value = null;
+}
+
+async function confirmRemoveMember() {
+  if (!memberToRemove.value || !data.value) return;
+
+  const member = memberToRemove.value;
+  removingMember.value = member.username;
+  removeError.value = "";
+
+  try {
+    await api.Course.removeMember(route.params.name as string, member.username);
+    // Refetch members to update the list
+    await refetchMembers();
+    closeRemoveConfirmDialog();
+  } catch (err: unknown) {
+    const axiosError = err as AxiosError<{ message: string }>;
+    removeError.value = axiosError.response?.data?.message || t("course.members.removeError");
+  } finally {
+    removingMember.value = null;
   }
 }
 
@@ -521,6 +584,13 @@ async function submit() {
               <button class="btn btn-sm btn-ghost" @click="roleChangeError = ''">×</button>
             </div>
 
+            <!-- Remove error message -->
+            <div v-if="removeError" class="alert alert-error mb-4 py-2">
+              <i-uil-exclamation-triangle />
+              <span>{{ removeError }}</span>
+              <button class="btn btn-sm btn-ghost" @click="removeError = ''">×</button>
+            </div>
+
             <table class="table w-full">
               <thead>
                 <tr>
@@ -528,6 +598,7 @@ async function submit() {
                   <th>{{ $t("course.members.tableDisplayedName") }}</th>
                   <th>{{ $t("course.members.tableRole") }}</th>
                   <th v-if="canChangeRoles">{{ $t("course.members.tableCourseRole") }}</th>
+                  <th v-if="canChangeRoles">{{ $t("course.members.tableActions") }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -540,52 +611,43 @@ async function submit() {
                       <span class="badge badge-primary">{{ $t("course.members.roleTeacher") }}</span>
                     </template>
                     <template v-else>
-                      <div class="flex h-10 items-center gap-2 overflow-visible">
+                      <div class="flex h-10 items-center gap-2">
                         <template v-if="roleChangeLoading === member.username">
                           <span class="loading loading-spinner loading-sm text-primary"></span>
                         </template>
 
-                        <div v-else class="flex items-center gap-2">
-                          <div
-                            @click="editingUser = editingUser === member.username ? null : member.username"
-                            class="input input-bordered input-sm bg-base-100 no-arrow flex w-32 cursor-pointer items-center justify-between px-3"
-                          >
-                            <span class="truncate">
-                              {{
-                                member.role === 3
-                                  ? $t("course.members.roleTA")
-                                  : $t("course.members.roleStudent")
-                              }}
-                            </span>
-                            <span class="text-[10px] opacity-50">{{
-                              editingUser === member.username ? "◀" : "▶"
-                            }}</span>
-                          </div>
-
-                          <div
-                            v-if="editingUser === member.username"
-                            class="animate-in fade-in slide-in-from-left-2 flex items-center gap-1 duration-200"
-                          >
-                            <button
-                              class="btn btn-circle btn-sm btn-primary tooltip tooltip-top flex items-center gap-1"
-                              :data-tip="hover.student"
-                              :class="{ 'btn-disabled opacity-40': member.role === 2 }"
-                              @click="handleRoleChange(member, 'student')"
-                            >
-                              S
-                            </button>
-
-                            <button
-                              class="btn btn-circle btn-sm btn-secondary tooltip tooltip-top flex items-center gap-1"
-                              :data-tip="hover.TA"
-                              :class="{ 'btn-disabled opacity-40': member.role === 3 }"
-                              @click="handleRoleChange(member, 'ta')"
-                            >
-                              TA
-                            </button>
-                          </div>
-                        </div>
+                        <select
+                          v-else
+                          class="select select-bordered select-sm w-32"
+                          :value="getCourseRole(member)"
+                          @change="
+                            handleRoleChange(
+                              member,
+                              ($event.target as HTMLSelectElement).value as 'student' | 'ta',
+                            )
+                          "
+                        >
+                          <option value="student">{{ $t("course.members.roleStudent") }}</option>
+                          <option value="ta">{{ $t("course.members.roleTA") }}</option>
+                        </select>
                       </div>
+                    </template>
+                  </td>
+                  <td v-if="canChangeRoles">
+                    <template v-if="getCourseRole(member) !== 'teacher'">
+                      <button
+                        class="btn btn-sm btn-ghost btn-error"
+                        :disabled="removingMember === member.username"
+                        @click="openRemoveConfirmDialog(member)"
+                        :title="$t('course.members.removeMember')"
+                      >
+                        <template v-if="removingMember === member.username">
+                          <span class="loading loading-spinner loading-xs"></span>
+                        </template>
+                        <template v-else>
+                          <i-uil-trash-alt />
+                        </template>
+                      </button>
                     </template>
                   </td>
                 </tr>
@@ -773,6 +835,30 @@ async function submit() {
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- Remove Member Confirm Dialog -->
+    <div v-if="showRemoveConfirmDialog" class="modal modal-open">
+      <div class="modal-box">
+        <h3 class="text-lg font-bold">{{ $t("course.members.removeConfirmTitle") }}</h3>
+        <p class="py-4">
+          {{ $t("course.members.confirmRemove", { username: memberToRemove?.username }) }}
+        </p>
+        <div v-if="removeError" class="alert alert-error mb-4">
+          <i-uil-exclamation-triangle />
+          <span>{{ removeError }}</span>
+        </div>
+        <div class="modal-action">
+          <button class="btn btn-error" @click="confirmRemoveMember" :disabled="removingMember !== null">
+            <span v-if="removingMember !== null" class="loading loading-spinner loading-sm"></span>
+            {{ $t("course.members.confirmButton") }}
+          </button>
+          <button class="btn btn-ghost" @click="closeRemoveConfirmDialog" :disabled="removingMember !== null">
+            {{ $t("course.members.cancel") }}
+          </button>
+        </div>
+      </div>
+      <div class="modal-backdrop" @click="closeRemoveConfirmDialog"></div>
     </div>
   </div>
 </template>

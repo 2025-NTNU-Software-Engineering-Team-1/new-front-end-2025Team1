@@ -350,6 +350,11 @@ const Course = {
       `/course/${courseName}/member/${username}/role`,
       { role },
     ),
+  // Remove member from course (for teachers only, not TAs)
+  removeMember: (courseName: string, username: string) =>
+    fetcher.delete<{ message: string; data: { username: string } }>(
+      `/course/${courseName}/member/${username}`,
+    ),
 };
 
 const User = {

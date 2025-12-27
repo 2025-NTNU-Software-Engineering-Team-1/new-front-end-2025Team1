@@ -588,6 +588,12 @@
       "roleChange": {
         "error": "Failed to change role"
       },
+      "tableActions": "Actions",
+      "removeMember": "Remove member",
+      "removeConfirmTitle": "Remove Member",
+      "confirmRemove": "Are you sure you want to remove {username} from this course? This action cannot be undone.",
+      "confirmButton": "Confirm Remove",
+      "removeError": "Failed to remove member",
       "errors": {
         "needAtLeastOne": "Please fill in at least one user with username, email and password",
         "invalidRoleForUser": "Invalid role \"{role}\" for user \"{username}\". Allowed: 0=Admin,1=Teacher,2=Student,3=TA",

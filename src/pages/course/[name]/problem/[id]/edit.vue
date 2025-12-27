@@ -561,7 +561,7 @@ function cleanupForDisplay(data?: ProblemForm) {
                   class="animate-bounce-horizontal absolute right-full z-50 mr-4 w-max bg-black px-3 py-2 text-sm font-bold text-white shadow-lg"
                 >
                   <div
-                    class="bg-info absolute -right-1 top-1/2 h-3 w-3 -translate-y-1/2 rotate-45 transform"
+                    class="bg-info absolute top-1/2 -right-1 h-3 w-3 -translate-y-1/2 rotate-45 transform"
                   ></div>
                   👋 Click here for Manual!
                 </div>

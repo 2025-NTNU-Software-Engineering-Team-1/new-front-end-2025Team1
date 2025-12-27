@@ -371,6 +371,33 @@ async function confirmDeleteAllTrials() {
     </div>
   </div>
 
+  <!-- Delete All Confirmation Modal -->
+  <dialog ref="deleteAllModal" class="modal">
+    <div class="modal-box">
+      <h3 class="text-error text-lg font-bold">
+        {{ t("course.problem.test.trialHistory.deleteAllTitle") }}
+      </h3>
+      <p class="py-4">
+        {{ t("course.problem.test.trialHistory.deleteAllConfirm") }}
+      </p>
+      <div class="modal-action">
+        <button class="btn" @click="deleteAllModal?.close()">
+          {{ t("common.cancel") }}
+        </button>
+        <button
+          class="btn btn-error"
+          :class="{ loading: isDeleteAllLoading }"
+          @click="confirmDeleteAllTrials"
+        >
+          {{ t("common.confirm") }}
+        </button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </dialog>
+
   <!-- Delete Error Modal -->
   <dialog ref="deleteErrorModal" class="modal">
     <div class="modal-box">

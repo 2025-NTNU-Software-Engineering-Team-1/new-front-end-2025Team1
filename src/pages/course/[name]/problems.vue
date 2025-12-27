@@ -86,7 +86,7 @@ const sortedProblems = computed(() => {
 
 // --- Search Logic (Name & ID) ---
 const searchQuery = ref("");
-// [ADDED] State to track if a search yielded no results
+// State to track if a search yielded no results
 const searchNotFound = ref(false);
 
 /**
@@ -139,7 +139,7 @@ function performSearch() {
   const query = searchQuery.value.trim();
   if (!query) return;
 
-  // [ADDED] Priority 1: Check if query is a valid ID (Number)
+  // Priority 1: Check if query is a valid ID (Number)
   const queryId = Number(query);
   if (!isNaN(queryId)) {
     const exactIdMatch = sortedProblems.value.find((p) => p.problemId === queryId);
@@ -149,7 +149,7 @@ function performSearch() {
     }
   }
 
-  // [MODIFIED] Priority 2: Name Search (Existing logic)
+  // Priority 2: Name Search (Existing logic)
   let bestMatchId = -1;
   let maxScore = -1;
 
@@ -171,7 +171,7 @@ function performSearch() {
   if (maxScore > 0 && bestMatchId !== -1) {
     navigateToProblem(bestMatchId);
   } else {
-    // [ADDED] No match found for either ID or Name
+    // No match found for either ID or Name
     searchNotFound.value = true;
   }
 }
@@ -229,6 +229,7 @@ const maxPage = computed(() => {
               <input
                 v-model="searchQuery"
                 type="text"
+                maxlength="50"
                 placeholder="Search Name or ID..."
                 class="input input-bordered input-sm w-40 transition-colors lg:w-64"
                 :class="{ 'input-error': searchNotFound }"
@@ -318,12 +319,15 @@ const maxPage = computed(() => {
                     </router-link>
                   </td>
                   <td>
-                    {{ problemName }}
-                    <span
-                      v-if="aiVTuber || hasAiVtuber(problemId)"
-                      class="ml-2 inline-flex items-center rounded-full bg-gradient-to-r from-purple-400 to-indigo-400 px-2 py-0.5 text-xs font-medium text-white"
-                      >AI-TA</span
-                    >
+                    <div class="flex w-full items-center justify-between">
+                      <span class="mr-2">{{ problemName }}</span>
+                      <span
+                        v-if="aiVTuber || hasAiVtuber(problemId)"
+                        class="inline-flex shrink-0 items-center rounded-full bg-gradient-to-r from-purple-400 to-indigo-400 px-2 py-0.5 text-xs font-medium text-white"
+                      >
+                        AI-TA
+                      </span>
+                    </div>
                   </td>
                   <td v-if="rolesCanReadProblemStatus.includes(session.role)">
                     <span class="badge ml-1">{{ status === 0 ? "VISIBLE" : "HIDDEN" }}</span>

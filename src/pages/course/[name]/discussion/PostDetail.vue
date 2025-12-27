@@ -536,6 +536,7 @@ onMounted(async () => {
                 :replying-to-id="replyToId"
                 :reply-content="replyContent"
                 :submitting-reply="submittingReply"
+                :is-post-closed="post.Is_Closed"
                 @reply="replyToComment"
                 @refresh="loadPostDetail"
                 @update-reply-content="(content) => (replyContent = content)"

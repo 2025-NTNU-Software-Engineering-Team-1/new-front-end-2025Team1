@@ -16,6 +16,7 @@ const props = defineProps<{
   replyingToId?: number;
   replyContent?: string;
   submittingReply?: boolean;
+  isPostClosed?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -95,7 +96,13 @@ const handleReply = () => {
 
       <!-- Actions -->
       <div class="flex items-center gap-4 text-xs">
-        <button class="hover:text-primary flex items-center gap-1 text-gray-500" @click="handleReply">
+        <button
+          class="flex items-center gap-1 text-gray-500"
+          :class="isPostClosed ? 'cursor-not-allowed opacity-50' : 'hover:text-primary'"
+          @click="!isPostClosed && handleReply()"
+          :disabled="isPostClosed"
+          :title="isPostClosed ? 'Post is closed' : ''"
+        >
           <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
             <path
               fill-rule="evenodd"
@@ -145,6 +152,7 @@ const handleReply = () => {
           :replying-to-id="replyingToId"
           :reply-content="replyContent"
           :submitting-reply="submittingReply"
+          :is-post-closed="isPostClosed"
           @reply="(id, author) => emit('reply', id, author)"
           @refresh="() => emit('refresh')"
           @update-reply-content="(content) => emit('updateReplyContent', content)"

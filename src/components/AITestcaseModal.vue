@@ -46,6 +46,7 @@ async function generate() {
     });
 
     // Extract testcases array from response
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data = response.data?.data ?? response.data ?? (response as any).data;
 
     if (data?.testcases && Array.isArray(data.testcases)) {
@@ -65,8 +66,10 @@ async function generate() {
     } else {
       throw new Error("Invalid response");
     }
-  } catch (err: any) {
-    const message = err?.response?.data?.message || err?.message || "";
+  } catch (err: unknown) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const errorObj = err as any;
+    const message = errorObj?.response?.data?.message || errorObj?.message || "";
     if (message.includes("No API key")) {
       error.value = t("aiChatbot.testcaseGenerator.noApiKey");
     } else if (message.includes("quota")) {
@@ -184,7 +187,7 @@ function useSelected() {
             <div>
               <div class="mb-1 text-sm font-semibold">{{ t("aiChatbot.testcaseGenerator.input") }}</div>
               <pre
-                class="bg-base-300 max-h-40 overflow-auto whitespace-pre-wrap break-words rounded p-2 text-sm"
+                class="bg-base-300 max-h-40 overflow-auto rounded p-2 text-sm break-words whitespace-pre-wrap"
                 >{{ tc.input }}</pre
               >
             </div>
@@ -194,7 +197,7 @@ function useSelected() {
                 {{ t("aiChatbot.testcaseGenerator.expectedOutput") }}
               </div>
               <pre
-                class="bg-base-300 max-h-40 overflow-auto whitespace-pre-wrap break-words rounded p-2 text-sm"
+                class="bg-base-300 max-h-40 overflow-auto rounded p-2 text-sm break-words whitespace-pre-wrap"
                 >{{ tc.expected_output }}</pre
               >
             </div>

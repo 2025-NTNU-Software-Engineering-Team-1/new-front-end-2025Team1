@@ -846,7 +846,11 @@ async function submitCode() {
                           </li>
                         </ul>
                         <div class="prose max-w-none flex-1 overflow-auto rounded border p-2">
+<<<<<<< Updated upstream
                           <pre class="break-words whitespace-pre-wrap">{{
+=======
+                          <pre class="whitespace-pre-wrap break-words">{{
+>>>>>>> Stashed changes
                             publicTestcaseFiles[selectedPreviewFileIndex]?.content ||
                             t("course.problem.test.topic.noContent")
                           }}</pre>
@@ -879,7 +883,11 @@ async function submitCode() {
                           </li>
                         </ul>
                         <div class="prose max-w-none flex-1 overflow-auto rounded border p-2">
+<<<<<<< Updated upstream
                           <pre class="break-words whitespace-pre-wrap">{{
+=======
+                          <pre class="whitespace-pre-wrap break-words">{{
+>>>>>>> Stashed changes
                             customTestcaseFiles[selectedPreviewFileIndex]?.content ||
                             t("course.problem.test.topic.noContent")
                           }}</pre>

@@ -126,8 +126,8 @@ const validateTaskInput = (index: number, field: string, target: HTMLInputElemen
 
   // 1. Validate Score: Max 100
   if (field === "taskScore") {
-    if (Number(val) > 999) {
-      val = "999";
+    if (Number(val) > 100) {
+      val = "100";
     }
   }
 

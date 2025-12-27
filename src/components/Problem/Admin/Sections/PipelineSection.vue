@@ -113,7 +113,7 @@ const DEBUG_MODE = 1;
 // [CONFIG] Constants
 // ==========================================
 // Define the maximum limit for list items
-const MAX_ITEMS_LIMIT = 100;
+const MAX_ITEMS_LIMIT = 300;
 
 // ==========================================
 // Logger Utility

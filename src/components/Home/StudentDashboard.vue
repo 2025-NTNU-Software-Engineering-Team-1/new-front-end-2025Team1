@@ -28,8 +28,8 @@ async function fetchData() {
     // 1. Get Courses
     const { data: courseData } = await fetcher.get<CourseList>("/course");
 
-    // [DEBUG] Log the fetched course list to inspect the API response
-    console.log("=== [1] API Response: Course List ===", courseData);
+    // [DEBUG 1] 查看後端回傳的所有課程列表
+    console.log("🔥 [DEBUG 1] API Get Courses:", courseData);
 
     courses.value = courseData;
 
@@ -38,8 +38,8 @@ async function fetchData() {
       try {
         const { data: hwData } = await fetcher.get<HomeworkList>(`/course/${c.course}/homework`);
 
-        // [DEBUG] Log the homework list fetched for a specific course
-        console.log(`=== [2] API Response: Homework for ${c.course} ===`, hwData);
+        // [DEBUG 2] 查看針對「特定課程」回傳的作業列表
+        console.log(`🔥 [DEBUG 2] API Get Homework for [${c.course}]:`, hwData);
 
         return hwData.map((h) => ({
           courseName: c.course,
@@ -54,8 +54,8 @@ async function fetchData() {
     const results = await Promise.all(hwPromises);
     const flattenedResults = results.flat();
 
-    // [DEBUG] Log all aggregated homeworks before filtering logic
-    console.log("=== [3] Aggregated Raw Homework Data ===", flattenedResults);
+    // [DEBUG 3] 查看所有課程撈完後，合併起來的「所有作業」原始資料
+    console.log("🔥 [DEBUG 3] All Raw Homeworks (Before Filter):", flattenedResults);
 
     homeworksRaw.value = flattenedResults;
   } catch (e: unknown) {
@@ -78,9 +78,8 @@ const upcomingDeadlines = computed(() => {
     .sort((a, b) => a.end - b.end)
     .slice(0, 5);
 
-  // [DEBUG] Log the final computed deadlines (filtered, sorted, and sliced)
-  // This helps verify if the filter logic (e.g. h.end > now) is working correctly
-  console.log("=== [4] Computed: Upcoming Deadlines (Final Display) ===", result);
+  // [DEBUG 4] 查看經過「過濾 (未過期)」與「排序」後，最後顯示在畫面上的前 5 筆
+  console.log("🔥 [DEBUG 4] Final Displayed Deadlines:", result);
 
   return result;
 });
@@ -241,7 +240,7 @@ onMounted(() => {
                     {{ c.course }}
                   </h3>
                   <p class="text-base-content/60 truncate text-xs">
-                    {{ c.teacher?.displayedName || c.teacher }}
+                    {{ c.teacher?.displayedName || c.teacher?.username || "Unknown Teacher" }}
                   </p>
                 </div>
               </div>

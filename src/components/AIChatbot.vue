@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, nextTick, onBeforeUnmount, onMounted } from "vue";
+import { ref, nextTick, onBeforeUnmount, onMounted, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { LAppDelegate } from "@/live2d/Framework/src/lappdelegate";
 import { setSkinConfig } from "@/live2d/Framework/src/lappdefine";
@@ -90,6 +90,13 @@ const showTrigger = ref(true);
 const draft = ref("");
 const live2dInited = ref(false);
 const isAwaitingReply = ref(false);
+const triggerPos = ref({ x: 0, y: 0 });
+const dragOffset = ref({ x: 0, y: 0 });
+const dragging = ref(false);
+const dragMoved = ref(false);
+const triggerSize = 72; // approximate button size (h-16 w-16)
+const triggerMargin = 24;
+const moveThreshold = 3;
 
 const currentExpression = ref<string | null>(null);
 
@@ -100,6 +107,86 @@ const showSkinSelector = ref(false);
 const currentSkinId = ref("builtin_hiyori");
 const avatarPath = ref("/live2d/hiyori_avatar.png");
 const maxChars = 1000;
+const triggerStyle = computed(() => {
+  const scale = chatScale.value;
+  if (isOpen.value) {
+    const right = Math.max(triggerMargin, window.innerWidth - (triggerPos.value.x + triggerSize));
+    const bottom = Math.max(triggerMargin, window.innerHeight - (triggerPos.value.y + triggerSize));
+    return {
+      transform: `scale(${scale})`,
+      right: `${right}px`,
+      bottom: `${bottom}px`,
+      left: "auto",
+      top: "auto",
+    };
+  }
+  return {
+    transform: `scale(${scale})`,
+    left: `${triggerPos.value.x}px`,
+    top: `${triggerPos.value.y}px`,
+    right: "auto",
+    bottom: "auto",
+  };
+});
+
+const clampTriggerPosition = () => {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const maxX = Math.max(triggerMargin, vw - triggerSize);
+  const maxY = Math.max(triggerMargin, vh - triggerSize);
+  triggerPos.value = {
+    x: Math.min(Math.max(triggerPos.value.x, triggerMargin), maxX),
+    y: Math.min(Math.max(triggerPos.value.y, triggerMargin), maxY),
+  };
+};
+
+const onTriggerMouseMove = (e: MouseEvent) => {
+  if (!dragging.value) return;
+  const rawX = e.clientX - dragOffset.value.x;
+  const rawY = e.clientY - dragOffset.value.y;
+  const clamped = {
+    x: Math.min(Math.max(rawX, triggerMargin), Math.max(window.innerWidth - triggerSize, triggerMargin)),
+    y: Math.min(Math.max(rawY, triggerMargin), Math.max(window.innerHeight - triggerSize, triggerMargin)),
+  };
+  dragMoved.value ||= Math.hypot(clamped.x - triggerPos.value.x, clamped.y - triggerPos.value.y) > moveThreshold;
+  triggerPos.value = clamped;
+};
+
+const onTriggerTouchMove = (e: TouchEvent) => {
+  if (!dragging.value) return;
+  const touch = e.touches[0];
+  if (!touch) return;
+  const rawX = touch.clientX - dragOffset.value.x;
+  const rawY = touch.clientY - dragOffset.value.y;
+  const clamped = {
+    x: Math.min(Math.max(rawX, triggerMargin), Math.max(window.innerWidth - triggerSize, triggerMargin)),
+    y: Math.min(Math.max(rawY, triggerMargin), Math.max(window.innerHeight - triggerSize, triggerMargin)),
+  };
+  dragMoved.value ||= Math.hypot(clamped.x - triggerPos.value.x, clamped.y - triggerPos.value.y) > moveThreshold;
+  triggerPos.value = clamped;
+};
+
+const stopTriggerDrag = () => {
+  dragging.value = false;
+  window.removeEventListener("mousemove", onTriggerMouseMove);
+  window.removeEventListener("mouseup", stopTriggerDrag);
+  window.removeEventListener("touchmove", onTriggerTouchMove);
+  window.removeEventListener("touchend", stopTriggerDrag);
+};
+
+const startTriggerDrag = (clientX: number, clientY: number) => {
+  dragging.value = true;
+  dragMoved.value = false;
+  clampTriggerPosition();
+  dragOffset.value = {
+    x: clientX - triggerPos.value.x,
+    y: clientY - triggerPos.value.y,
+  };
+  window.addEventListener("mousemove", onTriggerMouseMove);
+  window.addEventListener("mouseup", stopTriggerDrag);
+  window.addEventListener("touchmove", onTriggerTouchMove);
+  window.addEventListener("touchend", stopTriggerDrag);
+};
 
 // Emotion mappings for current skin
 const currentEmotionMappings = ref<Record<string, string | null>>({
@@ -514,6 +601,10 @@ const initLive2D = () => {
 };
 
 const openChat = () => {
+  if (dragMoved.value) {
+    dragMoved.value = false;
+    return;
+  }
   isOpen.value = true;
   showTrigger.value = false;
 
@@ -534,9 +625,26 @@ const onAfterLeave = () => {
   showTrigger.value = true;
 };
 
+const onTriggerMouseDown = (e: MouseEvent) => {
+  startTriggerDrag(e.clientX, e.clientY);
+};
+
+const onTriggerTouchStart = (e: TouchEvent) => {
+  const touch = e.touches[0];
+  if (!touch) return;
+  startTriggerDrag(touch.clientX, touch.clientY);
+};
+
 // Initialize skin preference on mount
 onMounted(() => {
   loadSkinPreference();
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  triggerPos.value = {
+    x: Math.max(triggerMargin, vw - triggerMargin - triggerSize),
+    y: Math.max(triggerMargin, vh - triggerMargin - triggerSize),
+  };
+  window.addEventListener("resize", clampTriggerPosition);
 });
 
 onBeforeUnmount(() => {
@@ -551,6 +659,12 @@ onBeforeUnmount(() => {
 
   thinkingTimers.forEach((timerId) => clearTimeout(timerId));
   thinkingTimers.clear();
+
+  window.removeEventListener("mousemove", onTriggerMouseMove);
+  window.removeEventListener("mouseup", stopTriggerDrag);
+  window.removeEventListener("touchmove", onTriggerTouchMove);
+  window.removeEventListener("touchend", stopTriggerDrag);
+  window.removeEventListener("resize", clampTriggerPosition);
 });
 </script>
 
@@ -562,13 +676,14 @@ onBeforeUnmount(() => {
     @click="closeChat"
   />
 
-  <!-- 右下角聊天區（整個一起 scale） -->
-  <div class="fixed bottom-6 right-6 z-50 origin-bottom-right" :style="{ transform: `scale(${chatScale})` }">
-    <!-- 開啟按鈕 -->
+  <!-- 拖曳開啟按鈕 -->
+  <div class="fixed z-50 origin-bottom-right" :style="triggerStyle">
     <button
       v-if="showTrigger && !isOpen"
       class="chat-icon-btn chat-holo relative flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-purple-400 to-indigo-400 shadow-lg"
       @click.stop="openChat"
+      @mousedown.prevent.stop="onTriggerMouseDown"
+      @touchstart.prevent.stop="onTriggerTouchStart"
       :aria-label="t('aiChatbot.open')"
     >
       <svg
@@ -585,8 +700,10 @@ onBeforeUnmount(() => {
         />
       </svg>
     </button>
+  </div>
 
-    <!-- 聊天窗 -->
+  <!-- 聊天窗：固定右下角位置 -->
+  <div class="fixed bottom-6 right-6 z-50 origin-bottom-right" :style="{ transform: `scale(${chatScale})` }">
     <Transition name="chat-pop" @after-leave="onAfterLeave">
       <div
         v-show="isOpen"

@@ -28,38 +28,44 @@ const { data: announcements, error, isLoading } = useAxios<AnnouncementList>("/a
           <skeleton-table :col="3" :row="5" />
         </template>
         <template #data>
-          <table class="table w-full">
-            <thead>
-              <tr>
-                <th>{{ $t("components.systemAnn.title") }}</th>
-                <th>{{ $t("components.systemAnn.createTime") }}</th>
-                <th v-if="session.isAdmin"></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="{ title, createTime, annId } in announcements" :key="annId" class="hover">
-                <td>
-                  <router-link
-                    :to="`/announcements/${annId}`"
-                    class="text-base-content/80 dark:text-base-content/80 visited:text-base-content/80 dark:visited:text-base-content/80 block min-w-0 whitespace-normal break-words hover:underline"
-                  >
-                    {{ title }}
-                  </router-link>
-                </td>
-                <td>{{ formatTime(createTime) }}</td>
-                <td v-if="session.isAdmin">
-                  <div class="tooltip" data-tip="Edit">
+          <div class="max-h-[30rem] overflow-y-auto">
+            <table class="table w-full">
+              <thead>
+                <tr>
+                  <th>{{ $t("components.systemAnn.title") }}</th>
+                  <th>{{ $t("components.systemAnn.createTime") }}</th>
+                  <th v-if="session.isAdmin"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="{ title, createTime, annId } in announcements"
+                  :key="annId"
+                  class="hover"
+                >
+                  <td>
                     <router-link
-                      class="btn btn-ghost btn-sm btn-circle"
-                      :to="`/course/Public/announcements/${annId}/edit`"
+                      :to="`/announcements/${annId}`"
+                      class="text-base-content/80 dark:text-base-content/80 visited:text-base-content/80 dark:visited:text-base-content/80 block min-w-0 whitespace-normal break-words hover:underline"
                     >
-                      <i-uil-edit class="lg:h-5 lg:w-5" />
+                      {{ title }}
                     </router-link>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                  </td>
+                  <td>{{ formatTime(createTime) }}</td>
+                  <td v-if="session.isAdmin">
+                    <div class="tooltip" data-tip="Edit">
+                      <router-link
+                        class="btn btn-ghost btn-sm btn-circle"
+                        :to="`/course/Public/announcements/${annId}/edit`"
+                      >
+                        <i-uil-edit class="lg:h-5 lg:w-5" />
+                      </router-link>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </template>
       </data-status-wrapper>
     </div>
@@ -75,7 +81,7 @@ const { data: announcements, error, isLoading } = useAxios<AnnouncementList>("/a
         <div class="skeleton mb-3 h-20 w-full rounded-xl" v-for="i in 3" :key="i"></div>
       </template>
       <template #data>
-        <div class="flex flex-col gap-3">
+        <div class="max-h-[30rem] scrollbar-thin flex flex-col gap-3 overflow-y-auto p-1">
           <div
             v-for="{ title, createTime, annId } in announcements"
             :key="annId"

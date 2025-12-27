@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, nextTick } from "vue";
 import { useI18n } from "vue-i18n";
 import { useTitle } from "@vueuse/core";
 import api, { type VtuberSkinInfo } from "@/models/api";
@@ -11,6 +11,10 @@ const { t } = useI18n();
 const skins = ref<VtuberSkinInfo[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
+
+// Dialog refs
+const uploadDialogRef = ref<HTMLDialogElement | null>(null);
+const editDialogRef = ref<HTMLDialogElement | null>(null);
 
 // Edit modal state
 const editingSkin = ref<VtuberSkinInfo | null>(null);
@@ -45,9 +49,13 @@ const openUpload = () => {
   uploadThumbnailPreview.value = null;
   uploadEmotions.value = "";
   uploadError.value = null;
+  nextTick(() => {
+    uploadDialogRef.value?.showModal();
+  });
 };
 
 const closeUpload = () => {
+  uploadDialogRef.value?.close();
   showUpload.value = false;
   if (uploadThumbnailPreview.value) {
     URL.revokeObjectURL(uploadThumbnailPreview.value);
@@ -192,10 +200,14 @@ const openEdit = async (skin: VtuberSkinInfo) => {
 
   editThumbnail.value = null;
   thumbnailPreview.value = null;
+  nextTick(() => {
+    editDialogRef.value?.showModal();
+  });
 };
 
 // Close edit modal
 const closeEdit = () => {
+  editDialogRef.value?.close();
   editingSkin.value = null;
   editName.value = "";
   editEmotions.value = "";
@@ -368,7 +380,7 @@ onMounted(() => {
     </div>
 
     <!-- Edit Modal -->
-    <div v-if="editingSkin" class="modal modal-open">
+    <dialog ref="editDialogRef" class="modal">
       <div class="modal-box" @paste="onThumbnailPaste" tabindex="0">
         <h3 class="text-lg font-bold">{{ $t("admin.skins.editTitle") }}</h3>
 
@@ -398,8 +410,8 @@ onMounted(() => {
           <div class="flex items-center gap-4">
             <div class="h-16 w-16 overflow-hidden rounded-lg bg-gray-200">
               <img
-                v-if="thumbnailPreview || editingSkin.thumbnail_path"
-                :src="thumbnailPreview || editingSkin.thumbnail_path || ''"
+                v-if="thumbnailPreview || editingSkin?.thumbnail_path"
+                :src="thumbnailPreview || editingSkin?.thumbnail_path || ''"
                 class="h-full w-full object-cover"
                 alt=""
               />
@@ -423,10 +435,12 @@ onMounted(() => {
           </button>
         </div>
       </div>
-      <div class="modal-backdrop" @click="closeEdit"></div>
-    </div>
+      <form method="dialog" class="modal-backdrop">
+        <button @click="closeEdit">close</button>
+      </form>
+    </dialog>
     <!-- Upload Modal -->
-    <div v-if="showUpload" class="modal modal-open">
+    <dialog ref="uploadDialogRef" class="modal">
       <div class="modal-box" @paste="onUploadThumbnailPaste" tabindex="0">
         <h3 class="text-lg font-bold">{{ $t("skinSelector.upload.title") }}</h3>
 
@@ -511,7 +525,9 @@ onMounted(() => {
           </button>
         </div>
       </div>
-      <div class="modal-backdrop" @click="closeUpload"></div>
-    </div>
+      <form method="dialog" class="modal-backdrop">
+        <button @click="closeUpload">close</button>
+      </form>
+    </dialog>
   </div>
 </template>

@@ -881,7 +881,7 @@
   },
   "components": {
     "validation": {
-      "not_blank": "不可為空白或僅空白字元",
+      "not_blank": "名稱不可為空白或僅空白字元",
       "contains_invisible": "包含不可見或控制字元"
     },
     "studentDashboard": {

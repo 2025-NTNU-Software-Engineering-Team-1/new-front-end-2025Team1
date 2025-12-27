@@ -110,11 +110,12 @@ const Submission = {
     status?: string;
     languageType?: string;
     course: string;
-  }) => fetcher.delete<{
-    ok: boolean;
-    deleted: number;
-    skipped: number;
-  }>('/submission/delete-all', { data: { filters } }),
+  }) =>
+    fetcher.delete<{
+      ok: boolean;
+      deleted: number;
+      skipped: number;
+    }>("/submission/delete-all", { data: { filters } }),
 
   getArtifactUrl: (id: string, kind: "compiledBinary" | "zip", taskIndex?: number) => {
     const base = (fetcher.defaults.baseURL || "").toString().replace(/\/$/, "");
@@ -305,7 +306,7 @@ const TrialSubmission = {
   // DELETE /trial-submission/<trial_id>
   delete: (trialSubmissionId: string) =>
     fetcher.delete<{ status: string; message: string; data: { ok: boolean } }>(
-      `/trial-submission/${trialSubmissionId}`
+      `/trial-submission/${trialSubmissionId}`,
     ),
 
   deleteAll: (problemId: number) =>

@@ -282,7 +282,7 @@ const maxPage = computed(() => {
               <thead>
                 <tr>
                   <th
-                    class="hover:bg-base-200 cursor-pointer transition-colors select-none"
+                    class="hover:bg-base-200 cursor-pointer select-none transition-colors"
                     @click="isSortDesc = !isSortDesc"
                   >
                     <div class="flex items-center gap-1">

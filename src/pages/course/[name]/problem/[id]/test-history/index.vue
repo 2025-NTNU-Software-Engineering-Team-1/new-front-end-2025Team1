@@ -337,7 +337,11 @@ async function confirmDeleteAllTrials() {
                       <span
                         :class="['badge badge-sm', item.type === 'public' ? 'badge-info' : 'badge-warning']"
                       >
-                        {{ item.type === "public" ? t("course.problem.test.trialHistory.public") : t("course.problem.test.trialHistory.custom") }}
+                        {{
+                          item.type === "public"
+                            ? t("course.problem.test.trialHistory.public")
+                            : t("course.problem.test.trialHistory.custom")
+                        }}
                       </span>
                     </td>
                     <td>{{ item.pid }}</td>
@@ -376,7 +380,9 @@ async function confirmDeleteAllTrials() {
       </h3>
       <p class="py-4">{{ deleteErrorMessage }}</p>
       <div class="modal-action">
-        <button class="btn" @click="closeDeleteErrorModal">{{ t("course.problem.test.trialHistory.close") }}</button>
+        <button class="btn" @click="closeDeleteErrorModal">
+          {{ t("course.problem.test.trialHistory.close") }}
+        </button>
       </div>
     </div>
     <form method="dialog" class="modal-backdrop">

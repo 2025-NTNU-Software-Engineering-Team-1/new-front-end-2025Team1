@@ -883,7 +883,7 @@
   },
   "components": {
     "validation": {
-      "not_blank": "Cannot be empty or whitespace",
+      "not_blank": "Name Cannot be empty or whitespace",
       "contains_invisible": "Contains invisible or control characters"
     },
     "studentDashboard": {

@@ -213,17 +213,17 @@ const isAllSelected = computed({
 function handleAITestcase(inputs: string[]) {
   // Find the next available starting number
   const existingNums = testcaseFiles.value
-    .filter(f => f.name.endsWith('.in'))
-    .map(f => parseInt(f.name.replace('.in', ''), 10))
-    .filter(n => !isNaN(n));
-  
+    .filter((f) => f.name.endsWith(".in"))
+    .map((f) => parseInt(f.name.replace(".in", ""), 10))
+    .filter((n) => !isNaN(n));
+
   let nextNum = 0;
   if (existingNums.length > 0) {
     nextNum = Math.max(...existingNums) + 1;
   }
-  
+
   for (let i = 0; i < inputs.length; i++) {
-    const fileNum = String(nextNum + i).padStart(4, '0');
+    const fileNum = String(nextNum + i).padStart(4, "0");
     testcaseFiles.value.push({ name: `${fileNum}.in`, content: inputs[i] });
     selectedTestcases.value.push(`${fileNum}.in`);
   }
@@ -244,13 +244,13 @@ function handleAITestcase(inputs: string[]) {
             <div class="flex items-center gap-2">
               <span
                 v-if="testcaseFiles.length > 0"
-                class="badge badge-success badge-outline inline-flex h-10 min-w-[72px] items-center justify-center px-3 py-0 text-sm whitespace-nowrap"
+                class="badge badge-success badge-outline inline-flex h-10 min-w-[72px] items-center justify-center whitespace-nowrap px-3 py-0 text-sm"
               >
                 {{ t("course.problems.uploaded") }}
               </span>
               <span
                 v-else
-                class="badge badge-outline inline-flex h-10 min-w-[90px] items-center justify-center px-3 py-0 text-center text-sm whitespace-nowrap opacity-70"
+                class="badge badge-outline inline-flex h-10 min-w-[90px] items-center justify-center whitespace-nowrap px-3 py-0 text-center text-sm opacity-70"
               >
                 {{ t("course.problems.notUploaded") }}
               </span>
@@ -267,10 +267,7 @@ function handleAITestcase(inputs: string[]) {
               @change="handleTestcaseUpload"
             />
             <!-- AI Generate Button -->
-            <button
-              class="btn btn-outline gap-1.5"
-              @click="showAITestcaseModal = true"
-            >
+            <button class="btn btn-outline gap-1.5" @click="showAITestcaseModal = true">
               <i-uil-robot class="h-5 w-5" />
               {{ t("aiChatbot.testcaseGenerator.button") }}
             </button>
@@ -320,7 +317,7 @@ function handleAITestcase(inputs: string[]) {
 
           <div class="rounded border p-4">
             <h4 class="mb-2 font-semibold">{{ t("course.problem.test.testcaseModal.preview") }}</h4>
-            <div class="bg-base-200 h-64 max-w-full overflow-auto rounded border p-2 whitespace-pre-wrap">
+            <div class="bg-base-200 h-64 max-w-full overflow-auto whitespace-pre-wrap rounded border p-2">
               <template v-if="selectedTestcaseContent.includes('blob:')">
                 <div v-for="(line, idx) in selectedTestcaseContent.split('\n')" :key="idx">
                   <template v-if="line.startsWith('blob:')">
@@ -368,10 +365,12 @@ function handleAITestcase(inputs: string[]) {
       :problem-id="route.params.id as string"
       :course-name="route.params.name as string"
       @close="showAITestcaseModal = false"
-      @use-testcases="(inputs: string[]) => {
-        handleAITestcase(inputs);
-        showAITestcaseModal = false;
-      }"
+      @use-testcases="
+        (inputs: string[]) => {
+          handleAITestcase(inputs);
+          showAITestcaseModal = false;
+        }
+      "
     />
   </div>
 </template>

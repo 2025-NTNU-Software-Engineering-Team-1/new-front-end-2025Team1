@@ -1109,7 +1109,7 @@ watch(
                     </div>
                   </div>
 
-                  <h6 class="mb-1 text-sm font-bold tracking-[0.2em] text-white uppercase drop-shadow-lg">
+                  <h6 class="mb-1 text-sm font-bold uppercase tracking-[0.2em] text-white drop-shadow-lg">
                     {{ t("course.problems.systemLocked") }}
                   </h6>
                   <div
@@ -1213,7 +1213,7 @@ watch(
                     </div>
                   </div>
 
-                  <h6 class="mb-1 text-sm font-bold tracking-[0.2em] text-white uppercase drop-shadow-lg">
+                  <h6 class="mb-1 text-sm font-bold uppercase tracking-[0.2em] text-white drop-shadow-lg">
                     {{ t("course.problems.accessDenied") }}
                   </h6>
                   <div
@@ -1365,7 +1365,7 @@ watch(
                   <a
                     v-for="group in functionGroups"
                     :key="group.name"
-                    class="tab tab-bordered tab-sm px-1 whitespace-nowrap transition-all duration-200"
+                    class="tab tab-bordered tab-sm whitespace-nowrap px-1 transition-all duration-200"
                     :class="{
                       'tab-active border-primary text-primary font-bold':
                         activeFunctionCategory === group.name,
@@ -1441,7 +1441,7 @@ watch(
               </div>
 
               <div class="mt-auto border-t border-gray-600 pt-2">
-                <label class="label pt-0 pb-1">
+                <label class="label pb-1 pt-0">
                   <span class="label-text-alt text-gray-400">Search / Add Custom Functions</span>
                 </label>
                 <MultiStringInput
@@ -1979,7 +1979,7 @@ watch(
             </div>
           </div>
         </div>
-        <div v-else class="pt-2 pl-1 text-xs opacity-70">
+        <div v-else class="pl-1 pt-2 text-xs opacity-70">
           {{
             problem.pipeline!.executionMode === "interactive"
               ? t("course.problems.uploadCustomCheckerWarning")
@@ -2051,7 +2051,7 @@ watch(
             <span class="label-text-alt text-error">{{ v$.assets.scorePy.$errors[0]?.$message }}</span>
           </label>
         </div>
-        <div v-else class="pt-2 pl-1 text-xs opacity-70">
+        <div v-else class="pl-1 pt-2 text-xs opacity-70">
           {{ t("course.problems.uploadCustomScorerInfo") }}
         </div>
       </div>

@@ -282,9 +282,12 @@ const showErrorOutput = computed(() => {
 const saStatusBadge = computed(() => {
   if (!testResult.value || effectiveStatus.value === SUBMISSION_STATUS_CODE.PENDING) return null;
   const status = testResult.value.saStatus;
-  if (status === 0) return { label: t("course.problem.test.trialHistory.saPassed"), className: "badge-success" };
-  if (status === 1) return { label: t("course.problem.test.trialHistory.saFailed"), className: "badge-error" };
-  if (status === null) return { label: t("course.problem.test.trialHistory.saSkipped"), className: "badge-ghost" };
+  if (status === 0)
+    return { label: t("course.problem.test.trialHistory.saPassed"), className: "badge-success" };
+  if (status === 1)
+    return { label: t("course.problem.test.trialHistory.saFailed"), className: "badge-error" };
+  if (status === null)
+    return { label: t("course.problem.test.trialHistory.saSkipped"), className: "badge-ghost" };
   return null;
 });
 const errorTitle = computed(() =>
@@ -417,7 +420,9 @@ async function viewCaseOutput(taskIndex: number, caseIndex: number) {
     console.error("Failed to load case artifact files", err);
     const axiosErr = err as { response?: { data?: { message?: string } }; message?: string };
     caseOutputError.value =
-      axiosErr?.response?.data?.message || axiosErr?.message || t("course.problem.test.trialHistory.loadArtifactError");
+      axiosErr?.response?.data?.message ||
+      axiosErr?.message ||
+      t("course.problem.test.trialHistory.loadArtifactError");
   } finally {
     caseOutputLoading.value = false;
   }
@@ -650,7 +655,9 @@ async function rejudge() {
         axiosErr?.response?.data?.message || t("course.problem.test.trialHistory.rejudgePermissionDenied");
     } else {
       rejudgeErrorMessage.value =
-        axiosErr?.response?.data?.message || axiosErr?.message || t("course.problem.test.trialHistory.rejudgeError");
+        axiosErr?.response?.data?.message ||
+        axiosErr?.message ||
+        t("course.problem.test.trialHistory.rejudgeError");
     }
     rejudgeErrorModal.value?.showModal();
   } finally {
@@ -688,7 +695,9 @@ async function deleteTrialSubmission() {
 
     // Extract error message and show modal
     deleteErrorMessage.value =
-      axiosErr?.response?.data?.message || axiosErr?.message || t("course.problem.test.trialHistory.deleteFailed");
+      axiosErr?.response?.data?.message ||
+      axiosErr?.message ||
+      t("course.problem.test.trialHistory.deleteFailed");
     deleteErrorModal.value?.showModal();
   } finally {
     isDeleteLoading.value = false;
@@ -706,7 +715,9 @@ function closeDeleteErrorModal() {
     <div class="card min-w-full">
       <div class="card-body">
         <div class="flex flex-wrap items-center justify-between gap-4">
-          <div class="card-title md:text-2xl lg:text-3xl">{{ t("course.problem.test.historyModal.title") }} #{{ $route.params.testId }}</div>
+          <div class="card-title md:text-2xl lg:text-3xl">
+            {{ t("course.problem.test.historyModal.title") }} #{{ $route.params.testId }}
+          </div>
           <div class="flex flex-wrap gap-2">
             <!-- Rejudge Button (only shown if user has permission) -->
             <button
@@ -748,7 +759,9 @@ function closeDeleteErrorModal() {
 
         <div class="card min-w-full rounded-none">
           <div class="card-body p-0">
-            <div class="card-title md:text-xl lg:text-2xl">{{ t("course.problem.test.trialHistory.generalInfo") }}</div>
+            <div class="card-title md:text-xl lg:text-2xl">
+              {{ t("course.problem.test.trialHistory.generalInfo") }}
+            </div>
             <div class="my-1" />
 
             <data-status-wrapper :error="error" :is-loading="isLoading">
@@ -803,7 +816,9 @@ function closeDeleteErrorModal() {
               </div>
               <div class="my-4" />
               <ui-spinner v-if="errorOutputLoading" class="mr-3 h-6 w-6" />
-              <div v-else-if="errorOutputError">{{ t("course.problem.test.trialHistory.fetchErrorMessagesFailed") }}</div>
+              <div v-else-if="errorOutputError">
+                {{ t("course.problem.test.trialHistory.fetchErrorMessagesFailed") }}
+              </div>
               <div v-else-if="errorOutput">
                 <code-editor v-model="errorOutput.stderr" readonly />
               </div>
@@ -812,14 +827,17 @@ function closeDeleteErrorModal() {
             <div class="my-4" />
 
             <div class="flex items-center justify-between">
-              <div class="card-title md:text-xl lg:text-2xl">{{ t("course.problem.test.trialHistory.testDetails") }}</div>
+              <div class="card-title md:text-xl lg:text-2xl">
+                {{ t("course.problem.test.trialHistory.testDetails") }}
+              </div>
               <button
                 v-if="testResult"
                 class="btn btn-success btn-sm"
                 @click="downloadAllResults"
                 :title="t('course.problem.test.trialHistory.downloadAllResults')"
               >
-                <i-uil-download-alt class="mr-1" /> {{ t("course.problem.test.trialHistory.downloadAllResults") }}
+                <i-uil-download-alt class="mr-1" />
+                {{ t("course.problem.test.trialHistory.downloadAllResults") }}
               </button>
             </div>
             <div class="my-1" />
@@ -877,7 +895,11 @@ function closeDeleteErrorModal() {
                     >
                       <i-uil-angle-down v-if="!expandTasks[taskIndex]" />
                       <i-uil-angle-up v-else />
-                      {{ expandTasks[taskIndex] ? t("course.problem.test.trialHistory.hideTestCases") : t("course.problem.test.trialHistory.showTestCases") }}
+                      {{
+                        expandTasks[taskIndex]
+                          ? t("course.problem.test.trialHistory.hideTestCases")
+                          : t("course.problem.test.trialHistory.showTestCases")
+                      }}
                     </div>
                   </td>
                 </tr>
@@ -925,7 +947,11 @@ function closeDeleteErrorModal() {
                   class="btn btn-info btn-xs ml-3"
                   @click="copy(testResult?.code || '')"
                 >
-                  {{ copied ? t("course.problem.test.trialHistory.copied") : t("course.problem.test.trialHistory.copy") }}
+                  {{
+                    copied
+                      ? t("course.problem.test.trialHistory.copied")
+                      : t("course.problem.test.trialHistory.copy")
+                  }}
                 </button>
               </div>
               <div class="my-1" />
@@ -945,11 +971,7 @@ function closeDeleteErrorModal() {
                   {{ saStatusBadge.label }}
                 </span>
               </div>
-              <button
-                v-if="SAReport?.reportUrl"
-                class="btn btn-sm"
-                @click="downloadSAReport"
-              >
+              <button v-if="SAReport?.reportUrl" class="btn btn-sm" @click="downloadSAReport">
                 <i-uil-file-download class="mr-1" /> Download report
               </button>
             </div>
@@ -963,7 +985,8 @@ function closeDeleteErrorModal() {
                 <div class="flex flex-col gap-2">
                   <div class="flex items-center gap-2" v-if="SAReport?.reportUrl">
                     <a class="btn btn-sm" :href="SAReport.reportUrl" target="_blank" rel="noopener">
-                      <i-uil-file-download class="mr-1" /> {{ t("course.problem.test.trialHistory.downloadReport") }}
+                      <i-uil-file-download class="mr-1" />
+                      {{ t("course.problem.test.trialHistory.downloadReport") }}
                     </a>
                   </div>
                   <div v-if="SAReport?.report && SAReport.report.trim()">
@@ -996,7 +1019,7 @@ function closeDeleteErrorModal() {
               <span class="label-text font-semibold">JSON Data</span>
             </label>
             <div class="bg-base-200 rounded p-4">
-              <pre class="font-mono text-sm whitespace-pre-wrap">{{ currentDetailData.jsonData }}</pre>
+              <pre class="whitespace-pre-wrap font-mono text-sm">{{ currentDetailData.jsonData }}</pre>
             </div>
           </div>
         </div>
@@ -1007,7 +1030,9 @@ function closeDeleteErrorModal() {
         <button class="btn btn-success btn-sm" @click="downloadModalJson">
           <i-uil-download-alt class="mr-1" /> {{ t("course.problem.test.trialHistory.downloadJson") }}
         </button>
-        <button class="btn btn-sm" @click="closeDetailModal">{{ t("course.problem.test.trialHistory.close") }}</button>
+        <button class="btn btn-sm" @click="closeDetailModal">
+          {{ t("course.problem.test.trialHistory.close") }}
+        </button>
       </div>
     </div>
     <form method="dialog" class="modal-backdrop">
@@ -1049,75 +1074,101 @@ function closeDeleteErrorModal() {
           <!-- Input Section -->
           <div>
             <label class="label pb-2">
-              <span class="label-text text-base font-semibold">{{ t("course.problem.test.trialHistory.input") }}</span>
+              <span class="label-text text-base font-semibold">{{
+                t("course.problem.test.trialHistory.input")
+              }}</span>
             </label>
             <div v-if="caseOutputData.input === null || caseOutputData.input === undefined">
-              <div class="text-base-content/60 py-2 italic">{{ t("course.problem.test.trialHistory.inputNotAvailable") }}</div>
+              <div class="text-base-content/60 py-2 italic">
+                {{ t("course.problem.test.trialHistory.inputNotAvailable") }}
+              </div>
             </div>
             <div v-else class="mt-2">
               <div v-if="caseOutputData.input.trim()">
                 <code-editor v-model="caseOutputData.input" readonly />
               </div>
-              <div v-else class="text-base-content/60 py-2 italic">{{ t("course.problem.test.trialHistory.empty") }}</div>
+              <div v-else class="text-base-content/60 py-2 italic">
+                {{ t("course.problem.test.trialHistory.empty") }}
+              </div>
             </div>
           </div>
 
           <!-- Expected Output Section -->
           <div>
             <label class="label pb-2">
-              <span class="label-text text-base font-semibold">{{ t("course.problem.test.trialHistory.expectedOutput") }}</span>
+              <span class="label-text text-base font-semibold">{{
+                t("course.problem.test.trialHistory.expectedOutput")
+              }}</span>
             </label>
             <div v-if="caseOutputData.expectedOutput === null || caseOutputData.expectedOutput === undefined">
-              <div class="text-base-content/60 py-2 italic">{{ t("course.problem.test.trialHistory.expectedNotAvailable") }}</div>
+              <div class="text-base-content/60 py-2 italic">
+                {{ t("course.problem.test.trialHistory.expectedNotAvailable") }}
+              </div>
             </div>
             <div v-else class="mt-2">
               <div v-if="caseOutputData.expectedOutput.trim()">
                 <code-editor v-model="caseOutputData.expectedOutput" readonly />
               </div>
-              <div v-else class="text-base-content/60 py-2 italic">{{ t("course.problem.test.trialHistory.empty") }}</div>
+              <div v-else class="text-base-content/60 py-2 italic">
+                {{ t("course.problem.test.trialHistory.empty") }}
+              </div>
             </div>
           </div>
 
           <!-- Stdout Section -->
           <div>
             <label class="label pb-2">
-              <span class="label-text text-base font-semibold">{{ t("course.problem.test.trialHistory.stdout") }}</span>
+              <span class="label-text text-base font-semibold">{{
+                t("course.problem.test.trialHistory.stdout")
+              }}</span>
             </label>
             <div v-if="caseOutputData.stdout === null">
               <!-- File doesn't exist -->
-              <div class="text-base-content/60 py-2 italic">{{ t("course.problem.test.trialHistory.fileNotExist", { file: "Stdout" }) }}</div>
+              <div class="text-base-content/60 py-2 italic">
+                {{ t("course.problem.test.trialHistory.fileNotExist", { file: "Stdout" }) }}
+              </div>
             </div>
             <div v-else class="mt-2">
               <!-- File exists (could be empty string) -->
               <div v-if="caseOutputData.stdout.trim()">
                 <code-editor v-model="caseOutputData.stdout" readonly />
               </div>
-              <div v-else class="text-base-content/60 py-2 italic">{{ t("course.problem.test.trialHistory.empty") }}</div>
+              <div v-else class="text-base-content/60 py-2 italic">
+                {{ t("course.problem.test.trialHistory.empty") }}
+              </div>
             </div>
           </div>
 
           <!-- Stderr Section -->
           <div class="mt-6">
             <label class="label pb-2">
-              <span class="label-text text-base font-semibold">{{ t("course.problem.test.trialHistory.stderr") }}</span>
+              <span class="label-text text-base font-semibold">{{
+                t("course.problem.test.trialHistory.stderr")
+              }}</span>
             </label>
             <div v-if="caseOutputData.stderr === null">
               <!-- File doesn't exist -->
-              <div class="text-base-content/60 py-2 italic">{{ t("course.problem.test.trialHistory.fileNotExist", { file: "Stderr" }) }}</div>
+              <div class="text-base-content/60 py-2 italic">
+                {{ t("course.problem.test.trialHistory.fileNotExist", { file: "Stderr" }) }}
+              </div>
             </div>
             <div v-else class="mt-2">
               <!-- File exists (could be empty string) -->
               <div v-if="caseOutputData.stderr.trim()">
                 <code-editor v-model="caseOutputData.stderr" readonly />
               </div>
-              <div v-else class="text-base-content/60 py-2 italic">{{ t("course.problem.test.trialHistory.empty") }}</div>
+              <div v-else class="text-base-content/60 py-2 italic">
+                {{ t("course.problem.test.trialHistory.empty") }}
+              </div>
             </div>
           </div>
 
           <!-- Artifact Files Section -->
           <div v-if="caseOutputData.files && Object.keys(caseOutputData.files).length > 0" class="mt-6">
             <label class="label pb-2">
-              <span class="label-text text-base font-semibold">{{ t("course.problem.test.trialHistory.artifactFiles") }}</span>
+              <span class="label-text text-base font-semibold">{{
+                t("course.problem.test.trialHistory.artifactFiles")
+              }}</span>
             </label>
             <div class="mt-2 space-y-4">
               <div
@@ -1173,7 +1224,9 @@ function closeDeleteErrorModal() {
             {{ t("course.problem.test.trialHistory.nextCase") }} <i-uil-angle-right class="ml-1" />
           </button>
         </div>
-        <button class="btn" @click="closeCaseOutputModal">{{ t("course.problem.test.trialHistory.close") }}</button>
+        <button class="btn" @click="closeCaseOutputModal">
+          {{ t("course.problem.test.trialHistory.close") }}
+        </button>
       </div>
     </div>
     <form method="dialog" class="modal-backdrop">
@@ -1190,7 +1243,9 @@ function closeDeleteErrorModal() {
       </h3>
       <p class="py-4">{{ rejudgeErrorMessage }}</p>
       <div class="modal-action">
-        <button class="btn" @click="closeRejudgeErrorModal">{{ t("course.problem.test.trialHistory.close") }}</button>
+        <button class="btn" @click="closeRejudgeErrorModal">
+          {{ t("course.problem.test.trialHistory.close") }}
+        </button>
       </div>
     </div>
     <form method="dialog" class="modal-backdrop">
@@ -1207,7 +1262,9 @@ function closeDeleteErrorModal() {
       </h3>
       <p class="py-4">{{ deleteErrorMessage }}</p>
       <div class="modal-action">
-        <button class="btn" @click="closeDeleteErrorModal">{{ t("course.problem.test.trialHistory.close") }}</button>
+        <button class="btn" @click="closeDeleteErrorModal">
+          {{ t("course.problem.test.trialHistory.close") }}
+        </button>
       </div>
     </div>
     <form method="dialog" class="modal-backdrop">
@@ -1215,4 +1272,3 @@ function closeDeleteErrorModal() {
     </form>
   </dialog>
 </template>
-

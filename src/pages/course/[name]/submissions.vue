@@ -262,7 +262,7 @@ async function deleteSubmission(id: string) {
     }
   } catch (err) {
     console.error("Delete failed:", err);
-} finally {
+  } finally {
     deletingIds.value.delete(id);
   }
 }
@@ -276,9 +276,9 @@ async function prepareDeleteAll() {
   // Fetch count of submissions matching filter
   const query = { ...routeQuery.value.filter, offset: 0, count: -1, course: route.params.name };
   const qs = queryString.stringify(query, { skipNull: true, skipEmptyString: true });
-  // Reuse existing fetcher or use api.Submission logic if possible, 
-  // but api methods usually return specific types. 
-  // We can just call getSubmissionsUrl logic reusing axios if needed, 
+  // Reuse existing fetcher or use api.Submission logic if possible,
+  // but api methods usually return specific types.
+  // We can just call getSubmissionsUrl logic reusing axios if needed,
   // but simpler to use fetcher directly as per existing pattern or reuse logic.
   // Actually, let's use the fetcher directly to get count.
   // Note: getSubmissionsUrl variable is computed, but we need the raw data for count.
@@ -323,51 +323,47 @@ async function confirmDeleteAll() {
 
           <!-- Admin/Teacher/TA actions: rejudge, download, search -->
           <dialog ref="rejudgeAllModal" class="modal">
-    <div class="modal-box">
-      <h3 class="text-lg font-bold">Confirm Rejudge All</h3>
-      <p class="py-4">
-        Are you sure you want to rejudge <strong>{{ rejudgeCount }}</strong> submission(s)?
-      </p>
-      <div class="modal-action">
-        <button class="btn" @click="rejudgeAllModal?.close()">Cancel</button>
-        <button class="btn btn-warning" :disabled="isRejudgeAllLoading" @click="confirmRejudgeAll">
-          <span v-if="isRejudgeAllLoading" class="loading loading-spinner"></span>
-          Rejudge {{ rejudgeCount }} Submissions
-        </button>
-      </div>
-    </div>
-    <form method="dialog" class="modal-backdrop">
-      <button>close</button>
-    </form>
-  </dialog>
+            <div class="modal-box">
+              <h3 class="text-lg font-bold">Confirm Rejudge All</h3>
+              <p class="py-4">
+                Are you sure you want to rejudge <strong>{{ rejudgeCount }}</strong> submission(s)?
+              </p>
+              <div class="modal-action">
+                <button class="btn" @click="rejudgeAllModal?.close()">Cancel</button>
+                <button class="btn btn-warning" :disabled="isRejudgeAllLoading" @click="confirmRejudgeAll">
+                  <span v-if="isRejudgeAllLoading" class="loading loading-spinner"></span>
+                  Rejudge {{ rejudgeCount }} Submissions
+                </button>
+              </div>
+            </div>
+            <form method="dialog" class="modal-backdrop">
+              <button>close</button>
+            </form>
+          </dialog>
 
-  <dialog ref="deleteAllModal" class="modal">
-    <div class="modal-box">
-      <h3 class="text-error text-lg font-bold">
-        <i-uil-exclamation-triangle class="mr-2 inline" />
-        Confirm Delete All
-      </h3>
-      <p class="py-4">
-        Are you sure you want to delete <strong>{{ deleteCount }}</strong> submission(s)?
-        <br />
-        <span class="text-warning">This action cannot be undone.</span>
-      </p>
-      <div class="modal-action">
-        <button class="btn" @click="deleteAllModal?.close()">Cancel</button>
-        <button
-          class="btn btn-error"
-          :disabled="isDeleteAllLoading"
-          @click="confirmDeleteAll"
-        >
-          <span v-if="isDeleteAllLoading" class="loading loading-spinner"></span>
-          Delete {{ deleteCount }} Submissions
-        </button>
-      </div>
-    </div>
-    <form method="dialog" class="modal-backdrop">
-      <button>close</button>
-    </form>
-  </dialog>
+          <dialog ref="deleteAllModal" class="modal">
+            <div class="modal-box">
+              <h3 class="text-error text-lg font-bold">
+                <i-uil-exclamation-triangle class="mr-2 inline" />
+                Confirm Delete All
+              </h3>
+              <p class="py-4">
+                Are you sure you want to delete <strong>{{ deleteCount }}</strong> submission(s)?
+                <br />
+                <span class="text-warning">This action cannot be undone.</span>
+              </p>
+              <div class="modal-action">
+                <button class="btn" @click="deleteAllModal?.close()">Cancel</button>
+                <button class="btn btn-error" :disabled="isDeleteAllLoading" @click="confirmDeleteAll">
+                  <span v-if="isDeleteAllLoading" class="loading loading-spinner"></span>
+                  Delete {{ deleteCount }} Submissions
+                </button>
+              </div>
+            </div>
+            <form method="dialog" class="modal-backdrop">
+              <button>close</button>
+            </form>
+          </dialog>
           <div
             v-if="session.isAdmin || session.isTeacher || session.isTA"
             class="flex items-center justify-between gap-4"

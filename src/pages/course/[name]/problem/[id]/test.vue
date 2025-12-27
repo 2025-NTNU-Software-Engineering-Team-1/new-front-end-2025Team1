@@ -18,7 +18,6 @@ import type { AxiosError } from "axios";
 import { useSession } from "@/stores/session";
 import AIChatbot from "@/components/AIChatbot.vue";
 
-
 const md = new MarkdownIt({
   html: true,
   breaks: true,
@@ -73,7 +72,6 @@ const hasCustomTestcases = ref(false); // Track if custom testcases exist
 // Unified preview modal state (public or custom)
 const showTestcasePreviewModal = ref(false);
 const previewMode = ref<"custom" | "public">("custom");
-
 
 // custom
 const customTestcaseFiles = ref<Array<{ name: string; content: string }>>([]);
@@ -568,7 +566,7 @@ async function submitCode() {
             <div class="divider" />
             <div class="bg-base-200 relative mt-4 rounded-lg p-4 transition-all duration-300">
               <button
-                class="absolute right-4 bottom-3 z-10 cursor-pointer text-gray-500 hover:text-gray-700"
+                class="absolute bottom-3 right-4 z-10 cursor-pointer text-gray-500 hover:text-gray-700"
                 @click="isExpanded = !isExpanded"
               >
                 <img
@@ -801,7 +799,6 @@ async function submitCode() {
 
                   <!-- Action Buttons - Normal size to match Submit button -->
                   <div class="flex gap-2">
-
                     <router-link
                       class="btn btn-outline gap-1.5"
                       :to="`/course/${route.params.name}/problem/${route.params.id}/test-history`"
@@ -863,7 +860,7 @@ async function submitCode() {
                           </li>
                         </ul>
                         <div class="prose max-w-none flex-1 overflow-auto rounded border p-2">
-                          <pre class="break-words whitespace-pre-wrap">{{
+                          <pre class="whitespace-pre-wrap break-words">{{
                             publicTestcaseFiles[selectedPreviewFileIndex]?.content ||
                             t("course.problem.test.topic.noContent")
                           }}</pre>
@@ -896,7 +893,7 @@ async function submitCode() {
                           </li>
                         </ul>
                         <div class="prose max-w-none flex-1 overflow-auto rounded border p-2">
-                          <pre class="break-words whitespace-pre-wrap">{{
+                          <pre class="whitespace-pre-wrap break-words">{{
                             customTestcaseFiles[selectedPreviewFileIndex]?.content ||
                             t("course.problem.test.topic.noContent")
                           }}</pre>
@@ -1003,7 +1000,5 @@ async function submitCode() {
       :current-code="aiCurrentCode"
       :username="session.username"
     />
-
-
   </div>
 </template>

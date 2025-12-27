@@ -5,6 +5,8 @@ import useVuelidate from "@vuelidate/core";
 import { required, maxLength, between, helpers } from "@vuelidate/validators";
 import { containsInvisible } from "@/utils/validators";
 import { useI18n } from "vue-i18n";
+import { hover_zh } from "../Hovers/hover-zh-tw";
+import { hover_en } from "../Hovers/hover-en";
 
 // hello
 
@@ -51,7 +53,10 @@ const openPanels = reactive({
   testdata: false,
   resdata: false,
 });
-const { t } = useI18n();
+const { t, locale  } = useI18n();
+const hover = computed(() => {
+  return locale.value === "en" ? hover_en : hover_zh;
+});
 const sectionRefs: Record<PanelKey, ReturnType<typeof ref<HTMLElement | null>>> = {
   desc: ref(null),
   config: ref(null),
@@ -651,7 +656,9 @@ async function submit() {
   <div ref="sectionRefs.desc" class="mt-4 flex flex-col gap-3">
     <div class="collapse-arrow rounded-box bg-base-200 border-base-300 collapse border shadow-sm">
       <input type="checkbox" class="peer" v-model="openPanels.desc" />
-      <div class="collapse-title text-base-content flex min-h-0 items-center py-3 text-base font-semibold">
+      <div class="collapse-title text-base-content flex min-h-0 items-center py-3 text-base font-semibold 
+        tooltip tooltip-top flex cursor-help items-center gap-1"
+          :data-tip="hover.setDescription">
         {{ t("course.problems.setDescription") }}
       </div>
       <div class="collapse-content peer-checked:pt-2">
@@ -664,7 +671,9 @@ async function submit() {
       class="collapse-arrow rounded-box bg-base-200 border-base-300 collapse border shadow-sm"
     >
       <input type="checkbox" class="peer" v-model="openPanels.config" />
-      <div class="collapse-title text-base-content flex min-h-0 items-center py-3 text-base font-semibold">
+      <div class="collapse-title text-base-content flex min-h-0 items-center py-3 text-base font-semibold
+        tooltip tooltip-top flex cursor-help items-center gap-1"
+        :data-tip="hover.setConfiguration">
         {{ t("course.problems.setConfiguration") }}
       </div>
       <div class="collapse-content peer-checked:pt-2">
@@ -677,7 +686,9 @@ async function submit() {
       class="collapse-arrow rounded-box bg-base-200 border-base-300 collapse border shadow-sm"
     >
       <input type="checkbox" class="peer" v-model="openPanels.pipeline" />
-      <div class="collapse-title text-base-content flex min-h-0 items-center py-3 text-base font-semibold">
+      <div class="collapse-title text-base-content flex min-h-0 items-center py-3 text-base font-semibold
+        tooltip tooltip-top flex cursor-help items-center gap-1"
+        :data-tip="hover.setPipelines">
         {{ t("course.problems.setPipelines") }}
       </div>
       <div class="collapse-content peer-checked:pt-2">
@@ -690,7 +701,9 @@ async function submit() {
       class="collapse-arrow rounded-box bg-base-200 border-base-300 collapse border shadow-sm"
     >
       <input type="checkbox" class="peer" v-model="openPanels.testdata" />
-      <div class="collapse-title text-base-content flex min-h-0 items-center py-3 text-base font-semibold">
+      <div class="collapse-title text-base-content flex min-h-0 items-center py-3 text-base font-semibold
+          tooltip tooltip-top flex cursor-help items-center gap-1"
+          :data-tip="hover.setTestData">
         {{ t("course.problems.setTestData") }}
       </div>
       <div class="collapse-content peer-checked:pt-2">
@@ -703,7 +716,9 @@ async function submit() {
       class="collapse-arrow rounded-box bg-base-200 border-base-300 collapse border shadow-sm"
     >
       <input type="checkbox" class="peer" v-model="openPanels.resdata" />
-      <div class="collapse-title text-base-content flex min-h-0 items-center py-3 text-base font-semibold">
+      <div class="collapse-title text-base-content flex min-h-0 items-center py-3 text-base font-semibold
+        tooltip tooltip-top flex cursor-help items-center gap-1"
+        :data-tip="hover.setResourceData">
         {{ t("course.problems.setResourceData") }}
       </div>
       <div class="collapse-content peer-checked:pt-2">

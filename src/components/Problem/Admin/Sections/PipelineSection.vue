@@ -1505,8 +1505,10 @@ watch(
 
           <div class="bg-base-200/50 mt-4 rounded-lg border border-gray-500 p-4">
             <div class="flex items-center gap-4">
-              <label class="label cursor-pointer justify-start gap-x-4">
-                <span class="label-text">{{ t("course.problems.aiCheckerEnable") }}</span>
+              <label class="label cursor-pointer justify-start gap-x-4
+                tooltip tooltip-top flex cursor-help items-center gap-1"
+                  :data-tip="hover.aiCheckerEnable">
+                <span class="label-text ">{{ t("course.problems.aiCheckerEnable") }}</span>
                 <input
                   type="checkbox"
                   class="toggle toggle-sm"
@@ -1534,7 +1536,7 @@ watch(
                   <div
                     tabindex="0"
                     role="button"
-                    class="select select-bordered select-sm flex w-full items-center justify-between bg-white"
+                    class="select select-bordered select-sm flex w-full items-center justify-between "
                   >
                     <span class="truncate">
                       {{
@@ -1545,14 +1547,14 @@ watch(
                   </div>
                   <ul
                     tabindex="0"
-                    class="dropdown-content menu rounded-box left-0 z-[100] mt-1 w-full border border-gray-300 bg-white p-2 shadow-lg"
+                    class="dropdown-content menu rounded-box left-0 z-[100] mt-1 w-full border border-base-300 bg-base-100 p-2 shadow-lg"
                   >
                     <li class="disabled px-4 py-2 text-xs opacity-50">
                       {{ t("course.problems.aiCheckerSelectKey") }}
                     </li>
                     <li v-for="key in aiCheckerApiKeys" :key="key.id">
                       <a
-                        class="text-gray-700 active:bg-gray-100"
+                        class="text-base-content active:bg-primary"
                         @click="(problem.config as any).aiChecker!.apiKeyId = key.id"
                         >{{ key.key_name }}</a
                       >
@@ -1572,13 +1574,13 @@ watch(
                   <div
                     tabindex="0"
                     role="button"
-                    class="select select-bordered select-sm flex w-full items-center justify-between bg-white"
+                    class="select select-bordered select-sm flex w-full items-center justify-between "
                   >
                     <span>{{ (problem.config as any).aiChecker?.model || "Select Model" }}</span>
                   </div>
                   <ul
                     tabindex="0"
-                    class="dropdown-content menu rounded-box left-0 z-[100] mt-1 w-full bg-white p-2 shadow"
+                    class="dropdown-content menu rounded-box left-0 z-[100] mt-1 w-full border border-base-300 bg-base-100 p-2 shadow"
                   >
                     <li>
                       <a @click="(problem.config as any).aiChecker!.model = 'gemini-2.5-flash-lite'"

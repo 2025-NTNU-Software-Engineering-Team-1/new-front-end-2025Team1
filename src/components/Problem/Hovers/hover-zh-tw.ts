@@ -1,5 +1,8 @@
 export const hover_zh = {
+  //description
+  setDescription:"test",
   //configuration
+  setConfiguration:"test",
   allowedLanguages: "test",
   maxZipSize: "test",
   tags: "test",
@@ -31,6 +34,7 @@ export const hover_zh = {
   sideCarArgs: "test",
   sideCarEnv: "test",
   //pipeline
+  setPipelines:"test",
   fileAccess: "test",
   libraryRestrictionsGroup1: "test",
   libraryRestrictionsGroup2: "test",
@@ -49,7 +53,9 @@ export const hover_zh = {
   uploadCustomChecker: "test",
   uploadCustomScorer: "test",
   customScoringScript: "test",
+  aiCheckerEnable:"test",
   //set test data
+  setTestData:"test",
   setDataZipFile: "test",
   //resource data
   setResourceData: "test",

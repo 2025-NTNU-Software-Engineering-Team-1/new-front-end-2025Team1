@@ -9,6 +9,7 @@ import api, { fetcher } from "@/models/api";
 import { useSession } from "@/stores/session";
 import { useTitle } from "@vueuse/core";
 import type { AxiosError } from "axios";
+import AIChatbot from "@/components/AIChatbot.vue";
 
 // ==========================================
 // [CONFIG] Console Debug Mode
@@ -185,6 +186,14 @@ const enableZipArtifact = computed(() => {
 const isZipSubmission = computed(() => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (problem.value as any)?.config?.acceptedFormat === "zip";
+});
+const aiChatEnabled = computed(() => Boolean((problem.value as any)?.config?.aiVTuber));
+const aiProblemId = computed(() =>
+  submission.value?.problemId != null ? String(submission.value.problemId) : "",
+);
+const aiCurrentCode = computed(() => {
+  if (isZipSubmission.value) return "";
+  return submission.value?.code ?? "";
 });
 const effectiveStatus = computed(() => {
   if (!submission.value) return SUBMISSION_STATUS_CODE.PENDING;
@@ -1240,4 +1249,13 @@ watch(submission, (val) => {
       <button>close</button>
     </form>
   </dialog>
+
+  <AIChatbot
+    v-if="aiChatEnabled && aiProblemId"
+    :course-id="route.params.name as string"
+    :course-name="route.params.name as string"
+    :problem-id="aiProblemId"
+    :current-code="aiCurrentCode"
+    :username="session.username"
+  />
 </template>

@@ -15,6 +15,8 @@ import texmath from "markdown-it-texmath";
 import katex from "katex";
 import "katex/dist/katex.min.css";
 import type { AxiosError } from "axios";
+import { useSession } from "@/stores/session";
+import AIChatbot from "@/components/AIChatbot.vue";
 
 const md = new MarkdownIt({
   html: true,
@@ -32,6 +34,7 @@ const renderMarkdown = (content: unknown): string => {
 
 const route = useRoute();
 const { t } = useI18n();
+const session = useSession();
 
 useTitle(`Test - ${route.params.id} - ${route.params.name} | Normal OJ`);
 const router = useRouter();
@@ -45,6 +48,7 @@ const trialSubmissionCount = ref<number | null>(null);
 const trialQuotaLoading = ref(false);
 
 const isExpanded = ref(true);
+const aiChatEnabled = computed(() => Boolean(problemData.value?.config?.aiVTuber));
 
 const lang = useStorage(LOCAL_STORAGE_KEY.LAST_USED_LANG, -1);
 const showSubmitModal = ref(false);
@@ -333,6 +337,7 @@ const form = reactive({
   isSubmitError: false,
   errorMessage: "",
 });
+const aiCurrentCode = computed(() => form.code ?? "");
 
 // Persist source code so users won't lose typed code when navigating away
 const codeStorageKey = `test_code_${(route.params.name as string) || ""}_${(route.params.id as string) || ""}`;
@@ -816,5 +821,14 @@ async function submitCode() {
         </div>
       </template>
     </data-status-wrapper>
+
+    <AIChatbot
+      v-if="aiChatEnabled"
+      :course-id="route.params.name as string"
+      :course-name="route.params.name as string"
+      :problem-id="route.params.id as string"
+      :current-code="aiCurrentCode"
+      :username="session.username"
+    />
   </div>
 </template>

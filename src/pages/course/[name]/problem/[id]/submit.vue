@@ -10,6 +10,8 @@ import api, { fetcher } from "@/models/api";
 import { useTitle, useStorage } from "@vueuse/core";
 import { LANGUAGE_OPTIONS, LOCAL_STORAGE_KEY } from "@/constants";
 import { useI18n } from "vue-i18n";
+import { useSession } from "@/stores/session";
+import AIChatbot from "@/components/AIChatbot.vue";
 
 // ==========================================
 // [CONFIG] Console Debug Mode
@@ -51,6 +53,7 @@ const logger = {
 // ==========================================
 const route = useRoute();
 const { t } = useI18n();
+const session = useSession();
 
 useTitle(`Submit - ${route.params.id} - ${route.params.name} | Normal OJ`);
 const router = useRouter();
@@ -61,6 +64,7 @@ const acceptedFormat = computed<AcceptedFormat>(() => {
   const fmt = (problem.value as any)?.config?.acceptedFormat;
   return fmt === "zip" ? "zip" : "code";
 });
+const aiChatEnabled = computed(() => Boolean((problem.value as any)?.config?.aiVTuber));
 
 const lang = useStorage(LOCAL_STORAGE_KEY.LAST_USED_LANG, -1);
 const form = reactive({
@@ -70,6 +74,11 @@ const form = reactive({
   isLoading: false,
   isSubmitError: false,
   errorMessage: "", // Added state for UI error notification
+});
+const aiCurrentCode = computed(() => {
+  if (acceptedFormat.value === "code") return form.code ?? "";
+  if (form.zip) return `[ZIP upload] ${form.zip.name}`;
+  return "";
 });
 
 // Verification rules switch according to acceptedFormat
@@ -437,4 +446,13 @@ async function submit() {
       </div>
     </div>
   </div>
+
+  <AIChatbot
+    v-if="aiChatEnabled"
+    :course-id="route.params.name as string"
+    :course-name="route.params.name as string"
+    :problem-id="route.params.id as string"
+    :current-code="aiCurrentCode"
+    :username="session.username"
+  />
 </template>

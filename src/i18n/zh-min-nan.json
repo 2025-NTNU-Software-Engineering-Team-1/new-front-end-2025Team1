@@ -1102,7 +1102,7 @@
       "hint": "請直接壓縮 Live2D Cubism Editor 匯出 ê 檔案，原本結構毋免改（上限 50 MB）",
       "emotions": "表情映射",
       "optional": "選填",
-      "emotionsHint": "對 model3.json 的 Expressions 揣著表情 ID，格式：{\"smile\": \"F05\", ...}",
+      "emotionsHint": "對 model3.json 的 Expressions 揣著表情 ID，格式：{'{\"}'}smile{'\"'}: {'\"'}F05{'\"'}, ...{'}'}",
       "thumbnail": "縮圖",
       "thumbnailHint": "Ctrl+V 貼或揀檔案",
       "chooseFile": "揀檔案",

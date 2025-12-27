@@ -111,8 +111,10 @@ async function loadTrialQuotaUsage() {
   trialQuotaLoading.value = true;
   try {
     const response = await api.TrialSubmission.getTrialHistory(Number(route.params.id));
-    if (response.status === "ok") {
-      trialSubmissionCount.value = response.data?.total_count ?? response.data?.history?.length ?? 0;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const merged = response as any;
+    if (merged.status === "ok") {
+      trialSubmissionCount.value = merged.data?.total_count ?? merged.data?.history?.length ?? 0;
     } else {
       trialSubmissionCount.value = null;
     }

@@ -89,6 +89,8 @@ interface Problem {
   config?: ProblemConfigExtra;
   pipeline?: ProblemPipeline;
   assets?: ProblemAssets;
+  trialSubmissionQuota?: number;
+  trialSubmissionCount?: number;
 }
 
 /* ------------------------------

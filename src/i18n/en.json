@@ -1198,7 +1198,7 @@
       "hint": "Zip files exported from Live2D Cubism Editor directly, keep original structure (max 50 MB)",
       "emotions": "Emotion Mappings",
       "optional": "Optional",
-      "emotionsHint": "Find expression IDs from model3.json Expressions, format: {\"smile\": \"F05\", ...}",
+      "emotionsHint": "Find expression IDs from model3.json Expressions, format: {'{\"}'}smile{'\"'}: {'\"'}F05{'\"'}, ...{'}'}",
       "thumbnail": "Thumbnail",
       "thumbnailHint": "Ctrl+V to paste or choose file",
       "chooseFile": "Choose File",

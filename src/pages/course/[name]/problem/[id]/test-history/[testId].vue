@@ -164,8 +164,10 @@ async function fetchTrialSubmission() {
       displayedName: session.displayedName || "Unknown",
     },
     status: normalizeStatus(response.data.status),
-    saStatus: response.data.saStatus ?? response.data.sa_status ?? null,
-    saMessage: response.data.saMessage ?? response.data.sa_message ?? null,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    saStatus: (response.data as any).sa_status ?? null,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    saMessage: (response.data as any).sa_message ?? null,
     runTime: Math.max(...(response.data.tasks?.map((t) => t.exec_time) ?? [0])),
     memoryUsage: Math.max(...(response.data.tasks?.map((t) => t.memory_usage) ?? [0])),
     score: response.data.score,

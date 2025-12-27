@@ -568,8 +568,12 @@ async function openAndScroll(panel: PanelKey) {
 }
 
 async function submit() {
-  hasSubmitted.value = true; // ✅ user clicked submit at least once
+  if (isLoading.value) return; // 🔒 prevent double click
+  isLoading.value = true;
+
+  hasSubmitted.value = true; // mark user has attempted submission
   logger.group("Form Submission");
+
   const ok = await v$.value.$validate();
 
   if (ok) {
@@ -580,6 +584,7 @@ async function submit() {
 
     const errs = v$.value.$errors as VuelidateError[];
     const panelsToOpen = new Set<string>();
+
     errs.forEach((e) => {
       const path = e.$propertyPath || e.$property || "";
       panelsToOpen.add(getPanelByErrorPath(path));
@@ -590,11 +595,12 @@ async function submit() {
         openPanels[p as PanelKey] = true;
       }
     });
+
     await nextTick();
     const first = errs[0];
     const firstPath = first?.$propertyPath || first?.$property || "";
     const firstPanel = getPanelByErrorPath(firstPath);
-    sectionRefs[firstPanel as keyof typeof sectionRefs].value?.scrollIntoView({
+    sectionRefs[firstPanel].value?.scrollIntoView({
       behavior: "smooth",
       block: "start",
     });
@@ -608,6 +614,10 @@ async function submit() {
   }
 
   logger.groupEnd();
+
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 6000);
 }
 
 onMounted(async () => {

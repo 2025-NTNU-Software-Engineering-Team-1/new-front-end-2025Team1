@@ -253,6 +253,11 @@ const effectiveStatus = computed(() => {
   if (normalized !== SUBMISSION_STATUS_CODE.PENDING) return normalized;
   return deriveStatusFromTasks(testResult.value.tasks) ?? normalized;
 });
+// Check if the problem accepts zip submissions (hide source code section for zip problems)
+const isZipSubmission = computed(() => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (problem.value as any)?.config?.acceptedFormat === "zip";
+});
 
 // Auto-refresh polling (every 2 seconds while status is Pending)
 const { pause, resume, isActive } = useIntervalFn(() => {
@@ -882,23 +887,26 @@ function closeDeleteErrorModal() {
 
         <div class="my-4" />
 
-        <skeleton-card v-if="!testResult" />
-        <div v-else class="card min-w-full rounded-none">
-          <div class="card-body p-0">
-            <div class="card-title md:text-xl lg:text-2xl">
-              Source Code
-              <button
-                v-if="isSupported && testResult"
-                class="btn btn-info btn-xs ml-3"
-                @click="copy(testResult?.code || '')"
-              >
-                {{ copied ? "Copied!" : "Copy" }}
-              </button>
+        <!-- Hide source section for zip submissions since they don't have meaningful source code -->
+        <template v-if="!isZipSubmission">
+          <skeleton-card v-if="!testResult" />
+          <div v-else class="card min-w-full rounded-none">
+            <div class="card-body p-0">
+              <div class="card-title md:text-xl lg:text-2xl">
+                Source Code
+                <button
+                  v-if="isSupported && testResult"
+                  class="btn btn-info btn-xs ml-3"
+                  @click="copy(testResult?.code || '')"
+                >
+                  {{ copied ? "Copied!" : "Copy" }}
+                </button>
+              </div>
+              <div class="my-1" />
+              <code-editor v-model="testResult.code" readonly />
             </div>
-            <div class="my-1" />
-            <code-editor v-model="testResult.code" readonly />
           </div>
-        </div>
+        </template>
 
         <div class="my-6" />
 

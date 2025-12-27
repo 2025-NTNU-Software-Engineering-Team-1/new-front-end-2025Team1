@@ -2,7 +2,6 @@
 import { useRoute } from "vue-router";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import { fetcher } from "@/models/api";
-import { computed } from "vue";
 import { useTitle } from "@vueuse/core";
 import { useProblemSelection } from "@/composables/useProblemSelection";
 import type { AxiosError } from "axios";

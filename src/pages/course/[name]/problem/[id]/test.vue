@@ -552,7 +552,7 @@ async function submitCode() {
             <div class="divider" />
             <div class="bg-base-200 relative mt-4 rounded-lg p-4 transition-all duration-300">
               <button
-                class="absolute bottom-3 right-4 z-10 cursor-pointer text-gray-500 hover:text-gray-700"
+                class="absolute right-4 bottom-3 z-10 cursor-pointer text-gray-500 hover:text-gray-700"
                 @click="isExpanded = !isExpanded"
               >
                 <img
@@ -624,32 +624,39 @@ async function submitCode() {
             </div>
 
             <!-- Test Settings Section - Redesigned -->
-            <div class="mt-6 rounded-xl border-2 border-base-content/20 bg-base-100/50 p-5">
+            <div class="border-base-content/20 bg-base-100/50 mt-6 rounded-xl border-2 p-5">
               <div class="flex flex-wrap items-stretch justify-between gap-4">
                 <!-- Left Section: Language & Test Data Type -->
                 <div class="flex flex-wrap items-stretch gap-4">
                   <!-- Language Selection - Own bordered section -->
-                  <div class="flex flex-col rounded-lg border border-base-content/10 bg-base-200/30 p-3">
-                    <span class="mb-2 text-sm font-medium text-base-content/70">
+                  <div class="border-base-content/10 bg-base-200/30 flex flex-col rounded-lg border p-3">
+                    <span class="text-base-content/70 mb-2 text-sm font-medium">
                       {{ t("course.problem.test.lang.text") }}
                     </span>
                     <select
                       v-model="v.lang.$model"
-                      :class="['select select-bordered w-full min-w-[160px]', v.lang.$error && 'select-error']"
+                      :class="[
+                        'select select-bordered w-full min-w-[160px]',
+                        v.lang.$error && 'select-error',
+                      ]"
                     >
                       <option :value="-1" disabled hidden>{{ t("course.problem.test.lang.select") }}</option>
-                      <option v-for="langOption in langOptions" :key="langOption.value" :value="langOption.value">
+                      <option
+                        v-for="langOption in langOptions"
+                        :key="langOption.value"
+                        :value="langOption.value"
+                      >
                         {{ langOption.text }}
                       </option>
                     </select>
-                    <span v-show="v.lang.$error" class="mt-1 text-xs text-error">
+                    <span v-show="v.lang.$error" class="text-error mt-1 text-xs">
                       {{ v.lang.$errors[0]?.$message }}
                     </span>
                   </div>
 
                   <!-- Test Data Type Selection - Own bordered section -->
-                  <div class="flex flex-col rounded-lg border border-base-content/10 bg-base-200/30 p-3">
-                    <span class="mb-2 text-sm font-medium text-base-content/70">
+                  <div class="border-base-content/10 bg-base-200/30 flex flex-col rounded-lg border p-3">
+                    <span class="text-base-content/70 mb-2 text-sm font-medium">
                       {{ t("course.problem.test.testcaseType.label") }}
                     </span>
                     <div class="flex flex-col gap-1.5">
@@ -658,8 +665,8 @@ async function submitCode() {
                         class="flex items-center gap-3 rounded-lg px-3 py-2 transition-all"
                         :class="[
                           useDefaultTestcases
-                            ? 'bg-primary/10 border border-primary/30'
-                            : 'bg-base-200/50 border border-transparent hover:bg-base-200',
+                            ? 'bg-primary/10 border-primary/30 border'
+                            : 'bg-base-200/50 hover:bg-base-200 border border-transparent',
                         ]"
                       >
                         <button
@@ -676,7 +683,9 @@ async function submitCode() {
                         </button>
                         <span
                           class="flex-1 text-sm"
-                          :class="useDefaultTestcases ? 'font-medium text-base-content' : 'text-base-content/70'"
+                          :class="
+                            useDefaultTestcases ? 'text-base-content font-medium' : 'text-base-content/70'
+                          "
                         >
                           {{ t("course.problem.test.testcaseType.public") }}
                         </span>
@@ -695,10 +704,10 @@ async function submitCode() {
                         class="flex items-center gap-3 rounded-lg px-3 py-2 transition-all"
                         :class="[
                           !hasCustomTestcases
-                            ? 'opacity-50 cursor-not-allowed bg-base-200/30 border border-transparent'
+                            ? 'bg-base-200/30 cursor-not-allowed border border-transparent opacity-50'
                             : !useDefaultTestcases
-                              ? 'bg-primary/10 border border-primary/30'
-                              : 'bg-base-200/50 border border-transparent hover:bg-base-200',
+                              ? 'bg-primary/10 border-primary/30 border'
+                              : 'bg-base-200/50 hover:bg-base-200 border border-transparent',
                         ]"
                       >
                         <button
@@ -714,7 +723,10 @@ async function submitCode() {
                                 : 'bg-base-300 text-base-content/50 hover:bg-base-content/20',
                           ]"
                         >
-                          <i-uil-check v-if="!useDefaultTestcases && hasCustomTestcases" class="h-3.5 w-3.5" />
+                          <i-uil-check
+                            v-if="!useDefaultTestcases && hasCustomTestcases"
+                            class="h-3.5 w-3.5"
+                          />
                           <i-uil-lock v-else-if="!hasCustomTestcases" class="h-3 w-3" />
                         </button>
                         <span
@@ -723,7 +735,7 @@ async function submitCode() {
                             !hasCustomTestcases
                               ? 'text-base-content/40'
                               : !useDefaultTestcases
-                                ? 'font-medium text-base-content'
+                                ? 'text-base-content font-medium'
                                 : 'text-base-content/70',
                           ]"
                         >
@@ -750,19 +762,21 @@ async function submitCode() {
                 <!-- Right Section: Trial Quota & Buttons -->
                 <div class="flex items-center gap-4">
                   <!-- Trial Quota Display - Own bordered section -->
-                  <div class="flex flex-col items-center justify-center rounded-lg border border-base-content/10 bg-base-200/30 px-5 py-3">
-                    <span class="text-xs font-medium text-base-content/60">
+                  <div
+                    class="border-base-content/10 bg-base-200/30 flex flex-col items-center justify-center rounded-lg border px-5 py-3"
+                  >
+                    <span class="text-base-content/60 text-xs font-medium">
                       {{ t("course.problem.test.trialQuota") }}
                     </span>
-                    <div class="mt-1 text-xl font-bold text-base-content">
+                    <div class="text-base-content mt-1 text-xl font-bold">
                       <template v-if="trialQuotaUnlimited">
-                        <span class="text-base font-medium text-success">{{
+                        <span class="text-success text-base font-medium">{{
                           t("components.problem.card.unlimited")
                         }}</span>
                       </template>
                       <template v-else>
                         <span>{{ trialQuotaLoading ? "..." : (trialQuotaRemaining ?? "-") }}</span>
-                        <span class="text-sm font-normal text-base-content/60">
+                        <span class="text-base-content/60 text-sm font-normal">
                           / {{ trialQuotaLimit ?? "-" }}
                         </span>
                       </template>
@@ -785,10 +799,7 @@ async function submitCode() {
                       <i-uil-file-edit-alt class="h-5 w-5" />
                       {{ t("course.problem.test.testcase") }}
                     </router-link>
-                    <button
-                      :class="['btn btn-primary gap-1.5', form.isLoading && 'loading']"
-                      @click="test"
-                    >
+                    <button :class="['btn btn-primary gap-1.5', form.isLoading && 'loading']" @click="test">
                       <i-uil-play class="h-5 w-5" />
                       {{ t("course.problem.test.run") }}
                     </button>
@@ -797,94 +808,93 @@ async function submitCode() {
               </div>
             </div>
 
-
             <!-- Testcases Preview Modal (public or custom) -->
-                <dialog
-                  class="modal border-0 bg-transparent p-0 backdrop:bg-black/20 backdrop:backdrop-blur-[1px]"
-                  :class="{ 'modal-open': showTestcasePreviewModal }"
-                >
-                  <div class="modal-box max-w-5xl rounded-3xl shadow-[0_4px_15px_rgba(0,0,0,0.2)]">
-                    <h3 class="text-lg font-bold">
-                      {{
-                        previewMode === "public"
-                          ? t("course.problem.test.testcaseType.viewPublicTitle")
-                          : t("course.problem.test.testcaseType.viewCustomTitle")
-                      }}
-                    </h3>
-                    <div class="py-4">
-                      <!-- Public -->
-                      <div v-if="previewMode === 'public'">
-                        <div v-if="publicTestcaseLoading" class="flex items-center justify-center">
-                          Loading...
-                        </div>
-                        <div v-else-if="publicTestcaseError" class="text-error">
-                          {{ publicTestcaseError }}
-                        </div>
-                        <div v-else>
-                          <div class="flex gap-4">
-                            <ul class="menu bg-base-100 w-48 rounded p-2">
-                              <li v-for="(f, idx) in publicTestcaseFiles" :key="f.name">
-                                <a
-                                  href="#"
-                                  @click.prevent="selectedPreviewFileIndex = idx"
-                                  :class="{ 'font-bold': selectedPreviewFileIndex === idx }"
-                                  >{{ f.name }}</a
-                                >
-                              </li>
-                              <li v-if="publicTestcaseFiles.length === 0" class="italic opacity-70">
-                                {{ t("course.problem.test.topic.noContent") }}
-                              </li>
-                            </ul>
-                            <div class="prose max-w-none flex-1 overflow-auto rounded border p-2">
-                              <pre class="whitespace-pre-wrap break-words">{{
-                                publicTestcaseFiles[selectedPreviewFileIndex]?.content ||
-                                t("course.problem.test.topic.noContent")
-                              }}</pre>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <!-- Custom -->
-                      <div v-else>
-                        <div v-if="customTestcaseLoading" class="flex items-center justify-center">
-                          Loading...
-                        </div>
-                        <div v-else-if="customTestcaseError" class="text-error">
-                          {{ customTestcaseError }}
-                        </div>
-                        <div v-else>
-                          <div class="flex gap-4">
-                            <ul class="menu bg-base-100 w-48 rounded p-2">
-                              <li v-for="(f, idx) in customTestcaseFiles" :key="f.name">
-                                <a
-                                  href="#"
-                                  @click.prevent="selectedPreviewFileIndex = idx"
-                                  :class="{ 'font-bold': selectedPreviewFileIndex === idx }"
-                                  >{{ f.name }}</a
-                                >
-                              </li>
-                              <li v-if="customTestcaseFiles.length === 0" class="italic opacity-70">
-                                {{ t("course.problem.test.topic.noContent") }}
-                              </li>
-                            </ul>
-                            <div class="prose max-w-none flex-1 overflow-auto rounded border p-2">
-                              <pre class="whitespace-pre-wrap break-words">{{
-                                customTestcaseFiles[selectedPreviewFileIndex]?.content ||
-                                t("course.problem.test.topic.noContent")
-                              }}</pre>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+            <dialog
+              class="modal border-0 bg-transparent p-0 backdrop:bg-black/20 backdrop:backdrop-blur-[1px]"
+              :class="{ 'modal-open': showTestcasePreviewModal }"
+            >
+              <div class="modal-box max-w-5xl rounded-3xl shadow-[0_4px_15px_rgba(0,0,0,0.2)]">
+                <h3 class="text-lg font-bold">
+                  {{
+                    previewMode === "public"
+                      ? t("course.problem.test.testcaseType.viewPublicTitle")
+                      : t("course.problem.test.testcaseType.viewCustomTitle")
+                  }}
+                </h3>
+                <div class="py-4">
+                  <!-- Public -->
+                  <div v-if="previewMode === 'public'">
+                    <div v-if="publicTestcaseLoading" class="flex items-center justify-center">
+                      Loading...
                     </div>
-                    <div class="modal-action">
-                      <button class="btn" @click="showTestcasePreviewModal = false">
-                        {{ t("common.close") }}
-                      </button>
+                    <div v-else-if="publicTestcaseError" class="text-error">
+                      {{ publicTestcaseError }}
+                    </div>
+                    <div v-else>
+                      <div class="flex gap-4">
+                        <ul class="menu bg-base-100 w-48 rounded p-2">
+                          <li v-for="(f, idx) in publicTestcaseFiles" :key="f.name">
+                            <a
+                              href="#"
+                              @click.prevent="selectedPreviewFileIndex = idx"
+                              :class="{ 'font-bold': selectedPreviewFileIndex === idx }"
+                              >{{ f.name }}</a
+                            >
+                          </li>
+                          <li v-if="publicTestcaseFiles.length === 0" class="italic opacity-70">
+                            {{ t("course.problem.test.topic.noContent") }}
+                          </li>
+                        </ul>
+                        <div class="prose max-w-none flex-1 overflow-auto rounded border p-2">
+                          <pre class="break-words whitespace-pre-wrap">{{
+                            publicTestcaseFiles[selectedPreviewFileIndex]?.content ||
+                            t("course.problem.test.topic.noContent")
+                          }}</pre>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </dialog>
+
+                  <!-- Custom -->
+                  <div v-else>
+                    <div v-if="customTestcaseLoading" class="flex items-center justify-center">
+                      Loading...
+                    </div>
+                    <div v-else-if="customTestcaseError" class="text-error">
+                      {{ customTestcaseError }}
+                    </div>
+                    <div v-else>
+                      <div class="flex gap-4">
+                        <ul class="menu bg-base-100 w-48 rounded p-2">
+                          <li v-for="(f, idx) in customTestcaseFiles" :key="f.name">
+                            <a
+                              href="#"
+                              @click.prevent="selectedPreviewFileIndex = idx"
+                              :class="{ 'font-bold': selectedPreviewFileIndex === idx }"
+                              >{{ f.name }}</a
+                            >
+                          </li>
+                          <li v-if="customTestcaseFiles.length === 0" class="italic opacity-70">
+                            {{ t("course.problem.test.topic.noContent") }}
+                          </li>
+                        </ul>
+                        <div class="prose max-w-none flex-1 overflow-auto rounded border p-2">
+                          <pre class="break-words whitespace-pre-wrap">{{
+                            customTestcaseFiles[selectedPreviewFileIndex]?.content ||
+                            t("course.problem.test.topic.noContent")
+                          }}</pre>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-action">
+                  <button class="btn" @click="showTestcasePreviewModal = false">
+                    {{ t("common.close") }}
+                  </button>
+                </div>
+              </div>
+            </dialog>
 
             <!-- Code Input Section - conditional based on acceptedFormat -->
             <template v-if="acceptedFormat === 'code'">
@@ -907,7 +917,9 @@ async function submitCode() {
             <template v-else>
               <div class="form-control mt-4">
                 <label class="label">
-                  <span class="label-text">{{ t("course.problem.test.uploadZip") || "Upload your solution (.zip)" }}</span>
+                  <span class="label-text">{{
+                    t("course.problem.test.uploadZip") || "Upload your solution (.zip)"
+                  }}</span>
                 </label>
                 <div class="mt-2">
                   <input

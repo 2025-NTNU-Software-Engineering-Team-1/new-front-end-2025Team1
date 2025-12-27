@@ -338,11 +338,7 @@ watch(
     </div>
 
     <!-- Testdata Validation Error Display (same style as vuelidate errors) -->
-    <label
-      class="label text-error"
-      v-show="testdataError"
-      v-text="testdataError"
-    />
+    <label class="label text-error" v-show="testdataError" v-text="testdataError" />
 
     <label
       class="label text-error"

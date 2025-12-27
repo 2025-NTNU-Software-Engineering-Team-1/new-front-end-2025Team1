@@ -222,13 +222,13 @@ const isAllSelected = computed({
             <div class="flex items-center gap-2">
               <span
                 v-if="testcaseFiles.length > 0"
-                class="badge badge-success badge-outline inline-flex h-10 min-w-[72px] items-center justify-center px-3 py-0 text-sm whitespace-nowrap"
+                class="badge badge-success badge-outline inline-flex h-10 min-w-[72px] items-center justify-center whitespace-nowrap px-3 py-0 text-sm"
               >
                 {{ t("course.problems.uploaded") }}
               </span>
               <span
                 v-else
-                class="badge badge-outline inline-flex h-10 min-w-[90px] items-center justify-center px-3 py-0 text-center text-sm whitespace-nowrap opacity-70"
+                class="badge badge-outline inline-flex h-10 min-w-[90px] items-center justify-center whitespace-nowrap px-3 py-0 text-center text-sm opacity-70"
               >
                 {{ t("course.problems.notUploaded") }}
               </span>
@@ -290,7 +290,7 @@ const isAllSelected = computed({
 
           <div class="rounded border p-4">
             <h4 class="mb-2 font-semibold">{{ t("course.problem.test.testcaseModal.preview") }}</h4>
-            <div class="bg-base-200 h-64 max-w-full overflow-auto rounded border p-2 whitespace-pre-wrap">
+            <div class="bg-base-200 h-64 max-w-full overflow-auto whitespace-pre-wrap rounded border p-2">
               <template v-if="selectedTestcaseContent.includes('blob:')">
                 <div v-for="(line, idx) in selectedTestcaseContent.split('\n')" :key="idx">
                   <template v-if="line.startsWith('blob:')">

@@ -472,7 +472,11 @@ async function submitScoreEdit() {
     await execute();
 
     // If submission was not pending before, ensure polling stays paused
-    if (!wasPending && submission.value && (effectiveStatus.value as number) !== SUBMISSION_STATUS_CODE.PENDING) {
+    if (
+      !wasPending &&
+      submission.value &&
+      (effectiveStatus.value as number) !== SUBMISSION_STATUS_CODE.PENDING
+    ) {
       if (isActive.value) {
         pause();
       }

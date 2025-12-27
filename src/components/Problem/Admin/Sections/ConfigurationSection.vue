@@ -986,6 +986,31 @@ const tagsString = computed({
 });
 
 // ==========================================
+// [NEW] Section: Zip Size Validation
+// ==========================================
+/**
+ * Validate Zip size on blur.
+ * Range: 50MB ~ 3000MB.
+ * If out of range, it reverts to the boundary values.
+ */
+function validateZipSize(e: Event) {
+  const input = e.target as HTMLInputElement;
+  let val = Number(input.value);
+
+  // Check boundaries
+  if (val < 50) val = 50;
+  if (val > 3000) val = 3000;
+
+  // Update configuration
+  if (problem.value.config) {
+    problem.value.config.maxStudentZipSizeMB = val;
+  }
+
+  // Force update the input display value
+  input.value = String(val);
+}
+
+// ==========================================
 // Section: Lifecycle Hooks
 // ==========================================
 onMounted(async () => {
@@ -1115,18 +1140,14 @@ onBeforeUnmount(() => {
         <input
           type="number"
           class="input-bordered input input-sm w-28 text-center"
-          min="1"
-          max="1000"
+          min="50"
+          max="3000"
           step="1"
           :value="problem.config!.maxStudentZipSizeMB ?? 50"
-          @input="
-            problem.config!.maxStudentZipSizeMB = Math.min(
-              1000,
-              Math.max(1, Number(($event.target as HTMLInputElement).value)),
-            )
-          "
+          @input="problem.config!.maxStudentZipSizeMB = Number(($event.target as HTMLInputElement).value)"
+          @blur="validateZipSize"
         />
-        <span class="text-xs whitespace-nowrap opacity-70">{{ t("course.problems.maxZipSizeDefault") }}</span>
+        <span class="whitespace-nowrap text-xs opacity-70">{{ t("course.problems.maxZipSizeDefault") }}</span>
       </div>
     </div>
 
@@ -1219,7 +1240,7 @@ onBeforeUnmount(() => {
                   <transition name="fade">
                     <div
                       v-if="showSuggestionTooltip"
-                      class="key-suggestion-tooltip bg-base-100 absolute top-full left-6 z-50 mt-2 w-72 rounded-md border border-gray-400 p-3 shadow-xl"
+                      class="key-suggestion-tooltip bg-base-100 absolute left-6 top-full z-50 mt-2 w-72 rounded-md border border-gray-400 p-3 shadow-xl"
                     >
                       <div v-if="isFetchingSuggestion" class="flex items-center text-sm">
                         <ui-spinner class="mr-2" /> {{ t("course.problems.aiKeyFetchingSuggestion") }}

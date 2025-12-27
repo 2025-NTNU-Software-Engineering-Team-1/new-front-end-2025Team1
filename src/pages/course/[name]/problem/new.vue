@@ -153,6 +153,7 @@ const animState = ref({
   spotlight: true,
   flying: false,
   hint: false,
+  skipped: false,
   style: {
     "--start-x": "0px",
     "--start-y": "0px",
@@ -162,6 +163,23 @@ const animState = ref({
 
 onMounted(async () => {
   await nextTick();
+
+  // LocalStorage Key
+  const COOKIE_KEY = "has_seen_manual_anim";
+
+  // Check if user has seen animation
+  if (route.query.reset_anim) {
+    localStorage.removeItem(COOKIE_KEY);
+  }
+
+  if (localStorage.getItem(COOKIE_KEY)) {
+    animState.value.spotlight = false;
+    animState.value.skipped = true;
+    return;
+  }
+
+  // Mark as seen
+  localStorage.setItem(COOKIE_KEY, "true");
 
   // 1. Calculate flight trajectory from screen center to button wrapper
   if (manualButtonWrapper.value) {
@@ -348,13 +366,18 @@ const openJSON = ref(false);
                 class="animate-bounce-horizontal absolute right-full z-50 mr-4 w-max rounded bg-black px-3 py-2 text-sm font-bold text-white shadow-lg dark:bg-white dark:text-black"
               >
                 <div
-                  class="bg-info absolute -right-1 top-1/2 h-3 w-3 -translate-y-1/2 rotate-45 transform"
+                  class="bg-info absolute top-1/2 -right-1 h-3 w-3 -translate-y-1/2 rotate-45 transform"
                 ></div>
                 👋 Click here for Manual!
               </div>
             </Transition>
 
-            <div class="opacity-0" :class="{ 'dash-fly-anim': animState.flying }">
+            <div
+              :class="[
+                animState.skipped ? 'opacity-100' : 'opacity-0',
+                { 'dash-fly-anim': animState.flying },
+              ]"
+            >
               <AdminManualModal />
             </div>
           </div>

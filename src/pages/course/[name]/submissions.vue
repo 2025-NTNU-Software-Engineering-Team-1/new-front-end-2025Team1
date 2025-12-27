@@ -188,7 +188,7 @@ async function rejudgeAll() {
   };
   const qs = queryString.stringify(query, { skipNull: true, skipEmptyString: true });
   const url = `/submission?${qs}`;
-  let allSubmissions: SubmissionList = [];
+  let allSubmissions: any[] = [];
   try {
     const { data } = await fetcher.get<GetSubmissionListResponse>(url);
     allSubmissions = data?.submissions || [];
@@ -276,10 +276,7 @@ async function deleteSubmission(id: string) {
           {{ $t("course.submissions.text") }}
 
           <!-- Admin/Teacher/TA actions: rejudge, download, search -->
-          <div
-            v-if="session.isAdmin || session.isTeacher || session.isTA"
-            class="flex items-center justify-between gap-4"
-          >
+          <div v-if="session.isAdmin || session.isTeacher || session.isTA" class="flex items-center justify-between gap-4">
             <button
               :class="['btn btn-warning btn-sm', isRejudgeAllLoading && 'loading']"
               :disabled="isRejudgeAllLoading"
@@ -469,11 +466,7 @@ async function deleteSubmission(id: string) {
 }
 
 /* Make sure table and all parents don't hide overflowing tooltip */
-.table,
-.table *,
-.card,
-.card-body,
-.card-container {
+.table, .table *, .card, .card-body, .card-container {
   overflow: visible !important;
 }
 </style>

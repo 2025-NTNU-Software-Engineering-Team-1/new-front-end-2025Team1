@@ -50,6 +50,13 @@ const trialQuotaLoading = ref(false);
 const isExpanded = ref(true);
 const aiChatEnabled = computed(() => Boolean(problemData.value?.config?.aiVTuber));
 
+// Determine submission format (code or zip) from problem config
+const acceptedFormat = computed<AcceptedFormat>(() => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const fmt = (problemData.value as any)?.config?.acceptedFormat;
+  return fmt === "zip" ? "zip" : "code";
+});
+
 const lang = useStorage(LOCAL_STORAGE_KEY.LAST_USED_LANG, -1);
 const showSubmitModal = ref(false);
 
@@ -333,13 +340,18 @@ onMounted(() => {
 
 const form = reactive({
   code: "",
+  zip: null as File | null,
   lang,
   testInput: "",
   isLoading: false,
   isSubmitError: false,
   errorMessage: "",
 });
-const aiCurrentCode = computed(() => form.code ?? "");
+const aiCurrentCode = computed(() => {
+  if (acceptedFormat.value === "code") return form.code ?? "";
+  if (form.zip) return `[ZIP upload] ${form.zip.name}`;
+  return "";
+});
 
 // Persist source code so users won't lose typed code when navigating away
 const codeStorageKey = `test_code_${(route.params.name as string) || ""}_${(route.params.id as string) || ""}`;
@@ -357,10 +369,23 @@ watch(
     }
   },
 );
-const rules = {
-  code: { required: helpers.withMessage(t("course.problem.submit.err.code"), required) },
+// Validation rules switch according to acceptedFormat
+const rules = computed(() => ({
+  code:
+    acceptedFormat.value === "code"
+      ? { required: helpers.withMessage(t("course.problem.submit.err.code"), required) }
+      : {},
+  zip:
+    acceptedFormat.value === "zip"
+      ? {
+          requiredFile: helpers.withMessage(
+            t("course.problem.test.err.zip") || "Please select a zip file",
+            (v: unknown) => v instanceof File,
+          ),
+        }
+      : {},
   lang: { betweenValue: helpers.withMessage(t("course.problem.submit.err.lang"), between(0, 3)) },
-};
+}));
 const v$ = useVuelidate(rules, form);
 
 // Template-friendly alias to avoid Volar template type errors
@@ -418,10 +443,20 @@ async function test() {
     console.log("requestResponse =", requestResponse);
     console.log("trialSubmissionId =", trialSubmissionId);
 
-    // Prepare code zip file
-    const codeWriter = new ZipWriter(new BlobWriter("application/zip"));
-    await codeWriter.add(`main${LANGUAGE_EXTENSION[form.lang]}`, new TextReader(form.code));
-    const codeBlob = await codeWriter.close();
+    // Prepare code blob based on acceptedFormat
+    let codeBlob: Blob;
+    if (acceptedFormat.value === "code") {
+      // CODE mode: compress source code into zip
+      const codeWriter = new ZipWriter(new BlobWriter("application/zip"));
+      await codeWriter.add(`main${LANGUAGE_EXTENSION[form.lang]}`, new TextReader(form.code));
+      codeBlob = await codeWriter.close();
+    } else {
+      // ZIP mode: use uploaded zip file directly
+      if (!form.zip) {
+        throw new Error("No zip file selected");
+      }
+      codeBlob = form.zip;
+    }
 
     // API 3: Upload code and optional custom testcases
     const formData = new FormData();
@@ -851,19 +886,48 @@ async function submitCode() {
                   </div>
                 </dialog>
 
-            <div class="form-control mt-4">
-              <label class="label">
-                <span class="label-text">{{ t("course.problem.test.card.code") }}</span>
-              </label>
-              <code-editor
-                v-model="form.code"
-                class="h-96"
-                :placeholder="t('course.problem.test.card.placeholder')"
-              />
-              <label class="label" v-show="v.code.$error">
-                <span class="label-text-alt text-error">{{ v.code.$errors[0]?.$message }}</span>
-              </label>
-            </div>
+            <!-- Code Input Section - conditional based on acceptedFormat -->
+            <template v-if="acceptedFormat === 'code'">
+              <div class="form-control mt-4">
+                <label class="label">
+                  <span class="label-text">{{ t("course.problem.test.card.code") }}</span>
+                </label>
+                <code-editor
+                  v-model="form.code"
+                  class="h-96"
+                  :placeholder="t('course.problem.test.card.placeholder')"
+                />
+                <label class="label" v-show="v.code.$error">
+                  <span class="label-text-alt text-error">{{ v.code.$errors[0]?.$message }}</span>
+                </label>
+              </div>
+            </template>
+
+            <!-- ZIP Upload Section -->
+            <template v-else>
+              <div class="form-control mt-4">
+                <label class="label">
+                  <span class="label-text">{{ t("course.problem.test.uploadZip") || "Upload your solution (.zip)" }}</span>
+                </label>
+                <div class="mt-2">
+                  <input
+                    type="file"
+                    accept=".zip"
+                    @change="form.zip = ($event.target as HTMLInputElement).files?.[0] || null"
+                    class="file-input-bordered file-input w-full max-w-xs"
+                  />
+                  <div class="mt-2 flex items-center gap-2" v-if="form.zip">
+                    <span class="text-sm">{{ form.zip.name }}</span>
+                    <button class="btn btn-ghost btn-sm" @click="form.zip = null">
+                      <i-uil-times class="h-4 w-4" />
+                    </button>
+                  </div>
+                  <label class="label" v-show="(v as any).zip?.$error">
+                    <span class="label-text-alt text-error">{{ (v as any).zip?.$errors[0]?.$message }}</span>
+                  </label>
+                </div>
+              </div>
+            </template>
 
             <div class="submit submit-place">
               <div class="flex justify-end">

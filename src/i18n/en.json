@@ -163,13 +163,15 @@
         "text": "Submit"
       },
       "test": {
+        "uploadZip": "Upload your solution (.zip)",
         "err": {
           "code": "Please paste your source code to test.",
           "lang": "Please select the programming language.",
           "msg": "Oops! Something went wrong when testing the code. Try again later.",
           "trialModeNotEnabled": "Trial mode is not enabled for this problem. Please contact the instructor to enable it.",
           "trialQuotaExceeded": "Trial submission quota exceeded for this problem.",
-          "permissionDenied": "You do not have permission to use the trial feature for this problem."
+          "permissionDenied": "You do not have permission to use the trial feature for this problem.",
+          "zip": "Please upload your solution (.zip) to test."
         },
         "card": {
           "title": "Test problem #",

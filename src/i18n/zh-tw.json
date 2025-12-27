@@ -163,10 +163,12 @@
         "text": "提交"
       },
       "test": {
+        "uploadZip": "上傳你的解答 (.zip)",
         "err": {
           "code": "請在此貼上你的原始碼以利測試。",
           "lang": "請選擇程式語言。",
           "msg": "Oops! 測試程式碼時發生錯誤。請稍後再試。",
+          "zip": "請上傳你的解答 (.zip) 以利測試。",
           "trialModeNotEnabled": "此題目尚未開放試測功能，請聯絡老師或助教啟用。",
           "trialQuotaExceeded": "此題測試額度已用完。",
           "permissionDenied": "您沒有權限使用此題目的試測功能。"

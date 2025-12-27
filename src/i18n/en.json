@@ -460,6 +460,7 @@
       "status": "Status",
       "lang": "Language",
       "clear": "Clear",
+      "search-name": "Search Name (exact match)",
       "table": {
         "id": "id",
         "pid": "pid",

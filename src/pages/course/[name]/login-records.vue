@@ -106,6 +106,7 @@ interface LoginRecord {
             v-model="searchName"
             :placeholder="$t('admin.user.search-name')"
             type="text"
+            maxlength="50"
             class="input input-bordered"
             @keyup.enter="
               currentPage = 1;

@@ -291,7 +291,8 @@ async function deleteSubmission(id: string) {
             <input
               v-model="searchUsername"
               type="text"
-              placeholder="Username (exact match)"
+              maxlength="50"
+              :placeholder="$t('course.submissions.search-name')"
               class="input-bordered input w-full max-w-xs"
               @keydown.enter="mutateFilter({ username: searchUsername })"
             />

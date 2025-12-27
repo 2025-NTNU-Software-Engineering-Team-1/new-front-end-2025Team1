@@ -458,6 +458,7 @@
       "status": "狀態",
       "lang": "語言",
       "clear": "清除",
+      "search-name": "搜尋名稱 (完全符合)",
       "table": {
         "id": "id",
         "pid": "題號",

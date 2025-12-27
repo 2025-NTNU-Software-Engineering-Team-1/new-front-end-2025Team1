@@ -237,6 +237,33 @@ function closeDeleteErrorModal() {
   deleteErrorModal.value?.close();
   deleteErrorMessage.value = "";
 }
+
+// Delete all trial submissions
+const isDeleteAllLoading = ref(false);
+const deleteAllModal = ref<HTMLDialogElement | null>(null);
+
+function prepareDeleteAllTrials() {
+  if (testHistory.value.length === 0) {
+    alert("No trial submissions to delete.");
+    return;
+  }
+  deleteAllModal.value?.showModal();
+}
+
+async function confirmDeleteAllTrials() {
+  isDeleteAllLoading.value = true;
+  try {
+    const result = await api.TrialSubmission.deleteAll(Number(route.params.id));
+    alert(`Deleted ${result.data.data.deleted} trial submissions.`);
+    deleteAllModal.value?.close();
+    testHistory.value = [];
+  } catch (err) {
+    console.error("Delete all failed:", err);
+    alert("Delete all failed.");
+  } finally {
+    isDeleteAllLoading.value = false;
+  }
+}
 </script>
 
 <template>
@@ -254,6 +281,14 @@ function closeDeleteErrorModal() {
               @click="rejudgeAll"
             >
               <i-uil-repeat :class="['mr-1', isRejudgeAllLoading && 'animate-spin']" /> Rejudge All
+            </button>
+            <button
+              v-if="canRejudge"
+              class="btn btn-outline btn-error btn-sm"
+              :disabled="isDeleteAllLoading || testHistory.length === 0"
+              @click="prepareDeleteAllTrials"
+            >
+              <i-uil-trash-alt :class="['mr-1', isDeleteAllLoading && 'animate-spin']" /> Delete All
             </button>
             <router-link :to="getBackPath()" class="btn btn-sm">
               <i-uil-arrow-left class="mr-1" />

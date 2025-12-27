@@ -294,6 +294,28 @@ const errorTitle = computed(() =>
       ? "Analysis Error"
       : "Compilation Error",
 );
+
+// Download SA Report using fetch + Blob to handle cross-origin URLs
+async function downloadSAReport() {
+  if (!SAReport.value?.reportUrl) return;
+  try {
+    const response = await fetch(SAReport.value.reportUrl);
+    if (!response.ok) throw new Error("Failed to fetch report");
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `sa-report-${route.params.testId}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error("Failed to download SA report", err);
+    // Fallback: open in new tab
+    window.open(SAReport.value.reportUrl, "_blank");
+  }
+}
 watchEffect(() => {
   if (testResult.value != null) {
     if (testResult.value.tasks) {
@@ -327,9 +349,11 @@ watchEffect(() => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const prob = problem.value as any;
   const hasStaticAnalysis = prob?.pipeline?.staticAnalysis?.libraryRestrictions?.enabled === true;
+  const judgingDone = effectiveStatus.value !== SUBMISSION_STATUS_CODE.PENDING;
 
-  if (hasStaticAnalysis && testResult.value) {
+  if (hasStaticAnalysis && testResult.value && judgingDone) {
     if (!SALoading.value && !SAReport.value) {
+      console.log("Static Analysis Enabled. Fetching Report...");
       fetchSAReport(`/trial-submission/${route.params.testId}/static-analysis`);
     }
   }
@@ -914,11 +938,20 @@ function closeDeleteErrorModal() {
 
         <div class="card min-w-full rounded-none">
           <div class="card-body p-0">
-            <div class="flex items-center gap-3">
-              <div class="card-title md:text-xl lg:text-2xl">{{ t("course.problem.test.trialHistory.saReport") }}</div>
-              <span v-if="saStatusBadge" :class="['badge', saStatusBadge.className]">
-                {{ saStatusBadge.label }}
-              </span>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="card-title md:text-xl lg:text-2xl">Static Analysis Report</div>
+                <span v-if="saStatusBadge" :class="['badge', saStatusBadge.className]">
+                  {{ saStatusBadge.label }}
+                </span>
+              </div>
+              <button
+                v-if="SAReport?.reportUrl"
+                class="btn btn-sm"
+                @click="downloadSAReport"
+              >
+                <i-uil-file-download class="mr-1" /> Download report
+              </button>
             </div>
             <div class="my-1" />
 

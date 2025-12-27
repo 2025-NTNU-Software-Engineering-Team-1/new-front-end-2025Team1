@@ -262,8 +262,54 @@ async function deleteSubmission(id: string) {
     }
   } catch (err) {
     console.error("Delete failed:", err);
-  } finally {
+} finally {
     deletingIds.value.delete(id);
+  }
+}
+
+// Delete all submissions matching current filter
+const isDeleteAllLoading = ref(false);
+const deleteAllModal = ref<HTMLDialogElement | null>(null);
+const deleteCount = ref(0);
+
+async function prepareDeleteAll() {
+  // Fetch count of submissions matching filter
+  const query = { ...routeQuery.value.filter, offset: 0, count: -1, course: route.params.name };
+  const qs = queryString.stringify(query, { skipNull: true, skipEmptyString: true });
+  // Reuse existing fetcher or use api.Submission logic if possible, 
+  // but api methods usually return specific types. 
+  // We can just call getSubmissionsUrl logic reusing axios if needed, 
+  // but simpler to use fetcher directly as per existing pattern or reuse logic.
+  // Actually, let's use the fetcher directly to get count.
+  // Note: getSubmissionsUrl variable is computed, but we need the raw data for count.
+  try {
+    const { data } = await fetcher.get<GetSubmissionListResponse>(`/submission?${qs}`);
+    deleteCount.value = data?.submissionCount || 0;
+    if (deleteCount.value === 0) {
+      alert("No submissions found matching the current filter.");
+      return;
+    }
+    deleteAllModal.value?.showModal();
+  } catch (err) {
+    console.error("Failed to fetch count:", err);
+  }
+}
+
+async function confirmDeleteAll() {
+  isDeleteAllLoading.value = true;
+  try {
+    const result = await api.Submission.deleteAll({
+      ...routeQuery.value.filter,
+      course: route.params.name as string,
+    });
+    alert(`Deleted ${result.data.deleted} submissions. Skipped: ${result.data.skipped}`);
+    deleteAllModal.value?.close();
+    execute(getSubmissionsUrl.value);
+  } catch (err) {
+    console.error("Delete all failed:", err);
+    alert("Delete all failed. Check console for details.");
+  } finally {
+    isDeleteAllLoading.value = false;
   }
 }
 </script>
@@ -276,12 +322,66 @@ async function deleteSubmission(id: string) {
           {{ $t("course.submissions.text") }}
 
           <!-- Admin/Teacher/TA actions: rejudge, download, search -->
+          <dialog ref="rejudgeAllModal" class="modal">
+    <div class="modal-box">
+      <h3 class="text-lg font-bold">Confirm Rejudge All</h3>
+      <p class="py-4">
+        Are you sure you want to rejudge <strong>{{ rejudgeCount }}</strong> submission(s)?
+      </p>
+      <div class="modal-action">
+        <button class="btn" @click="rejudgeAllModal?.close()">Cancel</button>
+        <button class="btn btn-warning" :disabled="isRejudgeAllLoading" @click="confirmRejudgeAll">
+          <span v-if="isRejudgeAllLoading" class="loading loading-spinner"></span>
+          Rejudge {{ rejudgeCount }} Submissions
+        </button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </dialog>
+
+  <dialog ref="deleteAllModal" class="modal">
+    <div class="modal-box">
+      <h3 class="text-error text-lg font-bold">
+        <i-uil-exclamation-triangle class="mr-2 inline" />
+        Confirm Delete All
+      </h3>
+      <p class="py-4">
+        Are you sure you want to delete <strong>{{ deleteCount }}</strong> submission(s)?
+        <br />
+        <span class="text-warning">This action cannot be undone.</span>
+      </p>
+      <div class="modal-action">
+        <button class="btn" @click="deleteAllModal?.close()">Cancel</button>
+        <button
+          class="btn btn-error"
+          :disabled="isDeleteAllLoading"
+          @click="confirmDeleteAll"
+        >
+          <span v-if="isDeleteAllLoading" class="loading loading-spinner"></span>
+          Delete {{ deleteCount }} Submissions
+        </button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </dialog>
           <div
             v-if="session.isAdmin || session.isTeacher || session.isTA"
             class="flex items-center justify-between gap-4"
           >
             <button class="btn btn-warning btn-sm" :disabled="isRejudgeAllLoading" @click="rejudgeAll">
               <i-uil-repeat :class="['mr-1', isRejudgeAllLoading && 'animate-spin']" /> Rejudge All
+            </button>
+            <button
+              v-if="session.isAdmin || session.isTeacher || session.isTA"
+              class="btn btn-outline btn-error btn-sm"
+              :disabled="isDeleteAllLoading"
+              @click="prepareDeleteAll"
+            >
+              <i-uil-trash-alt :class="['mr-1', isDeleteAllLoading && 'animate-spin']" /> Delete All
             </button>
             <div class="tooltip tooltip-bottom" data-tip="Download submissions json file">
               <button class="btn btn-sm" @click="downloadAllSubmissions">

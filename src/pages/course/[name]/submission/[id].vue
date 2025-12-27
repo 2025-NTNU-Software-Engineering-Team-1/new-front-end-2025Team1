@@ -249,6 +249,28 @@ const saStatusBadge = computed(() => {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const saMessage = computed(() => submission.value?.saMessage || "");
 
+// Download SA Report using fetch + Blob to handle cross-origin URLs
+async function downloadSAReport() {
+  if (!SAReport.value?.reportUrl) return;
+  try {
+    const response = await fetch(SAReport.value.reportUrl);
+    if (!response.ok) throw new Error("Failed to fetch report");
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `sa-report-${route.params.id}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    logger.error("Failed to download SA report", err);
+    // Fallback: open in new tab
+    window.open(SAReport.value.reportUrl, "_blank");
+  }
+}
+
 const { copy, copied, isSupported } = useClipboard();
 
 // Polling Logic
@@ -918,11 +940,20 @@ watch(submission, (val) => {
 
         <div class="card min-w-full rounded-none">
           <div class="card-body p-0">
-            <div class="flex items-center gap-3">
-              <div class="card-title md:text-xl lg:text-2xl">Static Analysis Report</div>
-              <span v-if="saStatusBadge" :class="['badge', saStatusBadge.className]">
-                {{ saStatusBadge.label }}
-              </span>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="card-title md:text-xl lg:text-2xl">Static Analysis Report</div>
+                <span v-if="saStatusBadge" :class="['badge', saStatusBadge.className]">
+                  {{ saStatusBadge.label }}
+                </span>
+              </div>
+              <button
+                v-if="SAReport?.reportUrl"
+                class="btn btn-sm"
+                @click="downloadSAReport"
+              >
+                <i-uil-file-download class="mr-1" /> Download report
+              </button>
             </div>
             <div class="my-1" />
 
@@ -932,11 +963,6 @@ watch(submission, (val) => {
               </template>
               <template #data>
                 <div class="flex flex-col gap-2">
-                  <div class="flex items-center gap-2" v-if="SAReport?.reportUrl">
-                    <a class="btn btn-sm" :href="SAReport.reportUrl" target="_blank" rel="noopener">
-                      <i-uil-file-download class="mr-1" /> Download report
-                    </a>
-                  </div>
                   <div v-if="SAReport?.report && SAReport.report.trim()">
                     <code-editor v-model="SAReport!.report" readonly />
                   </div>

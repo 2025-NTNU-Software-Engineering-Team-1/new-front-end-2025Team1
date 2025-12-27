@@ -828,7 +828,7 @@ watch(
           </div>
 
           <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
-            <div class="relative rounded border border-gray-500 p-2">
+            <div class="relative min-h-[16rem] rounded border border-gray-500 p-2">
               <div
                 v-if="!allowImports"
                 class="tech-lock-overlay absolute inset-0 z-20 flex flex-col items-center justify-center overflow-hidden rounded"
@@ -932,7 +932,7 @@ watch(
               </div>
             </div>
 
-            <div class="relative rounded border border-gray-500 p-2">
+            <div class="relative min-h-[16rem] rounded border border-gray-500 p-2">
               <div
                 v-if="!allowHeaders"
                 class="tech-lock-overlay absolute inset-0 z-20 flex flex-col items-center justify-center overflow-hidden rounded"
@@ -1036,7 +1036,7 @@ watch(
               </div>
             </div>
 
-            <div class="relative rounded border border-gray-500 p-2">
+            <div class="relative min-h-[16rem] rounded border border-gray-500 p-2">
               <div class="mb-2 flex items-center justify-between">
                 <h5
                   class="tooltip tooltip-top flex cursor-help items-center gap-1 text-sm font-medium"
@@ -1116,12 +1116,30 @@ watch(
 
         <div class="rounded-lg border border-gray-400 p-3">
           <div class="mb-3 flex items-center justify-between">
-            <h4
-              class="text tooltip tooltip-top flex cursor-help items-center gap-1 font-medium"
-              :data-tip="hover.syntaxRestrictions"
-            >
-              {{ t("course.problems.syntaxRestrictions") }}
-            </h4>
+            <div class="flex items-center gap-4">
+              <h4
+                class="text tooltip tooltip-top flex cursor-help items-center gap-1 font-medium"
+                :data-tip="hover.syntaxRestrictions"
+              >
+                {{ t("course.problems.syntaxRestrictions") }}
+              </h4>
+
+              <div class="flex gap-1">
+                <button
+                  class="btn btn-xs btn-ghost h-5 min-h-0 px-1 text-[10px]"
+                  @click="selectAllItems('syntax', syntaxMode)"
+                >
+                  {{ t("course.problems.all") }}
+                </button>
+                <button
+                  class="btn btn-xs btn-ghost text-error h-5 min-h-0 px-1 text-[10px]"
+                  @click="clearAllItems('syntax', syntaxMode)"
+                >
+                  {{ t("course.problems.clear") }}
+                </button>
+              </div>
+            </div>
+
             <div class="mode-switcher">
               <div class="mode-switcher-container">
                 <div

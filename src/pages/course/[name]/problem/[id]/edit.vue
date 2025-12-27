@@ -538,7 +538,7 @@ const mockProblemMeta = { owner: "", highScore: 0, submitCount: 0, ACUser: 0, su
               :style="animState.style"
             >
               <div
-                class="pointer-events-none absolute left-1/2 top-1/2 z-[-1] h-[280px] w-[280px]"
+                class="pointer-events-none absolute top-1/2 left-1/2 z-[-1] h-[280px] w-[280px]"
                 :class="animState.impact ? 'block opacity-70' : 'hidden opacity-0'"
                 style="transform: translate(-50%, -50%)"
               >
@@ -567,7 +567,7 @@ const mockProblemMeta = { owner: "", highScore: 0, submitCount: 0, ACUser: 0, su
                   class="animate-bounce-horizontal absolute right-full z-50 mr-4 w-max bg-black px-3 py-2 text-sm font-bold text-white shadow-lg"
                 >
                   <div
-                    class="bg-info absolute -right-1 top-1/2 h-3 w-3 -translate-y-1/2 rotate-45 transform"
+                    class="bg-info absolute top-1/2 -right-1 h-3 w-3 -translate-y-1/2 rotate-45 transform"
                   ></div>
                   👋 Click here for Manual!
                 </div>
@@ -624,7 +624,7 @@ const mockProblemMeta = { owner: "", highScore: 0, submitCount: 0, ACUser: 0, su
                 <input v-model="openJSON" type="checkbox" class="toggle" />
               </div>
 
-              <pre v-if="openJSON" class="bg-base-200 whitespace-pre-wrap rounded p-2"
+              <pre v-if="openJSON" class="bg-base-200 rounded p-2 whitespace-pre-wrap"
                 >{{ JSON.stringify(edittingProblem, null, 2) }}
               </pre>
 

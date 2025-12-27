@@ -38,23 +38,23 @@
       }
     },
     "settings": {
-        "title": "課的設定",
-        "generalInfo": "基本資料",
-        "appearance": "外觀設定",
-        "preview": "看起來像按呢",
-        "previewDesc": "這是代表圖佇儀表板頂懸的模樣。",
-        "courseColor": "代表色",
-        "courseEmoji": "代表圖",
-        "courseName": "課的名稱",
-        "teacher": "教師",
-        "save": "存起來",
-        "saved": "設定存好矣。",
-        "presets": "預設選項",
-        "standard": "標準色系",
-        "morandi": "莫蘭迪色系",
-        "custom": "自訂",
-        "emojiPlaceholder": "輸入抑是貼上任何 Emoji",
-        "teacherReadOnly": "無法度佇遮改課程擁有者"
+      "title": "課的設定",
+      "generalInfo": "基本資料",
+      "appearance": "外觀設定",
+      "preview": "看起來像按呢",
+      "previewDesc": "這是代表圖佇儀表板頂懸的模樣。",
+      "courseColor": "代表色",
+      "courseEmoji": "代表圖",
+      "courseName": "課的名稱",
+      "teacher": "教師",
+      "save": "存起來",
+      "saved": "設定存好矣。",
+      "presets": "預設選項",
+      "standard": "標準色系",
+      "morandi": "莫蘭迪色系",
+      "custom": "自訂",
+      "emojiPlaceholder": "輸入抑是貼上任何 Emoji",
+      "teacherReadOnly": "無法度佇遮改課程擁有者"
     },
     "aisetting": {
       "setupPage": "設置",
@@ -526,8 +526,7 @@
         "unknown-error-occurred": "發生未知錯誤 :("
       }
     }
-  }
-  ,
+  },
   "courses": {
     "index": {
       "list": "課程清單",
@@ -1087,7 +1086,7 @@
     "noRecords": "無登入紀錄",
     "rowCount": "攏總有 {n} 筆紀錄"
   },
-  "skinSelector": { 
+  "skinSelector": {
     "title": "揀 AI 助教外觀",
     "close": "關閉",
     "loadError": "無法度載入皮膚列表",

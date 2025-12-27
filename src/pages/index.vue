@@ -15,7 +15,7 @@ useTitle("Home | Normal OJ");
     class="mx-auto flex max-w-7xl gap-8 overflow-y-scroll p-4"
     :class="{
       'flex-col-reverse gap-4': !isDesktop,
-      'flex-row': isDesktop
+      'flex-row': isDesktop,
     }"
   >
     <!-- Main Content: Student Dashboard (Logged In) or Login (Logged Out) -->

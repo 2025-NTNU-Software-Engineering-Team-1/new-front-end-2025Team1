@@ -44,7 +44,7 @@ async function submit() {
 
   isLoading.value = true;
   try {
-    await api.Course.create({ 
+    await api.Course.create({
       course: newCourse.course,
       teacher: newCourse.teacher,
       color: newCourse.color,
@@ -77,7 +77,7 @@ async function submit() {
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
           <!-- Left: Form Fields -->
           <div class="space-y-4">
             <div class="form-control w-full">
@@ -111,10 +111,10 @@ async function submit() {
 
           <!-- Right: Appearance Selector -->
           <div class="pt-2">
-             <appearance-selector 
-               @update:color="newCourse.color = $event"
-               @update:emoji="newCourse.emoji = $event"
-             />
+            <appearance-selector
+              @update:color="newCourse.color = $event"
+              @update:emoji="newCourse.emoji = $event"
+            />
           </div>
         </div>
 

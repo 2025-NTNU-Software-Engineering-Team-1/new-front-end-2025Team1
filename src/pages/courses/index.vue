@@ -122,25 +122,32 @@ async function handleJoinCourse() {
               </tr>
             </thead>
             <tbody>
-              <tr v-for="{ course, teacher, color, emoji } in displayedCourses" :key="course" class="hover transition-colors">
+              <tr
+                v-for="{ course, teacher, color, emoji } in displayedCourses"
+                :key="course"
+                class="hover transition-colors"
+              >
                 <td
                   :class="{
-                    'min-w-[14rem] max-w-[16rem] whitespace-pre-wrap': !isDesktop,
+                    'max-w-[16rem] min-w-[14rem] whitespace-pre-wrap': !isDesktop,
                   }"
                 >
                   <div class="flex items-center gap-3">
-                    <course-avatar 
-                      :course-name="course" 
-                      :course-color="color" 
-                      :course-emoji="emoji" 
+                    <course-avatar
+                      :course-name="course"
+                      :course-color="color"
+                      :course-emoji="emoji"
                       size="md"
                     />
-                    <router-link :to="`/course/${course}`" class="link link-hover text-lg font-bold text-base-content">
+                    <router-link
+                      :to="`/course/${course}`"
+                      class="link link-hover text-base-content text-lg font-bold"
+                    >
                       {{ course }}
                     </router-link>
                   </div>
                 </td>
-                <td class="align-middle text-base-content/80">{{ teacher.username }}</td>
+                <td class="text-base-content/80 align-middle">{{ teacher.username }}</td>
               </tr>
             </tbody>
           </table>

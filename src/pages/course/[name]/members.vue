@@ -92,9 +92,6 @@ const {
   execute: refetchMembers,
 } = useAxios<Course>(`/course/${route.params.name}`, fetcher);
 
-// Get teacher username for comparison
-const teacherUsername = computed(() => data.value?.teacher?.username || "");
-
 // Check if user is course teacher (not just MODIFY permission, specifically teacher)
 const canChangeRoles = computed(() => {
   // Only course teacher or admin can change roles (not TAs)
@@ -280,9 +277,10 @@ function findDuplicatesInManual() {
 
 function formatDuplicateMessage(dups: { username: string[]; email: string[] }) {
   const parts: string[] = [];
-  if (dups.username.length) parts.push(`${t('course.members.errors.dupUsernames')} ${dups.username.join(', ')}`);
-  if (dups.email.length) parts.push(`${t('course.members.errors.dupEmails')} ${dups.email.join(', ')}`);
-  return parts.join('；');
+  if (dups.username.length)
+    parts.push(`${t("course.members.errors.dupUsernames")} ${dups.username.join(", ")}`);
+  if (dups.email.length) parts.push(`${t("course.members.errors.dupEmails")} ${dups.email.join(", ")}`);
+  return parts.join("；");
 }
 
 watch(newMembers, () => {
@@ -317,7 +315,7 @@ async function submit() {
     // Validate that we have at least one valid user
     const lines = csvData.split("\n");
     if (lines.length < 2) {
-      errorMsg.value = t('course.members.errors.needAtLeastOne');
+      errorMsg.value = t("course.members.errors.needAtLeastOne");
       return;
     }
   }
@@ -327,7 +325,7 @@ async function submit() {
     for (const u of manualUsers.value) {
       if (!u.username.trim() || !u.email.trim() || !u.password.trim()) continue; // skip empty rows
       if (!isValidRole(u.role)) {
-        errorMsg.value = t('course.members.errors.invalidRoleForUser', {
+        errorMsg.value = t("course.members.errors.invalidRoleForUser", {
           role: u.role,
           username: u.username,
         });
@@ -338,7 +336,7 @@ async function submit() {
     // Check for duplicates in manual input
     const d = findDuplicatesInManual();
     if (d.username.length || d.email.length) {
-      errorMsg.value = t('course.members.errors.duplicatesInInput', {
+      errorMsg.value = t("course.members.errors.duplicatesInInput", {
         details: formatDuplicateMessage(d),
       });
       return;
@@ -354,7 +352,7 @@ async function submit() {
         const val = (cols[roleIdx] || "").trim();
         if (!val) continue; // optional
         if (!/^[0-3]$/.test(val)) {
-          errorMsg.value = t('course.members.errors.invalidRoleOnLine', {
+          errorMsg.value = t("course.members.errors.invalidRoleOnLine", {
             val,
             line: i + 1,
           });
@@ -366,7 +364,7 @@ async function submit() {
     // Check for duplicates in CSV file (username/email)
     const dup = findDuplicatesInCSV(csvData);
     if (dup.username.length || dup.email.length) {
-      errorMsg.value = t('course.members.errors.duplicatesInCSV', {
+      errorMsg.value = t("course.members.errors.duplicatesInCSV", {
         details: formatDuplicateMessage(dup),
       });
       return;
@@ -383,12 +381,17 @@ async function submit() {
     });
 
     // If backend returned skipped entries (duplicates), show them as an error message
-    const skipped = (res as any)?.data?.skipped ?? (res as any)?.skipped;
+    const skipped =
+      (res as { data?: { skipped?: unknown[] } } | { skipped?: unknown[] })?.data?.skipped ??
+      (res as { skipped?: unknown[] })?.skipped;
     if (skipped && skipped.length > 0) {
       const skippedStr = skipped
-        .map((s: any) => `${s.username || ''}${s.email ? ` (${s.email})` : ''}`)
-        .join(', ');
-      errorMsg.value = t('course.members.errors.skippedEntries', {
+        .map(
+          (s: unknown) =>
+            `${(s as { username?: string; email?: string }).username || ""}${(s as { username?: string; email?: string }).email ? ` (${(s as { username?: string; email?: string }).email})` : ""}`,
+        )
+        .join(", ");
+      errorMsg.value = t("course.members.errors.skippedEntries", {
         users: skippedStr,
       });
       return;
@@ -399,7 +402,7 @@ async function submit() {
     if (axios.isAxiosError(error) && error.response?.data?.message) {
       errorMsg.value = error.response.data.message;
     } else {
-      errorMsg.value = t('course.members.errors.unknown-error-occurred');
+      errorMsg.value = t("course.members.errors.unknown-error-occurred");
     }
     // don't rethrow to keep UI stable; error is shown in the modal
     return;

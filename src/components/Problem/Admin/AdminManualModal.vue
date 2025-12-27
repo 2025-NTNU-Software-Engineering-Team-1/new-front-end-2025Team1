@@ -118,7 +118,7 @@ function scrollToId(id: string) {
   if (window.innerWidth < 1024) {
     mobileDrawerOpen.value = false;
   }
-  
+
   nextTick(() => {
     // Escape standard ID characters if needed using CSS.escape or just getElementById
     const el = document.getElementById(id);
@@ -130,10 +130,11 @@ function scrollToId(id: string) {
 }
 
 // Navigation
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function switchCategory(catId: string) {
   // If clicking same category, do nothing? Or maybe toggle? current behavior is fine.
   if (activeCategoryId.value === catId) return;
-  
+
   activeCategoryId.value = catId;
   const cat = categories.value.find((c) => c.id === catId);
   if (cat && cat.pages.length > 0) {
@@ -143,11 +144,11 @@ function switchCategory(catId: string) {
 
 async function switchPage(pageId: string) {
   if (activePageId.value === pageId) return;
-  
+
   // Find which category this page belongs to
-  const parentCat = categories.value.find(c => c.pages.some(p => p.id === pageId));
+  const parentCat = categories.value.find((c) => c.pages.some((p) => p.id === pageId));
   if (parentCat && parentCat.id !== activeCategoryId.value) {
-     activeCategoryId.value = parentCat.id;
+    activeCategoryId.value = parentCat.id;
   }
 
   saveScroll();
@@ -188,14 +189,14 @@ function validateSelection() {
 
   // 2. Refresh 'activeCategory' ref implicitly by using the updated ID
   const validCat = categories.value.find((c) => c.id === activeCategoryId.value);
-  
+
   // 3. Check if activePageId exists in validCat
   if (validCat) {
-     const pageExists = validCat.pages.find(p => p.id === activePageId.value);
-     if (!pageExists) {
-         // Fallback to first page
-         activePageId.value = validCat.pages[0]?.id ?? "basic";
-     }
+    const pageExists = validCat.pages.find((p) => p.id === activePageId.value);
+    if (!pageExists) {
+      // Fallback to first page
+      activePageId.value = validCat.pages[0]?.id ?? "basic";
+    }
   }
 }
 
@@ -208,9 +209,9 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown));
 watch(open, (v) => (document.body.style.overflow = v ? "hidden" : ""));
 
 // Simple Scroll Spy logic (Optional, can be improved with IntersectionObserver)
-// For now, we manually update activeTocId on click. 
+// For now, we manually update activeTocId on click.
 // Implementing full IntersectionObserver is strictly better but might be overkill if 'auto-collapse' just implies 'initially collapsed'.
-// User said: "Expected... jump, and auto-folding". 
+// User said: "Expected... jump, and auto-folding".
 // I will implement auto-folding logic: Show H2 regardless, Show H3 ONLY if H2 is active or H3 is active.
 </script>
 
@@ -230,184 +231,260 @@ watch(open, (v) => (document.body.style.overflow = v ? "hidden" : ""));
       <div class="absolute inset-0 bg-black/60" @click="closeManual" />
 
       <!-- Main Container -->
-      <div class="bg-base-100 flex h-full w-full flex-col overflow-hidden shadow-2xl relative z-10 lg:h-[85vh] lg:max-w-7xl lg:rounded-xl">
-        
+      <div
+        class="bg-base-100 relative z-10 flex h-full w-full flex-col overflow-hidden shadow-2xl lg:h-[85vh] lg:max-w-7xl lg:rounded-xl"
+      >
         <!-- Header -->
         <div class="border-base-300 flex items-center justify-between border-b px-4 py-3 lg:px-6 lg:py-4">
           <div class="flex items-center gap-4">
             <!-- Use local title map so it flips instantly with button -->
-            <h2 class="text-xl lg:text-3xl font-bold">{{ titles[lang] }}</h2>
-            
+            <h2 class="text-xl font-bold lg:text-3xl">{{ titles[lang] }}</h2>
+
             <!-- Language Switcher -->
             <div class="join hidden lg:flex">
-                <button type="button" class="join-item btn btn-sm" :class="lang === 'en' ? 'btn-active btn-neutral' : ''" @click="setLang('en')">EN</button>
-                <button type="button" class="join-item btn btn-sm" :class="lang === 'zh' ? 'btn-active btn-neutral' : ''" @click="setLang('zh')">中文</button>
+              <button
+                type="button"
+                class="join-item btn btn-sm"
+                :class="lang === 'en' ? 'btn-active btn-neutral' : ''"
+                @click="setLang('en')"
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                class="join-item btn btn-sm"
+                :class="lang === 'zh' ? 'btn-active btn-neutral' : ''"
+                @click="setLang('zh')"
+              >
+                中文
+              </button>
             </div>
             <!-- Mobile Lang Switcher (Simple Toggle) -->
-            <button 
-              type="button" 
-              class="btn btn-sm lg:hidden font-bold" 
+            <button
+              type="button"
+              class="btn btn-sm font-bold lg:hidden"
               @click="setLang(lang === 'en' ? 'zh' : 'en')"
             >
-              {{ lang === 'en' ? 'EN' : '中' }}
+              {{ lang === "en" ? "EN" : "中" }}
             </button>
           </div>
 
           <div class="flex items-center gap-2">
             <!-- Mobile Menu Toggle -->
             <button class="btn btn-square btn-ghost lg:hidden" @click="toggleDrawer">
-               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
             </button>
             <!-- Close Button -->
             <button type="button" class="btn btn-ghost btn-circle" @click="closeManual">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-6 w-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
             </button>
           </div>
         </div>
 
         <!-- Body Grid -->
-        <div class="flex flex-1 min-h-0 relative">
-          
+        <div class="relative flex min-h-0 flex-1">
           <!-- Desktop Column 1: Sitemap -->
           <!-- Reduced width to 1/6 (approx 16.6%) or min 200px seems fine, let's try fixed width for stability w-64 is 256px -->
-          <aside class="hidden lg:flex flex-col w-56 border-r border-base-300 bg-base-200/50 overflow-y-auto">
-             <div class="p-6">
-                <!-- Increased font size for sitemap -->
-                <!-- Removed opacity on Category Title for better contrast -->
-                <!-- Added key to force re-render if lang changes stuck -->
-                <div :key="lang">
-                  <template v-for="cat in categories" :key="cat.id">
-                     <div class="mb-8">
-                        <div class="text-base font-extrabold uppercase tracking-widest mb-3 px-2 text-base-content/70">{{ cat.title }}</div>
-                        <div class="space-y-1">
-                           <button
-                              v-for="p in cat.pages"
-                              :key="p.id"
-                              class="btn btn-ghost w-full justify-start font-normal text-lg capitalize"
-                              :class="p.id === activePageId ? 'btn-active' : ''"
-                              @click="switchPage(p.id)"
-                           >
-                              {{ p.title }}
-                           </button>
-                        </div>
-                     </div>
-                  </template>
-                </div>
-             </div>
+          <aside class="border-base-300 bg-base-200/50 hidden w-56 flex-col overflow-y-auto border-r lg:flex">
+            <div class="p-6">
+              <!-- Increased font size for sitemap -->
+              <!-- Removed opacity on Category Title for better contrast -->
+              <!-- Added key to force re-render if lang changes stuck -->
+              <div :key="lang">
+                <template v-for="cat in categories" :key="cat.id">
+                  <div class="mb-8">
+                    <div
+                      class="text-base-content/70 mb-3 px-2 text-base font-extrabold tracking-widest uppercase"
+                    >
+                      {{ cat.title }}
+                    </div>
+                    <div class="space-y-1">
+                      <button
+                        v-for="p in cat.pages"
+                        :key="p.id"
+                        class="btn btn-ghost w-full justify-start text-lg font-normal capitalize"
+                        :class="p.id === activePageId ? 'btn-active' : ''"
+                        @click="switchPage(p.id)"
+                      >
+                        {{ p.title }}
+                      </button>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
           </aside>
 
           <!-- Desktop Column 2: TOC -->
-          <aside class="hidden lg:flex flex-col w-64 border-r border-base-300 bg-base-100 overflow-y-auto">
-              <div class="p-6 sticky top-0">
-                  <div class="text-xs font-bold opacity-60 uppercase tracking-wider mb-4">{{ uiText.onThisPage }}</div>
-                  <nav class="space-y-1">
-                      <template v-for="h in tableOfContents" :key="h.id">
-                          <button
-                            class="block w-full text-left py-1.5 px-3 rounded hover:bg-base-200 transition-colors truncate"
-                            :class="[
-                               h.level === 3 ? 'pl-8 text-sm text-base-content/70' : 'pl-3 text-base font-medium',
-                               activeTocId === h.id ? 'bg-base-300 text-base-content font-bold' : ''
-                            ]"
-                            @click="scrollToId(h.id)"
-                          >
-                             {{ h.text }}
-                          </button>
-                      </template>
-                      
-                      <div v-if="tableOfContents.length === 0" class="text-xs opacity-50 italic px-2">
-                        {{ uiText.noSections }}
-                      </div>
-                  </nav>
+          <aside class="border-base-300 bg-base-100 hidden w-64 flex-col overflow-y-auto border-r lg:flex">
+            <div class="sticky top-0 p-6">
+              <div class="mb-4 text-xs font-bold tracking-wider uppercase opacity-60">
+                {{ uiText.onThisPage }}
               </div>
+              <nav class="space-y-1">
+                <template v-for="h in tableOfContents" :key="h.id">
+                  <button
+                    class="hover:bg-base-200 block w-full truncate rounded px-3 py-1.5 text-left transition-colors"
+                    :class="[
+                      h.level === 3 ? 'text-base-content/70 pl-8 text-sm' : 'pl-3 text-base font-medium',
+                      activeTocId === h.id ? 'bg-base-300 text-base-content font-bold' : '',
+                    ]"
+                    @click="scrollToId(h.id)"
+                  >
+                    {{ h.text }}
+                  </button>
+                </template>
+
+                <div v-if="tableOfContents.length === 0" class="px-2 text-xs italic opacity-50">
+                  {{ uiText.noSections }}
+                </div>
+              </nav>
+            </div>
           </aside>
 
           <!-- Desktop/Mobile Content -->
-          <main class="flex-1 overflow-y-auto bg-base-100 scroll-smooth pb-20 lg:pb-0" ref="contentRef">
-              <div class="max-w-4xl mx-auto px-4 py-8 lg:px-12 lg:py-12">
-                 <!-- Breadcrumbs Mobile -->
-                 <div class="text-sm breadcrumbs lg:hidden mb-4 opacity-50">
-                    <ul>
-                      <li>{{ activeCategory?.title }}</li>
-                      <li>{{ activePage?.title }}</li>
-                    </ul>
-                 </div>
-
-                 <template v-if="activePage">
-                    <!-- Title -->
-                    <h1 class="text-3xl lg:text-5xl font-extrabold mb-10 tracking-tight">{{ activePage.title }}</h1>
-                    <MarkdownRenderer :md="activePage.md" :preserve-whitespace="false" />
-                 </template>
-                 <div v-else class="text-center opacity-50 mt-10">{{ uiText.pageNotFound }}</div>
-                 
-                 <div class="h-32 lg:hidden"></div>
+          <main class="bg-base-100 flex-1 overflow-y-auto scroll-smooth pb-20 lg:pb-0" ref="contentRef">
+            <div class="mx-auto max-w-4xl px-4 py-8 lg:px-12 lg:py-12">
+              <!-- Breadcrumbs Mobile -->
+              <div class="breadcrumbs mb-4 text-sm opacity-50 lg:hidden">
+                <ul>
+                  <li>{{ activeCategory?.title }}</li>
+                  <li>{{ activePage?.title }}</li>
+                </ul>
               </div>
+
+              <template v-if="activePage">
+                <!-- Title -->
+                <h1 class="mb-10 text-3xl font-extrabold tracking-tight lg:text-5xl">
+                  {{ activePage.title }}
+                </h1>
+                <MarkdownRenderer :md="activePage.md" :preserve-whitespace="false" />
+              </template>
+              <div v-else class="mt-10 text-center opacity-50">{{ uiText.pageNotFound }}</div>
+
+              <div class="h-32 lg:hidden"></div>
+            </div>
           </main>
 
           <!-- Mobile Drawer (Slide Over) -->
           <div v-if="mobileDrawerOpen" class="absolute inset-0 z-50 flex lg:hidden">
-             <!-- Drawer Overlay -->
-             <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="toggleDrawer" />
-             
-             <!-- Drawer Content -->
-             <div class="relative w-4/5 max-w-sm bg-base-100 h-full shadow-2xl flex flex-col transition-transform">
-                <!-- Mobile Tabs -->
-                <div class="tabs tabs-boxed m-2 bg-base-200 p-1">
-                   <a class="tab tab-lg flex-1 text-lg font-bold" :class="{ 'tab-active': mobileTab === 'sitemap' }" @click="mobileTab = 'sitemap'">{{ uiText.menu }}</a>
-                   <a class="tab tab-lg flex-1 text-lg font-bold" :class="{ 'tab-active': mobileTab === 'toc' }" @click="mobileTab = 'toc'">{{ uiText.contents }}</a>
+            <!-- Drawer Overlay -->
+            <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="toggleDrawer" />
+
+            <!-- Drawer Content -->
+            <div
+              class="bg-base-100 relative flex h-full w-4/5 max-w-sm flex-col shadow-2xl transition-transform"
+            >
+              <!-- Mobile Tabs -->
+              <div class="tabs tabs-boxed bg-base-200 m-2 p-1">
+                <a
+                  class="tab tab-lg flex-1 text-lg font-bold"
+                  :class="{ 'tab-active': mobileTab === 'sitemap' }"
+                  @click="mobileTab = 'sitemap'"
+                  >{{ uiText.menu }}</a
+                >
+                <a
+                  class="tab tab-lg flex-1 text-lg font-bold"
+                  :class="{ 'tab-active': mobileTab === 'toc' }"
+                  @click="mobileTab = 'toc'"
+                  >{{ uiText.contents }}</a
+                >
+              </div>
+
+              <div class="flex-1 overflow-y-auto p-4">
+                <!-- Tab: Sitemap -->
+                <div v-if="mobileTab === 'sitemap'" class="space-y-8">
+                  <template v-for="cat in categories" :key="cat.id">
+                    <div>
+                      <div
+                        class="text-base-content mb-3 px-2 text-sm font-extrabold tracking-widest uppercase"
+                      >
+                        {{ cat.title }}
+                      </div>
+                      <ul class="menu bg-base-200 rounded-box w-full">
+                        <li v-for="p in cat.pages" :key="p.id">
+                          <a
+                            class="py-3 text-lg font-medium"
+                            :class="{ active: p.id === activePageId }"
+                            @click="
+                              switchPage(p.id);
+                              toggleDrawer();
+                            "
+                          >
+                            {{ p.title }}
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                  </template>
                 </div>
 
-                <div class="flex-1 overflow-y-auto p-4">
-                   <!-- Tab: Sitemap -->
-                   <div v-if="mobileTab === 'sitemap'" class="space-y-8">
-                      <template v-for="cat in categories" :key="cat.id">
-                        <div>
-                           <div class="text-sm font-extrabold uppercase tracking-widest mb-3 px-2 text-base-content">{{ cat.title }}</div>
-                           <ul class="menu bg-base-200 rounded-box w-full">
-                              <li v-for="p in cat.pages" :key="p.id">
-                                 <a 
-                                   class="py-3 text-lg font-medium"
-                                   :class="{ 'active': p.id === activePageId }"
-                                   @click="switchPage(p.id); toggleDrawer()"
-                                 >
-                                   {{ p.title }}
-                                 </a>
-                              </li>
-                           </ul>
-                        </div>
-                      </template>
-                   </div>
-                   
-                   <!-- Tab: TOC -->
-                   <div v-if="mobileTab === 'toc'">
-                      <div class="text-sm font-bold opacity-60 uppercase tracking-wider mb-4 px-2">{{ uiText.onThisPage }}</div>
-                      <div class="space-y-2">
-                          <template v-for="h in tableOfContents" :key="h.id">
-                             <button
-                               class="block w-full text-left py-4 px-4 rounded-xl bg-base-200 hover:bg-base-300 transition-colors"
-                               :class="h.level === 3 ? 'pl-8 text-base opacity-90' : 'text-lg font-bold'"
-                               @click="scrollToId(h.id); toggleDrawer()"
-                             >
-                                {{ h.text }}
-                             </button>
-                          </template>
-                      </div>
-                      <div v-if="tableOfContents.length === 0" class="text-base opacity-50 italic text-center py-8">
-                        {{ uiText.noSections }}
-                      </div>
-                   </div>
+                <!-- Tab: TOC -->
+                <div v-if="mobileTab === 'toc'">
+                  <div class="mb-4 px-2 text-sm font-bold tracking-wider uppercase opacity-60">
+                    {{ uiText.onThisPage }}
+                  </div>
+                  <div class="space-y-2">
+                    <template v-for="h in tableOfContents" :key="h.id">
+                      <button
+                        class="bg-base-200 hover:bg-base-300 block w-full rounded-xl px-4 py-4 text-left transition-colors"
+                        :class="h.level === 3 ? 'pl-8 text-base opacity-90' : 'text-lg font-bold'"
+                        @click="
+                          scrollToId(h.id);
+                          toggleDrawer();
+                        "
+                      >
+                        {{ h.text }}
+                      </button>
+                    </template>
+                  </div>
+                  <div
+                    v-if="tableOfContents.length === 0"
+                    class="py-8 text-center text-base italic opacity-50"
+                  >
+                    {{ uiText.noSections }}
+                  </div>
                 </div>
+              </div>
 
-                <!-- Drawer Footer: Language Switch -->
-                <div class="p-4 border-t border-base-300 bg-base-200/50">
-                    <button class="btn btn-outline w-full font-bold text-lg" @click="setLang(lang === 'en' ? 'zh' : 'en')">
-                       Change Language to {{ lang === 'en' ? '中文' : 'English' }}
-                    </button>
-                </div>
-             </div>
+              <!-- Drawer Footer: Language Switch -->
+              <div class="border-base-300 bg-base-200/50 border-t p-4">
+                <button
+                  class="btn btn-outline w-full text-lg font-bold"
+                  @click="setLang(lang === 'en' ? 'zh' : 'en')"
+                >
+                  Change Language to {{ lang === "en" ? "中文" : "English" }}
+                </button>
+              </div>
+            </div>
           </div>
-
         </div>
-
       </div>
     </div>
   </teleport>

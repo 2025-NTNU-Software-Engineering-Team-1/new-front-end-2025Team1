@@ -114,7 +114,7 @@ function mapStatusToCode(status: string): SubmissionStatusCodes {
 
 // Auto-refresh: Check if any items are pending
 const hasPendingItems = computed(() =>
-  testHistory.value.some((item) => item.result === SUBMISSION_STATUS_CODE.PENDING)
+  testHistory.value.some((item) => item.result === SUBMISSION_STATUS_CODE.PENDING),
 );
 
 // Document visibility for pause/resume polling
@@ -151,7 +151,7 @@ const { pause, resume, isActive } = useIntervalFn(
     }
   },
   3000,
-  { immediate: false }
+  { immediate: false },
 );
 
 // Watch for pending items and auto start/stop polling
@@ -288,7 +288,7 @@ async function deleteTrialSubmission(id: string | number, event: Event) {
                       <span
                         :class="['badge badge-sm', item.type === 'public' ? 'badge-info' : 'badge-warning']"
                       >
-                        {{ item.type === 'public' ? 'Public' : 'Custom' }}
+                        {{ item.type === "public" ? "Public" : "Custom" }}
                       </span>
                     </td>
                     <td>{{ item.pid }}</td>

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref, nextTick, onBeforeUnmount, onMounted } from "vue";
-import { useI18n } from "vue-i18n";
 import { LAppDelegate } from "@/live2d/Framework/src/lappdelegate";
 import { setSkinConfig } from "@/live2d/Framework/src/lappdefine";
 import api from "@/models/api";
@@ -16,8 +15,6 @@ const props = defineProps<{
   currentCode: string;
   username: string;
 }>();
-
-const { t } = useI18n();
 
 type ChatMessage = {
   id: number;
@@ -562,7 +559,7 @@ onBeforeUnmount(() => {
   />
 
   <!-- 右下角聊天區（整個一起 scale） -->
-  <div class="fixed bottom-6 right-6 z-50 origin-bottom-right" :style="{ transform: `scale(${chatScale})` }">
+  <div class="fixed right-6 bottom-6 z-50 origin-bottom-right" :style="{ transform: `scale(${chatScale})` }">
     <!-- 開啟按鈕 -->
     <button
       v-if="showTrigger && !isOpen"
@@ -621,11 +618,11 @@ onBeforeUnmount(() => {
               <div class="ml-2 flex items-center">
                 <select
                   v-model="selectedVoice"
-                  class="bg-white/20 text-white text-xs rounded border-none py-1 px-2 cursor-pointer outline-none hover:bg-white/30 transition-colors"
+                  class="cursor-pointer rounded border-none bg-white/20 px-2 py-1 text-xs text-white transition-colors outline-none hover:bg-white/30"
                   @change="onVoiceChange"
                   :title="$t('skinSelector.voice')"
                 >
-                  <option v-for="v in voices" :key="v.id" :value="v.id" class="text-black bg-white">
+                  <option v-for="v in voices" :key="v.id" :value="v.id" class="bg-white text-black">
                     {{ v.name }}
                   </option>
                 </select>
@@ -653,7 +650,7 @@ onBeforeUnmount(() => {
           <!-- 訊息區 -->
           <main
             ref="chatBodyEl"
-            class="flex-1 space-y-3 overflow-y-auto bg-gradient-to-b from-indigo-50/30 to-purple-50/30 px-5 pb-6 pt-3"
+            class="flex-1 space-y-3 overflow-y-auto bg-gradient-to-b from-indigo-50/30 to-purple-50/30 px-5 pt-3 pb-6"
           >
             <div
               v-for="msg in messages"
@@ -671,7 +668,7 @@ onBeforeUnmount(() => {
                     <div v-if="msg.phase === 'thinking'" class="typing-dots">
                       <span></span><span></span><span></span>
                     </div>
-                    <div v-else-if="msg.phase === 'typing'" class="whitespace-pre-wrap leading-relaxed">
+                    <div v-else-if="msg.phase === 'typing'" class="leading-relaxed whitespace-pre-wrap">
                       {{ msg.displayText ?? "" }}
                     </div>
                     <div v-else class="markdown-body ai-msg leading-relaxed">
@@ -685,7 +682,9 @@ onBeforeUnmount(() => {
                     class="tts-btn mt-1 flex h-7 w-7 items-center justify-center rounded-full border border-white/40 bg-white/30 backdrop-blur-sm hover:bg-white/50"
                     :class="{ 'animate-pulse': ttsLoading && speakingMsgId === msg.id }"
                     @click="speakText(msg.id, String(msg.text ?? ''))"
-                    :title="ttsLoading ? ttsLoadingStatus : (speakingMsgId === msg.id ? '停止朗讀' : '播放語音')"
+                    :title="
+                      ttsLoading ? ttsLoadingStatus : speakingMsgId === msg.id ? '停止朗讀' : '播放語音'
+                    "
                     :disabled="ttsLoading && speakingMsgId !== msg.id"
                   >
                     <!-- 載入中 spinner -->
@@ -695,8 +694,19 @@ onBeforeUnmount(() => {
                       viewBox="0 0 24 24"
                       fill="none"
                     >
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      <circle
+                        class="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        stroke-width="4"
+                      />
+                      <path
+                        class="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
                     </svg>
                     <!-- 停止圖示 -->
                     <svg
@@ -753,7 +763,7 @@ onBeforeUnmount(() => {
             <textarea
               v-model="draft"
               rows="2"
-              class="flex-1 resize-none rounded-2xl border border-white/40 bg-white/50 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-300"
+              class="flex-1 resize-none rounded-2xl border border-white/40 bg-white/50 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-500 focus:ring-2 focus:ring-purple-300 focus:outline-none"
               placeholder="輸入訊息…（Enter 送出，Shift+Enter 換行）"
               @keydown.enter.exact.prevent="send"
               @keydown.enter.shift.stop

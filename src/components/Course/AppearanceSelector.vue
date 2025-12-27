@@ -46,9 +46,30 @@ const RAINBOW_PALETTE = [
 ];
 
 const COURSE_EMOJIS = [
-  "💻", "📚", "🔢", "🧪", "🧬", "⚡", "🎨", "🎵", 
-  "📝", "📊", "📉", "📁", "🏫", "🎓", "📐", "🔬",
-  "🧠", "🤖", "🌍", "🏛️", "⚖️", "💼", "💹", "🗣️"
+  "💻",
+  "📚",
+  "🔢",
+  "🧪",
+  "🧬",
+  "⚡",
+  "🎨",
+  "🎵",
+  "📝",
+  "📊",
+  "📉",
+  "📁",
+  "🏫",
+  "🎓",
+  "📐",
+  "🔬",
+  "🧠",
+  "🤖",
+  "🌍",
+  "🏛️",
+  "⚖️",
+  "💼",
+  "💹",
+  "🗣️",
 ];
 
 const selectedColor = ref(props.initialColor || MORANDI_PALETTE[0]);
@@ -60,38 +81,37 @@ watch(selectedEmoji, (val) => emit("update:emoji", val));
 // Initialize
 emit("update:color", selectedColor.value);
 emit("update:emoji", selectedEmoji.value);
-
 </script>
 
 <template>
   <div class="space-y-4">
     <!-- Preview -->
-    <div class="flex items-center gap-4 p-4 bg-base-100 rounded-lg border border-base-200">
-      <course-avatar 
-        course-name="Preview" 
-        :course-color="selectedColor" 
-        :course-emoji="selectedEmoji" 
-        size="lg" 
+    <div class="bg-base-100 border-base-200 flex items-center gap-4 rounded-lg border p-4">
+      <course-avatar
+        course-name="Preview"
+        :course-color="selectedColor"
+        :course-emoji="selectedEmoji"
+        size="lg"
       />
       <div>
-        <div class="font-bold text-lg">{{ t("course.settings.preview") }}</div>
+        <div class="text-lg font-bold">{{ t("course.settings.preview") }}</div>
         <div class="text-sm opacity-60">{{ t("course.settings.previewDesc") }}</div>
       </div>
     </div>
 
     <!-- Color Selector -->
     <div>
-      <label class="label font-bold text-sm">{{ t("course.settings.courseColor") }}</label>
-      
+      <label class="label text-sm font-bold">{{ t("course.settings.courseColor") }}</label>
+
       <!-- Standard -->
       <div class="mb-2 text-xs opacity-70">{{ t("course.settings.standard") }}</div>
-      <div class="grid grid-cols-5 md:grid-cols-10 gap-2 mb-4">
-        <button 
-          v-for="color in RAINBOW_PALETTE" 
+      <div class="mb-4 grid grid-cols-5 gap-2 md:grid-cols-10">
+        <button
+          v-for="color in RAINBOW_PALETTE"
           :key="color"
           type="button"
-          class="w-8 h-8 md:w-10 md:h-10 rounded-full transition-transform hover:scale-110 focus:outline-none ring-offset-2 ring-offset-base-100"
-          :class="{ 'ring-2 ring-primary': selectedColor === color }"
+          class="ring-offset-base-100 h-8 w-8 rounded-full ring-offset-2 transition-transform hover:scale-110 focus:outline-none md:h-10 md:w-10"
+          :class="{ 'ring-primary ring-2': selectedColor === color }"
           :style="{ backgroundColor: color }"
           @click="selectedColor = color"
         />
@@ -99,13 +119,13 @@ emit("update:emoji", selectedEmoji.value);
 
       <!-- Morandi -->
       <div class="mb-2 text-xs opacity-70">{{ t("course.settings.morandi") }}</div>
-      <div class="grid grid-cols-6 gap-2 mb-4">
-        <button 
-          v-for="color in MORANDI_PALETTE" 
+      <div class="mb-4 grid grid-cols-6 gap-2">
+        <button
+          v-for="color in MORANDI_PALETTE"
           :key="color"
           type="button"
-          class="w-8 h-8 md:w-10 md:h-10 rounded-full transition-transform hover:scale-110 focus:outline-none ring-offset-2 ring-offset-base-100"
-          :class="{ 'ring-2 ring-primary': selectedColor === color }"
+          class="ring-offset-base-100 h-8 w-8 rounded-full ring-offset-2 transition-transform hover:scale-110 focus:outline-none md:h-10 md:w-10"
+          :class="{ 'ring-primary ring-2': selectedColor === color }"
           :style="{ backgroundColor: color }"
           @click="selectedColor = color"
         />
@@ -114,15 +134,17 @@ emit("update:emoji", selectedEmoji.value);
       <!-- Custom Color -->
       <div class="mb-2 text-xs opacity-70">{{ t("course.settings.custom") }}</div>
       <div class="flex items-center gap-3">
-        <div class="relative w-12 h-12 rounded-full overflow-hidden border border-base-300 shadow-sm cursor-pointer">
-           <input 
-             type="color" 
-             v-model="selectedColor"
-             class="absolute -top-2 -left-2 w-16 h-16 p-0 border-0 cursor-pointer"
-           />
+        <div
+          class="border-base-300 relative h-12 w-12 cursor-pointer overflow-hidden rounded-full border shadow-sm"
+        >
+          <input
+            type="color"
+            v-model="selectedColor"
+            class="absolute -top-2 -left-2 h-16 w-16 cursor-pointer border-0 p-0"
+          />
         </div>
-        <input 
-          type="text" 
+        <input
+          type="text"
           v-model="selectedColor"
           class="input input-bordered w-32 font-mono uppercase"
           placeholder="#000000"
@@ -133,17 +155,17 @@ emit("update:emoji", selectedEmoji.value);
 
     <!-- Emoji Selector -->
     <div>
-      <label class="label font-bold text-sm">{{ t("course.settings.courseEmoji") }}</label>
-      
+      <label class="label text-sm font-bold">{{ t("course.settings.courseEmoji") }}</label>
+
       <!-- Presets -->
       <div class="mb-2 text-xs opacity-70">{{ t("course.settings.presets") }}</div>
-      <div class="grid grid-cols-8 gap-2 mb-4">
-        <button 
-          v-for="emoji in COURSE_EMOJIS" 
+      <div class="mb-4 grid grid-cols-8 gap-2">
+        <button
+          v-for="emoji in COURSE_EMOJIS"
           :key="emoji"
           type="button"
-          class="w-8 h-8 flex items-center justify-center text-xl rounded hover:bg-base-200 transition-colors"
-          :class="{ 'bg-primary/20 ring-2 ring-primary ring-inset': selectedEmoji === emoji }"
+          class="hover:bg-base-200 flex h-8 w-8 items-center justify-center rounded text-xl transition-colors"
+          :class="{ 'bg-primary/20 ring-primary ring-2 ring-inset': selectedEmoji === emoji }"
           @click="selectedEmoji = emoji"
         >
           {{ emoji }}
@@ -153,17 +175,17 @@ emit("update:emoji", selectedEmoji.value);
       <!-- Custom Emoji -->
       <div class="mb-2 text-xs opacity-70">{{ t("course.settings.custom") }}</div>
       <div class="form-control">
-         <input 
-            type="text" 
-            v-model="selectedEmoji"
-            class="input input-bordered w-full md:w-1/2 text-center"
-            :class="emojiTextClass"
-            placeholder="👻"
-            maxlength="4"
-         />
-         <label class="label">
-           <span class="label-text-alt opacity-60">{{ t("course.settings.emojiPlaceholder") }}</span>
-         </label>
+        <input
+          type="text"
+          v-model="selectedEmoji"
+          class="input input-bordered w-full text-center md:w-1/2"
+          :class="emojiTextClass"
+          placeholder="👻"
+          maxlength="4"
+        />
+        <label class="label">
+          <span class="label-text-alt opacity-60">{{ t("course.settings.emojiPlaceholder") }}</span>
+        </label>
       </div>
     </div>
   </div>

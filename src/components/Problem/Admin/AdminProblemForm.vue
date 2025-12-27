@@ -717,7 +717,7 @@ async function submit() {
   <Transition name="slide-up">
     <div
       v-if="v$.$error"
-      class="border-l-error border-y-base-300 border-r-base-300 bg-base-100 mt-6 rounded-xl border-y border-l-4 border-r p-5 shadow-md"
+      class="border-l-error border-y-base-300 border-r-base-300 bg-base-100 mt-6 rounded-xl border-y border-r border-l-4 p-5 shadow-md"
     >
       <div class="flex items-start gap-4">
         <div class="bg-error/10 text-error rounded-full p-2">
@@ -741,13 +741,13 @@ async function submit() {
                 <span class="badge badge-error badge-xs badge-outline mt-0.5 shrink-0">
                   {{ e.path }}
                 </span>
-                <span class="text-base-content group-hover:text-error break-words font-medium">
+                <span class="text-base-content group-hover:text-error font-medium break-words">
                   {{ e.message }}
                 </span>
               </div>
 
               <i-uil-arrow-right
-                class="text-error ml-2 mt-0.5 h-4 w-4 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+                class="text-error mt-0.5 ml-2 h-4 w-4 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
               />
             </button>
           </div>

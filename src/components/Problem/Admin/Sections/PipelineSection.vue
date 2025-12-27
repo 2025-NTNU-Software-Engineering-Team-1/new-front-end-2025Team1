@@ -847,7 +847,7 @@ watch(
                     </div>
                   </div>
 
-                  <h6 class="mb-1 text-sm font-bold uppercase tracking-[0.2em] text-white drop-shadow-lg">
+                  <h6 class="mb-1 text-sm font-bold tracking-[0.2em] text-white uppercase drop-shadow-lg">
                     {{ t("course.problems.systemLocked") }}
                   </h6>
                   <div
@@ -951,7 +951,7 @@ watch(
                     </div>
                   </div>
 
-                  <h6 class="mb-1 text-sm font-bold uppercase tracking-[0.2em] text-white drop-shadow-lg">
+                  <h6 class="mb-1 text-sm font-bold tracking-[0.2em] text-white uppercase drop-shadow-lg">
                     {{ t("course.problems.accessDenied") }}
                   </h6>
                   <div
@@ -1190,10 +1190,7 @@ watch(
           </div>
 
           <!-- Warning message for invalid syntax values -->
-          <div
-            v-if="syntaxWarningMessage"
-            class="alert alert-warning mt-2 py-2 text-sm shadow-md"
-          >
+          <div v-if="syntaxWarningMessage" class="alert alert-warning mt-2 py-2 text-sm shadow-md">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="h-5 w-5 shrink-0 stroke-current"
@@ -1604,7 +1601,7 @@ watch(
             </div>
           </div>
         </div>
-        <div v-else class="pl-1 pt-2 text-xs opacity-70">
+        <div v-else class="pt-2 pl-1 text-xs opacity-70">
           {{
             problem.pipeline!.executionMode === "interactive"
               ? t("course.problems.uploadCustomCheckerWarning")
@@ -1675,7 +1672,7 @@ watch(
             <span class="label-text-alt text-error">{{ v$.assets.scorePy.$errors[0]?.$message }}</span>
           </label>
         </div>
-        <div v-else class="pl-1 pt-2 text-xs opacity-70">
+        <div v-else class="pt-2 pl-1 text-xs opacity-70">
           {{ t("course.problems.uploadCustomScorerInfo") }}
         </div>
       </div>

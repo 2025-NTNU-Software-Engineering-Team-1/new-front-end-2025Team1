@@ -231,7 +231,7 @@ watch(
           @dragleave="isDrag = false"
         >
           <template v-if="!testdata">
-            <span class="mb-6 mr-6 text-sm">{{ $t("components.problem.forms.dropFile") }}</span>
+            <span class="mr-6 mb-6 text-sm">{{ $t("components.problem.forms.dropFile") }}</span>
             <input
               type="file"
               id="file-uploader"

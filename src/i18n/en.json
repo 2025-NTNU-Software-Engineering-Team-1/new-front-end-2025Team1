@@ -46,30 +46,30 @@
       }
     },
     "courseSideBar": {
-        "admin": "Admin",
-        "members": "Members",
-        "settings": "Settings",
-        "aiManagement": "AI Management",
-        "loginRecords": "Login Records"
+      "admin": "Admin",
+      "members": "Members",
+      "settings": "Settings",
+      "aiManagement": "AI Management",
+      "loginRecords": "Login Records"
     },
     "settings": {
-        "title": "Course Settings",
-        "generalInfo": "General Info",
-        "appearance": "Appearance",
-        "preview": "Preview",
-        "previewDesc": "This is how the course icon will look.",
-        "courseColor": "Course Color",
-        "courseEmoji": "Course Emoji",
-        "courseName": "Course Name",
-        "teacher": "Teacher",
-        "save": "Save",
-        "saved": "Settings saved successfully.",
-        "presets": "Presets",
-        "standard": "Standard Colors",
-        "morandi": "Morandi Colors",
-        "custom": "Custom",
-        "emojiPlaceholder": "Type or paste any emoji here.",
-        "teacherReadOnly": "Course owner cannot be changed here."
+      "title": "Course Settings",
+      "generalInfo": "General Info",
+      "appearance": "Appearance",
+      "preview": "Preview",
+      "previewDesc": "This is how the course icon will look.",
+      "courseColor": "Course Color",
+      "courseEmoji": "Course Emoji",
+      "courseName": "Course Name",
+      "teacher": "Teacher",
+      "save": "Save",
+      "saved": "Settings saved successfully.",
+      "presets": "Presets",
+      "standard": "Standard Colors",
+      "morandi": "Morandi Colors",
+      "custom": "Custom",
+      "emojiPlaceholder": "Type or paste any emoji here.",
+      "teacherReadOnly": "Course owner cannot be changed here."
     },
     "aisetting": {
       "setupPage": "Set Up",
@@ -677,24 +677,24 @@
       "deadline": "Deadline: {deadline}"
     },
     "courseSideBar": {
-        "admin": "Admin",
-        "members": "Members",
-        "settings": "Settings",
-        "aiManagement": "AI Management",
-        "loginRecords": "Login Records"
+      "admin": "Admin",
+      "members": "Members",
+      "settings": "Settings",
+      "aiManagement": "AI Management",
+      "loginRecords": "Login Records"
     },
     "settings": {
-        "title": "Course Settings",
-        "generalInfo": "General Info",
-        "appearance": "Appearance",
-        "preview": "Preview",
-        "previewDesc": "This is how the course icon will look.",
-        "courseColor": "Course Color",
-        "courseEmoji": "Course Emoji",
-        "courseName": "Course Name",
-        "teacher": "Teacher",
-        "save": "Save",
-        "saved": "Settings saved successfully."
+      "title": "Course Settings",
+      "generalInfo": "General Info",
+      "appearance": "Appearance",
+      "preview": "Preview",
+      "previewDesc": "This is how the course icon will look.",
+      "courseColor": "Course Color",
+      "courseEmoji": "Course Emoji",
+      "courseName": "Course Name",
+      "teacher": "Teacher",
+      "save": "Save",
+      "saved": "Settings saved successfully."
     },
     "err": {
       "err": "Retry loading the post.",

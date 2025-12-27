@@ -11,7 +11,7 @@ import { useTitle } from "@vueuse/core";
 
 useTitle("Admin - User | Normal OJ");
 const { t } = useI18n();
-const users = ref<any[] | undefined>([]);
+const users = ref<unknown[] | undefined>([]);
 const fetchError = ref<unknown>(null);
 const fetchLoading = ref<boolean>(false);
 async function execute() {
@@ -19,7 +19,10 @@ async function execute() {
   try {
     const res = await fetcher.get("/user");
     // API response could be { data: [...] } or the array directly
-    users.value = (res as any).data?.data ?? (res as any).data ?? (res as any);
+    users.value =
+      (res as { data?: { data?: unknown[] } | unknown[] }).data?.data ??
+      (res as { data?: unknown[] }).data ??
+      (res as unknown[]);
   } catch (e) {
     fetchError.value = e;
   } finally {

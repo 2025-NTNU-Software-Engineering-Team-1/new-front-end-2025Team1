@@ -8,13 +8,11 @@ import useVuelidate from "@vuelidate/core";
 import { required, maxLength, helpers } from "@vuelidate/validators";
 import { useI18n } from "vue-i18n";
 import { containsInvisible } from "@/utils/validators";
-import { useSession } from "@/stores/session";
 import AppearanceSelector from "@/components/Course/AppearanceSelector.vue";
 
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
-const session = useSession();
 const courseName = route.params.name as string;
 
 useTitle(`Settings - ${courseName} | Normal OJ`);
@@ -73,9 +71,8 @@ async function fetchCourse() {
     form.teacher = data.teacher.username;
     form.color = data.color || "";
     form.emoji = data.emoji || "";
-    
-  } catch (e: any) {
-    errorMsg.value = e.message || "Failed to load course settings";
+  } catch (e: unknown) {
+    errorMsg.value = e instanceof Error ? e.message : "Failed to load course settings";
   } finally {
     isLoading.value = false;
   }
@@ -87,7 +84,7 @@ async function submit() {
   isSaving.value = true;
   errorMsg.value = "";
   successMsg.value = "";
-  
+
   try {
     await api.Course.modify({
       course: courseName,
@@ -96,9 +93,9 @@ async function submit() {
       color: form.color,
       emoji: form.emoji,
     });
-    
+
     successMsg.value = t("course.settings.saved");
-    
+
     // If name changed, redirect
     if (form.course !== courseName) {
       router.push(`/course/${form.course}/settings`);
@@ -106,8 +103,7 @@ async function submit() {
       // Refresh to ensure sync
       fetchCourse();
     }
-    
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (axios.isAxiosError(error) && error.response?.data?.message) {
       errorMsg.value = error.response.data.message;
     } else {
@@ -127,7 +123,6 @@ onMounted(() => {
   <div class="card-container">
     <div class="card min-w-full">
       <div class="card-body">
-        
         <!-- Toast Notification -->
         <div class="toast toast-end toast-bottom z-50">
           <div v-if="errorMsg" class="alert alert-error px-4 py-2 text-sm">
@@ -141,69 +136,65 @@ onMounted(() => {
         </div>
 
         <div v-if="isLoading" class="flex justify-center p-8">
-           <button class="btn btn-ghost loading">Loading...</button>
+          <button class="btn btn-ghost loading">Loading...</button>
         </div>
-        
-        <div v-else class="space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
-              <!-- General Info -->
-              <div class="md:col-span-4 space-y-4">
-                 <h4 class="font-bold text-lg border-b pb-2 mb-4">{{ $t("course.settings.generalInfo") }}</h4>
-                 
-                <div class="form-control w-full">
-                  <label class="label">
-                    <span class="label-text">{{ $t("course.settings.courseName") }}</span>
-                  </label>
-                  <input
-                    v-model="v$.course.$model"
-                    type="text"
-                    :class="['input-bordered input w-full', v$.course.$error && 'input-error']"
-                  />
-                  <label class="label" v-show="v$.course.$error">
-                    <span class="label-text-alt text-error" v-text="v$.course.$errors[0]?.$message" />
-                  </label>
-                </div>
 
-                <div class="form-control w-full">
-                  <label class="label">
-                    <span class="label-text">{{ $t("course.settings.teacher") }}</span>
-                    <span class="label-text-alt text-warning" v-if="false">Read Only</span> 
-                  </label>
-                  <input
-                    v-model="v$.teacher.$model"
-                    type="text"
-                    disabled
-                    class="input-bordered input w-full bg-base-200 cursor-not-allowed opacity-75"
-                  />
-                  <label class="label">
-                    <span class="label-text-alt opacity-50">{{ $t("course.settings.teacherReadOnly") }}</span>
-                  </label>
-                </div>
+        <div v-else class="space-y-6">
+          <div class="grid grid-cols-1 gap-8 md:grid-cols-12">
+            <!-- General Info -->
+            <div class="space-y-4 md:col-span-4">
+              <h4 class="mb-4 border-b pb-2 text-lg font-bold">{{ $t("course.settings.generalInfo") }}</h4>
+
+              <div class="form-control w-full">
+                <label class="label">
+                  <span class="label-text">{{ $t("course.settings.courseName") }}</span>
+                </label>
+                <input
+                  v-model="v$.course.$model"
+                  type="text"
+                  :class="['input-bordered input w-full', v$.course.$error && 'input-error']"
+                />
+                <label class="label" v-show="v$.course.$error">
+                  <span class="label-text-alt text-error" v-text="v$.course.$errors[0]?.$message" />
+                </label>
               </div>
-              
-              <!-- Appearance -->
-              <div class="md:col-span-8 space-y-4">
-                 <h4 class="font-bold text-lg border-b pb-2 mb-4">{{ $t("course.settings.appearance") }}</h4>
-                 <appearance-selector 
-                   :initial-color="form.color"
-                   :initial-emoji="form.emoji"
-                   @update:color="form.color = $event"
-                   @update:emoji="form.emoji = $event"
-                 />
+
+              <div class="form-control w-full">
+                <label class="label">
+                  <span class="label-text">{{ $t("course.settings.teacher") }}</span>
+                  <span class="label-text-alt text-warning" v-if="false">Read Only</span>
+                </label>
+                <input
+                  v-model="v$.teacher.$model"
+                  type="text"
+                  disabled
+                  class="input-bordered input bg-base-200 w-full cursor-not-allowed opacity-75"
+                />
+                <label class="label">
+                  <span class="label-text-alt opacity-50">{{ $t("course.settings.teacherReadOnly") }}</span>
+                </label>
               </div>
             </div>
-            
-            <div class="divider"></div>
-            
-            <div class="flex justify-end">
-               <button 
-                 class="btn btn-primary" 
-                 :class="{ 'loading': isSaving }"
-                 @click="submit"
-               >
-                 {{ $t("course.settings.save") }}
-               </button>
+
+            <!-- Appearance -->
+            <div class="space-y-4 md:col-span-8">
+              <h4 class="mb-4 border-b pb-2 text-lg font-bold">{{ $t("course.settings.appearance") }}</h4>
+              <appearance-selector
+                :initial-color="form.color"
+                :initial-emoji="form.emoji"
+                @update:color="form.color = $event"
+                @update:emoji="form.emoji = $event"
+              />
             </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="flex justify-end">
+            <button class="btn btn-primary" :class="{ loading: isSaving }" @click="submit">
+              {{ $t("course.settings.save") }}
+            </button>
+          </div>
         </div>
       </div>
     </div>

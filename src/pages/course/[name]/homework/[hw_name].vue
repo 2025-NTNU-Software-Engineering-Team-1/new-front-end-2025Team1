@@ -22,7 +22,7 @@ const { data, error, isLoading } = useAxios<HomeworkList>(`/course/${courseName}
 
 const homework = computed(() => {
   if (!data.value) return null;
-  return data.value.find(h => h.name === hwName);
+  return data.value.find((h) => h.name === hwName);
 });
 
 const {
@@ -30,7 +30,6 @@ const {
   error: fetchProblemError,
   isLoading: isFetchingProblem,
 } = useProblemSelection(courseName);
-
 </script>
 
 <template>
@@ -38,11 +37,11 @@ const {
     <div class="card min-w-full">
       <div class="card-body">
         <div class="mb-4">
-           <router-link :to="`/course/${courseName}/homeworks`" class="btn btn-sm btn-ghost gap-2 pl-0">
-             <i-uil-arrow-left />
-             {{ $t("course.hw.index.title") }}
-           </router-link>
-           <h1 class="card-title text-2xl mt-2">{{ hwName }}</h1>
+          <router-link :to="`/course/${courseName}/homeworks`" class="btn btn-sm btn-ghost gap-2 pl-0">
+            <i-uil-arrow-left />
+            {{ $t("course.hw.index.title") }}
+          </router-link>
+          <h1 class="card-title mt-2 text-2xl">{{ hwName }}</h1>
         </div>
 
         <data-status-wrapper
@@ -52,18 +51,12 @@ const {
           <template #loading>
             <skeleton-card />
           </template>
-          
+
           <template #data>
             <div v-if="homework">
-               <homework-card
-                 :homework="homework"
-                 :problems="problemId2Meta"
-                 class="mb-2"
-               />
+              <homework-card :homework="homework" :problems="problemId2Meta" class="mb-2" />
             </div>
-            <div v-else class="alert alert-error">
-              Homework not found.
-            </div>
+            <div v-else class="alert alert-error">Homework not found.</div>
           </template>
         </data-status-wrapper>
       </div>

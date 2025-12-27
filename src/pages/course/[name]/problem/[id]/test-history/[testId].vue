@@ -895,7 +895,7 @@ function closeDeleteErrorModal() {
               <span class="label-text font-semibold">JSON Data</span>
             </label>
             <div class="bg-base-200 rounded p-4">
-              <pre class="whitespace-pre-wrap font-mono text-sm">{{ currentDetailData.jsonData }}</pre>
+              <pre class="font-mono text-sm whitespace-pre-wrap">{{ currentDetailData.jsonData }}</pre>
             </div>
           </div>
         </div>
@@ -1083,7 +1083,7 @@ function closeDeleteErrorModal() {
   <!-- Rejudge Error Modal -->
   <dialog ref="rejudgeErrorModal" class="modal">
     <div class="modal-box">
-      <h3 class="text-lg font-bold text-error">
+      <h3 class="text-error text-lg font-bold">
         <i-uil-exclamation-triangle class="mr-2 inline" />
         Rejudge Failed
       </h3>
@@ -1100,7 +1100,7 @@ function closeDeleteErrorModal() {
   <!-- Delete Error Modal -->
   <dialog ref="deleteErrorModal" class="modal">
     <div class="modal-box">
-      <h3 class="text-lg font-bold text-error">
+      <h3 class="text-error text-lg font-bold">
         <i-uil-exclamation-triangle class="mr-2 inline" />
         Delete Failed
       </h3>

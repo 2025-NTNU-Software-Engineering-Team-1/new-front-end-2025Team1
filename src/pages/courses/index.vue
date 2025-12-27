@@ -85,6 +85,7 @@ async function handleJoinCourse() {
             v-model="courseCode"
             type="text"
             :placeholder="$t('courses.index.join.placeholder')"
+            maxlength="50"
             class="input input-bordered flex-1"
             :disabled="joinLoading"
             @keyup.enter="handleJoinCourse"
@@ -131,7 +132,7 @@ async function handleJoinCourse() {
               >
                 <td
                   :class="{
-                    'min-w-[14rem] max-w-[16rem] whitespace-pre-wrap': !isDesktop,
+                    'max-w-[16rem] min-w-[14rem] whitespace-pre-wrap': !isDesktop,
                   }"
                 >
                   <div class="flex items-center gap-3">

@@ -5,6 +5,7 @@ import type MarkdownIt from "markdown-it";
 import katex from "katex";
 import hljs from "highlight.js";
 import slugify from "./slugify";
+import stripMarkdown from "./stripMarkdown";
 
 // Lightweight anchor plugin to avoid external dependency issues.
 const addHeadingAnchors = (md: MarkdownIt) => {
@@ -15,7 +16,7 @@ const addHeadingAnchors = (md: MarkdownIt) => {
       const titleToken = tokens[i + 1];
       if (!titleToken || titleToken.type !== "inline") continue;
       const title = titleToken.content || "";
-      const id = slugify(title);
+      const id = slugify(stripMarkdown(title));
       if (!id) continue;
       tokens[i].attrSet("id", id);
     }

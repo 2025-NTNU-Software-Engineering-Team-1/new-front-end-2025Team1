@@ -897,7 +897,6 @@ onMounted(async () => {
 
       <!-- Buttons -->
       <div class="flex w-full items-center justify-center gap-3 md:w-auto md:justify-end">
-        <button class="btn btn-ghost btn-sm text-base-content/70">Cancel</button>
         <button
           :class="['btn btn-primary shadow-primary/20 px-8 shadow-lg', isLoading && 'loading']"
           @click="submit"

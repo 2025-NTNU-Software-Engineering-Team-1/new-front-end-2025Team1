@@ -324,6 +324,7 @@ const Homework = {
 
 const Course = {
   create: (body: CourseForm) => fetcher.post("/course", body),
+  modify: (body: { course: string; new_course: string; teacher: string; color: string; emoji: string }) => fetcher.put("/course", body),
   join: (body: { course_code: string }) =>
     fetcher.post<{ message: string; data: { course: string } }>("/course/join", body),
   // Course code management (for teachers)

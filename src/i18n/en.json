@@ -1,4 +1,12 @@
 {
+  "general": {
+    "back": "Back",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm"
+  },
   "settings": {
     "title": "Settings",
     "selectLang": "Select your preferred language"
@@ -36,6 +44,32 @@
         "title": "New Homework",
         "preview": "Preview"
       }
+    },
+    "courseSideBar": {
+        "admin": "Admin",
+        "members": "Members",
+        "settings": "Settings",
+        "aiManagement": "AI Management",
+        "loginRecords": "Login Records"
+    },
+    "settings": {
+        "title": "Course Settings",
+        "generalInfo": "General Info",
+        "appearance": "Appearance",
+        "preview": "Preview",
+        "previewDesc": "This is how the course icon will look.",
+        "courseColor": "Course Color",
+        "courseEmoji": "Course Emoji",
+        "courseName": "Course Name",
+        "teacher": "Teacher",
+        "save": "Save",
+        "saved": "Settings saved successfully.",
+        "presets": "Presets",
+        "standard": "Standard Colors",
+        "morandi": "Morandi Colors",
+        "custom": "Custom",
+        "emojiPlaceholder": "Type or paste any emoji here.",
+        "teacherReadOnly": "Course owner cannot be changed here."
     },
     "aisetting": {
       "setupPage": "Set Up",
@@ -631,6 +665,26 @@
       "not_allowed": "This problem does not allow sharing code",
       "deadline": "Deadline: {deadline}"
     },
+    "courseSideBar": {
+        "admin": "Admin",
+        "members": "Members",
+        "settings": "Settings",
+        "aiManagement": "AI Management",
+        "loginRecords": "Login Records"
+    },
+    "settings": {
+        "title": "Course Settings",
+        "generalInfo": "General Info",
+        "appearance": "Appearance",
+        "preview": "Preview",
+        "previewDesc": "This is how the course icon will look.",
+        "courseColor": "Course Color",
+        "courseEmoji": "Course Emoji",
+        "courseName": "Course Name",
+        "teacher": "Teacher",
+        "save": "Save",
+        "saved": "Settings saved successfully."
+    },
     "err": {
       "err": "Retry loading the post.",
       "err_unknown": "An unknown error occurred. Please try again later.",
@@ -728,6 +782,16 @@
     "validation": {
       "not_blank": "Cannot be empty or whitespace",
       "contains_invisible": "Contains invisible or control characters"
+    },
+    "studentDashboard": {
+      "welcome": "Here is what's happening in your courses.",
+      "upcomingDeadlines": "Upcoming Deadlines",
+      "noPendingHomework": "No pending homework",
+      "noPendingHomeworkDesc": "Great job! You have no upcoming deadlines.",
+      "myCourses": "My Courses",
+      "viewAllCourses": "View All Courses",
+      "noCourses": "You have not joined any courses yet.",
+      "joinCourse": "Join a Course"
     },
     "ann": {
       "form": {
@@ -872,8 +936,9 @@
       "submissions": "Submissions",
       "discussion": "Discussion",
       "members": "Members",
-      "aisetting": "AI Management",
-      "loginRecords": "Login Records"
+      "aisetting": "AI Setting",
+      "loginRecords": "Login Record",
+      "settings": "Settings"
     },
     "systemAnn": {
       "ann": "Announcements",

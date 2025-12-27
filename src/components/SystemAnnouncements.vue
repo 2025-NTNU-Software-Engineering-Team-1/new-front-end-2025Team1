@@ -15,10 +15,12 @@ const { data: announcements, error, isLoading } = useAxios<AnnouncementList>("/a
 </script>
 
 <template>
-  <div class="card-container">
     <div v-if="isDesktop" class="card min-w-full">
       <div class="card-body">
-        <div class="card-title mb-3">{{ $t("components.systemAnn.ann") }}</div>
+        <div class="card-title mb-3 flex items-center gap-2">
+          <i-uil-megaphone />
+          {{ $t("components.systemAnn.ann") }}
+        </div>
         <div class="my-2" />
 
         <data-status-wrapper :error="error as AxiosError" :is-loading="isLoading">
@@ -62,49 +64,44 @@ const { data: announcements, error, isLoading } = useAxios<AnnouncementList>("/a
         </data-status-wrapper>
       </div>
     </div>
-    <div v-else class="card min-w-full">
-      <div class="card-body">
-        <data-status-wrapper :error="error as AxiosError | undefined" :is-loading="isLoading">
-          <template #loading>
-            <skeleton-table :col="1" :row="5" />
-          </template>
-          <template #data>
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>{{ $t("components.systemAnn.ann") }}</th>
-                  <th v-if="session.isAdmin"></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="{ title, createTime, annId } in announcements" :key="annId" class="hover">
-                  <td class="min-w-[10rem] max-w-[12rem] truncate">
-                    <router-link
-                      :to="`/announcements/${annId}`"
-                      class="link link-hover text-base-content/80 dark:text-base-content/80 visited:text-base-content/80 dark:visited:text-base-content/80 max-w-full text-lg"
-                    >
-                      {{ title }}
-                    </router-link>
-                    <br />
-                    <!-- we can't use flex if we want to truncate the text -->
-                    <span class="text-sm">{{ formatTime(createTime) }}</span>
-                  </td>
-                  <td v-if="session.isAdmin">
-                    <div class="tooltip" data-tip="Edit">
+    <div v-else class="space-y-4">
+      <h2 class="text-xl font-bold flex items-center gap-2 text-base-content px-1">
+         <i-uil-megaphone />
+         {{ $t("components.systemAnn.ann") }}
+      </h2>
+
+      <data-status-wrapper :error="error as AxiosError | undefined" :is-loading="isLoading">
+        <template #loading>
+           <div class="skeleton h-20 w-full mb-3 rounded-xl" v-for="i in 3" :key="i"></div>
+        </template>
+        <template #data>
+           <div class="flex flex-col gap-3">
+             <div v-for="{ title, createTime, annId } in announcements" :key="annId" class="card bg-base-100 shadow-sm border border-base-200">
+               <div class="card-body p-4">
+                 <div class="flex justify-between items-start gap-3">
+                   <div class="min-w-0 flex-1">
+                     <h3 class="font-bold text-lg leading-snug">
+                       <router-link :to="`/announcements/${annId}`" class="hover:underline hover:text-primary transition-colors block">
+                         {{ title }}
+                       </router-link>
+                     </h3>
+                     <div class="text-xs text-base-content/60 mt-1">
+                       {{ formatTime(createTime) }}
+                     </div>
+                   </div>
+                   <div v-if="session.isAdmin" class="shrink-0">
                       <router-link
-                        class="btn btn-ghost btn-sm btn-circle"
+                        class="btn btn-ghost btn-xs btn-circle"
                         :to="`/course/Public/announcements/${annId}/edit`"
                       >
-                        <i-uil-edit class="lg:h-5 lg:w-5" />
+                        <i-uil-edit />
                       </router-link>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </template>
-        </data-status-wrapper>
-      </div>
+                   </div>
+                 </div>
+               </div>
+             </div>
+           </div>
+        </template>
+      </data-status-wrapper>
     </div>
-  </div>
 </template>

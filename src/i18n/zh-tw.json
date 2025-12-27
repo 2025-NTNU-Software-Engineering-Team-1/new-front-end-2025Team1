@@ -1,4 +1,12 @@
 {
+  "general": {
+    "back": "返回",
+    "save": "儲存",
+    "cancel": "取消",
+    "edit": "編輯",
+    "delete": "刪除",
+    "confirm": "確認"
+  },
   "settings": {
     "title": "設定",
     "selectLang": "選擇語言"
@@ -36,6 +44,32 @@
         "title": "新增作業",
         "preview": "預覽"
       }
+    },
+    "courseSideBar": {
+        "admin": "管理",
+        "members": "成員",
+        "settings": "課程設定",
+        "aiManagement": "AI 管理",
+        "loginRecords": "登入紀錄"
+    },
+    "settings": {
+        "title": "課程設定",
+        "generalInfo": "基本資訊",
+        "appearance": "外觀設定",
+        "preview": "預覽",
+        "previewDesc": "這是課程圖示在儀表板上的樣子。",
+        "courseColor": "課程代表色",
+        "courseEmoji": "課程圖示",
+        "courseName": "課程名稱",
+        "teacher": "教師",
+        "save": "儲存設定",
+        "saved": "設定已儲存。",
+        "presets": "預設選項",
+        "standard": "標準色系",
+        "morandi": "莫蘭迪色系",
+        "custom": "自訂",
+        "emojiPlaceholder": "輸入或貼上任何 Emoji",
+        "teacherReadOnly": "無法在此變更課程擁有者"
     },
     "aisetting": {
       "setupPage": "設置",
@@ -628,6 +662,26 @@
       "err": "請嘗試重新載入",
       "err_unknown": "未知錯誤",
       "err_failed_load": "載入失敗",
+      "courseSideBar": {
+        "admin": "管理",
+        "members": "成員",
+        "settings": "課程設定",
+        "aiManagement": "AI 管理",
+        "loginRecords": "登入紀錄"
+      },
+      "settings": {
+        "title": "課程設定",
+        "generalInfo": "基本資訊",
+        "appearance": "外觀設定",
+        "preview": "預覽",
+        "previewDesc": "這是課程圖示在儀表板上的樣子。",
+        "courseColor": "課程代表色",
+        "courseEmoji": "課程圖示",
+        "courseName": "課程名稱",
+        "teacher": "教師",
+        "save": "儲存設定",
+        "saved": "設定已儲存。"
+      },
       "err_failed_find": "無法找到該貼文。",
       "err_failed_reply": "回覆失敗",
       "err_network": "網路錯誤。 ",
@@ -726,6 +780,16 @@
     "validation": {
       "not_blank": "不可為空白或僅空白字元",
       "contains_invisible": "包含不可見或控制字元"
+    },
+    "studentDashboard": {
+      "welcome": "這是您目前的課程動態。",
+      "upcomingDeadlines": "近期截止",
+      "noPendingHomework": "無待繳作業",
+      "noPendingHomeworkDesc": "太棒了！您目前沒有即將截止的作業。",
+      "myCourses": "我的課程",
+      "viewAllCourses": "查看所有課程",
+      "noCourses": "您尚未加入任何課程。",
+      "joinCourse": "加入課程"
     },
     "ann": {
       "form": {
@@ -870,7 +934,8 @@
       "discussion": "討論區",
       "members": "成員",
       "aisetting": "AI 管理",
-      "loginRecords": "登入紀錄"
+      "loginRecords": "登入紀錄",
+      "settings": "課程設定"
     },
     "systemAnn": {
       "ann": "公告",

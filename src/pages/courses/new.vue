@@ -8,14 +8,17 @@ import useVuelidate from "@vuelidate/core";
 import { required, maxLength, helpers } from "@vuelidate/validators";
 import { useI18n } from "vue-i18n";
 import { containsInvisible } from "@/utils/validators";
+import AppearanceSelector from "@/components/Course/AppearanceSelector.vue";
 
 const router = useRouter();
 const { t } = useI18n();
 useTitle(`New Course | Normal OJ`);
 
-const newCourse = reactive<CourseForm>({
+const newCourse = reactive<CourseForm & { color: string; emoji: string }>({
   course: "",
   teacher: "",
+  color: "",
+  emoji: "",
 });
 const isLoading = ref(false);
 const errorMsg = ref("");
@@ -41,7 +44,12 @@ async function submit() {
 
   isLoading.value = true;
   try {
-    await api.Course.create({ ...newCourse });
+    await api.Course.create({ 
+      course: newCourse.course,
+      teacher: newCourse.teacher,
+      color: newCourse.color,
+      emoji: newCourse.emoji,
+    });
     router.push(`/course/${newCourse.course}`);
   } catch (error) {
     if (axios.isAxiosError(error) && error.response?.data?.message) {
@@ -69,35 +77,48 @@ async function submit() {
           </div>
         </div>
 
-        <div class="form-control w-full max-w-xs">
-          <label class="label">
-            <span class="label-text">{{ $t("courses.new.nameField") }}</span>
-          </label>
-          <input
-            v-model="v$.course.$model"
-            type="text"
-            :class="['input-bordered input w-full max-w-xs', v$.course.$error && 'input-error']"
-          />
-          <label class="label" v-show="v$.course.$error">
-            <span class="label-text-alt text-error" v-text="v$.course.$errors[0]?.$message" />
-          </label>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <!-- Left: Form Fields -->
+          <div class="space-y-4">
+            <div class="form-control w-full">
+              <label class="label">
+                <span class="label-text">{{ $t("courses.new.nameField") }}</span>
+              </label>
+              <input
+                v-model="v$.course.$model"
+                type="text"
+                :class="['input-bordered input w-full', v$.course.$error && 'input-error']"
+              />
+              <label class="label" v-show="v$.course.$error">
+                <span class="label-text-alt text-error" v-text="v$.course.$errors[0]?.$message" />
+              </label>
+            </div>
+
+            <div class="form-control w-full">
+              <label class="label">
+                <span class="label-text">{{ $t("courses.new.teacherField") }}</span>
+              </label>
+              <input
+                v-model="v$.teacher.$model"
+                type="text"
+                :class="['input-bordered input w-full', v$.teacher.$error && 'input-error']"
+              />
+              <label class="label" v-show="v$.teacher.$error">
+                <span class="label-text-alt text-error" v-text="v$.teacher.$errors[0]?.$message" />
+              </label>
+            </div>
+          </div>
+
+          <!-- Right: Appearance Selector -->
+          <div class="pt-2">
+             <appearance-selector 
+               @update:color="newCourse.color = $event"
+               @update:emoji="newCourse.emoji = $event"
+             />
+          </div>
         </div>
 
-        <div class="form-control w-full max-w-xs">
-          <label class="label">
-            <span class="label-text">{{ $t("courses.new.teacherField") }}</span>
-          </label>
-          <input
-            v-model="v$.teacher.$model"
-            type="text"
-            :class="['input-bordered input w-full max-w-xs', v$.teacher.$error && 'input-error']"
-          />
-          <label class="label" v-show="v$.teacher.$error">
-            <span class="label-text-alt text-error" v-text="v$.teacher.$errors[0]?.$message" />
-          </label>
-        </div>
-
-        <div class="mt-4 flex">
+        <div class="mt-8 flex justify-end">
           <button :class="['btn btn-success', isLoading && 'loading']" @click="submit">
             <i-uil-file-upload-alt class="mr-1 lg:h-5 lg:w-5" /> {{ $t("courses.new.submit") }}
           </button>

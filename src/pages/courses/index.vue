@@ -7,6 +7,7 @@ import api from "@/models/api";
 import { useSession, UserRole } from "@/stores/session";
 import { useI18n } from "vue-i18n";
 import type { AxiosError } from "axios";
+import CourseAvatar from "@/components/Course/CourseAvatar.vue";
 
 import useInteractions from "@/composables/useInteractions";
 
@@ -121,17 +122,25 @@ async function handleJoinCourse() {
               </tr>
             </thead>
             <tbody>
-              <tr v-for="{ course, teacher } in displayedCourses" :key="course" class="hover">
+              <tr v-for="{ course, teacher, color, emoji } in displayedCourses" :key="course" class="hover transition-colors">
                 <td
                   :class="{
-                    'min-w-[10rem] max-w-[12rem] whitespace-pre-wrap': !isDesktop,
+                    'min-w-[14rem] max-w-[16rem] whitespace-pre-wrap': !isDesktop,
                   }"
                 >
-                  <router-link :to="`/course/${course}`" class="link link-hover text-lg">{{
-                    course
-                  }}</router-link>
+                  <div class="flex items-center gap-3">
+                    <course-avatar 
+                      :course-name="course" 
+                      :course-color="color" 
+                      :course-emoji="emoji" 
+                      size="md"
+                    />
+                    <router-link :to="`/course/${course}`" class="link link-hover text-lg font-bold text-base-content">
+                      {{ course }}
+                    </router-link>
+                  </div>
                 </td>
-                <td>{{ teacher.username }}</td>
+                <td class="align-middle text-base-content/80">{{ teacher.username }}</td>
               </tr>
             </tbody>
           </table>

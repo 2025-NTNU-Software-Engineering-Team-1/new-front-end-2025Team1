@@ -24,6 +24,7 @@ const adminNavs =
         { name: t("components.courseSideBar.members"), path: "/members" },
         { name: t("components.courseSideBar.aisetting"), path: "/aisetting" },
         { name: t("components.courseSideBar.loginRecords"), path: "/login-records" },
+        { name: t("components.courseSideBar.settings"), path: "/settings" },
       ]
     : [];
 </script>

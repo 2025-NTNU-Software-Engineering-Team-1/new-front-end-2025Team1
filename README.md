@@ -84,12 +84,15 @@ Visit https://playwright.dev/docs/intro for more information. ✨
 To fix this:
 
 ```bash
-# 1. List all volumes
+# 1. Down the vue
+docker compose down vue
+
+# 2. List all volumes
 docker volume ls
 
-# 2. Find and remove the volume (usually named xxx_exclude or xxx_node_modules)
+# 3. Find and remove the volume (usually named xxx_exclude or xxx_node_modules)
 docker volume rm normal-oj-2025team1_exclude
 
-# 3. Rebuild and restart
+# 4. Rebuild and restart
 docker compose up -d --build vue
 ```

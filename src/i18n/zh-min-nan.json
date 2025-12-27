@@ -14,7 +14,7 @@
   "course": {
     "ann": {
       "index": {
-        "title": "公告",
+        "title": "放送",
         "table": {
           "title": "標題",
           "author": "發布者",
@@ -29,13 +29,32 @@
     },
     "hw": {
       "index": {
-        "title": "作業",
+        "title": "功課",
         "new": "新增"
       },
       "new": {
-        "title": "新增作業",
+        "title": "加新功課",
         "preview": "預覽"
       }
+    },
+    "settings": {
+        "title": "課的設定",
+        "generalInfo": "基本資料",
+        "appearance": "外觀設定",
+        "preview": "看起來像按呢",
+        "previewDesc": "這是代表圖佇儀表板頂懸的模樣。",
+        "courseColor": "代表色",
+        "courseEmoji": "代表圖",
+        "courseName": "課的名稱",
+        "teacher": "教師",
+        "save": "存起來",
+        "saved": "設定存好矣。",
+        "presets": "預設選項",
+        "standard": "標準色系",
+        "morandi": "莫蘭迪色系",
+        "custom": "自訂",
+        "emojiPlaceholder": "輸入抑是貼上任何 Emoji",
+        "teacherReadOnly": "無法度佇遮改課程擁有者"
     },
     "aisetting": {
       "setupPage": "設置",
@@ -505,7 +524,18 @@
         "teacher": "教師",
         "semester": "學期"
       },
-      "new": "新增"
+      "new": "加新",
+      "join": {
+        "title": "用代號加課",
+        "placeholder": "輸入代號",
+        "button": "參加",
+        "success": "成功加入課：{course}",
+        "errorEmpty": "請輸入代號",
+        "errorInvalid": "代號無效",
+        "errorAlreadyIn": "汝已經佇這个課矣",
+        "errorForbidden": "無法度用這个方式加課",
+        "errorGeneric": "加課的時陣發生錯誤"
+      }
     },
     "new": {
       "title": "新增課程",
@@ -807,8 +837,18 @@
       "aisetting": "AI 管理",
       "loginRecords": "登入紀錄"
     },
+    "studentDashboard": {
+      "welcome": "這係汝目前的課。",
+      "upcomingDeadlines": "強欲到期",
+      "noPendingHomework": "這馬無功課",
+      "noPendingHomeworkDesc": "讚喔！汝這馬無欲到期的功課。",
+      "myCourses": "我的課",
+      "viewAllCourses": "看全部的課",
+      "noCourses": "汝猶未加入任何課程。",
+      "joinCourse": "選課"
+    },
     "systemAnn": {
-      "ann": "公告",
+      "ann": "放送",
       "title": "標題",
       "createTime": "建立時間"
     },
@@ -826,8 +866,8 @@
       "button": "登入"
     },
     "sideBar": {
-      "home": "首頁",
-      "course": "課程",
+      "home": "頭頁",
+      "course": "課",
       "about": "關於",
       "admin": "管理",
       "profile": "個人"

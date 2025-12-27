@@ -9,6 +9,7 @@ export interface DiscussionPost {
   Reply_Count: number;
   Is_Pinned: boolean;
   Is_Closed?: boolean;
+  Is_Liked?: boolean;
   Content?: string;
   Category?: string;
   Is_Solved?: boolean;

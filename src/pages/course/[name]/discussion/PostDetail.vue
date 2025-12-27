@@ -122,6 +122,9 @@ const loadPostDetail = async () => {
         Problem_Id: postData.Problem_Id || postData.Problem_id || postData.problemId || "",
       };
 
+      // 設置用戶按讚狀態
+      userLikeStatus.value = postData.Is_Liked ?? false;
+
       // 正規化回覆數據，處理欄位名稱不一致的問題
       const rawReplies = postData.Replies || [];
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

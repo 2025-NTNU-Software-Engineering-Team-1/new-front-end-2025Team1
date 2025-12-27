@@ -47,7 +47,7 @@ const fontSizeClass = computed(() => {
 
 <template>
   <div
-    class="grid shrink-0 select-none place-items-center pb-1 leading-none text-white shadow-sm transition-transform"
+    class="grid shrink-0 place-items-center pb-1 leading-none text-white shadow-sm transition-transform select-none"
     :class="[sizeClasses, fontSizeClass]"
     :style="{ backgroundColor: displayColor }"
   >

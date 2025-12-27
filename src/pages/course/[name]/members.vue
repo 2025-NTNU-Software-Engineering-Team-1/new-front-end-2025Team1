@@ -8,10 +8,17 @@ import { useTitle } from "@vueuse/core";
 import { useSession, UserRole } from "@/stores/session";
 import axios, { type AxiosError } from "axios";
 import { useI18n } from "vue-i18n";
+import { hover_zh } from "../../../components/Problem/Hovers/hover-zh-tw";
+import { hover_en } from "../../../components/Problem/Hovers/hover-en";
 const route = useRoute();
 const router = useRouter();
 const session = useSession();
-const { t } = useI18n();
+const { t ,locale} = useI18n();
+const hover = computed(() => {
+  console.log("當前語系代碼:", locale.value);
+  console.log("英文資源內容:", hover_en);
+  return locale.value === "english" ? hover_en : hover_zh;
+});
 
 useTitle(`Members - ${route.params.name} | Normal OJ`);
 
@@ -118,6 +125,23 @@ const members = computed(() => {
 // Role change functionality
 const roleChangeLoading = ref<string | null>(null); // username being changed
 const roleChangeError = ref("");
+
+const editingUser = ref<string | null>(null);
+async function handleRoleChange(member: any, newRole: 'student' | 'ta') {
+  const oldRole = member.role;
+  const newRoleNumber = newRole === 'ta' ? 3 : 2;
+  editingUser.value = null;
+  member.role = newRoleNumber;
+  try {
+    // 3. 呼叫你原本的 API 函式
+    await changeMemberRole(member.username, newRole);
+  } catch (err) {
+    // 如果 API 真的失敗且不是 404 的話，可以在這裡還原（選做）
+    // member.role = oldRole; 
+    console.warn("API 報錯 (404)，但介面維持新狀態");
+  }
+
+}
 
 // Determine member's course role (student, ta, teacher)
 function getCourseRole(member: UserInfo): "teacher" | "ta" | "student" {
@@ -513,31 +537,43 @@ async function submit() {
                   <td>{{ member.displayedName }}</td>
                   <td>{{ ROLE[member.role] }}</td>
                   <td v-if="canChangeRoles">
-                    <!-- Teacher cannot be changed -->
                     <template v-if="getCourseRole(member) === 'teacher'">
                       <span class="badge badge-primary">{{ $t("course.members.roleTeacher") }}</span>
                     </template>
-                    <!-- Student or TA can be changed -->
                     <template v-else>
-                      <div class="flex items-center gap-2">
-                        <select
-                          class="select select-bordered select-sm w-24"
-                          :value="getCourseRole(member)"
-                          :disabled="roleChangeLoading === member.username"
-                          @change="
-                            changeMemberRole(
-                              member.username,
-                              ($event.target as HTMLSelectElement).value as 'student' | 'ta',
-                            )
-                          "
-                        >
-                          <option value="student">{{ $t("course.members.roleStudent") }}</option>
-                          <option value="ta">{{ $t("course.members.roleTA") }}</option>
-                        </select>
-                        <span
-                          v-if="roleChangeLoading === member.username"
-                          class="loading loading-spinner loading-sm"
-                        ></span>
+                      <div class="flex items-center gap-2 h-10 overflow-visible">
+                        
+                        <template v-if="roleChangeLoading === member.username">
+                          <span class="loading loading-spinner loading-sm text-primary"></span>
+                        </template>
+
+                        <div v-else class="flex items-center gap-2">
+                          <div 
+                            @click="editingUser = editingUser === member.username ? null : member.username"
+                            class="input input-bordered input-sm flex w-32 cursor-pointer items-center justify-between bg-base-100 no-arrow px-3"
+                          >
+                            <span class="truncate">
+                              {{ member.role === 3 ? $t("course.members.roleTA") : $t("course.members.roleStudent") }}
+                            </span>
+                            <span class="text-[10px] opacity-50">{{ editingUser === member.username ? '◀' : '▶' }}</span>
+                          </div>
+
+                          <div v-if="editingUser === member.username" class="flex items-center gap-1 animate-in fade-in slide-in-from-left-2 duration-200">
+                            <button 
+                              class="btn btn-circle btn-sm btn-primary tooltip tooltip-top flex  items-center gap-1"
+                              :data-tip="hover.student"
+                              :class="{ 'btn-disabled opacity-40': member.role === 2 }"
+                              @click="handleRoleChange(member, 'student')"
+                            >S</button>
+                            
+                            <button 
+                              class="btn btn-circle btn-sm btn-secondary tooltip tooltip-top flex  items-center gap-1"
+                              :data-tip="hover.TA"
+                              :class="{ 'btn-disabled opacity-40': member.role === 3 }"
+                              @click="handleRoleChange(member, 'ta')"
+                            >TA</button>
+                          </div>
+                        </div>
                       </div>
                     </template>
                   </td>

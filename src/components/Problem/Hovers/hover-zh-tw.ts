@@ -2,10 +2,10 @@ export const hover_zh = {
   //description
   setDescription: "test",
   //configuration
-  setConfiguration: "test",
-  allowedLanguages: "test",
-  maxZipSize: "test",
-  tags: "test",
+  setConfiguration: "測試",
+  allowedLanguages: "測試",
+  maxZipSize: "測試",
+  tags: "測試",
   quota: "test",
   aiTA: "test",
   aiModel: "test",
@@ -61,4 +61,7 @@ export const hover_zh = {
   setResourceData: "test",
   setResourceDataStudent: "test",
   setResourceDataTeacher: "test",
+  //member
+  student:"學生",
+  TA:"助教"
 };

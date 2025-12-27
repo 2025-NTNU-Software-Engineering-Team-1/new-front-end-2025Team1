@@ -17,7 +17,7 @@ import { assertFileSizeOK } from "@/utils/checkFileSize";
 
 const { t, locale } = useI18n();
 const hover = computed(() => {
-  return locale.value === "en" ? hover_en : hover_zh;
+  return locale.value === "english" ? hover_en : hover_zh;
 });
 
 // teacher file (interactive)

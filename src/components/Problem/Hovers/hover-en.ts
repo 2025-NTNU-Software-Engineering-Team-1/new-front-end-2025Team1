@@ -61,4 +61,7 @@ export const hover_en = {
   setResourceData: "test",
   setResourceDataStudent: "test",
   setResourceDataTeacher: "test",
+  //member
+  student:"student",
+  TA:"TA"
 };

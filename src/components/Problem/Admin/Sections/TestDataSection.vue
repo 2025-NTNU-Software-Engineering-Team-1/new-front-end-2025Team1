@@ -21,7 +21,7 @@ const route = useRoute();
 const isDrag = ref(false);
 const { t, locale } = useI18n();
 const hover = computed(() => {
-  return locale.value === "en" ? hover_en : hover_zh;
+  return locale.value === "english" ? hover_en : hover_zh;
 });
 // ==========================================
 // [CONFIG] Console Debug Mode

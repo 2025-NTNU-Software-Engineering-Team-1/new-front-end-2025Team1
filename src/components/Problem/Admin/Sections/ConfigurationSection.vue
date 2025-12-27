@@ -21,7 +21,7 @@ import api from "@/models/api";
 import { useI18n } from "vue-i18n";
 const { t, locale } = useI18n();
 const hover = computed(() => {
-  return locale.value === "en" ? hover_en : hover_zh;
+  return locale.value === "english" ? hover_en : hover_zh;
 });
 
 // ==========================================

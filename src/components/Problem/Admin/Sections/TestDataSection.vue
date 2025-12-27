@@ -65,6 +65,33 @@ if (!problem || !problem.value) {
 }
 
 // ==========================================
+// Testdata Validation Error State
+// ==========================================
+const testdataError = ref<string | null>(null);
+
+/**
+ * Checks if the filenames array contains macOS metadata files.
+ * macOS creates hidden files like `._filename` and `__MACOSX/` folder when zipping.
+ * These files can cause issues with testcase processing.
+ */
+function hasMacOSMetadataFiles(filenames: string[]): string[] {
+  const macosFiles: string[] = [];
+  for (const filename of filenames) {
+    // Check for __MACOSX directory (macOS resource fork folder)
+    if (filename.startsWith("__MACOSX/") || filename === "__MACOSX") {
+      macosFiles.push(filename);
+      continue;
+    }
+    // Check for ._ prefixed files (macOS extended attributes)
+    const basename = filename.split("/").pop() || "";
+    if (basename.startsWith("._")) {
+      macosFiles.push(filename);
+    }
+  }
+  return macosFiles;
+}
+
+// ==========================================
 // Computed Properties
 // ==========================================
 
@@ -141,12 +168,15 @@ watch(
     isDrag.value = false;
     const file = problem.value.assets?.testdataZip;
 
-    // Case 1: File removed
+    // Case 1: File removed - don't clear error (it might have been set by validation)
     if (!file) {
       logger.log("Testdata Zip removed, clearing tasks.");
       problem.value.testCaseInfo = { ...problem.value.testCaseInfo, tasks: [] };
       return;
     }
+
+    // New file uploaded - clear previous errors
+    testdataError.value = null;
 
     logger.group("Process Testdata Zip");
     logger.log("File Name", file.name);
@@ -158,21 +188,37 @@ watch(
       await reader.close();
 
       const filenames = entries.map(({ filename }) => filename);
+
+      // 2. Check for macOS metadata files (._* and __MACOSX/)
+      const macosFiles = hasMacOSMetadataFiles(filenames);
+      if (macosFiles.length > 0) {
+        const sampleFiles = macosFiles.slice(0, 3).join(", ");
+        const moreCount = macosFiles.length > 3 ? ` (and ${macosFiles.length - 3} more)` : "";
+        const msg = t("course.problems.macosZipDetected", {
+          files: sampleFiles + moreCount,
+        });
+        logger.error("macOS Metadata Files Detected", macosFiles);
+        testdataError.value = msg;
+        problem.value.assets!.testdataZip = null; // Clear invalid file
+        problem.value.testCaseInfo = { ...problem.value.testCaseInfo, tasks: [] };
+        return;
+      }
+
       const inputs = filenames.filter((f) => f.endsWith(".in"));
       const outputs = filenames.filter((f) => f.endsWith(".out"));
 
       logger.log("File Scan", { inputs: inputs.length, outputs: outputs.length });
 
-      // 2. Validate Symmetry
+      // 3. Validate Symmetry
       if (inputs.length !== outputs.length) {
         const msg = `Mismatch between Input (.in) and Output (.out) files.\n(in=${inputs.length}, out=${outputs.length})`;
         logger.error("Validation Failed", msg);
-        alert(msg);
+        testdataError.value = msg;
         problem.value.assets!.testdataZip = null; // Clear invalid file
         return;
       }
 
-      // 3. Parse Tasks based on naming convention (00, 01, 02...)
+      // 4. Parse Tasks based on naming convention (00, 01, 02...)
       let i = 0;
       const tasks = [];
 
@@ -198,19 +244,19 @@ watch(
         }
       }
 
-      // 4. Update Problem State
+      // 5. Update Problem State
       if (tasks.length > 0) {
         problem.value.testCaseInfo = { ...problem.value.testCaseInfo, tasks };
         logger.success("Tasks Updated", tasks);
       } else {
         const msg = "No valid test data found in the zip file (Expected structure: 00_xx.in).";
         logger.warn(msg);
-        alert(msg);
+        testdataError.value = msg;
         // Optional: clear file if invalid? keeping it for now as per original logic logic
       }
     } catch (err) {
       logger.error("Zip Processing Error", err);
-      alert("Failed to read the zip file. Please ensure it is a valid zip archive.");
+      testdataError.value = "Failed to read the zip file. Please ensure it is a valid zip archive.";
       problem.value.assets!.testdataZip = null;
     } finally {
       logger.groupEnd();
@@ -290,6 +336,13 @@ watch(
         </div>
       </div>
     </div>
+
+    <!-- Testdata Validation Error Display (same style as vuelidate errors) -->
+    <label
+      class="label text-error"
+      v-show="testdataError"
+      v-text="testdataError"
+    />
 
     <label
       class="label text-error"

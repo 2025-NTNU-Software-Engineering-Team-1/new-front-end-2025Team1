@@ -35,6 +35,25 @@
       "new": {
         "title": "加新功課",
         "preview": "預覽"
+      },
+      "stats": {
+        "pageTitle": "功課統計",
+        "title": "統計",
+        "scoreboard": "記分板",
+        "sortBy": "排序",
+        "username": "使用者名稱",
+        "sumDesc": "總分 (懸->低)",
+        "sumAsc": "總分 (低->懸)",
+        "begin": "開始時間",
+        "end": "結束時間",
+        "fetch": "更新",
+        "export": "匯出",
+        "tries": "擺",
+        "table": {
+          "user": "使用者",
+          "avg": "平均",
+          "sum": "總分"
+        }
       }
     },
     "settings": {

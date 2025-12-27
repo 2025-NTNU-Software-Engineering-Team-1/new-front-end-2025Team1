@@ -43,6 +43,25 @@
       "new": {
         "title": "New Homework",
         "preview": "Preview"
+      },
+      "stats": {
+        "pageTitle": "Homework Stats",
+        "title": "Stats",
+        "scoreboard": "Scoreboard",
+        "sortBy": "Sort By",
+        "username": "Username",
+        "sumDesc": "Sum in descending",
+        "sumAsc": "Sum in ascending",
+        "begin": "Begin",
+        "end": "End",
+        "fetch": "Fetch",
+        "export": "Export",
+        "tries": "tries",
+        "table": {
+          "user": "User",
+          "avg": "Avg",
+          "sum": "Sum"
+        }
       }
     },
     "courseSideBar": {

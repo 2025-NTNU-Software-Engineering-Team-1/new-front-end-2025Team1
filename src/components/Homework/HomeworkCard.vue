@@ -50,7 +50,14 @@ const state = computed(() => {
     <div class="card-body">
       <div class="flex flex-col items-start justify-between sm:flex-row">
         <div class="lg:text-2x card-title md:mb-8 md:text-xl">
-          {{ homework.name }}
+          <router-link
+            v-if="homework.id && !preview"
+            :to="`/course/${$route.params.name}/homework/${homework.id}`"
+            class="hover:underline"
+          >
+            {{ homework.name }}
+          </router-link>
+          <span v-else>{{ homework.name }}</span>
           <div :class="['badge', STATUS_CLASS[state]]">{{ state }}</div>
         </div>
         <due-countdown v-if="state === STATUS_LABEL.RUNNING" class="mt-2" :due="homework.end" />
@@ -59,28 +66,19 @@ const state = computed(() => {
       <div class="flex flex-wrap lg:flex-nowrap lg:gap-x-8">
         <div class="mb-8 w-full lg:flex-[2_1_0%]">
           <div class="card-title">{{ t("components.hw.card.availability.text") }}</div>
-          <div class="mt-2 flex flex-wrap overflow-x-auto lg:flex-nowrap">
-            <table v-if="isDesktop" class="table-compact table w-full">
-              <thead>
-                <tr>
-                  <th>{{ t("components.hw.card.availability.from") }}</th>
-                  <th>{{ t("components.hw.card.availability.due") }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>{{ formatTime(homework.start) }}</td>
-                  <td>{{ formatTime(homework.end) }}</td>
-                </tr>
-              </tbody>
-            </table>
-            <div v-else class="flex flex-wrap text-sm">
-              <div>
-                <span>{{ formatTime(homework.start) }}</span>
+          <div class="mt-2 text-sm">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div class="flex flex-col">
+                <span class="text-base-content/60 mb-1 text-xs font-bold uppercase">{{
+                  t("components.hw.card.availability.from")
+                }}</span>
+                <span class="font-mono text-base">{{ formatTime(homework.start) }}</span>
               </div>
-              ~
-              <div>
-                <span>{{ formatTime(homework.end) }}</span>
+              <div class="flex flex-col">
+                <span class="text-base-content/60 mb-1 text-xs font-bold uppercase">{{
+                  t("components.hw.card.availability.due")
+                }}</span>
+                <span class="font-mono text-base">{{ formatTime(homework.end) }}</span>
               </div>
             </div>
           </div>

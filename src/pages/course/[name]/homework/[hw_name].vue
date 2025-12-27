@@ -9,21 +9,16 @@ import type { AxiosError } from "axios";
 
 const route = useRoute();
 const courseName = route.params.name as string;
-const hwName = route.params.hw_name as string;
+// The route param is named hw_name, but it contains the homework ID when linked from Dashboard/List
+const hwId = route.params.hw_name as string;
 
-useTitle(`${hwName} - ${courseName} | Normal OJ`);
+useTitle(`Homework - ${courseName} | Normal OJ`);
 
-// Fetch data
-// Note: We fetch ALL homeworks and filter because there isn't a single homework API yet?
-// Wait, user just said "HW沒有homework/<homework>這個路由".
-// So I should probably use the list API or check if there is a way to get one.
-// The list API `/course/{name}/homework` returns all. It's efficient enough for now (~10-20 HWs).
-const { data, error, isLoading } = useAxios<HomeworkList>(`/course/${courseName}/homework`, fetcher);
-
-const homework = computed(() => {
-  if (!data.value) return null;
-  return data.value.find((h) => h.name === hwName);
-});
+// Fetch single homework by ID
+// Backend API: GET /homework/<id> returns { data: Homework } (unwrapped by fetcher typically)
+// We use 'any' for now or HomeworkListItem if imported, to avoid type issues until confirmed.
+// Assuming fetcher unwraps response.data.data -> Homework object
+const { data: homework, error, isLoading } = useAxios<HomeworkListItem>(`/homework/${hwId}`, fetcher);
 
 const {
   problemId2Meta,
@@ -41,7 +36,7 @@ const {
             <i-uil-arrow-left />
             {{ $t("course.hw.index.title") }}
           </router-link>
-          <h1 class="card-title mt-2 text-2xl">{{ hwName }}</h1>
+          <h1 class="card-title mt-2 text-2xl">{{ homework?.name }}</h1>
         </div>
 
         <data-status-wrapper

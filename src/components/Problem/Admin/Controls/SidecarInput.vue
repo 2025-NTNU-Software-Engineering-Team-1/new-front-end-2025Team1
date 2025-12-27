@@ -239,7 +239,7 @@ function commitEdit() {
             <textarea
               rows="1"
               placeholder="--port=3306, --host=0.0.0.0"
-              class="add-form-textarea textarea textarea-bordered textarea-sm w-full resize-none overflow-hidden break-all text-xs leading-normal"
+              class="add-form-textarea textarea textarea-bordered textarea-sm w-full resize-none overflow-hidden text-xs leading-normal break-all"
               v-model="newArgs"
               @input="autoResize"
               @focus="autoResize"
@@ -279,7 +279,7 @@ function commitEdit() {
             <textarea
               rows="1"
               placeholder="MYSQL_ROOT_PASSWORD=secret&#10;MYSQL_DATABASE=testdb"
-              class="add-form-textarea textarea textarea-bordered textarea-sm w-full resize-none overflow-hidden break-all text-xs leading-normal"
+              class="add-form-textarea textarea textarea-bordered textarea-sm w-full resize-none overflow-hidden text-xs leading-normal break-all"
               v-model="newEnv"
               @input="autoResize"
               @focus="autoResize"
@@ -331,16 +331,16 @@ function commitEdit() {
         <tbody>
           <template v-for="(sidecar, idx) in modelValue" :key="idx">
             <tr class="hover align-top">
-              <td class="whitespace-normal break-all py-1 font-mono text-sm font-bold">
+              <td class="py-1 font-mono text-sm font-bold break-all whitespace-normal">
                 {{ sidecar.name }}
               </td>
-              <td class="whitespace-normal break-all py-1 font-mono text-sm opacity-80">
+              <td class="py-1 font-mono text-sm break-all whitespace-normal opacity-80">
                 {{ sidecar.image }}
               </td>
-              <td class="whitespace-pre-wrap break-all py-1 font-mono text-xs opacity-70">
+              <td class="py-1 font-mono text-xs break-all whitespace-pre-wrap opacity-70">
                 {{ getSidecarArgs(sidecar) || "-" }}
               </td>
-              <td class="whitespace-normal break-all py-1 font-mono text-xs opacity-70">
+              <td class="py-1 font-mono text-xs break-all whitespace-normal opacity-70">
                 <span v-if="sidecar.env && Object.keys(sidecar.env).length > 0">
                   {{ Object.keys(sidecar.env).length }}
                   {{ t("course.problems.sideCarvars") }}
@@ -372,7 +372,7 @@ function commitEdit() {
                     </label>
                     <textarea
                       rows="1"
-                      class="auto-resize-textarea textarea textarea-bordered textarea-sm w-full resize-none overflow-hidden break-all leading-normal"
+                      class="auto-resize-textarea textarea textarea-bordered textarea-sm w-full resize-none overflow-hidden leading-normal break-all"
                       v-model="editArgs"
                       maxlength="2048"
                       placeholder="--port=3306, --host=0.0.0.0"
@@ -386,7 +386,7 @@ function commitEdit() {
                     </label>
                     <textarea
                       rows="1"
-                      class="auto-resize-textarea textarea textarea-bordered textarea-sm w-full resize-none overflow-hidden break-all leading-normal"
+                      class="auto-resize-textarea textarea textarea-bordered textarea-sm w-full resize-none overflow-hidden leading-normal break-all"
                       v-model="editEnv"
                       maxlength="2048"
                       placeholder="KEY=VALUE"

@@ -89,7 +89,7 @@ const sortedAnnouncements = computed(() => {
                       <span v-if="pinned" class="text-lg" title="置頂">📌</span>
                       <router-link
                         :to="`/course/${$route.params.name}/announcements/${annId}`"
-                        class="text-base-content/80 dark:text-base-content/80 visited:text-base-content/80 dark:visited:text-base-content/80 block min-w-0 whitespace-normal break-words hover:underline"
+                        class="text-base-content/80 dark:text-base-content/80 visited:text-base-content/80 dark:visited:text-base-content/80 block min-w-0 break-words whitespace-normal hover:underline"
                       >
                         {{ title }}
                       </router-link>

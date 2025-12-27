@@ -461,7 +461,7 @@ watch(areRestrictionsVisible, (newVal) => {
                 <transition name="fade">
                   <div
                     v-if="showReminder"
-                    class="group absolute -right-2 -top-2 z-10 flex animate-bounce cursor-pointer items-center justify-center hover:animate-none"
+                    class="group absolute -top-2 -right-2 z-10 flex animate-bounce cursor-pointer items-center justify-center hover:animate-none"
                     title="Active restrictions found"
                     @click="areRestrictionsVisible = true"
                   >
@@ -530,11 +530,11 @@ watch(areRestrictionsVisible, (newVal) => {
               >
                 <div>
                   <div
-                    class="mb-6 flex cursor-pointer select-none items-center gap-3"
+                    class="mb-6 flex cursor-pointer items-center gap-3 select-none"
                     @click="isLanguagesExpanded = !isLanguagesExpanded"
                   >
                     <div class="bg-primary h-6 w-1 rounded-full"></div>
-                    <span class="text-base-content/80 text-lg font-bold uppercase tracking-wide"
+                    <span class="text-base-content/80 text-lg font-bold tracking-wide uppercase"
                       >Allowed Languages</span
                     >
                     <span class="bg-base-300 text-base-content/60 rounded px-2 py-1 font-mono text-xs">{{
@@ -566,11 +566,11 @@ watch(areRestrictionsVisible, (newVal) => {
                 <div class="grid grid-cols-1 gap-10 lg:grid-cols-2">
                   <div class="space-y-6">
                     <div
-                      class="mb-2 flex cursor-pointer select-none items-center gap-3"
+                      class="mb-2 flex cursor-pointer items-center gap-3 select-none"
                       @click="isLibraryExpanded = !isLibraryExpanded"
                     >
                       <div class="bg-secondary h-6 w-1 rounded-full"></div>
-                      <span class="text-base-content/80 text-lg font-bold uppercase tracking-wide"
+                      <span class="text-base-content/80 text-lg font-bold tracking-wide uppercase"
                         >Static Analysis</span
                       >
                       <span
@@ -594,7 +594,7 @@ watch(areRestrictionsVisible, (newVal) => {
                           <div class="flex items-center justify-between">
                             <span class="text-base-content/90 text-sm font-bold">{{ s.label }}</span>
                             <div
-                              class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider"
+                              class="flex items-center gap-2 text-[10px] font-bold tracking-wider uppercase"
                             >
                               <template v-if="s.mode === 'whitelist'">
                                 <span
@@ -622,7 +622,7 @@ watch(areRestrictionsVisible, (newVal) => {
                             <span
                               v-for="sym in s.items"
                               :key="sym"
-                              class="bg-base-200/50 text-base-content/80 hover:text-primary hover:bg-base-200 inline-flex select-none items-center rounded px-2 py-1 font-mono text-xs transition-colors"
+                              class="bg-base-200/50 text-base-content/80 hover:text-primary hover:bg-base-200 inline-flex items-center rounded px-2 py-1 font-mono text-xs transition-colors select-none"
                             >
                               {{ sym }}
                             </span>
@@ -640,11 +640,11 @@ watch(areRestrictionsVisible, (newVal) => {
 
                   <div class="space-y-6">
                     <div
-                      class="mb-2 flex cursor-pointer select-none items-center gap-3"
+                      class="mb-2 flex cursor-pointer items-center gap-3 select-none"
                       @click="isNetworkExpanded = !isNetworkExpanded"
                     >
                       <div class="bg-warning h-6 w-1 rounded-full"></div>
-                      <span class="text-base-content/80 text-lg font-bold uppercase tracking-wide"
+                      <span class="text-base-content/80 text-lg font-bold tracking-wide uppercase"
                         >Network Access</span
                       >
                       <span
@@ -668,7 +668,7 @@ watch(areRestrictionsVisible, (newVal) => {
                             >
 
                             <div
-                              class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider"
+                              class="flex items-center gap-2 text-[10px] font-bold tracking-wider uppercase"
                             >
                               <template v-if="externalConfig.mode === 'whitelist'">
                                 <span
@@ -691,7 +691,7 @@ watch(areRestrictionsVisible, (newVal) => {
                               <span
                                 v-for="ip in externalConfig.ips"
                                 :key="ip"
-                                class="bg-base-200/50 text-base-content/80 hover:text-primary inline-flex select-none items-center rounded px-2 py-1 font-mono text-xs transition-colors"
+                                class="bg-base-200/50 text-base-content/80 hover:text-primary inline-flex items-center rounded px-2 py-1 font-mono text-xs transition-colors select-none"
                               >
                                 {{ ip }}
                               </span>
@@ -709,7 +709,7 @@ watch(areRestrictionsVisible, (newVal) => {
                               <span
                                 v-for="url in externalConfig.urls"
                                 :key="url"
-                                class="bg-base-200/50 text-base-content/80 hover:text-primary inline-flex h-auto select-none items-center break-all rounded px-2 py-1 text-left font-mono text-xs transition-colors"
+                                class="bg-base-200/50 text-base-content/80 hover:text-primary inline-flex h-auto items-center rounded px-2 py-1 text-left font-mono text-xs break-all transition-colors select-none"
                               >
                                 {{ url }}
                               </span>
@@ -722,7 +722,7 @@ watch(areRestrictionsVisible, (newVal) => {
 
                         <div v-if="sidecarList.length > 0">
                           <div
-                            class="text-base-content/40 mb-2 pl-1 text-xs font-bold uppercase tracking-widest"
+                            class="text-base-content/40 mb-2 pl-1 text-xs font-bold tracking-widest uppercase"
                           >
                             Sidecar Services
                           </div>
@@ -754,10 +754,10 @@ watch(areRestrictionsVisible, (newVal) => {
                                   <span class="text-lg">💻</span>
                                 </div>
                                 <div class="min-w-0 flex-1">
-                                  <div class="text-base-content/90 break-all text-sm font-bold">
+                                  <div class="text-base-content/90 text-sm font-bold break-all">
                                     {{ car.name }}
                                   </div>
-                                  <div class="text-base-content/50 break-all font-mono text-xs">
+                                  <div class="text-base-content/50 font-mono text-xs break-all">
                                     Image: {{ car.image }}
                                   </div>
                                 </div>
@@ -774,7 +774,7 @@ watch(areRestrictionsVisible, (newVal) => {
                                   <span
                                     v-for="(arg, argIdx) in car.args"
                                     :key="argIdx"
-                                    class="bg-base-200 text-base-content/70 h-auto break-all rounded px-1.5 py-0.5 text-left font-mono text-[10px]"
+                                    class="bg-base-200 text-base-content/70 h-auto rounded px-1.5 py-0.5 text-left font-mono text-[10px] break-all"
                                   >
                                     {{ arg }}
                                   </span>

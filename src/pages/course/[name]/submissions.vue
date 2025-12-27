@@ -188,7 +188,7 @@ async function rejudgeAll() {
   };
   const qs = queryString.stringify(query, { skipNull: true, skipEmptyString: true });
   const url = `/submission?${qs}`;
-  let allSubmissions: any[] = [];
+  let allSubmissions: SubmissionListItem[] = [];
   try {
     const { data } = await fetcher.get<GetSubmissionListResponse>(url);
     allSubmissions = data?.submissions || [];

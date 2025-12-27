@@ -64,6 +64,7 @@ const acceptedFormat = computed<AcceptedFormat>(() => {
   const fmt = (problem.value as any)?.config?.acceptedFormat;
   return fmt === "zip" ? "zip" : "code";
 });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const aiChatEnabled = computed(() => Boolean((problem.value as any)?.config?.aiVTuber));
 
 const lang = useStorage(LOCAL_STORAGE_KEY.LAST_USED_LANG, -1);

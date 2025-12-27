@@ -192,7 +192,6 @@ onMounted(async () => {
 
   // 2. Timeline Logic
   const landTime = ANIM_CONFIG.START_DELAY + ANIM_CONFIG.FLIGHT_DURATION * 0.95;
-  const cracksEndTime = landTime + ANIM_CONFIG.IMPACT_VISIBLE_MS;
   const hintStartTime = landTime + ANIM_CONFIG.HINT_DELAY_MS;
 
   // Step A: Trigger Flying animation
@@ -366,7 +365,7 @@ const openJSON = ref(false);
                 class="animate-bounce-horizontal absolute right-full z-50 mr-4 w-max rounded bg-black px-3 py-2 text-sm font-bold text-white shadow-lg dark:bg-white dark:text-black"
               >
                 <div
-                  class="bg-info absolute -right-1 top-1/2 h-3 w-3 -translate-y-1/2 rotate-45 transform"
+                  class="bg-info absolute top-1/2 -right-1 h-3 w-3 -translate-y-1/2 rotate-45 transform"
                 ></div>
                 👋 Click here for Manual!
               </div>

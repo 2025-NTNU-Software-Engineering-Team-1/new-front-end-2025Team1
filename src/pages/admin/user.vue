@@ -219,7 +219,7 @@ const editingTitle = computed(() => t("admin.user.editing", { user: edittingUser
         <label class="label">
           <span
             :class="[
-              'label-text-alt whitespace-normal break-words text-sm',
+              'label-text-alt text-sm break-words whitespace-normal',
               v$.password.$error && 'text-error',
             ]"
           >

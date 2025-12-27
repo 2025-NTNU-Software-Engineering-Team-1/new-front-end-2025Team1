@@ -8,17 +8,10 @@ import { useTitle } from "@vueuse/core";
 import { useSession, UserRole } from "@/stores/session";
 import axios, { type AxiosError } from "axios";
 import { useI18n } from "vue-i18n";
-import { hover_zh } from "../../../components/Problem/Hovers/hover-zh-tw";
-import { hover_en } from "../../../components/Problem/Hovers/hover-en";
 const route = useRoute();
 const router = useRouter();
 const session = useSession();
-const { t, locale } = useI18n();
-const hover = computed(() => {
-  console.log("當前語系代碼:", locale.value);
-  console.log("英文資源內容:", hover_en);
-  return locale.value === "english" ? hover_en : hover_zh;
-});
+const { t } = useI18n();
 
 useTitle(`Members - ${route.params.name} | Normal OJ`);
 
@@ -127,7 +120,7 @@ const roleChangeLoading = ref<string | null>(null); // username being changed
 const roleChangeError = ref("");
 
 const editingUser = ref<string | null>(null);
-async function handleRoleChange(member: any, newRole: "student" | "ta") {
+async function handleRoleChange(member: UserInfo, newRole: "student" | "ta") {
   editingUser.value = null;
 
   if (!data.value) return;
@@ -157,7 +150,7 @@ async function handleRoleChange(member: any, newRole: "student" | "ta") {
 
   try {
     await changeMemberRole(member.username, newRole);
-  } catch (err) {
+  } catch {
     // Rollback on error - restore original arrays
     if (data.value) {
       data.value.students = originalStudents;
@@ -196,9 +189,9 @@ const removeError = ref("");
 
 // Confirm dialog state
 const showRemoveConfirmDialog = ref(false);
-const memberToRemove = ref<any>(null);
+const memberToRemove = ref<UserInfo | null>(null);
 
-function openRemoveConfirmDialog(member: any) {
+function openRemoveConfirmDialog(member: UserInfo) {
   memberToRemove.value = member;
   showRemoveConfirmDialog.value = true;
 }

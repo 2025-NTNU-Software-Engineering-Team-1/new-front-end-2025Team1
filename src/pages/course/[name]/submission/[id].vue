@@ -187,6 +187,7 @@ const isZipSubmission = computed(() => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (problem.value as any)?.config?.acceptedFormat === "zip";
 });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const aiChatEnabled = computed(() => Boolean((problem.value as any)?.config?.aiVTuber));
 const aiProblemId = computed(() =>
   submission.value?.problemId != null ? String(submission.value.problemId) : "",

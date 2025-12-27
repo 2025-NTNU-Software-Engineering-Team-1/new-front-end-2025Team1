@@ -11,7 +11,14 @@ import { useTitle } from "@vueuse/core";
 
 useTitle("Admin - User | Normal OJ");
 const { t } = useI18n();
-const users = ref<unknown[] | undefined>([]);
+
+interface User {
+  username: string;
+  displayedName: string;
+  role: number;
+}
+
+const users = ref<User[] | undefined>([]);
 const fetchError = ref<unknown>(null);
 const fetchLoading = ref<boolean>(false);
 async function execute() {
@@ -19,10 +26,18 @@ async function execute() {
   try {
     const res = await fetcher.get("/user");
     // API response could be { data: [...] } or the array directly
-    users.value =
-      (res as { data?: { data?: unknown[] } | unknown[] }).data?.data ??
-      (res as { data?: unknown[] }).data ??
-      (res as unknown[]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = (res as any).data;
+    if (Array.isArray(data)) {
+      users.value = data;
+    } else if (data && Array.isArray(data.data)) {
+      users.value = data.data;
+    } else if (Array.isArray(res)) {
+      // access response directly if interceptor merged it?
+      // actually fetcher.get returns AxiosResponse, but interceptor spreads .data
+      // simpler to trust .data or the object itself if interceptor worked
+      users.value = res as unknown as User[];
+    }
   } catch (e) {
     fetchError.value = e;
   } finally {

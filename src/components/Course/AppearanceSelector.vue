@@ -81,6 +81,8 @@ watch(selectedEmoji, (val) => emit("update:emoji", val));
 // Initialize
 emit("update:color", selectedColor.value);
 emit("update:emoji", selectedEmoji.value);
+
+const emojiTextClass = ref("");
 </script>
 
 <template>

@@ -530,7 +530,8 @@ const rules = {
   },
 };
 
-const v$ = useVuelidate(rules, reactive(problem.value), { $autoDirty: true });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const v$ = useVuelidate(rules, reactive(problem.value) as any, { $autoDirty: true });
 provide("v$", v$);
 
 function update<K extends keyof ProblemForm>(key: K, value: ProblemForm[K]) {

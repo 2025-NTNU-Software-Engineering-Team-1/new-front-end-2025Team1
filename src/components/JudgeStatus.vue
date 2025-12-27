@@ -8,7 +8,9 @@ const props = defineProps<Props>();
 </script>
 
 <template>
-  <span :style="{ color: SUBMISSION_STATUS_REPR[props.status]?.color ?? '#666666' }">
-    {{ SUBMISSION_STATUS_REPR[props.status]?.label ?? "Unknown" }}
+  <span
+    :style="{ color: (SUBMISSION_STATUS_REPR as any)[props.status as unknown as number]?.color ?? '#666666' }"
+  >
+    {{ (SUBMISSION_STATUS_REPR as any)[props.status as unknown as number]?.label ?? "Unknown" }}
   </span>
 </template>

@@ -304,7 +304,7 @@ const langOptions = computed<LangOption[]>(() => {
     }
   });
   if (availables.length === 1) {
-    form.lang.value = availables[0].value;
+    form.lang = availables[0].value;
   }
   return availables;
 });
@@ -314,7 +314,7 @@ watchEffect(() => {
     const detectedLang = hljs.highlightAuto(form.code, ["c", "cpp", "python"]).language;
     // Since c and cpp are difficult to distinguish, we only detect python.
     if (detectedLang === "python" && langOptions.value.some((option) => option.value === 2)) {
-      form.lang.value = 2;
+      form.lang = 2;
     }
   }
 });
@@ -398,7 +398,7 @@ async function submitCode() {
   try {
     const blobWriter = new BlobWriter("application/zip");
     const writer = new ZipWriter(blobWriter);
-    await writer.add(`main${LANGUAGE_EXTENSION[form.lang.value]}`, new TextReader(form.code));
+    await writer.add(`main${LANGUAGE_EXTENSION[form.lang]}`, new TextReader(form.code));
     await writer.close();
     const blob = await blobWriter.getData();
     const formData = new FormData();

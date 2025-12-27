@@ -248,6 +248,8 @@ const TrialSubmission = {
         stdout: string;
         stderr: string;
       }>;
+      sa_status?: number;
+      sa_message?: string;
     }>(`/trial-submission/${trialSubmissionId}`),
 
   // API 6a: 下載某個 Task 的所有 case 結果（artifact zip）

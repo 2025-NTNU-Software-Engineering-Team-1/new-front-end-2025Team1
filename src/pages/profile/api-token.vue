@@ -9,6 +9,7 @@ import { formatTime } from "@/utils/formatTime";
 import { VueDatePicker } from "@vuepic/vue-datepicker";
 import "@vuepic/vue-datepicker/dist/main.css";
 import "./vue-datepicker-override.css";
+import PatManualModal from "@/components/Profile/PatManualModal.vue";
 
 const { t } = useI18n();
 import { containsInvisible } from "@/utils/validators";
@@ -223,10 +224,13 @@ async function handleDeactivate() {
       <div class="card-body">
         <div class="flex flex-wrap items-center justify-between gap-2">
           <h2 class="card-title text-2xl">{{ t("profile.apiToken.title") }}</h2>
-          <button class="btn btn-primary" @click="openCreateModal">
-            <i-uil-plus class="mr-2 h-5 w-5" />
-            {{ t("profile.apiToken.create_new_key") }}
-          </button>
+          <div class="flex items-center gap-2">
+            <PatManualModal />
+            <button class="btn btn-primary" @click="openCreateModal">
+              <i-uil-plus class="mr-2 h-5 w-5" />
+              {{ t("profile.apiToken.create_new_key") }}
+            </button>
+          </div>
         </div>
         <p class="text-base-content/70 mt-4 text-sm">
           {{ t("profile.apiToken.description") }}

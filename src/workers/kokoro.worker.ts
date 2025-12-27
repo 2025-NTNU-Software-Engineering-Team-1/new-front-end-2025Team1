@@ -18,8 +18,11 @@ const MODEL_ID = "onnx-community/Kokoro-82M-v1.0-ONNX";
 let kokoro: KokoroTTS | null = null;
 let isInitializing = false;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const ctx = self as any;
+
 // 監聽主執行緒訊息
-self.onmessage = async (e: MessageEvent<WorkerMessage>) => {
+ctx.onmessage = async (e: MessageEvent<WorkerMessage>) => {
   const msg = e.data;
 
   switch (msg.type) {
@@ -53,7 +56,7 @@ async function handleInit() {
       dtype: "q4",
       device,
       progress_callback: (progress: { status: string; loaded?: number; total?: number }) => {
-        if (progress.status === "progress" && progress.total) {
+        if (progress.status === "progress" && progress.total && progress.loaded) {
           const percent = Math.round(10 + (progress.loaded / progress.total) * 80);
           postResponse({ type: "progress", percent, text: `下載中... ${percent}%` });
         }
@@ -98,7 +101,8 @@ async function handleSpeak(text: string, voice: string, speed: number) {
   try {
     // 執行合成
     const audioData = await kokoro.generate(text, {
-      voice: voice as string,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      voice: voice as any,
       speed,
     });
 
@@ -114,7 +118,7 @@ async function handleSpeak(text: string, voice: string, speed: number) {
       text,
     };
 
-    (self as Worker).postMessage(response, [audio.buffer]);
+    ctx.postMessage(response, [audio.buffer]);
   } catch (err: unknown) {
     console.error("[KokoroWorker] Speak failed:", err);
     postResponse({ type: "error", error: err instanceof Error ? err.message : String(err) });
@@ -122,5 +126,5 @@ async function handleSpeak(text: string, voice: string, speed: number) {
 }
 
 function postResponse(msg: WorkerResponse) {
-  (self as Worker).postMessage(msg);
+  ctx.postMessage(msg);
 }

@@ -97,6 +97,7 @@ declare module 'vue' {
     MarkdownRenderer: typeof import('./../components/MarkdownRenderer.vue')['default']
     MultiStringInput: typeof import('./../components/Problem/Admin/Controls/MultiStringInput.vue')['default']
     PaginationButtons: typeof import('./../components/PaginationButtons.vue')['default']
+    PatManualModal: typeof import('./../components/Profile/PatManualModal.vue')['default']
     PipelineSection: typeof import('./../components/Problem/Admin/Sections/PipelineSection.vue')['default']
     PostCard: typeof import('./../components/Discussion/PostCard.vue')['default']
     PostManagementDropdown: typeof import('./../components/Discussion/PostManagementDropdown.vue')['default']

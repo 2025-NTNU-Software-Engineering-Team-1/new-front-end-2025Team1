@@ -1,6 +1,8 @@
 interface CourseListItem {
   course: string;
   teacher: UserInfo;
+  color?: string;
+  emoji?: string;
 }
 
 type CourseList = CourseListItem[];
@@ -14,6 +16,10 @@ interface Course {
 interface CourseForm {
   course: string;
   teacher: UserInfo["username"];
+  color: string;
+  emoji: string;
+  type: number;
+  quota: number;
 }
 
 interface CourseSummary {

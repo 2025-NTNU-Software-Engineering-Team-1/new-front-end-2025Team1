@@ -28,7 +28,8 @@ async function fetchCourseCode() {
   courseCodeError.value = "";
   try {
     const response = await api.Course.getCode(route.params.name as string);
-    courseCode.value = response.data.course_code;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    courseCode.value = (response as any).data.course_code;
   } catch {
     courseCodeError.value = t("course.members.courseCode.errorFetch");
   } finally {
@@ -41,7 +42,8 @@ async function generateCourseCode() {
   courseCodeError.value = "";
   try {
     const response = await api.Course.generateCode(route.params.name as string);
-    courseCode.value = response.data.course_code;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    courseCode.value = (response as any).data.course_code;
   } catch {
     courseCodeError.value = t("course.members.courseCode.errorGenerate");
   } finally {
@@ -381,9 +383,8 @@ async function submit() {
     });
 
     // If backend returned skipped entries (duplicates), show them as an error message
-    const skipped =
-      (res as { data?: { skipped?: unknown[] } } | { skipped?: unknown[] })?.data?.skipped ??
-      (res as { skipped?: unknown[] })?.skipped;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const skipped = (res as any).data?.skipped ?? (res as any).skipped;
     if (skipped && skipped.length > 0) {
       const skippedStr = skipped
         .map(

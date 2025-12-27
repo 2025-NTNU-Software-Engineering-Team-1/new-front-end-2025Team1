@@ -19,6 +19,8 @@ const newCourse = reactive<CourseForm & { color: string; emoji: string }>({
   teacher: "",
   color: "",
   emoji: "",
+  type: 0,
+  quota: 0,
 });
 const isLoading = ref(false);
 const errorMsg = ref("");
@@ -49,6 +51,8 @@ async function submit() {
       teacher: newCourse.teacher,
       color: newCourse.color,
       emoji: newCourse.emoji,
+      type: newCourse.type,
+      quota: newCourse.quota,
     });
     router.push(`/course/${newCourse.course}`);
   } catch (error) {

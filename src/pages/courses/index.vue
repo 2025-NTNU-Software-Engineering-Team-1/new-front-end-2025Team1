@@ -40,7 +40,9 @@ async function handleJoinCourse() {
 
   try {
     const response = await api.Course.join({ course_code: courseCode.value.trim() });
-    joinSuccess.value = t("courses.index.join.success", { course: response.data.course });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const courseName = (response as any).data.data.course;
+    joinSuccess.value = t("courses.index.join.success", { course: courseName });
     courseCode.value = "";
     // Refetch courses list
     await refetchCourses();

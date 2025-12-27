@@ -168,6 +168,7 @@
           "lang": "Please select the programming language.",
           "msg": "Oops! Something went wrong when testing the code. Try again later.",
           "trialModeNotEnabled": "Trial mode is not enabled for this problem. Please contact the instructor to enable it.",
+          "trialQuotaExceeded": "Trial submission quota exceeded for this problem.",
           "permissionDenied": "You do not have permission to use the trial feature for this problem."
         },
         "card": {
@@ -246,10 +247,11 @@
           "label": "Test Data Type",
           "public": "Public Test Cases",
           "custom": "Custom Test Cases",
-          "viewPublic": "View Public",
-          "viewCustom": "View Custom",
+          "viewPublic": "View",
+          "viewCustom": "View",
           "viewPublicTitle": "Public Test Cases Preview",
-          "viewCustomTitle": "Custom Test Cases Preview"
+          "viewCustomTitle": "Custom Test Cases Preview",
+          "notConfigured": "Not configured"
         }
       },
       "stats": {

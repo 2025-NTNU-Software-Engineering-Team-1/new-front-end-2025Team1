@@ -449,10 +449,16 @@ async function test() {
     // Check for specific error messages from backend
     const axiosError = error as AxiosError<{ message?: string }>;
     const backendMessage = axiosError?.response?.data?.message || "";
+    const backendMessageLower = backendMessage.toLowerCase();
 
-    if (backendMessage.includes("Trial mode is not enabled")) {
+    if (backendMessageLower.includes("trial mode is not enabled")) {
       form.errorMessage = t("course.problem.test.err.trialModeNotEnabled");
-    } else if (backendMessage.includes("permission") || backendMessage.includes("Forbidden")) {
+    } else if (
+      backendMessageLower.includes("trial submission quota") ||
+      backendMessageLower.includes("quota exceeded")
+    ) {
+      form.errorMessage = t("course.problem.test.err.trialQuotaExceeded");
+    } else if (backendMessageLower.includes("permission") || backendMessageLower.includes("forbidden")) {
       form.errorMessage = t("course.problem.test.err.permissionDenied");
     } else {
       form.errorMessage = t("course.problem.test.err.msg");
@@ -582,72 +588,182 @@ async function submitCode() {
               </div>
             </div>
 
-            <div class="flex items-center justify-between gap-4">
-              <div class="flex flex-1 gap-4">
-                <label class="form-control w-60">
-                  <div class="label">
-                    <span class="label-text text-sm text-gray-500">{{
-                      t("course.problem.test.lang.text")
-                    }}</span>
-                  </div>
-                  <select
-                    v-model="v.lang.$model"
-                    :class="['select-bordered select w-full', v.lang.$error && 'input-error']"
-                  >
-                    <option :value="-1" disabled hidden>{{ t("course.problem.test.lang.select") }}</option>
-                    <option v-for="lang in langOptions" :key="lang.value" :value="lang.value">
-                      {{ lang.text }}
-                    </option>
-                  </select>
-                  <label class="label" v-show="v.lang.$error">
-                    <span class="label-text-alt text-error">{{ v.lang.$errors[0]?.$message }}</span>
-                  </label>
-                </label>
-
-                <!-- Test Case Type Selection (only show if custom testcases exist) -->
-                <label v-if="hasCustomTestcases" class="form-control w-60">
-                  <div class="label">
-                    <span class="label-text text-sm text-gray-500">
-                      {{ t("course.problem.test.testcaseType.label") }}
+            <!-- Test Settings Section - Redesigned -->
+            <div class="mt-6 rounded-xl border-2 border-base-content/20 bg-base-100/50 p-5">
+              <div class="flex flex-wrap items-stretch justify-between gap-4">
+                <!-- Left Section: Language & Test Data Type -->
+                <div class="flex flex-wrap items-stretch gap-4">
+                  <!-- Language Selection - Own bordered section -->
+                  <div class="flex flex-col rounded-lg border border-base-content/10 bg-base-200/30 p-3">
+                    <span class="mb-2 text-sm font-medium text-base-content/70">
+                      {{ t("course.problem.test.lang.text") }}
+                    </span>
+                    <select
+                      v-model="v.lang.$model"
+                      :class="['select select-bordered w-full min-w-[160px]', v.lang.$error && 'select-error']"
+                    >
+                      <option :value="-1" disabled hidden>{{ t("course.problem.test.lang.select") }}</option>
+                      <option v-for="langOption in langOptions" :key="langOption.value" :value="langOption.value">
+                        {{ langOption.text }}
+                      </option>
+                    </select>
+                    <span v-show="v.lang.$error" class="mt-1 text-xs text-error">
+                      {{ v.lang.$errors[0]?.$message }}
                     </span>
                   </div>
-                  <div class="flex flex-col gap-2">
-                    <label class="label cursor-pointer justify-start gap-3 py-1">
-                      <input
-                        type="radio"
-                        class="radio radio-sm border-white transition-all [--chkfg:black] checked:border-white checked:bg-white"
-                        :value="true"
-                        v-model="useDefaultTestcases"
-                      />
-                      <span class="label-text">{{ t("course.problem.test.testcaseType.public") }}</span>
-                      <button
-                        type="button"
-                        class="btn btn-ghost btn-xs ml-2"
-                        @click="openPublicTestcasesModal"
-                      >
-                        {{ t("course.problem.test.testcaseType.viewPublic") }}
-                      </button>
-                    </label>
-                    <label class="label cursor-pointer justify-start gap-3 py-1">
-                      <input
-                        type="radio"
-                        class="radio radio-sm border-white transition-all [--chkfg:black] checked:border-white checked:bg-white"
-                        :value="false"
-                        v-model="useDefaultTestcases"
-                      />
-                      <span class="label-text">{{ t("course.problem.test.testcaseType.custom") }}</span>
-                      <button
-                        type="button"
-                        class="btn btn-ghost btn-xs ml-2"
-                        @click="openCustomTestcasesModal"
-                      >
-                        {{ t("course.problem.test.testcaseType.viewCustom") }}
-                      </button>
-                    </label>
-                  </div>
-                </label>
 
-                <!-- Testcases Preview Modal (public or custom) -->
+                  <!-- Test Data Type Selection - Own bordered section -->
+                  <div class="flex flex-col rounded-lg border border-base-content/10 bg-base-200/30 p-3">
+                    <span class="mb-2 text-sm font-medium text-base-content/70">
+                      {{ t("course.problem.test.testcaseType.label") }}
+                    </span>
+                    <div class="flex flex-col gap-1.5">
+                      <!-- Public Test Cases Option -->
+                      <div
+                        class="flex items-center gap-3 rounded-lg px-3 py-2 transition-all"
+                        :class="[
+                          useDefaultTestcases
+                            ? 'bg-primary/10 border border-primary/30'
+                            : 'bg-base-200/50 border border-transparent hover:bg-base-200',
+                        ]"
+                      >
+                        <button
+                          type="button"
+                          @click="useDefaultTestcases = true"
+                          class="flex h-5 w-5 items-center justify-center rounded-full transition-all"
+                          :class="[
+                            useDefaultTestcases
+                              ? 'bg-primary text-primary-content shadow-sm'
+                              : 'bg-base-300 text-base-content/50 hover:bg-base-content/20',
+                          ]"
+                        >
+                          <i-uil-check v-if="useDefaultTestcases" class="h-3.5 w-3.5" />
+                        </button>
+                        <span
+                          class="flex-1 text-sm"
+                          :class="useDefaultTestcases ? 'font-medium text-base-content' : 'text-base-content/70'"
+                        >
+                          {{ t("course.problem.test.testcaseType.public") }}
+                        </span>
+                        <button
+                          type="button"
+                          class="btn btn-ghost btn-xs gap-1 text-xs"
+                          @click="openPublicTestcasesModal"
+                        >
+                          <i-uil-eye class="h-3.5 w-3.5" />
+                          {{ t("course.problem.test.testcaseType.viewPublic") }}
+                        </button>
+                      </div>
+
+                      <!-- Custom Test Cases Option -->
+                      <div
+                        class="flex items-center gap-3 rounded-lg px-3 py-2 transition-all"
+                        :class="[
+                          !hasCustomTestcases
+                            ? 'opacity-50 cursor-not-allowed bg-base-200/30 border border-transparent'
+                            : !useDefaultTestcases
+                              ? 'bg-primary/10 border border-primary/30'
+                              : 'bg-base-200/50 border border-transparent hover:bg-base-200',
+                        ]"
+                      >
+                        <button
+                          type="button"
+                          @click="hasCustomTestcases && (useDefaultTestcases = false)"
+                          :disabled="!hasCustomTestcases"
+                          class="flex h-5 w-5 items-center justify-center rounded-full transition-all"
+                          :class="[
+                            !hasCustomTestcases
+                              ? 'bg-base-300/50 text-base-content/30 cursor-not-allowed'
+                              : !useDefaultTestcases
+                                ? 'bg-primary text-primary-content shadow-sm'
+                                : 'bg-base-300 text-base-content/50 hover:bg-base-content/20',
+                          ]"
+                        >
+                          <i-uil-check v-if="!useDefaultTestcases && hasCustomTestcases" class="h-3.5 w-3.5" />
+                          <i-uil-lock v-else-if="!hasCustomTestcases" class="h-3 w-3" />
+                        </button>
+                        <span
+                          class="flex-1 text-sm"
+                          :class="[
+                            !hasCustomTestcases
+                              ? 'text-base-content/40'
+                              : !useDefaultTestcases
+                                ? 'font-medium text-base-content'
+                                : 'text-base-content/70',
+                          ]"
+                        >
+                          {{ t("course.problem.test.testcaseType.custom") }}
+                          <span v-if="!hasCustomTestcases" class="ml-1 text-xs italic">
+                            ({{ t("course.problem.test.testcaseType.notConfigured") }})
+                          </span>
+                        </span>
+                        <button
+                          type="button"
+                          class="btn btn-ghost btn-xs gap-1 text-xs"
+                          :disabled="!hasCustomTestcases"
+                          :class="!hasCustomTestcases && 'btn-disabled opacity-50'"
+                          @click="hasCustomTestcases && openCustomTestcasesModal()"
+                        >
+                          <i-uil-eye class="h-3.5 w-3.5" />
+                          {{ t("course.problem.test.testcaseType.viewCustom") }}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Right Section: Trial Quota & Buttons -->
+                <div class="flex items-center gap-4">
+                  <!-- Trial Quota Display - Own bordered section -->
+                  <div class="flex flex-col items-center justify-center rounded-lg border border-base-content/10 bg-base-200/30 px-5 py-3">
+                    <span class="text-xs font-medium text-base-content/60">
+                      {{ t("course.problem.test.trialQuota") }}
+                    </span>
+                    <div class="mt-1 text-xl font-bold text-base-content">
+                      <template v-if="trialQuotaUnlimited">
+                        <span class="text-base font-medium text-success">{{
+                          t("components.problem.card.unlimited")
+                        }}</span>
+                      </template>
+                      <template v-else>
+                        <span>{{ trialQuotaLoading ? "..." : (trialQuotaRemaining ?? "-") }}</span>
+                        <span class="text-sm font-normal text-base-content/60">
+                          / {{ trialQuotaLimit ?? "-" }}
+                        </span>
+                      </template>
+                    </div>
+                  </div>
+
+                  <!-- Action Buttons - Normal size to match Submit button -->
+                  <div class="flex gap-2">
+                    <router-link
+                      class="btn btn-outline gap-1.5"
+                      :to="`/course/${route.params.name}/problem/${route.params.id}/test-history`"
+                    >
+                      <i-uil-history class="h-5 w-5" />
+                      {{ t("course.problem.test.history") }}
+                    </router-link>
+                    <router-link
+                      class="btn btn-outline gap-1.5"
+                      :to="`/course/${route.params.name}/problem/${route.params.id}/test-cases`"
+                    >
+                      <i-uil-file-edit-alt class="h-5 w-5" />
+                      {{ t("course.problem.test.testcase") }}
+                    </router-link>
+                    <button
+                      :class="['btn btn-primary gap-1.5', form.isLoading && 'loading']"
+                      @click="test"
+                    >
+                      <i-uil-play class="h-5 w-5" />
+                      {{ t("course.problem.test.run") }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+            <!-- Testcases Preview Modal (public or custom) -->
                 <dialog
                   class="modal border-0 bg-transparent p-0 backdrop:bg-black/20 backdrop:backdrop-blur-[1px]"
                   :class="{ 'modal-open': showTestcasePreviewModal }"
@@ -734,44 +850,6 @@ async function submitCode() {
                     </div>
                   </div>
                 </dialog>
-              </div>
-
-              <div class="stats shrink-0 py-1">
-                <div class="stat place-items-center py-0">
-                  <div class="stat-title text-sm">{{ t("course.problem.test.trialQuota") }}</div>
-                  <div class="stat-value text-lg">
-                    <template v-if="trialQuotaUnlimited">
-                      <span class="text-sm">{{ t("components.problem.card.unlimited") }}</span>
-                    </template>
-                    <template v-else>
-                      <span>{{ trialQuotaLoading ? "..." : (trialQuotaRemaining ?? "-") }}</span>
-                      <span class="text-sm font-normal">/ {{ trialQuotaLimit ?? "-" }}</span>
-                    </template>
-                  </div>
-                </div>
-              </div>
-
-              <div class="flex gap-2">
-                <router-link
-                  class="btn"
-                  :to="`/course/${route.params.name}/problem/${route.params.id}/test-history`"
-                >
-                  <i-uil-history class="mr-1 h-5 w-5" />
-                  {{ t("course.problem.test.history") }}
-                </router-link>
-                <router-link
-                  class="btn"
-                  :to="`/course/${route.params.name}/problem/${route.params.id}/test-cases`"
-                >
-                  <i-uil-file-alt class="mr-1 h-5 w-5" />
-                  {{ t("course.problem.test.testcase") }}
-                </router-link>
-                <button :class="['btn btn-primary', form.isLoading && 'loading']" @click="test">
-                  <i-uil-play class="mr-1 h-5 w-5" />
-                  {{ t("course.problem.test.run") }}
-                </button>
-              </div>
-            </div>
 
             <div class="form-control mt-4">
               <label class="label">

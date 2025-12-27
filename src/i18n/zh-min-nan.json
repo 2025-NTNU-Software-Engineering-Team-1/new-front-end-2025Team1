@@ -153,6 +153,7 @@
           "lang": "請選擇程式語言。",
           "msg": "害啊！測試程式碼的時陣發生錯誤。請等咧再試看覓。",
           "trialModeNotEnabled": "這个題目猶未開放試測功能，請聯絡老師抑是助教啟用。",
+          "trialQuotaExceeded": "這个題目的測試額度用罄矣。",
           "permissionDenied": "你無權限使用這个題目的試測功能。"
         },
         "card": {

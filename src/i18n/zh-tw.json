@@ -168,6 +168,7 @@
           "lang": "請選擇程式語言。",
           "msg": "Oops! 測試程式碼時發生錯誤。請稍後再試。",
           "trialModeNotEnabled": "此題目尚未開放試測功能，請聯絡老師或助教啟用。",
+          "trialQuotaExceeded": "此題測試額度已用完。",
           "permissionDenied": "您沒有權限使用此題目的試測功能。"
         },
         "card": {
@@ -245,10 +246,11 @@
           "label": "測資類型",
           "public": "公開測資",
           "custom": "自訂測資",
-          "viewPublic": "查看公開",
-          "viewCustom": "查看自訂",
+          "viewPublic": "查看",
+          "viewCustom": "查看",
           "viewPublicTitle": "公開測資預覽",
-          "viewCustomTitle": "自訂測資預覽"
+          "viewCustomTitle": "自訂測資預覽",
+          "notConfigured": "尚未設定"
         }
       },
       "stats": {

@@ -281,11 +281,11 @@ async function deleteSubmission(id: string) {
             class="flex items-center justify-between gap-4"
           >
             <button
-              :class="['btn btn-warning btn-sm', isRejudgeAllLoading && 'loading']"
+              class="btn btn-warning btn-sm"
               :disabled="isRejudgeAllLoading"
               @click="rejudgeAll"
             >
-              <i-uil-repeat class="mr-1" /> Rejudge All
+              <i-uil-repeat :class="['mr-1', isRejudgeAllLoading && 'animate-spin']" /> Rejudge All
             </button>
             <div class="tooltip tooltip-bottom" data-tip="Download submissions json file">
               <button class="btn btn-sm" @click="downloadAllSubmissions">

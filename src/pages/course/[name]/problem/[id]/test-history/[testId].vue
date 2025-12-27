@@ -255,7 +255,7 @@ const effectiveStatus = computed(() => {
 });
 
 // Auto-refresh polling (every 2 seconds while status is Pending)
-const { pause, isActive } = useIntervalFn(() => {
+const { pause, resume, isActive } = useIntervalFn(() => {
   if (testResult.value != null && effectiveStatus.value === SUBMISSION_STATUS_CODE.PENDING) {
     fetchTrialSubmission().catch((err) => {
       console.error("Polling error:", err);
@@ -599,7 +599,14 @@ async function rejudge() {
   isRejudgeLoading.value = true;
   try {
     await api.TrialSubmission.rejudge(String(route.params.testId));
-    router.go(0);
+    if (testResult.value) {
+      testResult.value.status = SUBMISSION_STATUS_CODE.PENDING;
+      testResult.value.tasks = [];
+    }
+    errorOutputFetched.value = false;
+    if (!isActive.value) {
+      resume();
+    }
   } catch (err: unknown) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const axiosErr = err as any;
@@ -677,7 +684,7 @@ function closeDeleteErrorModal() {
               :disabled="isRejudgeLoading"
               @click="rejudge"
             >
-              <i-uil-repeat class="mr-1" :class="{ 'animate-spin': isRejudgeLoading }" /> Rejudge
+              <i-uil-repeat :class="['mr-1', isRejudgeLoading && 'animate-spin']" /> Rejudge
             </button>
             <!-- Delete Button (only shown if user has permission) -->
             <button

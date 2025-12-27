@@ -189,6 +189,13 @@ watch(submission, (val) => {
   if (val) logger.log("Submission Data Loaded", { id: val.submissionId, status: val.status });
 });
 
+const effectiveStatus = computed(() => {
+  if (!submission.value) return SUBMISSION_STATUS_CODE.PENDING;
+  const normalized = normalizeStatus(submission.value.status);
+  if (normalized !== SUBMISSION_STATUS_CODE.PENDING) return normalized;
+  return deriveStatusFromTasks(submission.value.tasks) ?? normalized;
+});
+
 watchEffect(() => {
   if (submission.value && !problem.value) {
     logger.log("Fetching linked Problem Config...", submission.value.problemId);
@@ -198,8 +205,9 @@ watchEffect(() => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const prob = problem.value as any;
   const hasStaticAnalysis = prob?.pipeline?.staticAnalysis?.libraryRestrictions?.enabled === true;
+  const judgingDone = effectiveStatus.value !== SUBMISSION_STATUS_CODE.PENDING;
 
-  if (hasStaticAnalysis && submission.value) {
+  if (hasStaticAnalysis && submission.value && judgingDone) {
     // Prevent duplicate logs if already loading
     if (!SALoading.value && !SAReport.value) {
       logger.log("Static Analysis Enabled. Fetching Report...");
@@ -229,12 +237,6 @@ const aiProblemId = computed(() =>
 const aiCurrentCode = computed(() => {
   if (isZipSubmission.value) return "";
   return submission.value?.code ?? "";
-});
-const effectiveStatus = computed(() => {
-  if (!submission.value) return SUBMISSION_STATUS_CODE.PENDING;
-  const normalized = normalizeStatus(submission.value.status);
-  if (normalized !== SUBMISSION_STATUS_CODE.PENDING) return normalized;
-  return deriveStatusFromTasks(submission.value.tasks) ?? normalized;
 });
 const saStatusBadge = computed(() => {
   if (!submission.value || effectiveStatus.value === SUBMISSION_STATUS_CODE.PENDING) return null;
@@ -702,11 +704,11 @@ watch(submission, (val) => {
             </div>
             <button
               v-if="session.isAdmin"
-              :class="['btn btn-warning md:btn-md', isRejudgeLoading && 'loading']"
+              class="btn btn-warning md:btn-md"
               :disabled="isRejudgeLoading"
               @click="rejudge"
             >
-              <i-uil-repeat class="mr-1" /> Rejudge
+              <i-uil-repeat :class="['mr-1', isRejudgeLoading && 'animate-spin']" /> Rejudge
             </button>
             <button
               v-if="session.isAdmin"
@@ -1095,7 +1097,7 @@ watch(submission, (val) => {
           {{ $t("course.submission.binaryNotFound.cancel") }}
         </button>
         <button class="btn btn-warning" @click="confirmRejudgeForBinary" :disabled="isRejudgeLoading">
-          <i-uil-repeat class="mr-1" />
+          <i-uil-repeat :class="['mr-1', isRejudgeLoading && 'animate-spin']" />
           {{ $t("course.submission.binaryNotFound.rejudge") }}
         </button>
       </div>

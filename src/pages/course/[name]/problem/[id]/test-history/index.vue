@@ -190,8 +190,10 @@ async function rejudgeAll() {
   isRejudgeAllLoading.value = true;
   try {
     await api.TrialSubmission.rejudgeAll(problemId);
-    // Reload the list
-    router.go(0);
+    testHistory.value = testHistory.value.map((item) => ({
+      ...item,
+      result: SUBMISSION_STATUS_CODE.PENDING,
+    }));
   } catch (err) {
     console.error("Rejudge all failed:", err);
   } finally {
@@ -201,6 +203,8 @@ async function rejudgeAll() {
 
 // Delete functionality
 const deletingIds = ref<Set<string | number>>(new Set());
+const deleteErrorModal = ref<HTMLDialogElement | null>(null);
+const deleteErrorMessage = ref<string>("");
 async function deleteTrialSubmission(id: string | number, event: Event) {
   event.stopPropagation(); // Prevent row click navigation
 
@@ -218,10 +222,20 @@ async function deleteTrialSubmission(id: string | number, event: Event) {
       testHistory.value = testHistory.value.filter((item) => item.id !== id);
     }
   } catch (err: unknown) {
-    console.error("Delete failed:", err);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const axiosErr = err as any;
+    console.error("Delete failed:", axiosErr);
+    deleteErrorMessage.value =
+      axiosErr?.response?.data?.message || axiosErr?.message || "Failed to delete trial submission.";
+    deleteErrorModal.value?.showModal();
   } finally {
     deletingIds.value.delete(id);
   }
+}
+
+function closeDeleteErrorModal() {
+  deleteErrorModal.value?.close();
+  deleteErrorMessage.value = "";
 }
 </script>
 
@@ -235,11 +249,11 @@ async function deleteTrialSubmission(id: string | number, event: Event) {
             <!-- Rejudge All Button (only shown if user has permission) -->
             <button
               v-if="canRejudge"
-              :class="['btn btn-warning btn-sm', isRejudgeAllLoading && 'loading']"
+              class="btn btn-warning btn-sm"
               :disabled="isRejudgeAllLoading || testHistory.length === 0"
               @click="rejudgeAll"
             >
-              <i-uil-repeat class="mr-1" /> Rejudge All
+              <i-uil-repeat :class="['mr-1', isRejudgeAllLoading && 'animate-spin']" /> Rejudge All
             </button>
             <router-link :to="getBackPath()" class="btn btn-sm">
               <i-uil-arrow-left class="mr-1" />
@@ -317,4 +331,21 @@ async function deleteTrialSubmission(id: string | number, event: Event) {
       </div>
     </div>
   </div>
+
+  <!-- Delete Error Modal -->
+  <dialog ref="deleteErrorModal" class="modal">
+    <div class="modal-box">
+      <h3 class="text-error text-lg font-bold">
+        <i-uil-exclamation-triangle class="mr-2 inline" />
+        Delete Failed
+      </h3>
+      <p class="py-4">{{ deleteErrorMessage }}</p>
+      <div class="modal-action">
+        <button class="btn" @click="closeDeleteErrorModal">Close</button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </dialog>
 </template>

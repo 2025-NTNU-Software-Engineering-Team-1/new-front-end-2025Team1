@@ -148,7 +148,7 @@ function commitEdit() {
 }
 
 const getSidecarArgs = (sidecar: Sidecar) => argsToString(sidecar.args);
-const getSidecarEnv = (sidecar: Sidecar) => envToString(sidecar.env);
+
 </script>
 
 <template>

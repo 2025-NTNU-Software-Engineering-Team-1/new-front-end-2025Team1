@@ -1273,7 +1273,8 @@ watch(
                 <span
                   class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
                   :data-tip="hover.uploadFile"
-                  >{{ t("course.problems.uploadFile") }}<span class="text-error ml-1" aria-hidden="true">*</span></span
+                  >{{ t("course.problems.uploadFile")
+                  }}<span class="text-error ml-1" aria-hidden="true">*</span></span
                 >
               </label>
               <div class="flex items-center gap-2">
@@ -1341,7 +1342,8 @@ watch(
                 <span
                   class="tooltip tooltip-top flex cursor-help items-center gap-1 text-sm opacity-80"
                   :data-tip="hover.interactiveUploadTeacherCode"
-                  >{{ t("course.problems.interactiveUploadTeacherCode") }}<span class="text-error ml-1" aria-hidden="true">*</span></span
+                  >{{ t("course.problems.interactiveUploadTeacherCode")
+                  }}<span class="text-error ml-1" aria-hidden="true">*</span></span
                 >
                 <div class="flex items-center gap-2">
                   <div
@@ -1479,7 +1481,8 @@ watch(
             <span
               class="tooltip tooltip-top flex cursor-help items-center gap-1 pl-1 text-sm opacity-80"
               :data-tip="hover.uploadCustomChecker"
-              >{{ t("course.problems.uploadCustomChecker") }}<span class="text-error ml-1" aria-hidden="true">*</span></span
+              >{{ t("course.problems.uploadCustomChecker")
+              }}<span class="text-error ml-1" aria-hidden="true">*</span></span
             >
             <input
               type="file"
@@ -1654,7 +1657,8 @@ watch(
             <span
               class="tooltip tooltip-top flex cursor-help items-center gap-1 pl-1 text-sm opacity-80"
               :data-tip="hover.uploadCustomScorer"
-              >{{ t("course.problems.uploadCustomScorer") }}<span class="text-error ml-1" aria-hidden="true">*</span></span
+              >{{ t("course.problems.uploadCustomScorer")
+              }}<span class="text-error ml-1" aria-hidden="true">*</span></span
             >
             <input
               type="file"

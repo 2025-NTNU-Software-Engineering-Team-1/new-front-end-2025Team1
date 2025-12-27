@@ -32,7 +32,6 @@ const DEBUG_MODE = 1;
 // ==========================================
 // [CONSTANTS] Validation Limits
 // ==========================================
-const MAX_LIST_SIZE = 10;
 const MAX_CHAR_LENGTH = 2048;
 const MAX_DOCKER_SIZE_BYTES = 1024 * 1024 * 1024; // 1GB
 const IP_REGEX =
@@ -487,23 +486,27 @@ const networkErrors = computed(() => {
   // === IP 檢查 ===
   ips.forEach((ip, i) => {
     if (!IP_REGEX.test(ip)) {
-      errors.ip.push(`IP #${i + 1} 格式錯誤 (0-255.0-255.0-255.0-255)`);
+      errors.ip.push(`IP #${i + 1} Formatting error (0-255.0-255.0-255.0-255)`);
     }
   });
 
   // === URL 檢查 ===
   urls.forEach((url, i) => {
     if (url.length > MAX_CHAR_LENGTH) {
-      errors.url.push(`URL #${i + 1} 長度超過 ${MAX_CHAR_LENGTH}`);
+      errors.url.push(`URL #${i + 1} Length Exceeding ${MAX_CHAR_LENGTH}`);
     }
   });
 
   // === UX 提示：空白清單時 ===
   if (model === "Black" && ips.length === 0 && urls.length === 0) {
-    errors.global.push("※ 未設定任何封鎖項，外網預設全開（Black list 模式）。");
+    errors.global.push(
+      "※ No blocking options are set; external network access is fully open by default (Blacklist mode).",
+    );
   }
   if (model === "White" && ips.length === 0 && urls.length === 0) {
-    errors.global.push("※ 未設定允許項，外網預設全關（White list 模式）。");
+    errors.global.push(
+      "※ No allowed items are set; external network access is disabled by default (Whitelist mode).",
+    );
   }
 
   // === Sidecar 檢查 ===
@@ -516,7 +519,7 @@ const networkErrors = computed(() => {
       (typeof sc.env === "string" ? sc.env.trim() !== "" : sc.env && Object.keys(sc.env).length > 0);
 
     if (hasAny && (!sc.name || !sc.image)) {
-      errors.sidecars.push(`Sidecar #${idx + 1}：若有任一欄位輸入，Name 與 Image 必填。`);
+      errors.sidecars.push(`Sidecar #${idx + 1}：If any field is entered, Name and Image are required.`);
     }
   });
 
@@ -1021,7 +1024,8 @@ onBeforeUnmount(() => {
           class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
           :data-tip="hover.allowedLanguages"
         >
-          {{ t("course.problems.allowedLanguages") }}<span class="text-error ml-1" aria-hidden="true">*</span></span
+          {{ t("course.problems.allowedLanguages")
+          }}<span class="text-error ml-1" aria-hidden="true">*</span></span
         ></label
       >
       <LanguageMultiSelect
@@ -1179,7 +1183,8 @@ onBeforeUnmount(() => {
                 <label
                   class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
                   :data-tip="hover.selectAPIKeys"
-                  >{{ t("course.problems.selectAPIKeys") }}<span class="text-error ml-1" aria-hidden="true">*</span></label
+                  >{{ t("course.problems.selectAPIKeys")
+                  }}<span class="text-error ml-1" aria-hidden="true">*</span></label
                 >
 
                 <div v-if="selectedKeyStats.total > 0" class="ml-2 flex items-center gap-2">
@@ -1552,7 +1557,8 @@ onBeforeUnmount(() => {
             <span
               class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
               :data-tip="hover.uploadPublicTestData"
-              >{{ t("course.problems.uploadPublicTestData") }}<span class="text-error ml-1" aria-hidden="true">*</span></span
+              >{{ t("course.problems.uploadPublicTestData")
+              }}<span class="text-error ml-1" aria-hidden="true">*</span></span
             >
             <div class="flex items-center gap-2">
               <div
@@ -1628,7 +1634,8 @@ onBeforeUnmount(() => {
             <span
               class="label-text tooltip tooltip-top flex cursor-help items-center gap-1"
               :data-tip="hover.uploadACFiles"
-              >{{ t("course.problems.uploadACFiles") }}<span class="text-error ml-1" aria-hidden="true">*</span></span
+              >{{ t("course.problems.uploadACFiles")
+              }}<span class="text-error ml-1" aria-hidden="true">*</span></span
             >
             <div class="flex items-center gap-2">
               <div

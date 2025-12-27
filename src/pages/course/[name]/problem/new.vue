@@ -182,8 +182,6 @@ onMounted(async () => {
     animState.value.flying = true;
   }, ANIM_CONFIG.START_DELAY);
 
-  
-
   // Step D: Fade out spotlight and show the hint bubble
   setTimeout(() => {
     animState.value.spotlight = false;
@@ -338,8 +336,6 @@ const openJSON = ref(false);
             class="relative z-50 flex items-center justify-center"
             :style="animState.style"
           >
-            
-
             <Transition
               enter-active-class="transition duration-200"
               enter-from-class="opacity-0 scale-90"

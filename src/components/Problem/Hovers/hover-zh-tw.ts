@@ -62,6 +62,6 @@ export const hover_zh = {
   setResourceDataStudent: "test",
   setResourceDataTeacher: "test",
   //member
-  student:"學生",
-  TA:"助教"
+  student: "學生",
+  TA: "助教",
 };

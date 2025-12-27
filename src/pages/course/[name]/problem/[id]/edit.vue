@@ -530,7 +530,6 @@ const mockProblemMeta = { owner: "", highScore: 0, submitCount: 0, ACUser: 0, su
               class="relative z-50 flex items-center justify-center"
               :style="animState.style"
             >
-
               <Transition
                 enter-active-class="transition duration-200"
                 enter-from-class="opacity-0 scale-90"

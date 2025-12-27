@@ -13,7 +13,7 @@ import { hover_en } from "../../../components/Problem/Hovers/hover-en";
 const route = useRoute();
 const router = useRouter();
 const session = useSession();
-const { t ,locale} = useI18n();
+const { t, locale } = useI18n();
 const hover = computed(() => {
   console.log("當前語系代碼:", locale.value);
   console.log("英文資源內容:", hover_en);
@@ -127,9 +127,9 @@ const roleChangeLoading = ref<string | null>(null); // username being changed
 const roleChangeError = ref("");
 
 const editingUser = ref<string | null>(null);
-async function handleRoleChange(member: any, newRole: 'student' | 'ta') {
+async function handleRoleChange(member: any, newRole: "student" | "ta") {
   const oldRole = member.role;
-  const newRoleNumber = newRole === 'ta' ? 3 : 2;
+  const newRoleNumber = newRole === "ta" ? 3 : 2;
   editingUser.value = null;
   member.role = newRoleNumber;
   try {
@@ -137,10 +137,9 @@ async function handleRoleChange(member: any, newRole: 'student' | 'ta') {
     await changeMemberRole(member.username, newRole);
   } catch (err) {
     // 如果 API 真的失敗且不是 404 的話，可以在這裡還原（選做）
-    // member.role = oldRole; 
+    // member.role = oldRole;
     console.warn("API 報錯 (404)，但介面維持新狀態");
   }
-
 }
 
 // Determine member's course role (student, ta, teacher)
@@ -541,37 +540,49 @@ async function submit() {
                       <span class="badge badge-primary">{{ $t("course.members.roleTeacher") }}</span>
                     </template>
                     <template v-else>
-                      <div class="flex items-center gap-2 h-10 overflow-visible">
-                        
+                      <div class="flex h-10 items-center gap-2 overflow-visible">
                         <template v-if="roleChangeLoading === member.username">
                           <span class="loading loading-spinner loading-sm text-primary"></span>
                         </template>
 
                         <div v-else class="flex items-center gap-2">
-                          <div 
+                          <div
                             @click="editingUser = editingUser === member.username ? null : member.username"
-                            class="input input-bordered input-sm flex w-32 cursor-pointer items-center justify-between bg-base-100 no-arrow px-3"
+                            class="input input-bordered input-sm bg-base-100 no-arrow flex w-32 cursor-pointer items-center justify-between px-3"
                           >
                             <span class="truncate">
-                              {{ member.role === 3 ? $t("course.members.roleTA") : $t("course.members.roleStudent") }}
+                              {{
+                                member.role === 3
+                                  ? $t("course.members.roleTA")
+                                  : $t("course.members.roleStudent")
+                              }}
                             </span>
-                            <span class="text-[10px] opacity-50">{{ editingUser === member.username ? '◀' : '▶' }}</span>
+                            <span class="text-[10px] opacity-50">{{
+                              editingUser === member.username ? "◀" : "▶"
+                            }}</span>
                           </div>
 
-                          <div v-if="editingUser === member.username" class="flex items-center gap-1 animate-in fade-in slide-in-from-left-2 duration-200">
-                            <button 
-                              class="btn btn-circle btn-sm btn-primary tooltip tooltip-top flex  items-center gap-1"
+                          <div
+                            v-if="editingUser === member.username"
+                            class="animate-in fade-in slide-in-from-left-2 flex items-center gap-1 duration-200"
+                          >
+                            <button
+                              class="btn btn-circle btn-sm btn-primary tooltip tooltip-top flex items-center gap-1"
                               :data-tip="hover.student"
                               :class="{ 'btn-disabled opacity-40': member.role === 2 }"
                               @click="handleRoleChange(member, 'student')"
-                            >S</button>
-                            
-                            <button 
-                              class="btn btn-circle btn-sm btn-secondary tooltip tooltip-top flex  items-center gap-1"
+                            >
+                              S
+                            </button>
+
+                            <button
+                              class="btn btn-circle btn-sm btn-secondary tooltip tooltip-top flex items-center gap-1"
                               :data-tip="hover.TA"
                               :class="{ 'btn-disabled opacity-40': member.role === 3 }"
                               @click="handleRoleChange(member, 'ta')"
-                            >TA</button>
+                            >
+                              TA
+                            </button>
                           </div>
                         </div>
                       </div>

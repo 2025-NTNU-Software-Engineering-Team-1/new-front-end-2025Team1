@@ -509,6 +509,26 @@ async function delete_() {
 const openPreview = ref(false);
 const openJSON = ref(false);
 const mockProblemMeta = { owner: "", highScore: 0, submitCount: 0, ACUser: 0, submitter: 0 };
+// ==========================================
+// [HELPER] JSON Display Cleanup
+// ==========================================
+function cleanupForDisplay(data?: ProblemForm) {
+  if (!data) return {};
+
+  // Shallow copy to avoid modifying original
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+  const { pipeline_conf, pipelineConf, testCase, test_case, config, ...rest } = data as any;
+
+  // Clean nested config if needed
+  let cleanConfig = config;
+  if (config) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { artifact_collection, ...restConfig } = config;
+    cleanConfig = restConfig;
+  }
+
+  return { ...rest, config: cleanConfig };
+}
 </script>
 
 <template>
@@ -599,7 +619,7 @@ const mockProblemMeta = { owner: "", highScore: 0, submitCount: 0, ACUser: 0, su
               </div>
 
               <pre v-if="openJSON" class="bg-base-200 whitespace-pre-wrap rounded p-2"
-                >{{ JSON.stringify(edittingProblem, null, 2) }}
+                >{{ JSON.stringify(cleanupForDisplay(edittingProblem), null, 2) }}
               </pre>
 
               <div class="mb-[50%]" />

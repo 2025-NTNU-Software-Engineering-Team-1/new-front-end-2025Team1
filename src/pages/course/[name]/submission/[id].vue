@@ -53,6 +53,63 @@ const route = useRoute();
 useTitle(`Submission - ${route.params.id} - ${route.params.name} | Normal OJ`);
 const router = useRouter();
 
+// ==========================================
+// Status Normalization (string -> code)
+// ==========================================
+const STATUS_CODE_MAP: Record<string, SubmissionStatusCodes> = {
+  AC: SUBMISSION_STATUS_CODE.ACCEPTED,
+  WA: SUBMISSION_STATUS_CODE.WRONG_ANSWER,
+  CE: SUBMISSION_STATUS_CODE.COMPILE_ERROR,
+  TLE: SUBMISSION_STATUS_CODE.TIME_LIMIT_EXCEED,
+  MLE: SUBMISSION_STATUS_CODE.MEMORY_LIMIT_EXCEED,
+  RE: SUBMISSION_STATUS_CODE.RUNTIME_ERROR,
+  JE: SUBMISSION_STATUS_CODE.JUDGE_ERROR,
+  OLE: SUBMISSION_STATUS_CODE.OUTPUT_LIMIT_EXCEED,
+  AE: SUBMISSION_STATUS_CODE.ANALYSIS_ERROR,
+  PENDING: SUBMISSION_STATUS_CODE.PENDING,
+  JUDGING: SUBMISSION_STATUS_CODE.PENDING,
+  ACCEPTED: SUBMISSION_STATUS_CODE.ACCEPTED,
+  "WRONG ANSWER": SUBMISSION_STATUS_CODE.WRONG_ANSWER,
+  "COMPILE ERROR": SUBMISSION_STATUS_CODE.COMPILE_ERROR,
+  "TIME LIMIT EXCEED": SUBMISSION_STATUS_CODE.TIME_LIMIT_EXCEED,
+  "MEMORY LIMIT EXCEED": SUBMISSION_STATUS_CODE.MEMORY_LIMIT_EXCEED,
+  "RUNTIME ERROR": SUBMISSION_STATUS_CODE.RUNTIME_ERROR,
+  "JUDGE ERROR": SUBMISSION_STATUS_CODE.JUDGE_ERROR,
+  "OUTPUT LIMIT EXCEED": SUBMISSION_STATUS_CODE.OUTPUT_LIMIT_EXCEED,
+  "ANALYSIS ERROR": SUBMISSION_STATUS_CODE.ANALYSIS_ERROR,
+};
+
+function normalizeStatus(rawStatus: unknown): SubmissionStatusCodes {
+  if (typeof rawStatus === "number") {
+    return rawStatus as SubmissionStatusCodes;
+  }
+  if (typeof rawStatus === "string") {
+    const trimmed = rawStatus.trim();
+    if (!trimmed) return SUBMISSION_STATUS_CODE.PENDING;
+    if (STATUS_CODE_MAP[trimmed] != null) return STATUS_CODE_MAP[trimmed];
+    const upper = trimmed.toUpperCase();
+    if (STATUS_CODE_MAP[upper] != null) return STATUS_CODE_MAP[upper];
+    const numeric = Number(trimmed);
+    if (!Number.isNaN(numeric)) return numeric as SubmissionStatusCodes;
+  }
+  return SUBMISSION_STATUS_CODE.PENDING;
+}
+
+function deriveStatusFromTasks(tasks?: Task[]): SubmissionStatusCodes | null {
+  if (!tasks || tasks.length === 0) return null;
+  let worst: SubmissionStatusCodes | null = null;
+  for (const task of tasks) {
+    const taskStatus = normalizeStatus(task.status);
+    worst = worst == null ? taskStatus : Math.max(worst, taskStatus);
+    if (!task.cases) continue;
+    for (const taskCase of task.cases) {
+      const caseStatus = normalizeStatus(taskCase.status);
+      worst = worst == null ? caseStatus : Math.max(worst, caseStatus);
+    }
+  }
+  return worst;
+}
+
 // Main Submission Data
 const {
   data: submission,
@@ -129,8 +186,14 @@ const isZipSubmission = computed(() => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (problem.value as any)?.config?.acceptedFormat === "zip";
 });
+const effectiveStatus = computed(() => {
+  if (!submission.value) return SUBMISSION_STATUS_CODE.PENDING;
+  const normalized = normalizeStatus(submission.value.status);
+  if (normalized !== SUBMISSION_STATUS_CODE.PENDING) return normalized;
+  return deriveStatusFromTasks(submission.value.tasks) ?? normalized;
+});
 const saStatusBadge = computed(() => {
-  if (!submission.value || submission.value.status === SUBMISSION_STATUS_CODE.PENDING) return null;
+  if (!submission.value || effectiveStatus.value === SUBMISSION_STATUS_CODE.PENDING) return null;
   const status = submission.value.saStatus;
   if (status === 0) return { label: "SA Passed", className: "badge-success" };
   if (status === 1) return { label: "SA Failed", className: "badge-error" };
@@ -158,15 +221,17 @@ watchEffect(() => {
     if (submission.value.tasks) {
       expandTasks.value = submission.value.tasks.map(() => false);
     }
-    if (submission.value.status !== SUBMISSION_STATUS_CODE.PENDING) {
+    if (effectiveStatus.value !== SUBMISSION_STATUS_CODE.PENDING) {
       if (isActive.value) {
-        logger.success("Judging Finished. Polling Stopped.", { finalStatus: submission.value.status });
+        logger.success("Judging Finished. Polling Stopped.", { finalStatus: effectiveStatus.value });
         pause();
       }
 
-      if (submission.value.status === SUBMISSION_STATUS_CODE.COMPILE_ERROR) {
-        logger.warn("Compile Error Detected. Fetching Output...");
-        fetchCEOutput();
+      if (effectiveStatus.value === SUBMISSION_STATUS_CODE.COMPILE_ERROR) {
+        if (!CELoading.value && !CEOutput.value) {
+          logger.warn("Compile Error Detected. Fetching Output...");
+          fetchCEOutput();
+        }
       }
     }
   }
@@ -394,11 +459,11 @@ async function submitScoreEdit() {
 
     // Refresh submission data (only once, don't trigger polling)
     // Ensure polling stays paused if submission is not pending
-    const wasPending = submission.value.status === SUBMISSION_STATUS_CODE.PENDING;
+    const wasPending = effectiveStatus.value === SUBMISSION_STATUS_CODE.PENDING;
     await execute();
 
     // If submission was not pending before, ensure polling stays paused
-    if (!wasPending && submission.value && submission.value.status !== SUBMISSION_STATUS_CODE.PENDING) {
+    if (!wasPending && submission.value && effectiveStatus.value !== SUBMISSION_STATUS_CODE.PENDING) {
       if (isActive.value) {
         pause();
       }
@@ -649,7 +714,7 @@ watch(submission, (val) => {
                         </router-link>
                       </td>
                       <td>{{ submission.user.username }} ({{ submission.user.displayedName }})</td>
-                      <td><judge-status :status="submission.status" /></td>
+                      <td><judge-status :status="effectiveStatus" /></td>
                       <td>{{ submission.runTime }} ms</td>
                       <td>{{ submission.memoryUsage }} KB</td>
                       <td>
@@ -674,7 +739,7 @@ watch(submission, (val) => {
 
             <div class="my-4" />
 
-            <div v-if="submission?.status === SUBMISSION_STATUS_CODE.COMPILE_ERROR">
+            <div v-if="effectiveStatus === SUBMISSION_STATUS_CODE.COMPILE_ERROR">
               <div class="card-title md:text-xl lg:text-2xl">
                 <i-uil-exclamation-circle class="text-error mr-2" />
                 {{ $t("course.submission.compile_error.title") }}
@@ -715,7 +780,7 @@ watch(submission, (val) => {
               <tbody>
                 <tr>
                   <td>{{ $t("course.submission.detail.overall") }}</td>
-                  <td><judge-status :status="task.status" /></td>
+                  <td><judge-status :status="normalizeStatus(task.status)" /></td>
                   <td>{{ task.execTime }} ms</td>
                   <td>{{ task.memoryUsage }} KB</td>
                   <td>
@@ -757,7 +822,7 @@ watch(submission, (val) => {
                   :key="`case-${taskIndex}-${caseIndex}`"
                 >
                   <td>{{ taskIndex }}-{{ caseIndex }}</td>
-                  <td><judge-status :status="_case.status" /></td>
+                  <td><judge-status :status="normalizeStatus(_case.status)" /></td>
                   <td>{{ _case.execTime }} ms</td>
                   <td>{{ _case.memoryUsage }} KB</td>
                   <td>-</td>

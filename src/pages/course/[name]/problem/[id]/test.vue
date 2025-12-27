@@ -8,7 +8,7 @@ import useVuelidate from "@vuelidate/core";
 import { required, between, helpers } from "@vuelidate/validators";
 import api, { fetcher } from "@/models/api";
 import { useTitle, useStorage } from "@vueuse/core";
-import { LANGUAGE_OPTIONS, LOCAL_STORAGE_KEY } from "@/constants";
+import { LANGUAGE_OPTIONS, LOCAL_STORAGE_KEY, isQuotaUnlimited } from "@/constants";
 import { useI18n } from "vue-i18n";
 import MarkdownIt from "markdown-it";
 import texmath from "markdown-it-texmath";
@@ -41,6 +41,8 @@ const { data: problem, error, isLoading } = useAxios<Problem>(`/problem/view/${r
 const problemData = computed<Problem | undefined>(() => problem?.value as Problem | undefined);
 const axiosError = computed<AxiosError | undefined>(() => (error?.value as AxiosError) ?? undefined);
 const loading = computed<boolean>(() => Boolean(isLoading?.value));
+const trialSubmissionCount = ref<number | null>(null);
+const trialQuotaLoading = ref(false);
 
 const isExpanded = ref(true);
 
@@ -71,6 +73,51 @@ const publicTestcaseLoading = ref(false);
 const publicTestcaseError = ref("");
 
 const selectedPreviewFileIndex = ref(0);
+const trialQuotaLimit = computed<number | null>(() => {
+  const dbLimit = problemData.value?.trialSubmissionQuota;
+  if (typeof dbLimit === "number") return dbLimit;
+  const configLimit = problemData.value?.config?.maxNumberOfTrial;
+  return typeof configLimit === "number" ? configLimit : null;
+});
+const trialQuotaUnlimited = computed(() => {
+  if (trialQuotaLimit.value == null) return false;
+  return isQuotaUnlimited(trialQuotaLimit.value);
+});
+const trialQuotaRemaining = computed<number | null>(() => {
+  if (trialQuotaUnlimited.value) return null;
+  if (trialQuotaLimit.value == null || trialSubmissionCount.value == null) return null;
+  return Math.max(trialQuotaLimit.value - trialSubmissionCount.value, 0);
+});
+
+async function loadTrialQuotaUsage() {
+  if (trialQuotaLimit.value == null || trialQuotaUnlimited.value) {
+    trialSubmissionCount.value = null;
+    return;
+  }
+  trialQuotaLoading.value = true;
+  try {
+    const response = await api.TrialSubmission.getTrialHistory(Number(route.params.id));
+    if (response.status === "ok") {
+      trialSubmissionCount.value = response.data?.total_count ?? response.data?.history?.length ?? 0;
+    } else {
+      trialSubmissionCount.value = null;
+    }
+  } catch (err) {
+    console.warn("Failed to load trial quota usage:", err);
+    trialSubmissionCount.value = null;
+  } finally {
+    trialQuotaLoading.value = false;
+  }
+}
+
+watch(
+  trialQuotaLimit,
+  (limit) => {
+    if (limit == null) return;
+    loadTrialQuotaUsage();
+  },
+  { immediate: true },
+);
 
 async function loadCustomTestcasePreview() {
   if (!customTestcasesBlob.value) {
@@ -661,6 +708,21 @@ async function submitCode() {
                     </div>
                   </div>
                 </dialog>
+              </div>
+
+              <div class="stats shrink-0 py-1">
+                <div class="stat place-items-center py-0">
+                  <div class="stat-title text-sm">{{ t("course.problem.test.trialQuota") }}</div>
+                  <div class="stat-value text-lg">
+                    <template v-if="trialQuotaUnlimited">
+                      <span class="text-sm">{{ t("components.problem.card.unlimited") }}</span>
+                    </template>
+                    <template v-else>
+                      <span>{{ trialQuotaLoading ? "..." : trialQuotaRemaining ?? "-" }}</span>
+                      <span class="text-sm font-normal">/ {{ trialQuotaLimit ?? "-" }}</span>
+                    </template>
+                  </div>
+                </div>
               </div>
 
               <div class="flex gap-2">

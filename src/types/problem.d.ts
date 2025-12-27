@@ -33,6 +33,7 @@ interface ProblemForm {
   tags: string[];
   allowedLanguage: number;
   quota: number;
+  trialSubmissionQuota?: number;
   type: ProblemType;
   status: ProblemStatus;
   testCaseInfo: {

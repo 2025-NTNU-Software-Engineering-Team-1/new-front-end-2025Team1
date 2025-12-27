@@ -16,6 +16,65 @@ const router = useRouter();
 useTitle(`Test History - ${route.params.testId} - ${route.params.name} | Normal OJ`);
 // const router = useRouter();
 
+// ==========================================
+// Status Normalization (string -> code)
+// ==========================================
+const STATUS_CODE_MAP: Record<string, SubmissionStatusCodes> = {
+  AC: SUBMISSION_STATUS_CODE.ACCEPTED,
+  WA: SUBMISSION_STATUS_CODE.WRONG_ANSWER,
+  CE: SUBMISSION_STATUS_CODE.COMPILE_ERROR,
+  AE: SUBMISSION_STATUS_CODE.ANALYSIS_ERROR,
+  TLE: SUBMISSION_STATUS_CODE.TIME_LIMIT_EXCEED,
+  MLE: SUBMISSION_STATUS_CODE.MEMORY_LIMIT_EXCEED,
+  RE: SUBMISSION_STATUS_CODE.RUNTIME_ERROR,
+  JE: SUBMISSION_STATUS_CODE.JUDGE_ERROR,
+  OLE: SUBMISSION_STATUS_CODE.OUTPUT_LIMIT_EXCEED,
+  PENDING: SUBMISSION_STATUS_CODE.PENDING,
+  JUDGING: SUBMISSION_STATUS_CODE.PENDING,
+  ERR: SUBMISSION_STATUS_CODE.JUDGE_ERROR,
+  ERROR: SUBMISSION_STATUS_CODE.JUDGE_ERROR,
+  ACCEPTED: SUBMISSION_STATUS_CODE.ACCEPTED,
+  "WRONG ANSWER": SUBMISSION_STATUS_CODE.WRONG_ANSWER,
+  "COMPILE ERROR": SUBMISSION_STATUS_CODE.COMPILE_ERROR,
+  "ANALYSIS ERROR": SUBMISSION_STATUS_CODE.ANALYSIS_ERROR,
+  "TIME LIMIT EXCEED": SUBMISSION_STATUS_CODE.TIME_LIMIT_EXCEED,
+  "MEMORY LIMIT EXCEED": SUBMISSION_STATUS_CODE.MEMORY_LIMIT_EXCEED,
+  "RUNTIME ERROR": SUBMISSION_STATUS_CODE.RUNTIME_ERROR,
+  "JUDGE ERROR": SUBMISSION_STATUS_CODE.JUDGE_ERROR,
+  "OUTPUT LIMIT EXCEED": SUBMISSION_STATUS_CODE.OUTPUT_LIMIT_EXCEED,
+};
+
+function normalizeStatus(rawStatus: unknown): SubmissionStatusCodes {
+  if (typeof rawStatus === "number") {
+    return rawStatus as SubmissionStatusCodes;
+  }
+  if (typeof rawStatus === "string") {
+    const trimmed = rawStatus.trim();
+    if (!trimmed) return SUBMISSION_STATUS_CODE.PENDING;
+    if (STATUS_CODE_MAP[trimmed] != null) return STATUS_CODE_MAP[trimmed];
+    const upper = trimmed.toUpperCase();
+    if (STATUS_CODE_MAP[upper] != null) return STATUS_CODE_MAP[upper];
+    const numeric = Number(trimmed);
+    if (!Number.isNaN(numeric)) return numeric as SubmissionStatusCodes;
+  }
+  return SUBMISSION_STATUS_CODE.PENDING;
+}
+
+function deriveStatusFromTasks(tasks?: TestTask[]): SubmissionStatusCodes | null {
+  if (!tasks || tasks.length === 0) return null;
+  let worst: SubmissionStatusCodes | null = null;
+  for (const task of tasks) {
+    const taskStatus = normalizeStatus(task.status);
+    worst = worst == null ? taskStatus : Math.max(worst, taskStatus);
+    if (!task.cases) continue;
+    for (const taskCase of task.cases) {
+      const caseStatus = normalizeStatus(taskCase.status);
+      worst = worst == null ? caseStatus : Math.max(worst, caseStatus);
+    }
+  }
+  return worst;
+}
+
 // Define test result type
 type TestCase = {
   id: number;
@@ -104,9 +163,9 @@ async function fetchTrialSubmission() {
       username: session.username || "Unknown",
       displayedName: session.displayedName || "Unknown",
     },
-    status: mapStatusToCode(response.data.status),
-    saStatus: response.data.sa_status ?? null,
-    saMessage: response.data.sa_message ?? null,
+    status: normalizeStatus(response.data.status),
+    saStatus: response.data.saStatus ?? response.data.sa_status ?? null,
+    saMessage: response.data.saMessage ?? response.data.sa_message ?? null,
     runTime: Math.max(...(response.data.tasks?.map((t) => t.exec_time) ?? [0])),
     memoryUsage: Math.max(...(response.data.tasks?.map((t) => t.memory_usage) ?? [0])),
     score: response.data.score,
@@ -137,11 +196,11 @@ async function fetchTrialSubmission() {
           exec_time: backendTask.exec_time,
           memory_usage: backendTask.memory_usage,
           score: backendTask.score,
-          status: mapStatusToCode(backendTask.status),
+          status: normalizeStatus(backendTask.status),
           cases:
             backendTask.cases?.map((caseData, caseIdx) => ({
               id: caseIdx,
-              status: mapStatusToCode(caseData.status),
+              status: normalizeStatus(caseData.status),
               exec_time: caseData.exec_time,
               memory_usage: caseData.memory_usage,
               input: caseData.input || "",
@@ -184,28 +243,18 @@ onMounted(async () => {
   }
 });
 
-// Helper function to map backend status string to status code
-function mapStatusToCode(status: string): SubmissionStatusCodes {
-  const statusMap: { [key: string]: SubmissionStatusCodes } = {
-    AC: SUBMISSION_STATUS_CODE.ACCEPTED,
-    WA: SUBMISSION_STATUS_CODE.WRONG_ANSWER,
-    CE: SUBMISSION_STATUS_CODE.COMPILE_ERROR,
-    AE: SUBMISSION_STATUS_CODE.ANALYSIS_ERROR,
-    TLE: SUBMISSION_STATUS_CODE.TIME_LIMIT_EXCEED,
-    MLE: SUBMISSION_STATUS_CODE.MEMORY_LIMIT_EXCEED,
-    RE: SUBMISSION_STATUS_CODE.RUNTIME_ERROR,
-    JE: SUBMISSION_STATUS_CODE.JUDGE_ERROR,
-    OLE: SUBMISSION_STATUS_CODE.OUTPUT_LIMIT_EXCEED,
-    Pending: SUBMISSION_STATUS_CODE.PENDING,
-  };
-  return statusMap[status] ?? SUBMISSION_STATUS_CODE.PENDING;
-}
-
 const { copy, copied, isSupported } = useClipboard();
+
+const effectiveStatus = computed(() => {
+  if (!testResult.value) return SUBMISSION_STATUS_CODE.PENDING;
+  const normalized = normalizeStatus(testResult.value.status);
+  if (normalized !== SUBMISSION_STATUS_CODE.PENDING) return normalized;
+  return deriveStatusFromTasks(testResult.value.tasks) ?? normalized;
+});
 
 // Auto-refresh polling (every 2 seconds while status is Pending)
 const { pause, isActive } = useIntervalFn(() => {
-  if (testResult.value != null && testResult.value.status === SUBMISSION_STATUS_CODE.PENDING) {
+  if (testResult.value != null && effectiveStatus.value === SUBMISSION_STATUS_CODE.PENDING) {
     fetchTrialSubmission().catch((err) => {
       console.error("Polling error:", err);
     });
@@ -214,7 +263,7 @@ const { pause, isActive } = useIntervalFn(() => {
 
 const expandTasks = ref<boolean[]>([]);
 const showErrorOutput = computed(() => {
-  const status = testResult.value?.status;
+  const status = effectiveStatus.value;
   return (
     status === SUBMISSION_STATUS_CODE.COMPILE_ERROR ||
     status === SUBMISSION_STATUS_CODE.ANALYSIS_ERROR ||
@@ -222,7 +271,7 @@ const showErrorOutput = computed(() => {
   );
 });
 const saStatusBadge = computed(() => {
-  if (!testResult.value || testResult.value.status === SUBMISSION_STATUS_CODE.PENDING) return null;
+  if (!testResult.value || effectiveStatus.value === SUBMISSION_STATUS_CODE.PENDING) return null;
   const status = testResult.value.saStatus;
   if (status === 0) return { label: "SA Passed", className: "badge-success" };
   if (status === 1) return { label: "SA Failed", className: "badge-error" };
@@ -230,9 +279,9 @@ const saStatusBadge = computed(() => {
   return null;
 });
 const errorTitle = computed(() =>
-  testResult.value?.status === SUBMISSION_STATUS_CODE.JUDGE_ERROR
+  effectiveStatus.value === SUBMISSION_STATUS_CODE.JUDGE_ERROR
     ? "Judge Error"
-    : testResult.value?.status === SUBMISSION_STATUS_CODE.ANALYSIS_ERROR
+    : effectiveStatus.value === SUBMISSION_STATUS_CODE.ANALYSIS_ERROR
       ? "Analysis Error"
       : "Compilation Error",
 );
@@ -242,16 +291,16 @@ watchEffect(() => {
       expandTasks.value = testResult.value.tasks.map(() => false);
     }
     // Stop polling when status is no longer Pending
-    if (testResult.value.status !== SUBMISSION_STATUS_CODE.PENDING) {
+    if (effectiveStatus.value !== SUBMISSION_STATUS_CODE.PENDING) {
       if (isActive.value) {
-        console.log("Judging finished. Polling stopped.", { finalStatus: testResult.value.status });
+        console.log("Judging finished. Polling stopped.", { finalStatus: effectiveStatus.value });
         pause();
       }
       // Fetch error output for CE/JE (only once)
       if (
-        (testResult.value.status === SUBMISSION_STATUS_CODE.COMPILE_ERROR ||
-          testResult.value.status === SUBMISSION_STATUS_CODE.ANALYSIS_ERROR ||
-          testResult.value.status === SUBMISSION_STATUS_CODE.JUDGE_ERROR) &&
+        (effectiveStatus.value === SUBMISSION_STATUS_CODE.COMPILE_ERROR ||
+          effectiveStatus.value === SUBMISSION_STATUS_CODE.ANALYSIS_ERROR ||
+          effectiveStatus.value === SUBMISSION_STATUS_CODE.JUDGE_ERROR) &&
         !errorOutputFetched.value
       ) {
         errorOutputFetched.value = true;
@@ -692,7 +741,7 @@ function closeDeleteErrorModal() {
                         </router-link>
                       </td>
                       <td>{{ testResult.user.username }} ({{ testResult.user.displayedName }})</td>
-                      <td><judge-status :status="testResult.status" /></td>
+                      <td><judge-status :status="effectiveStatus" /></td>
                       <td>{{ testResult.runTime }} ms</td>
                       <td>{{ testResult.memoryUsage }} KB</td>
                       <td>{{ testResult.score }}</td>
@@ -757,7 +806,7 @@ function closeDeleteErrorModal() {
               <tbody>
                 <tr>
                   <td>Overall</td>
-                  <td><judge-status :status="task.status" /></td>
+                  <td><judge-status :status="normalizeStatus(task.status)" /></td>
                   <td>{{ task.exec_time }} ms</td>
                   <td>{{ task.memory_usage }} KB</td>
                   <td>{{ task.score }}</td>
@@ -794,7 +843,7 @@ function closeDeleteErrorModal() {
                 </tr>
                 <tr v-show="expandTasks[taskIndex]" v-for="(_case, caseIndex) in task.cases" :key="caseIndex">
                   <td>{{ taskIndex }}-{{ caseIndex }}</td>
-                  <td><judge-status :status="_case.status" /></td>
+                  <td><judge-status :status="normalizeStatus(_case.status)" /></td>
                   <td>{{ _case.exec_time }} ms</td>
                   <td>{{ _case.memory_usage }} KB</td>
                   <td>-</td>

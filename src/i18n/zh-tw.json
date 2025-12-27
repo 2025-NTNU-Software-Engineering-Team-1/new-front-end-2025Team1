@@ -181,6 +181,7 @@
         "history": "歷史記錄",
         "testcase": "測資",
         "run": "執行",
+        "trialQuota": "測試額度",
         "submitModal": {
           "title": "提交確認",
           "message": "確定要提交此程式碼進行正式評分嗎？",

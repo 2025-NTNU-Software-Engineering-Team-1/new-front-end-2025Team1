@@ -181,6 +181,7 @@
         "history": "History",
         "testcase": "Testcase",
         "run": "Run",
+        "trialQuota": "Trial Quota",
         "back": "Back",
         "submitModal": {
           "title": "Submit Confirmation",

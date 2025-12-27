@@ -111,6 +111,7 @@ declare module 'vue' {
     ProblemInfoCard: typeof import('./../components/Problem/ProblemInfoCard.vue')['default']
     ProblemMultiSelect: typeof import('./../components/Homework/Fields/ProblemMultiSelect.vue')['default']
     ProblemTestdataDescriptionModal: typeof import('./../components/Problem/Forms/ProblemTestdataDescriptionModal.vue')['default']
+    RandomCoin: typeof import('./../components/Problem/Admin/Controls/RandomCoin.vue')['default']
     ReplyItem: typeof import('./../components/Discussion/ReplyItem.vue')['default']
     ReplyManagementDropdown: typeof import('./../components/Discussion/ReplyManagementDropdown.vue')['default']
     ResourceDataSection: typeof import('./../components/Problem/Admin/Sections/ResourceDataSection.vue')['default']

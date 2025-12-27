@@ -568,7 +568,7 @@ async function submitCode() {
             <div class="divider" />
             <div class="bg-base-200 relative mt-4 rounded-lg p-4 transition-all duration-300">
               <button
-                class="absolute right-4 bottom-3 z-10 cursor-pointer text-gray-500 hover:text-gray-700"
+                class="absolute bottom-3 right-4 z-10 cursor-pointer text-gray-500 hover:text-gray-700"
                 @click="isExpanded = !isExpanded"
               >
                 <img
@@ -801,10 +801,7 @@ async function submitCode() {
 
                   <!-- Action Buttons - Normal size to match Submit button -->
                   <div class="flex gap-2">
-                    <button
-                      class="btn btn-outline gap-1.5"
-                      @click="showAITestcaseModal = true"
-                    >
+                    <button class="btn btn-outline gap-1.5" @click="showAITestcaseModal = true">
                       <i-uil-robot class="h-5 w-5" />
                       {{ t("aiChatbot.testcaseGenerator.button") }}
                     </button>
@@ -869,7 +866,7 @@ async function submitCode() {
                           </li>
                         </ul>
                         <div class="prose max-w-none flex-1 overflow-auto rounded border p-2">
-                          <pre class="break-words whitespace-pre-wrap">{{
+                          <pre class="whitespace-pre-wrap break-words">{{
                             publicTestcaseFiles[selectedPreviewFileIndex]?.content ||
                             t("course.problem.test.topic.noContent")
                           }}</pre>
@@ -902,7 +899,7 @@ async function submitCode() {
                           </li>
                         </ul>
                         <div class="prose max-w-none flex-1 overflow-auto rounded border p-2">
-                          <pre class="break-words whitespace-pre-wrap">{{
+                          <pre class="whitespace-pre-wrap break-words">{{
                             customTestcaseFiles[selectedPreviewFileIndex]?.content ||
                             t("course.problem.test.topic.noContent")
                           }}</pre>
@@ -1015,7 +1012,11 @@ async function submitCode() {
       :problem-id="route.params.id as string"
       :course-name="route.params.name as string"
       @close="showAITestcaseModal = false"
-      @use-testcase="(input: string) => { /* TODO: Use generated testcase */ console.log('Generated input:', input); }"
+      @use-testcase="
+        (input: string) => {
+          /* TODO: Use generated testcase */ console.log('Generated input:', input);
+        }
+      "
     />
   </div>
 </template>

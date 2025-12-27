@@ -12,6 +12,7 @@ import { hover_en } from "../../Hovers/hover-en";
 import LanguageMultiSelect from "../../Forms/LanguageMultiSelect.vue";
 import MultiStringInput from "../Controls/MultiStringInput.vue";
 import SidecarInput from "../Controls/SidecarInput.vue";
+import RandomCoin from "../Controls/RandomCoin.vue";
 
 // Utils & API
 import { assertFileSizeOK } from "@/utils/checkFileSize";
@@ -900,6 +901,19 @@ watch(
 );
 
 // ==========================================
+// Handler for Random Coin
+// ==========================================
+function onCoinGenerated(val: number) {
+  // Update local string value for input display
+  localAiMaxToken.value = String(val);
+  // Update actual config data
+  if (problem.value.config) {
+    problem.value.config.aiMaxToken = val;
+  }
+  logger.log("Random Token Generated", val);
+}
+
+// ==========================================
 // Section: Sidecars & Network Helper
 // ==========================================
 const hasExistingNetworkConfig = computed(() => {
@@ -1158,18 +1172,23 @@ onBeforeUnmount(() => {
                 <label class="label mb-1">
                   <span class="label-text">{{ t("course.problems.aiMaxToken") }}</span>
                 </label>
-                <input
-                  type="number"
-                  class="input input-bordered input-sm"
-                  :min="500"
-                  :max="100000"
-                  step="1"
-                  :value="localAiMaxToken"
-                  @input="onAiMaxTokenInput"
-                  @blur="onAiMaxTokenBlur"
-                  @keyup="onAiMaxTokenKeyup"
-                  placeholder="500~100000"
-                />
+
+                <div class="flex items-center gap-2">
+                  <input
+                    type="number"
+                    class="input input-bordered input-sm flex-1"
+                    :min="500"
+                    :max="100000"
+                    step="1"
+                    :value="localAiMaxToken"
+                    @input="onAiMaxTokenInput"
+                    @blur="onAiMaxTokenBlur"
+                    @keyup="onAiMaxTokenKeyup"
+                    placeholder="500~100000"
+                  />
+                  <RandomCoin :min="500" :max="100000" @generated="onCoinGenerated" />
+                </div>
+
                 <label class="label">
                   <span class="label-text-alt">500~100000</span>
                 </label>

@@ -624,6 +624,18 @@ function closeCaseOutputModal() {
   currentViewingCase.value = null;
 }
 
+const copiedArtifactKey = ref<string | null>(null);
+
+function copyArtifactContent(content: string, key: string) {
+  navigator.clipboard.writeText(content);
+  copiedArtifactKey.value = key;
+  setTimeout(() => {
+    if (copiedArtifactKey.value === key) {
+      copiedArtifactKey.value = null;
+    }
+  }, 2000);
+}
+
 // Case Navigation
 const hasNextCase = computed(() => {
   if (!currentViewingCase.value || !submission.value) return false;
@@ -1197,11 +1209,20 @@ watch(submission, (val) => {
         <div v-else-if="caseOutputData" class="space-y-6">
           <!-- Stdout Section -->
           <div>
-            <label class="label pb-2">
+            <div class="flex items-center justify-between pb-2">
               <span class="label-text text-base font-semibold">{{
                 $t("course.submission.caseOutput.stdout")
               }}</span>
-            </label>
+              <button
+                v-if="caseOutputData.stdout"
+                class="btn btn-ghost btn-sm opacity-70 hover:opacity-100"
+                @click="copyArtifactContent(caseOutputData.stdout || '', 'stdout')"
+                :title="$t('course.submission.source.copy')"
+              >
+                <i-uil-copy v-if="copiedArtifactKey !== 'stdout'" class="h-5 w-5" />
+                <i-uil-check v-else class="text-success h-5 w-5" />
+              </button>
+            </div>
             <div v-if="caseOutputData.stdout === null">
               <!-- File doesn't exist -->
               <div class="text-base-content/60 py-2 italic">
@@ -1221,11 +1242,20 @@ watch(submission, (val) => {
 
           <!-- Stderr Section -->
           <div class="mt-6">
-            <label class="label pb-2">
+            <div class="flex items-center justify-between pb-2">
               <span class="label-text text-base font-semibold">{{
                 $t("course.submission.caseOutput.stderr")
               }}</span>
-            </label>
+              <button
+                v-if="caseOutputData.stderr"
+                class="btn btn-ghost btn-sm opacity-70 hover:opacity-100"
+                @click="copyArtifactContent(caseOutputData.stderr || '', 'stderr')"
+                :title="$t('course.submission.source.copy')"
+              >
+                <i-uil-copy v-if="copiedArtifactKey !== 'stderr'" class="h-5 w-5" />
+                <i-uil-check v-else class="text-success h-5 w-5" />
+              </button>
+            </div>
             <div v-if="caseOutputData.stderr === null">
               <!-- File doesn't exist -->
               <div class="text-base-content/60 py-2 italic">
@@ -1270,6 +1300,16 @@ watch(submission, (val) => {
                   <i :class="getFileIconClass(file.extension)" class="h-5 w-5" />
                   <span class="truncate font-medium" :title="String(fileName)">{{ fileName }}</span>
                   <span class="badge badge-sm flex-shrink-0">{{ file.extension || "no ext" }}</span>
+                  <div class="flex-grow"></div>
+                  <button
+                    v-if="file.type === 'text'"
+                    class="btn btn-ghost btn-sm opacity-70 hover:opacity-100"
+                    @click="copyArtifactContent(file.content, String(fileName))"
+                    :title="$t('course.submission.source.copy')"
+                  >
+                    <i-uil-copy v-if="copiedArtifactKey !== fileName" class="h-5 w-5" />
+                    <i-uil-check v-else class="text-success h-5 w-5" />
+                  </button>
                 </div>
                 <div class="flex-grow overflow-y-auto pr-2"></div>
                 <!-- Image Files -->

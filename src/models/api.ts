@@ -516,7 +516,13 @@ const APITokenAPI = {
 
 const Chatbot = {
   // 使用者發問：POST /ai/chatbot/ask
-  ask: (body: { message: string; current_code: string; course_name: string; problem_id: string; language?: string }) =>
+  ask: (body: {
+    message: string;
+    current_code: string;
+    course_name: string;
+    problem_id: string;
+    language?: string;
+  }) =>
     fetcher.post<{
       data: { text: string; emotion?: string }[];
     }>("/ai/chatbot/ask", body),

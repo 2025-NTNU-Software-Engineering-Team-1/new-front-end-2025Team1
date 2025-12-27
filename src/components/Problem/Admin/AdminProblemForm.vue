@@ -623,7 +623,7 @@ async function submit() {
 onMounted(async () => {
   initFormStructure();
   await nextTick();
-  await v$.value.$validate();
+  // REMOVED: await v$.value.$validate(); to prevent RED error messages on initial load
 });
 </script>
 

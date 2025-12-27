@@ -6,8 +6,9 @@
  * - Displays a coin with cyberpunk visual effects
  * - Neon glow, glitch effects, and matrix rain
  * - Generates random integer between min and max
+ * - Customizable size
  */
-import { ref } from "vue";
+import { ref, computed } from "vue";
 
 const props = defineProps({
   min: {
@@ -18,6 +19,10 @@ const props = defineProps({
     type: Number,
     default: 100000,
   },
+  size: {
+    type: Number,
+    default: 35, // 預設 48px
+  },
 });
 
 const emit = defineEmits<{
@@ -26,6 +31,16 @@ const emit = defineEmits<{
 
 const isSpinning = ref(false);
 const matrixChars = ref<Array<{ id: number; char: string; x: number; delay: number }>>([]);
+
+// 計算相關尺寸
+const sizeVars = computed(() => ({
+  "--coin-size": `${props.size}px`,
+  "--glow-size": `${props.size + 32}px`,
+  "--matrix-fall-distance": `${props.size + 12}px`,
+  "--font-size": `${props.size * 0.5}px`,
+  "--matrix-font-size": `${props.size * 0.25}px`,
+  "--border-width": `${Math.max(2, props.size * 0.04)}px`,
+}));
 
 function spinCoin() {
   if (isSpinning.value) return;
@@ -48,18 +63,19 @@ function spinCoin() {
 function generateMatrixRain() {
   const chars = "01アイウエオカキクケコサシスセソタチツテト";
   const count = 15;
+  const spreadRange = props.size * 0.8; // 根據大小調整散布範圍
 
   matrixChars.value = Array.from({ length: count }, (_, i) => ({
     id: Date.now() + i,
     char: chars[Math.floor(Math.random() * chars.length)],
-    x: Math.random() * 80 - 40, // -40 to 40
+    x: Math.random() * spreadRange - spreadRange / 2,
     delay: Math.random() * 0.3,
   }));
 }
 </script>
 
 <template>
-  <div class="coin-wrapper" :class="{ disabled: isSpinning }">
+  <div class="coin-wrapper" :class="{ disabled: isSpinning }" :style="sizeVars">
     <div class="tooltip" data-tip="Click to randomize Token">
       <!-- Matrix rain container -->
       <div class="matrix-container">
@@ -129,7 +145,7 @@ function generateMatrixRain() {
   top: -10px;
   color: #0f0;
   font-family: "Courier New", monospace;
-  font-size: 12px;
+  font-size: var(--matrix-font-size);
   font-weight: bold;
   text-shadow: 0 0 5px #0f0;
   animation: matrixFall 1s ease-out forwards;
@@ -142,7 +158,7 @@ function generateMatrixRain() {
     opacity: 1;
   }
   100% {
-    transform: translateY(60px);
+    transform: translateY(var(--matrix-fall-distance));
     opacity: 0;
   }
 }
@@ -154,8 +170,8 @@ function generateMatrixRain() {
   padding: 0;
   cursor: pointer;
   perspective: 1000px;
-  width: 48px;
-  height: 48px;
+  width: var(--coin-size);
+  height: var(--coin-size);
   position: relative;
   transition: transform 0.2s;
 }
@@ -175,14 +191,14 @@ function generateMatrixRain() {
   left: 50%;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  border: 2px solid;
+  border: var(--border-width) solid;
   opacity: 0;
   pointer-events: none;
 }
 
 .ring-1 {
-  width: 48px;
-  height: 48px;
+  width: var(--coin-size);
+  height: var(--coin-size);
   border-color: #06b6d4;
   box-shadow:
     0 0 10px #06b6d4,
@@ -190,8 +206,8 @@ function generateMatrixRain() {
 }
 
 .ring-2 {
-  width: 48px;
-  height: 48px;
+  width: var(--coin-size);
+  height: var(--coin-size);
   border-color: #ec4899;
   box-shadow:
     0 0 10px #ec4899,
@@ -204,13 +220,13 @@ function generateMatrixRain() {
 
 @keyframes pulseRing {
   0% {
-    width: 48px;
-    height: 48px;
+    width: var(--coin-size);
+    height: var(--coin-size);
     opacity: 1;
   }
   100% {
-    width: 80px;
-    height: 80px;
+    width: var(--glow-size);
+    height: var(--glow-size);
     opacity: 0;
   }
 }
@@ -237,7 +253,7 @@ function generateMatrixRain() {
   border-radius: 50%;
   backface-visibility: hidden;
   overflow: hidden;
-  border: 2px solid;
+  border: var(--border-width) solid;
 }
 
 .coin-front {
@@ -284,14 +300,14 @@ function generateMatrixRain() {
     transform: translateY(0);
   }
   100% {
-    transform: translateY(48px);
+    transform: translateY(var(--coin-size));
   }
 }
 
 /* Currency symbol */
 .currency-symbol {
   font-family: "Courier New", monospace;
-  font-size: 24px;
+  font-size: var(--font-size);
   font-weight: bold;
   color: #06b6d4;
   text-shadow:

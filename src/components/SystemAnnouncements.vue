@@ -41,7 +41,7 @@ const { data: announcements, error, isLoading } = useAxios<AnnouncementList>("/a
                 <td>
                   <router-link
                     :to="`/announcements/${annId}`"
-                    class="text-base-content/80 dark:text-base-content/80 visited:text-base-content/80 dark:visited:text-base-content/80 block min-w-0 break-words whitespace-normal hover:underline"
+                    class="text-base-content/80 dark:text-base-content/80 visited:text-base-content/80 dark:visited:text-base-content/80 block min-w-0 whitespace-normal break-words hover:underline"
                   >
                     {{ title }}
                   </router-link>
@@ -84,7 +84,7 @@ const { data: announcements, error, isLoading } = useAxios<AnnouncementList>("/a
             <div class="card-body p-4">
               <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0 flex-1">
-                  <h3 class="text-lg leading-snug font-bold">
+                  <h3 class="text-lg font-bold leading-snug">
                     <router-link
                       :to="`/announcements/${annId}`"
                       class="hover:text-primary block transition-colors hover:underline"

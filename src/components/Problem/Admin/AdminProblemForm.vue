@@ -53,7 +53,7 @@ const openPanels = reactive({
   testdata: false,
   resdata: false,
 });
-const { t, locale  } = useI18n();
+const { t, locale } = useI18n();
 const hover = computed(() => {
   return locale.value === "en" ? hover_en : hover_zh;
 });
@@ -656,9 +656,10 @@ async function submit() {
   <div ref="sectionRefs.desc" class="mt-4 flex flex-col gap-3">
     <div class="collapse-arrow rounded-box bg-base-200 border-base-300 collapse border shadow-sm">
       <input type="checkbox" class="peer" v-model="openPanels.desc" />
-      <div class="collapse-title text-base-content flex min-h-0 items-center py-3 text-base font-semibold 
-        tooltip tooltip-top flex cursor-help items-center gap-1"
-          :data-tip="hover.setDescription">
+      <div
+        class="collapse-title text-base-content tooltip tooltip-top flex min-h-0 cursor-help items-center gap-1 py-3 text-base font-semibold"
+        :data-tip="hover.setDescription"
+      >
         {{ t("course.problems.setDescription") }}
       </div>
       <div class="collapse-content peer-checked:pt-2">
@@ -671,9 +672,10 @@ async function submit() {
       class="collapse-arrow rounded-box bg-base-200 border-base-300 collapse border shadow-sm"
     >
       <input type="checkbox" class="peer" v-model="openPanels.config" />
-      <div class="collapse-title text-base-content flex min-h-0 items-center py-3 text-base font-semibold
-        tooltip tooltip-top flex cursor-help items-center gap-1"
-        :data-tip="hover.setConfiguration">
+      <div
+        class="collapse-title text-base-content tooltip tooltip-top flex min-h-0 cursor-help items-center gap-1 py-3 text-base font-semibold"
+        :data-tip="hover.setConfiguration"
+      >
         {{ t("course.problems.setConfiguration") }}
       </div>
       <div class="collapse-content peer-checked:pt-2">
@@ -686,9 +688,10 @@ async function submit() {
       class="collapse-arrow rounded-box bg-base-200 border-base-300 collapse border shadow-sm"
     >
       <input type="checkbox" class="peer" v-model="openPanels.pipeline" />
-      <div class="collapse-title text-base-content flex min-h-0 items-center py-3 text-base font-semibold
-        tooltip tooltip-top flex cursor-help items-center gap-1"
-        :data-tip="hover.setPipelines">
+      <div
+        class="collapse-title text-base-content tooltip tooltip-top flex min-h-0 cursor-help items-center gap-1 py-3 text-base font-semibold"
+        :data-tip="hover.setPipelines"
+      >
         {{ t("course.problems.setPipelines") }}
       </div>
       <div class="collapse-content peer-checked:pt-2">
@@ -701,9 +704,10 @@ async function submit() {
       class="collapse-arrow rounded-box bg-base-200 border-base-300 collapse border shadow-sm"
     >
       <input type="checkbox" class="peer" v-model="openPanels.testdata" />
-      <div class="collapse-title text-base-content flex min-h-0 items-center py-3 text-base font-semibold
-          tooltip tooltip-top flex cursor-help items-center gap-1"
-          :data-tip="hover.setTestData">
+      <div
+        class="collapse-title text-base-content tooltip tooltip-top flex min-h-0 cursor-help items-center gap-1 py-3 text-base font-semibold"
+        :data-tip="hover.setTestData"
+      >
         {{ t("course.problems.setTestData") }}
       </div>
       <div class="collapse-content peer-checked:pt-2">
@@ -716,9 +720,10 @@ async function submit() {
       class="collapse-arrow rounded-box bg-base-200 border-base-300 collapse border shadow-sm"
     >
       <input type="checkbox" class="peer" v-model="openPanels.resdata" />
-      <div class="collapse-title text-base-content flex min-h-0 items-center py-3 text-base font-semibold
-        tooltip tooltip-top flex cursor-help items-center gap-1"
-        :data-tip="hover.setResourceData">
+      <div
+        class="collapse-title text-base-content tooltip tooltip-top flex min-h-0 cursor-help items-center gap-1 py-3 text-base font-semibold"
+        :data-tip="hover.setResourceData"
+      >
         {{ t("course.problems.setResourceData") }}
       </div>
       <div class="collapse-content peer-checked:pt-2">
@@ -733,7 +738,7 @@ async function submit() {
   <Transition name="slide-up">
     <div
       v-if="v$.$error"
-      class="border-l-error border-y-base-300 border-r-base-300 bg-base-100 mt-6 rounded-xl border-y border-r border-l-4 p-5 shadow-md"
+      class="border-l-error border-y-base-300 border-r-base-300 bg-base-100 mt-6 rounded-xl border-y border-l-4 border-r p-5 shadow-md"
     >
       <div class="flex items-start gap-4">
         <div class="bg-error/10 text-error rounded-full p-2">
@@ -757,13 +762,13 @@ async function submit() {
                 <span class="badge badge-error badge-xs badge-outline mt-0.5 shrink-0">
                   {{ e.path }}
                 </span>
-                <span class="text-base-content group-hover:text-error font-medium break-words">
+                <span class="text-base-content group-hover:text-error break-words font-medium">
                   {{ e.message }}
                 </span>
               </div>
 
               <i-uil-arrow-right
-                class="text-error mt-0.5 ml-2 h-4 w-4 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+                class="text-error ml-2 mt-0.5 h-4 w-4 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
               />
             </button>
           </div>

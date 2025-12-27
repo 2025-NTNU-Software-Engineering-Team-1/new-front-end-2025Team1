@@ -427,7 +427,7 @@
       "selectedKeysTitle": "已選取的金鑰 ({count}) - 點擊下方項目以移除",
       "ACFile": "僅允許: .py, .c or .cpp",
       "enableCppHint": "請先啟用 C/C++ 語言才能使用此功能",
-      "interActive":" 僅允許: .py, .c or .cpp"
+      "interActive": " 僅允許: .py, .c or .cpp"
     },
     "submissions": {
       "text": "繳交狀態",

@@ -27,12 +27,20 @@ async function fetchData() {
   try {
     // 1. Get Courses
     const { data: courseData } = await fetcher.get<CourseList>("/course");
+
+    // [DEBUG] Log the fetched course list to inspect the API response
+    console.log("=== [1] API Response: Course List ===", courseData);
+
     courses.value = courseData;
 
     // 2. Get Homeworks for each course (Parallel)
     const hwPromises = courses.value.map(async (c) => {
       try {
         const { data: hwData } = await fetcher.get<HomeworkList>(`/course/${c.course}/homework`);
+
+        // [DEBUG] Log the homework list fetched for a specific course
+        console.log(`=== [2] API Response: Homework for ${c.course} ===`, hwData);
+
         return hwData.map((h) => ({
           courseName: c.course,
           hw: h,
@@ -44,7 +52,12 @@ async function fetchData() {
     });
 
     const results = await Promise.all(hwPromises);
-    homeworksRaw.value = results.flat();
+    const flattenedResults = results.flat();
+
+    // [DEBUG] Log all aggregated homeworks before filtering logic
+    console.log("=== [3] Aggregated Raw Homework Data ===", flattenedResults);
+
+    homeworksRaw.value = flattenedResults;
   } catch (e: unknown) {
     console.error("Dashboard fetch error", e);
     error.value = e instanceof Error ? e.message : "Failed to load dashboard data";
@@ -56,7 +69,7 @@ async function fetchData() {
 // ---- Computed ----
 const upcomingDeadlines = computed(() => {
   const now = dayjs().unix();
-  return homeworksRaw.value
+  const result = homeworksRaw.value
     .map((item) => ({
       ...item.hw,
       courseName: item.courseName,
@@ -64,6 +77,12 @@ const upcomingDeadlines = computed(() => {
     .filter((h) => h.end > now)
     .sort((a, b) => a.end - b.end)
     .slice(0, 5);
+
+  // [DEBUG] Log the final computed deadlines (filtered, sorted, and sliced)
+  // This helps verify if the filter logic (e.g. h.end > now) is working correctly
+  console.log("=== [4] Computed: Upcoming Deadlines (Final Display) ===", result);
+
+  return result;
 });
 
 // ---- Helpers ----
@@ -92,7 +111,6 @@ onMounted(() => {
 
 <template>
   <div class="space-y-6">
-    <!-- Welcome Header -->
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-base-content text-2xl font-bold">
@@ -102,7 +120,6 @@ onMounted(() => {
     </div>
 
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-5">
-      <!-- Left Column: Upcoming Deadlines (Span 3) -->
       <div class="space-y-4 lg:col-span-3">
         <h2 class="text-base-content flex items-center gap-2 text-xl font-bold">
           <i-uil-clock />
@@ -114,7 +131,6 @@ onMounted(() => {
         </div>
 
         <div v-else-if="upcomingDeadlines.length > 0" class="flex flex-col gap-3">
-          <!-- Homework Item -->
           <div
             v-for="h in upcomingDeadlines"
             :key="h.id"
@@ -194,7 +210,6 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- Right Column: My Courses (Span 2) -->
       <div class="space-y-4 lg:col-span-2">
         <h2 class="text-base-content flex items-center gap-2 text-xl font-bold">
           <i-uil-book-open />
@@ -211,7 +226,7 @@ onMounted(() => {
               v-for="c in courses"
               :key="c.course"
               :to="`/course/${c.course}`"
-              class="card bg-base-100 group border-base-200 border shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+              class="card bg-base-100 border-base-200 group border shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
             >
               <div class="card-body flex flex-row items-center gap-3 p-4">
                 <course-avatar

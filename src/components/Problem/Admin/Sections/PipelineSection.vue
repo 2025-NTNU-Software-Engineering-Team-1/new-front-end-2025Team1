@@ -847,7 +847,7 @@ watch(
                     </div>
                   </div>
 
-                  <h6 class="mb-1 text-sm font-bold tracking-[0.2em] text-white uppercase drop-shadow-lg">
+                  <h6 class="mb-1 text-sm font-bold uppercase tracking-[0.2em] text-white drop-shadow-lg">
                     {{ t("course.problems.systemLocked") }}
                   </h6>
                   <div
@@ -951,7 +951,7 @@ watch(
                     </div>
                   </div>
 
-                  <h6 class="mb-1 text-sm font-bold tracking-[0.2em] text-white uppercase drop-shadow-lg">
+                  <h6 class="mb-1 text-sm font-bold uppercase tracking-[0.2em] text-white drop-shadow-lg">
                     {{ t("course.problems.accessDenied") }}
                   </h6>
                   <div
@@ -1408,7 +1408,7 @@ watch(
                   "
                 />
                 <div>
-                  <span class="pl-4">{{t("course.problems.interActive")}}</span>
+                  <span class="pl-4">{{ t("course.problems.interActive") }}</span>
                 </div>
               </div>
 
@@ -1508,10 +1508,11 @@ watch(
 
           <div class="bg-base-200/50 mt-4 rounded-lg border border-gray-500 p-4">
             <div class="flex items-center gap-4">
-              <label class="label cursor-pointer justify-start gap-x-4
-                tooltip tooltip-top flex cursor-help items-center gap-1"
-                  :data-tip="hover.aiCheckerEnable">
-                <span class="label-text ">{{ t("course.problems.aiCheckerEnable") }}</span>
+              <label
+                class="label tooltip tooltip-top flex cursor-help cursor-pointer items-center justify-start gap-1 gap-x-4"
+                :data-tip="hover.aiCheckerEnable"
+              >
+                <span class="label-text">{{ t("course.problems.aiCheckerEnable") }}</span>
                 <input
                   type="checkbox"
                   class="toggle toggle-sm"
@@ -1539,7 +1540,7 @@ watch(
                   <div
                     tabindex="0"
                     role="button"
-                    class="select select-bordered select-sm flex w-full items-center justify-between "
+                    class="select select-bordered select-sm flex w-full items-center justify-between"
                   >
                     <span class="truncate">
                       {{
@@ -1550,7 +1551,7 @@ watch(
                   </div>
                   <ul
                     tabindex="0"
-                    class="dropdown-content menu rounded-box left-0 z-[100] mt-1 w-full border border-base-300 bg-base-100 p-2 shadow-lg"
+                    class="dropdown-content menu rounded-box border-base-300 bg-base-100 left-0 z-[100] mt-1 w-full border p-2 shadow-lg"
                   >
                     <li class="disabled px-4 py-2 text-xs opacity-50">
                       {{ t("course.problems.aiCheckerSelectKey") }}
@@ -1577,13 +1578,13 @@ watch(
                   <div
                     tabindex="0"
                     role="button"
-                    class="select select-bordered select-sm flex w-full items-center justify-between "
+                    class="select select-bordered select-sm flex w-full items-center justify-between"
                   >
                     <span>{{ (problem.config as any).aiChecker?.model || "Select Model" }}</span>
                   </div>
                   <ul
                     tabindex="0"
-                    class="dropdown-content menu rounded-box left-0 z-[100] mt-1 w-full border border-base-300 bg-base-100 p-2 shadow"
+                    class="dropdown-content menu rounded-box border-base-300 bg-base-100 left-0 z-[100] mt-1 w-full border p-2 shadow"
                   >
                     <li>
                       <a @click="(problem.config as any).aiChecker!.model = 'gemini-2.5-flash-lite'"
@@ -1606,7 +1607,7 @@ watch(
             </div>
           </div>
         </div>
-        <div v-else class="pt-2 pl-1 text-xs opacity-70">
+        <div v-else class="pl-1 pt-2 text-xs opacity-70">
           {{
             problem.pipeline!.executionMode === "interactive"
               ? t("course.problems.uploadCustomCheckerWarning")
@@ -1677,7 +1678,7 @@ watch(
             <span class="label-text-alt text-error">{{ v$.assets.scorePy.$errors[0]?.$message }}</span>
           </label>
         </div>
-        <div v-else class="pt-2 pl-1 text-xs opacity-70">
+        <div v-else class="pl-1 pt-2 text-xs opacity-70">
           {{ t("course.problems.uploadCustomScorerInfo") }}
         </div>
       </div>

@@ -1,8 +1,8 @@
 export const hover_en = {
   //description
-  setDescription:"test",
+  setDescription: "test",
   //configuration
-  setConfiguration:"test",
+  setConfiguration: "test",
   allowedLanguages: "test",
   maxZipSize: "test",
   tags: "test",
@@ -34,7 +34,7 @@ export const hover_en = {
   sideCarArgs: "test",
   sideCarEnv: "test",
   //pipeline
-  setPipelines:"test",
+  setPipelines: "test",
   fileAccess: "test",
   libraryRestrictionsGroup1: "test",
   libraryRestrictionsGroup2: "test",
@@ -53,9 +53,9 @@ export const hover_en = {
   uploadCustomChecker: "test",
   uploadCustomScorer: "test",
   customScoringScript: "test",
-  aiCheckerEnable:"test",
+  aiCheckerEnable: "test",
   //set test data
-  setTestData:"test",
+  setTestData: "test",
   setDataZipFile: "test",
   //resource data
   setResourceData: "test",

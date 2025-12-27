@@ -281,6 +281,7 @@ watch(open, (v) => (document.body.style.overflow = v ? "hidden" : ""));
     class="btn btn-sm lg:btn-md border-2 border-black bg-white text-black transition-colors hover:bg-black hover:text-white dark:border-zinc-400 dark:bg-zinc-800 dark:text-white dark:hover:bg-white dark:hover:text-black"
     @click.stop="openManual"
   >
+    <i-uil-book-open class="mr-1" />
     {{ t("components.problem.manual.open") }}
   </button>
 
@@ -383,7 +384,7 @@ watch(open, (v) => (document.body.style.overflow = v ? "hidden" : ""));
                 <template v-for="cat in categories" :key="cat.id">
                   <div class="mb-8">
                     <div
-                      class="text-base-content/70 mb-3 px-2 text-base font-extrabold uppercase tracking-widest"
+                      class="text-base-content/70 mb-3 px-2 text-base font-extrabold tracking-widest uppercase"
                     >
                       {{ cat.title }}
                     </div>
@@ -421,7 +422,7 @@ watch(open, (v) => (document.body.style.overflow = v ? "hidden" : ""));
             :style="{ width: `${tocWidth}px` }"
           >
             <div class="sticky top-0 p-6">
-              <div class="mb-4 text-xs font-bold uppercase tracking-wider opacity-60">
+              <div class="mb-4 text-xs font-bold tracking-wider uppercase opacity-60">
                 {{ uiText.onThisPage }}
               </div>
               <nav class="space-y-1">
@@ -511,7 +512,7 @@ watch(open, (v) => (document.body.style.overflow = v ? "hidden" : ""));
                   <template v-for="cat in categories" :key="cat.id">
                     <div>
                       <div
-                        class="text-base-content mb-3 px-2 text-sm font-extrabold uppercase tracking-widest"
+                        class="text-base-content mb-3 px-2 text-sm font-extrabold tracking-widest uppercase"
                       >
                         {{ cat.title }}
                       </div>
@@ -535,7 +536,7 @@ watch(open, (v) => (document.body.style.overflow = v ? "hidden" : ""));
 
                 <!-- Tab: TOC -->
                 <div v-if="mobileTab === 'toc'">
-                  <div class="mb-4 px-2 text-sm font-bold uppercase tracking-wider opacity-60">
+                  <div class="mb-4 px-2 text-sm font-bold tracking-wider uppercase opacity-60">
                     {{ uiText.onThisPage }}
                   </div>
                   <div class="space-y-2">

@@ -1407,6 +1407,9 @@ watch(
                     }
                   "
                 />
+                <div>
+                  <span class="pl-4">{{t("course.problems.interActive")}}</span>
+                </div>
               </div>
 
               <label v-if="v$?.assets?.teacherFile?.$error || teacherFileError" class="label">

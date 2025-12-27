@@ -428,7 +428,8 @@
       "inactive": "Inactive",
       "selectedKeysTitle": "Selected Keys ({count})  - Click items below to remove",
       "ACFile": "Only allowed: .py, .c, or .cpp",
-      "enableCppHint": "Enable C/C++ to unlock."
+      "enableCppHint": "Enable C/C++ to unlock.",
+      "interActive":"Only allowed: .py, .c, or .cpp"
     },
     "submissions": {
       "text": "Submissions",

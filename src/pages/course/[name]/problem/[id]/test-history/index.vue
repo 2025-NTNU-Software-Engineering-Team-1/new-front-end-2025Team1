@@ -352,7 +352,7 @@ async function confirmDeleteAllTrials() {
                     <td>{{ item.lang }}</td>
                     <td>{{ dayjs(item.timestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
                     <td v-if="canRejudge">
-                      <div class="tooltip" data-tip="Delete">
+                      <div class="tooltip" :data-tip="$t('course.problem.test.trialHistory.delete')">
                         <button
                           class="btn btn-ghost btn-sm btn-circle text-error"
                           :class="{ loading: deletingIds.has(item.id) }"

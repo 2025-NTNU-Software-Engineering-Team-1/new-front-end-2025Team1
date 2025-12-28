@@ -420,7 +420,7 @@ function triggerMascotReaction(type: "angel" | "devil") {
             <button
               v-if="session.isAdmin"
               class="btn btn-ghost btn-sm"
-              data-tip="Download test case"
+              :data-tip="$t('components.problem.card.downloadTestCase')"
               @click="downloadTestCase(Number($route.params.id))"
             >
               <i-uil-folder-download />
@@ -480,7 +480,9 @@ function triggerMascotReaction(type: "angel" | "devil") {
                 >
                   <span class="text-lg">{{ areRestrictionsVisible ? "×" : "⚙" }}</span>
                   <span>{{
-                    areRestrictionsVisible ? "Hide Constraints" : "View Environment Constraints"
+                    areRestrictionsVisible
+                      ? $t("components.problem.card.hideConstraints")
+                      : $t("components.problem.card.viewEnvironmentConstraints")
                   }}</span>
                 </button>
 
@@ -488,7 +490,7 @@ function triggerMascotReaction(type: "angel" | "devil") {
                   <div
                     v-if="showReminder"
                     class="group absolute -top-2 -right-2 z-10 flex animate-bounce cursor-pointer items-center justify-center hover:animate-none"
-                    title="Active restrictions found"
+                    :title="$t('components.problem.card.activeRestrictionsFound')"
                     @click="areRestrictionsVisible = true"
                   >
                     <div
@@ -499,7 +501,7 @@ function triggerMascotReaction(type: "angel" | "devil") {
                       <div
                         class="flex h-4 w-4 items-center justify-center rounded-full transition-colors hover:bg-white/20"
                         @click="dismissReminder"
-                        title="Dismiss reminder"
+                        :title="$t('components.problem.card.dismissReminder')"
                       >
                         ×
                       </div>
@@ -583,9 +585,9 @@ function triggerMascotReaction(type: "angel" | "devil") {
                     @click="isLanguagesExpanded = !isLanguagesExpanded"
                   >
                     <div class="bg-primary h-6 w-1 rounded-full"></div>
-                    <span class="text-base-content/80 text-lg font-bold tracking-wide uppercase"
-                      >Allowed Languages</span
-                    >
+                    <span class="text-base-content/80 text-lg font-bold tracking-wide uppercase">{{
+                      $t("components.problem.card.allowedLanguages")
+                    }}</span>
                     <span class="bg-base-300 text-base-content/60 rounded px-2 py-1 font-mono text-xs">{{
                       allowedLangTexts.length
                     }}</span>
@@ -619,9 +621,9 @@ function triggerMascotReaction(type: "angel" | "devil") {
                       @click="isLibraryExpanded = !isLibraryExpanded"
                     >
                       <div class="bg-secondary h-6 w-1 rounded-full"></div>
-                      <span class="text-base-content/80 text-lg font-bold tracking-wide uppercase"
-                        >Static Analysis</span
-                      >
+                      <span class="text-base-content/80 text-lg font-bold tracking-wide uppercase">{{
+                        $t("course.problems.staticAnalysisGroup")
+                      }}</span>
                       <span
                         v-if="lib?.enabled"
                         class="bg-base-300 text-base-content/60 rounded px-2 py-1 font-mono text-xs"
@@ -649,17 +651,21 @@ function triggerMascotReaction(type: "angel" | "devil") {
                                 <span
                                   class="bg-success h-2 w-2 animate-pulse rounded-full shadow-[0_0_8px_rgba(var(--su),0.6)]"
                                 ></span>
-                                <span class="text-success">Allowed Only</span>
+                                <span class="text-success">{{
+                                  $t("components.problem.card.allowedOnly")
+                                }}</span>
                               </template>
                               <template v-else-if="s.mode === 'blacklist'">
                                 <span
                                   class="bg-error h-2 w-2 rounded-full shadow-[0_0_8px_rgba(var(--er),0.6)]"
                                 ></span>
-                                <span class="text-error">Blocked</span>
+                                <span class="text-error">{{ $t("components.problem.card.blocked") }}</span>
                               </template>
                               <template v-else>
                                 <span class="bg-base-300 h-2 w-2 rounded-full"></span>
-                                <span class="text-base-content/40">Unrestricted</span>
+                                <span class="text-base-content/40">{{
+                                  $t("components.problem.card.unrestricted")
+                                }}</span>
                               </template>
                             </div>
                           </div>
@@ -677,13 +683,17 @@ function triggerMascotReaction(type: "angel" | "devil") {
                             </span>
                           </div>
                           <div v-else class="text-base-content/30 pl-3 text-xs italic">
-                            {{ s.disabled ? "Not applicable" : "No rules defined" }}
+                            {{
+                              s.disabled
+                                ? $t("components.problem.card.notApplicable")
+                                : $t("components.problem.card.noRulesDefined")
+                            }}
                           </div>
                         </div>
                       </div>
                     </transition>
                     <div v-if="!lib?.enabled" class="text-base-content/40 pl-4 text-sm italic">
-                      No library restrictions active.
+                      {{ $t("components.problem.card.noLibraryRestrictionsActive") }}
                     </div>
                   </div>
 
@@ -693,9 +703,9 @@ function triggerMascotReaction(type: "angel" | "devil") {
                       @click="isNetworkExpanded = !isNetworkExpanded"
                     >
                       <div class="bg-warning h-6 w-1 rounded-full"></div>
-                      <span class="text-base-content/80 text-lg font-bold tracking-wide uppercase"
-                        >Network Access</span
-                      >
+                      <span class="text-base-content/80 text-lg font-bold tracking-wide uppercase">{{
+                        $t("course.problems.networkSidecars")
+                      }}</span>
                       <span
                         v-if="isNetworkEnabled"
                         class="bg-base-300 text-base-content/60 rounded px-2 py-1 font-mono text-xs"
@@ -723,13 +733,15 @@ function triggerMascotReaction(type: "angel" | "devil") {
                                 <span
                                   class="bg-success h-2 w-2 animate-pulse rounded-full shadow-[0_0_8px_rgba(var(--su),0.6)]"
                                 ></span>
-                                <span class="text-success">Whitelist (Allowed Only)</span>
+                                <span class="text-success">{{
+                                  $t("components.problem.card.allowedOnly")
+                                }}</span>
                               </template>
                               <template v-else>
                                 <span
                                   class="bg-error h-2 w-2 rounded-full shadow-[0_0_8px_rgba(var(--er),0.6)]"
                                 ></span>
-                                <span class="text-error">Blacklist (Blocked)</span>
+                                <span class="text-error">{{ $t("components.problem.card.blocked") }}</span>
                               </template>
                             </div>
                           </div>
@@ -746,7 +758,7 @@ function triggerMascotReaction(type: "angel" | "devil") {
                               </span>
                             </div>
                             <div v-else class="text-base-content/30 text-xs italic">
-                              No specific IPs defined
+                              {{ $t("components.problem.card.noRulesDefined") }}
                             </div>
                           </div>
 
@@ -764,7 +776,7 @@ function triggerMascotReaction(type: "angel" | "devil") {
                               </span>
                             </div>
                             <div v-else class="text-base-content/30 text-xs italic">
-                              No specific URLs defined
+                              {{ $t("components.problem.card.noRulesDefined") }}
                             </div>
                           </div>
                         </div>

@@ -734,7 +734,7 @@ watch(submission, (val) => {
 
           <div class="flex flex-wrap items-center gap-2">
             <div v-if="enableCompiledBinary" class="btn md:btn-md" @click="downloadCompiledBinary">
-              <i-uil-folder-download class="mr-1" /> Download binary
+              <i-uil-folder-download class="mr-1" /> {{ $t("course.submissions.downloadbinary") }}
             </div>
             <button
               v-if="session.isAdmin"
@@ -742,7 +742,8 @@ watch(submission, (val) => {
               :disabled="isRejudgeLoading"
               @click="rejudge"
             >
-              <i-uil-repeat :class="['mr-1', isRejudgeLoading && 'animate-spin']" /> Rejudge
+              <i-uil-repeat :class="['mr-1', isRejudgeLoading && 'animate-spin']" />
+              {{ $t("course.submissions.rejudge") }}
             </button>
             <button
               v-if="session.isAdmin"
@@ -753,7 +754,7 @@ watch(submission, (val) => {
               :disabled="isDeleteLoading"
               @click="deleteSubmission"
             >
-              <i-uil-trash-alt class="mr-1" /> Delete
+              <i-uil-trash-alt class="mr-1" /> {{ $t("course.submissions.delete") }}
             </button>
           </div>
         </div>
@@ -807,7 +808,7 @@ watch(submission, (val) => {
                           v-if="canEditScore"
                           class="btn btn-ghost btn-xs ml-1"
                           @click="openScoreEditModal(null)"
-                          title="Edit Score"
+                          :title="$t('course.submission.editScore')"
                         >
                           <i-uil-edit class="h-4 w-4" />
                         </button>
@@ -873,7 +874,7 @@ watch(submission, (val) => {
                       v-if="canEditScore"
                       class="btn btn-ghost btn-xs ml-1"
                       @click="openScoreEditModal(taskIndex)"
-                      title="Edit Task Score"
+                      :title="$t('course.submission.editTaskScore')"
                     >
                       <i-uil-edit class="h-4 w-4" />
                     </button>

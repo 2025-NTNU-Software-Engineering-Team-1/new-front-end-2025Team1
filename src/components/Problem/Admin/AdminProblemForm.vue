@@ -5,8 +5,7 @@ import useVuelidate from "@vuelidate/core";
 import { required, maxLength, between, helpers } from "@vuelidate/validators";
 import { containsInvisible } from "@/utils/validators";
 import { useI18n } from "vue-i18n";
-import { hover_zh } from "../Hovers/hover-zh-tw";
-import { hover_en } from "../Hovers/hover-en";
+import { getHoverTranslations } from "../Hovers";
 
 // Define display mode state
 const isAdvanced = ref(false);
@@ -116,9 +115,7 @@ watch(
 );
 
 const { t, locale } = useI18n();
-const hover = computed(() => {
-  return locale.value === "english" ? hover_en : hover_zh;
-});
+const hover = computed(() => getHoverTranslations(locale.value));
 const sectionRefs: Record<PanelKey, ReturnType<typeof ref<HTMLElement | null>>> = {
   desc: ref(null),
   config: ref(null),

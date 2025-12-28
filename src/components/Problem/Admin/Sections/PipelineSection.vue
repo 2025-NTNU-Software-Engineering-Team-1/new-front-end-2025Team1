@@ -5,8 +5,7 @@
 import { useI18n } from "vue-i18n";
 import { onMounted, inject, Ref, ref, watch, computed } from "vue";
 import { useRoute } from "vue-router";
-import { hover_zh } from "../../Hovers/hover-zh-tw";
-import { hover_en } from "../../Hovers/hover-en";
+import { getHoverTranslations } from "../../Hovers";
 
 // Components
 import MultiStringInput from "../Controls/MultiStringInput.vue";
@@ -16,9 +15,7 @@ import api from "@/models/api";
 import { assertFileSizeOK } from "@/utils/checkFileSize";
 
 const { t, locale } = useI18n();
-const hover = computed(() => {
-  return locale.value === "english" ? hover_en : hover_zh;
-});
+const hover = computed(() => getHoverTranslations(locale.value));
 
 // teacher file (interactive)
 const teacherFileError = ref("");
@@ -2115,7 +2112,7 @@ watch(
               <i-uil-lock-alt
                 v-if="problem.pipeline!.executionMode === 'interactive'"
                 class="text-error"
-                title="Disabled in interactive mode"
+                :title="t('course.problems.disabledInInteractiveMode')"
               />
             </span>
             <input

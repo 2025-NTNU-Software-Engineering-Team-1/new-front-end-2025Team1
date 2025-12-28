@@ -338,7 +338,12 @@ const maxPage = computed(() => {
           <div class="relative flex flex-col">
             <div class="flex items-center gap-2">
               <!-- Group By Tag Toggle -->
-              <div class="tooltip mr-2" :data-tip="isGroupedView ? 'Back to Table' : 'Group By Tag'">
+              <div
+                class="tooltip mr-2"
+                :data-tip="
+                  isGroupedView ? $t('course.problems.backToTable') : $t('course.problems.groupByTag')
+                "
+              >
                 <button
                   class="btn btn-sm btn-circle"
                   :class="isGroupedView ? 'btn-primary' : 'btn-ghost'"
@@ -482,7 +487,11 @@ const maxPage = computed(() => {
                     <td>
                       <div
                         class="tooltip"
-                        :data-tip="hasTrialHistory(problemId) ? 'Test History' : 'Trial Mode Disabled'"
+                        :data-tip="
+                          hasTrialHistory(problemId)
+                            ? $t('course.problems.testHistory')
+                            : $t('course.problems.trialModeDisabled')
+                        "
                         @click.stop
                       >
                         <router-link
@@ -500,7 +509,7 @@ const maxPage = computed(() => {
                           <i-uil-history class="lg:h-5 lg:w-5" />
                         </router-link>
                       </div>
-                      <div class="tooltip" data-tip="Stats" @click.stop>
+                      <div class="tooltip" :data-tip="$t('course.problems.stats')" @click.stop>
                         <router-link
                           class="btn btn-ghost btn-sm btn-circle mr-1"
                           :to="`/course/${$route.params.name}/problem/${problemId}/stats`"
@@ -508,7 +517,7 @@ const maxPage = computed(() => {
                           <i-uil-chart-line class="lg:h-5 lg:w-5" />
                         </router-link>
                       </div>
-                      <div class="tooltip" data-tip="Copycat">
+                      <div class="tooltip" :data-tip="$t('course.problems.copycat')">
                         <router-link
                           v-if="session.isAdmin"
                           class="btn btn-ghost btn-sm btn-circle mr-1"
@@ -535,7 +544,7 @@ const maxPage = computed(() => {
                         </router-link>
                       </div>
 
-                      <div class="tooltip" data-tip="Edit">
+                      <div class="tooltip" :data-tip="$t('course.problems.edit')">
                         <router-link
                           v-if="session.isAdmin"
                           class="btn btn-ghost btn-sm btn-circle"
@@ -562,7 +571,11 @@ const maxPage = computed(() => {
                         </router-link>
                       </div>
                       <!-- Delete Button -->
-                      <div v-if="session.isAdmin || session.isTeacher" class="tooltip" data-tip="Delete">
+                      <div
+                        v-if="session.isAdmin || session.isTeacher"
+                        class="tooltip"
+                        :data-tip="$t('course.problems.delete')"
+                      >
                         <button
                           class="btn btn-ghost btn-sm btn-circle text-error"
                           @click.stop="deleteProblem($event, problemId, problemName)"
@@ -686,7 +699,11 @@ const maxPage = computed(() => {
                         <td>
                           <div
                             class="tooltip"
-                            :data-tip="hasTrialHistory(problemId) ? 'Test History' : 'Trial Mode Disabled'"
+                            :data-tip="
+                              hasTrialHistory(problemId)
+                                ? $t('course.problems.testHistory')
+                                : $t('course.problems.trialModeDisabled')
+                            "
                             @click.stop
                           >
                             <router-link
@@ -704,7 +721,7 @@ const maxPage = computed(() => {
                               <i-uil-history class="lg:h-5 lg:w-5" />
                             </router-link>
                           </div>
-                          <div class="tooltip" data-tip="Stats">
+                          <div class="tooltip" :data-tip="$t('course.problems.stats')">
                             <router-link
                               class="btn btn-ghost btn-sm btn-circle mr-1"
                               :to="`/course/${$route.params.name}/problem/${problemId}/stats`"
@@ -712,7 +729,7 @@ const maxPage = computed(() => {
                               <i-uil-chart-line class="lg:h-5 lg:w-5" />
                             </router-link>
                           </div>
-                          <div class="tooltip" data-tip="Copycat">
+                          <div class="tooltip" :data-tip="$t('course.problems.copycat')">
                             <router-link
                               v-if="session.isAdmin"
                               class="btn btn-ghost btn-sm btn-circle mr-1"
@@ -739,7 +756,7 @@ const maxPage = computed(() => {
                             </router-link>
                           </div>
 
-                          <div class="tooltip" data-tip="Edit">
+                          <div class="tooltip" :data-tip="$t('course.problems.edit')">
                             <router-link
                               v-if="session.isAdmin"
                               class="btn btn-ghost btn-sm btn-circle"
@@ -766,7 +783,11 @@ const maxPage = computed(() => {
                             </router-link>
                           </div>
                           <!-- Delete Button (Grouped) -->
-                          <div v-if="session.isAdmin || session.isTeacher" class="tooltip" data-tip="Delete">
+                          <div
+                            v-if="session.isAdmin || session.isTeacher"
+                            class="tooltip"
+                            :data-tip="$t('course.problems.delete')"
+                          >
                             <button
                               class="btn btn-ghost btn-sm btn-circle text-error"
                               @click.stop="deleteProblem($event, problemId, problemName)"

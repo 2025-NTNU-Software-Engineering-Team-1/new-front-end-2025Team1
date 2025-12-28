@@ -391,7 +391,7 @@ async function confirmDeleteAll() {
               <i-uil-trash-alt :class="['mr-1', isDeleteAllLoading && 'animate-spin']" />
               {{ $t("course.submissions.deleteAll") }}
             </button>
-            <div class="tooltip tooltip-bottom" data-tip="Download submissions json file">
+            <div class="tooltip tooltip-bottom" :data-tip="$t('course.submissions.downloadJson')">
               <button class="btn btn-sm" @click="downloadAllSubmissions">
                 <i-uil-file-download class="h-5 w-5" />
               </button>
@@ -478,7 +478,7 @@ async function confirmDeleteAll() {
                   <td class="overflow-visible">
                     <div class="flex items-center">
                       <!-- Tooltip for submission id -->
-                      <div class="tooltip tooltip-bottom" data-tip="show details">
+                      <div class="tooltip tooltip-bottom" :data-tip="$t('course.submissions.showDetails')">
                         <router-link
                           :to="`/course/${$route.params.name}/submission/${submission.submissionId}`"
                           class="link"
@@ -489,7 +489,7 @@ async function confirmDeleteAll() {
                       <div
                         v-if="isSupported"
                         class="tooltip tooltip-bottom"
-                        :data-tip="copied ? 'copied!' : 'copy link'"
+                        :data-tip="copied ? $t('course.submissions.copied') : $t('course.submissions.copyLink')"
                       >
                         <i-uil-link
                           class="ml-2 h-4 w-4 cursor-pointer"
@@ -505,7 +505,7 @@ async function confirmDeleteAll() {
                   <td>
                     <div
                       class="tooltip tooltip-bottom"
-                      :data-tip="problemId2Meta[submission.problemId.toString()]?.name || 'loading...'"
+                      :data-tip="problemId2Meta[submission.problemId.toString()]?.name || $t('course.submissions.loading')"
                     >
                       <router-link
                         :to="`/course/${$route.params.name}/problem/${submission.problemId}`"
@@ -534,7 +534,7 @@ async function confirmDeleteAll() {
                   <td v-if="session.isTeacher">{{ submission.ipAddr }}</td>
                   <td v-if="session.isTA">{{ submission.ipAddr }}</td>
                   <td v-if="session.isAdmin">
-                    <div class="tooltip" data-tip="Delete">
+                    <div class="tooltip" :data-tip="$t('course.submissions.delete')">
                       <button
                         class="btn btn-ghost btn-sm btn-circle text-error"
                         :class="{ loading: deletingIds.has(submission.submissionId) }"

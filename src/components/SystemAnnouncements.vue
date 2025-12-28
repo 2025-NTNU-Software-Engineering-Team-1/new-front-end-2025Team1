@@ -49,7 +49,7 @@ const { data: announcements, error, isLoading } = useAxios<AnnouncementList>("/a
                   </td>
                   <td class="border-base-content/40 border-b">{{ formatTime(createTime) }}</td>
                   <td v-if="session.isAdmin" class="border-base-content/40 border-b">
-                    <div class="tooltip" data-tip="Edit">
+                    <div class="tooltip" :data-tip="$t('course.problems.edit')">
                       <router-link
                         class="btn btn-ghost btn-sm btn-circle"
                         :to="`/course/Public/announcements/${annId}/edit`"

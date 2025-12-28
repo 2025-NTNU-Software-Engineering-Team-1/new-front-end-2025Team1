@@ -123,7 +123,7 @@ async function confirmDelete() {
                 >
                   <td>
                     <div class="flex min-w-0 items-center gap-2">
-                      <span v-if="pinned" class="text-lg" title="置頂">📌</span>
+                      <span v-if="pinned" class="text-lg" :title="$t('course.announcements.pinned')">📌</span>
                       <router-link
                         :to="`/course/${$route.params.name}/announcements/${annId}`"
                         class="text-base-content/80 dark:text-base-content/80 visited:text-base-content/80 dark:visited:text-base-content/80 block min-w-0 break-words whitespace-normal hover:underline"
@@ -135,7 +135,7 @@ async function confirmDelete() {
                   <td>{{ creator.displayedName }}</td>
                   <td>{{ formatTime(createTime) }}</td>
                   <td v-if="session.isAdmin">
-                    <div class="tooltip" data-tip="Edit">
+                    <div class="tooltip" :data-tip="$t('course.problems.edit')">
                       <router-link
                         class="btn btn-ghost btn-sm btn-circle"
                         :to="`/course/${$route.params.name}/announcements/${annId}/edit`"
@@ -143,7 +143,7 @@ async function confirmDelete() {
                         <i-uil-edit class="lg:h-5 lg:w-5" />
                       </router-link>
                     </div>
-                    <div class="tooltip" data-tip="Delete">
+                    <div class="tooltip" :data-tip="$t('course.problems.delete')">
                       <button
                         class="btn btn-ghost btn-sm btn-circle text-error"
                         @click="deleteAnnouncement($event, annId, title)"
@@ -153,7 +153,7 @@ async function confirmDelete() {
                     </div>
                   </td>
                   <td v-if="session.isTeacher">
-                    <div class="tooltip" data-tip="Edit">
+                    <div class="tooltip" :data-tip="$t('course.problems.edit')">
                       <router-link
                         class="btn btn-ghost btn-sm btn-circle"
                         :to="`/course/${$route.params.name}/announcements/${annId}/edit`"
@@ -161,7 +161,7 @@ async function confirmDelete() {
                         <i-uil-edit class="lg:h-5 lg:w-5" />
                       </router-link>
                     </div>
-                    <div class="tooltip" data-tip="Delete">
+                    <div class="tooltip" :data-tip="$t('course.problems.delete')">
                       <button
                         class="btn btn-ghost btn-sm btn-circle text-error"
                         @click="deleteAnnouncement($event, annId, title)"
@@ -171,7 +171,7 @@ async function confirmDelete() {
                     </div>
                   </td>
                   <td v-if="session.isTA">
-                    <div class="tooltip" data-tip="Edit">
+                    <div class="tooltip" :data-tip="$t('course.problems.edit')">
                       <router-link
                         class="btn btn-ghost btn-sm btn-circle"
                         :to="`/course/${$route.params.name}/announcements/${annId}/edit`"

@@ -2,12 +2,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { inject, Ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { hover_zh } from "../../Hovers/hover-zh-tw";
-import { hover_en } from "../../Hovers/hover-en";
+import { getHoverTranslations } from "../../Hovers";
 const { t, locale } = useI18n();
-const hover = computed(() => {
-  return locale.value === "english" ? hover_en : hover_zh;
-});
+const hover = computed(() => getHoverTranslations(locale.value));
 
 defineProps<{ v$: any }>();
 defineEmits<{

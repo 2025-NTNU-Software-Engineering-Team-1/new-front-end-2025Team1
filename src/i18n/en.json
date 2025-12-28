@@ -228,7 +228,7 @@
       "collapse": "Close",
       "executionMode": "Execution Mode",
       "executionModeGeneral": "General",
-      "executionModeFuncitonOnly": "Function-Only",
+      "executionModeFunctionOnly": "Function-Only",
       "executionModeInteractive": "Interactive",
       "uploadFile": "Upload Makefile.zip",
       "upload": "Upload",
@@ -304,6 +304,7 @@
       "sideCarAction": "Action",
       "sideCarCommaSeparated": "Comma separated",
       "sideCarKEYVALUEPerLine": "Each line separately",
+      "sideCar_EnvKEYVALUE": "Env key value",
       "addSidecar": "Add Sidecar",
       "noSidecarsConfigured": "No Sidecar",
       "testDataZip": "Test data zip file",
@@ -324,7 +325,16 @@
       "timeLimit": "Time Limit (ms)",
       "current": "Current:",
       "task": "task(s)",
-      "uncategorized": "Uncategorized"
+      "uncategorized": "Uncategorized",
+      "stats": "Stats",
+      "copycat": "Copycat",
+      "testHistory": "Test History",
+      "trialModeDisabled": "Trial Mode Disabled",
+      "edit": "Edit",
+      "delete": "Delete",
+      "backToTable": "Back to Table View",
+      "groupByTag": "Group by Tag",
+      "randomizeToken": "Click to randomize Token"
     },
     "aisetting": {
       "setupPage": "Set Up",
@@ -608,7 +618,12 @@
       "clear": "Clear",
       "search-name": "Search Name (exact match)",
       "rejudgeAll": "Rejudge All",
+      "rejudge": "Rejudge",
       "deleteAll": "Delete All",
+      "delete": "Delete",
+      "downloadbinary": "Download Binary",
+      "downloadJson": "Download JSON",
+      "showDetails": "Show Detail",
       "table": {
         "id": "id",
         "pid": "pid",
@@ -1109,7 +1124,19 @@
           "score": "Score"
         },
         "noContent": "no content",
-        "unlimited": "unlimited"
+        "unlimited": "unlimited",
+        "downloadTestCase": "Download Test Case",
+        "activeRestrictionsFound": "Active restrictions found!",
+        "dismissReminder": "Dismiss reminder",
+        "hideConstraints": "Hide Constraints",
+        "viewEnvironmentConstraints": "View Environment Constraints",
+        "allowedOnly": "Allowed Only",
+        "blocked": "Blocked",
+        "unrestricted": "Unrestricted",
+        "disabled": "Disabled",
+        "notApplicable": "Not applicable",
+        "noRulesDefined": "No rules defined",
+        "noLibraryRestrictionsActive": "No library restrictions active."
       },
       "infoCard": {
         "score": "Score",

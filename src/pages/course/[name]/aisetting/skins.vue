@@ -329,7 +329,7 @@ onMounted(() => {
       <button
         class="btn btn-primary btn-sm"
         :disabled="skins.length >= MAX_SKINS"
-        :title="skins.length >= MAX_SKINS ? `Limit of ${MAX_SKINS} skins reached` : ''"
+        :title="skins.length >= MAX_SKINS ? $t('admin.skins.limitReached', { max: MAX_SKINS }) : ''"
         @click="openUpload"
       >
         <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -367,7 +367,7 @@ onMounted(() => {
                   class="h-full w-full cursor-pointer object-cover transition-opacity hover:opacity-80"
                   @click="openPreview(skin.thumbnail_path)"
                   alt="Thumbnail"
-                  title="Click to preview"
+                  :title="$t('admin.skins.clickToPreview')"
                 />
                 <span v-else class="flex h-full items-center justify-center text-lg">🎭</span>
               </div>

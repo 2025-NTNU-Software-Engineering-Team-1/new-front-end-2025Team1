@@ -228,7 +228,7 @@
       "clear": "清除選取",
       "executionMode": "執行模式",
       "executionModeGeneral": "一般模式",
-      "executionModeFuncitonOnly": "僅限函式模式",
+      "executionModeFunctionOnly": "僅限函式模式",
       "executionModeInteractive": "互動模式",
       "uploadFile": "上傳 Makefile.zip",
       "upload": "上傳",
@@ -304,6 +304,7 @@
       "sideCarAction": "操作",
       "sideCarCommaSeparated": "用逗號分開",
       "sideCarKEYVALUEPerLine": "每個單獨一行",
+      "sideCar_EnvKEYVALUE": "環境變數",
       "addSidecar": "新增Sidecar",
       "noSidecarsConfigured": "沒有Sidecar",
       "testDataZip": "測資壓縮檔",
@@ -323,7 +324,16 @@
       "timeLimit": "時間限制 (ms)",
       "current": "目前：",
       "task": "個子任務",
-      "uncategorized": "未分類"
+      "uncategorized": "未分類",
+      "stats": "數據",
+      "copycat": "抄襲檢測",
+      "testHistory": "測試歷史",
+      "trialModeDisabled": "試用模式已停用",
+      "edit": "編輯",
+      "delete": "刪除",
+      "backToTable": "返回表格橫覽",
+      "groupByTag": "按標籤分類",
+      "randomizeToken": "點擊以隨機生成 Token"
     },
     "aisetting": {
       "setupPage": "設置",
@@ -597,6 +607,33 @@
             "time": "繳交時間"
           }
         }
+      }
+    },
+    "submissions": {
+      "text": "繳交狀態",
+      "problem": "題目",
+      "status": "狀態",
+      "lang": "語言",
+      "clear": "清除",
+      "search-name": "搜尋名稱 (完全符合)",
+      "rejudgeAll": "全部重新評分",
+      "rejudge": "重新評分",
+      "deleteAll": "全部刪除",
+      "delete": "刪除",
+      "downloadbinary": "下載二進位檔",
+      "downloadJson": "下載json檔",
+      "showDetails": "查看詳細內容",
+      "table": {
+        "id": "id",
+        "pid": "題號",
+        "user": "使用者",
+        "result": "評判結果",
+        "score": "得分",
+        "runtime": "執行時間",
+        "memory": "記憶體用量",
+        "lang": "語言",
+        "time": "繳交時間",
+        "ipAddr": "IP 位址"
       }
     },
     "submission": {
@@ -1085,7 +1122,19 @@
           "score": "配分"
         },
         "noContent": "無",
-        "unlimited": "無限制"
+        "unlimited": "無限制",
+        "downloadTestCase": "下載測試案例",
+        "activeRestrictionsFound": "發現啟用的限制項目！",
+        "dismissReminder": "關閉提醒",
+        "hideConstraints": "隱藏限制項目",
+        "viewEnvironmentConstraints": "檢視環境限制",
+        "allowedOnly": "僅允許",
+        "blocked": "已封鎖",
+        "unrestricted": "無限制",
+        "disabled": "已停用",
+        "notApplicable": "不適用",
+        "noRulesDefined": "未定義規則",
+        "noLibraryRestrictionsActive": "未啟用函式庫限制。"
       },
       "infoCard": {
         "score": "得分",

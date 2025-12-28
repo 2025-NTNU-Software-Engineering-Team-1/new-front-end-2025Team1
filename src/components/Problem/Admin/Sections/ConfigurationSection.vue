@@ -6,8 +6,7 @@
 import { inject, Ref, ref, reactive, watch, computed, onMounted, onBeforeUnmount } from "vue";
 import { useRoute } from "vue-router";
 import { ZipReader, BlobReader } from "@zip.js/zip.js";
-import { hover_zh } from "../../Hovers/hover-zh-tw";
-import { hover_en } from "../../Hovers/hover-en";
+import { getHoverTranslations } from "../../Hovers";
 // Components
 import LanguageMultiSelect from "../../Forms/LanguageMultiSelect.vue";
 import MultiStringInput from "../Controls/MultiStringInput.vue";
@@ -21,9 +20,7 @@ import api from "@/models/api";
 
 import { useI18n } from "vue-i18n";
 const { t, locale } = useI18n();
-const hover = computed(() => {
-  return locale.value === "english" ? hover_en : hover_zh;
-});
+const hover = computed(() => getHoverTranslations(locale.value));
 
 // ==========================================
 // [CONFIG] Console Debug Mode
@@ -2037,7 +2034,7 @@ onBeforeUnmount(() => {
                           type="button"
                           class="btn btn-ghost btn-xs text-error h-6 min-h-0 w-6 p-0"
                           @click="removeDockerEnv(index)"
-                          title="Remove this environment"
+                          :title="t('course.problems.removeEnvironment')"
                         >
                           <i-uil-trash-alt />
                         </button>

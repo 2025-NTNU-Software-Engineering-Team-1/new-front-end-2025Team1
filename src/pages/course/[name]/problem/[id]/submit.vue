@@ -376,11 +376,7 @@ async function submit() {
         </div>
 
         <template v-if="acceptedFormat === 'code'">
-<<<<<<< Updated upstream
           <div class="mt-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-start md:gap-8">
-=======
-          <div class="mt-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-start md:gap-8">
->>>>>>> Stashed changes
             <div class="card-title md:text-lg lg:text-xl">
               {{ t("course.problem.submit.card.placeholder") }}
             </div>
@@ -410,11 +406,7 @@ async function submit() {
         </template>
 
         <template v-else>
-<<<<<<< Updated upstream
           <div class="mt-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-start md:gap-8">
-=======
-          <div class="mt-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-start md:gap-8">
->>>>>>> Stashed changes
             <div class="card-title md:text-lg lg:text-xl">Upload your solution (.zip)</div>
 
             <div class="form-control w-full md:max-w-xs">

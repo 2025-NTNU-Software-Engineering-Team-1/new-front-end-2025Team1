@@ -34,10 +34,7 @@ declare module 'vue' {
     IUilAngleDoubleRight: typeof import('~icons/uil/angle-double-right')['default']
     IUilAngleDown: typeof import('~icons/uil/angle-down')['default']
     IUilAngleUp: typeof import('~icons/uil/angle-up')['default']
-<<<<<<< Updated upstream
     IUilBan: typeof import('~icons/uil/ban')['default']
-=======
->>>>>>> Stashed changes
     IUilBars: typeof import('~icons/uil/bars')['default']
     IUilBolt: typeof import('~icons/uil/bolt')['default']
     IUilBookAlt: typeof import('~icons/uil/book-alt')['default']
@@ -48,19 +45,13 @@ declare module 'vue' {
     IUilClipboardNotes: typeof import('~icons/uil/clipboard-notes')['default']
     IUilClock: typeof import('~icons/uil/clock')['default']
     IUilConstructor: typeof import('~icons/uil/constructor')['default']
-<<<<<<< Updated upstream
-=======
     IUilCopy: typeof import('~icons/uil/copy')['default']
->>>>>>> Stashed changes
     IUilEdit: typeof import('~icons/uil/edit')['default']
     IUilExclamationCircle: typeof import('~icons/uil/exclamation-circle')['default']
     IUilExclamationTriangle: typeof import('~icons/uil/exclamation-triangle')['default']
     IUilEye: typeof import('~icons/uil/eye')['default']
-<<<<<<< Updated upstream
-=======
     IUilFileBlockAlt: typeof import('~icons/uil/file-block-alt')['default']
     IUilFileDownload: typeof import('~icons/uil/file-download')['default']
->>>>>>> Stashed changes
     IUilFileExclamationAlt: typeof import('~icons/uil/file-exclamation-alt')['default']
     IUilFileUploadAlt: typeof import('~icons/uil/file-upload-alt')['default']
     IUilFlask: typeof import('~icons/uil/flask')['default']
@@ -71,30 +62,21 @@ declare module 'vue' {
     IUilHourglass: typeof import('~icons/uil/hourglass')['default']
     IUilLanguage: typeof import('~icons/uil/language')['default']
     IUilLayerGroup: typeof import('~icons/uil/layer-group')['default']
-<<<<<<< Updated upstream
     IUilLock: typeof import('~icons/uil/lock')['default']
-=======
     IUilLink: typeof import('~icons/uil/link')['default']
->>>>>>> Stashed changes
     IUilLockAlt: typeof import('~icons/uil/lock-alt')['default']
     IUilMapMarkerInfo: typeof import('~icons/uil/map-marker-info')['default']
     IUilMegaphone: typeof import('~icons/uil/megaphone')['default']
     IUilMinus: typeof import('~icons/uil/minus')['default']
     IUilMonitor: typeof import('~icons/uil/monitor')['default']
     IUilMoon: typeof import('~icons/uil/moon')['default']
-<<<<<<< Updated upstream
     IUilPen: typeof import('~icons/uil/pen')['default']
-=======
->>>>>>> Stashed changes
     IUilPlus: typeof import('~icons/uil/plus')['default']
     IUilPlusCircle: typeof import('~icons/uil/plus-circle')['default']
     IUilProcess: typeof import('~icons/uil/process')['default']
     IUilQuestionCircle: typeof import('~icons/uil/question-circle')['default']
-<<<<<<< Updated upstream
-=======
     IUilRefresh: typeof import('~icons/uil/refresh')['default']
     IUilRepeat: typeof import('~icons/uil/repeat')['default']
->>>>>>> Stashed changes
     IUilSearch: typeof import('~icons/uil/search')['default']
     IUilSetting: typeof import('~icons/uil/setting')['default']
     IUilSun: typeof import('~icons/uil/sun')['default']

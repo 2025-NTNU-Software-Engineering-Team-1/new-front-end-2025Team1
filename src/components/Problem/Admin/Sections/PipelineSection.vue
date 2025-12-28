@@ -1266,7 +1266,6 @@ watch(
                     <i-uil-lock class="text-warning/60 text-3xl opacity-80" />
                   </div>
 
-<<<<<<< Updated upstream
                   <div class="space-y-1">
                     <h3 class="text-base-content text-sm font-medium tracking-wide opacity-80">
                       {{ t("course.problems.systemLocked") }}
@@ -1275,19 +1274,6 @@ watch(
                       {{ t("course.problems.enablePythonHint") || "Enable Python to unlock." }}
                     </p>
                   </div>
-=======
-                  <h6 class="mb-1 text-sm font-bold uppercase tracking-[0.2em] text-white drop-shadow-lg">
-                    {{ t("course.problems.systemLocked") }}
-                  </h6>
-                  <div
-                    class="mb-2 h-px w-16 bg-gradient-to-r from-transparent via-yellow-500/50 to-transparent"
-                  ></div>
-
-                  <p class="max-w-[200px] px-2 font-mono text-xs leading-relaxed text-gray-300">
-                    <span class="mr-1 text-yellow-500/80">>></span>
-                    {{ t("course.problems.enablePythonHint") || "Enable Python to unlock." }}
-                  </p>
->>>>>>> Stashed changes
                 </div>
               </div>
 
@@ -1362,7 +1348,6 @@ watch(
                     </div>
                   </div>
 
-<<<<<<< Updated upstream
                   <div class="flex flex-wrap content-start gap-1">
                     <button
                       v-for="opt in activeImportGroupData.items"
@@ -1395,14 +1380,6 @@ watch(
                     </button>
                   </div>
                 </div>
-=======
-                  <h6 class="mb-1 text-sm font-bold uppercase tracking-[0.2em] text-white drop-shadow-lg">
-                    {{ t("course.problems.accessDenied") }}
-                  </h6>
-                  <div
-                    class="mb-2 h-px w-16 bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"
-                  ></div>
->>>>>>> Stashed changes
 
                 <div class="mt-auto border-t border-gray-600 pt-2">
                   <label class="label pb-1 pt-0">

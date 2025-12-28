@@ -907,8 +907,11 @@ const assetPaths = computed<Record<string, string>>(() => {
 });
 
 const hasAsset = (key: string) => Boolean(assetPaths.value && assetPaths.value[key]);
-const assetDownloadUrl = (key: string) =>
-  assetPaths.value && assetPaths.value[key] ? api.Problem.getAssetDownloadUrl(route.params.id, key) : null;
+const assetDownloadUrl = (key: string) => {
+  const pid = route.params.id;
+  if (Array.isArray(pid)) return null;
+  return assetPaths.value && assetPaths.value[key] ? api.Problem.getAssetDownloadUrl(pid, key) : null;
+};
 
 if (!problem.value.pipeline) {
   ensurePipeline();

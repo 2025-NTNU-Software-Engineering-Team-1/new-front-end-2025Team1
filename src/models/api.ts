@@ -45,7 +45,8 @@ const Problem = {
       headers: { "Content-Type": "multipart/form-data" },
     }),
   getTestCaseUrl: (problemId: number) => `${fetcher.defaults.baseURL}/problem/${problemId}/testcase`,
-  getAssetDownloadUrl: (problemId: string | number, assetType: string) => {
+  getAssetDownloadUrl: (problemId: string | number | string[], assetType: string) => {
+    if (Array.isArray(problemId)) return "";
     const base = (fetcher.defaults.baseURL || "").toString().replace(/\/$/, "");
     return `${base}/problem/${problemId}/asset/${assetType}/download`;
   },

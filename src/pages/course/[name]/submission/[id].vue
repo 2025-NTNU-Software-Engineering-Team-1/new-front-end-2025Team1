@@ -1311,16 +1311,15 @@ watch(submission, (val) => {
                     <i-uil-check v-else class="text-success h-5 w-5" />
                   </button>
                 </div>
-                <div class="flex-grow overflow-y-auto pr-2"></div>
                 <!-- Image Files -->
                 <div
                   v-if="file.type === 'image'"
-                  class="bg-base-100 flex h-full items-center justify-center rounded p-4"
+                  class="bg-base-100 flex min-h-0 flex-grow items-center justify-center rounded p-4"
                 >
                   <img
                     :src="`data:${file.mimeType || 'image/png'};base64,${file.content}`"
                     :alt="String(fileName)"
-                    class="max-h-full max-w-full rounded object-contain shadow-sm"
+                    class="h-full w-full rounded object-contain shadow-sm"
                     draggable="false"
                   />
                 </div>

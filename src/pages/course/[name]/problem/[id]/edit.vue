@@ -2,7 +2,7 @@
 // ==========================================
 // Imports
 // ==========================================
-import { ref, watch, provide, Ref, onMounted, nextTick } from "vue";
+import { ref, watch, provide, Ref, onMounted, nextTick, computed } from "vue";
 import { useTitle } from "@vueuse/core";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import { useRoute, useRouter } from "vue-router";
@@ -10,7 +10,9 @@ import api, { fetcher } from "@/models/api";
 import axios, { type AxiosError } from "axios";
 import AdminProblemForm from "@/components/Problem/Admin/AdminProblemForm.vue";
 import AdminManualModal from "@/components/Problem/Admin/AdminManualModal.vue";
+import ProblemExportModal from "@/components/Problem/ProblemExportModal.vue";
 import { useI18n } from "vue-i18n";
+import { downloadBlob } from "@/utils/download";
 
 // ==========================================
 // [CONFIG] Animation Settings (Ultra-Fast)
@@ -299,7 +301,7 @@ const {
   data: problem,
   error: fetchError,
   isLoading: isFetching,
-} = useAxios<Problem>(`/problem/view/${route.params.id}`, fetcher);
+} = useAxios<Problem>(`/problem/manage/${route.params.id}`, fetcher);
 
 const edittingProblem = ref<ProblemForm>();
 
@@ -546,6 +548,11 @@ async function confirmDelete() {
 const openPreview = ref(false);
 const openJSON = ref(false);
 const mockProblemMeta = { owner: "", highScore: 0, submitCount: 0, ACUser: 0, submitter: 0 };
+const exportModalOpen = ref(false);
+const isExporting = ref(false);
+const canExportProblem = computed(
+  () => session.isAdmin || (edittingProblem.value as Partial<Problem> | undefined)?.owner === session.username,
+);
 // ==========================================
 // [HELPER] JSON Display Cleanup
 // ==========================================
@@ -565,6 +572,46 @@ function cleanupForDisplay(data?: ProblemForm) {
   }
 
   return { ...rest, config: cleanConfig };
+}
+
+async function handleExport(components: string[]) {
+  if (isExporting.value) return;
+  if (!canExportProblem.value) {
+    alert(t("course.problems.exportNotAllowed"));
+    return;
+  }
+  isExporting.value = true;
+  try {
+    const problemId = Number(route.params.id);
+    const resp = await api.Problem.exportZip(problemId, components);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const blob: Blob = (resp as any).data || (resp as any);
+    downloadBlob(blob, `problem_${problemId}.noj.zip`);
+  } catch (err) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const errorObj = err as any;
+    let message = "Failed to export problem. Please try again.";
+    const responseData = errorObj?.response?.data;
+    if (responseData instanceof Blob) {
+      try {
+        const text = await responseData.text();
+        const parsed = JSON.parse(text);
+        message = parsed?.message || text || message;
+      } catch {
+        try {
+          message = (await responseData.text()) || message;
+        } catch {
+          message = message;
+        }
+      }
+    } else {
+      message = errorObj?.response?.data?.message || errorObj?.message || message;
+    }
+    logger.error("Export failed", err);
+    alert(message);
+  } finally {
+    isExporting.value = false;
+  }
 }
 </script>
 
@@ -615,6 +662,13 @@ function cleanupForDisplay(data?: ProblemForm) {
               </div>
             </div>
 
+            <button
+              v-if="canExportProblem"
+              :class="['btn btn-primary btn-outline btn-sm lg:btn-md', isExporting && 'loading']"
+              @click="exportModalOpen = true"
+            >
+              <i-uil-download-alt class="mr-1 lg:h-5 lg:w-5" /> {{ t("course.problems.export") }}
+            </button>
             <button
               :class="['btn btn-error btn-outline btn-sm lg:btn-md', isDeleting && 'loading']"
               @click="delete_"
@@ -711,6 +765,8 @@ function cleanupForDisplay(data?: ProblemForm) {
       </div>
     </div>
   </div>
+
+  <problem-export-modal v-model="exportModalOpen" :problem-count="1" @confirm="handleExport" />
 </template>
 
 <style scoped>

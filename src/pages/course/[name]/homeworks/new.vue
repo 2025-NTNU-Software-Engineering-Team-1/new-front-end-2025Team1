@@ -1,18 +1,27 @@
 <script setup lang="ts">
 import dayjs from "dayjs";
-import { ref, reactive } from "vue";
+import { ref, reactive, watchEffect } from "vue";
 import { useTitle } from "@vueuse/core";
 import { useRoute, useRouter } from "vue-router";
 import axios, { type AxiosError } from "axios";
 import api from "@/models/api";
+import { useSession } from "@/stores/session";
 import { useProblemSelection } from "@/composables/useProblemSelection";
 import HomeworkForm from "@/components/Homework/HomeworkForm.vue";
 
 const route = useRoute();
 const router = useRouter();
+const session = useSession();
 useTitle(`New Homework - ${route.params.name} | Normal OJ`);
 
 const formElement = ref<InstanceType<typeof HomeworkForm>>();
+
+watchEffect(() => {
+  if (session.isNotValidated) return;
+  if (!(session.isAdmin || session.isTeacher || session.isTA)) {
+    router.replace(`/course/${route.params.name}/homeworks`);
+  }
+});
 
 const newHomework = reactive<HomeworkForm>({
   name: "",
@@ -20,6 +29,7 @@ const newHomework = reactive<HomeworkForm>({
   problemIds: [],
   start: dayjs().unix(),
   end: dayjs().add(7, "day").unix(),
+  penalty: "score = 0",
 });
 
 const {

@@ -5,6 +5,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import api, { fetcher } from "@/models/api";
 import axios, { type AxiosError } from "axios";
+import { useSession } from "@/stores/session";
 import { useProblemSelection } from "@/composables/useProblemSelection";
 import HomeworkForm from "@/components/Homework/HomeworkForm.vue";
 import { useI18n } from "vue-i18n";
@@ -12,6 +13,7 @@ import { useI18n } from "vue-i18n";
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
+const session = useSession();
 useTitle(`${t("course.hw.edit.title")} - ${route.params.id} - ${route.params.name} | Normal OJ`);
 
 const formElement = ref<InstanceType<typeof HomeworkForm>>();
@@ -24,8 +26,13 @@ const {
 
 const edittingHomework = ref<Homework>();
 watchEffect(() => {
+  if (session.isNotValidated) return;
+  if (!(session.isAdmin || session.isTeacher || session.isTA)) {
+    router.replace(`/course/${route.params.name}/homeworks`);
+    return;
+  }
   if (homework.value) {
-    edittingHomework.value = { ...homework.value };
+    edittingHomework.value = { ...homework.value, penalty: homework.value.penalty ?? "score = 0" };
   }
 });
 function update<K extends keyof Homework>(key: K, value: Homework[K]) {

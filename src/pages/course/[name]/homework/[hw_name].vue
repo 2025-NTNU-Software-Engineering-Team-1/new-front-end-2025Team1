@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { watch } from "vue";
 import { useRoute } from "vue-router";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import { fetcher } from "@/models/api";
-import { useTitle } from "@vueuse/core";
+import { useTitle, useIntervalFn, useDocumentVisibility } from "@vueuse/core";
 import { useProblemSelection } from "@/composables/useProblemSelection";
 import type { AxiosError } from "axios";
 
@@ -17,13 +18,41 @@ useTitle(`Homework - ${courseName} | Normal OJ`);
 // Backend API: GET /homework/<id> returns { data: Homework } (unwrapped by fetcher typically)
 // We use 'any' for now or HomeworkListItem if imported, to avoid type issues until confirmed.
 // Assuming fetcher unwraps response.data.data -> Homework object
-const { data: homework, error, isLoading } = useAxios<HomeworkListItem>(`/homework/${hwId}`, fetcher);
+const homeworkUrl = `/homework/${hwId}`;
+const { data: homework, error, isLoading, execute } = useAxios<HomeworkListItem>(homeworkUrl, fetcher);
 
 const {
   problemId2Meta,
   error: fetchProblemError,
   isLoading: isFetchingProblem,
 } = useProblemSelection(courseName);
+
+const visibility = useDocumentVisibility();
+function refreshHomework() {
+  if (isLoading.value) return;
+  const url = `${homeworkUrl}${homeworkUrl.includes("?") ? "&" : "?"}_t=${Date.now()}`;
+  execute(url);
+}
+const { pause, resume, isActive } = useIntervalFn(
+  () => {
+    if (visibility.value === "visible") {
+      refreshHomework();
+    }
+  },
+  10000,
+  { immediate: false },
+);
+watch(
+  visibility,
+  (state) => {
+    if (state === "visible") {
+      if (!isActive.value) resume();
+    } else if (isActive.value) {
+      pause();
+    }
+  },
+  { immediate: true },
+);
 </script>
 
 <template>

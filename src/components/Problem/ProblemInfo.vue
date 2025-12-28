@@ -16,8 +16,13 @@ interface Props {
   aiVtuber?: boolean;
   // indicates whether trial history is available for this problem
   hasTrialHistory?: boolean;
+  selectable?: boolean;
+  selected?: boolean;
 }
 defineProps<Props>();
+const emit = defineEmits<{
+  (e: "toggleSelect"): void;
+}>();
 </script>
 
 <template>
@@ -26,6 +31,13 @@ defineProps<Props>();
     <div class="collapse-title bg-base-200 text-base">
       <div class="flex flex-col">
         <div class="flex items-center gap-2">
+          <input
+            v-if="selectable"
+            type="checkbox"
+            class="checkbox checkbox-sm"
+            :checked="selected"
+            @click.stop="emit('toggleSelect')"
+          />
           <span class="text-lg font-bold">{{ problemName }}</span>
           <span
             v-if="aiVtuber"

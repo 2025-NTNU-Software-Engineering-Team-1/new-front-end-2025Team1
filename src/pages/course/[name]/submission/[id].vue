@@ -224,6 +224,18 @@ const enableZipArtifact = computed(() => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return !!(problem.value as any)?.config?.artifactCollection?.includes("zip");
 });
+const isPythonSubmission = computed(() => submission.value?.languageType === 2);
+const rejudgeEligibleStatuses = new Set([
+  SUBMISSION_STATUS_CODE.ACCEPTED,
+  SUBMISSION_STATUS_CODE.WRONG_ANSWER,
+  SUBMISSION_STATUS_CODE.TIME_LIMIT_EXCEED,
+  SUBMISSION_STATUS_CODE.MEMORY_LIMIT_EXCEED,
+  SUBMISSION_STATUS_CODE.RUNTIME_ERROR,
+]);
+const shouldPromptRejudgeForBinary = computed(() => {
+  if (isPythonSubmission.value) return false;
+  return rejudgeEligibleStatuses.has(effectiveStatus.value);
+});
 // Check if the problem accepts zip submissions (hide source code section for zip problems)
 const isZipSubmission = computed(() => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -380,12 +392,17 @@ function closeDeleteErrorModal() {
 // Download artifact (files provided by backend)
 // Binary not found modal state
 const binaryNotFoundModal = ref<HTMLDialogElement | null>(null);
+const binaryUnavailableModal = ref<HTMLDialogElement | null>(null);
 
 async function downloadCompiledBinary() {
   logger.log("Action: Download Compiled Binary");
   const url = api.Submission.getArtifactUrl(route.params.id as string, "compiledBinary");
 
   try {
+    if (isPythonSubmission.value) {
+      binaryUnavailableModal.value?.showModal();
+      return;
+    }
     // Use HEAD request to check if binary exists first
     const response = await fetch(url, {
       method: "HEAD",
@@ -396,12 +413,11 @@ async function downloadCompiledBinary() {
       // Binary exists, proceed with download
       window.open(url, "_blank");
     } else if (response.status === 404) {
-      // Binary not found, check if artifact collection is enabled
-      if (enableCompiledBinary.value) {
-        logger.warn("Binary not found but artifact collection is enabled. Prompting rejudge.");
+      if (shouldPromptRejudgeForBinary.value) {
+        logger.warn("Binary not found. Prompting rejudge.");
         binaryNotFoundModal.value?.showModal();
       } else {
-        alert("Compiled binary not available.");
+        binaryUnavailableModal.value?.showModal();
       }
     } else {
       // Other errors
@@ -416,6 +432,10 @@ async function downloadCompiledBinary() {
 
 function closeBinaryNotFoundModal() {
   binaryNotFoundModal.value?.close();
+}
+
+function closeBinaryUnavailableModal() {
+  binaryUnavailableModal.value?.close();
 }
 
 async function confirmRejudgeForBinary() {
@@ -1134,6 +1154,27 @@ watch(submission, (val) => {
         <button class="btn btn-warning" @click="confirmRejudgeForBinary" :disabled="isRejudgeLoading">
           <i-uil-repeat :class="['mr-1', isRejudgeLoading && 'animate-spin']" />
           {{ $t("course.submission.binaryNotFound.rejudge") }}
+        </button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </dialog>
+
+  <!-- Binary Unavailable Modal -->
+  <dialog ref="binaryUnavailableModal" class="modal">
+    <div class="modal-box">
+      <h3 class="text-lg font-bold">
+        <i-uil-info-circle class="text-info mr-2" />
+        {{ $t("course.submission.binaryUnavailable.title") }}
+      </h3>
+
+      <p class="py-4">{{ $t("course.submission.binaryUnavailable.description") }}</p>
+
+      <div class="modal-action">
+        <button class="btn" @click="closeBinaryUnavailableModal">
+          {{ $t("course.submission.binaryUnavailable.close") }}
         </button>
       </div>
     </div>

@@ -81,6 +81,27 @@ const Problem = {
 
   // get a problem detail
   get: (id: string | number) => fetcher.get<Problem>(`/problem/view/${id}`),
+
+  // import/export
+  exportZip: (id: string | number, components?: string[]) =>
+    fetcher.get(`/problem/${id}/export`, {
+      params: components && components.length ? { components: components.join(",") } : undefined,
+      responseType: "blob",
+    }),
+  exportBatch: (problemIds: number[], components?: string[]) =>
+    fetcher.post(
+      "/problem/export-batch",
+      { problemIds, components: components && components.length ? components : undefined },
+      { responseType: "blob" },
+    ),
+  import: (formData: FormData) =>
+    fetcher.post("/problem/import", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }),
+  importBatch: (formData: FormData) =>
+    fetcher.post("/problem/import-batch", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }),
 };
 
 const Submission = {
@@ -355,6 +376,8 @@ const Course = {
   create: (body: CourseForm) => fetcher.post("/course", body),
   modify: (body: { course: string; new_course: string; teacher: string; color: string; emoji: string }) =>
     fetcher.put("/course", body),
+  list: () => fetcher.get("/course"),
+  get: (courseName: string) => fetcher.get(`/course/${courseName}`),
   join: (body: { course_code: string }) =>
     fetcher.post<{ message: string; data: { course: string } }>("/course/join", body),
   // Course code management (for teachers)

@@ -9,11 +9,13 @@ import { isQuotaUnlimited } from "@/constants";
 import useInteractions from "@/composables/useInteractions";
 import type { AxiosError } from "axios";
 import { useI18n } from "vue-i18n";
-
-// hello
+import ProblemExportModal from "@/components/Problem/ProblemExportModal.vue";
+import ImportProblemModal from "@/components/Problem/ImportProblemModal.vue";
+import { downloadBlob } from "@/utils/download";
 
 const session = useSession();
 const rolesCanReadProblemStatus = [UserRole.Admin, UserRole.Teacher, UserRole.TA];
+const canManageProblems = computed(() => session.isAdmin || session.isTeacher || session.isTA);
 const route = useRoute();
 const router = useRouter();
 defineProps(["name"]);
@@ -28,6 +30,7 @@ const {
   data: problems,
   error,
   isLoading,
+  execute,
 } = useAxios<ProblemList>(`/problem?offset=0&count=-1&course=${route.params.name}`, fetcher);
 
 // Cache for problem details (keyed by problemId)
@@ -123,6 +126,109 @@ const groupedProblems = computed(() => {
 
 function toggleGroupView() {
   isGroupedView.value = !isGroupedView.value;
+}
+
+const selectedProblemIds = ref<Set<number>>(new Set());
+const exportModalOpen = ref(false);
+const exportTargetIds = ref<number[]>([]);
+const importModalOpen = ref(false);
+const isExporting = ref(false);
+
+const selectedCount = computed(() => selectedProblemIds.value.size);
+
+function canExportProblem(problemId: number) {
+  if (session.isAdmin) return true;
+  const detail = problemDetailCache[problemId];
+  return !!detail && detail.owner === session.username;
+}
+
+const visibleProblems = computed(() => {
+  if (!sortedProblems.value) return [];
+  if (isGroupedView.value) return sortedProblems.value;
+  return sortedProblems.value.slice((page.value - 1) * 10, page.value * 10);
+});
+
+const selectableVisible = computed(() =>
+  visibleProblems.value.filter((problem) => canExportProblem(problem.problemId)),
+);
+
+const allVisibleSelected = computed(() => {
+  if (!selectableVisible.value.length) return false;
+  return selectableVisible.value.every((p) => selectedProblemIds.value.has(p.problemId));
+});
+
+function toggleSelection(id: number) {
+  if (!canExportProblem(id)) return;
+  const next = new Set(selectedProblemIds.value);
+  if (next.has(id)) {
+    next.delete(id);
+  } else {
+    next.add(id);
+  }
+  selectedProblemIds.value = next;
+}
+
+function toggleSelectAll() {
+  const next = new Set(selectedProblemIds.value);
+  if (allVisibleSelected.value) {
+    selectableVisible.value.forEach((p) => next.delete(p.problemId));
+  } else {
+    selectableVisible.value.forEach((p) => next.add(p.problemId));
+  }
+  selectedProblemIds.value = next;
+}
+
+function openExportModal(ids: number[]) {
+  exportTargetIds.value = [...ids];
+  exportModalOpen.value = true;
+}
+
+function openExportSelected() {
+  if (!selectedProblemIds.value.size) return;
+  openExportModal(Array.from(selectedProblemIds.value));
+}
+
+async function handleExport(components: string[]) {
+  if (!exportTargetIds.value.length || isExporting.value) return;
+  isExporting.value = true;
+  try {
+    if (exportTargetIds.value.length === 1) {
+      const id = exportTargetIds.value[0];
+      const resp = await api.Problem.exportZip(id, components);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const blob: Blob = (resp as any).data || (resp as any);
+      downloadBlob(blob, `problem_${id}.noj.zip`);
+    } else {
+      const resp = await api.Problem.exportBatch(exportTargetIds.value, components);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const blob: Blob = (resp as any).data || (resp as any);
+      downloadBlob(blob, "problems_export.noj.zip");
+    }
+  } catch (err) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const errorObj = err as any;
+    let message = "Failed to export problems. Please try again.";
+    const responseData = errorObj?.response?.data;
+    if (responseData instanceof Blob) {
+      try {
+        const text = await responseData.text();
+        const parsed = JSON.parse(text);
+        message = parsed?.message || text || message;
+      } catch {
+        try {
+          message = (await responseData.text()) || message;
+        } catch {
+          message = message;
+        }
+      }
+    } else {
+      message = errorObj?.response?.data?.message || errorObj?.message || message;
+    }
+    console.error("Failed to export problems:", err);
+    alert(message);
+  } finally {
+    isExporting.value = false;
+  }
 }
 
 // --- Search Logic (Name & ID) ---
@@ -242,13 +348,19 @@ const isDeleting = ref(false);
 
 async function performDelete(id: number) {
   try {
-    const res = await api.Problem.delete(id);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((res as any).ok) {
-      if (problems.value) {
-        problems.value = problems.value.filter((p) => p.problemId !== id);
-      }
+    await api.Problem.delete(id);
+    if (problems.value) {
+      problems.value = problems.value.filter((p) => p.problemId !== id);
     }
+    if (Object.prototype.hasOwnProperty.call(problemDetailCache, id)) {
+      delete problemDetailCache[id];
+    }
+    if (selectedProblemIds.value.has(id)) {
+      const next = new Set(selectedProblemIds.value);
+      next.delete(id);
+      selectedProblemIds.value = next;
+    }
+    await execute();
   } catch (e) {
     console.error("Failed to delete problem:", e);
     alert("Failed to delete problem. Please try again.");
@@ -373,6 +485,23 @@ const maxPage = computed(() => {
           </div>
 
           <div class="flex items-center gap-2">
+            <button
+              v-if="selectedCount"
+              class="btn btn-primary btn-sm lg:btn-md"
+              :class="{ loading: isExporting }"
+              @click="openExportSelected"
+            >
+              <i-uil-download-alt class="mr-1 lg:h-5 lg:w-5" />
+              {{ $t("course.problems.exportSelected") }} ({{ selectedCount }})
+            </button>
+            <button
+              v-if="canManageProblems"
+              class="btn btn-outline btn-sm lg:btn-md"
+              @click="importModalOpen = true"
+            >
+              <i-uil-import class="mr-1 lg:h-5 lg:w-5" />
+              {{ $t("course.problems.import") }}
+            </button>
             <router-link
               v-if="session.isAdmin"
               class="btn btn-success btn-sm lg:btn-md"
@@ -400,7 +529,7 @@ const maxPage = computed(() => {
         <div class="my-2" />
         <data-status-wrapper :error="error as AxiosError" :is-loading="isLoading">
           <template #loading>
-            <skeleton-table v-if="isDesktop" :col="5" :row="5" />
+            <skeleton-table v-if="isDesktop" :col="canManageProblems ? 6 : 5" :row="5" />
             <div v-else class="flex items-center justify-center">
               <ui-spinner />
             </div>
@@ -411,6 +540,15 @@ const maxPage = computed(() => {
               <table v-if="isDesktop" class="table w-full">
                 <thead>
                   <tr>
+                    <th v-if="canManageProblems">
+                      <input
+                        type="checkbox"
+                        class="checkbox checkbox-sm"
+                        :checked="allVisibleSelected"
+                        :disabled="!selectableVisible.length"
+                        @change="toggleSelectAll"
+                      />
+                    </th>
                     <th
                       class="hover:bg-base-200 cursor-pointer transition-colors select-none"
                       @click="isSortDesc = !isSortDesc"
@@ -445,6 +583,15 @@ const maxPage = computed(() => {
                     }"
                     @click="router.push(`/course/${$route.params.name}/problem/${problemId}`)"
                   >
+                    <td v-if="canManageProblems">
+                      <input
+                        type="checkbox"
+                        class="checkbox checkbox-sm"
+                        :checked="selectedProblemIds.has(problemId)"
+                        :disabled="!canExportProblem(problemId)"
+                        @change="toggleSelection(problemId)"
+                      />
+                    </td>
                     <td>
                       <router-link
                         :to="`/course/${$route.params.name}/problem/${problemId}`"
@@ -517,6 +664,15 @@ const maxPage = computed(() => {
                         >
                           <i-uil-chart-line class="lg:h-5 lg:w-5" />
                         </router-link>
+                      </div>
+                      <div v-if="canExportProblem(problemId)" class="tooltip" :data-tip="$t('course.problems.export')">
+                        <button
+                          class="btn btn-ghost btn-sm btn-circle mr-1"
+                          :class="{ loading: isExporting }"
+                          @click="openExportModal([problemId])"
+                        >
+                          <i-uil-download-alt class="lg:h-5 lg:w-5" />
+                        </button>
                       </div>
                       <div class="tooltip" :data-tip="$t('course.problems.copycat')">
                         <router-link
@@ -608,6 +764,9 @@ const maxPage = computed(() => {
                   :is-ta="session.isTA"
                   :ai-vtuber="aiVTuber || hasAiVtuber(problemId)"
                   :has-trial-history="hasTrialHistory(problemId)"
+                  :selectable="canExportProblem(problemId)"
+                  :selected="selectedProblemIds.has(problemId)"
+                  @toggle-select="toggleSelection(problemId)"
                 />
               </template>
             </div>
@@ -627,6 +786,15 @@ const maxPage = computed(() => {
                   <table class="table w-full">
                     <thead>
                       <tr>
+                        <th v-if="canManageProblems">
+                          <input
+                            type="checkbox"
+                            class="checkbox checkbox-sm"
+                            :checked="allVisibleSelected"
+                            :disabled="!selectableVisible.length"
+                            @change="toggleSelectAll"
+                          />
+                        </th>
                         <th>{{ $t("course.problems.id") }}</th>
                         <th>{{ $t("course.problems.name") }}</th>
                         <th v-if="rolesCanReadProblemStatus.includes(session.role)">
@@ -659,6 +827,15 @@ const maxPage = computed(() => {
                         }"
                         @click="router.push(`/course/${$route.params.name}/problem/${problemId}`)"
                       >
+                        <td v-if="canManageProblems">
+                          <input
+                            type="checkbox"
+                            class="checkbox checkbox-sm"
+                            :checked="selectedProblemIds.has(problemId)"
+                            :disabled="!canExportProblem(problemId)"
+                            @change="toggleSelection(problemId)"
+                          />
+                        </td>
                         <td>
                           <router-link
                             :to="`/course/${$route.params.name}/problem/${problemId}`"
@@ -729,6 +906,15 @@ const maxPage = computed(() => {
                             >
                               <i-uil-chart-line class="lg:h-5 lg:w-5" />
                             </router-link>
+                          </div>
+                          <div v-if="canExportProblem(problemId)" class="tooltip" :data-tip="$t('course.problems.export')">
+                            <button
+                              class="btn btn-ghost btn-sm btn-circle mr-1"
+                              :class="{ loading: isExporting }"
+                              @click="openExportModal([problemId])"
+                            >
+                              <i-uil-download-alt class="lg:h-5 lg:w-5" />
+                            </button>
                           </div>
                           <div class="tooltip" :data-tip="$t('course.problems.copycat')">
                             <router-link
@@ -844,6 +1030,14 @@ const maxPage = computed(() => {
       <button @click="deleteModalOpen = false">close</button>
     </form>
   </dialog>
+
+  <problem-export-modal
+    v-model="exportModalOpen"
+    :problem-count="exportTargetIds.length"
+    @confirm="handleExport"
+  />
+
+  <import-problem-modal v-model="importModalOpen" :course-name="String(route.params.name)" @imported="execute()" />
 </template>
 
 <style scoped>

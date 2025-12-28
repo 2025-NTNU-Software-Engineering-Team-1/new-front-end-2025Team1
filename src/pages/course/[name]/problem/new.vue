@@ -263,9 +263,21 @@ async function submit() {
         fd.append("public_testdata.zip", assets.trialModePublicTestDataZip);
         attachedFiles.push("public_testdata.zip");
       }
-      if (assets.trialModeACFiles && assets.trialModeACFiles.length > 0) {
-        assets.trialModeACFiles.forEach((f) => fd.append("ac_code", f));
-        attachedFiles.push(`ac_code (${assets.trialModeACFiles.length})`);
+      if (assets.trialModeACFiles) {
+        if (Array.isArray(assets.trialModeACFiles)) {
+          assets.trialModeACFiles.forEach((f) => {
+            const ext = f.name.split(".").pop()?.toLowerCase() || "";
+            const key = ext === "c" || ext === "cpp" || ext === "py" ? `ac_code.${ext}` : "ac_code";
+            fd.append(key, f, f.name);
+            attachedFiles.push(f.name);
+          });
+        } else {
+          const f = assets.trialModeACFiles as File;
+          const ext = f.name.split(".").pop()?.toLowerCase() || "";
+          const key = ext === "c" || ext === "cpp" || ext === "py" ? `ac_code.${ext}` : "ac_code";
+          fd.append(key, f, f.name);
+          attachedFiles.push(f.name);
+        }
       }
       if (assets.testdataZip) {
         fd.append("case", assets.testdataZip);

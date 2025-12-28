@@ -36,6 +36,7 @@ type TestHistoryItem = {
   lang: string;
   timestamp: number;
   type: "public" | "custom";
+  userLabel: string;
 };
 
 const testHistory = ref<TestHistoryItem[]>([]);
@@ -77,6 +78,7 @@ onMounted(async () => {
           lang: LANG[item.language_type] || "Unknown",
           timestamp: Number(item.timestamp),
           type: item.use_default_case === false ? "custom" : "public",
+          userLabel: formatUserLabel(item),
         })) || [];
       console.log("Loaded trial history:", testHistory.value);
     } else {
@@ -136,6 +138,7 @@ async function fetchHistory() {
           lang: LANG[item.language_type] || "Unknown",
           timestamp: Number(item.timestamp),
           type: item.use_default_case === false ? "custom" : "public",
+          userLabel: formatUserLabel(item),
         })) || [];
     }
   } catch (err) {
@@ -178,6 +181,10 @@ function viewTestDetail(testId: string | number) {
   const targetPath = `/course/${route.params.name}/problem/${route.params.id}/test-history/${testId}`;
   console.log("Navigating to:", targetPath);
   router.push(targetPath);
+}
+
+function formatUserLabel(item: { user?: { username?: string } }): string {
+  return item?.user?.username?.trim() || "Unknown";
 }
 
 // Rejudge All functionality
@@ -311,6 +318,7 @@ async function confirmDeleteAllTrials() {
                 <thead>
                   <tr>
                     <th>{{ t("course.problem.test.historyModal.table.id") }}</th>
+                    <th v-if="canRejudge">{{ t("course.problem.test.historyModal.table.user") }}</th>
                     <th class="text-center">{{ t("course.problem.test.trialHistory.type") }}</th>
                     <th>PID</th>
                     <th>{{ t("course.problem.test.historyModal.table.result") }}</th>
@@ -335,6 +343,7 @@ async function confirmDeleteAllTrials() {
                         {{ item.id }}
                       </router-link>
                     </td>
+                    <td v-if="canRejudge">{{ item.userLabel }}</td>
                     <td class="text-center">
                       <span
                         :class="['badge badge-sm', item.type === 'public' ? 'badge-info' : 'badge-warning']"

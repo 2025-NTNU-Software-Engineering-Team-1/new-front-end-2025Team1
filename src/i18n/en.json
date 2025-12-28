@@ -5,7 +5,11 @@
     "cancel": "Cancel",
     "edit": "Edit",
     "delete": "Delete",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "deleteConfirmTitle": "Delete Confirmation",
+    "deleteConfirmText": "Are you sure you want to delete \"{name}\"?",
+    "deleteDetails": "This action cannot be undone.",
+    "shiftTip": "Tip: Hold Shift + Click to skip this confirmation"
   },
   "settings": {
     "title": "Settings",

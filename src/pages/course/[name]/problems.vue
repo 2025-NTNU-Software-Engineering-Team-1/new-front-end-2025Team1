@@ -228,6 +228,47 @@ function performSearch() {
   }
 }
 
+// --- Delete Logic ---
+// --- Delete Logic ---
+const deleteModalOpen = ref(false);
+const itemToDelete = ref<{ id: number; name: string } | null>(null);
+const isDeleting = ref(false);
+
+async function performDelete(id: number) {
+  try {
+    const res = await api.Problem.delete(id);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((res as any).ok) {
+      if (problems.value) {
+        problems.value = problems.value.filter((p) => p.problemId !== id);
+      }
+    }
+  } catch (e) {
+    console.error("Failed to delete problem:", e);
+    alert("Failed to delete problem. Please try again.");
+  }
+}
+
+function deleteProblem(event: MouseEvent, id: number, name: string) {
+  // If Shift is held, delete immediately
+  if (event.shiftKey) {
+    performDelete(id);
+    return;
+  }
+  // Otherwise open modal
+  itemToDelete.value = { id, name };
+  deleteModalOpen.value = true;
+}
+
+async function confirmDelete() {
+  if (!itemToDelete.value) return;
+  isDeleting.value = true;
+  await performDelete(itemToDelete.value.id);
+  isDeleting.value = false;
+  deleteModalOpen.value = false;
+  itemToDelete.value = null;
+}
+
 // Watcher to clear error when user types
 watch(searchQuery, () => {
   if (searchNotFound.value) searchNotFound.value = false;
@@ -495,6 +536,19 @@ const maxPage = computed(() => {
                           <i-uil-edit class="lg:h-5 lg:w-5" />
                         </router-link>
                       </div>
+                      <!-- Delete Button -->
+                      <div
+                        v-if="session.isAdmin || session.isTeacher"
+                        class="tooltip"
+                        data-tip="Delete"
+                      >
+                        <button
+                          class="btn btn-ghost btn-sm btn-circle text-error"
+                          @click="deleteProblem($event, problemId, problemName)"
+                        >
+                          <i-uil-trash-alt class="lg:h-5 lg:w-5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 </tbody>
@@ -675,6 +729,19 @@ const maxPage = computed(() => {
                               <i-uil-edit class="lg:h-5 lg:w-5" />
                             </router-link>
                           </div>
+                          <!-- Delete Button (Grouped) -->
+                          <div
+                            v-if="session.isAdmin || session.isTeacher"
+                            class="tooltip"
+                            data-tip="Delete"
+                          >
+                            <button
+                              class="btn btn-ghost btn-sm btn-circle text-error"
+                              @click="deleteProblem($event, problemId, problemName)"
+                            >
+                              <i-uil-trash-alt class="lg:h-5 lg:w-5" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     </tbody>
@@ -697,4 +764,30 @@ const maxPage = computed(() => {
       </div>
     </div>
   </div>
+
+  <!-- Delete Confirmation Modal -->
+  <dialog class="modal" :class="{ 'modal-open': deleteModalOpen }">
+    <div class="modal-box">
+      <h3 class="font-bold text-lg">{{ $t("general.deleteConfirmTitle") }}</h3>
+      <p class="py-4">
+        {{ $t("general.deleteConfirmText", { name: itemToDelete?.name }) }}
+        <br />
+        <span class="text-error">{{ $t("general.deleteDetails") }}</span>
+      </p>
+      <p class="text-xs text-gray-500 mt-2">
+        {{ $t("general.shiftTip") }}
+      </p>
+      <div class="modal-action">
+        <button class="btn" @click="deleteModalOpen = false" :disabled="isDeleting">
+          {{ $t("general.cancel") }}
+        </button>
+        <button class="btn btn-error" @click="confirmDelete" :disabled="isDeleting">
+          {{ isDeleting ? "..." : $t("general.delete") }}
+        </button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button @click="deleteModalOpen = false">close</button>
+    </form>
+  </dialog>
 </template>

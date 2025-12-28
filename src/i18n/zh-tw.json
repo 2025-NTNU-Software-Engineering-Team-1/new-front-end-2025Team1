@@ -5,7 +5,11 @@
     "cancel": "取消",
     "edit": "編輯",
     "delete": "刪除",
-    "confirm": "確認"
+    "confirm": "確認",
+    "deleteConfirmTitle": "刪除確認",
+    "deleteConfirmText": "確定要刪除「{name}」嗎？",
+    "deleteDetails": "此動作無法復原。",
+    "shiftTip": "提示：按住 Shift + 點擊可跳過此確認"
   },
   "settings": {
     "title": "設定",

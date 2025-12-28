@@ -1,4 +1,16 @@
 {
+  "general": {
+    "back": "返回",
+    "save": "儲存",
+    "cancel": "取消",
+    "edit": "編輯",
+    "delete": "刪除",
+    "confirm": "確認",
+    "deleteConfirmTitle": "刪除確認",
+    "deleteConfirmText": "確定欲刪除「{name}」無？",
+    "deleteDetails": "這个動作無法度復原。",
+    "shiftTip": "小撇步：按住 Shift + 點擊會當跳過這个確認"
+  },
   "settings": {
     "title": "設定",
     "selectLang": "選擇語言"

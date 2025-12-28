@@ -654,9 +654,18 @@ onMounted(() => {
   loadSkinPreference();
   const vw = window.innerWidth;
   const vh = window.innerHeight;
+  // 提交按钮在 right-6 bottom-6 (24px from right, 24px from bottom)
+  // 提交按钮高度约 40-50px，所以顶部在距离底部约 70px
+  // AI 按钮高度 64px，放在提交按钮上方，留 20px 间距
+  // 所以 AI 按钮底部应该在距离底部约 150px 的位置
+  const submitButtonRight = 24; // right-6 = 1.5rem = 24px
+  const submitButtonBottom = 24; // bottom-6 = 1.5rem = 24px
+  const submitButtonHeight = 48; // 估算提交按钮高度
+  const spacing = 0; // AI 按钮和提交按钮之间的间距
+  const aiButtonBottom = submitButtonBottom + submitButtonHeight + spacing;
   triggerPos.value = {
-    x: Math.max(triggerMargin, vw - triggerMargin - triggerSize),
-    y: Math.max(triggerMargin, vh - triggerMargin - triggerSize),
+    x: Math.max(triggerMargin, vw - submitButtonRight - triggerSize),
+    y: Math.max(triggerMargin, vh - aiButtonBottom - triggerSize),
   };
   window.addEventListener("resize", clampTriggerPosition);
 });

@@ -954,7 +954,7 @@ async function submitCode() {
             </template>
 
             <!-- Floating Submit Button -->
-            <div class="fixed right-6 bottom-6 z-50">
+            <div class="fixed right-10 bottom-6 z-50">
               <button
                 class="btn btn-primary shadow-lg transition-transform hover:scale-105"
                 @click="showSubmitModal = true"

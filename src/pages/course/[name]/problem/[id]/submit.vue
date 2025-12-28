@@ -380,22 +380,6 @@ async function submit() {
             <div class="card-title md:text-lg lg:text-xl">
               {{ t("course.problem.submit.card.placeholder") }}
             </div>
-
-            <div class="form-control w-full md:max-w-xs">
-              <label class="label">
-                <span class="label-text">Select Language</span>
-              </label>
-              <select
-                v-model="(v$ as any).lang.$model"
-                :class="['select-bordered select', (v$ as any).lang.$error && 'input-error']"
-              >
-                <option disabled :value="-1">{{ t("course.problem.submit.lang.select") }}</option>
-                <option v-for="{ text, value } in langOptions" :key="value" :value="value">{{ text }}</option>
-              </select>
-              <label class="label" v-show="(v$ as any).lang.$error">
-                <span class="label-text-alt text-error" v-text="(v$ as any).lang.$errors[0]?.$message" />
-              </label>
-            </div>
           </div>
           <code-editor v-model="form.code" class="mt-4" />
           <span
@@ -408,22 +392,6 @@ async function submit() {
         <template v-else>
           <div class="mt-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-start md:gap-8">
             <div class="card-title md:text-lg lg:text-xl">Upload your solution (.zip)</div>
-
-            <div class="form-control w-full md:max-w-xs">
-              <label class="label">
-                <span class="label-text">Select Language</span>
-              </label>
-              <select
-                v-model="(v$ as any).lang.$model"
-                :class="['select-bordered select', (v$ as any).lang.$error && 'input-error']"
-              >
-                <option disabled :value="-1">{{ t("course.problem.submit.lang.select") }}</option>
-                <option v-for="{ text, value } in langOptions" :key="value" :value="value">{{ text }}</option>
-              </select>
-              <label class="label" v-show="(v$ as any).lang.$error">
-                <span class="label-text-alt text-error" v-text="(v$ as any).lang.$errors[0]?.$message" />
-              </label>
-            </div>
           </div>
           <div class="mt-4">
             <input
@@ -464,7 +432,17 @@ async function submit() {
   <div
     class="border-base-300 bg-base-100 fixed right-0 bottom-0 left-0 z-50 w-full border-t p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]"
   >
-    <div class="flex w-full justify-end px-4 md:px-8">
+    <div class="flex w-full items-center justify-end gap-4 px-4 md:px-8">
+      <div class="form-control">
+        <select
+          v-model="(v$ as any).lang.$model"
+          :class="['select-bordered select', (v$ as any).lang.$error && 'input-error']"
+          class="w-full max-w-[10rem]"
+        >
+          <option disabled :value="-1">{{ t("course.problem.submit.lang.select") }}</option>
+          <option v-for="{ text, value } in langOptions" :key="value" :value="value">{{ text }}</option>
+        </select>
+      </div>
       <button :class="['btn btn-primary min-w-[150px]', form.isLoading && 'loading']" @click="submit">
         <i-uil-file-upload-alt class="mr-2 h-5 w-5" /> {{ t("course.problem.submit.text") }}
       </button>

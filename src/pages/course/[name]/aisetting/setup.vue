@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import { useRoute } from "vue-router";
 import { useTitle } from "@vueuse/core";
 import api from "@/models/api";
@@ -82,6 +82,16 @@ interface ApiKey {
 }
 
 const apiKeys = ref<ApiKey[]>([]);
+
+const searchQuery = ref("");
+
+const filteredApiKeys = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase();
+  if (!query) return apiKeys.value;
+  return apiKeys.value.filter(
+    (k) => k.key_name.toLowerCase().includes(query) || (k.created_by || "").toLowerCase().includes(query),
+  );
+});
 
 // State for the new key input form
 const newKey = ref({
@@ -399,7 +409,15 @@ onMounted(fetchKeys);
         </div>
 
         <div class="border-base-300 rounded-lg border p-5">
-          <h3 class="mb-4 text-lg font-semibold">{{ t("course.aisetting.setup.subtitleExistingKey") }}</h3>
+          <div class="mb-4 flex items-center justify-between">
+            <h3 class="text-lg font-semibold">{{ t("course.aisetting.setup.subtitleExistingKey") }}</h3>
+            <input
+              v-model="searchQuery"
+              type="text"
+              class="input input-bordered input-sm w-64"
+              placeholder="Search by Key Name or Creator"
+            />
+          </div>
 
           <div v-if="isLoading && apiKeys.length === 0" class="py-4 text-center opacity-60">
             <ui-spinner />
@@ -409,9 +427,9 @@ onMounted(fetchKeys);
             {{ t("course.aisetting.setup.display.noKey") }}
           </div>
 
-          <div v-else class="space-y-4">
+          <div v-else class="max-h-[600px] space-y-4 overflow-y-auto pr-2">
             <div
-              v-for="k in apiKeys"
+              v-for="k in filteredApiKeys"
               :key="k.id"
               class="border-base-300 bg-base-100 dark:bg-base-200/20 grid grid-cols-1 gap-4 rounded-lg border p-4 md:grid-cols-12 md:items-end"
             >

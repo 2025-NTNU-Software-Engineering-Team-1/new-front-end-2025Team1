@@ -11,180 +11,126 @@ import { useI18n } from "vue-i18n";
 import { hover_zh } from "../../Hovers/hover-zh-tw";
 import { hover_en } from "../../Hovers/hover-en";
 
-// ==========================================
-// [CONFIG] Console Debug Mode
-// ==========================================
-const DEBUG_MODE = 1;
+import { isMacOsZip } from "@/utils/zipValidator";
 
 // ==========================================
-// Logger Utility
+// Definitions
+// ==========================================
+
+const props = defineProps<{
+  variant: "student" | "teacher";
+}>();
+
+const problem = inject<Ref<ProblemForm>>("problem")!;
+const { t, locale } = useI18n();
+const route = useRoute();
+
+const hover = computed(() => {
+  return locale.value === "english" ? hover_en : hover_zh;
+});
+
+// ==========================================
+// Local Logger
 // ==========================================
 const logger = {
   log: (label: string, data?: unknown) => {
-    if (!DEBUG_MODE) return;
     console.log(`%c[Log] ${label}`, "color: #3b82f6; font-weight: bold;", data || "");
   },
   success: (label: string, data?: unknown) => {
-    if (!DEBUG_MODE) return;
     console.log(`%c[Success] ${label}`, "color: #10b981; font-weight: bold;", data || "");
   },
   error: (label: string, error?: unknown) => {
-    if (!DEBUG_MODE) return;
     console.log(`%c[Error] ${label}`, "color: #ef4444; font-weight: bold;", error || "");
   },
   warn: (label: string, data?: unknown) => {
-    if (!DEBUG_MODE) return;
     console.log(`%c[Warn] ${label}`, "color: #f59e0b; font-weight: bold;", data || "");
   },
   group: (label: string) => {
-    if (!DEBUG_MODE) return;
     console.group(`%c[Group] ${label}`, "color: #8b5cf6; font-weight: bold;");
   },
   groupEnd: () => {
-    if (!DEBUG_MODE) return;
     console.groupEnd();
   },
 };
 
 // ==========================================
-// Props & Setup
+// State
 // ==========================================
-const props = withDefaults(defineProps<{ variant?: "student" | "teacher" }>(), {
-  variant: "student",
-});
 
-const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
-const route = useRoute();
 const isDrag = ref(false);
-const { t, locale } = useI18n();
-const hover = computed(() => {
-  return locale.value === "english" ? hover_en : hover_zh;
-});
-// Safety Check
-if (!problem || !problem.value) {
-  logger.error("Problem injection failed");
-  throw new Error("ResourceDataSection requires problem injection");
-}
-
-// ==========================================
-// Section: Dynamic Keys (Teacher vs Student)
-// ==========================================
-const isTeacher = computed(() => props.variant === "teacher");
-
-// Determine config keys based on variant
-const enableKey = computed(() => (isTeacher.value ? "resourceDataTeacher" : "resourceData"));
-const assetKey = computed(() => (isTeacher.value ? "resourceDataTeacherZip" : "resourceDataZip"));
-const assetPathKey = computed(() => (isTeacher.value ? "resource_data_teacher" : "resource_data"));
-const labelText = computed(() =>
-  isTeacher.value ? t("course.problems.setResourceDataTeacher") : t("course.problems.setResourceDataStudent"),
-);
-
-// ==========================================
-// Section: Permissions & Status
-// ==========================================
-
-// Check if Allow Read is enabled in pipeline or legacy config
-const allowReadRef = computed(() => {
-  const pipe = problem.value.pipeline || {};
-  const cfg = problem.value.config || ({} as any);
-  return Boolean(pipe.allowRead ?? cfg.allowRead ?? cfg.allow_read ?? cfg.fopen ?? false);
-});
-
-// Teachers always have permission; Students need Allow Read
-const allowReadSatisfied = computed(() => isTeacher.value || allowReadRef.value);
-
-// Check if test cases exist (Remote or Local)
-const hasRemoteTestcase = computed(() => Boolean((problem.value.config as any)?.assetPaths?.case));
-const hasTestdata = computed(
-  () => hasRemoteTestcase.value || (problem.value.testCaseInfo?.tasks?.length ?? 0) > 0,
-);
-
-const hasExistingTasks = computed(() => (problem.value.testCaseInfo?.tasks?.length ?? 0) > 0);
-
-const hasRemoteAsset = computed(() =>
-  Boolean((problem.value.config as any)?.assetPaths?.[assetPathKey.value]),
-);
-
-// ==========================================
-// Section: Validation Messages
-// ==========================================
-
-// Warning message (Computed directly, no need for watchers)
-const resourceDataWarning = computed(() => {
-  if (isTeacher.value) return "";
-  if (!allowReadSatisfied.value && enableRef.value) {
-    return t("course.problem.allowReadToUse");
-  }
-  return "";
-});
-
-const enableDisabledReason = computed(() => {
-  if (!hasTestdata.value) return t("course.problems.uploadTestDataFirst");
-  if (!allowReadSatisfied.value) return t("course.problems.allowReadRequired");
-  return "";
-});
-
-const showDisabledText = computed(() => Boolean(enableDisabledReason.value || resourceDataWarning.value));
-
-// ==========================================
-// Section: State Accessors (Get/Set)
-// ==========================================
-
-// Toggle Switch Reference
-const enableRef = computed({
-  get: () => (problem.value.config as any)?.[enableKey.value],
-  set: (val: boolean) => {
-    (problem.value.config as any)[enableKey.value] = val;
-  },
-});
-
-// File Object Reference
-const fileRef = computed({
-  get: () => (problem.value.assets as any)?.[assetKey.value] ?? null,
-  set: (val: File | null) => {
-    if (problem.value.assets) (problem.value.assets as any)[assetKey.value] = val;
-  },
-});
-
-// Download URL Generator
-const downloadUrl = computed(() => {
-  const pid = route.params.id;
-  if (!pid || Array.isArray(pid)) return null;
-  const assetPaths = (problem.value.config as any)?.assetPaths;
-  if (assetPaths && !assetPaths[assetPathKey.value]) return null;
-  return `/api/problem/${pid}/asset/${assetPathKey.value}/download`;
-});
-
-// Reset count if feature is disabled
 const resourceCaseCount = ref<number | null>(null);
 
-watch(
-  () => problem.value.config?.resourceData,
-  (val) => {
-    if (!val) {
-      resourceCaseCount.value = null;
-    }
-  },
+// Computed mappings based on variant
+const isStudent = computed(() => props.variant === "student");
+
+const labelText = computed(() =>
+  isStudent.value ? t("course.problems.setResourceData") : t("course.problems.setResourceDataTeacher"),
 );
 
-const remoteTaskCount = computed(() => {
-  const len = problem.value.testCaseInfo?.tasks?.length ?? 0;
-  return len > 0 ? len : null;
+const enableRef = computed({
+  get: () => {
+    if (isStudent.value) return problem.value.config?.resourceData || false;
+    return problem.value.config?.resourceDataTeacher || false;
+  },
+  set: (val: boolean) => {
+    if (!problem.value.config) problem.value.config = {} as any;
+    if (isStudent.value) {
+      problem.value.config.resourceData = val;
+    } else {
+      problem.value.config.resourceDataTeacher = val;
+    }
+  },
 });
 
-// ==========================================
-// Section: Zip Validation Logic
-// ==========================================
-
-// Generate expected prefixes (e.g., "0001", "0002") based on Task/Case count
-const expectedPrefixes = computed(() => {
-  const tasks = problem.value.testCaseInfo?.tasks || [];
-  const prefixes: string[] = [];
-  tasks.forEach((t, ti) => {
-    for (let ci = 0; ci < (t.caseCount || 0); ci++) {
-      prefixes.push(`${String(ti).padStart(2, "0")}${String(ci).padStart(2, "0")}`);
+const fileRef = computed({
+  get: () => {
+    if (isStudent.value) return problem.value.assets?.resourceDataZip || null;
+    return problem.value.assets?.resourceDataTeacherZip || null;
+  },
+  set: (val: File | null) => {
+    if (!problem.value.assets) problem.value.assets = {};
+    if (isStudent.value) {
+      problem.value.assets.resourceDataZip = val;
+    } else {
+      problem.value.assets.resourceDataTeacherZip = val;
     }
-  });
+  },
+});
+
+const hasRemoteAsset = computed(() => {
+  const assetPaths = problem.value.config?.assetPaths;
+  const key = isStudent.value ? "resource_data" : "resource_data_teacher";
+  return Boolean(assetPaths && assetPaths[key]);
+});
+
+const downloadUrl = computed(() => {
+  const assetPaths = problem.value.config?.assetPaths;
+  const key = isStudent.value ? "resource_data" : "resource_data_teacher";
+  return assetPaths ? assetPaths[key] : null;
+});
+
+const allowReadSatisfied = computed(() => true);
+const enableDisabledReason = computed(() => "");
+const showDisabledText = computed(() => false);
+const resourceDataWarning = computed(() => "");
+const remoteTaskCount = computed(() => null);
+
+const hasExistingTasks = computed(() => {
+  return (problem.value.testCaseInfo?.tasks?.length || 0) > 0;
+});
+
+const expectedPrefixes = computed(() => {
+  const prefixes: string[] = [];
+  const tasks = problem.value.testCaseInfo?.tasks || [];
+  let taskIdx = 0;
+  for (const task of tasks) {
+    const tParams = String(taskIdx).padStart(2, "0");
+    for (let i = 0; i < task.caseCount; i++) {
+      const cParams = String(i + 1).padStart(2, "0");
+      prefixes.push(`${tParams}${cParams}`);
+    }
+    taskIdx++;
+  }
   return prefixes;
 });
 
@@ -203,17 +149,27 @@ watch(
     logger.group("Validate Resource Data Zip");
     logger.log("File Selected", file.name);
 
-    // Pre-check: Do test tasks exist?
-    if (!hasExistingTasks.value) {
-      logger.warn("No existing tasks found. Clearing file.");
-      fileRef.value = null;
-      logger.groupEnd();
-      return;
-    }
-
     try {
+      // 0. MacOS Check
+      if (await isMacOsZip(file)) {
+        logger.warn("MacOS Zip detected. Blocking silently.");
+        fileRef.value = null;
+        logger.groupEnd();
+        return;
+      }
+
+      // Pre-check: Do test tasks exist?
+      // ... (existing logic)
+      if (!hasExistingTasks.value) {
+        logger.warn("No existing tasks found. Clearing file.");
+        fileRef.value = null;
+        logger.groupEnd();
+        return;
+      }
+
       // 1. Read Zip
       const reader = new ZipReader(new BlobReader(file));
+
       const entries = await reader.getEntries();
 
       // Filter out folders

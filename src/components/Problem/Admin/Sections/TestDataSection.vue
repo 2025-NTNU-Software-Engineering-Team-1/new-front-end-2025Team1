@@ -14,6 +14,13 @@ import { hover_en } from "../../Hovers/hover-en";
 // ==========================================
 // Props & Injection
 // ==========================================
+import { isMacOsZip } from "@/utils/zipValidator";
+
+// ... (imports remain)
+
+// ==========================================
+// Props & Injection
+// ==========================================
 defineProps<{ v$: any }>();
 
 const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
@@ -68,28 +75,6 @@ if (!problem || !problem.value) {
 // Testdata Validation Error State
 // ==========================================
 const testdataError = ref<string | null>(null);
-
-/**
- * Checks if the filenames array contains macOS metadata files.
- * macOS creates hidden files like `._filename` and `__MACOSX/` folder when zipping.
- * These files can cause issues with testcase processing.
- */
-function hasMacOSMetadataFiles(filenames: string[]): string[] {
-  const macosFiles: string[] = [];
-  for (const filename of filenames) {
-    // Check for __MACOSX directory (macOS resource fork folder)
-    if (filename.startsWith("__MACOSX/") || filename === "__MACOSX") {
-      macosFiles.push(filename);
-      continue;
-    }
-    // Check for ._ prefixed files (macOS extended attributes)
-    const basename = filename.split("/").pop() || "";
-    if (basename.startsWith("._")) {
-      macosFiles.push(filename);
-    }
-  }
-  return macosFiles;
-}
 
 // ==========================================
 // Computed Properties
@@ -182,27 +167,21 @@ watch(
     logger.log("File Name", file.name);
 
     try {
-      // 1. Read Zip Content
+      // 1. Check for MacOS Metadata (Silent Block)
+      if (await isMacOsZip(file)) {
+        logger.warn("MacOS Zip detected. Blocking silently.");
+        problem.value.assets!.testdataZip = null;
+        problem.value.testCaseInfo = { ...problem.value.testCaseInfo, tasks: [] };
+        // Do NOT set error message
+        return;
+      }
+
+      // 2. Read Zip Content
       const reader = new ZipReader(new BlobReader(file));
       const entries = await reader.getEntries();
       await reader.close();
 
       const filenames = entries.map(({ filename }) => filename);
-
-      // 2. Check for macOS metadata files (._* and __MACOSX/)
-      const macosFiles = hasMacOSMetadataFiles(filenames);
-      if (macosFiles.length > 0) {
-        const sampleFiles = macosFiles.slice(0, 3).join(", ");
-        const moreCount = macosFiles.length > 3 ? ` (and ${macosFiles.length - 3} more)` : "";
-        const msg = t("course.problems.macosZipDetected", {
-          files: sampleFiles + moreCount,
-        });
-        logger.error("macOS Metadata Files Detected", macosFiles);
-        testdataError.value = msg;
-        problem.value.assets!.testdataZip = null; // Clear invalid file
-        problem.value.testCaseInfo = { ...problem.value.testCaseInfo, tasks: [] };
-        return;
-      }
 
       const inputs = filenames.filter((f) => f.endsWith(".in"));
       const outputs = filenames.filter((f) => f.endsWith(".out"));

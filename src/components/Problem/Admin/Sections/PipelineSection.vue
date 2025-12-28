@@ -14,6 +14,7 @@ import MultiStringInput from "../Controls/MultiStringInput.vue";
 // Utils & API
 import api from "@/models/api";
 import { assertFileSizeOK } from "@/utils/checkFileSize";
+import { isMacOsZip } from "@/utils/zipValidator";
 
 const { t, locale } = useI18n();
 const hover = computed(() => {
@@ -1975,13 +1976,19 @@ watch(
                 class="file-input-bordered file-input file-input-sm w-56"
                 :class="{ 'input-error': v$?.assets?.makefileZip?.$error }"
                 @change="
-                  (e: Event) => {
-                    const file = (e.target as HTMLInputElement).files?.[0] || null;
+                  async (e: Event) => {
+                    const inputEl = e.target as HTMLInputElement;
+                    const file = inputEl.files?.[0] || null;
+                    if (file && (await isMacOsZip(file))) {
+                      problem.assets!.makefileZip = null;
+                      inputEl.value = '';
+                      return;
+                    }
                     problem.assets!.makefileZip = file;
                     v$?.assets?.makefileZip?.$touch();
                     if (!file || !assertFileSizeOK(file, 'makefileZip')) {
                       problem.assets!.makefileZip = null;
-                      (e.target as HTMLInputElement).value = '';
+                      inputEl.value = '';
                     }
                   }
                 "

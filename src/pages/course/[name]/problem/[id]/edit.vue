@@ -503,11 +503,13 @@ async function discard() {
   if (confirm(t("course.problem.edit.confirmDiscard"))) router.push(`/course/${route.params.name}/problems`);
 }
 
+const isDeleting = ref(false);
+
 async function delete_() {
-  if (!formElement.value || !confirm(t("course.problem.edit.confirmDelete"))) return;
+  if (!confirm(t("course.problem.edit.confirmDelete"))) return;
 
   logger.warn("Deleting Problem...", route.params.id);
-  formElement.value.isLoading = true;
+  isDeleting.value = true;
 
   try {
     await api.Problem.delete(route.params.id as string);
@@ -515,13 +517,15 @@ async function delete_() {
     router.push(`/course/${route.params.name}/problems`);
   } catch (error) {
     logger.error("Deletion Failed", error);
-    formElement.value.errorMsg =
-      axios.isAxiosError(error) && error.response?.data?.message
-        ? error.response.data.message
-        : "Unknown error occurred :(";
+    if (formElement.value) {
+      formElement.value.errorMsg =
+        axios.isAxiosError(error) && error.response?.data?.message
+          ? error.response.data.message
+          : "Unknown error occurred :(";
+    }
     throw error;
   } finally {
-    formElement.value.isLoading = false;
+    isDeleting.value = false;
   }
 }
 
@@ -601,15 +605,12 @@ function cleanupForDisplay(data?: ProblemForm) {
             </div>
 
             <button
-              :class="['btn btn-error btn-outline btn-sm lg:btn-md', formElement?.isLoading && 'loading']"
+              :class="['btn btn-error btn-outline btn-sm lg:btn-md', isDeleting && 'loading']"
               @click="delete_"
             >
               <i-uil-trash-alt class="mr-1 lg:h-5 lg:w-5" /> {{ t("course.problem.edit.delete") }}
             </button>
-            <button
-              :class="['btn btn-warning btn-sm lg:btn-md', formElement?.isLoading && 'loading']"
-              @click="discard"
-            >
+            <button class="btn btn-warning btn-sm lg:btn-md" @click="discard">
               <i-uil-times-circle class="mr-1 lg:h-5 lg:w-5" /> {{ t("course.problem.edit.discardChanges") }}
             </button>
           </div>

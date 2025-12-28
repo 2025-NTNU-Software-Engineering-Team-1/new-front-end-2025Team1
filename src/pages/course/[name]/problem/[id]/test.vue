@@ -704,17 +704,20 @@ async function submitCode() {
                         <button
                           type="button"
                           @click="useDefaultTestcases = true"
-                          class="btn btn-sm gap-2"
+                          class="btn btn-sm gap-2 transition-all"
                           :class="
                             useDefaultTestcases
-                              ? 'btn-neutral ring-primary/20 ring-2'
-                              : 'btn-ghost border-base-content/20 bg-base-100 opacity-70'
+                              ? 'btn-neutral ring-primary/20 shadow-md ring-2'
+                              : 'btn-ghost border-base-content/20 bg-base-100 opacity-60 hover:opacity-100'
                           "
                         >
                           <i-uil-globe class="h-4 w-4" />
                           <span class="hidden sm:inline">{{
                             t("course.problem.test.testcaseType.public")
                           }}</span>
+                          <span v-if="useDefaultTestcases" class="badge badge-primary badge-sm">
+                            Active
+                          </span>
                         </button>
                       </div>
 
@@ -731,11 +734,11 @@ async function submitCode() {
                           type="button"
                           @click="hasCustomTestcases && (useDefaultTestcases = false)"
                           :disabled="!hasCustomTestcases"
-                          class="btn btn-sm gap-2"
+                          class="btn btn-sm gap-2 transition-all"
                           :class="[
                             !useDefaultTestcases && hasCustomTestcases
-                              ? 'btn-neutral'
-                              : 'btn-ghost border-base-content/20 bg-base-100',
+                              ? 'btn-neutral ring-primary/20 shadow-md ring-2'
+                              : 'btn-ghost border-base-content/20 bg-base-100 opacity-60 hover:opacity-100',
                             !hasCustomTestcases && 'opacity-50',
                           ]"
                         >

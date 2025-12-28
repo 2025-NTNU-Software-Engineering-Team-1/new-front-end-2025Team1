@@ -1248,7 +1248,7 @@ watch(
             </div>
           </div>
 
-          <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+          <div class="grid grid-cols-1 items-start gap-3 md:grid-cols-3">
             <div class="relative flex min-h-[26rem] flex-col rounded border border-gray-500 p-2">
               <div
                 v-if="!allowImports"

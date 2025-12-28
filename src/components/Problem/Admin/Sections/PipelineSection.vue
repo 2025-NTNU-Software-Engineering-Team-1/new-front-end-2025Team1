@@ -1163,6 +1163,29 @@ watch(
   },
   { immediate: true },
 );
+
+// ==========================================
+// [NEW] Zip Format Validation Rule
+// ==========================================
+/**
+ * Validation Rule:
+ * Cannot use "Function-Only" mode when Accepted Format is "Zip".
+ */
+const isFunctionOnlyDisabled = computed(() => {
+  return problem.value.config?.acceptedFormat === "zip";
+});
+
+watch(
+  () => problem.value.config?.acceptedFormat,
+  (newFormat) => {
+    // Auto-switch to General if current mode becomes invalid
+    if (newFormat === "zip" && problem.value.pipeline?.executionMode === "functionOnly") {
+      problem.value.pipeline.executionMode = "general";
+      logger.log("[Auto-Fix] Switched Execution Mode to General because Zip format was selected.");
+    }
+  },
+  { immediate: true },
+);
 </script>
 
 <template>
@@ -1873,18 +1896,27 @@ watch(
               >{{ t("course.problems.executionModeGeneral") }}</span
             >
           </label>
-          <label class="label cursor-pointer gap-2">
-            <input
-              type="radio"
-              class="radio"
-              value="functionOnly"
-              v-model="problem.pipeline!.executionMode as 'general' | 'functionOnly' | 'interactive'"
-            />
-            <span
-              class="label-text tooltip tooltip-right flex cursor-help items-center gap-1"
-              :data-tip="hover.executionModeFuncitonOnly"
-              >{{ t("course.problems.executionModeFuncitonOnly") }}</span
+          <label
+            class="label cursor-pointer gap-2"
+            :class="{ 'cursor-not-allowed opacity-50': isFunctionOnlyDisabled }"
+          >
+            <div
+              class="tooltip tooltip-top flex items-center gap-1"
+              :data-tip="
+                isFunctionOnlyDisabled
+                  ? t('course.problems.functionOnlyDisabledHint')
+                  : hover.executionModeFuncitonOnly
+              "
             >
+              <input
+                type="radio"
+                class="radio"
+                value="functionOnly"
+                v-model="problem.pipeline!.executionMode as 'general' | 'functionOnly' | 'interactive'"
+                :disabled="isFunctionOnlyDisabled"
+              />
+              <span class="label-text">{{ t("course.problems.executionModeFuncitonOnly") }}</span>
+            </div>
           </label>
           <label class="label cursor-pointer gap-2">
             <input

@@ -142,7 +142,7 @@ const emojiTextClass = ref("");
           <input
             type="color"
             v-model="selectedColor"
-            class="absolute -left-2 -top-2 h-16 w-16 cursor-pointer border-0 p-0"
+            class="absolute -top-2 -left-2 h-16 w-16 cursor-pointer border-0 p-0"
           />
         </div>
         <input

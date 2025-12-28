@@ -716,6 +716,9 @@
       "nameField": "Course Name",
       "teacherField": "Teacher",
       "submit": "Submit",
+      "error": {
+        "invalid_name": "Invalid course name."
+      },
       "unknown-error-occurred": "Unknown error occurred :("
     }
   },

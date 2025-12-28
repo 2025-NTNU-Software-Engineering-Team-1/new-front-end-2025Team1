@@ -714,6 +714,9 @@
       "nameField": "課程名稱",
       "teacherField": "課程教師",
       "submit": "送出",
+      "error": {
+        "invalid_name": "課程名稱包含無效字元。"
+      },
       "unknown-error-occurred": "發生未知錯誤 :("
     }
   },

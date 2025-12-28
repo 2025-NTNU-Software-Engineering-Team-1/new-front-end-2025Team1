@@ -57,7 +57,7 @@ const session = useSession();
 
 useTitle(`Submit - ${route.params.id} - ${route.params.name} | Normal OJ`);
 const router = useRouter();
-const { data: problem, error, isLoading } = useAxios<Problem>(`/problem/view/${route.params.id}`, fetcher);
+const { data: problem, error } = useAxios<Problem>(`/problem/view/${route.params.id}`, fetcher);
 
 const acceptedFormat = computed<AcceptedFormat>(() => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -462,7 +462,7 @@ async function submit() {
   </div>
 
   <div
-    class="border-base-300 bg-base-100 fixed bottom-0 left-0 right-0 z-50 w-full border-t p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]"
+    class="border-base-300 bg-base-100 fixed right-0 bottom-0 left-0 z-50 w-full border-t p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]"
   >
     <div class="flex w-full justify-end px-4 md:px-8">
       <button :class="['btn btn-primary min-w-[150px]', form.isLoading && 'loading']" @click="submit">

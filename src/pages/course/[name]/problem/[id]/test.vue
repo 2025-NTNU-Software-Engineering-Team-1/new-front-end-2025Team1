@@ -566,7 +566,7 @@ async function submitCode() {
             <div class="divider" />
             <div class="bg-base-200 relative mt-4 rounded-lg p-4 transition-all duration-300">
               <button
-                class="absolute bottom-3 right-4 z-10 cursor-pointer text-gray-500 hover:text-gray-700"
+                class="absolute right-4 bottom-3 z-10 cursor-pointer text-gray-500 hover:text-gray-700"
                 @click="isExpanded = !isExpanded"
               >
                 <img
@@ -647,9 +647,9 @@ async function submitCode() {
                 <div class="flex flex-col gap-4 md:flex-row md:items-center">
                   <!-- Language Selector -->
                   <div class="form-control w-full md:w-auto">
-                    <label class="label pb-1 pt-0">
+                    <label class="label pt-0 pb-1">
                       <span
-                        class="label-text text-base-content/60 text-xs font-bold uppercase tracking-wider"
+                        class="label-text text-base-content/60 text-xs font-bold tracking-wider uppercase"
                         >{{ t("course.problem.test.lang.text") }}</span
                       >
                     </label>
@@ -675,9 +675,9 @@ async function submitCode() {
 
                   <!-- Test Data Type Selection -->
                   <div class="form-control w-full md:w-auto">
-                    <label class="label pb-1 pt-0">
+                    <label class="label pt-0 pb-1">
                       <span
-                        class="label-text text-base-content/60 text-xs font-bold uppercase tracking-wider"
+                        class="label-text text-base-content/60 text-xs font-bold tracking-wider uppercase"
                         >{{ t("course.problem.test.testcaseType.label") }}</span
                       >
                     </label>
@@ -858,7 +858,7 @@ async function submitCode() {
                           </li>
                         </ul>
                         <div class="prose max-w-none flex-1 overflow-auto rounded border p-2">
-                          <pre class="whitespace-pre-wrap break-words">{{
+                          <pre class="break-words whitespace-pre-wrap">{{
                             publicTestcaseFiles[selectedPreviewFileIndex]?.content ||
                             t("course.problem.test.topic.noContent")
                           }}</pre>
@@ -891,7 +891,7 @@ async function submitCode() {
                           </li>
                         </ul>
                         <div class="prose max-w-none flex-1 overflow-auto rounded border p-2">
-                          <pre class="whitespace-pre-wrap break-words">{{
+                          <pre class="break-words whitespace-pre-wrap">{{
                             customTestcaseFiles[selectedPreviewFileIndex]?.content ||
                             t("course.problem.test.topic.noContent")
                           }}</pre>
@@ -954,7 +954,7 @@ async function submitCode() {
             </template>
 
             <!-- Floating Submit Button -->
-            <div class="fixed bottom-6 right-6 z-50">
+            <div class="fixed right-6 bottom-6 z-50">
               <button
                 class="btn btn-primary shadow-lg transition-transform hover:scale-105"
                 @click="showSubmitModal = true"

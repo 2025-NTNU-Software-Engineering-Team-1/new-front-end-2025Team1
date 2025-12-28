@@ -222,7 +222,7 @@ async function submit() {
 
   logger.group("Submit New Problem");
   formElement.value.isLoading = true;
-  
+
   // 最小延迟1.5秒防止二次点击，但不会让用户等太久
   const minDelayPromise = new Promise((resolve) => setTimeout(resolve, 1500));
 

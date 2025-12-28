@@ -828,16 +828,61 @@ const maxPage = computed(() => {
 .hover-suction {
   transform-origin: center;
   transition:
-    transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-    box-shadow 0.4s ease;
+    transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.4s ease;
   will-change: transform, box-shadow;
 }
 
+@keyframes suction-wave {
+  0% {
+    transform: scale(1) translateY(0) rotateX(0deg);
+  }
+  15% {
+    transform: scale(0.995) translateY(1px) rotateX(0.5deg);
+  }
+  35% {
+    transform: scale(0.988) translateY(3px) rotateX(1.5deg);
+  }
+  55% {
+    transform: scale(0.992) translateY(2px) rotateX(1deg);
+  }
+  75% {
+    transform: scale(0.99) translateY(2.5px) rotateX(1.2deg);
+  }
+  100% {
+    transform: scale(0.991) translateY(2px) rotateX(1deg);
+  }
+}
+
+@keyframes shadow-pulse {
+  0% {
+    box-shadow: inset 0 0 0 rgba(0, 0, 0, 0);
+  }
+  40% {
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.03);
+  }
+  100% {
+    box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+}
+
 .hover-suction:hover {
-  /* Suction effect: Scale down slightly + Rotate X to look like it's tilting in + Translate Z for depth */
-  transform: scale(0.98) perspective(500px) rotateX(2deg) translateY(2px);
-  box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.05);
+  animation:
+    suction-wave 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards,
+    shadow-pulse 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   background-color: var(--base-200, #f2f2f2);
   z-index: 10;
+}
+
+@media (hover: none) {
+  .hover-suction {
+    transition: background-color 0.2s ease;
+  }
+
+  .hover-suction:active {
+    background-color: var(--base-200, #f2f2f2);
+    transform: scale(0.99);
+  }
 }
 </style>

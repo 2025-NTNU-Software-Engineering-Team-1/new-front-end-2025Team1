@@ -948,7 +948,8 @@
           "quota": "Quota",
           "score": "Score",
           "stats": "Stats",
-          "copycat": "Copycat"
+          "copycat": "Copycat",
+          "unknown": "Unknown"
         },
         "description": {
           "text": "Description",

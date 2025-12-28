@@ -68,11 +68,13 @@ function getScore(pid: number): number | string {
           </router-link>
         </td>
         <td>
-          <ui-spinner v-if="!problems[pid.toString()]" />
+          <span v-if="!problems[pid.toString()]">
+            {{ t("components.hw.card.problems.unknown") }} ({{ pid }})
+          </span>
           <span v-else>{{ problems[pid.toString()].name }}</span>
         </td>
         <td>
-          <ui-spinner v-if="!problems[pid.toString()]" />
+          <span v-if="!problems[pid.toString()]">-</span>
           <span v-else-if="isQuotaUnlimited(problems[pid.toString()].quota)" class="text-sm">{{
             $t("components.problem.card.unlimited")
           }}</span>

@@ -129,7 +129,10 @@ onMounted(() => {
           <skeleton-card />
         </div>
 
-        <div v-else-if="upcomingDeadlines.length > 0" class="flex flex-col gap-3">
+        <div
+          v-else-if="upcomingDeadlines.length > 0"
+          class="scrollbar-thin flex max-h-[30rem] flex-col gap-3 overflow-y-auto p-1"
+        >
           <div
             v-for="h in upcomingDeadlines"
             :key="h.id"
@@ -219,7 +222,10 @@ onMounted(() => {
           <div class="skeleton mb-2 h-14 w-full" v-for="i in 3" :key="i"></div>
         </div>
 
-        <div v-else-if="courses.length > 0" class="flex flex-col gap-3">
+        <div
+          v-else-if="courses.length > 0"
+          class="scrollbar-thin flex max-h-[30rem] flex-col gap-3 overflow-y-auto p-1"
+        >
           <div class="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-1 2xl:grid-cols-2">
             <router-link
               v-for="c in courses"

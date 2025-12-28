@@ -945,8 +945,9 @@
           "name": "題名",
           "quota": "額度",
           "score": "得分",
-          "stats": "數據",
-          "copycat": "抄襲"
+          "stats": "統計",
+          "copycat": "Copycat",
+          "unknown": "未知"
         },
         "description": {
           "text": "說明",

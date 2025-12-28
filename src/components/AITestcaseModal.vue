@@ -233,181 +233,188 @@ function useSelected() {
 </script>
 
 <template>
-  <dialog class="modal modal-open z-[9999]">
-    <div class="modal-box max-h-[80vh] max-w-3xl overflow-y-auto">
-      <h3 class="text-lg font-bold">
-        {{ t("aiChatbot.testcaseGenerator.title") }}
-      </h3>
+  <Teleport to="body">
+    <dialog class="modal modal-open z-[9999]">
+      <div class="modal-box max-h-[80vh] max-w-3xl overflow-y-auto">
+        <h3 class="text-lg font-bold">
+          {{ t("aiChatbot.testcaseGenerator.title") }}
+        </h3>
 
-      <!-- Hint Input -->
-      <div class="form-control mt-4">
-        <label class="label">
-          <span class="label-text">{{ t("aiChatbot.testcaseGenerator.hint") }}</span>
-        </label>
-        <input
-          v-model="hint"
-          type="text"
-          class="input input-bordered w-full"
-          :placeholder="t('aiChatbot.testcaseGenerator.hintPlaceholder')"
-          :disabled="isLoading"
-          @keyup.enter="generate"
-        />
-      </div>
-
-      <!-- Generate Button -->
-      <div class="mt-4">
-        <button
-          class="btn btn-primary"
-          :class="{ loading: isLoading }"
-          :disabled="isLoading"
-          @click="generate"
-        >
-          {{
-            isLoading
-              ? t("aiChatbot.testcaseGenerator.generating")
-              : t("aiChatbot.testcaseGenerator.generate")
-          }}
-        </button>
-      </div>
-
-      <!-- Error -->
-      <div v-if="error" class="alert alert-error mt-4">
-        <span>{{ error }}</span>
-      </div>
-
-      <!-- Multiple Testcases -->
-      <div v-if="testcases.length > 0" class="mt-4 space-y-4">
-        <div class="flex items-center justify-between">
-          <span class="font-semibold">{{
-            t("aiChatbot.testcaseGenerator.generated", { count: testcases.length })
-          }}</span>
-          <span class="text-base-content/70 text-sm">{{ t("aiChatbot.testcaseGenerator.selectToUse") }}</span>
+        <!-- Hint Input -->
+        <div class="form-control mt-4">
+          <label class="label">
+            <span class="label-text">{{ t("aiChatbot.testcaseGenerator.hint") }}</span>
+          </label>
+          <input
+            v-model="hint"
+            type="text"
+            class="input input-bordered w-full"
+            :placeholder="t('aiChatbot.testcaseGenerator.hintPlaceholder')"
+            :disabled="isLoading"
+            @keyup.enter="generate"
+          />
         </div>
 
-        <!-- Advanced Mode Info -->
-        <div v-if="isAdvancedMode" class="alert alert-info text-sm">
-          <i-uil-info-circle class="h-5 w-5" />
-          <span>{{ t("aiChatbot.testcaseGenerator.assignInfo") }}</span>
+        <!-- Generate Button -->
+        <div class="mt-4">
+          <button
+            class="btn btn-primary"
+            :class="{ loading: isLoading }"
+            :disabled="isLoading"
+            @click="generate"
+          >
+            {{
+              isLoading
+                ? t("aiChatbot.testcaseGenerator.generating")
+                : t("aiChatbot.testcaseGenerator.generate")
+            }}
+          </button>
         </div>
 
-        <!-- Duplicate Warning -->
-        <div v-if="hasDuplicates && isAdvancedMode" class="alert alert-warning text-sm">
-          <i-uil-exclamation-triangle class="h-5 w-5" />
-          <span>{{ t("aiChatbot.testcaseGenerator.duplicateWarning") }}</span>
+        <!-- Error -->
+        <div v-if="error" class="alert alert-error mt-4">
+          <span>{{ error }}</span>
         </div>
 
-        <!-- Missing 0000 Warning -->
-        <div v-if="missingZeroZero && isAdvancedMode" class="alert alert-warning text-sm">
-          <i-uil-exclamation-triangle class="h-5 w-5" />
-          <span>{{ t("aiChatbot.testcaseGenerator.missingZeroZeroWarning") }}</span>
-        </div>
-
-        <div
-          v-for="(tc, index) in testcases"
-          :key="index"
-          class="collapse-arrow bg-base-200 collapse rounded-lg"
-        >
-          <input type="checkbox" :checked="selectedIndices.has(index)" @change="toggleSelect(index)" />
-          <div class="collapse-title flex items-center gap-2 font-medium">
-            <input
-              type="checkbox"
-              class="checkbox checkbox-sm"
-              :checked="selectedIndices.has(index)"
-              @click.stop="toggleSelect(index)"
-            />
-            <span>{{ t("aiChatbot.testcaseGenerator.testcase") }} #{{ index + 1 }}</span>
-
-            <!-- Show assignment preview in title (teacher mode) -->
-            <span v-if="isAdvancedMode && taskAssignments[index]" class="badge badge-outline badge-sm ml-2">
-              {{ String(taskAssignments[index].task).padStart(2, "0")
-              }}{{ String(taskAssignments[index].case).padStart(2, "0") }}.in
-            </span>
-
-            <span v-if="tc.explanation && !isAdvancedMode" class="text-base-content/60 ml-2 truncate text-sm">
-              - {{ tc.explanation }}
-            </span>
+        <!-- Multiple Testcases -->
+        <div v-if="testcases.length > 0" class="mt-4 space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="font-semibold">{{
+              t("aiChatbot.testcaseGenerator.generated", { count: testcases.length })
+            }}</span>
+            <span class="text-base-content/70 text-sm">{{
+              t("aiChatbot.testcaseGenerator.selectToUse")
+            }}</span>
           </div>
-          <div class="collapse-content space-y-3">
-            <!-- Task/Case Assignment (Teacher Mode) - inside collapse content -->
-            <div
-              v-if="isAdvancedMode && taskAssignments[index]"
-              class="bg-base-300 flex items-center gap-3 rounded-lg p-3"
-            >
-              <span class="text-sm font-medium">{{ t("aiChatbot.testcaseGenerator.assign") }}:</span>
-              <div class="flex items-center gap-2">
-                <span class="text-sm">Task:</span>
-                <input
-                  type="number"
-                  class="input input-bordered input-sm w-20"
-                  :value="taskAssignments[index].task"
-                  min="0"
-                  max="99"
-                  @input="updateTask(index, parseInt(($event.target as HTMLInputElement).value) || 0)"
-                />
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="text-sm">Case:</span>
-                <input
-                  type="number"
-                  class="input input-bordered input-sm w-20"
-                  :value="taskAssignments[index].case"
-                  min="0"
-                  max="99"
-                  @input="updateCase(index, parseInt(($event.target as HTMLInputElement).value) || 0)"
-                />
-              </div>
-              <span class="badge badge-primary">
-                → {{ String(taskAssignments[index].task).padStart(2, "0")
-                }}{{ String(taskAssignments[index].case).padStart(2, "0") }}.in/out
+
+          <!-- Advanced Mode Info -->
+          <div v-if="isAdvancedMode" class="alert alert-info text-sm">
+            <i-uil-info-circle class="h-5 w-5" />
+            <span>{{ t("aiChatbot.testcaseGenerator.assignInfo") }}</span>
+          </div>
+
+          <!-- Duplicate Warning -->
+          <div v-if="hasDuplicates && isAdvancedMode" class="alert alert-warning text-sm">
+            <i-uil-exclamation-triangle class="h-5 w-5" />
+            <span>{{ t("aiChatbot.testcaseGenerator.duplicateWarning") }}</span>
+          </div>
+
+          <!-- Missing 0000 Warning -->
+          <div v-if="missingZeroZero && isAdvancedMode" class="alert alert-warning text-sm">
+            <i-uil-exclamation-triangle class="h-5 w-5" />
+            <span>{{ t("aiChatbot.testcaseGenerator.missingZeroZeroWarning") }}</span>
+          </div>
+
+          <div
+            v-for="(tc, index) in testcases"
+            :key="index"
+            class="collapse-arrow bg-base-200 collapse rounded-lg"
+          >
+            <input type="checkbox" :checked="selectedIndices.has(index)" @change="toggleSelect(index)" />
+            <div class="collapse-title flex items-center gap-2 font-medium">
+              <input
+                type="checkbox"
+                class="checkbox checkbox-sm"
+                :checked="selectedIndices.has(index)"
+                @click.stop="toggleSelect(index)"
+              />
+              <span>{{ t("aiChatbot.testcaseGenerator.testcase") }} #{{ index + 1 }}</span>
+
+              <!-- Show assignment preview in title (teacher mode) -->
+              <span v-if="isAdvancedMode && taskAssignments[index]" class="badge badge-outline badge-sm ml-2">
+                {{ String(taskAssignments[index].task).padStart(2, "0")
+                }}{{ String(taskAssignments[index].case).padStart(2, "0") }}.in
+              </span>
+
+              <span
+                v-if="tc.explanation && !isAdvancedMode"
+                class="text-base-content/60 ml-2 truncate text-sm"
+              >
+                - {{ tc.explanation }}
               </span>
             </div>
-
-            <!-- Explanation (in advanced mode, show inside) -->
-            <div v-if="tc.explanation && isAdvancedMode" class="text-sm italic opacity-70">
-              {{ tc.explanation }}
-            </div>
-            <!-- Input -->
-            <div>
-              <div class="mb-1 text-sm font-semibold">{{ t("aiChatbot.testcaseGenerator.input") }}</div>
-              <pre
-                class="bg-base-300 max-h-40 overflow-auto rounded p-2 text-sm break-words whitespace-pre-wrap"
-                >{{ tc.input }}</pre
+            <div class="collapse-content space-y-3">
+              <!-- Task/Case Assignment (Teacher Mode) - inside collapse content -->
+              <div
+                v-if="isAdvancedMode && taskAssignments[index]"
+                class="bg-base-300 flex items-center gap-3 rounded-lg p-3"
               >
-            </div>
-            <!-- Expected Output -->
-            <div>
-              <div class="mb-1 text-sm font-semibold">
-                {{ t("aiChatbot.testcaseGenerator.expectedOutput") }}
+                <span class="text-sm font-medium">{{ t("aiChatbot.testcaseGenerator.assign") }}:</span>
+                <div class="flex items-center gap-2">
+                  <span class="text-sm">Task:</span>
+                  <input
+                    type="number"
+                    class="input input-bordered input-sm w-20"
+                    :value="taskAssignments[index].task"
+                    min="0"
+                    max="99"
+                    @input="updateTask(index, parseInt(($event.target as HTMLInputElement).value) || 0)"
+                  />
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-sm">Case:</span>
+                  <input
+                    type="number"
+                    class="input input-bordered input-sm w-20"
+                    :value="taskAssignments[index].case"
+                    min="0"
+                    max="99"
+                    @input="updateCase(index, parseInt(($event.target as HTMLInputElement).value) || 0)"
+                  />
+                </div>
+                <span class="badge badge-primary">
+                  → {{ String(taskAssignments[index].task).padStart(2, "0")
+                  }}{{ String(taskAssignments[index].case).padStart(2, "0") }}.in/out
+                </span>
               </div>
-              <pre
-                class="bg-base-300 max-h-40 overflow-auto rounded p-2 text-sm break-words whitespace-pre-wrap"
-                >{{ tc.expected_output }}</pre
-              >
+
+              <!-- Explanation (in advanced mode, show inside) -->
+              <div v-if="tc.explanation && isAdvancedMode" class="text-sm italic opacity-70">
+                {{ tc.explanation }}
+              </div>
+              <!-- Input -->
+              <div>
+                <div class="mb-1 text-sm font-semibold">{{ t("aiChatbot.testcaseGenerator.input") }}</div>
+                <pre
+                  class="bg-base-300 max-h-40 overflow-auto rounded p-2 text-sm break-words whitespace-pre-wrap"
+                  >{{ tc.input }}</pre
+                >
+              </div>
+              <!-- Expected Output -->
+              <div>
+                <div class="mb-1 text-sm font-semibold">
+                  {{ t("aiChatbot.testcaseGenerator.expectedOutput") }}
+                </div>
+                <pre
+                  class="bg-base-300 max-h-40 overflow-auto rounded p-2 text-sm break-words whitespace-pre-wrap"
+                  >{{ tc.expected_output }}</pre
+                >
+              </div>
             </div>
+          </div>
+
+          <!-- Use Selected Button -->
+          <div>
+            <button
+              class="btn btn-secondary"
+              :disabled="selectedIndices.size === 0 || (isAdvancedMode && (hasDuplicates || missingZeroZero))"
+              @click="useSelected"
+            >
+              {{ t("aiChatbot.testcaseGenerator.useSelected", { count: selectedIndices.size }) }}
+            </button>
           </div>
         </div>
 
-        <!-- Use Selected Button -->
-        <div>
-          <button
-            class="btn btn-secondary"
-            :disabled="selectedIndices.size === 0 || (isAdvancedMode && (hasDuplicates || missingZeroZero))"
-            @click="useSelected"
-          >
-            {{ t("aiChatbot.testcaseGenerator.useSelected", { count: selectedIndices.size }) }}
+        <!-- Modal Actions -->
+        <div class="modal-action">
+          <button class="btn" @click="emit('close')">
+            {{ t("common.close") }}
           </button>
         </div>
       </div>
-
-      <!-- Modal Actions -->
-      <div class="modal-action">
-        <button class="btn" @click="emit('close')">
-          {{ t("common.close") }}
-        </button>
-      </div>
-    </div>
-    <form method="dialog" class="modal-backdrop">
-      <button @click="emit('close')">close</button>
-    </form>
-  </dialog>
+      <form method="dialog" class="modal-backdrop">
+        <button @click="emit('close')">close</button>
+      </form>
+    </dialog>
+  </Teleport>
 </template>

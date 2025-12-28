@@ -18,7 +18,6 @@ import RandomCoin from "../Controls/RandomCoin.vue";
 import { assertFileSizeOK } from "@/utils/checkFileSize";
 import { fetcher } from "@/models/api";
 import api from "@/models/api";
-import { isMacOsZip } from "@/utils/zipValidator";
 
 import { useI18n } from "vue-i18n";
 const { t, locale } = useI18n();
@@ -205,17 +204,46 @@ function onTrialLimitInput(e: Event) {
  * macOS creates hidden files like `._filename` and `__MACOSX/` folder when zipping.
  * These files can cause issues with testcase processing.
  */
-async function validateTrialPublicZip(file: File): Promise<boolean> {
-  trialTestdataError.value = null;
-  // [NEW] MacOS Check
-  if (await isMacOsZip(file)) {
-    return false;
+function hasMacOSMetadataFiles(filenames: string[]): string[] {
+  const macosFiles: string[] = [];
+  for (const filename of filenames) {
+    // Check for __MACOSX directory (macOS resource fork folder)
+    if (filename.startsWith("__MACOSX/") || filename === "__MACOSX") {
+      macosFiles.push(filename);
+      continue;
+    }
+    // Check for ._ prefixed files (macOS extended attributes)
+    const basename = filename.split("/").pop() || "";
+    if (basename.startsWith("._")) {
+      macosFiles.push(filename);
+    }
   }
+  return macosFiles;
+}
+
+async function validateTrialPublicZip(file: File): Promise<boolean> {
+  logger.group("Validate Trial Zip");
+  trialTestdataError.value = null;
 
   try {
     const reader = new ZipReader(new BlobReader(file));
     const entries = await reader.getEntries();
-    await reader.close();
+    await reader.close?.();
+
+    const filenames = entries.map((e) => e.filename);
+
+    // [Validation] Block Mac Zip
+    const macosFiles = hasMacOSMetadataFiles(filenames);
+    if (macosFiles.length > 0) {
+      const sampleFiles = macosFiles.slice(0, 3).join(", ");
+      const moreCount = macosFiles.length > 3 ? ` (and ${macosFiles.length - 3} more)` : "";
+      const msg = t("course.problems.macosZipDetected", {
+        files: sampleFiles + moreCount,
+      });
+      logger.error("macOS Metadata Files Detected", macosFiles);
+      trialTestdataError.value = msg;
+      return false;
+    }
 
     // Filter out directories and system files
     const validEntries = entries.filter((e: any) => {
@@ -404,10 +432,6 @@ async function inspectDockerZip(file: File) {
   detectedDockerEnvs.value = [];
   dockerZipError.value = "";
 
-  if (await isMacOsZip(file)) {
-    return false;
-  }
-
   // [Validation] File Size
   if (file.size > MAX_DOCKER_SIZE_BYTES) {
     dockerZipError.value = "File size exceeds limit (1GB)";
@@ -420,7 +444,8 @@ async function inspectDockerZip(file: File) {
     const entries = await reader.getEntries();
     await reader.close();
 
-    /*const hasMacFiles = entries.some(
+    // [Validation] Block Mac Zip
+    const hasMacFiles = entries.some(
       (e) => e.filename.includes("__MACOSX") || e.filename.split("/").pop()?.startsWith("._"),
     );
 
@@ -428,7 +453,7 @@ async function inspectDockerZip(file: File) {
       dockerZipError.value = "MacOS Zip files are not allowed. Please remove __MACOSX and ._ files.";
       logger.error("Mac zip detected");
       return false;
-    }*/
+    }
 
     const dockerfiles = entries.filter((e) => !e.directory && e.filename.endsWith("Dockerfile"));
 

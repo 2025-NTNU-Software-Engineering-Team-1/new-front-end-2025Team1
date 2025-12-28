@@ -27,7 +27,7 @@ const Auth = {
   logout: () => fetcher.get("/auth/session"),
   changePassword: (body: { oldPassword: string; newPassword: string }) =>
     fetcher.post("/auth/change-password", body),
-  batchSignup: (body: { newUsers: string; force: boolean; course: string }) =>
+  batchSignup: (body: { newUsers: string; force: boolean; course: string | null }) =>
     fetcher.post("/auth/batch-signup", body),
   checkEmail: (body: { email: string }) => fetcher.post<CheckEmail>("/auth/check/email", body),
   sendRecoveryEmail: (body: { email: string }) => fetcher.post("/auth/password-recovery", body),

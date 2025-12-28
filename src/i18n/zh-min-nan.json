@@ -589,6 +589,7 @@
       "csvUpload": "上傳 CSV 檔案",
       "csvUploadInfo": "共檔案拖來遮，抑是點擊來揀",
       "manualInput": "手動輸入",
+      "addRow": "新增一列",
       "optionUsername": "使用者名稱",
       "optionDisplayName": "顯示名稱",
       "optionRole": "角色",

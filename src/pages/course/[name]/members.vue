@@ -221,7 +221,7 @@ async function confirmRemoveMember() {
   }
 }
 
-const rolesCanCreateCourse = [UserRole.Admin];
+const rolesCanCreateCourse = [UserRole.Admin, UserRole.Teacher];
 
 const isOpen = ref(false);
 const newMembers = ref<File | null>();
@@ -244,12 +244,16 @@ interface ManualUser {
   role: string;
 }
 
-const roleOptions = [
-  { text: "Admin", value: "0" },
-  { text: "Teacher", value: "1" },
-  { text: "Student", value: "2" },
-  { text: "TA", value: "3" },
-];
+const roleOptions = computed(() => {
+  const options = [
+    { text: "Admin", value: "0" },
+    { text: "Teacher", value: "1" },
+    { text: "Student", value: "2" },
+    { text: "TA", value: "3" },
+  ];
+  if (session.isAdmin) return options;
+  return options.filter((opt) => opt.value !== "0");
+});
 
 const createEmptyUser = (): ManualUser => ({
   username: "",

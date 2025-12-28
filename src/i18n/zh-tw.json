@@ -163,13 +163,13 @@
       "aiKeyLoadingKeys": "正在載入金鑰...",
       "dropToActivate": "放開以啟用",
       "dropToDeactivate": "放開以停用",
-      "trialMode": "試用模式",
-      "trialMaxNumber": "試用模式最大次數",
+      "trialMode": "測試模式",
+      "trialMaxNumber": "測試模式最大次數",
       "trialMaxNumberPlaceholder": "-1 (無限制) 或 1–500",
       "resultVisible": "結果對學生可見",
       "resultDownloadable": "輸出對學生可下載",
-      "allowViewingExecutionOutput": "允許檢視試用執行的輸出 (stdout/stderr)",
-      "allowDownloadingOutputFiles": "允許下載試用執行產生的輸出檔案",
+      "allowViewingExecutionOutput": "允許檢視測試執行的輸出 (stdout/stderr)",
+      "allowDownloadingOutputFiles": "允許下載測試執行產生的輸出檔案 (BIN)",
       "uploadPublicTestData": "上傳公開測資",
       "uploaded": "已上傳",
       "download": "下載",
@@ -256,7 +256,7 @@
       "problemSettings": "題目設定",
       "configureProblemDetails": "設定題目詳細資訊、驗證和資源。",
       "exampleProblemName": "例如：Hello World",
-      "waitingForEdit": "等待編輯並提交",
+      "waitingForEdit": "等待檢查並提交",
       "completeBeforeSubmit": "請在提交前完成表單",
       "detailedErrorLog": "詳細錯誤日誌",
       "fixIssues": "修正 {count} 個問題",
@@ -281,7 +281,7 @@
       "ACFile": "AC 檔案",
       "networkErrors": {
         "global": {
-          "0": "※ 無設定封鎖選項；外部網路存取預設完全開放（黑名單模式）。"
+          "0": "※ 無設定封鎖選項；外部網路存取預設關閉（白名單模式）。"
         }
       },
       "networkAccessWhitelist": "白名單模式",
@@ -1086,7 +1086,7 @@
     "problem": {
       "forms": {
         "nameField": "題目名稱",
-        "hiddenToggle": "隱藏",
+        "hiddenToggle": "是否可見",
         "quotaField": "額度",
         "quotaHint": "若輸入 -1 則為無額度限制",
         "tags": "標籤",

@@ -548,14 +548,10 @@ const networkErrors = computed(() => {
 
   // === UX 提示：空白清單時 ===
   if (model === "Black" && ips.length === 0 && urls.length === 0) {
-    errors.global.push(
-      "※ No blocking options are set; external network access is fully open by default (Blacklist mode).",
-    );
+    errors.global.push(t("course.problems.noBlockingOptionsSet"));
   }
   if (model === "White" && ips.length === 0 && urls.length === 0) {
-    errors.global.push(
-      "※ No allowed items are set; external network access is disabled by default (Whitelist mode).",
-    );
+    errors.global.push(t("course.problems.noAllowedItemsSet"));
   }
 
   // === Sidecar 檢查 ===
@@ -1809,7 +1805,7 @@ onBeforeUnmount(() => {
                   d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                 ></path>
               </svg>
-              <span>{{ t("course.problems.networkErrors.global[0]") }} </span>
+              <span>{{ networkErrors.global[0] }} </span>
             </div>
           </div>
 

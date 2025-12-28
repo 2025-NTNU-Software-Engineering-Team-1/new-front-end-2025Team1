@@ -334,7 +334,8 @@ async function searchExistingUsers(query: string) {
   try {
     const response = await api.Course.searchUsers(route.params.name as string, query);
     // Response interceptor merges response.data, so actual data array is in response.data
-    const users = ((response as { data?: ExistingUser[] }).data || []) as ExistingUser[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const users = ((response as any).data || []) as ExistingUser[];
     // Filter out already selected users (backend already filters course members)
     existingUserSearchResults.value = users.filter(
       (u) => !selectedExistingUsers.value.some((s) => s.username === u.username),
@@ -374,8 +375,8 @@ async function submitExistingUsers() {
     const usernames = selectedExistingUsers.value.map((u) => u.username);
     const response = await api.Course.addMembers(route.params.name as string, usernames);
     // Response interceptor merges response.data, so actual result is in response.data
-    const result = (response as { data?: { added: string[]; already_in: string[]; not_found: string[] } })
-      .data;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = (response as any).data;
 
     if (result?.added && result.added.length > 0) {
       // Success - refresh the page
@@ -752,7 +753,7 @@ async function submit() {
 
     <input v-model="isOpen" type="checkbox" id="my-modal" class="modal-toggle" />
     <div class="modal">
-      <div class="modal-box max-w-2xl">
+      <div class="modal-box flex min-h-[40vh] max-w-2xl flex-col">
         <!-- Modal Title -->
         <h3 class="mb-4 text-lg font-bold">{{ $t("course.members.addExisting.title") }}</h3>
 
@@ -786,7 +787,7 @@ async function submit() {
               <!-- Search Results Dropdown (absolute positioned) -->
               <div
                 v-if="existingUserSearchResults.length > 0"
-                class="border-base-300 bg-base-100 absolute top-full right-0 left-0 z-50 mt-1 max-h-48 overflow-y-auto rounded-lg border shadow-lg"
+                class="border-base-300 bg-base-100 absolute top-full right-0 left-0 z-50 mt-1 max-h-80 overflow-y-auto rounded-lg border shadow-lg"
               >
                 <div
                   v-for="user in existingUserSearchResults"
@@ -841,7 +842,7 @@ async function submit() {
         </div>
 
         <!-- Modal Actions -->
-        <div class="modal-action">
+        <div class="modal-action mt-auto">
           <label for="my-modal" class="btn btn-ghost">{{ $t("course.members.cancel") }}</label>
           <button
             :class="['btn btn-success ml-3', addExistingLoading && 'loading']"
@@ -856,7 +857,7 @@ async function submit() {
 
     <!-- Remove Member Confirm Dialog -->
     <div v-if="showRemoveConfirmDialog" class="modal modal-open">
-      <div class="modal-box">
+      <div class="modal-box flex flex-col">
         <h3 class="text-lg font-bold">{{ $t("course.members.removeConfirmTitle") }}</h3>
         <p class="py-4">
           {{ $t("course.members.confirmRemove", { username: memberToRemove?.username }) }}
@@ -865,7 +866,7 @@ async function submit() {
           <i-uil-exclamation-triangle />
           <span>{{ removeError }}</span>
         </div>
-        <div class="modal-action">
+        <div class="modal-action mt-auto">
           <button class="btn btn-error" @click="confirmRemoveMember" :disabled="removingMember !== null">
             <span v-if="removingMember !== null" class="loading loading-spinner loading-sm"></span>
             {{ $t("course.members.confirmButton") }}

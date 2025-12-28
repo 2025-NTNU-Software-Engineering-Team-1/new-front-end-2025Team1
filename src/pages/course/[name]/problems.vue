@@ -590,6 +590,7 @@ const maxPage = computed(() => {
                         :checked="selectedProblemIds.has(problemId)"
                         :disabled="!canExportProblem(problemId)"
                         @change="toggleSelection(problemId)"
+                        @click.stop
                       />
                     </td>
                     <td>
@@ -838,6 +839,7 @@ const maxPage = computed(() => {
                             :checked="selectedProblemIds.has(problemId)"
                             :disabled="!canExportProblem(problemId)"
                             @change="toggleSelection(problemId)"
+                            @click.stop
                           />
                         </td>
                         <td>

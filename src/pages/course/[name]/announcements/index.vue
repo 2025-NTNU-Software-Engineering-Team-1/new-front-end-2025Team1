@@ -191,13 +191,13 @@ async function confirmDelete() {
   <!-- Delete Confirmation Modal -->
   <dialog class="modal" :class="{ 'modal-open': deleteModalOpen }">
     <div class="modal-box">
-      <h3 class="font-bold text-lg">{{ $t("general.deleteConfirmTitle") }}</h3>
+      <h3 class="text-lg font-bold">{{ $t("general.deleteConfirmTitle") }}</h3>
       <p class="py-4">
         {{ $t("general.deleteConfirmText", { name: itemToDelete?.name }) }}
         <br />
         <span class="text-error">{{ $t("general.deleteDetails") }}</span>
       </p>
-      <p class="text-xs text-gray-500 mt-2">
+      <p class="mt-2 text-xs text-gray-500">
         {{ $t("general.shiftTip") }}
       </p>
       <div class="modal-action">

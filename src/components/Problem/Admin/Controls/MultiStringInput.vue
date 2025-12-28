@@ -6,6 +6,7 @@ const props = defineProps<{
   modelValue: string[];
   placeholder?: string;
   badgeClass?: string;
+  maxLength?: number;
 }>();
 
 // Define emits
@@ -50,6 +51,7 @@ function remove(i: number) {
         :placeholder="placeholder || 'Add item'"
         class="input-bordered input input-sm w-full"
         @keydown.enter.prevent="add"
+        :maxlength="maxLength"
       />
       <button class="btn btn-sm" @click="add">Add</button>
     </div>

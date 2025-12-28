@@ -483,6 +483,89 @@ const FUNCTION_CATEGORIES_MAP: Record<string, string[]> = {
   "C++ I/O": ["cout", "cin", "cerr", "clog", "endl", "flush", "getline", "get", "put", "read", "write"],
 };
 
+const IMPORT_CATEGORIES_MAP: Record<string, string[]> = {
+  "Core / DSA": [
+    "math",
+    "random",
+    "itertools",
+    "functools",
+    "operator",
+    "collections",
+    "heapq",
+    "bisect",
+    "string",
+    "statistics",
+  ],
+  Timing: ["time", "datetime"],
+  "Text / parsing": ["re", "json", "csv"],
+  System: ["os", "sys", "pathlib", "subprocess", "shutil"],
+  Typing: ["typing", "dataclasses"],
+  "Numerical / data": ["numpy", "pandas"],
+  Visualization: ["matplotlib", "matplotlib.pyplot"],
+  "Machine learning": [
+    "sklearn",
+    "sklearn.model_selection",
+    "sklearn.metrics",
+    "sklearn.linear_model",
+    "sklearn.neighbors",
+    "sklearn.tree",
+  ],
+};
+
+const HEADER_CATEGORIES_MAP: Record<string, string[]> = {
+  "C standard headers": [
+    "stdio.h",
+    "stdlib.h",
+    "string.h",
+    "math.h",
+    "time.h",
+    "ctype.h",
+    "assert.h",
+    "errno.h",
+    "float.h",
+    "limits.h",
+    "locale.h",
+    "setjmp.h",
+    "signal.h",
+    "stdarg.h",
+    "stddef.h",
+    "stdint.h",
+    "stdbool.h",
+  ],
+  "POSIX headers": ["sys/types.h", "sys/stat.h", "fcntl.h", "unistd.h", "pthread.h"],
+  "C++ STL headers": [
+    "iostream",
+    "fstream",
+    "sstream",
+    "iomanip",
+    "vector",
+    "string",
+    "array",
+    "list",
+    "forward_list",
+    "deque",
+    "queue",
+    "stack",
+    "set",
+    "map",
+    "unordered_set",
+    "unordered_map",
+    "algorithm",
+    "functional",
+    "iterator",
+    "utility",
+    "memory",
+    "numeric",
+    "cmath",
+    "cstdlib",
+    "cstring",
+    "ctime",
+    "bitset",
+    "tuple",
+    "regex",
+  ],
+};
+
 // ==========================================
 // Section: File Permissions (Read/Write)
 // ==========================================
@@ -542,37 +625,9 @@ const libraryOptions = ref({
 });
 
 // Fetch options from backend
-const pythonPresets = [
-  "math",
-  "random",
-  "itertools",
-  "functools",
-  "operator",
-  "collections",
-  "heapq",
-  "bisect",
-  "string",
-  "statistics",
-  "time",
-  "re",
-  "json",
-  "csv",
-  "numpy",
-  "pandas",
-  "matplotlib.pyplot",
-  "sklearn",
-  "sklearn.model_selection",
-  "sklearn.metrics",
-  "sklearn.linear_model",
-  "sklearn.neighbors",
-  "sklearn.tree",
-  "os",
-  "sys",
-  "pathlib",
-  "subprocess",
-  "typing",
-  "dataclasses",
-];
+// Fetch options from backend
+// Flatten the categorised map to get defaults
+const pythonPresets = Object.values(IMPORT_CATEGORIES_MAP).flat();
 
 async function fetchStaticAnalysisOptions() {
   logger.group("Fetch Static Analysis Options");
@@ -676,34 +731,138 @@ const activeGroupData = computed(() => {
   return functionGroups.value.find((g) => g.name === activeFunctionCategory.value) || { name: "", items: [] };
 });
 
+// ==========================================
+// [NEW] Import Categorization
+// ==========================================
+const activeImportCategory = ref("");
+
+const importGroups = computed(() => {
+  const backendImportsSet = new Set(libraryOptions.value.imports || []);
+  // Use presets if backend is empty/failed, or just show what's available + what we know
+  // Actually, we want to show all categories that have items in the 'available options' list.
+  // The 'libraryOptions.imports' is populated in fetchStaticAnalysisOptions with specific logic.
+
+  const groups: { name: string; items: string[] }[] = [];
+  const categorizedItems = new Set<string>();
+
+  for (const [categoryName, items] of Object.entries(IMPORT_CATEGORIES_MAP)) {
+    // Show category if it has any items that are in the available options (libraryOptions.imports)
+    // If libraryOptions.imports is just the presets, then all presets will show up.
+    const validItems = items.filter((item) => backendImportsSet.has(item));
+
+    if (validItems.length > 0) {
+      groups.push({ name: categoryName, items: validItems });
+      validItems.forEach((i) => categorizedItems.add(i));
+    }
+  }
+
+  // Handle Others
+  const otherItems = (libraryOptions.value.imports || []).filter((item) => !categorizedItems.has(item));
+  if (otherItems.length > 0) {
+    groups.push({ name: "Others / Uncategorized", items: otherItems });
+  }
+
+  return groups;
+});
+
+watch(
+  importGroups,
+  (newGroups) => {
+    if (newGroups.length > 0) {
+      const exists = newGroups.find((g) => g.name === activeImportCategory.value);
+      if (!exists) {
+        activeImportCategory.value = newGroups[0].name;
+      }
+    } else {
+      activeImportCategory.value = "";
+    }
+  },
+  { immediate: true },
+);
+
+const activeImportGroupData = computed(() => {
+  return importGroups.value.find((g) => g.name === activeImportCategory.value) || { name: "", items: [] };
+});
+
+// ==========================================
+// [NEW] Header Categorization
+// ==========================================
+const activeHeaderCategory = ref("");
+
+const headerGroups = computed(() => {
+  const backendHeadersSet = new Set(libraryOptions.value.headers || []);
+  const groups: { name: string; items: string[] }[] = [];
+  const categorizedItems = new Set<string>();
+
+  for (const [categoryName, items] of Object.entries(HEADER_CATEGORIES_MAP)) {
+    const validItems = items.filter((item) => backendHeadersSet.has(item));
+    if (validItems.length > 0) {
+      groups.push({ name: categoryName, items: validItems });
+      validItems.forEach((i) => categorizedItems.add(i));
+    }
+  }
+
+  const otherItems = (libraryOptions.value.headers || []).filter((item) => !categorizedItems.has(item));
+  if (otherItems.length > 0) {
+    groups.push({ name: "Others / Uncategorized", items: otherItems });
+  }
+
+  return groups;
+});
+
+watch(
+  headerGroups,
+  (newGroups) => {
+    if (newGroups.length > 0) {
+      const exists = newGroups.find((g) => g.name === activeHeaderCategory.value);
+      if (!exists) {
+        activeHeaderCategory.value = newGroups[0].name;
+      }
+    } else {
+      activeHeaderCategory.value = "";
+    }
+  },
+  { immediate: true },
+);
+
+const activeHeaderGroupData = computed(() => {
+  return headerGroups.value.find((g) => g.name === activeHeaderCategory.value) || { name: "", items: [] };
+});
+
 /**
  * Select all items within a specific category group.
  */
-function selectCategoryItems(categoryItems: string[], mode: LibMode) {
+/**
+ * Select all items within a specific category group.
+ */
+function selectCategoryItems(categoryItems: string[], mode: LibMode, section: LibSection = "functions") {
   ensurePipeline();
   const restrictions = problem.value.pipeline!.staticAnalysis!.libraryRestrictions![mode]!;
-  const currentArr = restrictions.functions || [];
+  const currentArr = restrictions[section] || [];
   const resultSet = new Set(currentArr);
   categoryItems.forEach((item) => resultSet.add(item));
   const newArr = Array.from(resultSet);
 
   if (newArr.length > MAX_ITEMS_LIMIT) {
-    restrictions.functions = newArr.slice(0, MAX_ITEMS_LIMIT);
+    restrictions[section] = newArr.slice(0, MAX_ITEMS_LIMIT);
     logger.warn("Limit reached", `Category selection truncated.`);
   } else {
-    restrictions.functions = newArr;
+    restrictions[section] = newArr;
   }
 }
 
 /**
  * Clear all items belonging to a specific category group.
  */
-function clearCategoryItems(categoryItems: string[], mode: LibMode) {
+/**
+ * Clear all items belonging to a specific category group.
+ */
+function clearCategoryItems(categoryItems: string[], mode: LibMode, section: LibSection = "functions") {
   ensurePipeline();
   const restrictions = problem.value.pipeline!.staticAnalysis!.libraryRestrictions![mode]!;
-  const currentArr = restrictions.functions || [];
+  const currentArr = restrictions[section] || [];
   const categorySet = new Set(categoryItems);
-  restrictions.functions = currentArr.filter((item) => !categorySet.has(item));
+  restrictions[section] = currentArr.filter((item) => !categorySet.has(item));
 }
 
 // ==========================================
@@ -1090,40 +1249,35 @@ watch(
           </div>
 
           <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
-            <div class="relative min-h-[16rem] rounded border border-gray-500 p-2">
+            <div class="relative flex min-h-[26rem] flex-col rounded border border-gray-500 p-2">
               <div
                 v-if="!allowImports"
-                class="tech-lock-overlay absolute inset-0 z-20 flex flex-col items-center justify-center overflow-hidden rounded"
+                class="bg-base-100/60 absolute inset-0 z-20 flex flex-col items-center justify-center overflow-hidden rounded-lg backdrop-blur-[2px] transition-all duration-500"
               >
+                <!-- Interactive 'Wake up' glow effect behind -->
                 <div
-                  class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"
+                  class="via-base-content/5 absolute inset-0 bg-gradient-to-tr from-transparent to-transparent opacity-50"
                 ></div>
 
-                <div class="relative z-10 flex flex-col items-center p-4 text-center">
-                  <div class="relative mb-3 flex h-14 w-14 items-center justify-center">
-                    <div class="absolute inset-0 animate-ping rounded-full bg-yellow-500/20"></div>
-                    <div
-                      class="relative flex h-full w-full items-center justify-center rounded-full border border-yellow-500/30 bg-gradient-to-br from-gray-800 to-black shadow-[0_0_15px_rgba(234,179,8,0.3)]"
-                    >
-                      <i-uil-lock-alt class="text-2xl text-yellow-400 drop-shadow-md" />
-                    </div>
+                <div class="z-10 flex flex-col items-center gap-3 p-6 text-center">
+                  <div class="relative flex items-center justify-center">
+                    <!-- Soft pulse ring -->
+                    <div class="bg-warning/20 absolute h-12 w-12 animate-pulse rounded-full"></div>
+                    <i-uil-lock class="text-warning/60 text-3xl opacity-80" />
                   </div>
 
-                  <h6 class="mb-1 text-sm font-bold uppercase tracking-[0.2em] text-white drop-shadow-lg">
-                    {{ t("course.problems.systemLocked") }}
-                  </h6>
-                  <div
-                    class="mb-2 h-px w-16 bg-gradient-to-r from-transparent via-yellow-500/50 to-transparent"
-                  ></div>
-
-                  <p class="max-w-[200px] px-2 font-mono text-xs leading-relaxed text-gray-300">
-                    <span class="mr-1 text-yellow-500/80">>></span>
-                    {{ t("course.problems.enablePythonHint") || "Enable Python to unlock." }}
-                  </p>
+                  <div class="space-y-1">
+                    <h3 class="text-base-content text-sm font-medium tracking-wide opacity-80">
+                      {{ t("course.problems.systemLocked") }}
+                    </h3>
+                    <p class="text-base-content font-mono text-xs opacity-50">
+                      {{ t("course.problems.enablePythonHint") || "Enable Python to unlock." }}
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              <div class="mb-2 flex items-center justify-between">
+              <div class="mb-2 flex items-center justify-between" v-if="allowImports">
                 <h5
                   class="tooltip tooltip-right flex cursor-help items-center gap-1 text-sm font-medium"
                   :data-tip="hover.importsRestrictions"
@@ -1135,99 +1289,153 @@ watch(
                     class="btn btn-xs btn-ghost h-5 min-h-0 px-1 text-[10px]"
                     @click="selectAllItems('imports', libraryMode)"
                   >
-                    {{ t("course.problems.all") }}
+                    + All (Global)
                   </button>
                   <button
                     class="btn btn-xs btn-ghost text-error h-5 min-h-0 px-1 text-[10px]"
                     @click="clearAllItems('imports', libraryMode)"
                   >
-                    {{ t("course.problems.clear") }}
+                    {{ t("course.problems.clear") }} (All)
                   </button>
                 </div>
               </div>
 
-              <div v-if="allowImports" class="flex flex-wrap gap-1">
-                <button
-                  v-for="opt in libraryOptions.imports"
-                  :key="`import-${opt}`"
-                  class="btn btn-xs"
-                  :class="
-                    problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.imports.includes(opt)
-                      ? libraryMode === 'whitelist'
-                        ? 'btn-info'
-                        : 'btn-error'
-                      : ''
-                  "
-                  :disabled="
-                    !problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.imports.includes(
-                      opt,
-                    ) &&
-                    problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.imports.length >=
-                      MAX_ITEMS_LIMIT
-                  "
-                  @click="
-                    toggleItem(
-                      problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.imports,
-                      opt,
-                    )
-                  "
-                >
-                  {{ opt }}
-                </button>
-              </div>
-              <div v-if="allowImports" class="mt-2">
-                <MultiStringInput
-                  :model-value="problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.imports"
-                  @update:model-value="(val: string[]) => handleManualUpdate('imports', libraryMode, val)"
-                  :placeholder="
-                    problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.imports.length >=
-                    MAX_ITEMS_LIMIT
-                      ? t('course.problems.limitReached') || 'Limit Reached'
-                      : t('course.problems.placeholderImport')
-                  "
-                  :badge-class="libraryMode === 'whitelist' ? 'badge-info' : 'badge-error'"
-                  :disabled="
-                    problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.imports.length >=
-                    MAX_ITEMS_LIMIT
-                  "
-                />
-              </div>
-            </div>
-
-            <div class="relative min-h-[16rem] rounded border border-gray-500 p-2">
-              <div
-                v-if="!allowHeaders"
-                class="tech-lock-overlay absolute inset-0 z-20 flex flex-col items-center justify-center overflow-hidden rounded"
-              >
-                <div
-                  class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"
-                ></div>
-
-                <div class="relative z-10 flex flex-col items-center p-4 text-center">
-                  <div class="relative mb-3 flex h-14 w-14 items-center justify-center">
-                    <div class="absolute inset-0 animate-ping rounded-full bg-blue-500/20"></div>
-                    <div
-                      class="relative flex h-full w-full items-center justify-center rounded-full border border-blue-500/30 bg-gradient-to-br from-gray-800 to-black shadow-[0_0_15px_rgba(59,130,246,0.3)]"
+              <div v-if="allowImports" class="flex min-h-0 flex-1 flex-col">
+                <div class="mb-2 w-full px-1">
+                  <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 sm:justify-start">
+                    <a
+                      v-for="group in importGroups"
+                      :key="group.name"
+                      class="tab tab-bordered tab-sm whitespace-nowrap px-1 transition-all duration-200"
+                      :class="{
+                        'tab-active border-primary text-primary font-bold':
+                          activeImportCategory === group.name,
+                        'hover:border-base-content/40 border-transparent':
+                          activeImportCategory !== group.name,
+                      }"
+                      @click="activeImportCategory = group.name"
                     >
-                      <i-uil-lock-alt class="text-2xl text-blue-400 drop-shadow-md" />
+                      {{ group.name }}
+                    </a>
+
+                    <span v-if="importGroups.length === 0" class="py-2 text-xs opacity-50">
+                      No categories available.
+                    </span>
+                  </div>
+                </div>
+
+                <div
+                  class="custom-scrollbar border-base-content/10 bg-base-200/30 mb-3 flex-1 overflow-y-auto rounded-lg border p-2"
+                >
+                  <div
+                    v-if="activeImportGroupData.name"
+                    class="border-base-content/10 bg-base-200 sticky top-0 z-10 mb-2 flex items-center justify-between border-b pb-1 opacity-95"
+                  >
+                    <span class="text-xs font-bold opacity-70">{{ activeImportGroupData.name }}</span>
+                    <div class="flex gap-1">
+                      <button
+                        class="btn btn-xs btn-ghost hover:bg-base-300 h-5 min-h-0 px-2 text-[10px]"
+                        @click="selectCategoryItems(activeImportGroupData.items, libraryMode, 'imports')"
+                      >
+                        + All
+                      </button>
+                      <button
+                        class="btn btn-xs btn-ghost text-error hover:bg-base-300 h-5 min-h-0 px-2 text-[10px]"
+                        @click="clearCategoryItems(activeImportGroupData.items, libraryMode, 'imports')"
+                      >
+                        Delete
+                      </button>
                     </div>
                   </div>
 
-                  <h6 class="mb-1 text-sm font-bold uppercase tracking-[0.2em] text-white drop-shadow-lg">
-                    {{ t("course.problems.accessDenied") }}
-                  </h6>
-                  <div
-                    class="mb-2 h-px w-16 bg-gradient-to-r from-transparent via-blue-500/50 to-transparent"
-                  ></div>
+                  <div class="flex flex-wrap content-start gap-1">
+                    <button
+                      v-for="opt in activeImportGroupData.items"
+                      :key="`import-${opt}`"
+                      class="btn btn-xs"
+                      :class="
+                        problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.imports.includes(
+                          opt,
+                        )
+                          ? libraryMode === 'whitelist'
+                            ? 'btn-info'
+                            : 'btn-error'
+                          : ''
+                      "
+                      :disabled="
+                        !problem.pipeline!.staticAnalysis!.libraryRestrictions![
+                          libraryMode
+                        ]!.imports.includes(opt) &&
+                        problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.imports.length >=
+                          MAX_ITEMS_LIMIT
+                      "
+                      @click="
+                        toggleItem(
+                          problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.imports,
+                          opt,
+                        )
+                      "
+                    >
+                      {{ opt }}
+                    </button>
+                  </div>
+                </div>
 
-                  <p class="max-w-[200px] px-2 font-mono text-xs leading-relaxed text-gray-300">
-                    <span class="mr-1 text-blue-500/80">>></span>
-                    {{ t("course.problems.enableCppHint") || "Enable C/C++ to unlock." }}
-                  </p>
+                <div class="mt-auto border-t border-gray-600 pt-2">
+                  <label class="label pb-1 pt-0">
+                    <span class="label-text-alt text-gray-400">Search / Add Custom Imports</span>
+                  </label>
+                  <MultiStringInput
+                    :model-value="
+                      problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.imports
+                    "
+                    @update:model-value="(val: string[]) => handleManualUpdate('imports', libraryMode, val)"
+                    :placeholder="
+                      problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.imports.length >=
+                      MAX_ITEMS_LIMIT
+                        ? t('course.problems.limitReached') || 'Limit Reached'
+                        : t('course.problems.placeholderImport')
+                    "
+                    :badge-class="libraryMode === 'whitelist' ? 'badge-info' : 'badge-error'"
+                    :disabled="
+                      problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.imports.length >=
+                      MAX_ITEMS_LIMIT
+                    "
+                    :max-length="50"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="relative flex min-h-[26rem] flex-col rounded border border-gray-500 p-2">
+              <div
+                v-if="!allowHeaders"
+                class="bg-base-100/60 absolute inset-0 z-20 flex flex-col items-center justify-center overflow-hidden rounded-lg backdrop-blur-[2px] transition-all duration-500"
+              >
+                <!-- Interactive 'Wake up' glow effect behind -->
+                <div
+                  class="via-base-content/5 absolute inset-0 bg-gradient-to-tr from-transparent to-transparent opacity-50"
+                ></div>
+
+                <div class="z-10 flex flex-col items-center gap-3 p-6 text-center">
+                  <div class="relative flex items-center justify-center">
+                    <!-- Soft pulse ring -->
+                    <div class="bg-info/20 absolute h-12 w-12 animate-pulse rounded-full"></div>
+                    <i-uil-lock class="text-info/60 text-3xl opacity-80" />
+                  </div>
+
+                  <div class="space-y-1">
+                    <h3 class="text-base-content text-sm font-medium tracking-wide opacity-80">
+                      {{ t("course.problems.accessDenied") }}
+                    </h3>
+                    <p class="text-base-content font-mono text-xs opacity-50">
+                      {{ t("course.problems.enableCppHint") || "Enable C/C++ to unlock." }}
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              <div class="mb-2 flex items-center justify-between">
+              <div class="mb-2 flex items-center justify-between" v-if="allowHeaders">
                 <h5
                   class="tooltip tooltip-right flex cursor-help items-center gap-1 text-sm font-medium"
                   :data-tip="hover.headersRestrictions"
@@ -1239,62 +1447,121 @@ watch(
                     class="btn btn-xs btn-ghost h-5 min-h-0 px-1 text-[10px]"
                     @click="selectAllItems('headers', libraryMode)"
                   >
-                    {{ t("course.problems.all") }}
+                    + All (Global)
                   </button>
                   <button
                     class="btn btn-xs btn-ghost text-error h-5 min-h-0 px-1 text-[10px]"
                     @click="clearAllItems('headers', libraryMode)"
                   >
-                    {{ t("course.problems.clear") }}
+                    {{ t("course.problems.clear") }} (All)
                   </button>
                 </div>
               </div>
 
-              <div v-if="allowHeaders" class="flex flex-wrap gap-1">
-                <button
-                  v-for="opt in libraryOptions.headers"
-                  :key="`header-${opt}`"
-                  class="btn btn-xs"
-                  :class="
-                    problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.headers.includes(opt)
-                      ? libraryMode === 'whitelist'
-                        ? 'btn-info'
-                        : 'btn-error'
-                      : ''
-                  "
-                  :disabled="
-                    !problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.headers.includes(
-                      opt,
-                    ) &&
-                    problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.headers.length >=
-                      MAX_ITEMS_LIMIT
-                  "
-                  @click="
-                    toggleItem(
-                      problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.headers,
-                      opt,
-                    )
-                  "
+              <div v-if="allowHeaders" class="flex min-h-0 flex-1 flex-col">
+                <div class="mb-2 w-full px-1">
+                  <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 sm:justify-start">
+                    <a
+                      v-for="group in headerGroups"
+                      :key="group.name"
+                      class="tab tab-bordered tab-sm whitespace-nowrap px-1 transition-all duration-200"
+                      :class="{
+                        'tab-active border-primary text-primary font-bold':
+                          activeHeaderCategory === group.name,
+                        'hover:border-base-content/40 border-transparent':
+                          activeHeaderCategory !== group.name,
+                      }"
+                      @click="activeHeaderCategory = group.name"
+                    >
+                      {{ group.name }}
+                    </a>
+
+                    <span v-if="headerGroups.length === 0" class="py-2 text-xs opacity-50">
+                      No categories available.
+                    </span>
+                  </div>
+                </div>
+
+                <div
+                  class="custom-scrollbar border-base-content/10 bg-base-200/30 mb-3 flex-1 overflow-y-auto rounded-lg border p-2"
                 >
-                  {{ opt }}
-                </button>
-              </div>
-              <div v-if="allowHeaders" class="mt-2">
-                <MultiStringInput
-                  :model-value="problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.headers"
-                  @update:model-value="(val: string[]) => handleManualUpdate('headers', libraryMode, val)"
-                  :placeholder="
-                    problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.headers.length >=
-                    MAX_ITEMS_LIMIT
-                      ? t('course.problems.limitReached') || 'Limit Reached'
-                      : t('course.problems.placeholderHeader')
-                  "
-                  :badge-class="libraryMode === 'whitelist' ? 'badge-info' : 'badge-error'"
-                  :disabled="
-                    problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.headers.length >=
-                    MAX_ITEMS_LIMIT
-                  "
-                />
+                  <div
+                    v-if="activeHeaderGroupData.name"
+                    class="border-base-content/10 bg-base-200 sticky top-0 z-10 mb-2 flex items-center justify-between border-b pb-1 opacity-95"
+                  >
+                    <span class="text-xs font-bold opacity-70">{{ activeHeaderGroupData.name }}</span>
+                    <div class="flex gap-1">
+                      <button
+                        class="btn btn-xs btn-ghost hover:bg-base-300 h-5 min-h-0 px-2 text-[10px]"
+                        @click="selectCategoryItems(activeHeaderGroupData.items, libraryMode, 'headers')"
+                      >
+                        + All
+                      </button>
+                      <button
+                        class="btn btn-xs btn-ghost text-error hover:bg-base-300 h-5 min-h-0 px-2 text-[10px]"
+                        @click="clearCategoryItems(activeHeaderGroupData.items, libraryMode, 'headers')"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="flex flex-wrap content-start gap-1">
+                    <button
+                      v-for="opt in activeHeaderGroupData.items"
+                      :key="`header-${opt}`"
+                      class="btn btn-xs"
+                      :class="
+                        problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.headers.includes(
+                          opt,
+                        )
+                          ? libraryMode === 'whitelist'
+                            ? 'btn-info'
+                            : 'btn-error'
+                          : ''
+                      "
+                      :disabled="
+                        !problem.pipeline!.staticAnalysis!.libraryRestrictions![
+                          libraryMode
+                        ]!.headers.includes(opt) &&
+                        problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.headers.length >=
+                          MAX_ITEMS_LIMIT
+                      "
+                      @click="
+                        toggleItem(
+                          problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.headers,
+                          opt,
+                        )
+                      "
+                    >
+                      {{ opt }}
+                    </button>
+                  </div>
+                </div>
+
+                <div class="mt-auto border-t border-gray-600 pt-2">
+                  <label class="label pb-1 pt-0">
+                    <span class="label-text-alt text-gray-400">Search / Add Custom Headers</span>
+                  </label>
+                  <MultiStringInput
+                    :model-value="
+                      problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.headers
+                    "
+                    @update:model-value="(val: string[]) => handleManualUpdate('headers', libraryMode, val)"
+                    :placeholder="
+                      problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.headers.length >=
+                      MAX_ITEMS_LIMIT
+                        ? t('course.problems.limitReached') || 'Limit Reached'
+                        : t('course.problems.placeholderHeader')
+                    "
+                    :badge-class="libraryMode === 'whitelist' ? 'badge-info' : 'badge-error'"
+                    :disabled="
+                      problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.headers.length >=
+                      MAX_ITEMS_LIMIT
+                    "
+                    :max-length="50"
+                  />
+                </div>
               </div>
             </div>
 
@@ -1394,13 +1661,13 @@ watch(
                   <div class="flex gap-1">
                     <button
                       class="btn btn-xs btn-ghost hover:bg-base-300 h-5 min-h-0 px-2 text-[10px]"
-                      @click="selectCategoryItems(activeGroupData.items, libraryMode)"
+                      @click="selectCategoryItems(activeGroupData.items, libraryMode, 'functions')"
                     >
                       + All
                     </button>
                     <button
                       class="btn btn-xs btn-ghost text-error hover:bg-base-300 h-5 min-h-0 px-2 text-[10px]"
-                      @click="clearCategoryItems(activeGroupData.items, libraryMode)"
+                      @click="clearCategoryItems(activeGroupData.items, libraryMode, 'functions')"
                     >
                       Delete
                     </button>
@@ -1460,6 +1727,7 @@ watch(
                     problem.pipeline!.staticAnalysis!.libraryRestrictions![libraryMode]!.functions.length >=
                     MAX_ITEMS_LIMIT
                   "
+                  :max-length="50"
                 />
               </div>
             </div>
@@ -1556,6 +1824,7 @@ watch(
                 problem.pipeline!.staticAnalysis!.libraryRestrictions![syntaxMode]!.syntax.length >=
                 MAX_ITEMS_LIMIT
               "
+              :max-length="50"
             />
           </div>
 

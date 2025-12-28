@@ -376,7 +376,7 @@ async function submit() {
         </div>
 
         <template v-if="acceptedFormat === 'code'">
-          <div class="mt-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-start md:gap-8">
+          <div class="mt-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-start md:gap-8">
             <div class="card-title md:text-lg lg:text-xl">
               {{ t("course.problem.submit.card.placeholder") }}
             </div>
@@ -406,7 +406,7 @@ async function submit() {
         </template>
 
         <template v-else>
-          <div class="mt-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-start md:gap-8">
+          <div class="mt-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-start md:gap-8">
             <div class="card-title md:text-lg lg:text-xl">Upload your solution (.zip)</div>
 
             <div class="form-control w-full md:max-w-xs">
@@ -462,7 +462,7 @@ async function submit() {
   </div>
 
   <div
-    class="border-base-300 bg-base-100 fixed right-0 bottom-0 left-0 z-50 w-full border-t p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]"
+    class="border-base-300 bg-base-100 fixed bottom-0 left-0 right-0 z-50 w-full border-t p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]"
   >
     <div class="flex w-full justify-end px-4 md:px-8">
       <button :class="['btn btn-primary min-w-[150px]', form.isLoading && 'loading']" @click="submit">

@@ -361,11 +361,10 @@ async function submitBatchUsers() {
       });
       return;
     }
-    
+
     // Close modal and refresh list
     isOpen.value = false;
     execute(); // Refresh user list
-    
   } catch (error) {
     if (axios.isAxiosError(error) && error.response?.data?.message) {
       addUserErrorMsg.value = error.response.data.message;
@@ -493,7 +492,7 @@ async function submitBatchUsers() {
         <label class="label">
           <span
             :class="[
-              'label-text-alt text-sm break-words whitespace-normal',
+              'label-text-alt whitespace-normal break-words text-sm',
               v$.password.$error && 'text-error',
             ]"
           >
@@ -632,11 +631,7 @@ async function submitBatchUsers() {
           </div>
 
           <!-- User Rows -->
-          <div
-            v-for="(user, index) in manualUsers"
-            :key="index"
-            class="grid grid-cols-12 items-center gap-2"
-          >
+          <div v-for="(user, index) in manualUsers" :key="index" class="grid grid-cols-12 items-center gap-2">
             <input
               v-model="user.username"
               type="text"
@@ -661,10 +656,7 @@ async function submitBatchUsers() {
               :placeholder="t('skinSelector.upload.optional')"
               class="input input-bordered input-sm col-span-2"
             />
-            <select
-              v-model="user.role"
-              class="select select-bordered select-sm col-span-2"
-            >
+            <select v-model="user.role" class="select select-bordered select-sm col-span-2">
               <option value="0">Admin</option>
               <option value="1">Teacher</option>
               <option value="2">Student</option>
@@ -682,27 +674,30 @@ async function submitBatchUsers() {
           </div>
 
           <!-- Add Row Button -->
-          <button class="btn btn-ghost btn-sm btn-block border-dashed border-2" @click="addManualUser">
+          <button class="btn btn-ghost btn-sm btn-block border-2 border-dashed" @click="addManualUser">
             <i-uil-plus /> {{ t("course.members.addRow") }}
           </button>
         </div>
       </template>
-      
+
       <!-- Modal Actions -->
       <div class="modal-action">
         <label for="add-user-modal" class="btn btn-ghost">
-            {{ $t("admin.user.cancel") }}
+          {{ $t("admin.user.cancel") }}
         </label>
         <button
           class="btn btn-primary"
           :class="{ loading: isProcessingSignup }"
-          :disabled="isProcessingSignup || (inputMode === 'csv' && !newMembers) || (inputMode === 'manual' && !manualUsers.some(u => u.username))"
+          :disabled="
+            isProcessingSignup ||
+            (inputMode === 'csv' && !newMembers) ||
+            (inputMode === 'manual' && !manualUsers.some((u) => u.username))
+          "
           @click="submitBatchUsers"
         >
           {{ $t("admin.user.submit") }}
         </button>
       </div>
-
     </div>
   </div>
 </template>

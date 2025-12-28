@@ -24,6 +24,9 @@ interface NetworkRestriction {
     ip?: string[];
     url?: string[];
   };
+  custom_env?: {
+    env_list?: string[];
+  };
 }
 
 // 2. Define the Library/Static Analysis structure
@@ -306,6 +309,11 @@ const networkItemsCount = computed(() => {
   return count;
 });
 
+const customEnvList = computed(() => {
+  if (!isNetworkEnabled.value || !netRestriction.value?.custom_env?.env_list) return [];
+  return netRestriction.value.custom_env.env_list;
+});
+
 const isReminderDismissed = ref(false);
 const totalRestrictionsCount = computed(() => {
   const libCount = lib.value?.enabled ? libraryItemsCount.value : 0;
@@ -543,7 +551,7 @@ function triggerMascotReaction(type: "angel" | "devil") {
                         marginTop: `${p.y}px`,
                       }"
                     >
-                      {{ p.type === "angel" ? "🤍" : "💢" }}
+                      {{ p.type === "angel" ? "🤍" : "💥" }}
                     </span>
                   </div>
                   <div
@@ -844,6 +852,29 @@ function triggerMascotReaction(type: "angel" | "devil") {
                                   >
                                     {{ arg }}
                                   </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div v-if="customEnvList.length > 0">
+                          <div
+                            class="text-base-content/40 mb-2 pl-1 text-xs font-bold tracking-widest uppercase"
+                          >
+                            Custom Image
+                          </div>
+
+                          <div class="border-base-content/5 bg-base-100/60 rounded-xl border p-4">
+                            <div class="flex flex-col gap-2">
+                              <span class="text-base-content/70 text-sm font-semibold">Image Lists</span>
+                              <div class="flex flex-col gap-1 pl-2">
+                                <div
+                                  v-for="env in customEnvList"
+                                  :key="env"
+                                  class="text-base-content/90 font-mono text-xs"
+                                >
+                                  - {{ env }}
                                 </div>
                               </div>
                             </div>

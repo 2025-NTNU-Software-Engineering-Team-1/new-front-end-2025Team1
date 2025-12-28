@@ -15,7 +15,7 @@ const isDark = useDark({
   valueDark: "dark",
   valueLight: "light",
 });
-const toggleDark = useToggle(isDark);
+// const toggleDark = useToggle(isDark); // Unused
 
 const isMiniSidebarToggled = useStorage(LOCAL_STORAGE_KEY.MINI_SIDEBAR, false);
 

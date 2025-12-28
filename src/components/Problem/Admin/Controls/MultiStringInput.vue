@@ -47,13 +47,7 @@ const displayedBadges = computed(() => {
     .map((value, index) => ({ value, originalIndex: index }));
 });
 
-// 计算隐藏的badge数量
-const hiddenCount = computed(() => {
-  if (!shouldShowCollapse.value || isExpanded.value) {
-    return 0;
-  }
-  return props.modelValue.length - COLLAPSE_THRESHOLD;
-});
+// (Removed unused hiddenCount)
 
 // 切换展开/收合状态
 function toggleExpand() {

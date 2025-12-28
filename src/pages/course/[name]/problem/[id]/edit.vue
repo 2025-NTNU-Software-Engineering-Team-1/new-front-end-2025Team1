@@ -13,6 +13,7 @@ import AdminManualModal from "@/components/Problem/Admin/AdminManualModal.vue";
 import ProblemExportModal from "@/components/Problem/ProblemExportModal.vue";
 import { useI18n } from "vue-i18n";
 import { downloadBlob } from "@/utils/download";
+import { useSession } from "@/stores/session";
 
 // ==========================================
 // [CONFIG] Animation Settings (Ultra-Fast)
@@ -66,6 +67,7 @@ const logger = {
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
+const session = useSession();
 
 useTitle(`Edit Problem - ${route.params.id} - ${route.params.name} | Normal OJ`);
 
@@ -602,7 +604,7 @@ async function handleExport(components: string[]) {
         try {
           message = (await responseData.text()) || message;
         } catch {
-          message = message;
+          // ignore
         }
       }
     } else {

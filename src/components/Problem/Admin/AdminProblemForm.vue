@@ -25,7 +25,7 @@ function loadPersistedMode() {
     } else {
       localStorage.removeItem(STORAGE_KEY);
     }
-  } catch (e) {
+  } catch {
     localStorage.removeItem(STORAGE_KEY);
   }
 }

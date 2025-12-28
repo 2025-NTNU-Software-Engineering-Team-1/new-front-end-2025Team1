@@ -218,7 +218,7 @@ async function handleExport(components: string[]) {
         try {
           message = (await responseData.text()) || message;
         } catch {
-          message = message;
+          // ignore
         }
       }
     } else {

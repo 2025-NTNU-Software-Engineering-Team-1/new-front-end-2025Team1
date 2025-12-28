@@ -150,7 +150,22 @@ const languageTypes = LANGUAGE_OPTIONS.map(({ text, value }) => ({
   text,
   value: value.toString(),
 }));
-const searchUsername = ref("");
+const searchUsername = ref(routeQuery.value.filter.username || "");
+
+// Sync searchUsername when URL filter changes (e.g., cleared by filters)
+watch(
+  () => routeQuery.value.filter.username,
+  (newVal) => {
+    searchUsername.value = newVal || "";
+  },
+);
+
+// Auto-reset filter when search bar is cleared
+watch(searchUsername, (newVal) => {
+  if (newVal === "") {
+    mutateFilter({ username: "" });
+  }
+});
 
 // Clipboard copy logic
 const { copy, copied, isSupported } = useClipboard();

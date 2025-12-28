@@ -32,14 +32,14 @@ const { data: announcements, error, isLoading } = useAxios<AnnouncementList>("/a
             <table class="table w-full">
               <thead>
                 <tr>
-                  <th>{{ $t("components.systemAnn.title") }}</th>
-                  <th>{{ $t("components.systemAnn.createTime") }}</th>
-                  <th v-if="session.isAdmin"></th>
+                  <th class="border-b border-base-content/40">{{ $t("components.systemAnn.title") }}</th>
+                  <th class="border-b border-base-content/40">{{ $t("components.systemAnn.createTime") }}</th>
+                  <th v-if="session.isAdmin" class="border-b border-base-content/40"></th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="{ title, createTime, annId } in announcements" :key="annId" class="hover">
-                  <td>
+                  <td class="border-b border-base-content/40">
                     <router-link
                       :to="`/announcements/${annId}`"
                       class="text-base-content/80 dark:text-base-content/80 visited:text-base-content/80 dark:visited:text-base-content/80 block min-w-0 break-words whitespace-normal hover:underline"
@@ -47,8 +47,8 @@ const { data: announcements, error, isLoading } = useAxios<AnnouncementList>("/a
                       {{ title }}
                     </router-link>
                   </td>
-                  <td>{{ formatTime(createTime) }}</td>
-                  <td v-if="session.isAdmin">
+                  <td class="border-b border-base-content/40">{{ formatTime(createTime) }}</td>
+                  <td v-if="session.isAdmin" class="border-b border-base-content/40">
                     <div class="tooltip" data-tip="Edit">
                       <router-link
                         class="btn btn-ghost btn-sm btn-circle"
@@ -81,7 +81,7 @@ const { data: announcements, error, isLoading } = useAxios<AnnouncementList>("/a
           <div
             v-for="{ title, createTime, annId } in announcements"
             :key="annId"
-            class="card bg-base-100 border-base-200 border shadow-sm"
+            class="card bg-base-100 border-base-content/20 border shadow-sm"
           >
             <div class="card-body p-4">
               <div class="flex items-start justify-between gap-3">

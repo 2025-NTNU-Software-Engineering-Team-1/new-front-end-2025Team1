@@ -19,9 +19,14 @@ useTitle("Home | Normal OJ");
     }"
   >
     <!-- Main Content: Student Dashboard (Logged In) or Login (Logged Out) -->
-    <div class="w-full">
+    <div :class="isDesktop ? 'w-2/3' : 'w-full'">
       <student-dashboard v-if="session.isLogin" />
       <login-section v-else />
+    </div>
+
+    <!-- Sidebar: Announcements -->
+    <div :class="isDesktop ? 'w-1/3' : 'w-full'">
+      <system-announcements />
     </div>
   </div>
 </template>

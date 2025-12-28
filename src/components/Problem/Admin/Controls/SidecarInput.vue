@@ -116,7 +116,7 @@ function parseArgsString(argsStr: string): string[] {
 
 function argsToString(args: string[] | undefined): string {
   if (!args) return "";
-  return args.join(", ");
+  return args.join(",\n");
 }
 
 const getSidecarArgs = (sidecar: Sidecar) => argsToString(sidecar.args);

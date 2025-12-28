@@ -345,7 +345,12 @@ async function confirmDeleteAll() {
     <div class="card min-w-full">
       <div class="card-body">
         <div class="card-title justify-between">
-          {{ $t("course.submissions.text") }}
+          <div class="flex items-center gap-3">
+            <span>{{ $t("course.submissions.text") }}</span>
+            <span class="text-base-content/70 text-sm">
+              {{ $t("course.submissions.rowCount", { n: submissionCount ?? 0 }) }}
+            </span>
+          </div>
 
           <!-- Admin/Teacher/TA actions: rejudge, download, search -->
           <dialog ref="rejudgeAllModal" class="modal">

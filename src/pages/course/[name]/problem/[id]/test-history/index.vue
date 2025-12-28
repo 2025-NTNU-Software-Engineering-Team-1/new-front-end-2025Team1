@@ -43,6 +43,7 @@ const testHistory = ref<TestHistoryItem[]>([]);
 const error = ref<AxiosError | undefined>(undefined);
 const isLoading = ref(false);
 const canRejudge = ref(false);
+const historyCount = computed(() => testHistory.value.length);
 
 // API 4: Load trial submission history when component mounts
 onMounted(async () => {
@@ -278,7 +279,12 @@ async function confirmDeleteAllTrials() {
     <div class="card min-w-full">
       <div class="card-body">
         <div class="flex flex-wrap items-center justify-between gap-4">
-          <div class="card-title">{{ t("course.problem.test.historyModal.title") }}</div>
+          <div class="flex items-center gap-3">
+            <div class="card-title">{{ t("course.problem.test.historyModal.title") }}</div>
+            <span class="text-base-content/70 text-sm">
+              {{ t("course.problem.test.trialHistory.rowCount", { n: historyCount }) }}
+            </span>
+          </div>
           <div class="flex gap-2">
             <!-- Rejudge All Button (only shown if user has permission) -->
             <button

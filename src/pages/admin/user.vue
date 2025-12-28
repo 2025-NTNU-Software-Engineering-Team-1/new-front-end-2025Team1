@@ -18,9 +18,30 @@ interface User {
   role: number;
 }
 
+type CourseRole = "teacher" | "ta" | "student";
+
+interface CourseMemberInfo {
+  username: string;
+  displayedName?: string;
+}
+
+interface CourseDetail {
+  teacher?: CourseMemberInfo;
+  TAs?: CourseMemberInfo[];
+  students?: CourseMemberInfo[];
+}
+
+interface CourseMembership {
+  course: string;
+  role: CourseRole;
+}
+
 const users = ref<User[] | undefined>([]);
 const fetchError = ref<unknown>(null);
 const fetchLoading = ref<boolean>(false);
+const courseMemberships = ref<Record<string, CourseMembership[]>>({});
+const courseMembershipLoading = ref(false);
+const courseMembershipError = ref("");
 async function execute() {
   fetchLoading.value = true;
   try {
@@ -38,6 +59,7 @@ async function execute() {
       // simpler to trust .data or the object itself if interceptor worked
       users.value = res as unknown as User[];
     }
+    void loadCourseMemberships();
   } catch (e) {
     fetchError.value = e;
   } finally {
@@ -74,6 +96,90 @@ const rules = {
   password: { minLength: minLength(1) },
 };
 const v$ = useVuelidate(rules, userForm);
+const courseRolePriority = {
+  teacher: 3,
+  ta: 2,
+  student: 1,
+} as const;
+function courseRoleLabel(role: CourseRole) {
+  if (role === "teacher") return t("admin.user.teacher");
+  if (role === "ta") return t("admin.user.ta");
+  return t("admin.user.student");
+}
+function courseRoleBadgeClass(role: CourseRole) {
+  if (role === "teacher") return "badge-primary";
+  if (role === "ta") return "badge-warning";
+  return "badge-success";
+}
+function getCourseMemberships(username: string) {
+  return courseMemberships.value[username] ?? [];
+}
+async function loadCourseMemberships() {
+  if (courseMembershipLoading.value) return;
+  courseMembershipLoading.value = true;
+  courseMembershipError.value = "";
+  try {
+    const res = await api.Course.list();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const payload = (res as any)?.data ?? res;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = (payload as any)?.data ?? payload;
+    const courseEntries = Array.isArray(data) ? data : [];
+    const courseNames = Array.from(
+      new Set(
+        courseEntries
+          .map((entry) => (typeof entry === "string" ? entry : entry?.course))
+          .filter((course): course is string => typeof course === "string" && course.length > 0),
+      ),
+    );
+
+    const courseDetails = await Promise.all(
+      courseNames.map(async (courseName) => {
+        try {
+          const detailRes = await api.Course.get(courseName);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const detailPayload = (detailRes as any)?.data ?? detailRes;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const detail = (detailPayload as any)?.data ?? detailPayload;
+          return { course: courseName, detail: detail as CourseDetail };
+        } catch {
+          return null;
+        }
+      }),
+    );
+
+    const membershipMap: Record<string, Record<string, CourseRole>> = {};
+    const addMembership = (username: string | undefined, course: string, role: CourseRole) => {
+      if (!username) return;
+      if (!membershipMap[username]) membershipMap[username] = {};
+      const existing = membershipMap[username][course];
+      if (!existing || courseRolePriority[role] > courseRolePriority[existing]) {
+        membershipMap[username][course] = role;
+      }
+    };
+
+    for (const entry of courseDetails) {
+      if (!entry?.detail) continue;
+      const detail = entry.detail;
+      addMembership(detail.teacher?.username, entry.course, "teacher");
+      detail.TAs?.forEach((ta) => addMembership(ta?.username, entry.course, "ta"));
+      detail.students?.forEach((student) => addMembership(student?.username, entry.course, "student"));
+    }
+
+    const normalized: Record<string, CourseMembership[]> = {};
+    for (const [username, roles] of Object.entries(membershipMap)) {
+      normalized[username] = Object.entries(roles)
+        .map(([course, role]) => ({ course, role }))
+        .sort((a, b) => a.course.localeCompare(b.course));
+    }
+    courseMemberships.value = normalized;
+  } catch (err) {
+    courseMembershipError.value = t("admin.user.course-load-error");
+    courseMemberships.value = {};
+  } finally {
+    courseMembershipLoading.value = false;
+  }
+}
 function editUser(username: string) {
   const originalData = users.value?.find((d) => d.username === username);
   if (!originalData) return;
@@ -393,6 +499,12 @@ async function submitBatchUsers() {
       <option :value="2">{{ t("admin.user.student") }}</option>
       <option :value="3">{{ t("admin.user.ta") }}</option>
     </select>
+    <div class="flex flex-wrap items-center gap-2 text-sm">
+      <span class="text-base-content/70">{{ t("admin.user.role") }}</span>
+      <span class="badge badge-sm badge-primary">{{ courseRoleLabel("teacher") }}</span>
+      <span class="badge badge-sm badge-warning">{{ courseRoleLabel("ta") }}</span>
+      <span class="badge badge-sm badge-success">{{ courseRoleLabel("student") }}</span>
+    </div>
 
     <span>{{ t("admin.user.row-count", { n: filteredUsers?.length }) }}</span>
 
@@ -404,7 +516,7 @@ async function submitBatchUsers() {
 
   <data-status-wrapper :error="fetchError as AxiosError" :is-loading="fetchLoading">
     <template #loading>
-      <skeleton-table :col="3" :row="5" />
+      <skeleton-table :col="5" :row="5" />
     </template>
     <template #data>
       <table class="table-compact table w-full">
@@ -413,6 +525,7 @@ async function submitBatchUsers() {
             <th>{{ t("admin.user.username") }}</th>
             <th>{{ t("admin.user.display-name") }}</th>
             <th>{{ t("admin.user.role") }}</th>
+            <th>{{ t("admin.user.courses") }}</th>
             <th></th>
           </tr>
         </thead>
@@ -421,6 +534,28 @@ async function submitBatchUsers() {
             <td>{{ username }}</td>
             <td>{{ displayedName }}</td>
             <td>{{ ROLE[role] }}</td>
+            <td>
+              <div class="flex flex-wrap items-center gap-1">
+                <template v-if="courseMembershipLoading">
+                  <span class="loading loading-spinner loading-xs text-primary"></span>
+                </template>
+                <template v-else-if="courseMembershipError">
+                  <span class="text-error text-xs">{{ courseMembershipError }}</span>
+                </template>
+                <template v-else>
+                  <template v-if="getCourseMemberships(username).length">
+                    <span
+                      v-for="membership in getCourseMemberships(username)"
+                      :key="`${username}-${membership.course}`"
+                      :class="['badge badge-sm', courseRoleBadgeClass(membership.role)]"
+                    >
+                      {{ membership.course }}
+                    </span>
+                  </template>
+                  <span v-else class="text-base-content/60 text-xs">{{ t("admin.user.no-course") }}</span>
+                </template>
+              </div>
+            </td>
             <td>
               <div class="btn btn-ghost btn-sm btn-circle" @click="editUser(username)">
                 <i-uil-pen />

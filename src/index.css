@@ -112,7 +112,32 @@
   background-color: var(--color-base-300) !important;
 }
 
-/* Custom Sidebar Active Color */
+/* Custom Sidebar Active + Hover Highlight */
+.sidebar-link,
+.sidebar-active {
+  position: relative;
+  isolation: isolate;
+}
+
+.sidebar-link::before,
+.sidebar-active::before {
+  content: "";
+  position: absolute;
+  inset: -6px 0;
+  background-color: #26568c;
+  border-radius: inherit;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: -1;
+}
+
+.sidebar-link:hover::before,
+.sidebar-link:focus-visible::before,
+.sidebar-active::before {
+  opacity: 1;
+}
+
 .sidebar-active {
   background-color: #26568c !important;
   color: white !important;

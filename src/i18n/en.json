@@ -318,6 +318,7 @@
         "trialHistory": {
           "delete": "Delete",
           "close": "Close",
+          "rowCount": "{n} record(s)",
           "backToList": "Back to List",
           "backToProblem": "Back to Problem",
           "rejudge": "Rejudge",
@@ -1340,6 +1341,9 @@
       "submit": "Submit",
       "password": "Password",
       "role": "Role",
+      "courses": "Courses",
+      "no-course": "No courses",
+      "course-load-error": "Failed to load courses",
       "display-name": "Display Name",
       "username": "Username",
       "editing": "Editing: {user}",
@@ -1348,7 +1352,7 @@
       "admin": "Admin",
       "ta": "TA",
       "select-role": "Select Role",
-      "row-count": "Row Count: {n}",
+      "row-count": "User Count: {n}",
       "search-name": "Search Name"
     },
     "unknown-error-occurred": "An unknown error occurred :(",

@@ -187,7 +187,7 @@ function useSelected() {
             <div>
               <div class="mb-1 text-sm font-semibold">{{ t("aiChatbot.testcaseGenerator.input") }}</div>
               <pre
-                class="bg-base-300 max-h-40 overflow-auto whitespace-pre-wrap break-words rounded p-2 text-sm"
+                class="bg-base-300 max-h-40 overflow-auto rounded p-2 text-sm break-words whitespace-pre-wrap"
                 >{{ tc.input }}</pre
               >
             </div>
@@ -197,7 +197,7 @@ function useSelected() {
                 {{ t("aiChatbot.testcaseGenerator.expectedOutput") }}
               </div>
               <pre
-                class="bg-base-300 max-h-40 overflow-auto whitespace-pre-wrap break-words rounded p-2 text-sm"
+                class="bg-base-300 max-h-40 overflow-auto rounded p-2 text-sm break-words whitespace-pre-wrap"
                 >{{ tc.expected_output }}</pre
               >
             </div>

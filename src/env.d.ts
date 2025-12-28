@@ -10,6 +10,8 @@ declare module "*.vue" {
   export default component;
 }
 
+declare module "splitpanes";
+
 declare namespace Live2DCubismCore {
   // 這兩個是來自官方 Core 的物件，型別先維持 any，
   // 但用 eslint 註解關掉 no-explicit-any 規則，避免 lint � �錯。

@@ -1169,7 +1169,7 @@ onBeforeUnmount(() => {
           @input="problem.config!.maxStudentZipSizeMB = Number(($event.target as HTMLInputElement).value)"
           @blur="validateZipSize"
         />
-        <span class="whitespace-nowrap text-xs opacity-70">{{ t("course.problems.maxZipSizeDefault") }}</span>
+        <span class="text-xs whitespace-nowrap opacity-70">{{ t("course.problems.maxZipSizeDefault") }}</span>
       </div>
     </div>
 
@@ -1268,7 +1268,7 @@ onBeforeUnmount(() => {
                   <transition name="fade">
                     <div
                       v-if="showSuggestionTooltip"
-                      class="key-suggestion-tooltip bg-base-100 absolute left-6 top-full z-50 mt-2 w-72 rounded-md border border-gray-400 p-3 shadow-xl"
+                      class="key-suggestion-tooltip bg-base-100 absolute top-full left-6 z-50 mt-2 w-72 rounded-md border border-gray-400 p-3 shadow-xl"
                     >
                       <div v-if="isFetchingSuggestion" class="flex items-center text-sm">
                         <ui-spinner class="mr-2" /> {{ t("course.problems.aiKeyFetchingSuggestion") }}

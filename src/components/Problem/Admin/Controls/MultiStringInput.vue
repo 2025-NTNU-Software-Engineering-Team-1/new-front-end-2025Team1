@@ -60,7 +60,7 @@ function remove(i: number) {
       <div
         v-for="(s, i) in modelValue"
         :key="s"
-        class="badge h-auto min-h-0 gap-1 whitespace-normal break-all text-left"
+        class="badge h-auto min-h-0 gap-1 text-left break-all whitespace-normal"
         :class="[badgeClass || 'badge-info', badgeStyle]"
       >
         <span>{{ s }}</span>

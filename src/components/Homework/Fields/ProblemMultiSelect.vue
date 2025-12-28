@@ -58,7 +58,7 @@ function handleUpdate(value: number[]) {
         >
           <div
             v-if="filteredProblems.length === 0 && query !== ''"
-            class="relative cursor-default select-none px-4 py-2 text-gray-700"
+            class="relative cursor-default px-4 py-2 text-gray-700 select-none"
           >
             Nothing found.
           </div>
@@ -70,7 +70,7 @@ function handleUpdate(value: number[]) {
             :value="Number(problem.value)"
             as="template"
           >
-            <li :class="[active && 'bg-base-300', 'relative cursor-default select-none py-2 pl-10 pr-4']">
+            <li :class="[active && 'bg-base-300', 'relative cursor-default py-2 pr-4 pl-10 select-none']">
               <span :class="[selected ? 'font-medium' : 'font-normal', 'block truncate']">
                 {{ problem.text }}
               </span>

@@ -1284,7 +1284,7 @@ watch(submission, (val) => {
 
             <div
               ref="artifactContainer"
-              class="scrollbar-hide mt-2 flex cursor-grab select-none gap-4 overflow-x-auto pb-4"
+              class="scrollbar-hide mt-2 flex cursor-grab gap-4 overflow-x-auto pb-4 select-none"
               @mousedown="startDrag"
               @mouseleave="stopDrag"
               @mouseup="stopDrag"
@@ -1293,7 +1293,7 @@ watch(submission, (val) => {
               <div
                 v-for="(file, fileName) in caseOutputData.files"
                 :key="fileName"
-                class="border-base-300 bg-base-100 flex h-[500px] min-w-[350px] max-w-[600px] flex-shrink-0 flex-col overflow-hidden rounded-lg border p-4"
+                class="border-base-300 bg-base-100 flex h-[500px] max-w-[600px] min-w-[350px] flex-shrink-0 flex-col overflow-hidden rounded-lg border p-4"
               >
                 <!-- File Header -->
                 <div class="mb-3 flex flex-shrink-0 items-center gap-2">

@@ -205,7 +205,19 @@ async function validateTrialPublicZip(file: File): Promise<boolean> {
     const entries = await reader.getEntries();
     await reader.close?.();
 
-    // Filter out directories and system files (e.g. __MACOSX)
+    // [Validation] Block Mac Zip
+    const hasMacFiles = entries.some(
+      (e: any) => e.filename.includes("__MACOSX") || e.filename.split("/").pop()?.startsWith("._"),
+    );
+
+    if (hasMacFiles) {
+      const msg = "MacOS Zip files are not allowed. Please remove __MACOSX and ._ files before uploading.";
+      logger.error(msg);
+      alert(msg);
+      return false;
+    }
+
+    // Filter out directories and system files
     const validEntries = entries.filter((e: any) => {
       if (e.directory) return false;
       if (e.filename.endsWith("/")) return false;
@@ -403,6 +415,17 @@ async function inspectDockerZip(file: File) {
     const reader = new ZipReader(new BlobReader(file));
     const entries = await reader.getEntries();
     await reader.close();
+
+    // [Validation] Block Mac Zip
+    const hasMacFiles = entries.some(
+      (e) => e.filename.includes("__MACOSX") || e.filename.split("/").pop()?.startsWith("._"),
+    );
+
+    if (hasMacFiles) {
+      dockerZipError.value = "MacOS Zip files are not allowed. Please remove __MACOSX and ._ files.";
+      logger.error("Mac zip detected");
+      return false;
+    }
 
     const dockerfiles = entries.filter((e) => !e.directory && e.filename.endsWith("Dockerfile"));
 

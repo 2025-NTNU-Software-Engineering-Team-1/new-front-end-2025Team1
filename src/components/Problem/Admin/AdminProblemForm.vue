@@ -615,9 +615,14 @@ async function submit() {
 
   logger.groupEnd();
 
-  setTimeout(() => {
-    isLoading.value = false;
-  }, 10000);
+  // 验证失败时，延迟1.5秒后重置，防止二次点击但不会让用户等太久
+  // 验证成功时，由父组件控制 isLoading（成功会跳转，失败会在 finally 中重置）
+  if (!ok) {
+    setTimeout(() => {
+      isLoading.value = false;
+    }, 1500);
+  }
+  // 验证成功时不在这里重置，由父组件的 finally 块控制
 }
 
 onMounted(async () => {

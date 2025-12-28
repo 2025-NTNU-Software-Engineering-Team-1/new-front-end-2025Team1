@@ -383,7 +383,8 @@ async function submit() {
 
   logger.group("Submit Edit Problem");
   formElement.value.isLoading = true;
-  const delayPromise = new Promise((resolve) => setTimeout(resolve, 4000));
+  // 最小延迟1.5秒防止二次点击，但不会让用户等太久
+  const delayPromise = new Promise((resolve) => setTimeout(resolve, 1500));
 
   try {
     const pid = Number(route.params.id);

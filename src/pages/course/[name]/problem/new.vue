@@ -222,6 +222,9 @@ async function submit() {
 
   logger.group("Submit New Problem");
   formElement.value.isLoading = true;
+  
+  // 最小延迟1.5秒防止二次点击，但不会让用户等太久
+  const minDelayPromise = new Promise((resolve) => setTimeout(resolve, 1500));
 
   try {
     // Step 1: Create Problem Metadata
@@ -309,6 +312,9 @@ async function submit() {
     await api.Problem.uploadAssetsV2(problemId, fd);
     logger.success("All assets uploaded successfully");
 
+    // 等待最小延迟，防止二次点击
+    await minDelayPromise;
+
     router.push(`/course/${route.params.name}/problem/${problemId}`);
   } catch (error) {
     logger.error("Submission Failed", error);
@@ -318,6 +324,8 @@ async function submit() {
           ? (error.response.data.message as string)
           : "Unknown error occurred :(";
     }
+    // 失败时也等待最小延迟，防止二次点击
+    await minDelayPromise;
     throw error;
   } finally {
     if (formElement.value) formElement.value.isLoading = false;

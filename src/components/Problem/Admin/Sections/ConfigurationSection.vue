@@ -754,34 +754,25 @@ async function fetchKeys() {
 // Section: Key Search
 // ==========================================
 const searchQuery = ref("");
-const activeKeyRefs = ref<Record<string, HTMLElement | null>>({});
-const inactiveKeyRefs = ref<Record<string, HTMLElement | null>>({});
 
-function scrollToKey() {
+// [Optimized] Real-time filtering
+const filteredActiveKeys = computed(() => {
   const query = searchQuery.value.trim().toLowerCase();
-  if (!query) return;
+  if (!query) return apiKeys.active;
+  return apiKeys.active.filter(
+    (k: any) =>
+      k.key_name.toLowerCase().includes(query) || (k.created_by || "").toLowerCase().includes(query),
+  );
+});
 
-  const matchActive = apiKeys.active.find((k: any) => k.key_name.toLowerCase().includes(query)) as any;
-  const matchInactive = apiKeys.inactive.find((k: any) => k.key_name.toLowerCase().includes(query)) as any;
-
-  if (matchActive) {
-    showActiveKeys.value = true;
-    requestAnimationFrame(() => {
-      activeKeyRefs.value[matchActive.id]?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    });
-  } else if (matchInactive) {
-    showInactiveKeys.value = true;
-    requestAnimationFrame(() => {
-      inactiveKeyRefs.value[matchInactive.id]?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    });
-  }
-}
+const filteredInactiveKeys = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase();
+  if (!query) return apiKeys.inactive;
+  return apiKeys.inactive.filter(
+    (k: any) =>
+      k.key_name.toLowerCase().includes(query) || (k.created_by || "").toLowerCase().includes(query),
+  );
+});
 
 // ==========================================
 // Section: Selected Keys Management
@@ -1369,10 +1360,8 @@ onBeforeUnmount(() => {
                 v-model="searchQuery"
                 type="text"
                 class="input-bordered input input-sm flex-1"
-                placeholder="Search by Key Name"
-                @keyup.enter="scrollToKey"
+                placeholder="Search by Key Name or Creator"
               />
-              <button class="btn btn-sm" @click="scrollToKey">{{ t("course.problems.aiKeySearch") }}</button>
             </div>
 
             <div v-if="isFetchingKeys" class="flex items-center gap-2 py-4 text-sm opacity-70">
@@ -1418,10 +1407,9 @@ onBeforeUnmount(() => {
                 </button>
 
                 <div v-show="showActiveKeys" class="h-64 overflow-y-auto p-3">
-                  <template v-for="key in apiKeys.active as any[]" :key="(key as any).id">
+                  <template v-for="key in filteredActiveKeys as any[]" :key="(key as any).id">
                     <label
                       v-if="!selectedKeys.includes(key.id)"
-                      :ref="(el) => (activeKeyRefs[(key as any).id] = el as HTMLElement)"
                       class="hover:border-info/30 hover:bg-base-200 flex cursor-move items-start gap-3 rounded-lg border border-transparent p-3 transition"
                       draggable="true"
                       @dragstart="onDragStart($event, key.id, true)"
@@ -1499,10 +1487,9 @@ onBeforeUnmount(() => {
                 </button>
 
                 <div v-show="showInactiveKeys" class="h-64 overflow-y-auto p-3">
-                  <template v-for="key in apiKeys.inactive as any[]" :key="(key as any).id">
+                  <template v-for="key in filteredInactiveKeys as any[]" :key="(key as any).id">
                     <label
                       v-if="!selectedKeys.includes(key.id)"
-                      :ref="(el) => (inactiveKeyRefs[(key as any).id] = el as HTMLElement)"
                       class="hover:border-error/30 hover:bg-base-200 flex cursor-move items-start gap-3 rounded-lg border border-transparent p-3 transition"
                       draggable="true"
                       @dragstart="onDragStart($event, key.id, false)"

@@ -1610,7 +1610,6 @@ watch(
                     @click="clearAllItems('functions', libraryMode)"
                   >
                     {{ t("course.problems.clearAll") }}
-                    />
                   </button>
                 </div>
               </div>

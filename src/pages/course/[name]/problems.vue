@@ -603,9 +603,9 @@ const maxPage = computed(() => {
               <div v-for="group in groupedProblems" :key="group.groupName" class="w-full">
                 <!-- Group Header -->
                 <div class="mb-2 flex items-center gap-2 px-2">
+                  <span class="badge badge-sm badge-ghost">{{ group.problems.length }}</span>
                   <i-uil-tag-alt class="text-primary h-5 w-5" />
                   <h3 class="text-lg font-bold">{{ group.groupName }}</h3>
-                  <span class="badge badge-sm badge-ghost">{{ group.problems.length }}</span>
                 </div>
 
                 <!-- Group Table -->

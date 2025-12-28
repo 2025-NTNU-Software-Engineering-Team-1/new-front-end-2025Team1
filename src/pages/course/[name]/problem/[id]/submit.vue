@@ -368,7 +368,7 @@ async function submit() {
 </script>
 
 <template>
-  <div class="card-container">
+  <div class="card-container pb-28">
     <div class="card min-w-full">
       <div class="card-body">
         <div class="card-title md:text-2xl lg:text-3xl">
@@ -376,8 +376,26 @@ async function submit() {
         </div>
 
         <template v-if="acceptedFormat === 'code'">
-          <div class="card-title mt-10 md:text-lg lg:text-xl">
-            {{ t("course.problem.submit.card.placeholder") }}
+          <div class="mt-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-start md:gap-8">
+            <div class="card-title md:text-lg lg:text-xl">
+              {{ t("course.problem.submit.card.placeholder") }}
+            </div>
+
+            <div class="form-control w-full md:max-w-xs">
+              <label class="label">
+                <span class="label-text">Select Language</span>
+              </label>
+              <select
+                v-model="(v$ as any).lang.$model"
+                :class="['select-bordered select', (v$ as any).lang.$error && 'input-error']"
+              >
+                <option disabled :value="-1">{{ t("course.problem.submit.lang.select") }}</option>
+                <option v-for="{ text, value } in langOptions" :key="value" :value="value">{{ text }}</option>
+              </select>
+              <label class="label" v-show="(v$ as any).lang.$error">
+                <span class="label-text-alt text-error" v-text="(v$ as any).lang.$errors[0]?.$message" />
+              </label>
+            </div>
           </div>
           <code-editor v-model="form.code" class="mt-4" />
           <span
@@ -388,7 +406,25 @@ async function submit() {
         </template>
 
         <template v-else>
-          <div class="card-title mt-10 md:text-lg lg:text-xl">Upload your solution (.zip)</div>
+          <div class="mt-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-start md:gap-8">
+            <div class="card-title md:text-lg lg:text-xl">Upload your solution (.zip)</div>
+
+            <div class="form-control w-full md:max-w-xs">
+              <label class="label">
+                <span class="label-text">Select Language</span>
+              </label>
+              <select
+                v-model="(v$ as any).lang.$model"
+                :class="['select-bordered select', (v$ as any).lang.$error && 'input-error']"
+              >
+                <option disabled :value="-1">{{ t("course.problem.submit.lang.select") }}</option>
+                <option v-for="{ text, value } in langOptions" :key="value" :value="value">{{ text }}</option>
+              </select>
+              <label class="label" v-show="(v$ as any).lang.$error">
+                <span class="label-text-alt text-error" v-text="(v$ as any).lang.$errors[0]?.$message" />
+              </label>
+            </div>
+          </div>
           <div class="mt-4">
             <input
               type="file"
@@ -421,30 +457,17 @@ async function submit() {
             <span>{{ form.errorMessage }}</span>
           </div>
         </div>
-
-        <div class="mt-10 flex items-center justify-between">
-          <div class="form-control w-full max-w-xs">
-            <label class="label">
-              <span class="label-text">{{ t("course.problem.submit.lang.text") }}</span>
-              <ui-spinner v-if="isLoading" class="h-6 w-6" />
-            </label>
-            <select
-              v-model="(v$ as any).lang.$model"
-              :class="['select-bordered select', (v$ as any).lang.$error && 'input-error']"
-            >
-              <option disabled :value="-1">{{ t("course.problem.submit.lang.select") }}</option>
-              <option v-for="{ text, value } in langOptions" :key="value" :value="value">{{ text }}</option>
-            </select>
-            <label class="label" v-show="(v$ as any).lang.$error">
-              <span class="label-text-alt text-error" v-text="(v$ as any).lang.$errors[0]?.$message" />
-            </label>
-          </div>
-
-          <button :class="['btn', form.isLoading && 'loading']" @click="submit">
-            <i-uil-file-upload-alt class="mr-1 h-5 w-5" /> {{ t("course.problem.submit.text") }}
-          </button>
-        </div>
       </div>
+    </div>
+  </div>
+
+  <div
+    class="border-base-300 bg-base-100 fixed bottom-0 left-0 right-0 z-50 w-full border-t p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]"
+  >
+    <div class="flex w-full justify-end px-4 md:px-8">
+      <button :class="['btn btn-primary min-w-[150px]', form.isLoading && 'loading']" @click="submit">
+        <i-uil-file-upload-alt class="mr-2 h-5 w-5" /> {{ t("course.problem.submit.text") }}
+      </button>
     </div>
   </div>
 

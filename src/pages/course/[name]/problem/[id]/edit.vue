@@ -509,6 +509,26 @@ async function delete_() {
 const openPreview = ref(false);
 const openJSON = ref(false);
 const mockProblemMeta = { owner: "", highScore: 0, submitCount: 0, ACUser: 0, submitter: 0 };
+// ==========================================
+// [HELPER] JSON Display Cleanup
+// ==========================================
+function cleanupForDisplay(data?: ProblemForm) {
+  if (!data) return {};
+
+  // Shallow copy to avoid modifying original
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+  const { pipeline_conf, pipelineConf, testCase, test_case, config, ...rest } = data as any;
+
+  // Clean nested config if needed
+  let cleanConfig = config;
+  if (config) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { artifact_collection, ...restConfig } = config;
+    cleanConfig = restConfig;
+  }
+
+  return { ...rest, config: cleanConfig };
+}
 </script>
 
 <template>
@@ -541,7 +561,7 @@ const mockProblemMeta = { owner: "", highScore: 0, submitCount: 0, ACUser: 0, su
                   class="animate-bounce-horizontal absolute right-full z-50 mr-4 w-max bg-black px-3 py-2 text-sm font-bold text-white shadow-lg"
                 >
                   <div
-                    class="bg-info absolute top-1/2 -right-1 h-3 w-3 -translate-y-1/2 rotate-45 transform"
+                    class="bg-info absolute -right-1 top-1/2 h-3 w-3 -translate-y-1/2 rotate-45 transform"
                   ></div>
                   👋 Click here for Manual!
                 </div>
@@ -598,8 +618,8 @@ const mockProblemMeta = { owner: "", highScore: 0, submitCount: 0, ACUser: 0, su
                 <input v-model="openJSON" type="checkbox" class="toggle" />
               </div>
 
-              <pre v-if="openJSON" class="bg-base-200 rounded p-2 whitespace-pre-wrap"
-                >{{ JSON.stringify(edittingProblem, null, 2) }}
+              <pre v-if="openJSON" class="bg-base-200 whitespace-pre-wrap rounded p-2"
+                >{{ JSON.stringify(cleanupForDisplay(edittingProblem), null, 2) }}
               </pre>
 
               <div class="mb-[50%]" />

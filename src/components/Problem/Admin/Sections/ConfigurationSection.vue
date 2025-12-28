@@ -172,6 +172,7 @@ function onQuotaInput(e: Event) {
 // Section: Trial Mode
 // ==========================================
 const trialQuotaError = ref("");
+const trialTestdataError = ref<string | null>(null);
 const localTrialLimit = ref<number | "">(problem.value?.config?.maxNumberOfTrial ?? "");
 
 function onTrialLimitInput(e: Event) {
@@ -198,22 +199,49 @@ function onTrialLimitInput(e: Event) {
   }
 }
 
+/**
+ * Checks if the filenames array contains macOS metadata files.
+ * macOS creates hidden files like `._filename` and `__MACOSX/` folder when zipping.
+ * These files can cause issues with testcase processing.
+ */
+function hasMacOSMetadataFiles(filenames: string[]): string[] {
+  const macosFiles: string[] = [];
+  for (const filename of filenames) {
+    // Check for __MACOSX directory (macOS resource fork folder)
+    if (filename.startsWith("__MACOSX/") || filename === "__MACOSX") {
+      macosFiles.push(filename);
+      continue;
+    }
+    // Check for ._ prefixed files (macOS extended attributes)
+    const basename = filename.split("/").pop() || "";
+    if (basename.startsWith("._")) {
+      macosFiles.push(filename);
+    }
+  }
+  return macosFiles;
+}
+
 async function validateTrialPublicZip(file: File): Promise<boolean> {
   logger.group("Validate Trial Zip");
+  trialTestdataError.value = null;
+
   try {
     const reader = new ZipReader(new BlobReader(file));
     const entries = await reader.getEntries();
     await reader.close?.();
 
-    // [Validation] Block Mac Zip
-    const hasMacFiles = entries.some(
-      (e: any) => e.filename.includes("__MACOSX") || e.filename.split("/").pop()?.startsWith("._"),
-    );
+    const filenames = entries.map((e) => e.filename);
 
-    if (hasMacFiles) {
-      const msg = "MacOS Zip files are not allowed. Please remove __MACOSX and ._ files before uploading.";
-      logger.error(msg);
-      alert(msg);
+    // [Validation] Block Mac Zip
+    const macosFiles = hasMacOSMetadataFiles(filenames);
+    if (macosFiles.length > 0) {
+      const sampleFiles = macosFiles.slice(0, 3).join(", ");
+      const moreCount = macosFiles.length > 3 ? ` (and ${macosFiles.length - 3} more)` : "";
+      const msg = t("course.problems.macosZipDetected", {
+        files: sampleFiles + moreCount,
+      });
+      logger.error("macOS Metadata Files Detected", macosFiles);
+      trialTestdataError.value = msg;
       return false;
     }
 
@@ -229,7 +257,7 @@ async function validateTrialPublicZip(file: File): Promise<boolean> {
     if (!validEntries.length) {
       const msg = "Zip contains no valid files (or only empty folders).";
       logger.error(msg);
-      alert(msg);
+      trialTestdataError.value = msg;
       return false;
     }
 
@@ -241,7 +269,7 @@ async function validateTrialPublicZip(file: File): Promise<boolean> {
       const msg =
         "Invalid files found (must be .in or .out only):\n" + invalid.map((e: any) => e.filename).join("\n");
       logger.error(msg);
-      alert(msg);
+      trialTestdataError.value = msg;
       return false;
     }
 
@@ -259,7 +287,7 @@ async function validateTrialPublicZip(file: File): Promise<boolean> {
         "Missing .out files for the following .in files:\n" +
         missingOutFiles.map((name: any) => `${name}.in`).join("\n");
       logger.error(msg);
-      alert(msg);
+      trialTestdataError.value = msg;
       return false;
     }
 
@@ -268,7 +296,7 @@ async function validateTrialPublicZip(file: File): Promise<boolean> {
   } catch (err) {
     const msg = "Failed to read zip file: " + err;
     logger.error(msg);
-    alert(msg);
+    trialTestdataError.value = msg;
     return false;
   } finally {
     logger.groupEnd();
@@ -1636,6 +1664,7 @@ onBeforeUnmount(() => {
                   const inputEl = e.target as HTMLInputElement;
                   const file = inputEl.files?.[0] || null;
                   problem.assets!.trialModePublicTestDataZip = null;
+                  trialTestdataError = null;
                   if (!file) {
                     inputEl.value = '';
                     v$?.assets?.trialModePublicTestDataZip?.$touch();
@@ -1668,6 +1697,9 @@ onBeforeUnmount(() => {
             <span class="label-text-alt text-error">{{
               v$.assets.trialModePublicTestDataZip.$errors[0]?.$message
             }}</span>
+          </label>
+          <label v-if="trialTestdataError" class="label text-error">
+            <span class="label-text-alt whitespace-pre-wrap">{{ trialTestdataError }}</span>
           </label>
         </div>
 

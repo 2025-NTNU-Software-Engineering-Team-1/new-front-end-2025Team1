@@ -617,7 +617,7 @@ async function submit() {
 
   setTimeout(() => {
     isLoading.value = false;
-  }, 6000);
+  }, 10000);
 }
 
 onMounted(async () => {
@@ -865,7 +865,7 @@ onMounted(async () => {
     class="bg-base-100/90 border-base-300 fixed bottom-0 left-0 right-0 z-40 border-t p-4 shadow-[0_-8px_20px_rgba(0,0,0,0.1)] backdrop-blur-md"
   >
     <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 md:flex-row">
-      <div class="flex w-full items-center justify-center gap-3 md:w-auto md:justify-start">
+      <div class="flex w-full items-center justify-center gap-3 md:flex-1 md:justify-center">
         <!-- 🕒 Before first submit -->
         <template v-if="!hasSubmitted">
           <div class="bg-base-200 text-base-content/50 rounded-full p-2">
@@ -907,12 +907,17 @@ onMounted(async () => {
 
       <!-- Buttons -->
       <div class="flex w-full items-center justify-center gap-3 md:w-auto md:justify-end">
-        <button
-          :class="['btn btn-primary shadow-primary/20 px-8 shadow-lg', isLoading && 'loading']"
-          @click="submit"
-        >
-          <i-uil-file-upload-alt class="mr-1 h-5 w-5" v-if="!isLoading" />
-          {{ t("course.members.submit") }}
+        <button :class="['btn btn-primary shadow-primary/20 relative px-8 shadow-lg']" @click="submit">
+          <!-- Loading Spinner (Absolute & Top Layer) -->
+          <div v-if="isLoading" class="absolute inset-0 z-50 flex items-center justify-center">
+            <span class="loading loading-spinner loading-md"></span>
+          </div>
+
+          <!-- Content (Hidden when loading but preserves width) -->
+          <span :class="['flex items-center', isLoading ? 'opacity-0' : 'opacity-100']">
+            <i-uil-file-upload-alt class="mr-1 h-5 w-5" />
+            {{ t("course.members.submit") }}
+          </span>
         </button>
       </div>
     </div>

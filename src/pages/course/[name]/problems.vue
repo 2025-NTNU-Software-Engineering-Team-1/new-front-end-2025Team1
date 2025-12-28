@@ -292,7 +292,7 @@ const maxPage = computed(() => {
           <div class="relative flex flex-col">
             <div class="flex items-center gap-2">
               <!-- Group By Tag Toggle -->
-              <div class="tooltip" :data-tip="isGroupedView ? 'Back to Table' : 'Group By Tag'">
+              <div class="tooltip mr-2" :data-tip="isGroupedView ? 'Back to Table' : 'Group By Tag'">
                 <button
                   class="btn btn-sm btn-circle"
                   :class="isGroupedView ? 'btn-primary' : 'btn-ghost'"

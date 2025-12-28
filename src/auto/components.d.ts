@@ -82,6 +82,7 @@ declare module 'vue' {
     IUilSearch: typeof import('~icons/uil/search')['default']
     IUilSetting: typeof import('~icons/uil/setting')['default']
     IUilSun: typeof import('~icons/uil/sun')['default']
+    IUilSync: typeof import('~icons/uil/sync')['default']
     IUilTable: typeof import('~icons/uil/table')['default']
     IUilTagAlt: typeof import('~icons/uil/tag-alt')['default']
     IUilTimes: typeof import('~icons/uil/times')['default']

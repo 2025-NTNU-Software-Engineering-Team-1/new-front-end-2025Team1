@@ -37,9 +37,7 @@ const adminNavs =
 
     <li
       v-for="{ name, path } in generalNavs"
-      :class="[
-        $route.path.startsWith(`/course/${$route.params.name}${path}`) && 'border-l-4 border-blue-500',
-      ]"
+      :class="[$route.path.startsWith(`/course/${$route.params.name}${path}`) && 'border-primary border-l-4']"
     >
       <router-link :to="`/course/${$route.params.name}${path}`">{{ name }}</router-link>
     </li>

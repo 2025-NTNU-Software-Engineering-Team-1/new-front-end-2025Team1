@@ -114,7 +114,7 @@ const items: ComputedRef<{ [k: string | symbol]: { path: null | string; text: st
 </script>
 
 <template>
-  <div class="navbar min-h-[2rem] border-b border-gray-600 px-6">
+  <div class="navbar border-base-300 min-h-[2rem] border-b px-6">
     <div class="breadcrumbs flex-1 text-sm">
       <ul>
         <li>

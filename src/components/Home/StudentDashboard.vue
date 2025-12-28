@@ -121,7 +121,7 @@ onMounted(() => {
       </div>
     </div>
 
-    <splitpanes class="default-theme" style="height: 80vh">
+    <splitpanes style="height: 80vh">
       <!-- Left Block: Upcoming Deadlines -->
       <pane min-size="20">
         <div class="h-full space-y-4 overflow-y-auto p-4">

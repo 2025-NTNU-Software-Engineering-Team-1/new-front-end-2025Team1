@@ -142,3 +142,25 @@
   padding-bottom: 0.75rem !important;
   min-height: 0 !important;
 }
+
+/* Splitpanes Dark Mode Overrides */
+.splitpanes__splitter {
+  @apply bg-base-300 border-base-200 relative w-1 border-l;
+}
+
+.splitpanes__splitter:before,
+.splitpanes__splitter:after {
+  @apply bg-base-content/20 absolute top-1/2 left-1/2 -ml-[1px] h-8 w-[1px] -translate-y-1/2 content-[''];
+}
+
+.splitpanes__splitter:before {
+  @apply -mt-2;
+}
+
+.splitpanes__splitter:after {
+  @apply mt-2;
+}
+
+.splitpanes__pane {
+  @apply bg-base-100;
+}

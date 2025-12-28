@@ -417,7 +417,7 @@
       "functionsRestrictions": "函式限制",
       "executionMode": "執行模式",
       "executionModeGeneral": "一般模式",
-      "executionModeFuncitonOnly": "僅限函式模式",
+      "executionModeFunctionOnly": "僅限函式模式",
       "executionModeInteractive": "互動模式",
       "functionOnlyDisabledHint": "當允許格式為 Zip 時，無法使用僅限函式模式。",
       "uploadFile": "上傳 Makefile.zip",

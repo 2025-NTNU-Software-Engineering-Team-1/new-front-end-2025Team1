@@ -419,7 +419,7 @@
       "functionsRestrictions": "Functions Restrictions",
       "executionMode": "Execution Mode",
       "executionModeGeneral": "General",
-      "executionModeFuncitonOnly": "Function-Only",
+      "executionModeFunctionOnly": "Function-Only",
       "executionModeInteractive": "Interactive",
       "functionOnlyDisabledHint": "Function-Only mode is not available when Accepted Format is Zip.",
       "uploadFile": "Upload Makefile.zip",

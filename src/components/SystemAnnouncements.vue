@@ -32,14 +32,14 @@ const { data: announcements, error, isLoading } = useAxios<AnnouncementList>("/a
             <table class="table w-full">
               <thead>
                 <tr>
-                  <th class="border-b border-base-content/40">{{ $t("components.systemAnn.title") }}</th>
-                  <th class="border-b border-base-content/40">{{ $t("components.systemAnn.createTime") }}</th>
-                  <th v-if="session.isAdmin" class="border-b border-base-content/40"></th>
+                  <th class="border-base-content/40 border-b">{{ $t("components.systemAnn.title") }}</th>
+                  <th class="border-base-content/40 border-b">{{ $t("components.systemAnn.createTime") }}</th>
+                  <th v-if="session.isAdmin" class="border-base-content/40 border-b"></th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="{ title, createTime, annId } in announcements" :key="annId" class="hover">
-                  <td class="border-b border-base-content/40">
+                  <td class="border-base-content/40 border-b">
                     <router-link
                       :to="`/announcements/${annId}`"
                       class="text-base-content/80 dark:text-base-content/80 visited:text-base-content/80 dark:visited:text-base-content/80 block min-w-0 break-words whitespace-normal hover:underline"
@@ -47,8 +47,8 @@ const { data: announcements, error, isLoading } = useAxios<AnnouncementList>("/a
                       {{ title }}
                     </router-link>
                   </td>
-                  <td class="border-b border-base-content/40">{{ formatTime(createTime) }}</td>
-                  <td v-if="session.isAdmin" class="border-b border-base-content/40">
+                  <td class="border-base-content/40 border-b">{{ formatTime(createTime) }}</td>
+                  <td v-if="session.isAdmin" class="border-base-content/40 border-b">
                     <div class="tooltip" data-tip="Edit">
                       <router-link
                         class="btn btn-ghost btn-sm btn-circle"

@@ -121,7 +121,7 @@ onMounted(() => {
           <div
             v-for="h in upcomingDeadlines"
             :key="h.id"
-            class="card bg-base-100 border-l-4 border-y border-r border-base-content/30 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+            class="card bg-base-100 border-base-content/30 border-y border-r border-l-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
             :style="{
               borderLeftColor: getCourseColor(
                 h.courseName,

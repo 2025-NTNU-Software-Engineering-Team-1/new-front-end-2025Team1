@@ -1905,7 +1905,7 @@ watch(
               :data-tip="
                 isFunctionOnlyDisabled
                   ? t('course.problems.functionOnlyDisabledHint')
-                  : hover.executionModeFuncitonOnly
+                  : hover.executionModeFunctionOnly
               "
             >
               <input
@@ -1915,7 +1915,7 @@ watch(
                 v-model="problem.pipeline!.executionMode as 'general' | 'functionOnly' | 'interactive'"
                 :disabled="isFunctionOnlyDisabled"
               />
-              <span class="label-text">{{ t("course.problems.executionModeFuncitonOnly") }}</span>
+              <span class="label-text">{{ t("course.problems.executionModeFunctionOnly") }}</span>
             </div>
           </label>
           <label class="label cursor-pointer gap-2">

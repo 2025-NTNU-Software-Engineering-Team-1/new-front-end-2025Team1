@@ -59,7 +59,7 @@ export const hover_en = {
   syntaxRestrictions: "Restrict syntax structures the program can use (e.g., for, while, etc.).",
   executionMode: "Select program execution mode (General, Interactive, etc.).",
   executionModeGeneral: "General Mode: Standard I/O (stdin/stdout) judgment.",
-  executionModeFuncitonOnly: "Function Only Mode: Students implement specific functions (LeetCode style).",
+  executionModeFunctionOnly: "Function Only Mode: Students implement specific functions (LeetCode style).",
   executionModeInteractive: "Interactive Mode: Student program needs to interact with a judge program.",
   uploadFile: "Upload related files (e.g., Makefile, Header, etc.).",
   interactiveTeacherFirsts: "Interactive Mode Setting: Whether to execute teacher's code first.",

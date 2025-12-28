@@ -1,4 +1,16 @@
 {
+  "general": {
+    "back": "返回",
+    "save": "儲存",
+    "cancel": "取消",
+    "edit": "編輯",
+    "delete": "刪除",
+    "confirm": "確認",
+    "deleteConfirmTitle": "刪除確認",
+    "deleteConfirmText": "確定欲刪除「{name}」無？",
+    "deleteDetails": "這个動作無法度復原。",
+    "shiftTip": "小撇步：按住 Shift + 點擊會當跳過這个確認"
+  },
   "settings": {
     "title": "設定",
     "selectLang": "選擇語言"
@@ -25,6 +37,14 @@
       "new": {
         "title": "新增公告",
         "preview": "預覽"
+      },
+      "edit": {
+        "title": "編輯公告",
+        "delete": "刪除",
+        "discardChanges": "取消更改",
+        "preview": "預覽",
+        "confirmDelete": "確定欲刪除此公告無？",
+        "confirmDiscard": "確定欲取消更改無？"
       }
     },
     "hw": {
@@ -36,10 +56,18 @@
         "title": "加新功課",
         "preview": "預覽"
       },
+      "edit": {
+        "title": "編輯功課",
+        "delete": "刪除",
+        "discardChanges": "取消更改",
+        "preview": "預覽",
+        "confirmDelete": "確定欲刪除此功課無？",
+        "confirmDiscard": "確定欲取消更改無？"
+      },
       "stats": {
-        "pageTitle": "功課統計",
-        "title": "統計",
-        "scoreboard": "記分板",
+        "pageTitle": "Score Board",
+        "title": "Score Board",
+        "scoreboard": "Score Board",
         "sortBy": "排序",
         "username": "使用者名稱",
         "sumDesc": "總分 (懸->低)",
@@ -81,12 +109,16 @@
       "skinsPage": "皮膚管理",
       "setup": {
         "title": "AI 管理 - 設定",
+        "subtitle": "安全地管理您的AI整合金鑰",
         "subtitleNewKey": "新增金鑰資訊 (Gemini)",
         "subtitleExistingKey": "現有金鑰",
+        "successmsg": "添加成功！已屏蔽 ID：",
+        "total": "總和：",
         "input": {
           "name": "金鑰名稱 *",
           "value": "API 金鑰值",
-          "addKey": "新增金鑰"
+          "addKey": "新增金鑰",
+          "searchPlaceholder": "以金鑰名稱或建立者搜尋"
         },
         "display": {
           "noKey": "暫時無金鑰",
@@ -95,7 +127,13 @@
           "createdBy": "建立者",
           "active": "啟用",
           "save": "儲存",
-          "delete": "刪除"
+          "delete": "刪除",
+          "action": "操作"
+        },
+        "filter": {
+          "all": "全部",
+          "active": "啟用",
+          "inactive": "未啟用"
         }
       },
       "usage": {
@@ -130,6 +168,22 @@
         "title": "新增題目",
         "preview": "預覽",
         "json": "JSON（供開發人員檢查）"
+      },
+      "edit": {
+        "title": "編輯題目",
+        "delete": "刪除",
+        "discardChanges": "取消更改",
+        "preview": "預覽",
+        "json": "JSON（供開發人員檢查）",
+        "confirmDelete": "確定欲刪除此題目無？",
+        "confirmDiscard": "確定欲取消更改無？",
+        "manualHint": "👋 點落遮看說明！"
+      },
+      "copycat": {
+        "title": "題目 #{id} ê 抄襲檢測",
+        "generating": "報告生成中...",
+        "generateReport": "點擊來生成報告",
+        "loadError": "載入課程成員失敗，請等咧再試看覓。"
       },
       "submit": {
         "err": {
@@ -187,6 +241,10 @@
         "testcase": "測資",
         "run": "執行",
         "trialQuota": "測試額度",
+        "back": "轉去",
+        "rejudgeAll": "全部重新評分",
+        "deleteAll": "刪除全部",
+        "rejudge": "重新評分",
         "submitModal": {
           "title": "提交確認",
           "message": "確定欲提交這个程式碼進行正式評分無？",
@@ -197,6 +255,7 @@
           "title": "測試歷史記錄",
           "table": {
             "id": "編號",
+            "user": "使用者",
             "result": "結果",
             "score": "分數",
             "time": "時間"
@@ -235,8 +294,10 @@
         "trialHistory": {
           "delete": "刪除",
           "close": "關閉",
+          "rowCount": "攏總有 {n} 筆紀錄",
           "backToList": "轉去列表",
           "backToProblem": "轉去題目",
+          "rejudge": "重新評分",
           "type": "類型",
           "public": "公開",
           "custom": "自訂",
@@ -299,7 +360,7 @@
         "general": {
           "tried": "已嘗試使用者數量",
           "ac": "AC 使用者數量",
-          "acRatio": "AC Submission 比率",
+          "acRatio": "AC 繳交比率",
           "avg": "平均分數",
           "sd": "標準差"
         },
@@ -322,12 +383,81 @@
       }
     },
     "problems": {
+      "searchPlaceholder": "搜揣題目名稱抑是編號...",
       "text": "題目",
       "id": "題號",
       "name": "題名",
       "tags": "標籤",
       "quota": "額度",
       "new": "加新",
+      "export": "匯出",
+      "exportSelected": "匯出選中",
+      "exportOptions": "匯出選項",
+      "exportComponents": "匯出組件",
+      "exportCount": "已選擇 {count} 題",
+      "exportHint": "核心設定佮測資會強制匯出。",
+      "import": "匯入題目",
+      "importTitle": "匯入題目",
+      "importPreview": "匯入預覽",
+      "importDropHint": "拖放抑是點擊上傳 .noj.zip",
+      "importParsing": "解析中...",
+      "importing": "匯入中...",
+      "importStart": "開始匯入",
+      "importCourse": "目標課程",
+      "importCoursePlaceholder": "搜揣抑是揀課程（會當複選）",
+      "importCourseHint": "干焦顯示目前帳號是課程老師 ê 課程（管理員會當看全部）",
+      "importCourseLoading": "載入課程中...",
+      "importCourseLoadFailed": "載入課程失敗",
+      "importStatus": "初始狀態",
+      "importStatusHidden": "隱藏",
+      "importStatusVisible": "顯示",
+      "importTestcaseCount": "測資數量：{count}",
+      "importComponents": "匯入組件",
+      "importAssetWarningTitle": "檔案 kah 功能設定無一致",
+      "importAssetWarningHint": "選擇 ê 檔案愛有對應 ê 功能開啟，無然匯入會失敗。請開啟功能抑是取消勾選該檔案。",
+      "importDone": "匯入完成",
+      "importBatchDone": "成功匯入 {count} 題",
+      "importBatchFailed": "失敗 {count} 題",
+      "importFailed": "匯入失敗",
+      "importManifestMissing": "缺少 manifest.json",
+      "importMetaMissing": "缺少 meta.json",
+      "importParseFailed": "無法解析壓縮檔",
+      "importCourseRequired": "請至少揀一門課程",
+      "exportNotAllowed": "干焦管理者抑是題目擁有者會當匯出",
+      "clearFile": "清除檔案",
+      "selectAll": "全選",
+      "clearAll": "清除",
+      "required": "必要",
+      "cancel": "取消",
+      "problemTypeProgramming": "程式題",
+      "problemTypeFillIn": "填空題",
+      "problemTypeFileUpload": "檔案題",
+      "componentMeta": "題目設定",
+      "componentTestcase": "測試案例",
+      "componentChecker": "自訂 Checker",
+      "componentMakefile": "Function Only - Makefile",
+      "componentTeacherFile": "Interactive - Teacher File",
+      "componentScoringScript": "自訂計分",
+      "componentScoringConfig": "評分 - Scoring Config (score.json)",
+      "componentLocalService": "Local Service",
+      "componentResourceData": "學生資料",
+      "componentResourceDataTeacher": "教師資料",
+      "componentNetworkDockerfile": "Dockerfiles",
+      "componentTrialPublicTestdata": "公開測資",
+      "componentTrialAcCode": "AC Code",
+      "componentStaticAnalysis": "Static Analysis - Rules",
+      "componentNetworkSettings": "設定 - Network",
+      "componentAiTaSettings": "設定 - AI-TA",
+      "componentArtifactSettings": "設定 - Artifact Collection",
+      "componentFileAccessSettings": "設定 - File Access",
+      "componentSectionCore": "核心",
+      "componentSectionExecution": "執行",
+      "componentSectionScoring": "Custom Judging",
+      "componentSectionResources": "資源資料",
+      "componentSectionNetwork": "Side Car",
+      "componentSectionTrial": "Trial Mode",
+      "componentSectionAnalysis": "Static Analysis",
+      "componentSectionSettings": "設定",
       "status": "隱藏",
       "allowedLanguages": "准用 ê 程式語言",
       "acceptedFormat": "准用 ê 格式",
@@ -346,12 +476,14 @@
       "aiKeySuggestionStudentCount": "學生人數:",
       "aiKeySuggestionSuggestedKeys": "建議 ê Key 數量:",
       "aiKeySuggestionReason": "原因:",
-      "aiKeySearch": "搜揣",
+      "aiKeySearch": "搜揣金鑰名稱抑是建立者",
       "aiKeyLoadingKeys": "載入 Key...",
       "activeAiKeys": "啟用中 ê Key",
       "inactiveAiKeys": "停用中 ê Key",
       "trialMode": "測試模式",
       "trialMaxNumber": "測試次數上限",
+      "trialMaxNumberPlaceholder": "-1 (無限制) 或 1–500",
+      "meansUnlimited": "-1 代表無限制",
       "resultVisible": "開放看結果",
       "allowViewingExecutionOutput": "會當看執行 ê 輸出結果",
       "resultDownloadable": "開放下載結果",
@@ -387,9 +519,16 @@
       "headersRestrictionDisabled": "已停用標頭檔限制",
       "headersRestrictionInfo": "愛啟用 C/C++ 語言才會當用此功能",
       "functionsRestrictions": "函式限制",
+      "searchAddCustomHeaders": "搜尋 / 新增自訂標頭檔",
+      "searchAddCustomFunctions": "搜尋 / 新增自訂函式",
+      "searchAddCustomImports": "搜尋 / 新增自訂匯入",
+      "expandMore": "展開",
+      "collapse": "收合",
+      "all": "全部選取",
+      "clear": "清除選取",
       "executionMode": "執行模式",
       "executionModeGeneral": "一般模式",
-      "executionModeFuncitonOnly": "純函式模式",
+      "executionModeFunctionOnly": "純函式模式",
       "executionModeInteractive": "互動模式",
       "uploadFile": "上傳 Makefile.zip",
       "upload": "上傳",
@@ -414,11 +553,6 @@
       "descriptionProblem": "題目描述",
       "descriptionInput": "輸入說明",
       "descriptionOutput": "輸出說明",
-      "exampleInput": "範例輸入 {no}",
-      "exampleOutput": "範例輸出 {no}",
-      "AddSample": "新增範例",
-      "RemoveLast": "提掉最後一項",
-      "hint": "提示",
       "testDataZip": "測資壓縮檔",
       "zipFile": "ZIP 檔案",
       "downloadCurrent": "下載目前測資",
@@ -447,7 +581,6 @@
       "setResourceData": "設定資源資料",
       "submissionBlocked": "繳交被擋。請改下面幾項：",
       "commaSeparated": "用逗號分開",
-      "meansUnlimited": "-1 代表無限制",
       "allowedlan": "准用: .c, .cpp, .py",
       "networkSidecars": "內外網服務 (Network & Sidecars)",
       "onlyAllowSpecificInfo": "干焦准特定的 IP/URL。封鎖所有其他內容",
@@ -456,7 +589,49 @@
       "delete": "刪除",
       "discardChanges": "取消變更",
       "Preview": "預覽",
-      "editProblem": "編輯題目:"
+      "editProblem": "編輯題目:",
+      "problemSettings": "題目設定",
+      "configureProblemDetails": "設定題目詳細資訊、驗證和資源。",
+      "general": "一般",
+      "advanced": "進階",
+      "exampleInput": "範例輸入 #{no}",
+      "exampleOutput": "範例輸出 #{no}",
+      "hint": "提示",
+      "AddSample": "新增範例",
+      "RemoveLast": "移除最後一個範例",
+      "onlyInOutFiles": "僅 .in 和 .out 檔案 inside ZIP; 每個 .in 檔案必須有對應的 .out 檔案; ≤ 1 GB",
+      "ACFile": "AC 檔案",
+      "networkErrors": {
+        "global": {
+          "0": "※ 無設定封鎖選項；外部網路存取預設完全開放（黑名單模式）。"
+        }
+      },
+      "Docker": "Docker",
+      "DockerfileLocation": "Dockerfile 位置",
+      "DockerfileLocationPlaceholder": "環境資料夾/Dockerfile",
+      "DockerfileLocationError": "Dockerfile 位置錯誤，請確保結構為「環境資料夾/Dockerfile」。",
+      "DockerfileLocationErrorCount": "偵測到無效的資料夾數量：{count}。必須介於 1 到 5 之間。",
+      "sideCarName": "Sidecar 容器名稱",
+      "sideCarImage": "Docker 映像檔",
+      "sideCarArgs": "參數",
+      "sideCarEnv": "環境變數",
+      "sideCarAction": "操作",
+      "sideCarCommaSeparated": "用逗號分開",
+      "sideCarKEYVALUEPerLine": "每個單獨一行",
+      "sideCar_EnvKEYVALUE": "環境變數",
+      "addSidecar": "新增 Sidecar",
+      "noSidecarsConfigured": "無Sidecar",
+      "Advanced": "進階",
+      "systemLocked": "系統關閉",
+      "uncategorized": "未分類",
+      "stats": "數據",
+      "copycat": "抄襲檢測",
+      "testHistory": "測試歷史",
+      "trialModeDisabled": "測試模式停矣",
+      "edit": "編輯",
+      "backToTable": "轉去表格橫覽",
+      "groupByTag": "照標籤分類",
+      "randomizeToken": "點落去隨機生 Token"
     },
     "submissions": {
       "text": "繳交狀態",
@@ -464,6 +639,14 @@
       "status": "狀態",
       "lang": "語言",
       "clear": "清除",
+      "rowCount": "攏總有 {n} 筆紀錄",
+      "rejudgeAll": "全部重新評分",
+      "rejudge": "重新評分",
+      "deleteAll": "全部刪除",
+      "delete": "刪除",
+      "downloadbinary": "下載二進位檔",
+      "downloadJson": "下載json檔",
+      "showDetails": "查看詳細內容",
       "table": {
         "id": "id",
         "pid": "題號",
@@ -563,6 +746,11 @@
         "cancel": "取消",
         "rejudge": "Rejudge"
       },
+      "binaryUnavailable": {
+        "title": "無可下載的編譯後可執行檔",
+        "description": "這个提交無編譯後的可執行檔通下載。",
+        "close": "關閉"
+      },
       "rejudgeError": {
         "title": "Rejudge 失敗",
         "close": "關閉"
@@ -589,6 +777,7 @@
       "csvUpload": "上傳 CSV 檔案",
       "csvUploadInfo": "共檔案拖來遮，抑是點擊來揀",
       "manualInput": "手動輸入",
+      "addRow": "新增一列",
       "optionUsername": "使用者名稱",
       "optionDisplayName": "顯示名稱",
       "optionRole": "角色",
@@ -605,6 +794,19 @@
         "dupEmails": "重複 Email：",
         "skippedEntries": "以下使用者未建立，因為使用者名稱或 Email 已存在：{users}",
         "unknown-error-occurred": "發生未知錯誤 :("
+      },
+      "addExisting": {
+        "title": "加入現有使用者",
+        "searchPlaceholder": "搜揣使用者...",
+        "selectedUsers": "揀好 ê 使用者",
+        "noUsersSelected": "猶未揀任何使用者",
+        "addToCourse": "加入課程",
+        "addSuccess": "成功加入 {count} 个使用者",
+        "addFailed": "加入使用者失敗",
+        "alreadyInCourse": "使用者已經佇課程內",
+        "userNotFound": "揣無使用者",
+        "searchHint": "輸入使用者名稱來搜揣",
+        "noResults": "揣無符合 ê 使用者"
       }
     }
   },
@@ -617,6 +819,7 @@
         "semester": "學期"
       },
       "new": "加新",
+      "searchPlaceholder": "搜尋課程",
       "join": {
         "title": "用代號加課",
         "placeholder": "輸入代號",
@@ -634,6 +837,9 @@
       "nameField": "課程名稱",
       "teacherField": "課程教師",
       "submit": "送出",
+      "error": {
+        "invalid_name": "課程名稱有毋對的字。"
+      },
       "unknown-error-occurred": "發生未知錯誤 :("
     }
   },
@@ -782,7 +988,9 @@
   "components": {
     "validation": {
       "not_blank": "袂使是空白或者只有空白字元",
-      "contains_invisible": "包含不可見或控制字元"
+      "contains_invisible": "包含不可見或控制字元",
+      "required": "這个欄位是必填項目",
+      "maxLength": "長度袂使超過 {max} 個字"
     },
     "ann": {
       "form": {
@@ -802,8 +1010,12 @@
         "problems": "題目集",
         "fromField": "開始時間",
         "dueField": "截止時間",
+        "penalty": "遲交扣分",
+        "penaltyHint": "會使類 Python 表達式，變數：score、overtime（天）。",
+        "penaltyPlaceholder": "score = score * (0.8 ** overtime)",
         "descField": "說明",
-        "submit": "送出"
+        "submit": "送出",
+        "search": "可輸入 ID 或名稱搜尋"
       },
       "validation": {
         "not_blank": "名稱袂使是空白或者只有空白字元",
@@ -827,13 +1039,14 @@
           "name": "題名",
           "quota": "額度",
           "score": "得分",
-          "stats": "數據",
-          "copycat": "抄襲"
+          "stats": "統計",
+          "copycat": "Copycat",
+          "unknown": "未知"
         },
         "description": {
           "text": "說明",
           "edit": "編輯",
-          "stats": "數據"
+          "stats": "Score Board"
         }
       }
     },
@@ -902,7 +1115,30 @@
           "score": "配分"
         },
         "noContent": "無",
-        "unlimited": "無限制"
+        "unlimited": "無限制",
+        "downloadTestCase": "下載測試案例",
+        "activeRestrictionsFound": "有看著開ê限制項目！",
+        "dismissReminder": "關起來",
+        "hideConstraints": "藏起限制項目",
+        "viewEnvironmentConstraints": "看環境限制",
+        "allowedOnly": "干焦准",
+        "blocked": "已擋落",
+        "unrestricted": "無限制",
+        "disabled": "停用",
+        "notApplicable": "無適用",
+        "noRulesDefined": "猶未定規則",
+        "noLibraryRestrictionsActive": "猶未開函式庫限制。",
+        "allowedLanguages": "准用 ê 程式語言",
+        "external": "外部網路存取限制",
+        "ip": "IP 位址",
+        "url": "連結 / 網域",
+        "sidecarservices": "Sidecar 服務",
+        "image": "映像檔：",
+        "arg": "參數: ",
+        "customimage": "自訂映像檔",
+        "imagelist": "映像檔列",
+        "networkalert": "網路存取已啟用，但未配置任何特定限制或sidecar。",
+        "networkdisable": "網路存取已完全停用。"
       },
       "infoCard": {
         "score": "得分",
@@ -984,6 +1220,9 @@
       "submit": "提交",
       "password": "密碼",
       "role": "角色",
+      "courses": "課程",
+      "no-course": "無課程",
+      "course-load-error": "載入課程失敗",
       "display-name": "顯示名稱",
       "username": "帳號",
       "editing": "當咧編輯：{user}",
@@ -992,7 +1231,7 @@
       "admin": "管理員",
       "ta": "助教",
       "select-role": "選擇角色",
-      "row-count": "資料筆數：{n}",
+      "row-count": "使用者數：{n}",
       "search-name": "搜尋名稱"
     },
     "unknown-error-occurred": "發生未知錯誤 :(",
@@ -1014,7 +1253,8 @@
         "user": "人數",
         "homework": "作業數量",
         "problem": "題目數量",
-        "submission": "提交數量"
+        "submission": "提交數量",
+        "total": "總數"
       }
     },
     "skins": {
@@ -1165,7 +1405,18 @@
     "refresh": "重整理",
     "download": "下載 CSV",
     "noRecords": "無登入紀錄",
-    "rowCount": "攏總有 {n} 筆紀錄"
+    "rowCount": "攏總有 {n} 筆紀錄",
+    "bannedIPs": {
+      "title": "被封鎖 ê IP",
+      "ip": "IP 位址",
+      "remainingTime": "賰 ê 時間",
+      "failureCount": "失敗次數",
+      "unban": "解除封鎖",
+      "unbanSuccess": "已經解除 IP 封鎖矣",
+      "unbanFailed": "解除封鎖失敗",
+      "noBannedIPs": "目前無被封鎖 ê IP",
+      "seconds": "秒"
+    }
   },
   "skinSelector": {
     "title": "揀 AI 助教外觀",
@@ -1218,5 +1469,68 @@
       "noResponse": "AI 沒有回傳內容，請稍後再試。",
       "unavailable": "AI 助教暫時無法回應，請稍後再試。"
     }
+  },
+  "hovers": {
+    "setDescription": "設定題目ê說明，包含標題、內容、範例測資等說明。",
+    "setConfiguration": "配置題目ê基本設定，親像名、配額、語言限制等。",
+    "allowedLanguages": "選擇學生會使使ê程式語言。",
+    "maxZipSize": "設定學生上傳 ZIP 檔ê最大限制 (MB)。",
+    "tags": "幫題目設定標籤，方便分類佮搜揣 (用逗號分開)。",
+    "quota": "設定逐个學生ê提交次數限制，-1 代表無限制。",
+    "aiTA": "開啟 AI 助教功能，學生會使透過 AI 接著作答提示。",
+    "aiModel": "選擇 AI 助教用ê模型版本。",
+    "selectAPIKeys": "選擇這个題目會使開ê API 金鑰 (會使選真濟个)。",
+    "activeAiKeys": "當當咧用ê API 金鑰，會輪流使。",
+    "inactiveAiKeys": "猶未開ê API 金鑰 (搝去頂面就開矣)。",
+    "trialMode": "開啟測試模式，准學生佇正式提交進前先試行。",
+    "trialMaxNumber": "設定測試模式ê執行次數限制，-1 代表無限制。",
+    "resultVisible": "准學生看詳細ê測試結果佮錯誤訊息。",
+    "resultDownloadable": "准學生下載測試執行ê輸出檔案 (干焦佇結果看會著ê時陣有效)。",
+    "uploadPublicTestData": "上傳公開測資 ZIP 檔，予測試模式用 (包含 .in 佮 .out)。",
+    "uploadACFiles": "上傳正確答案 (AC/Reference) 程式碼。",
+    "networkSidecars": "配置 Sidecar 容器，提供額外ê網路服務。",
+    "networkAccessRestriction": "設定外部網路存取限制。",
+    "networkAccessModel": "黑名單 (無定義ê就准) 抑是白名單 (無定義ê就擋)。",
+    "networkAccessIPList": "設定准抑是擋ê IP 地址列表。",
+    "networkAccessURLList": "設定准抑是擋ê URL 列表。",
+    "SandboxEnvironment": "設定程式執行ê沙盒環境佮 Docker 映像檔。",
+    "Sidecars": "配置綴主程式做伙執行ê輔助容器 (Sidecars)。",
+    "dockerFiles": "上傳自訂 Dockerfile 嚟起執行環境。",
+    "sideCarName": "Sidecar 容器ê名。",
+    "sideCarImage": "Sidecar 用ê Docker 映像檔名稱。",
+    "sideCarArgs": "傳予 Sidecar 容器ê啟動參數。",
+    "sideCarEnv": "設定 Sidecar 容器ê環境變數。",
+    "ArtifactCollection": "設定需要對執行環境收集ê檔案 (Artifacts)。",
+    "CompiledBinary": "收集編譯後ê二進位檔。",
+    "StudentArtifact": "收集學生程式產生ê特定檔案。",
+    "setPipelines": "配置程式碼ê編譯佮執行流程。",
+    "fileAccess": "設定學生程式對檔案系統ê存取權限。",
+    "libraryRestrictionsGroup1": "設定靜態分析佮函式庫使用限制。",
+    "libraryRestrictionsGroup2": "設定進階函式庫佮語法限制。",
+    "importsRestrictions": "限制 Python 腳本會使匯入ê模組 (Imports)。",
+    "headersRestrictions": "限制 C/C++ 程式會使引用ê標頭檔 (Headers)。",
+    "functionsRestrictions": "限制程式會使叫ê特定函式。",
+    "syntaxRestrictions": "限制程式會使用ê語法結構 (親像 for, while 等)。",
+    "executionMode": "選擇程式執行模式 (一般模式、互動模式等)。",
+    "executionModeGeneral": "一般模式：標準輸入/輸出 (stdin/stdout) 判定。",
+    "executionModeFuncitonOnly": "干焦函式模式：學生干焦需要實作指定ê函式 (親像 LeetCode)。",
+    "executionModeInteractive": "互動模式：學生程式需要佮測資程式進行互動溝通。",
+    "uploadFile": "上傳需要ê相關檔案 (親像 Makefile, Header 等)。",
+    "interactiveTeacherFirsts": "互動模式設定：敢愛先執行老師ê程式。",
+    "interactiveUploadTeacherCode": "上傳互動模式需要ê老師程式碼 (Interactor)。",
+    "customChecker": "開啟自訂檢測器 (Special Judge)。",
+    "uploadCustomChecker": "上傳自訂檢測腳本 (Python)。",
+    "uploadCustomScorer": "上傳自訂評分腳本。",
+    "customScoringScript": "開啟自訂評分邏輯。",
+    "aiCheckerEnable": "開啟 AI 輔助檢查 (AI Checker)。",
+    "setTestData": "管理測試資料 (Test Data)。",
+    "setDataZipFile": "上傳包含所有測試資料ê ZIP 檔案。",
+    "setResourceData": "設定資源檔案。",
+    "setResourceDataStudent": "上傳學生會使存取ê資源檔案。",
+    "setResourceDataTeacher": "上傳干焦予評測端用ê資源檔案。",
+    "student": "學生",
+    "TA": "助教",
+    "appendSample": "加範例",
+    "removeLastSample": "提掉上尾一个範例"
   }
 }

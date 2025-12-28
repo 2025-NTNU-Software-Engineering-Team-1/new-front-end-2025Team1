@@ -432,7 +432,50 @@ function closeCaseOutputModal() {
   caseOutputModal.value?.close();
   caseOutputData.value = null;
   caseOutputError.value = null;
+  caseOutputError.value = null;
   currentViewingCase.value = null;
+}
+
+// Artifact Drag-to-Scroll Logic
+const artifactContainer = ref<HTMLElement | null>(null);
+let isDown = false;
+let startX = 0;
+let scrollLeft = 0;
+
+function startDrag(e: MouseEvent) {
+  if (!artifactContainer.value) return;
+  isDown = true;
+  artifactContainer.value.classList.add("cursor-grabbing");
+  artifactContainer.value.classList.remove("cursor-grab");
+  startX = e.pageX - artifactContainer.value.offsetLeft;
+  scrollLeft = artifactContainer.value.scrollLeft;
+}
+
+function stopDrag() {
+  if (!artifactContainer.value) return;
+  isDown = false;
+  artifactContainer.value.classList.remove("cursor-grabbing");
+  artifactContainer.value.classList.add("cursor-grab");
+}
+
+function onDrag(e: MouseEvent) {
+  if (!isDown || !artifactContainer.value) return;
+  e.preventDefault();
+  const x = e.pageX - artifactContainer.value.offsetLeft;
+  const walk = (x - startX) * 2;
+  artifactContainer.value.scrollLeft = scrollLeft - walk;
+}
+
+const copiedArtifactKey = ref<string | null>(null);
+
+function copyArtifactContent(content: string, key: string) {
+  navigator.clipboard.writeText(content);
+  copiedArtifactKey.value = key;
+  setTimeout(() => {
+    if (copiedArtifactKey.value === key) {
+      copiedArtifactKey.value = null;
+    }
+  }, 2000);
 }
 
 // Case Navigation
@@ -726,7 +769,8 @@ function closeDeleteErrorModal() {
               :disabled="isRejudgeLoading"
               @click="rejudge"
             >
-              <i-uil-repeat :class="['mr-1', isRejudgeLoading && 'animate-spin']" /> Rejudge
+              <i-uil-repeat :class="['mr-1', isRejudgeLoading && 'animate-spin']" />
+              {{ $t("course.problem.test.trialHistory.rejudge") }}
             </button>
             <!-- Delete Button (only shown if user has permission) -->
             <button
@@ -1073,11 +1117,20 @@ function closeDeleteErrorModal() {
         >
           <!-- Input Section -->
           <div>
-            <label class="label pb-2">
+            <div class="flex items-center justify-between pb-2">
               <span class="label-text text-base font-semibold">{{
                 t("course.problem.test.trialHistory.input")
               }}</span>
-            </label>
+              <button
+                v-if="caseOutputData.input"
+                class="btn btn-ghost btn-sm opacity-70 hover:opacity-100"
+                @click="copyArtifactContent(caseOutputData.input || '', 'input')"
+                :title="t('course.problem.test.trialHistory.copy')"
+              >
+                <i-uil-copy v-if="copiedArtifactKey !== 'input'" class="h-5 w-5" />
+                <i-uil-check v-else class="text-success h-5 w-5" />
+              </button>
+            </div>
             <div v-if="caseOutputData.input === null || caseOutputData.input === undefined">
               <div class="text-base-content/60 py-2 italic">
                 {{ t("course.problem.test.trialHistory.inputNotAvailable") }}
@@ -1095,11 +1148,20 @@ function closeDeleteErrorModal() {
 
           <!-- Expected Output Section -->
           <div>
-            <label class="label pb-2">
+            <div class="flex items-center justify-between pb-2">
               <span class="label-text text-base font-semibold">{{
                 t("course.problem.test.trialHistory.expectedOutput")
               }}</span>
-            </label>
+              <button
+                v-if="caseOutputData.expectedOutput"
+                class="btn btn-ghost btn-sm opacity-70 hover:opacity-100"
+                @click="copyArtifactContent(caseOutputData.expectedOutput || '', 'expectedOutput')"
+                :title="t('course.problem.test.trialHistory.copy')"
+              >
+                <i-uil-copy v-if="copiedArtifactKey !== 'expectedOutput'" class="h-5 w-5" />
+                <i-uil-check v-else class="text-success h-5 w-5" />
+              </button>
+            </div>
             <div v-if="caseOutputData.expectedOutput === null || caseOutputData.expectedOutput === undefined">
               <div class="text-base-content/60 py-2 italic">
                 {{ t("course.problem.test.trialHistory.expectedNotAvailable") }}
@@ -1117,11 +1179,20 @@ function closeDeleteErrorModal() {
 
           <!-- Stdout Section -->
           <div>
-            <label class="label pb-2">
+            <div class="flex items-center justify-between pb-2">
               <span class="label-text text-base font-semibold">{{
                 t("course.problem.test.trialHistory.stdout")
               }}</span>
-            </label>
+              <button
+                v-if="caseOutputData.stdout"
+                class="btn btn-ghost btn-sm opacity-70 hover:opacity-100"
+                @click="copyArtifactContent(caseOutputData.stdout || '', 'stdout')"
+                :title="t('course.problem.test.trialHistory.copy')"
+              >
+                <i-uil-copy v-if="copiedArtifactKey !== 'stdout'" class="h-5 w-5" />
+                <i-uil-check v-else class="text-success h-5 w-5" />
+              </button>
+            </div>
             <div v-if="caseOutputData.stdout === null">
               <!-- File doesn't exist -->
               <div class="text-base-content/60 py-2 italic">
@@ -1141,11 +1212,20 @@ function closeDeleteErrorModal() {
 
           <!-- Stderr Section -->
           <div class="mt-6">
-            <label class="label pb-2">
+            <div class="flex items-center justify-between pb-2">
               <span class="label-text text-base font-semibold">{{
                 t("course.problem.test.trialHistory.stderr")
               }}</span>
-            </label>
+              <button
+                v-if="caseOutputData.stderr"
+                class="btn btn-ghost btn-sm opacity-70 hover:opacity-100"
+                @click="copyArtifactContent(caseOutputData.stderr || '', 'stderr')"
+                :title="t('course.problem.test.trialHistory.copy')"
+              >
+                <i-uil-copy v-if="copiedArtifactKey !== 'stderr'" class="h-5 w-5" />
+                <i-uil-check v-else class="text-success h-5 w-5" />
+              </button>
+            </div>
             <div v-if="caseOutputData.stderr === null">
               <!-- File doesn't exist -->
               <div class="text-base-content/60 py-2 italic">
@@ -1169,43 +1249,68 @@ function closeDeleteErrorModal() {
               <span class="label-text text-base font-semibold">{{
                 t("course.problem.test.trialHistory.artifactFiles")
               }}</span>
+              <span class="label-text-alt ml-2 text-gray-500">(Drag to scroll)</span>
             </label>
-            <div class="mt-2 space-y-4">
+
+            <div
+              ref="artifactContainer"
+              class="scrollbar-hide mt-2 flex cursor-grab gap-4 overflow-x-auto pb-4 select-none"
+              @mousedown="startDrag"
+              @mouseleave="stopDrag"
+              @mouseup="stopDrag"
+              @mousemove="onDrag"
+            >
               <div
                 v-for="(file, fileName) in caseOutputData.files"
                 :key="fileName"
-                class="border-base-300 rounded-lg border p-4"
+                class="border-base-300 bg-base-100 flex h-[500px] max-w-[600px] min-w-[350px] flex-shrink-0 flex-col overflow-hidden rounded-lg border p-4"
               >
                 <!-- File Header -->
-                <div class="mb-3 flex items-center gap-2">
+                <div class="mb-3 flex flex-shrink-0 items-center gap-2">
                   <i :class="getFileIconClass(file.extension)" class="h-5 w-5" />
-                  <span class="font-medium">{{ fileName }}</span>
-                  <span class="badge badge-sm">{{ file.extension || "no ext" }}</span>
+                  <span class="truncate font-medium" :title="String(fileName)">{{ fileName }}</span>
+                  <span class="badge badge-sm flex-shrink-0">{{ file.extension || "no ext" }}</span>
+                  <div class="flex-grow"></div>
+                  <button
+                    v-if="file.type === 'text'"
+                    class="btn btn-ghost btn-sm opacity-70 hover:opacity-100"
+                    @click="copyArtifactContent(file.content, String(fileName))"
+                    :title="t('course.problem.test.trialHistory.copy')"
+                  >
+                    <i-uil-copy v-if="copiedArtifactKey !== fileName" class="h-5 w-5" />
+                    <i-uil-check v-else class="text-success h-5 w-5" />
+                  </button>
                 </div>
 
                 <!-- Image Files -->
-                <div v-if="file.type === 'image'" class="bg-base-100 flex justify-center rounded p-4">
+                <div
+                  v-if="file.type === 'image'"
+                  class="bg-base-100 flex min-h-0 flex-grow items-center justify-center rounded p-4"
+                >
                   <img
                     :src="`data:${file.mimeType || 'image/png'};base64,${file.content}`"
                     :alt="String(fileName)"
-                    style="max-width: 100%; max-height: 70vh; min-width: 200px; min-height: 200px"
-                    class="border-base-300 rounded border object-contain shadow-sm"
+                    class="h-full w-full rounded object-contain shadow-sm"
+                    draggable="false"
                   />
                 </div>
 
                 <!-- Markdown Files -->
                 <div v-else-if="file.extension === '.md' && file.type === 'text'" class="mt-2">
-                  <!-- Fallback to code editor or assumes markdown renderer exists -->
                   <markdown-renderer :content="file.content" />
                 </div>
 
                 <!-- Text Files (including code files) -->
-                <div v-else-if="file.type === 'text'" class="mt-2">
-                  <code-editor v-model="file.content" readonly />
+                <div v-else-if="file.type === 'text'" class="mt-2 h-full">
+                  <code-editor v-model="file.content" readonly class="h-full" />
                 </div>
 
                 <!-- Binary Files (not images) -->
-                <div v-else class="text-base-content/60 py-2 italic">
+                <div
+                  v-else
+                  class="text-base-content/60 flex h-full flex-col items-center justify-center py-10 text-center italic"
+                >
+                  <i-uil-file-block-alt class="mb-2 text-4xl" />
                   {{ t("course.problem.test.trialHistory.binaryNoPreview") }}
                 </div>
               </div>

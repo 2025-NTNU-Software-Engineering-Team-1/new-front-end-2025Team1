@@ -5,12 +5,13 @@
 // ==========================================
 import { inject, Ref, ref, watch, computed } from "vue";
 import { useRoute } from "vue-router";
-import { ZipReader, BlobReader } from "@zip.js/zip.js";
+import { ZipReader, BlobReader, ZipWriter, BlobWriter, TextReader } from "@zip.js/zip.js";
 import { assertFileSizeOK } from "@/utils/checkFileSize";
+import { isMacOsZip } from "@/utils/zipValidator";
 import api from "@/models/api";
 import { useI18n } from "vue-i18n";
-import { hover_zh } from "../../Hovers/hover-zh-tw";
-import { hover_en } from "../../Hovers/hover-en";
+import { getHoverTranslations } from "../../Hovers";
+import AITestcaseModal from "@/components/AITestcaseModal.vue";
 
 // ==========================================
 // Props & Injection
@@ -21,9 +22,76 @@ const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
 const route = useRoute();
 const isDrag = ref(false);
 const { t, locale } = useI18n();
-const hover = computed(() => {
-  return locale.value === "english" ? hover_en : hover_zh;
-});
+const hover = computed(() => getHoverTranslations(locale.value));
+
+// AI Testcase Modal State
+const showAITestcaseModal = ref(false);
+const isCreatingZip = ref(false);
+
+// Type for advanced testcase assignment
+type TestcaseAssignment = {
+  task: number;
+  case: number;
+  input: string;
+  output: string;
+};
+
+// Handle AI-generated testcases (simple mode - legacy, each as separate task)
+async function handleAITestcases(inputs: string[], outputs?: string[]) {
+  if (!inputs.length) return;
+  isCreatingZip.value = true;
+
+  try {
+    const zipWriter = new ZipWriter(new BlobWriter("application/zip"));
+
+    for (let i = 0; i < inputs.length; i++) {
+      const task = String(i).padStart(2, "0");
+      const caseNum = "00";
+      await zipWriter.add(`${task}${caseNum}.in`, new TextReader(inputs[i]));
+      if (outputs && outputs[i]) {
+        await zipWriter.add(`${task}${caseNum}.out`, new TextReader(outputs[i]));
+      }
+    }
+
+    const blob = await zipWriter.close();
+    const file = new File([blob], "ai_generated_testdata.zip", { type: "application/zip" });
+    problem.value.assets!.testdataZip = file;
+  } catch (err) {
+    console.error("Failed to create testdata zip from AI:", err);
+    testdataError.value = "Failed to create testdata from AI-generated test cases.";
+  } finally {
+    isCreatingZip.value = false;
+  }
+}
+
+// Handle AI-generated testcases (advanced mode - with custom task/case assignment)
+async function handleAITestcasesAdvanced(assignments: TestcaseAssignment[]) {
+  if (!assignments.length) return;
+  isCreatingZip.value = true;
+
+  try {
+    const zipWriter = new ZipWriter(new BlobWriter("application/zip"));
+
+    for (const a of assignments) {
+      const task = String(a.task).padStart(2, "0");
+      const caseNum = String(a.case).padStart(2, "0");
+      await zipWriter.add(`${task}${caseNum}.in`, new TextReader(a.input));
+      if (a.output) {
+        await zipWriter.add(`${task}${caseNum}.out`, new TextReader(a.output));
+      }
+    }
+
+    const blob = await zipWriter.close();
+    const file = new File([blob], "ai_generated_testdata.zip", { type: "application/zip" });
+    problem.value.assets!.testdataZip = file;
+  } catch (err) {
+    console.error("Failed to create testdata zip from AI:", err);
+    testdataError.value = "Failed to create testdata from AI-generated test cases.";
+  } finally {
+    isCreatingZip.value = false;
+  }
+}
+
 // ==========================================
 // [CONFIG] Console Debug Mode
 // ==========================================
@@ -70,28 +138,6 @@ if (!problem || !problem.value) {
 // ==========================================
 const testdataError = ref<string | null>(null);
 
-/**
- * Checks if the filenames array contains macOS metadata files.
- * macOS creates hidden files like `._filename` and `__MACOSX/` folder when zipping.
- * These files can cause issues with testcase processing.
- */
-function hasMacOSMetadataFiles(filenames: string[]): string[] {
-  const macosFiles: string[] = [];
-  for (const filename of filenames) {
-    // Check for __MACOSX directory (macOS resource fork folder)
-    if (filename.startsWith("__MACOSX/") || filename === "__MACOSX") {
-      macosFiles.push(filename);
-      continue;
-    }
-    // Check for ._ prefixed files (macOS extended attributes)
-    const basename = filename.split("/").pop() || "";
-    if (basename.startsWith("._")) {
-      macosFiles.push(filename);
-    }
-  }
-  return macosFiles;
-}
-
 // ==========================================
 // Computed Properties
 // ==========================================
@@ -111,7 +157,7 @@ const hasBackendTestcase = computed(() => hasExistingTasks.value || hasRemoteTes
 const currentTaskLabel = computed(() => {
   if (!hasBackendTestcase.value) return "";
   const len = problem.value.testCaseInfo?.tasks?.length ?? 0;
-  return len > 0 ? `${len} task(s)` : "remote";
+  return len > 0 ? `${len} ${t("course.problems.task")}` : "remote";
 });
 
 // ==========================================
@@ -185,27 +231,24 @@ watch(
     logger.log("File Name", file.name);
 
     try {
-      // 1. Read Zip Content
-      const reader = new ZipReader(new BlobReader(file));
-      const entries = await reader.getEntries();
-      await reader.close();
-
-      const filenames = entries.map(({ filename }) => filename);
-
-      // 2. Check for macOS metadata files (._* and __MACOSX/)
-      const macosFiles = hasMacOSMetadataFiles(filenames);
-      if (macosFiles.length > 0) {
-        const sampleFiles = macosFiles.slice(0, 3).join(", ");
-        const moreCount = macosFiles.length > 3 ? ` (and ${macosFiles.length - 3} more)` : "";
+      // 1. Check for macOS metadata files (Fast fail)
+      if (await isMacOsZip(file)) {
         const msg = t("course.problems.macosZipDetected", {
-          files: sampleFiles + moreCount,
+          files: "MacOS System Files",
         });
-        logger.error("macOS Metadata Files Detected", macosFiles);
+        logger.error("macOS Metadata Files Detected");
         testdataError.value = msg;
         problem.value.assets!.testdataZip = null; // Clear invalid file
         problem.value.testCaseInfo = { ...problem.value.testCaseInfo, tasks: [] };
         return;
       }
+
+      // 2. Read Zip Content
+      const reader = new ZipReader(new BlobReader(file));
+      const entries = await reader.getEntries();
+      await reader.close();
+
+      const filenames = entries.map(({ filename }) => filename);
 
       const inputs = filenames.filter((f) => f.endsWith(".in"));
       const outputs = filenames.filter((f) => f.endsWith(".out"));
@@ -276,7 +319,7 @@ watch(
       >
       <div class="flex items-center gap-2">
         <span v-if="hasBackendTestcase" class="badge badge-outline badge-success text-xs">
-          Current: {{ currentTaskLabel }}
+          {{ t("course.problems.current") }} {{ currentTaskLabel }}
         </span>
         <span v-else class="badge badge-outline text-xs opacity-70">{{
           t("course.problems.notUploaded")
@@ -290,6 +333,16 @@ watch(
         >
           {{ t("course.problems.downloadCurrent") }}
         </a>
+        <!-- AI Generate Button -->
+        <button
+          type="button"
+          class="btn btn-xs btn-outline gap-1"
+          :disabled="isCreatingZip"
+          @click="showAITestcaseModal = true"
+        >
+          <i-uil-robot class="h-4 w-4" />
+          {{ t("aiChatbot.testcaseGenerator.generateForJudging") }}
+        </button>
       </div>
     </label>
 
@@ -395,5 +448,32 @@ watch(
         </div>
       </div>
     </template>
+
+    <!-- AI Testcase Generator Modal -->
+    <AITestcaseModal
+      v-if="showAITestcaseModal"
+      :problem-id="route.params.id as string | undefined"
+      :course-name="(problem.courses?.[0] || route.params.name) as string"
+      mode="teacher"
+      :problem-context="{
+        title: problem.problemName || '',
+        description: problem.description?.description || '',
+        input_format: problem.description?.input || '',
+        output_format: problem.description?.output || '',
+      }"
+      @close="showAITestcaseModal = false"
+      @use-testcases="
+        (inputs: string[], outputs?: string[]) => {
+          handleAITestcases(inputs, outputs);
+          showAITestcaseModal = false;
+        }
+      "
+      @use-testcases-advanced="
+        (assignments: TestcaseAssignment[]) => {
+          handleAITestcasesAdvanced(assignments);
+          showAITestcaseModal = false;
+        }
+      "
+    />
   </div>
 </template>

@@ -5,14 +5,14 @@
 // ==========================================
 import { inject, Ref, ref, reactive, watch, computed, onMounted, onBeforeUnmount } from "vue";
 import { useRoute } from "vue-router";
-import { ZipReader, BlobReader } from "@zip.js/zip.js";
-import { hover_zh } from "../../Hovers/hover-zh-tw";
-import { hover_en } from "../../Hovers/hover-en";
+import { ZipReader, BlobReader, ZipWriter, BlobWriter, TextReader } from "@zip.js/zip.js";
+import { getHoverTranslations } from "../../Hovers";
 // Components
 import LanguageMultiSelect from "../../Forms/LanguageMultiSelect.vue";
 import MultiStringInput from "../Controls/MultiStringInput.vue";
 import SidecarInput from "../Controls/SidecarInput.vue";
 import RandomCoin from "../Controls/RandomCoin.vue";
+import AITestcaseModal from "@/components/AITestcaseModal.vue";
 
 // Utils & API
 import { assertFileSizeOK } from "@/utils/checkFileSize";
@@ -21,9 +21,7 @@ import api from "@/models/api";
 
 import { useI18n } from "vue-i18n";
 const { t, locale } = useI18n();
-const hover = computed(() => {
-  return locale.value === "english" ? hover_en : hover_zh;
-});
+const hover = computed(() => getHoverTranslations(locale.value));
 
 // ==========================================
 // [CONFIG] Console Debug Mode
@@ -40,6 +38,70 @@ const IP_REGEX =
 
 // AC file
 const acFileError = ref("");
+
+// AI Testcase Modal for Public Testdata
+const showAIPublicTestcaseModal = ref(false);
+const isCreatingPublicZip = ref(false);
+
+// Type for advanced testcase assignment
+type TestcaseAssignment = {
+  task: number;
+  case: number;
+  input: string;
+  output: string;
+};
+
+async function handleAIPublicTestcases(inputs: string[], outputs?: string[]) {
+  if (!inputs.length) return;
+  isCreatingPublicZip.value = true;
+
+  try {
+    const zipWriter = new ZipWriter(new BlobWriter("application/zip"));
+
+    for (let i = 0; i < inputs.length; i++) {
+      const task = String(i).padStart(2, "0");
+      const caseNum = "00";
+      await zipWriter.add(`${task}${caseNum}.in`, new TextReader(inputs[i]));
+      if (outputs && outputs[i]) {
+        await zipWriter.add(`${task}${caseNum}.out`, new TextReader(outputs[i]));
+      }
+    }
+
+    const blob = await zipWriter.close();
+    const file = new File([blob], "ai_generated_public_testdata.zip", { type: "application/zip" });
+    problem.value.assets!.trialModePublicTestDataZip = file;
+  } catch (err) {
+    console.error("Failed to create public testdata zip from AI:", err);
+  } finally {
+    isCreatingPublicZip.value = false;
+  }
+}
+
+async function handleAIPublicTestcasesAdvanced(assignments: TestcaseAssignment[]) {
+  if (!assignments.length) return;
+  isCreatingPublicZip.value = true;
+
+  try {
+    const zipWriter = new ZipWriter(new BlobWriter("application/zip"));
+
+    for (const a of assignments) {
+      const task = String(a.task).padStart(2, "0");
+      const caseNum = String(a.case).padStart(2, "0");
+      await zipWriter.add(`${task}${caseNum}.in`, new TextReader(a.input));
+      if (a.output) {
+        await zipWriter.add(`${task}${caseNum}.out`, new TextReader(a.output));
+      }
+    }
+
+    const blob = await zipWriter.close();
+    const file = new File([blob], "ai_generated_public_testdata.zip", { type: "application/zip" });
+    problem.value.assets!.trialModePublicTestDataZip = file;
+  } catch (err) {
+    console.error("Failed to create public testdata zip from AI:", err);
+  } finally {
+    isCreatingPublicZip.value = false;
+  }
+}
 
 // ==========================================
 // Logger Utility
@@ -172,6 +234,7 @@ function onQuotaInput(e: Event) {
 // Section: Trial Mode
 // ==========================================
 const trialQuotaError = ref("");
+const trialTestdataError = ref<string | null>(null);
 const localTrialLimit = ref<number | "">(problem.value?.config?.maxNumberOfTrial ?? "");
 
 function onTrialLimitInput(e: Event) {
@@ -198,14 +261,53 @@ function onTrialLimitInput(e: Event) {
   }
 }
 
+/**
+ * Checks if the filenames array contains macOS metadata files.
+ * macOS creates hidden files like `._filename` and `__MACOSX/` folder when zipping.
+ * These files can cause issues with testcase processing.
+ */
+function hasMacOSMetadataFiles(filenames: string[]): string[] {
+  const macosFiles: string[] = [];
+  for (const filename of filenames) {
+    // Check for __MACOSX directory (macOS resource fork folder)
+    if (filename.startsWith("__MACOSX/") || filename === "__MACOSX") {
+      macosFiles.push(filename);
+      continue;
+    }
+    // Check for ._ prefixed files (macOS extended attributes)
+    const basename = filename.split("/").pop() || "";
+    if (basename.startsWith("._")) {
+      macosFiles.push(filename);
+    }
+  }
+  return macosFiles;
+}
+
 async function validateTrialPublicZip(file: File): Promise<boolean> {
   logger.group("Validate Trial Zip");
+  trialTestdataError.value = null;
+
   try {
     const reader = new ZipReader(new BlobReader(file));
     const entries = await reader.getEntries();
     await reader.close?.();
 
-    // Filter out directories and system files (e.g. __MACOSX)
+    const filenames = entries.map((e) => e.filename);
+
+    // [Validation] Block Mac Zip
+    const macosFiles = hasMacOSMetadataFiles(filenames);
+    if (macosFiles.length > 0) {
+      const sampleFiles = macosFiles.slice(0, 3).join(", ");
+      const moreCount = macosFiles.length > 3 ? ` (and ${macosFiles.length - 3} more)` : "";
+      const msg = t("course.problems.macosZipDetected", {
+        files: sampleFiles + moreCount,
+      });
+      logger.error("macOS Metadata Files Detected", macosFiles);
+      trialTestdataError.value = msg;
+      return false;
+    }
+
+    // Filter out directories and system files
     const validEntries = entries.filter((e: any) => {
       if (e.directory) return false;
       if (e.filename.endsWith("/")) return false;
@@ -217,7 +319,7 @@ async function validateTrialPublicZip(file: File): Promise<boolean> {
     if (!validEntries.length) {
       const msg = "Zip contains no valid files (or only empty folders).";
       logger.error(msg);
-      alert(msg);
+      trialTestdataError.value = msg;
       return false;
     }
 
@@ -229,7 +331,7 @@ async function validateTrialPublicZip(file: File): Promise<boolean> {
       const msg =
         "Invalid files found (must be .in or .out only):\n" + invalid.map((e: any) => e.filename).join("\n");
       logger.error(msg);
-      alert(msg);
+      trialTestdataError.value = msg;
       return false;
     }
 
@@ -247,7 +349,7 @@ async function validateTrialPublicZip(file: File): Promise<boolean> {
         "Missing .out files for the following .in files:\n" +
         missingOutFiles.map((name: any) => `${name}.in`).join("\n");
       logger.error(msg);
-      alert(msg);
+      trialTestdataError.value = msg;
       return false;
     }
 
@@ -256,7 +358,7 @@ async function validateTrialPublicZip(file: File): Promise<boolean> {
   } catch (err) {
     const msg = "Failed to read zip file: " + err;
     logger.error(msg);
-    alert(msg);
+    trialTestdataError.value = msg;
     return false;
   } finally {
     logger.groupEnd();
@@ -407,6 +509,17 @@ async function inspectDockerZip(file: File) {
     const entries = await reader.getEntries();
     await reader.close();
 
+    // [Validation] Block Mac Zip
+    const hasMacFiles = entries.some(
+      (e) => e.filename.includes("__MACOSX") || e.filename.split("/").pop()?.startsWith("._"),
+    );
+
+    if (hasMacFiles) {
+      dockerZipError.value = "MacOS Zip files are not allowed. Please remove __MACOSX and ._ files.";
+      logger.error("Mac zip detected");
+      return false;
+    }
+
     const dockerfiles = entries.filter((e) => !e.directory && e.filename.endsWith("Dockerfile"));
 
     if (dockerfiles.length === 0) {
@@ -503,14 +616,10 @@ const networkErrors = computed(() => {
 
   // === UX 提示：空白清單時 ===
   if (model === "Black" && ips.length === 0 && urls.length === 0) {
-    errors.global.push(
-      "※ No blocking options are set; external network access is fully open by default (Blacklist mode).",
-    );
+    errors.global.push(t("course.problems.noBlockingOptionsSet"));
   }
   if (model === "White" && ips.length === 0 && urls.length === 0) {
-    errors.global.push(
-      "※ No allowed items are set; external network access is disabled by default (Whitelist mode).",
-    );
+    errors.global.push(t("course.problems.noAllowedItemsSet"));
   }
 
   // === Sidecar 檢查 ===
@@ -706,34 +815,25 @@ async function fetchKeys() {
 // Section: Key Search
 // ==========================================
 const searchQuery = ref("");
-const activeKeyRefs = ref<Record<string, HTMLElement | null>>({});
-const inactiveKeyRefs = ref<Record<string, HTMLElement | null>>({});
 
-function scrollToKey() {
+// [Optimized] Real-time filtering
+const filteredActiveKeys = computed(() => {
   const query = searchQuery.value.trim().toLowerCase();
-  if (!query) return;
+  if (!query) return apiKeys.active;
+  return apiKeys.active.filter(
+    (k: any) =>
+      k.key_name.toLowerCase().includes(query) || (k.created_by || "").toLowerCase().includes(query),
+  );
+});
 
-  const matchActive = apiKeys.active.find((k: any) => k.key_name.toLowerCase().includes(query)) as any;
-  const matchInactive = apiKeys.inactive.find((k: any) => k.key_name.toLowerCase().includes(query)) as any;
-
-  if (matchActive) {
-    showActiveKeys.value = true;
-    requestAnimationFrame(() => {
-      activeKeyRefs.value[matchActive.id]?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    });
-  } else if (matchInactive) {
-    showInactiveKeys.value = true;
-    requestAnimationFrame(() => {
-      inactiveKeyRefs.value[matchInactive.id]?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    });
-  }
-}
+const filteredInactiveKeys = computed(() => {
+  const query = searchQuery.value.trim().toLowerCase();
+  if (!query) return apiKeys.inactive;
+  return apiKeys.inactive.filter(
+    (k: any) =>
+      k.key_name.toLowerCase().includes(query) || (k.created_by || "").toLowerCase().includes(query),
+  );
+});
 
 // ==========================================
 // Section: Selected Keys Management
@@ -1321,10 +1421,8 @@ onBeforeUnmount(() => {
                 v-model="searchQuery"
                 type="text"
                 class="input-bordered input input-sm flex-1"
-                placeholder="Search by Key Name"
-                @keyup.enter="scrollToKey"
+                :placeholder="t('course.problems.aiKeySearch')"
               />
-              <button class="btn btn-sm" @click="scrollToKey">{{ t("course.problems.aiKeySearch") }}</button>
             </div>
 
             <div v-if="isFetchingKeys" class="flex items-center gap-2 py-4 text-sm opacity-70">
@@ -1370,10 +1468,9 @@ onBeforeUnmount(() => {
                 </button>
 
                 <div v-show="showActiveKeys" class="h-64 overflow-y-auto p-3">
-                  <template v-for="key in apiKeys.active as any[]" :key="(key as any).id">
+                  <template v-for="key in filteredActiveKeys as any[]" :key="(key as any).id">
                     <label
                       v-if="!selectedKeys.includes(key.id)"
-                      :ref="(el) => (activeKeyRefs[(key as any).id] = el as HTMLElement)"
                       class="hover:border-info/30 hover:bg-base-200 flex cursor-move items-start gap-3 rounded-lg border border-transparent p-3 transition"
                       draggable="true"
                       @dragstart="onDragStart($event, key.id, true)"
@@ -1451,10 +1548,9 @@ onBeforeUnmount(() => {
                 </button>
 
                 <div v-show="showInactiveKeys" class="h-64 overflow-y-auto p-3">
-                  <template v-for="key in apiKeys.inactive as any[]" :key="(key as any).id">
+                  <template v-for="key in filteredInactiveKeys as any[]" :key="(key as any).id">
                     <label
                       v-if="!selectedKeys.includes(key.id)"
-                      :ref="(el) => (inactiveKeyRefs[(key as any).id] = el as HTMLElement)"
                       class="hover:border-error/30 hover:bg-base-200 flex cursor-move items-start gap-3 rounded-lg border border-transparent p-3 transition"
                       draggable="true"
                       @dragstart="onDragStart($event, key.id, false)"
@@ -1529,11 +1625,11 @@ onBeforeUnmount(() => {
               :class="['input-bordered input w-full', trialQuotaError && 'input-error']"
               :value="localTrialLimit"
               @input="onTrialLimitInput"
-              placeholder="-1 (unlimited) or 1–500"
+              :placeholder="t('course.problems.trialMaxNumberPlaceholder')"
             />
             <label class="label">
               <span class="label-text-alt" :class="trialQuotaError ? 'text-error' : ''">
-                {{ trialQuotaError || "-1 means unlimited" }}
+                {{ trialQuotaError || t("course.problems.meansUnlimited") }}
               </span>
             </label>
           </div>
@@ -1603,6 +1699,16 @@ onBeforeUnmount(() => {
               <span v-else class="badge badge-outline text-xs opacity-70">{{
                 t("course.problems.notUploaded")
               }}</span>
+              <!-- AI Generate Button for Public Testdata -->
+              <button
+                type="button"
+                class="btn btn-xs btn-outline gap-1"
+                :disabled="isCreatingPublicZip"
+                @click="showAIPublicTestcaseModal = true"
+              >
+                <i-uil-robot class="h-4 w-4" />
+                {{ t("aiChatbot.testcaseGenerator.generateForPublic") }}
+              </button>
             </div>
           </div>
           <div class="mt-3 flex items-center gap-2">
@@ -1616,6 +1722,7 @@ onBeforeUnmount(() => {
                   const inputEl = e.target as HTMLInputElement;
                   const file = inputEl.files?.[0] || null;
                   problem.assets!.trialModePublicTestDataZip = null;
+                  trialTestdataError = null;
                   if (!file) {
                     inputEl.value = '';
                     v$?.assets?.trialModePublicTestDataZip?.$touch();
@@ -1641,13 +1748,15 @@ onBeforeUnmount(() => {
             />
           </div>
           <div class="mt-1 pl-1 text-xs opacity-70">
-            Only <code>.in</code> and <code>.out</code> files inside ZIP; each <code>.in</code> must have a
-            corresponding <code>.out</code> file; ≤ 1 GB
+            {{ t("course.problems.onlyInOutFiles") }}
           </div>
           <label v-if="v$?.assets?.trialModePublicTestDataZip?.$error" class="label">
             <span class="label-text-alt text-error">{{
               v$.assets.trialModePublicTestDataZip.$errors[0]?.$message
             }}</span>
+          </label>
+          <label v-if="trialTestdataError" class="label text-error">
+            <span class="label-text-alt whitespace-pre-wrap">{{ trialTestdataError }}</span>
           </label>
         </div>
 
@@ -1774,7 +1883,7 @@ onBeforeUnmount(() => {
                   d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                 ></path>
               </svg>
-              <span>{{ networkErrors.global[0] }}</span>
+              <span>{{ networkErrors.global[0] }} </span>
             </div>
           </div>
 
@@ -1864,6 +1973,7 @@ onBeforeUnmount(() => {
                   <MultiStringInput
                     v-model="problem.config!.networkAccessRestriction!.external!.url"
                     placeholder="e.g. google.com"
+                    :is-link="true"
                     :badge-class="
                       problem.config!.networkAccessRestriction!.external!.model === 'White'
                         ? 'badge-info'
@@ -1998,7 +2108,7 @@ onBeforeUnmount(() => {
                           type="button"
                           class="btn btn-ghost btn-xs text-error h-6 min-h-0 w-6 p-0"
                           @click="removeDockerEnv(index)"
-                          title="Remove this environment"
+                          :title="t('course.problems.removeEnvironment')"
                         >
                           <i-uil-trash-alt />
                         </button>
@@ -2042,6 +2152,34 @@ onBeforeUnmount(() => {
       </div>
     </div>
   </div>
+
+  <!-- AI Testcase Generator Modal for Public Testdata -->
+  <AITestcaseModal
+    v-if="showAIPublicTestcaseModal"
+    :problem-id="route.params.id as string | undefined"
+    :course-name="(problem.courses?.[0] || route.params.name) as string"
+    mode="teacher"
+    :include-output="true"
+    :problem-context="{
+      title: problem.problemName || '',
+      description: problem.description?.description || '',
+      input_format: problem.description?.input || '',
+      output_format: problem.description?.output || '',
+    }"
+    @close="showAIPublicTestcaseModal = false"
+    @use-testcases="
+      (inputs: string[], outputs?: string[]) => {
+        handleAIPublicTestcases(inputs, outputs);
+        showAIPublicTestcaseModal = false;
+      }
+    "
+    @use-testcases-advanced="
+      (assignments: TestcaseAssignment[]) => {
+        handleAIPublicTestcasesAdvanced(assignments);
+        showAIPublicTestcaseModal = false;
+      }
+    "
+  />
 </template>
 
 <style scoped>

@@ -58,7 +58,7 @@ export const hover_zh = {
   syntaxRestrictions: "限制程式可使用的語法結構 (如 for, while 等)。",
   executionMode: "選擇程式執行模式 (一般模式、互動模式等)。",
   executionModeGeneral: "一般模式：標準輸入/輸出 (stdin/stdout) 判定。",
-  executionModeFuncitonOnly: "僅函式模式：學生只需實作指定函式 (類似 LeetCode)。",
+  executionModeFunctionOnly: "僅函式模式：學生只需實作指定函式 (類似 LeetCode)。",
   executionModeInteractive: "互動模式：學生程式需與測資程式進行互動溝通。",
   uploadFile: "上傳所需的相關檔案 (如 Makefile, Header 等)。",
   interactiveTeacherFirsts: "互動模式設定：是否先執行老師的程式。",

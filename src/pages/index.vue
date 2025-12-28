@@ -3,11 +3,14 @@ import { useTitle } from "@vueuse/core";
 import { useSession } from "@/stores/session";
 import useInteractions from "@/composables/useInteractions";
 import StudentDashboard from "@/components/Home/StudentDashboard.vue";
+import LoginSection from "@/components/LoginSection.vue";
+import SystemAnnouncements from "@/components/SystemAnnouncements.vue";
+import { useI18n } from "vue-i18n";
 
 const { isDesktop } = useInteractions();
 const session = useSession();
-
-useTitle("Home | Normal OJ");
+const { t } = useI18n();
+useTitle(`${t("home.title")} | ${t("general.title_tag")}`);
 </script>
 
 <template>

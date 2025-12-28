@@ -4,9 +4,11 @@ import { useRoute } from "vue-router";
 import api, { fetcher } from "@/models/api";
 import { useIntervalFn, useTitle } from "@vueuse/core";
 import { ref, watchEffect, computed } from "vue";
+import { useI18n } from "vue-i18n";
 
 const route = useRoute();
-useTitle(`Copycat - ${route.params.id} - ${route.params.name} | Normal OJ`);
+const { t } = useI18n();
+useTitle(`${t("course.problem.copycat.title", { id: route.params.id })} - ${route.params.name} | Normal OJ`);
 const { data: course, error } = useAxios<Course>(`/course/${route.params.name}`, fetcher);
 const { data, execute } = useAxios<MossReport>(
   `/copycat?course=${route.params.name}&problemId=${route.params.id}`,
@@ -47,22 +49,26 @@ async function generateReport() {
   <div class="card-container">
     <div class="card min-w-full">
       <div class="card-body">
-        <div class="card-title md:text-2xl lg:text-3xl">Copycat of problem #{{ $route.params.id }}</div>
+        <div class="card-title md:text-2xl lg:text-3xl">
+          {{ t("course.problem.copycat.title", { id: $route.params.id }) }}
+        </div>
 
         <div v-if="error" class="alert alert-error shadow-lg">
           <div>
             <i-uil-times-circle />
-            <span>Oops! Failed to load course members. Try again later.</span>
+            <span>{{ t("course.problem.copycat.loadError") }}</span>
           </div>
         </div>
 
         <div v-if="isReportGenerationFailed">
           <button class="btn" @click="generateReport">
-            <i-uil-file-upload-alt class="mr-1 h-5 w-5" />Click me to generate report
+            <i-uil-file-upload-alt class="mr-1 h-5 w-5" />{{ t("course.problem.copycat.generateReport") }}
           </button>
         </div>
 
-        <div v-if="!data || (!data.cpp_report && !data.python_report)">Report generating...</div>
+        <div v-if="!data || (!data.cpp_report && !data.python_report)">
+          {{ t("course.problem.copycat.generating") }}
+        </div>
         <div v-else v-html="data.cpp_report" />
       </div>
     </div>

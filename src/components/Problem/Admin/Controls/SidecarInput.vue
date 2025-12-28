@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from "vue";
 import { useI18n } from "vue-i18n";
-import { hover_zh } from "../../Hovers/hover-zh-tw";
-import { hover_en } from "../../Hovers/hover-en";
+import { getHoverTranslations } from "../../Hovers";
 
 // ==========================================
 // Type Definitions
@@ -41,9 +40,7 @@ const errorMessage = ref("");
 // Localization
 // ==========================================
 const { t, locale } = useI18n();
-const hover = computed(() => {
-  return locale.value === "english" ? hover_en : hover_zh;
-});
+const hover = computed(() => getHoverTranslations(locale.value));
 
 // ==========================================
 // State: Editing
@@ -116,7 +113,7 @@ function parseArgsString(argsStr: string): string[] {
 
 function argsToString(args: string[] | undefined): string {
   if (!args) return "";
-  return args.join(", ");
+  return args.join(",\n");
 }
 
 const getSidecarArgs = (sidecar: Sidecar) => argsToString(sidecar.args);

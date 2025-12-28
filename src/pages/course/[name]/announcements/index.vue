@@ -2,7 +2,8 @@
 import { computed } from "vue";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import { useRoute } from "vue-router";
-import { fetcher } from "@/models/api";
+import api, { fetcher } from "@/models/api";
+import { ref } from "vue";
 import { formatTime } from "@/utils/formatTime";
 import { useSession } from "@/stores/session";
 import { useTitle } from "@vueuse/core";
@@ -10,6 +11,7 @@ import type { AxiosError } from "axios";
 
 const session = useSession();
 const route = useRoute();
+defineProps(["name"]);
 
 useTitle(`Announcements - ${route.params.name} | Normal OJ`);
 const {
@@ -29,6 +31,42 @@ const sortedAnnouncements = computed(() => {
     return b.createTime - a.createTime;
   });
 });
+
+// --- Delete Logic ---
+const deleteModalOpen = ref(false);
+const itemToDelete = ref<{ id: string; name: string } | null>(null);
+const isDeleting = ref(false);
+
+async function performDelete(id: string) {
+  try {
+    await api.Announcement.delete({ annId: id });
+    // Remove from local list to update UI
+    if (announcements.value) {
+      announcements.value = announcements.value.filter((a) => a.annId !== id);
+    }
+  } catch (e) {
+    console.error("Failed to delete announcement:", e);
+    alert("Failed to delete announcement. Please try again.");
+  }
+}
+
+function deleteAnnouncement(event: MouseEvent, id: string, name: string) {
+  if (event.shiftKey) {
+    performDelete(id);
+    return;
+  }
+  itemToDelete.value = { id, name };
+  deleteModalOpen.value = true;
+}
+
+async function confirmDelete() {
+  if (!itemToDelete.value) return;
+  isDeleting.value = true;
+  await performDelete(itemToDelete.value.id);
+  isDeleting.value = false;
+  deleteModalOpen.value = false;
+  itemToDelete.value = null;
+}
 </script>
 
 <template>
@@ -86,7 +124,7 @@ const sortedAnnouncements = computed(() => {
                 >
                   <td>
                     <div class="flex min-w-0 items-center gap-2">
-                      <span v-if="pinned" class="text-lg" title="置頂">📌</span>
+                      <span v-if="pinned" class="text-lg" :title="$t('course.announcements.pinned')">📌</span>
                       <router-link
                         :to="`/course/${$route.params.name}/announcements/${annId}`"
                         class="text-base-content/80 dark:text-base-content/80 visited:text-base-content/80 dark:visited:text-base-content/80 block min-w-0 break-words whitespace-normal hover:underline"
@@ -98,17 +136,25 @@ const sortedAnnouncements = computed(() => {
                   <td>{{ creator.displayedName }}</td>
                   <td>{{ formatTime(createTime) }}</td>
                   <td v-if="session.isAdmin">
-                    <div class="tooltip" data-tip="Edit">
+                    <div class="tooltip" :data-tip="$t('course.problems.edit')">
                       <router-link
                         class="btn btn-ghost btn-sm btn-circle"
                         :to="`/course/${$route.params.name}/announcements/${annId}/edit`"
                       >
                         <i-uil-edit class="lg:h-5 lg:w-5" />
                       </router-link>
+                    </div>
+                    <div class="tooltip" :data-tip="$t('course.problems.delete')">
+                      <button
+                        class="btn btn-ghost btn-sm btn-circle text-error"
+                        @click="deleteAnnouncement($event, annId, title)"
+                      >
+                        <i-uil-trash-alt class="lg:h-5 lg:w-5" />
+                      </button>
                     </div>
                   </td>
                   <td v-if="session.isTeacher">
-                    <div class="tooltip" data-tip="Edit">
+                    <div class="tooltip" :data-tip="$t('course.problems.edit')">
                       <router-link
                         class="btn btn-ghost btn-sm btn-circle"
                         :to="`/course/${$route.params.name}/announcements/${annId}/edit`"
@@ -116,9 +162,17 @@ const sortedAnnouncements = computed(() => {
                         <i-uil-edit class="lg:h-5 lg:w-5" />
                       </router-link>
                     </div>
+                    <div class="tooltip" :data-tip="$t('course.problems.delete')">
+                      <button
+                        class="btn btn-ghost btn-sm btn-circle text-error"
+                        @click="deleteAnnouncement($event, annId, title)"
+                      >
+                        <i-uil-trash-alt class="lg:h-5 lg:w-5" />
+                      </button>
+                    </div>
                   </td>
                   <td v-if="session.isTA">
-                    <div class="tooltip" data-tip="Edit">
+                    <div class="tooltip" :data-tip="$t('course.problems.edit')">
                       <router-link
                         class="btn btn-ghost btn-sm btn-circle"
                         :to="`/course/${$route.params.name}/announcements/${annId}/edit`"
@@ -135,4 +189,29 @@ const sortedAnnouncements = computed(() => {
       </div>
     </div>
   </div>
+  <!-- Delete Confirmation Modal -->
+  <dialog class="modal" :class="{ 'modal-open': deleteModalOpen }">
+    <div class="modal-box">
+      <h3 class="text-lg font-bold">{{ $t("general.deleteConfirmTitle") }}</h3>
+      <p class="py-4">
+        {{ $t("general.deleteConfirmText", { name: itemToDelete?.name }) }}
+        <br />
+        <span class="text-error">{{ $t("general.deleteDetails") }}</span>
+      </p>
+      <p class="mt-2 text-xs text-gray-500">
+        {{ $t("general.shiftTip") }}
+      </p>
+      <div class="modal-action">
+        <button class="btn" @click="deleteModalOpen = false" :disabled="isDeleting">
+          {{ $t("general.cancel") }}
+        </button>
+        <button class="btn btn-error" @click="confirmDelete" :disabled="isDeleting">
+          {{ isDeleting ? "..." : $t("general.delete") }}
+        </button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button @click="deleteModalOpen = false">close</button>
+    </form>
+  </dialog>
 </template>

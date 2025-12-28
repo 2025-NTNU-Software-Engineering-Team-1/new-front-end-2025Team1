@@ -7,7 +7,7 @@ defineProps<Props>();
 
 <template>
   <router-link
-    class="btn btn-ghost w-full justify-center rounded-none px-0 text-white hover:bg-[#26568c] hover:text-white"
+    class="sidebar-link btn btn-ghost w-full justify-center rounded-none px-0 text-white hover:bg-[#26568c] hover:text-white"
     :to="to"
   >
     <div class="flex flex-col items-center">

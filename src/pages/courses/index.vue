@@ -16,8 +16,18 @@ const { t } = useI18n();
 
 useTitle("Courses | Normal OJ");
 const { data: courses, error, isLoading, execute: refetchCourses } = useAxios<CourseList>("/course", fetcher);
+const searchQuery = ref("");
 
-const displayedCourses = computed(() => [...(courses.value ?? [])].reverse());
+const displayedCourses = computed(() => {
+  const list = courses.value ?? [];
+  const query = searchQuery.value.toLowerCase().trim();
+
+  if (!query) {
+    return [...list].reverse();
+  }
+
+  return list.filter((c) => c.course.toLowerCase().includes(query)).reverse();
+});
 
 const session = useSession();
 const rolesCanCreateCourse = [UserRole.Admin, UserRole.Teacher];
@@ -110,50 +120,62 @@ async function handleJoinCourse() {
         </div>
       </div>
 
-      <div class="my-2" />
+      <div class="mb-4 flex items-center gap-2">
+        <label class="input input-bordered flex w-full items-center gap-2">
+          <i-uil-search class="text-base-content/50" />
+          <input
+            type="text"
+            class="grow"
+            :placeholder="$t('courses.index.searchPlaceholder') || 'Search Course'"
+            v-model="searchQuery"
+          />
+        </label>
+      </div>
 
       <data-status-wrapper :error="error as AxiosError" :is-loading="isLoading">
         <template #loading>
           <skeleton-table :col="2" :row="5" />
         </template>
         <template #data>
-          <table class="table w-full">
-            <thead>
-              <tr>
-                <th>{{ $t("courses.index.table.course") }}</th>
-                <th>{{ $t("courses.index.table.teacher") }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="{ course, teacher, color, emoji } in displayedCourses"
-                :key="course"
-                class="hover transition-colors"
-              >
-                <td
-                  :class="{
-                    'max-w-[16rem] min-w-[14rem] whitespace-pre-wrap': !isDesktop,
-                  }"
+          <div class="scrollbar-hide border-base-200 max-h-[60vh] overflow-y-auto rounded-lg border">
+            <table class="table w-full">
+              <thead class="bg-base-100 sticky top-0 z-10 shadow-sm">
+                <tr>
+                  <th>{{ $t("courses.index.table.course") }}</th>
+                  <th>{{ $t("courses.index.table.teacher") }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="{ course, teacher, color, emoji } in displayedCourses"
+                  :key="course"
+                  class="hover transition-colors"
                 >
-                  <div class="flex items-center gap-3">
-                    <course-avatar
-                      :course-name="course"
-                      :course-color="color"
-                      :course-emoji="emoji"
-                      size="md"
-                    />
-                    <router-link
-                      :to="`/course/${course}`"
-                      class="link link-hover text-base-content text-lg font-bold"
-                    >
-                      {{ course }}
-                    </router-link>
-                  </div>
-                </td>
-                <td class="text-base-content/80 align-middle">{{ teacher.username }}</td>
-              </tr>
-            </tbody>
-          </table>
+                  <td
+                    :class="{
+                      'max-w-[16rem] min-w-[14rem] whitespace-pre-wrap': !isDesktop,
+                    }"
+                  >
+                    <div class="flex items-center gap-3">
+                      <course-avatar
+                        :course-name="course"
+                        :course-color="color"
+                        :course-emoji="emoji"
+                        size="md"
+                      />
+                      <router-link
+                        :to="`/course/${course}`"
+                        class="link link-hover text-base-content text-lg font-bold"
+                      >
+                        {{ course }}
+                      </router-link>
+                    </div>
+                  </td>
+                  <td class="text-base-content/80 align-middle">{{ teacher.username }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </template>
       </data-status-wrapper>
     </div>

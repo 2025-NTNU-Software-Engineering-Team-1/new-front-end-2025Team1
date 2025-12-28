@@ -16,6 +16,7 @@ import { AxiosError } from "axios";
 const route = useRoute();
 const router = useRouter();
 const session = useSession();
+defineProps(["name"]);
 
 useTitle(`Submissions - ${route.params.name} | Normal OJ`);
 
@@ -149,7 +150,22 @@ const languageTypes = LANGUAGE_OPTIONS.map(({ text, value }) => ({
   text,
   value: value.toString(),
 }));
-const searchUsername = ref("");
+const searchUsername = ref(routeQuery.value.filter.username || "");
+
+// Sync searchUsername when URL filter changes (e.g., cleared by filters)
+watch(
+  () => routeQuery.value.filter.username,
+  (newVal) => {
+    searchUsername.value = newVal || "";
+  },
+);
+
+// Auto-reset filter when search bar is cleared
+watch(searchUsername, (newVal) => {
+  if (newVal === "") {
+    mutateFilter({ username: "" });
+  }
+});
 
 // Clipboard copy logic
 const { copy, copied, isSupported } = useClipboard();
@@ -329,7 +345,12 @@ async function confirmDeleteAll() {
     <div class="card min-w-full">
       <div class="card-body">
         <div class="card-title justify-between">
-          {{ $t("course.submissions.text") }}
+          <div class="flex items-center gap-3">
+            <span>{{ $t("course.submissions.text") }}</span>
+            <span class="text-base-content/70 text-sm">
+              {{ $t("course.submissions.rowCount", { n: submissionCount ?? 0 }) }}
+            </span>
+          </div>
 
           <!-- Admin/Teacher/TA actions: rejudge, download, search -->
           <dialog ref="rejudgeAllModal" class="modal">
@@ -379,7 +400,8 @@ async function confirmDeleteAll() {
             class="flex items-center justify-between gap-4"
           >
             <button class="btn btn-warning btn-sm" :disabled="isRejudgeAllLoading" @click="rejudgeAll">
-              <i-uil-repeat :class="['mr-1', isRejudgeAllLoading && 'animate-spin']" /> Rejudge All
+              <i-uil-repeat :class="['mr-1', isRejudgeAllLoading && 'animate-spin']" />
+              {{ $t("course.submissions.rejudgeAll") }}
             </button>
             <button
               v-if="session.isAdmin || session.isTeacher || session.isTA"
@@ -387,9 +409,10 @@ async function confirmDeleteAll() {
               :disabled="isDeleteAllLoading"
               @click="prepareDeleteAll"
             >
-              <i-uil-trash-alt :class="['mr-1', isDeleteAllLoading && 'animate-spin']" /> Delete All
+              <i-uil-trash-alt :class="['mr-1', isDeleteAllLoading && 'animate-spin']" />
+              {{ $t("course.submissions.deleteAll") }}
             </button>
-            <div class="tooltip tooltip-bottom" data-tip="Download submissions json file">
+            <div class="tooltip tooltip-bottom" :data-tip="$t('course.submissions.downloadJson')">
               <button class="btn btn-sm" @click="downloadAllSubmissions">
                 <i-uil-file-download class="h-5 w-5" />
               </button>
@@ -476,7 +499,7 @@ async function confirmDeleteAll() {
                   <td class="overflow-visible">
                     <div class="flex items-center">
                       <!-- Tooltip for submission id -->
-                      <div class="tooltip tooltip-bottom" data-tip="show details">
+                      <div class="tooltip tooltip-bottom" :data-tip="$t('course.submissions.showDetails')">
                         <router-link
                           :to="`/course/${$route.params.name}/submission/${submission.submissionId}`"
                           class="link"
@@ -487,7 +510,9 @@ async function confirmDeleteAll() {
                       <div
                         v-if="isSupported"
                         class="tooltip tooltip-bottom"
-                        :data-tip="copied ? 'copied!' : 'copy link'"
+                        :data-tip="
+                          copied ? $t('course.submissions.copied') : $t('course.submissions.copyLink')
+                        "
                       >
                         <i-uil-link
                           class="ml-2 h-4 w-4 cursor-pointer"
@@ -503,7 +528,10 @@ async function confirmDeleteAll() {
                   <td>
                     <div
                       class="tooltip tooltip-bottom"
-                      :data-tip="problemId2Meta[submission.problemId.toString()]?.name || 'loading...'"
+                      :data-tip="
+                        problemId2Meta[submission.problemId.toString()]?.name ||
+                        $t('course.submissions.loading')
+                      "
                     >
                       <router-link
                         :to="`/course/${$route.params.name}/problem/${submission.problemId}`"
@@ -532,7 +560,7 @@ async function confirmDeleteAll() {
                   <td v-if="session.isTeacher">{{ submission.ipAddr }}</td>
                   <td v-if="session.isTA">{{ submission.ipAddr }}</td>
                   <td v-if="session.isAdmin">
-                    <div class="tooltip" data-tip="Delete">
+                    <div class="tooltip" :data-tip="$t('course.submissions.delete')">
                       <button
                         class="btn btn-ghost btn-sm btn-circle text-error"
                         :class="{ loading: deletingIds.has(submission.submissionId) }"

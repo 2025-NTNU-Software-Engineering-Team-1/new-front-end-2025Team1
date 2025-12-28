@@ -16,8 +16,13 @@ interface Props {
   aiVtuber?: boolean;
   // indicates whether trial history is available for this problem
   hasTrialHistory?: boolean;
+  selectable?: boolean;
+  selected?: boolean;
 }
 defineProps<Props>();
+const emit = defineEmits<{
+  (e: "toggleSelect"): void;
+}>();
 </script>
 
 <template>
@@ -26,6 +31,13 @@ defineProps<Props>();
     <div class="collapse-title bg-base-200 text-base">
       <div class="flex flex-col">
         <div class="flex items-center gap-2">
+          <input
+            v-if="selectable"
+            type="checkbox"
+            class="checkbox checkbox-sm"
+            :checked="selected"
+            @click.stop="emit('toggleSelect')"
+          />
           <span class="text-lg font-bold">{{ problemName }}</span>
           <span
             v-if="aiVtuber"
@@ -86,7 +98,7 @@ defineProps<Props>();
           </div>
           <div class="stat-title text-sm">Admin Control</div>
           <div class="stat-value text-lg">
-            <div class="tooltip" data-tip="Stats">
+            <div class="tooltip" :data-tip="$t('course.problems.stats')">
               <router-link
                 class="btn btn-ghost btn-sm btn-circle mr-1"
                 :to="`/course/${$route.params.name}/problem/${id}/stats`"
@@ -94,7 +106,7 @@ defineProps<Props>();
                 <i-uil-chart-line class="lg:h-5 lg:w-5" />
               </router-link>
             </div>
-            <div class="tooltip" data-tip="Copycat">
+            <div class="tooltip" :data-tip="$t('course.problems.copycat')">
               <router-link
                 class="btn btn-ghost btn-sm btn-circle mr-1"
                 :to="`/course/${$route.params.name}/problem/${id}/copycat`"
@@ -102,7 +114,7 @@ defineProps<Props>();
                 <i-uil-file-exclamation-alt class="lg:h-5 lg:w-5" />
               </router-link>
             </div>
-            <div class="tooltip" data-tip="Edit">
+            <div class="tooltip" :data-tip="$t('course.problems.edit')">
               <router-link
                 class="btn btn-ghost btn-sm btn-circle"
                 :to="`/course/${$route.params.name}/problem/${id}/edit`"

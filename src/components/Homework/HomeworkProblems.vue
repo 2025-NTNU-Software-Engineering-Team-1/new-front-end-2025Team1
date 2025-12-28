@@ -68,11 +68,13 @@ function getScore(pid: number): number | string {
           </router-link>
         </td>
         <td>
-          <ui-spinner v-if="!problems[pid.toString()]" />
+          <span v-if="!problems[pid.toString()]">
+            {{ t("components.hw.card.problems.unknown") }} ({{ pid }})
+          </span>
           <span v-else>{{ problems[pid.toString()].name }}</span>
         </td>
         <td>
-          <ui-spinner v-if="!problems[pid.toString()]" />
+          <span v-if="!problems[pid.toString()]">-</span>
           <span v-else-if="isQuotaUnlimited(problems[pid.toString()].quota)" class="text-sm">{{
             $t("components.problem.card.unlimited")
           }}</span>
@@ -82,7 +84,7 @@ function getScore(pid: number): number | string {
           {{ getScore(pid) }}
         </td>
         <td>
-          <div class="tooltip" data-tip="Stats">
+          <div class="tooltip" :data-tip="$t('course.problems.stats')">
             <router-link
               class="btn btn-ghost btn-xs"
               :to="`/course/${$route.params.name}/problem/${pid}/stats`"
@@ -92,7 +94,7 @@ function getScore(pid: number): number | string {
           </div>
         </td>
         <td v-if="session.isAdmin">
-          <div class="tooltip" data-tip="Copycat">
+          <div class="tooltip" :data-tip="$t('course.problems.copycat')">
             <router-link
               class="btn btn-ghost btn-xs"
               :to="`/course/${$route.params.name}/problem/${pid}/copycat`"

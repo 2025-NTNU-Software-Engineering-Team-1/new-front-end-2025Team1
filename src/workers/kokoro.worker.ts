@@ -10,7 +10,7 @@ export type WorkerMessage =
 export type WorkerResponse =
   | { type: "init-success" }
   | { type: "init-fail"; error: string }
-  | { type: "progress"; percent: number; text: string }
+  | { type: "progress"; percent: number; text: string; params?: Record<string, unknown> }
   | { type: "audio"; audio: Float32Array; sampling_rate: number; text: string }
   | { type: "error"; error: string };
 
@@ -44,13 +44,12 @@ async function handleInit() {
   if (kokoro || isInitializing) return;
 
   isInitializing = true;
-  postResponse({ type: "progress", percent: 0, text: "正在載入語音模型..." });
+  postResponse({ type: "progress", percent: 0, text: "kokoro.loadingModel" });
 
   try {
     // 強制使用 WASM
     const device = "wasm";
-
-    postResponse({ type: "progress", percent: 10, text: "正在下載模型..." });
+    postResponse({ type: "progress", percent: 10, text: "kokoro.downloadingModel" });
 
     kokoro = await KokoroTTS.from_pretrained(MODEL_ID, {
       dtype: "q4",
@@ -58,7 +57,12 @@ async function handleInit() {
       progress_callback: (progress: { status: string; loaded?: number; total?: number }) => {
         if (progress.status === "progress" && progress.total && progress.loaded) {
           const percent = Math.round(10 + (progress.loaded / progress.total) * 80);
-          postResponse({ type: "progress", percent, text: `下載中... ${percent}%` });
+          postResponse({
+            type: "progress",
+            percent,
+            text: "kokoro.downloadingProgress",
+            params: { percent },
+          });
         }
       },
     });
@@ -82,7 +86,7 @@ async function handleInit() {
       console.log("[KokoroWorker] Patched _validate_voice for Chinese support");
     }
 
-    postResponse({ type: "progress", percent: 100, text: "語音引擎就緒" });
+    postResponse({ type: "progress", percent: 100, text: "kokoro.engineReady" });
     postResponse({ type: "init-success" });
   } catch (err: unknown) {
     console.error("[KokoroWorker] Init failed:", err);

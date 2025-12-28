@@ -28,19 +28,12 @@ async function fetchData() {
     // 1. Get Courses
     const { data: courseData } = await fetcher.get<CourseList>("/course");
 
-    // [DEBUG 1] 查看後端回傳的所有課程列表
-    console.log("🔥 [DEBUG 1] API Get Courses:", courseData);
-
     courses.value = courseData;
 
     // 2. Get Homeworks for each course (Parallel)
     const hwPromises = courses.value.map(async (c) => {
       try {
         const { data: hwData } = await fetcher.get<HomeworkList>(`/course/${c.course}/homework`);
-
-        // [DEBUG 2] 查看針對「特定課程」回傳的作業列表
-        console.log(`🔥 [DEBUG 2] API Get Homework for [${c.course}]:`, hwData);
-
         return hwData.map((h) => ({
           courseName: c.course,
           hw: h,
@@ -53,10 +46,6 @@ async function fetchData() {
 
     const results = await Promise.all(hwPromises);
     const flattenedResults = results.flat();
-
-    // [DEBUG 3] 查看所有課程撈完後，合併起來的「所有作業」原始資料
-    console.log("🔥 [DEBUG 3] All Raw Homeworks (Before Filter):", flattenedResults);
-
     homeworksRaw.value = flattenedResults;
   } catch (e: unknown) {
     console.error("Dashboard fetch error", e);
@@ -77,10 +66,6 @@ const upcomingDeadlines = computed(() => {
     .filter((h) => h.end > now)
     .sort((a, b) => a.end - b.end)
     .slice(0, 5);
-
-  // [DEBUG 4] 查看經過「過濾 (未過期)」與「排序」後，最後顯示在畫面上的前 5 筆
-  console.log("🔥 [DEBUG 4] Final Displayed Deadlines:", result);
-
   return result;
 });
 
@@ -129,11 +114,14 @@ onMounted(() => {
           <skeleton-card />
         </div>
 
-        <div v-else-if="upcomingDeadlines.length > 0" class="flex flex-col gap-3">
+        <div
+          v-else-if="upcomingDeadlines.length > 0"
+          class="scrollbar-thin flex max-h-[30rem] flex-col gap-3 overflow-y-auto p-1"
+        >
           <div
             v-for="h in upcomingDeadlines"
             :key="h.id"
-            class="card bg-base-100 border-l-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+            class="card bg-base-100 border-base-content/30 border-y border-r border-l-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
             :style="{
               borderLeftColor: getCourseColor(
                 h.courseName,
@@ -219,13 +207,16 @@ onMounted(() => {
           <div class="skeleton mb-2 h-14 w-full" v-for="i in 3" :key="i"></div>
         </div>
 
-        <div v-else-if="courses.length > 0" class="flex flex-col gap-3">
-          <div class="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-1 2xl:grid-cols-2">
+        <div
+          v-else-if="courses.length > 0"
+          class="scrollbar-thin flex max-h-[30rem] flex-col gap-3 overflow-y-auto p-1"
+        >
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-1">
             <router-link
               v-for="c in courses"
               :key="c.course"
               :to="`/course/${c.course}`"
-              class="card bg-base-100 border-base-200 group border shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+              class="card bg-base-100 border-base-content/30 group border shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
             >
               <div class="card-body flex flex-row items-center gap-3 p-4">
                 <course-avatar

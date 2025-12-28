@@ -112,7 +112,32 @@
   background-color: var(--color-base-300) !important;
 }
 
-/* Custom Sidebar Active Color */
+/* Custom Sidebar Active + Hover Highlight */
+.sidebar-link,
+.sidebar-active {
+  position: relative;
+  isolation: isolate;
+}
+
+.sidebar-link::before,
+.sidebar-active::before {
+  content: "";
+  position: absolute;
+  inset: -6px 0;
+  background-color: #26568c;
+  border-radius: inherit;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: -1;
+}
+
+.sidebar-link:hover::before,
+.sidebar-link:focus-visible::before,
+.sidebar-active::before {
+  opacity: 1;
+}
+
 .sidebar-active {
   background-color: #26568c !important;
   color: white !important;
@@ -141,4 +166,26 @@
   padding-top: 0.75rem !important;
   padding-bottom: 0.75rem !important;
   min-height: 0 !important;
+}
+
+/* Splitpanes Dark Mode Overrides */
+.splitpanes__splitter {
+  @apply bg-base-300 border-base-200 relative w-1 border-l;
+}
+
+.splitpanes__splitter:before,
+.splitpanes__splitter:after {
+  @apply bg-base-content/20 absolute top-1/2 left-1/2 -ml-[1px] h-8 w-[1px] -translate-y-1/2 content-[''];
+}
+
+.splitpanes__splitter:before {
+  @apply -mt-2;
+}
+
+.splitpanes__splitter:after {
+  @apply mt-2;
+}
+
+.splitpanes__pane {
+  @apply bg-base-100;
 }

@@ -5,12 +5,39 @@ import useVuelidate from "@vuelidate/core";
 import { required, maxLength, between, helpers } from "@vuelidate/validators";
 import { containsInvisible } from "@/utils/validators";
 import { useI18n } from "vue-i18n";
-import { hover_zh } from "../Hovers/hover-zh-tw";
-import { hover_en } from "../Hovers/hover-en";
+import { getHoverTranslations } from "../Hovers";
 
 // Define display mode state
 const isAdvanced = ref(false);
 const hasSubmitted = ref(false);
+
+const STORAGE_KEY = "problem-form-mode";
+const EXPIRY_DAYS = 100;
+
+function loadPersistedMode() {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (!stored) return;
+
+  try {
+    const { mode, expiry } = JSON.parse(stored);
+    if (new Date().getTime() < expiry) {
+      isAdvanced.value = mode;
+    } else {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  } catch {
+    localStorage.removeItem(STORAGE_KEY);
+  }
+}
+
+function persistMode(val: boolean) {
+  const expiry = new Date().getTime() + EXPIRY_DAYS * 24 * 60 * 60 * 1000;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ mode: val, expiry }));
+}
+
+watch(isAdvanced, (newVal) => {
+  persistMode(newVal);
+});
 
 // hello
 
@@ -88,9 +115,7 @@ watch(
 );
 
 const { t, locale } = useI18n();
-const hover = computed(() => {
-  return locale.value === "english" ? hover_en : hover_zh;
-});
+const hover = computed(() => getHoverTranslations(locale.value));
 const sectionRefs: Record<PanelKey, ReturnType<typeof ref<HTMLElement | null>>> = {
   desc: ref(null),
   config: ref(null),
@@ -290,6 +315,7 @@ function initFormStructure() {
 }
 
 onMounted(() => {
+  loadPersistedMode();
   initFormStructure();
 });
 
@@ -615,12 +641,18 @@ async function submit() {
 
   logger.groupEnd();
 
-  setTimeout(() => {
-    isLoading.value = false;
-  }, 6000);
+  // 验证失败时，延迟1.5秒后重置，防止二次点击但不会让用户等太久
+  // 验证成功时，由父组件控制 isLoading（成功会跳转，失败会在 finally 中重置）
+  if (!ok) {
+    setTimeout(() => {
+      isLoading.value = false;
+    }, 1500);
+  }
+  // 验证成功时不在这里重置，由父组件的 finally 块控制
 }
 
 onMounted(async () => {
+  loadPersistedMode();
   initFormStructure();
   await nextTick();
   // REMOVED: await v$.value.$validate(); to prevent RED error messages on initial load
@@ -643,26 +675,26 @@ onMounted(async () => {
   <!-- Header -->
   <div class="border-base-300 mb-6 flex flex-wrap items-end justify-between gap-4 border-b pb-4">
     <div>
-      <h2 class="text-base-content text-2xl font-bold">Problem Settings</h2>
-      <p class="text-base-content/60 text-sm">Configure problem details, validation, and resources.</p>
+      <h2 class="text-base-content text-2xl font-bold">{{ t("course.problems.problemSettings") }}</h2>
+      <p class="text-base-content/60 text-sm">{{ t("course.problems.configureProblemDetails") }}</p>
     </div>
 
     <div class="border-base-300 bg-base-100 rounded-lg border p-3">
       <label class="flex cursor-pointer items-center gap-3">
         <span class="text-sm font-medium" :class="isAdvanced ? 'text-base-content/40' : 'text-base-content'">
-          General
+          {{ t("course.problems.general") }}
         </span>
         <input type="checkbox" class="toggle toggle-sm" v-model="isAdvanced" />
         <span class="text-sm font-medium" :class="isAdvanced ? 'text-base-content' : 'text-base-content/40'">
-          Advanced
+          {{ t("course.problems.advanced") }}
         </span>
       </label>
     </div>
   </div>
 
   <!-- Basic fields -->
-  <div class="mb-6 grid grid-cols-1 items-start gap-x-6 gap-y-4 md:grid-cols-2">
-    <div class="form-control w-full">
+  <div class="mb-6 flex flex-col items-start gap-y-4 md:flex-row md:items-center md:gap-x-6">
+    <div class="form-control w-full flex-1">
       <label class="label">
         <span class="label-text font-bold">
           {{ t("course.problems.problemName") }}
@@ -680,7 +712,7 @@ onMounted(async () => {
         ]"
         :value="problem.problemName"
         @input="update('problemName', ($event.target as HTMLInputElement).value)"
-        placeholder="e.g. Hello World"
+        :placeholder="t('course.problems.exampleProblemName')"
       />
 
       <div class="min-h-[24px]">
@@ -693,24 +725,34 @@ onMounted(async () => {
       </div>
     </div>
 
-    <div class="form-control w-full md:max-w-xs">
-      <label class="label">
-        <span class="label-text font-bold">{{ t("components.problem.forms.hiddenToggle") }}</span>
-      </label>
-      <div class="bg-base-100 border-base-300 flex h-[3rem] items-center gap-3 rounded-lg border px-4">
+    <div class="form-control shrink-0">
+      <label
+        class="bg-base-200/50 hover:bg-base-200 flex cursor-pointer items-center gap-4 rounded-xl px-4 py-2.5 transition-all"
+      >
+        <div class="flex items-center gap-3">
+          <div
+            class="flex h-8 w-8 items-center justify-center rounded-lg transition-colors duration-200"
+            :class="
+              problem.status === 1 ? 'bg-success/20 text-success' : 'bg-base-content/10 text-base-content/50'
+            "
+          >
+            <i-uil-eye v-if="problem.status === 1" class="h-5 w-5" />
+            <i-uil-ban v-else class="h-5 w-5" />
+          </div>
+          <span
+            class="text-sm font-bold transition-colors duration-200"
+            :class="problem.status === 1 ? 'text-success' : 'text-base-content/50'"
+          >
+            {{ problem.status === 1 ? t("course.problems.visible") : t("course.problems.hidden") }}
+          </span>
+        </div>
         <input
           type="checkbox"
-          class="toggle toggle-success"
+          class="toggle toggle-success toggle-sm"
           :checked="problem.status === 1"
           @change="update('status', (problem.status ^ 1) as 0 | 1)"
         />
-        <span
-          class="text-sm font-medium"
-          :class="problem.status === 1 ? 'text-success' : 'text-base-content/50'"
-        >
-          {{ problem.status === 1 ? "Visible" : "Hidden" }}
-        </span>
-      </div>
+      </label>
     </div>
   </div>
 
@@ -768,7 +810,7 @@ onMounted(async () => {
         >
           <i-uil-process class="text-base-content/70 h-5 w-5" />
           {{ t("course.problems.setPipelines") }}
-          <span class="badge badge-sm badge-ghost ml-2 font-normal">Advanced</span>
+          <span class="badge badge-sm badge-ghost ml-2 font-normal">{{ t("course.problems.Advanced") }}</span>
         </div>
         <div
           class="collapse-content peer-checked:pt-2"
@@ -816,7 +858,7 @@ onMounted(async () => {
         >
           <i-uil-folder class="text-base-content/70 h-5 w-5" />
           {{ t("course.problems.setResourceData") }}
-          <span class="badge badge-sm badge-ghost ml-2 font-normal">Advanced</span>
+          <span class="badge badge-sm badge-ghost ml-2 font-normal">{{ t("course.problems.Advanced") }}</span>
         </div>
         <div
           class="collapse-content peer-checked:pt-2"
@@ -837,7 +879,7 @@ onMounted(async () => {
         class="border-l-error border-y-base-300 border-r-base-300 bg-base-100 mt-4 rounded-xl border-y border-r border-l-4 p-5 shadow-sm"
       >
         <h3 class="text-error mb-2 flex items-center gap-2 font-bold">
-          <i-uil-exclamation-triangle /> Detailed Error Log
+          <i-uil-exclamation-triangle /> {{ t("course.problems.detailedErrorLog") }}
         </h3>
         <div class="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
           <button
@@ -862,18 +904,21 @@ onMounted(async () => {
 
   <!-- Footer Action Bar -->
   <div
-    class="bg-base-100/90 border-base-300 fixed right-0 bottom-0 left-0 z-40 border-t p-4 shadow-[0_-8px_20px_rgba(0,0,0,0.1)] backdrop-blur-md"
+    class="bg-base-100/90 border-base-300 fixed right-0 bottom-0 left-0 z-40 border-t py-4 pr-6 shadow-[0_-8px_20px_rgba(0,0,0,0.1)] backdrop-blur-md"
+    :style="{ paddingLeft: 'max(1.5rem, calc((100vw - 80rem) / 2 + 1.5rem))' }"
   >
     <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 md:flex-row">
-      <div class="flex w-full items-center justify-center gap-3 md:w-auto md:justify-start">
+      <div class="flex w-full items-center justify-center gap-3 md:flex-1 md:justify-center">
         <!-- 🕒 Before first submit -->
         <template v-if="!hasSubmitted">
           <div class="bg-base-200 text-base-content/50 rounded-full p-2">
             <i-uil-hourglass class="h-6 w-6" />
           </div>
           <div class="flex flex-col">
-            <span class="text-base-content/80 text-sm font-bold">Waiting for edit and submit</span>
-            <span class="text-base-content/50 text-xs">Please complete the form before submitting</span>
+            <span class="text-base-content/80 text-sm font-bold">{{
+              t("course.problems.waitingForEdit")
+            }}</span>
+            <span class="text-base-content/50 text-xs">{{ t("course.problems.completeBeforeSubmit") }}</span>
           </div>
         </template>
 
@@ -883,12 +928,12 @@ onMounted(async () => {
             <i-uil-exclamation-triangle class="h-6 w-6" />
           </div>
           <div class="flex flex-col">
-            <span class="text-error text-sm font-bold">Submission Blocked</span>
+            <span class="text-error text-sm font-bold">{{ t("course.problems.submissionBlocked") }}</span>
             <button
               @click="errorSummary.length > 0 && openAndScroll(errorSummary[0].panel)"
               class="link link-hover text-base-content/70 hover:text-error text-left text-xs"
             >
-              Fix {{ errorSummary.length }} issues found
+              {{ t("course.problems.fixIssues", { count: errorSummary.length }) }}
             </button>
           </div>
         </template>
@@ -899,20 +944,25 @@ onMounted(async () => {
             <i-uil-check-circle class="h-6 w-6" />
           </div>
           <div class="flex flex-col">
-            <span class="text-success text-sm font-bold">Ready to Submit</span>
-            <span class="text-base-content/60 text-xs">All required fields are valid</span>
+            <span class="text-success text-sm font-bold">{{ t("course.problems.readyToSubmit") }}</span>
+            <span class="text-base-content/60 text-xs">{{ t("course.problems.allValid") }}</span>
           </div>
         </template>
       </div>
 
       <!-- Buttons -->
       <div class="flex w-full items-center justify-center gap-3 md:w-auto md:justify-end">
-        <button
-          :class="['btn btn-primary shadow-primary/20 px-8 shadow-lg', isLoading && 'loading']"
-          @click="submit"
-        >
-          <i-uil-file-upload-alt class="mr-1 h-5 w-5" v-if="!isLoading" />
-          {{ t("course.members.submit") }}
+        <button :class="['btn btn-primary shadow-primary/20 relative px-8 shadow-lg']" @click="submit">
+          <!-- Loading Spinner (Absolute & Top Layer) -->
+          <div v-if="isLoading" class="absolute inset-0 z-50 flex items-center justify-center">
+            <span class="loading loading-spinner loading-md"></span>
+          </div>
+
+          <!-- Content (Hidden when loading but preserves width) -->
+          <span :class="['flex items-center', isLoading ? 'opacity-0' : 'opacity-100']">
+            <i-uil-file-upload-alt class="mr-1 h-5 w-5" />
+            {{ t("course.members.submit") }}
+          </span>
         </button>
       </div>
     </div>

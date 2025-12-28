@@ -1,46 +1,48 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { computed, ref } from "vue";
 import { Combobox, ComboboxInput, ComboboxButton, ComboboxOptions, ComboboxOption } from "@headlessui/vue";
 
+interface CourseOption {
+  text: string;
+  value: string;
+}
+
 interface Props {
-  modelValue: number[];
-  problems: { text: string; value: string }[];
+  modelValue: string[];
+  courses: CourseOption[];
+  placeholder?: string;
 }
 
 const props = defineProps<Props>();
 const emit = defineEmits<{
-  (e: "update:model-value", newValue: number[]): void;
+  (e: "update:model-value", newValue: string[]): void;
 }>();
 
 const query = ref("");
 
-const filteredProblems = computed(() =>
+const filteredCourses = computed(() =>
   query.value === ""
-    ? props.problems
-    : props.problems.filter((problem) => {
+    ? props.courses
+    : props.courses.filter((course) => {
         const q = query.value.toLowerCase();
-        return problem.text.toLowerCase().includes(q) || problem.value.toLowerCase().includes(q);
+        return course.text.toLowerCase().includes(q) || course.value.toLowerCase().includes(q);
       }),
 );
 
-function handleUpdate(value: number[]) {
+function handleUpdate(value: string[]) {
   emit("update:model-value", value);
-  // Clear query after selection if desired, or keep it.
-  // Usually for multi-select with a single input acting as filter, we might want to keep it or clear it.
-  // Given the UI style, clearing it might cause the placeholder to show again.
-  // query.value = "";
 }
 </script>
 
 <template>
   <Combobox :model-value="modelValue" multiple @update:model-value="handleUpdate">
     <div class="relative mt-1">
-      <div class="relative w-full max-w-xs">
+      <div class="relative w-full">
         <ComboboxInput
           class="input-bordered input w-full pr-10 text-left"
-          :placeholder="modelValue.length ? modelValue.join(', ') : $t('components.hw.form.search')"
+          :placeholder="modelValue.length ? modelValue.join(', ') : placeholder || 'Search courses'"
           @change="query = $event.target.value"
-          maxlength="50"
+          maxlength="80"
         />
         <ComboboxButton class="absolute inset-y-0 right-0 flex items-center pr-2">
           <i-uil-angle-down class="h-5 w-5 text-gray-400" aria-hidden="true" />
@@ -57,22 +59,22 @@ function handleUpdate(value: number[]) {
           class="bg-base-100 absolute z-50 mt-1 max-h-80 w-full overflow-auto rounded-md py-1 text-base shadow-lg sm:text-sm"
         >
           <div
-            v-if="filteredProblems.length === 0 && query !== ''"
+            v-if="filteredCourses.length === 0 && query !== ''"
             class="relative cursor-default px-4 py-2 text-gray-700 select-none"
           >
             Nothing found.
           </div>
 
           <ComboboxOption
-            v-slot="{ active, selected }"
-            v-for="problem in filteredProblems"
-            :key="problem.value"
-            :value="Number(problem.value)"
+            v-for="course in filteredCourses"
+            :key="course.value"
+            :value="course.value"
             as="template"
+            v-slot="{ active, selected }"
           >
             <li :class="[active && 'bg-base-300', 'relative cursor-default py-2 pr-4 pl-10 select-none']">
               <span :class="[selected ? 'font-medium' : 'font-normal', 'block truncate']">
-                {{ problem.text }}
+                {{ course.text }}
               </span>
               <span
                 v-if="selected"

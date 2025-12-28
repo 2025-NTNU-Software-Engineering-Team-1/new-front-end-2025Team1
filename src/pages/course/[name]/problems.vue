@@ -8,11 +8,19 @@ import { useTitle } from "@vueuse/core";
 import { isQuotaUnlimited } from "@/constants";
 import useInteractions from "@/composables/useInteractions";
 import type { AxiosError } from "axios";
+import { useI18n } from "vue-i18n";
+import ProblemExportModal from "@/components/Problem/ProblemExportModal.vue";
+import ImportProblemModal from "@/components/Problem/ImportProblemModal.vue";
+import { downloadBlob } from "@/utils/download";
 
 const session = useSession();
 const rolesCanReadProblemStatus = [UserRole.Admin, UserRole.Teacher, UserRole.TA];
+const canManageProblems = computed(() => session.isAdmin || session.isTeacher || session.isTA);
 const route = useRoute();
 const router = useRouter();
+defineProps(["name"]);
+
+const { t: $t } = useI18n();
 
 const { isDesktop } = useInteractions();
 
@@ -22,6 +30,7 @@ const {
   data: problems,
   error,
   isLoading,
+  execute,
 } = useAxios<ProblemList>(`/problem?offset=0&count=-1&course=${route.params.name}`, fetcher);
 
 // Cache for problem details (keyed by problemId)
@@ -84,6 +93,144 @@ const sortedProblems = computed(() => {
   return list;
 });
 
+// --- Grouping Logic ---
+const isGroupedView = ref(false);
+
+const groupedProblems = computed(() => {
+  if (!sortedProblems.value) return [];
+
+  const groups: Record<string, typeof sortedProblems.value> = {};
+
+  for (const p of sortedProblems.value) {
+    // Sort tags to ensure consistency (e.g. "A,B" is same as "B,A")
+    const tags = p.tags ? [...p.tags].sort() : [];
+    const key = tags.length > 0 ? tags.join(", ") : $t("course.problems.uncategorized");
+
+    if (!groups[key]) {
+      groups[key] = [];
+    }
+    groups[key].push(p);
+  }
+
+  // Convert map to array of objects for easier template iteration
+  // Sort groups by key (Uncategorized Last? Or Alphabetical?)
+  // Let's do alphabetical, but put Uncategorized at the end if we want.
+  // For now, simple alphabetical key sort.
+  return Object.keys(groups)
+    .sort()
+    .map((key) => ({
+      groupName: key,
+      problems: groups[key],
+    }));
+});
+
+function toggleGroupView() {
+  isGroupedView.value = !isGroupedView.value;
+}
+
+const selectedProblemIds = ref<Set<number>>(new Set());
+const exportModalOpen = ref(false);
+const exportTargetIds = ref<number[]>([]);
+const importModalOpen = ref(false);
+const isExporting = ref(false);
+
+const selectedCount = computed(() => selectedProblemIds.value.size);
+
+function canExportProblem(problemId: number) {
+  if (session.isAdmin) return true;
+  const detail = problemDetailCache[problemId];
+  return !!detail && detail.owner === session.username;
+}
+
+const visibleProblems = computed(() => {
+  if (!sortedProblems.value) return [];
+  if (isGroupedView.value) return sortedProblems.value;
+  return sortedProblems.value.slice((page.value - 1) * 10, page.value * 10);
+});
+
+const selectableVisible = computed(() =>
+  visibleProblems.value.filter((problem) => canExportProblem(problem.problemId)),
+);
+
+const allVisibleSelected = computed(() => {
+  if (!selectableVisible.value.length) return false;
+  return selectableVisible.value.every((p) => selectedProblemIds.value.has(p.problemId));
+});
+
+function toggleSelection(id: number) {
+  if (!canExportProblem(id)) return;
+  const next = new Set(selectedProblemIds.value);
+  if (next.has(id)) {
+    next.delete(id);
+  } else {
+    next.add(id);
+  }
+  selectedProblemIds.value = next;
+}
+
+function toggleSelectAll() {
+  const next = new Set(selectedProblemIds.value);
+  if (allVisibleSelected.value) {
+    selectableVisible.value.forEach((p) => next.delete(p.problemId));
+  } else {
+    selectableVisible.value.forEach((p) => next.add(p.problemId));
+  }
+  selectedProblemIds.value = next;
+}
+
+function openExportModal(ids: number[]) {
+  exportTargetIds.value = [...ids];
+  exportModalOpen.value = true;
+}
+
+function openExportSelected() {
+  if (!selectedProblemIds.value.size) return;
+  openExportModal(Array.from(selectedProblemIds.value));
+}
+
+async function handleExport(components: string[]) {
+  if (!exportTargetIds.value.length || isExporting.value) return;
+  isExporting.value = true;
+  try {
+    if (exportTargetIds.value.length === 1) {
+      const id = exportTargetIds.value[0];
+      const resp = await api.Problem.exportZip(id, components);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const blob: Blob = (resp as any).data || (resp as any);
+      downloadBlob(blob, `problem_${id}.noj.zip`);
+    } else {
+      const resp = await api.Problem.exportBatch(exportTargetIds.value, components);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const blob: Blob = (resp as any).data || (resp as any);
+      downloadBlob(blob, "problems_export.noj.zip");
+    }
+  } catch (err) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const errorObj = err as any;
+    let message = "Failed to export problems. Please try again.";
+    const responseData = errorObj?.response?.data;
+    if (responseData instanceof Blob) {
+      try {
+        const text = await responseData.text();
+        const parsed = JSON.parse(text);
+        message = parsed?.message || text || message;
+      } catch {
+        try {
+          message = (await responseData.text()) || message;
+        } catch {
+          // ignore
+        }
+      }
+    } else {
+      message = errorObj?.response?.data?.message || errorObj?.message || message;
+    }
+    console.error("Failed to export problems:", err);
+    alert(message);
+  } finally {
+    isExporting.value = false;
+  }
+}
+
 // --- Search Logic (Name & ID) ---
 const searchQuery = ref("");
 // State to track if a search yielded no results
@@ -113,11 +260,28 @@ function calculateScore(targetName: string, query: string): number {
  * Helper: Navigates to the page containing the target problem ID
  */
 function navigateToProblem(targetId: number) {
+  // If in grouped view, we might not have pagination in the same way.
+  // But currently Grouped View implies we show EVERYTHING or we Pagination Groups?
+  // The user requirement says "maintain functionalities".
+  // If Grouped View is ON, maybe we disable pagination and show all?
+  // Or we paginate the LIST?
+  // Let's assume Grouped View shows ALL problems for simplicity as typical for "Group By" features,
+  // or checks if the found ID is visible.
+
+  // If we are sticking to pagination in Table mode, Search finds the page.
+  // In Grouped Mode, if we show all, we just scroll to it?
+  // For now, let's keep the logic about "Page" for Table View.
+
   const indexInSortedList = sortedProblems.value.findIndex((p) => p.problemId === targetId);
 
   if (indexInSortedList !== -1) {
     const targetPage = Math.ceil((indexInSortedList + 1) / 10);
-    page.value = targetPage;
+    // Only affect page if we aren't grouped, or if we decide to paginate groups (complex).
+    // Let's assume pagination is relevant for Tabled view.
+    if (!isGroupedView.value) {
+      page.value = targetPage;
+    }
+
     // Reset not found state on success
     searchNotFound.value = false;
     // Optional: Log for debugging
@@ -176,6 +340,53 @@ function performSearch() {
   }
 }
 
+// --- Delete Logic ---
+// --- Delete Logic ---
+const deleteModalOpen = ref(false);
+const itemToDelete = ref<{ id: number; name: string } | null>(null);
+const isDeleting = ref(false);
+
+async function performDelete(id: number) {
+  try {
+    await api.Problem.delete(id);
+    if (problems.value) {
+      problems.value = problems.value.filter((p) => p.problemId !== id);
+    }
+    if (Object.prototype.hasOwnProperty.call(problemDetailCache, id)) {
+      delete problemDetailCache[id];
+    }
+    if (selectedProblemIds.value.has(id)) {
+      const next = new Set(selectedProblemIds.value);
+      next.delete(id);
+      selectedProblemIds.value = next;
+    }
+    await execute();
+  } catch (e) {
+    console.error("Failed to delete problem:", e);
+    alert("Failed to delete problem. Please try again.");
+  }
+}
+
+function deleteProblem(event: MouseEvent, id: number, name: string) {
+  // If Shift is held, delete immediately
+  if (event.shiftKey) {
+    performDelete(id);
+    return;
+  }
+  // Otherwise open modal
+  itemToDelete.value = { id, name };
+  deleteModalOpen.value = true;
+}
+
+async function confirmDelete() {
+  if (!itemToDelete.value) return;
+  isDeleting.value = true;
+  await performDelete(itemToDelete.value.id);
+  isDeleting.value = false;
+  deleteModalOpen.value = false;
+  itemToDelete.value = null;
+}
+
 // Watcher to clear error when user types
 watch(searchQuery, () => {
   if (searchNotFound.value) searchNotFound.value = false;
@@ -195,14 +406,27 @@ watchEffect(() => {
 
 // Prefetch visible problem details for AI-TA badge
 watchEffect(() => {
-  const visible = (sortedProblems.value || [])
-    .slice((page.value - 1) * 10, page.value * 10)
-    .map((p) => p.problemId);
-  if (visible.length) prefetchDetailsFor(visible);
+  // In Grouped View, we might be showing ALL problems or a lot of them.
+  // Warning: Prefetching ALL might be heavy if there are thousands.
+  // Assuming list size is reasonable (<100).
+  if (isGroupedView.value) {
+    // Prefetch all if reasonable size?
+    // Let's prefetch all sortedProblems IDs to ensure badges work in grouped view.
+    const allIds = (sortedProblems.value || []).map((p) => p.problemId);
+    if (allIds.length) prefetchDetailsFor(allIds);
+  } else {
+    const visible = (sortedProblems.value || [])
+      .slice((page.value - 1) * 10, page.value * 10)
+      .map((p) => p.problemId);
+    if (visible.length) prefetchDetailsFor(visible);
+  }
 });
 
 watch(page, () => {
-  router.replace({ query: { page: page.value } });
+  // Only push query param if NOT in grouped view (or if we support page param in grouped view)
+  if (!isGroupedView.value) {
+    router.replace({ query: { page: page.value } });
+  }
 });
 
 // Reset page when sort changes
@@ -226,11 +450,27 @@ const maxPage = computed(() => {
 
           <div class="relative flex flex-col">
             <div class="flex items-center gap-2">
+              <!-- Group By Tag Toggle -->
+              <div
+                class="tooltip mr-2"
+                :data-tip="
+                  isGroupedView ? $t('course.problems.backToTable') : $t('course.problems.groupByTag')
+                "
+              >
+                <button
+                  class="btn btn-sm btn-circle"
+                  :class="isGroupedView ? 'btn-primary' : 'btn-ghost'"
+                  @click="toggleGroupView"
+                >
+                  <i-uil-layer-group class="h-5 w-5" v-if="!isGroupedView" />
+                  <i-uil-table class="h-5 w-5" v-else />
+                </button>
+              </div>
               <input
                 v-model="searchQuery"
                 type="text"
                 maxlength="50"
-                placeholder="Search Name or ID..."
+                :placeholder="$t('course.problems.searchPlaceholder')"
                 class="input input-bordered input-sm w-40 transition-colors lg:w-64"
                 :class="{ 'input-error': searchNotFound }"
                 @keyup.enter="performSearch"
@@ -244,7 +484,24 @@ const maxPage = computed(() => {
             </span>
           </div>
 
-          <div class="flex gap-2">
+          <div class="flex items-center gap-2">
+            <button
+              v-if="selectedCount"
+              class="btn btn-primary btn-sm lg:btn-md"
+              :class="{ loading: isExporting }"
+              @click="openExportSelected"
+            >
+              <i-uil-download-alt class="mr-1 lg:h-5 lg:w-5" />
+              {{ $t("course.problems.exportSelected") }} ({{ selectedCount }})
+            </button>
+            <button
+              v-if="canManageProblems"
+              class="btn btn-outline btn-sm lg:btn-md"
+              @click="importModalOpen = true"
+            >
+              <i-uil-import class="mr-1 lg:h-5 lg:w-5" />
+              {{ $t("course.problems.import") }}
+            </button>
             <router-link
               v-if="session.isAdmin"
               class="btn btn-success btn-sm lg:btn-md"
@@ -272,183 +529,588 @@ const maxPage = computed(() => {
         <div class="my-2" />
         <data-status-wrapper :error="error as AxiosError" :is-loading="isLoading">
           <template #loading>
-            <skeleton-table v-if="isDesktop" :col="5" :row="5" />
+            <skeleton-table v-if="isDesktop" :col="canManageProblems ? 6 : 5" :row="5" />
             <div v-else class="flex items-center justify-center">
               <ui-spinner />
             </div>
           </template>
           <template #data>
-            <table v-if="isDesktop" class="table w-full">
-              <thead>
-                <tr>
-                  <th
-                    class="hover:bg-base-200 cursor-pointer transition-colors select-none"
-                    @click="isSortDesc = !isSortDesc"
-                  >
-                    <div class="flex items-center gap-1">
-                      {{ $t("course.problems.id") }}
-                      <span class="text-xs">{{ isSortDesc ? "▼" : "▲" }}</span>
-                    </div>
-                  </th>
-                  <th>{{ $t("course.problems.name") }}</th>
-                  <th v-if="rolesCanReadProblemStatus.includes(session.role)">
-                    {{ $t("course.problems.status") }}
-                  </th>
-                  <th>{{ $t("course.problems.tags") }}</th>
-                  <th>{{ $t("course.problems.quota") }}</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="{ problemId, problemName, tags, quota, submitCount, status, aiVTuber } in (
-                    sortedProblems || []
-                  ).slice((page - 1) * 10, page * 10)"
-                  :key="problemId"
-                  class="hover"
-                  :class="{
-                    'bg-base-200':
-                      searchQuery &&
-                      (problemName.toLowerCase() === searchQuery.toLowerCase() ||
-                        Number(searchQuery) === problemId),
-                  }"
-                >
-                  <td>
-                    <router-link :to="`/course/${$route.params.name}/problem/${problemId}`" class="link">
-                      {{ problemId }}
-                    </router-link>
-                  </td>
-                  <td>
-                    <div class="flex w-full items-center justify-between">
-                      <span class="mr-2">{{ problemName }}</span>
-                      <span
-                        v-if="aiVTuber || hasAiVtuber(problemId)"
-                        class="inline-flex shrink-0 items-center rounded-full bg-gradient-to-r from-purple-400 to-indigo-400 px-2 py-0.5 text-xs font-medium text-white"
-                      >
-                        AI-TA
-                      </span>
-                    </div>
-                  </td>
-                  <td v-if="rolesCanReadProblemStatus.includes(session.role)">
-                    <span class="badge ml-1">{{ status === 0 ? "VISIBLE" : "HIDDEN" }}</span>
-                  </td>
-                  <td>
-                    <span class="badge badge-info mr-1" v-for="tag in tags" :key="tag">{{ tag }}</span>
-                  </td>
-                  <td>
-                    <template v-if="isQuotaUnlimited(quota)">
-                      <span class="text-sm">{{ $t("components.problem.card.unlimited") }}</span>
-                    </template>
-                    <template v-else> {{ quota - submitCount }} / {{ quota }} </template>
-                  </td>
-                  <td>
-                    <div
-                      class="tooltip"
-                      :data-tip="hasTrialHistory(problemId) ? 'Test History' : 'Trial Mode Disabled'"
+            <!-- Normal Table View -->
+            <div v-if="!isGroupedView" class="w-full">
+              <table v-if="isDesktop" class="table w-full">
+                <thead>
+                  <tr>
+                    <th v-if="canManageProblems">
+                      <input
+                        type="checkbox"
+                        class="checkbox checkbox-sm"
+                        :checked="allVisibleSelected"
+                        :disabled="!selectableVisible.length"
+                        @change="toggleSelectAll"
+                      />
+                    </th>
+                    <th
+                      class="hover:bg-base-200 cursor-pointer transition-colors select-none"
+                      @click="isSortDesc = !isSortDesc"
                     >
+                      <div class="flex items-center gap-1">
+                        {{ $t("course.problems.id") }}
+                        <i-uil-angle-down v-if="isSortDesc" class="h-4 w-4" />
+                        <i-uil-angle-up v-else class="h-4 w-4" />
+                      </div>
+                    </th>
+                    <th>{{ $t("course.problems.name") }}</th>
+                    <th v-if="rolesCanReadProblemStatus.includes(session.role)">
+                      {{ $t("course.problems.status") }}
+                    </th>
+                    <th>{{ $t("course.problems.tags") }}</th>
+                    <th>{{ $t("course.problems.quota") }}</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="{ problemId, problemName, tags, quota, submitCount, status, aiVTuber } in (
+                      sortedProblems || []
+                    ).slice((page - 1) * 10, page * 10)"
+                    :key="problemId"
+                    class="hover hover-suction cursor-pointer transition-all duration-300"
+                    :class="{
+                      'bg-base-200':
+                        searchQuery &&
+                        (problemName.toLowerCase() === searchQuery.toLowerCase() ||
+                          Number(searchQuery) === problemId),
+                    }"
+                    @click="router.push(`/course/${$route.params.name}/problem/${problemId}`)"
+                  >
+                    <td v-if="canManageProblems">
+                      <input
+                        type="checkbox"
+                        class="checkbox checkbox-sm"
+                        :checked="selectedProblemIds.has(problemId)"
+                        :disabled="!canExportProblem(problemId)"
+                        @change="toggleSelection(problemId)"
+                      />
+                    </td>
+                    <td>
                       <router-link
-                        :class="[
-                          'btn btn-ghost btn-sm btn-circle mr-1',
-                          !hasTrialHistory(problemId) && 'pointer-events-none opacity-30',
-                        ]"
-                        :to="
+                        :to="`/course/${$route.params.name}/problem/${problemId}`"
+                        class="link"
+                        @click.stop
+                      >
+                        {{ problemId }}
+                      </router-link>
+                    </td>
+                    <td>
+                      <div class="flex w-full items-center justify-between">
+                        <router-link
+                          :to="`/course/${$route.params.name}/problem/${problemId}`"
+                          class="mr-2 no-underline hover:no-underline"
+                          @click.stop
+                        >
+                          {{ problemName }}
+                        </router-link>
+                        <span
+                          v-if="aiVTuber || hasAiVtuber(problemId)"
+                          class="inline-flex shrink-0 items-center rounded-full bg-gradient-to-r from-purple-400 to-indigo-400 px-2 py-0.5 text-xs font-medium text-white"
+                        >
+                          AI-TA
+                        </span>
+                      </div>
+                    </td>
+                    <td v-if="rolesCanReadProblemStatus.includes(session.role)">
+                      <span class="badge ml-1">{{
+                        status === 0 ? $t("course.problems.visible") : $t("course.problems.hidden")
+                      }}</span>
+                    </td>
+                    <td>
+                      <span class="badge badge-info mr-1" v-for="tag in tags" :key="tag">{{ tag }}</span>
+                    </td>
+                    <td>
+                      <template v-if="isQuotaUnlimited(quota)">
+                        <span class="text-sm">{{ $t("components.problem.card.unlimited") }}</span>
+                      </template>
+                      <template v-else> {{ quota - submitCount }} / {{ quota }} </template>
+                    </td>
+                    <td>
+                      <div
+                        class="tooltip"
+                        :data-tip="
                           hasTrialHistory(problemId)
-                            ? `/course/${$route.params.name}/problem/${problemId}/test-history?from=problems`
-                            : '#'
+                            ? $t('course.problems.testHistory')
+                            : $t('course.problems.trialModeDisabled')
                         "
-                        :tabindex="hasTrialHistory(problemId) ? 0 : -1"
+                        @click.stop
                       >
-                        <i-uil-history class="lg:h-5 lg:w-5" />
-                      </router-link>
-                    </div>
-                    <div class="tooltip" data-tip="Stats">
-                      <router-link
-                        class="btn btn-ghost btn-sm btn-circle mr-1"
-                        :to="`/course/${$route.params.name}/problem/${problemId}/stats`"
+                        <router-link
+                          :class="[
+                            'btn btn-ghost btn-sm btn-circle mr-1',
+                            !hasTrialHistory(problemId) && 'pointer-events-none opacity-30',
+                          ]"
+                          :to="
+                            hasTrialHistory(problemId)
+                              ? `/course/${$route.params.name}/problem/${problemId}/test-history?from=problems`
+                              : '#'
+                          "
+                          :tabindex="hasTrialHistory(problemId) ? 0 : -1"
+                        >
+                          <i-uil-history class="lg:h-5 lg:w-5" />
+                        </router-link>
+                      </div>
+                      <div class="tooltip" :data-tip="$t('course.problems.stats')" @click.stop>
+                        <router-link
+                          class="btn btn-ghost btn-sm btn-circle mr-1"
+                          :to="`/course/${$route.params.name}/problem/${problemId}/stats`"
+                        >
+                          <i-uil-chart-line class="lg:h-5 lg:w-5" />
+                        </router-link>
+                      </div>
+                      <div
+                        v-if="canExportProblem(problemId)"
+                        class="tooltip"
+                        :data-tip="$t('course.problems.export')"
                       >
-                        <i-uil-chart-line class="lg:h-5 lg:w-5" />
-                      </router-link>
-                    </div>
-                    <div class="tooltip" data-tip="Copycat">
-                      <router-link
-                        v-if="session.isAdmin"
-                        class="btn btn-ghost btn-sm btn-circle mr-1"
-                        :to="`/course/${$route.params.name}/problem/${problemId}/copycat`"
-                      >
-                        <i-uil-file-exclamation-alt class="lg:h-5 lg:w-5" />
-                      </router-link>
-                      <router-link
-                        v-if="session.isTeacher"
-                        class="btn btn-ghost btn-sm btn-circle mr-1"
-                        :to="`/course/${$route.params.name}/problem/${problemId}/copycat`"
-                      >
-                        <i-uil-file-exclamation-alt class="lg:h-5 lg:w-5" />
-                      </router-link>
-                      <router-link
-                        v-if="session.isTA"
-                        class="btn btn-ghost btn-sm btn-circle mr-1"
-                        :to="`/course/${$route.params.name}/problem/${problemId}/copycat`"
-                      >
-                        <i-uil-file-exclamation-alt class="lg:h-5 lg:w-5" />
-                      </router-link>
-                    </div>
+                        <button
+                          class="btn btn-ghost btn-sm btn-circle mr-1"
+                          :class="{ loading: isExporting }"
+                          @click="openExportModal([problemId])"
+                        >
+                          <i-uil-download-alt class="lg:h-5 lg:w-5" />
+                        </button>
+                      </div>
+                      <div class="tooltip" :data-tip="$t('course.problems.copycat')">
+                        <router-link
+                          v-if="session.isAdmin"
+                          class="btn btn-ghost btn-sm btn-circle mr-1"
+                          :to="`/course/${$route.params.name}/problem/${problemId}/copycat`"
+                          @click.stop
+                        >
+                          <i-uil-file-exclamation-alt class="lg:h-5 lg:w-5" />
+                        </router-link>
+                        <router-link
+                          v-if="session.isTeacher"
+                          class="btn btn-ghost btn-sm btn-circle mr-1"
+                          :to="`/course/${$route.params.name}/problem/${problemId}/copycat`"
+                          @click.stop
+                        >
+                          <i-uil-file-exclamation-alt class="lg:h-5 lg:w-5" />
+                        </router-link>
+                        <router-link
+                          v-if="session.isTA"
+                          class="btn btn-ghost btn-sm btn-circle mr-1"
+                          :to="`/course/${$route.params.name}/problem/${problemId}/copycat`"
+                          @click.stop
+                        >
+                          <i-uil-file-exclamation-alt class="lg:h-5 lg:w-5" />
+                        </router-link>
+                      </div>
 
-                    <div class="tooltip" data-tip="Edit">
-                      <router-link
-                        v-if="session.isAdmin"
-                        class="btn btn-ghost btn-sm btn-circle"
-                        :to="`/course/${$route.params.name}/problem/${problemId}/edit`"
+                      <div class="tooltip" :data-tip="$t('course.problems.edit')">
+                        <router-link
+                          v-if="session.isAdmin"
+                          class="btn btn-ghost btn-sm btn-circle"
+                          :to="`/course/${$route.params.name}/problem/${problemId}/edit`"
+                          @click.stop
+                        >
+                          <i-uil-edit class="lg:h-5 lg:w-5" />
+                        </router-link>
+                        <router-link
+                          v-if="session.isTeacher"
+                          class="btn btn-ghost btn-sm btn-circle"
+                          :to="`/course/${$route.params.name}/problem/${problemId}/edit`"
+                          @click.stop
+                        >
+                          <i-uil-edit class="lg:h-5 lg:w-5" />
+                        </router-link>
+                        <router-link
+                          v-if="session.isTA"
+                          class="btn btn-ghost btn-sm btn-circle"
+                          :to="`/course/${$route.params.name}/problem/${problemId}/edit`"
+                          @click.stop
+                        >
+                          <i-uil-edit class="lg:h-5 lg:w-5" />
+                        </router-link>
+                      </div>
+                      <!-- Delete Button -->
+                      <div
+                        v-if="session.isAdmin || session.isTeacher"
+                        class="tooltip"
+                        :data-tip="$t('course.problems.delete')"
                       >
-                        <i-uil-edit class="lg:h-5 lg:w-5" />
-                      </router-link>
-                      <router-link
-                        v-if="session.isTeacher"
-                        class="btn btn-ghost btn-sm btn-circle"
-                        :to="`/course/${$route.params.name}/problem/${problemId}/edit`"
-                      >
-                        <i-uil-edit class="lg:h-5 lg:w-5" />
-                      </router-link>
-                      <router-link
-                        v-if="session.isTA"
-                        class="btn btn-ghost btn-sm btn-circle"
-                        :to="`/course/${$route.params.name}/problem/${problemId}/edit`"
-                      >
-                        <i-uil-edit class="lg:h-5 lg:w-5" />
-                      </router-link>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                        <button
+                          class="btn btn-ghost btn-sm btn-circle text-error"
+                          @click.stop="deleteProblem($event, problemId, problemName)"
+                        >
+                          <i-uil-trash-alt class="lg:h-5 lg:w-5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
 
-            <template
-              v-else
-              v-for="{ problemId, problemName, tags, quota, submitCount, status, aiVTuber } in (
-                sortedProblems || []
-              ).slice((page - 1) * 10, page * 10)"
-            >
-              <problem-info
-                :id="problemId"
-                :problem-name="problemName"
-                :unlimited-quota="isQuotaUnlimited(quota)"
-                :quota-limit="quota"
-                :quota-remaining="quota - submitCount"
-                :tags="tags"
-                :visible="status"
-                :is-admin="session.isAdmin"
-                :is-teacher="session.isTeacher"
-                :is-ta="session.isTA"
-                :ai-vtuber="aiVTuber || hasAiVtuber(problemId)"
-                :has-trial-history="hasTrialHistory(problemId)"
-              />
-            </template>
+              <template
+                v-else
+                v-for="{ problemId, problemName, tags, quota, submitCount, status, aiVTuber } in (
+                  sortedProblems || []
+                ).slice((page - 1) * 10, page * 10)"
+              >
+                <problem-info
+                  :id="problemId"
+                  :problem-name="problemName"
+                  :unlimited-quota="isQuotaUnlimited(quota)"
+                  :quota-limit="quota"
+                  :quota-remaining="quota - submitCount"
+                  :tags="tags"
+                  :visible="status"
+                  :is-admin="session.isAdmin"
+                  :is-teacher="session.isTeacher"
+                  :is-ta="session.isTA"
+                  :ai-vtuber="aiVTuber || hasAiVtuber(problemId)"
+                  :has-trial-history="hasTrialHistory(problemId)"
+                  :selectable="canExportProblem(problemId)"
+                  :selected="selectedProblemIds.has(problemId)"
+                  @toggle-select="toggleSelection(problemId)"
+                />
+              </template>
+            </div>
+
+            <!-- Grouped View -->
+            <div v-else class="flex w-full flex-col gap-6">
+              <div v-for="group in groupedProblems" :key="group.groupName" class="w-full">
+                <!-- Group Header -->
+                <div class="mb-2 flex items-center gap-2 px-2">
+                  <span class="badge badge-sm badge-ghost">{{ group.problems.length }}</span>
+                  <i-uil-tag-alt class="text-primary h-5 w-5" />
+                  <h3 class="text-lg font-bold">{{ group.groupName }}</h3>
+                </div>
+
+                <!-- Group Table -->
+                <div class="bg-base-100 rounded-box border-base-200 overflow-x-auto border shadow-sm">
+                  <table class="table w-full">
+                    <thead>
+                      <tr>
+                        <th v-if="canManageProblems">
+                          <input
+                            type="checkbox"
+                            class="checkbox checkbox-sm"
+                            :checked="allVisibleSelected"
+                            :disabled="!selectableVisible.length"
+                            @change="toggleSelectAll"
+                          />
+                        </th>
+                        <th>{{ $t("course.problems.id") }}</th>
+                        <th>{{ $t("course.problems.name") }}</th>
+                        <th v-if="rolesCanReadProblemStatus.includes(session.role)">
+                          {{ $t("course.problems.status") }}
+                        </th>
+                        <!-- <th>{{ $t("course.problems.tags") }}</th> -->
+                        <!-- Tags redundant here -->
+                        <th>{{ $t("course.problems.quota") }}</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr
+                        v-for="{
+                          problemId,
+                          problemName,
+                          tags,
+                          quota,
+                          submitCount,
+                          status,
+                          aiVTuber,
+                        } in group.problems"
+                        :key="problemId"
+                        class="hover hover-suction cursor-pointer transition-all duration-300"
+                        :class="{
+                          'bg-base-200':
+                            searchQuery &&
+                            (problemName.toLowerCase() === searchQuery.toLowerCase() ||
+                              Number(searchQuery) === problemId),
+                        }"
+                        @click="router.push(`/course/${$route.params.name}/problem/${problemId}`)"
+                      >
+                        <td v-if="canManageProblems">
+                          <input
+                            type="checkbox"
+                            class="checkbox checkbox-sm"
+                            :checked="selectedProblemIds.has(problemId)"
+                            :disabled="!canExportProblem(problemId)"
+                            @change="toggleSelection(problemId)"
+                          />
+                        </td>
+                        <td>
+                          <router-link
+                            :to="`/course/${$route.params.name}/problem/${problemId}`"
+                            class="link"
+                            @click.stop
+                          >
+                            {{ problemId }}
+                          </router-link>
+                        </td>
+                        <td>
+                          <div class="flex w-full items-center justify-between">
+                            <router-link
+                              :to="`/course/${$route.params.name}/problem/${problemId}`"
+                              class="mr-2 no-underline hover:no-underline"
+                              @click.stop
+                            >
+                              {{ problemName }}
+                            </router-link>
+                            <span
+                              v-if="aiVTuber || hasAiVtuber(problemId)"
+                              class="inline-flex shrink-0 items-center rounded-full bg-gradient-to-r from-purple-400 to-indigo-400 px-2 py-0.5 text-xs font-medium text-white"
+                            >
+                              AI-TA
+                            </span>
+                          </div>
+                        </td>
+                        <td v-if="rolesCanReadProblemStatus.includes(session.role)">
+                          <span class="badge ml-1">{{ status === 0 ? "VISIBLE" : "HIDDEN" }}</span>
+                        </td>
+                        <!-- <td>
+                                    <span class="badge badge-info mr-1" v-for="tag in tags" :key="tag">{{ tag }}</span>
+                                </td> -->
+                        <td>
+                          <template v-if="isQuotaUnlimited(quota)">
+                            <span class="text-sm">{{ $t("components.problem.card.unlimited") }}</span>
+                          </template>
+                          <template v-else> {{ quota - submitCount }} / {{ quota }} </template>
+                        </td>
+                        <td>
+                          <div
+                            class="tooltip"
+                            :data-tip="
+                              hasTrialHistory(problemId)
+                                ? $t('course.problems.testHistory')
+                                : $t('course.problems.trialModeDisabled')
+                            "
+                            @click.stop
+                          >
+                            <router-link
+                              :class="[
+                                'btn btn-ghost btn-sm btn-circle mr-1',
+                                !hasTrialHistory(problemId) && 'pointer-events-none opacity-30',
+                              ]"
+                              :to="
+                                hasTrialHistory(problemId)
+                                  ? `/course/${$route.params.name}/problem/${problemId}/test-history?from=problems`
+                                  : '#'
+                              "
+                              :tabindex="hasTrialHistory(problemId) ? 0 : -1"
+                            >
+                              <i-uil-history class="lg:h-5 lg:w-5" />
+                            </router-link>
+                          </div>
+                          <div class="tooltip" :data-tip="$t('course.problems.stats')">
+                            <router-link
+                              class="btn btn-ghost btn-sm btn-circle mr-1"
+                              :to="`/course/${$route.params.name}/problem/${problemId}/stats`"
+                            >
+                              <i-uil-chart-line class="lg:h-5 lg:w-5" />
+                            </router-link>
+                          </div>
+                          <div
+                            v-if="canExportProblem(problemId)"
+                            class="tooltip"
+                            :data-tip="$t('course.problems.export')"
+                          >
+                            <button
+                              class="btn btn-ghost btn-sm btn-circle mr-1"
+                              :class="{ loading: isExporting }"
+                              @click="openExportModal([problemId])"
+                            >
+                              <i-uil-download-alt class="lg:h-5 lg:w-5" />
+                            </button>
+                          </div>
+                          <div class="tooltip" :data-tip="$t('course.problems.copycat')">
+                            <router-link
+                              v-if="session.isAdmin"
+                              class="btn btn-ghost btn-sm btn-circle mr-1"
+                              :to="`/course/${$route.params.name}/problem/${problemId}/copycat`"
+                              @click.stop
+                            >
+                              <i-uil-file-exclamation-alt class="lg:h-5 lg:w-5" />
+                            </router-link>
+                            <router-link
+                              v-if="session.isTeacher"
+                              class="btn btn-ghost btn-sm btn-circle mr-1"
+                              :to="`/course/${$route.params.name}/problem/${problemId}/copycat`"
+                              @click.stop
+                            >
+                              <i-uil-file-exclamation-alt class="lg:h-5 lg:w-5" />
+                            </router-link>
+                            <router-link
+                              v-if="session.isTA"
+                              class="btn btn-ghost btn-sm btn-circle mr-1"
+                              :to="`/course/${$route.params.name}/problem/${problemId}/copycat`"
+                              @click.stop
+                            >
+                              <i-uil-file-exclamation-alt class="lg:h-5 lg:w-5" />
+                            </router-link>
+                          </div>
+
+                          <div class="tooltip" :data-tip="$t('course.problems.edit')">
+                            <router-link
+                              v-if="session.isAdmin"
+                              class="btn btn-ghost btn-sm btn-circle"
+                              :to="`/course/${$route.params.name}/problem/${problemId}/edit`"
+                              @click.stop
+                            >
+                              <i-uil-edit class="lg:h-5 lg:w-5" />
+                            </router-link>
+                            <router-link
+                              v-if="session.isTeacher"
+                              class="btn btn-ghost btn-sm btn-circle"
+                              :to="`/course/${$route.params.name}/problem/${problemId}/edit`"
+                              @click.stop
+                            >
+                              <i-uil-edit class="lg:h-5 lg:w-5" />
+                            </router-link>
+                            <router-link
+                              v-if="session.isTA"
+                              class="btn btn-ghost btn-sm btn-circle"
+                              :to="`/course/${$route.params.name}/problem/${problemId}/edit`"
+                              @click.stop
+                            >
+                              <i-uil-edit class="lg:h-5 lg:w-5" />
+                            </router-link>
+                          </div>
+                          <!-- Delete Button (Grouped) -->
+                          <div
+                            v-if="session.isAdmin || session.isTeacher"
+                            class="tooltip"
+                            :data-tip="$t('course.problems.delete')"
+                          >
+                            <button
+                              class="btn btn-ghost btn-sm btn-circle text-error"
+                              @click.stop="deleteProblem($event, problemId, problemName)"
+                            >
+                              <i-uil-trash-alt class="lg:h-5 lg:w-5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Empty State for Grouped View if no problems -->
+              <div v-if="!groupedProblems.length" class="py-10 text-center text-gray-500">
+                No problems found.
+              </div>
+            </div>
           </template>
         </data-status-wrapper>
 
-        <div class="card-actions mt-5">
+        <!-- Pagination for Normal View Only -->
+        <div class="card-actions mt-5" v-if="!isGroupedView">
           <pagination-buttons v-model="page" :maxPage="maxPage" />
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Delete Confirmation Modal -->
+  <dialog class="modal" :class="{ 'modal-open': deleteModalOpen }">
+    <div class="modal-box">
+      <h3 class="text-lg font-bold">{{ $t("general.deleteConfirmTitle") }}</h3>
+      <p class="py-4">
+        {{ $t("general.deleteConfirmText", { name: itemToDelete?.name }) }}
+        <br />
+        <span class="text-error">{{ $t("general.deleteDetails") }}</span>
+      </p>
+      <p class="mt-2 text-xs text-gray-500">
+        {{ $t("general.shiftTip") }}
+      </p>
+      <div class="modal-action">
+        <button class="btn" @click="deleteModalOpen = false" :disabled="isDeleting">
+          {{ $t("general.cancel") }}
+        </button>
+        <button class="btn btn-error" @click="confirmDelete" :disabled="isDeleting">
+          {{ isDeleting ? "..." : $t("general.delete") }}
+        </button>
+      </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+      <button @click="deleteModalOpen = false">close</button>
+    </form>
+  </dialog>
+
+  <problem-export-modal
+    v-model="exportModalOpen"
+    :problem-count="exportTargetIds.length"
+    @confirm="handleExport"
+  />
+
+  <import-problem-modal
+    v-model="importModalOpen"
+    :course-name="String(route.params.name)"
+    @imported="execute()"
+  />
 </template>
+
+<style scoped>
+.hover-suction {
+  transform-origin: center;
+  transition:
+    transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.4s ease;
+  will-change: transform, box-shadow;
+}
+
+@keyframes suction-wave {
+  0% {
+    transform: scale(1) translateY(0) rotateX(0deg);
+  }
+  15% {
+    transform: scale(0.995) translateY(1px) rotateX(0.5deg);
+  }
+  35% {
+    transform: scale(0.988) translateY(3px) rotateX(1.5deg);
+  }
+  55% {
+    transform: scale(0.992) translateY(2px) rotateX(1deg);
+  }
+  75% {
+    transform: scale(0.99) translateY(2.5px) rotateX(1.2deg);
+  }
+  100% {
+    transform: scale(0.991) translateY(2px) rotateX(1deg);
+  }
+}
+
+@keyframes shadow-pulse {
+  0% {
+    box-shadow: inset 0 0 0 rgba(0, 0, 0, 0);
+  }
+  40% {
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.03);
+  }
+  100% {
+    box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+}
+
+.hover-suction:hover {
+  animation:
+    suction-wave 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards,
+    shadow-pulse 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  background-color: var(--base-200, #f2f2f2);
+  z-index: 10;
+}
+
+@media (hover: none) {
+  .hover-suction {
+    transition: background-color 0.2s ease;
+  }
+
+  .hover-suction:active {
+    background-color: var(--base-200, #f2f2f2);
+    transform: scale(0.99);
+  }
+}
+</style>

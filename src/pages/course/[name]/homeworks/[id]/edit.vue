@@ -5,12 +5,16 @@ import { useRoute, useRouter } from "vue-router";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import api, { fetcher } from "@/models/api";
 import axios, { type AxiosError } from "axios";
+import { useSession } from "@/stores/session";
 import { useProblemSelection } from "@/composables/useProblemSelection";
 import HomeworkForm from "@/components/Homework/HomeworkForm.vue";
+import { useI18n } from "vue-i18n";
 
 const route = useRoute();
 const router = useRouter();
-useTitle(`Edit Homework - ${route.params.id} - ${route.params.name} | Normal OJ`);
+const { t } = useI18n();
+const session = useSession();
+useTitle(`${t("course.hw.edit.title")} - ${route.params.id} - ${route.params.name} | Normal OJ`);
 
 const formElement = ref<InstanceType<typeof HomeworkForm>>();
 
@@ -22,8 +26,13 @@ const {
 
 const edittingHomework = ref<Homework>();
 watchEffect(() => {
+  if (session.isNotValidated) return;
+  if (!(session.isAdmin || session.isTeacher || session.isTA)) {
+    router.replace(`/course/${route.params.name}/homeworks`);
+    return;
+  }
   if (homework.value) {
-    edittingHomework.value = { ...homework.value };
+    edittingHomework.value = { ...homework.value, penalty: homework.value.penalty ?? "score = 0" };
   }
 });
 function update<K extends keyof Homework>(key: K, value: Homework[K]) {
@@ -66,7 +75,7 @@ async function submit() {
 async function delete_() {
   if (!formElement.value) return;
   formElement.value.isLoading = true;
-  if (!confirm("Are u sure?")) return;
+  if (!confirm(t("course.hw.edit.confirmDelete"))) return;
   try {
     await api.Homework.delete(route.params.id as string);
     router.push(`/course/${route.params.name}/homeworks`);
@@ -82,7 +91,7 @@ async function delete_() {
   }
 }
 function discard() {
-  if (!confirm("Are u sure?")) return;
+  if (!confirm(t("course.hw.edit.confirmDiscard"))) return;
   router.push(`/course/${route.params.name}/homeworks`);
 }
 </script>
@@ -92,19 +101,19 @@ function discard() {
     <div class="card min-w-full">
       <div class="card-body">
         <div class="card-title mb-3 justify-between">
-          Edit homework: {{ edittingHomework?.name }}
+          {{ t("course.hw.edit.title") }}: {{ edittingHomework?.name }}
           <div class="flex gap-x-3">
             <button
               :class="['btn btn-error btn-outline btn-sm lg:btn-md', formElement?.isLoading && 'loading']"
               @click="delete_"
             >
-              <i-uil-trash-alt class="mr-1 lg:h-5 lg:w-5" /> Delete
+              <i-uil-trash-alt class="mr-1 lg:h-5 lg:w-5" /> {{ t("course.hw.edit.delete") }}
             </button>
             <button
               :class="['btn btn-warning btn-sm lg:btn-md', formElement?.isLoading && 'loading']"
               @click="discard"
             >
-              <i-uil-times-circle class="mr-1 lg:h-5 lg:w-5" /> Discard Changes
+              <i-uil-times-circle class="mr-1 lg:h-5 lg:w-5" /> {{ t("course.hw.edit.discardChanges") }}
             </button>
           </div>
         </div>
@@ -129,7 +138,7 @@ function discard() {
               <div class="divider" />
 
               <div class="card-title mb-3">
-                Preview
+                {{ t("course.hw.edit.preview") }}
                 <input v-model="openPreview" type="checkbox" class="toggle" />
               </div>
 

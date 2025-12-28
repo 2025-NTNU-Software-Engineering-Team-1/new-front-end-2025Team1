@@ -2,7 +2,7 @@
 // ==========================================
 // Imports
 // ==========================================
-import { ref, watch, provide, Ref, onMounted, nextTick } from "vue";
+import { ref, watch, provide, Ref, onMounted, nextTick, computed } from "vue";
 import { useTitle } from "@vueuse/core";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import { useRoute, useRouter } from "vue-router";
@@ -10,7 +10,10 @@ import api, { fetcher } from "@/models/api";
 import axios, { type AxiosError } from "axios";
 import AdminProblemForm from "@/components/Problem/Admin/AdminProblemForm.vue";
 import AdminManualModal from "@/components/Problem/Admin/AdminManualModal.vue";
+import ProblemExportModal from "@/components/Problem/ProblemExportModal.vue";
 import { useI18n } from "vue-i18n";
+import { downloadBlob } from "@/utils/download";
+import { useSession } from "@/stores/session";
 
 // ==========================================
 // [CONFIG] Animation Settings (Ultra-Fast)
@@ -64,6 +67,7 @@ const logger = {
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
+const session = useSession();
 
 useTitle(`Edit Problem - ${route.params.id} - ${route.params.name} | Normal OJ`);
 
@@ -244,10 +248,28 @@ const animState = ref({
     "--start-y": "0px",
     "--flight-time": `${ANIM_CONFIG.FLIGHT_DURATION}ms`,
   } as Record<string, string>,
+  skipped: false,
 });
 
 onMounted(async () => {
   await nextTick();
+
+  // LocalStorage Key
+  const COOKIE_KEY = "has_seen_manual_anim";
+
+  // Check if user has seen animation
+  if (route.query.reset_anim) {
+    localStorage.removeItem(COOKIE_KEY);
+  }
+
+  if (localStorage.getItem(COOKIE_KEY)) {
+    animState.value.spotlight = false;
+    animState.value.skipped = true;
+    return;
+  }
+
+  // Mark as seen
+  localStorage.setItem(COOKIE_KEY, "true");
 
   // 1. Calculate Dash Trajectory
   if (manualButtonWrapper.value) {
@@ -281,7 +303,7 @@ const {
   data: problem,
   error: fetchError,
   isLoading: isFetching,
-} = useAxios<Problem>(`/problem/view/${route.params.id}`, fetcher);
+} = useAxios<Problem>(`/problem/manage/${route.params.id}`, fetcher);
 
 const edittingProblem = ref<ProblemForm>();
 
@@ -365,6 +387,8 @@ async function submit() {
 
   logger.group("Submit Edit Problem");
   formElement.value.isLoading = true;
+  // 最小延迟1.5秒防止二次点击，但不会让用户等太久
+  const delayPromise = new Promise((resolve) => setTimeout(resolve, 1500));
 
   try {
     const pid = Number(route.params.id);
@@ -460,6 +484,8 @@ async function submit() {
       await api.Problem.uploadAssetsV2(pid, fd);
     }
 
+    await delayPromise;
+
     logger.success("Update Successful. Redirecting...");
     router.push(`/course/${route.params.name}/problem/${route.params.id}`);
   } catch (error) {
@@ -477,15 +503,28 @@ async function submit() {
   }
 }
 
+const openDiscardDialog = ref(false);
+
 async function discard() {
-  if (confirm("Are u sure?")) router.push(`/course/${route.params.name}/problems`);
+  openDiscardDialog.value = true;
 }
 
-async function delete_() {
-  if (!formElement.value || !confirm("Are u sure?")) return;
+function confirmDiscard() {
+  openDiscardDialog.value = false;
+  router.push(`/course/${route.params.name}/problems`);
+}
 
+const isDeleting = ref(false);
+const openDeleteDialog = ref(false);
+
+async function delete_() {
+  openDeleteDialog.value = true;
+}
+
+async function confirmDelete() {
+  openDeleteDialog.value = false;
   logger.warn("Deleting Problem...", route.params.id);
-  formElement.value.isLoading = true;
+  isDeleting.value = true;
 
   try {
     await api.Problem.delete(route.params.id as string);
@@ -493,13 +532,15 @@ async function delete_() {
     router.push(`/course/${route.params.name}/problems`);
   } catch (error) {
     logger.error("Deletion Failed", error);
-    formElement.value.errorMsg =
-      axios.isAxiosError(error) && error.response?.data?.message
-        ? error.response.data.message
-        : "Unknown error occurred :(";
+    if (formElement.value) {
+      formElement.value.errorMsg =
+        axios.isAxiosError(error) && error.response?.data?.message
+          ? error.response.data.message
+          : "Unknown error occurred :(";
+    }
     throw error;
   } finally {
-    formElement.value.isLoading = false;
+    isDeleting.value = false;
   }
 }
 
@@ -509,6 +550,72 @@ async function delete_() {
 const openPreview = ref(false);
 const openJSON = ref(false);
 const mockProblemMeta = { owner: "", highScore: 0, submitCount: 0, ACUser: 0, submitter: 0 };
+const exportModalOpen = ref(false);
+const isExporting = ref(false);
+const canExportProblem = computed(
+  () =>
+    session.isAdmin || (edittingProblem.value as Partial<Problem> | undefined)?.owner === session.username,
+);
+// ==========================================
+// [HELPER] JSON Display Cleanup
+// ==========================================
+function cleanupForDisplay(data?: ProblemForm) {
+  if (!data) return {};
+
+  // Shallow copy to avoid modifying original
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+  const { pipeline_conf, pipelineConf, testCase, test_case, config, ...rest } = data as any;
+
+  // Clean nested config if needed
+  let cleanConfig = config;
+  if (config) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { artifact_collection, ...restConfig } = config;
+    cleanConfig = restConfig;
+  }
+
+  return { ...rest, config: cleanConfig };
+}
+
+async function handleExport(components: string[]) {
+  if (isExporting.value) return;
+  if (!canExportProblem.value) {
+    alert(t("course.problems.exportNotAllowed"));
+    return;
+  }
+  isExporting.value = true;
+  try {
+    const problemId = Number(route.params.id);
+    const resp = await api.Problem.exportZip(problemId, components);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const blob: Blob = (resp as any).data || (resp as any);
+    downloadBlob(blob, `problem_${problemId}.noj.zip`);
+  } catch (err) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const errorObj = err as any;
+    let message = "Failed to export problem. Please try again.";
+    const responseData = errorObj?.response?.data;
+    if (responseData instanceof Blob) {
+      try {
+        const text = await responseData.text();
+        const parsed = JSON.parse(text);
+        message = parsed?.message || text || message;
+      } catch {
+        try {
+          message = (await responseData.text()) || message;
+        } catch {
+          // ignore
+        }
+      }
+    } else {
+      message = errorObj?.response?.data?.message || errorObj?.message || message;
+    }
+    logger.error("Export failed", err);
+    alert(message);
+  } finally {
+    isExporting.value = false;
+  }
+}
 </script>
 
 <template>
@@ -521,7 +628,7 @@ const mockProblemMeta = { owner: "", highScore: 0, submitCount: 0, ACUser: 0, su
     <div class="card min-w-full">
       <div class="card-body">
         <div class="card-title mb-3 justify-between">
-          {{ t("course.problems.editProblem") }}{{ $route.params.id }} - {{ edittingProblem?.problemName }}
+          {{ t("course.problem.edit.title") }} #{{ $route.params.id }} - {{ edittingProblem?.problemName }}
 
           <div class="flex items-center gap-x-3">
             <div
@@ -543,29 +650,36 @@ const mockProblemMeta = { owner: "", highScore: 0, submitCount: 0, ACUser: 0, su
                   <div
                     class="bg-info absolute top-1/2 -right-1 h-3 w-3 -translate-y-1/2 rotate-45 transform"
                   ></div>
-                  👋 Click here for Manual!
+                  {{ t("course.problem.edit.manualHint") }}
                 </div>
               </Transition>
 
               <div
-                class="opacity-0 transition-opacity duration-300"
-                :class="{ 'dash-fly-anim': animState.flying }"
+                class="transition-opacity duration-300"
+                :class="[
+                  animState.skipped ? 'opacity-100' : 'opacity-0',
+                  { 'dash-fly-anim': animState.flying },
+                ]"
               >
                 <AdminManualModal />
               </div>
             </div>
 
             <button
-              :class="['btn btn-error btn-outline btn-sm lg:btn-md', formElement?.isLoading && 'loading']"
-              @click="delete_"
+              v-if="canExportProblem"
+              :class="['btn btn-primary btn-outline btn-sm lg:btn-md', isExporting && 'loading']"
+              @click="exportModalOpen = true"
             >
-              <i-uil-trash-alt class="mr-1 lg:h-5 lg:w-5" /> {{ t("course.problems.delete") }}
+              <i-uil-download-alt class="mr-1 lg:h-5 lg:w-5" /> {{ t("course.problems.export") }}
             </button>
             <button
-              :class="['btn btn-warning btn-sm lg:btn-md', formElement?.isLoading && 'loading']"
-              @click="discard"
+              :class="['btn btn-error btn-outline btn-sm lg:btn-md', isDeleting && 'loading']"
+              @click="delete_"
             >
-              <i-uil-times-circle class="mr-1 lg:h-5 lg:w-5" /> {{ t("course.problems.discardChanges") }}
+              <i-uil-trash-alt class="mr-1 lg:h-5 lg:w-5" /> {{ t("course.problem.edit.delete") }}
+            </button>
+            <button class="btn btn-warning btn-sm lg:btn-md" @click="discard">
+              <i-uil-times-circle class="mr-1 lg:h-5 lg:w-5" /> {{ t("course.problem.edit.discardChanges") }}
             </button>
           </div>
         </div>
@@ -578,7 +692,7 @@ const mockProblemMeta = { owner: "", highScore: 0, submitCount: 0, ACUser: 0, su
 
               <div class="divider" />
               <div class="card-title mb-3">
-                {{ t("course.problems.Preview") }}
+                {{ t("course.problem.edit.preview") }}
                 <input v-model="openPreview" type="checkbox" class="toggle" />
               </div>
 
@@ -594,21 +708,68 @@ const mockProblemMeta = { owner: "", highScore: 0, submitCount: 0, ACUser: 0, su
 
               <div class="divider my-4" />
               <div class="card-title mb-3">
-                JSON
+                {{ t("course.problem.edit.json") }}
                 <input v-model="openJSON" type="checkbox" class="toggle" />
               </div>
 
               <pre v-if="openJSON" class="bg-base-200 rounded p-2 whitespace-pre-wrap"
-                >{{ JSON.stringify(edittingProblem, null, 2) }}
+                >{{ JSON.stringify(cleanupForDisplay(edittingProblem), null, 2) }}
               </pre>
 
               <div class="mb-[50%]" />
             </template>
           </template>
         </data-status-wrapper>
+
+        <!-- Discard Confirmation Dialog -->
+        <ui-dialog v-model="openDiscardDialog">
+          <template #title>
+            <div class="text-warning flex items-center gap-2">
+              <i-uil-exclamation-triangle />
+              {{ t("course.problem.edit.discardChanges") }}
+            </div>
+          </template>
+          <template #content>
+            <p class="py-4">{{ t("course.problem.edit.confirmDiscard") }}</p>
+            <div class="modal-action">
+              <button class="btn btn-ghost" @click="openDiscardDialog = false">
+                {{ t("general.cancel") }}
+              </button>
+              <button class="btn btn-warning" @click="confirmDiscard">
+                {{ t("general.confirm") }}
+              </button>
+            </div>
+          </template>
+        </ui-dialog>
+
+        <!-- Delete Confirmation Dialog -->
+        <ui-dialog v-model="openDeleteDialog">
+          <template #title>
+            <div class="text-error flex items-center gap-2">
+              <i-uil-trash-alt />
+              {{ t("general.deleteConfirmTitle") }}
+            </div>
+          </template>
+          <template #content>
+            <p class="py-2">{{ t("course.problem.edit.confirmDelete") }}</p>
+            <p class="text-error py-2 font-bold">
+              {{ t("general.deleteDetails") }}
+            </p>
+            <div class="modal-action">
+              <button class="btn btn-ghost" @click="openDeleteDialog = false">
+                {{ t("general.cancel") }}
+              </button>
+              <button class="btn btn-error" @click="confirmDelete">
+                {{ t("general.delete") }}
+              </button>
+            </div>
+          </template>
+        </ui-dialog>
       </div>
     </div>
   </div>
+
+  <problem-export-modal v-model="exportModalOpen" :problem-count="1" @confirm="handleExport" />
 </template>
 
 <style scoped>

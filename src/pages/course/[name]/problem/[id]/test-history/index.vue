@@ -36,12 +36,14 @@ type TestHistoryItem = {
   lang: string;
   timestamp: number;
   type: "public" | "custom";
+  userLabel: string;
 };
 
 const testHistory = ref<TestHistoryItem[]>([]);
 const error = ref<AxiosError | undefined>(undefined);
 const isLoading = ref(false);
 const canRejudge = ref(false);
+const historyCount = computed(() => testHistory.value.length);
 
 // API 4: Load trial submission history when component mounts
 onMounted(async () => {
@@ -77,6 +79,7 @@ onMounted(async () => {
           lang: LANG[item.language_type] || "Unknown",
           timestamp: Number(item.timestamp),
           type: item.use_default_case === false ? "custom" : "public",
+          userLabel: formatUserLabel(item),
         })) || [];
       console.log("Loaded trial history:", testHistory.value);
     } else {
@@ -136,6 +139,7 @@ async function fetchHistory() {
           lang: LANG[item.language_type] || "Unknown",
           timestamp: Number(item.timestamp),
           type: item.use_default_case === false ? "custom" : "public",
+          userLabel: formatUserLabel(item),
         })) || [];
     }
   } catch (err) {
@@ -178,6 +182,10 @@ function viewTestDetail(testId: string | number) {
   const targetPath = `/course/${route.params.name}/problem/${route.params.id}/test-history/${testId}`;
   console.log("Navigating to:", targetPath);
   router.push(targetPath);
+}
+
+function formatUserLabel(item: { user?: { username?: string } }): string {
+  return item?.user?.username?.trim() || "Unknown";
 }
 
 // Rejudge All functionality
@@ -271,7 +279,12 @@ async function confirmDeleteAllTrials() {
     <div class="card min-w-full">
       <div class="card-body">
         <div class="flex flex-wrap items-center justify-between gap-4">
-          <div class="card-title">{{ t("course.problem.test.historyModal.title") }}</div>
+          <div class="flex items-center gap-3">
+            <div class="card-title">{{ t("course.problem.test.historyModal.title") }}</div>
+            <span class="text-base-content/70 text-sm">
+              {{ t("course.problem.test.trialHistory.rowCount", { n: historyCount }) }}
+            </span>
+          </div>
           <div class="flex gap-2">
             <!-- Rejudge All Button (only shown if user has permission) -->
             <button
@@ -280,7 +293,8 @@ async function confirmDeleteAllTrials() {
               :disabled="isRejudgeAllLoading || testHistory.length === 0"
               @click="rejudgeAll"
             >
-              <i-uil-repeat :class="['mr-1', isRejudgeAllLoading && 'animate-spin']" /> Rejudge All
+              <i-uil-repeat :class="['mr-1', isRejudgeAllLoading && 'animate-spin']" />
+              {{ $t("course.submissions.rejudgeAll") }}
             </button>
             <button
               v-if="canRejudge"
@@ -288,7 +302,8 @@ async function confirmDeleteAllTrials() {
               :disabled="isDeleteAllLoading || testHistory.length === 0"
               @click="prepareDeleteAllTrials"
             >
-              <i-uil-trash-alt :class="['mr-1', isDeleteAllLoading && 'animate-spin']" /> Delete All
+              <i-uil-trash-alt :class="['mr-1', isDeleteAllLoading && 'animate-spin']" />
+              {{ $t("course.submissions.deleteAll") }}
             </button>
             <router-link :to="getBackPath()" class="btn btn-sm">
               <i-uil-arrow-left class="mr-1" />
@@ -309,6 +324,7 @@ async function confirmDeleteAllTrials() {
                 <thead>
                   <tr>
                     <th>{{ t("course.problem.test.historyModal.table.id") }}</th>
+                    <th v-if="canRejudge">{{ t("course.problem.test.historyModal.table.user") }}</th>
                     <th class="text-center">{{ t("course.problem.test.trialHistory.type") }}</th>
                     <th>PID</th>
                     <th>{{ t("course.problem.test.historyModal.table.result") }}</th>
@@ -333,6 +349,7 @@ async function confirmDeleteAllTrials() {
                         {{ item.id }}
                       </router-link>
                     </td>
+                    <td v-if="canRejudge">{{ item.userLabel }}</td>
                     <td class="text-center">
                       <span
                         :class="['badge badge-sm', item.type === 'public' ? 'badge-info' : 'badge-warning']"
@@ -350,7 +367,7 @@ async function confirmDeleteAllTrials() {
                     <td>{{ item.lang }}</td>
                     <td>{{ dayjs(item.timestamp).format("YYYY-MM-DD HH:mm:ss") }}</td>
                     <td v-if="canRejudge">
-                      <div class="tooltip" data-tip="Delete">
+                      <div class="tooltip" :data-tip="$t('course.problem.test.trialHistory.delete')">
                         <button
                           class="btn btn-ghost btn-sm btn-circle text-error"
                           :class="{ loading: deletingIds.has(item.id) }"

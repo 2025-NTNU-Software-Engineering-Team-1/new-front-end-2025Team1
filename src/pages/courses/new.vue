@@ -57,7 +57,11 @@ async function submit() {
     router.push(`/course/${newCourse.course}`);
   } catch (error) {
     if (axios.isAxiosError(error) && error.response?.data?.message) {
-      errorMsg.value = error.response.data.message;
+      if (error.response.data.message === "Not allowed name.") {
+        errorMsg.value = t("courses.new.error.invalid_name");
+      } else {
+        errorMsg.value = error.response.data.message;
+      }
     } else {
       errorMsg.value = t("courses.new.unknown-error-occurred");
     }

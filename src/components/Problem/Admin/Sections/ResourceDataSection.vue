@@ -5,12 +5,11 @@
 // ==========================================
 import { inject, Ref, ref, watch, computed } from "vue";
 import { useRoute } from "vue-router";
+import { useI18n } from "vue-i18n";
 import { ZipReader, BlobReader } from "@zip.js/zip.js";
 import { assertFileSizeOK } from "@/utils/checkFileSize";
+import { getHoverTranslations } from "../../Hovers";
 import api from "@/models/api";
-import { useI18n } from "vue-i18n";
-import { hover_zh } from "../../Hovers/hover-zh-tw";
-import { hover_en } from "../../Hovers/hover-en";
 
 // ==========================================
 // [CONFIG] Console Debug Mode
@@ -58,9 +57,7 @@ const problem = inject<Ref<ProblemForm>>("problem") as Ref<ProblemForm>;
 const route = useRoute();
 const isDrag = ref(false);
 const { t, locale } = useI18n();
-const hover = computed(() => {
-  return locale.value === "english" ? hover_en : hover_zh;
-});
+const hover = computed(() => getHoverTranslations(locale.value));
 // Safety Check
 if (!problem || !problem.value) {
   logger.error("Problem injection failed");

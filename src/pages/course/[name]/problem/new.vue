@@ -9,6 +9,9 @@ import axios from "axios";
 import api from "@/models/api";
 import AdminProblemForm from "@/components/Problem/Admin/AdminProblemForm.vue";
 import AdminManualModal from "@/components/Problem/Admin/AdminManualModal.vue";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 // ==========================================
 // [CONFIG] Animation Settings (Ultra-Fast)
@@ -61,7 +64,7 @@ const logger = {
 // ==========================================
 const route = useRoute();
 const router = useRouter();
-useTitle(`New Problem - ${route.params.name} | Normal OJ`);
+useTitle(`${t("course.problem.new.title")} - ${route.params.name} | Normal OJ`);
 
 const formElement = ref<InstanceType<typeof AdminProblemForm>>();
 
@@ -220,6 +223,9 @@ async function submit() {
   logger.group("Submit New Problem");
   formElement.value.isLoading = true;
 
+  // 最小延迟1.5秒防止二次点击，但不会让用户等太久
+  const minDelayPromise = new Promise((resolve) => setTimeout(resolve, 1500));
+
   try {
     // Step 1: Create Problem Metadata
     logger.log("Step 1: Creating Problem Metadata...", newProblem.value);
@@ -257,9 +263,21 @@ async function submit() {
         fd.append("public_testdata.zip", assets.trialModePublicTestDataZip);
         attachedFiles.push("public_testdata.zip");
       }
-      if (assets.trialModeACFiles && assets.trialModeACFiles.length > 0) {
-        assets.trialModeACFiles.forEach((f) => fd.append("ac_code", f));
-        attachedFiles.push(`ac_code (${assets.trialModeACFiles.length})`);
+      if (assets.trialModeACFiles) {
+        if (Array.isArray(assets.trialModeACFiles)) {
+          assets.trialModeACFiles.forEach((f) => {
+            const ext = f.name.split(".").pop()?.toLowerCase() || "";
+            const key = ext === "c" || ext === "cpp" || ext === "py" ? `ac_code.${ext}` : "ac_code";
+            fd.append(key, f, f.name);
+            attachedFiles.push(f.name);
+          });
+        } else {
+          const f = assets.trialModeACFiles as File;
+          const ext = f.name.split(".").pop()?.toLowerCase() || "";
+          const key = ext === "c" || ext === "cpp" || ext === "py" ? `ac_code.${ext}` : "ac_code";
+          fd.append(key, f, f.name);
+          attachedFiles.push(f.name);
+        }
       }
       if (assets.testdataZip) {
         fd.append("case", assets.testdataZip);
@@ -306,6 +324,9 @@ async function submit() {
     await api.Problem.uploadAssetsV2(problemId, fd);
     logger.success("All assets uploaded successfully");
 
+    // 等待最小延迟，防止二次点击
+    await minDelayPromise;
+
     router.push(`/course/${route.params.name}/problem/${problemId}`);
   } catch (error) {
     logger.error("Submission Failed", error);
@@ -315,6 +336,8 @@ async function submit() {
           ? (error.response.data.message as string)
           : "Unknown error occurred :(";
     }
+    // 失败时也等待最小延迟，防止二次点击
+    await minDelayPromise;
     throw error;
   } finally {
     if (formElement.value) formElement.value.isLoading = false;
@@ -346,7 +369,7 @@ const openJSON = ref(false);
     <div class="card min-w-full">
       <div class="card-body">
         <div class="card-title mb-3 justify-between">
-          New Problem
+          {{ t("course.problem.new.title") }}
 
           <div
             ref="manualButtonWrapper"
@@ -386,7 +409,7 @@ const openJSON = ref(false);
 
         <div class="divider" />
         <div class="card-title mb-3">
-          Preview
+          {{ t("course.problem.new.preview") }}
           <input v-model="openPreview" type="checkbox" class="toggle" />
         </div>
         <problem-card
@@ -398,7 +421,7 @@ const openJSON = ref(false);
         <div class="divider my-4" />
 
         <div class="card-title mb-3">
-          JSON
+          {{ t("course.problem.new.json") }}
           <input v-model="openJSON" type="checkbox" class="toggle" />
         </div>
         <pre v-if="openJSON" class="bg-base-200 rounded p-2">{{ JSON.stringify(newProblem, null, 2) }}</pre>

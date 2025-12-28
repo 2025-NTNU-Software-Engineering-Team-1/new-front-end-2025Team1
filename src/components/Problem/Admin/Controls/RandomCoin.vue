@@ -9,6 +9,9 @@
  * - Customizable size
  */
 import { ref, computed } from "vue";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 const props = defineProps({
   min: {
@@ -76,7 +79,7 @@ function generateMatrixRain() {
 
 <template>
   <div class="coin-wrapper" :class="{ disabled: isSpinning }" :style="sizeVars">
-    <div class="tooltip" data-tip="Click to randomize Token">
+    <div class="tooltip" :data-tip="t('course.problems.randomizeToken')">
       <!-- Matrix rain container -->
       <div class="matrix-container">
         <div

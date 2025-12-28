@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { fetcher } from "@/models/api";
+import api from "@/models/api";
 import { useAxios } from "@vueuse/integrations/useAxios";
-import { computed, ref, watch, onMounted } from "vue";
+import { computed, ref, watch, onMounted, onUnmounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useTitle } from "@vueuse/core";
 import type { AxiosError } from "axios";
 
 useTitle("Admin - Login Records | Normal OJ");
-useI18n();
+const { t } = useI18n();
 
 // Pagination state
 const currentPage = ref(1);
@@ -89,6 +90,78 @@ interface LoginRecord {
   success: boolean;
   timestamp: string;
 }
+
+// =========== IP Ban Management ===========
+interface BannedIP {
+  ip: string;
+  remaining_seconds: number;
+  failure_count: number;
+}
+
+const bannedIPs = ref<BannedIP[]>([]);
+const bannedIPsLoading = ref(true);
+const bannedIPsError = ref<string | null>(null);
+const unbanningIP = ref<string | null>(null);
+let refreshInterval: ReturnType<typeof setInterval> | null = null;
+
+async function fetchBannedIPs() {
+  bannedIPsLoading.value = true;
+  bannedIPsError.value = null;
+  try {
+    const response = await api.Admin.getBannedIPs();
+    // Response is merged by interceptor, so data.banned_ips is at top level
+    const responseData = response as unknown as { banned_ips?: BannedIP[] };
+    bannedIPs.value = responseData.banned_ips || [];
+  } catch {
+    bannedIPsError.value = t("loginRecords.bannedIPs.unbanFailed");
+  } finally {
+    bannedIPsLoading.value = false;
+  }
+}
+
+async function unbanIP(ip: string) {
+  unbanningIP.value = ip;
+  try {
+    await api.Admin.unbanIP(ip);
+    // Remove from local list
+    bannedIPs.value = bannedIPs.value.filter((b) => b.ip !== ip);
+  } catch {
+    bannedIPsError.value = t("loginRecords.bannedIPs.unbanFailed");
+  } finally {
+    unbanningIP.value = null;
+  }
+}
+
+function formatRemainingTime(seconds: number): string {
+  if (seconds < 60) {
+    return `${seconds} ${t("loginRecords.bannedIPs.seconds")}`;
+  }
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${minutes}m ${remainingSeconds}s`;
+}
+
+// Auto-refresh countdown timer
+function decrementCountdowns() {
+  bannedIPs.value = bannedIPs.value
+    .map((b) => ({
+      ...b,
+      remaining_seconds: Math.max(0, b.remaining_seconds - 1),
+    }))
+    .filter((b) => b.remaining_seconds > 0);
+}
+
+onMounted(() => {
+  fetchBannedIPs();
+  // Update countdown every second
+  refreshInterval = setInterval(decrementCountdowns, 1000);
+});
+
+onUnmounted(() => {
+  if (refreshInterval) {
+    clearInterval(refreshInterval);
+  }
+});
 </script>
 
 <template>
@@ -182,5 +255,63 @@ interface LoginRecord {
         </div>
       </template>
     </data-status-wrapper>
+
+    <!-- Banned IPs Section -->
+    <div class="divider"></div>
+    <div class="space-y-4">
+      <h2 class="text-lg font-semibold">{{ $t("loginRecords.bannedIPs.title") }}</h2>
+
+      <div v-if="bannedIPsError" class="alert alert-error">
+        <span>{{ bannedIPsError }}</span>
+      </div>
+
+      <div v-if="bannedIPsLoading" class="flex items-center gap-2">
+        <span class="loading loading-spinner loading-sm"></span>
+        <span>Loading...</span>
+      </div>
+
+      <div v-else-if="bannedIPs.length === 0" class="text-base-content/50">
+        {{ $t("loginRecords.bannedIPs.noBannedIPs") }}
+      </div>
+
+      <div v-else class="overflow-x-auto">
+        <table class="table-compact table w-full">
+          <thead>
+            <tr>
+              <th>{{ $t("loginRecords.bannedIPs.ip") }}</th>
+              <th>{{ $t("loginRecords.bannedIPs.remainingTime") }}</th>
+              <th>{{ $t("loginRecords.bannedIPs.failureCount") }}</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="banned in bannedIPs" :key="banned.ip" class="hover">
+              <td class="font-mono">{{ banned.ip }}</td>
+              <td>
+                <span class="badge badge-warning">
+                  {{ formatRemainingTime(banned.remaining_seconds) }}
+                </span>
+              </td>
+              <td>{{ banned.failure_count }}</td>
+              <td>
+                <button
+                  class="btn btn-error btn-xs"
+                  :disabled="unbanningIP === banned.ip"
+                  @click="unbanIP(banned.ip)"
+                >
+                  <span v-if="unbanningIP === banned.ip" class="loading loading-spinner loading-xs"></span>
+                  <span v-else>{{ $t("loginRecords.bannedIPs.unban") }}</span>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <button class="btn btn-ghost btn-sm" @click="fetchBannedIPs">
+        <i-uil-sync />
+        {{ $t("loginRecords.refresh") }}
+      </button>
+    </div>
   </div>
 </template>

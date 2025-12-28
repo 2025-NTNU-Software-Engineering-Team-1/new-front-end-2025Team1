@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useTitle } from "@vueuse/core";
+import { useTitle, useIntervalFn, useDocumentVisibility } from "@vueuse/core";
 import { useI18n } from "vue-i18n";
 import { useAxios } from "@vueuse/integrations/useAxios";
 import { computed, watch, ref, watchEffect } from "vue";
@@ -68,6 +68,32 @@ watch(
   (url) => {
     if (url && !scoreboard.value) {
       execute(url);
+    }
+  },
+  { immediate: true },
+);
+const visibility = useDocumentVisibility();
+function refreshScoreboard() {
+  if (!getScoreboardUrl.value || isScoreboardFetching.value) return;
+  const url = `${getScoreboardUrl.value}${getScoreboardUrl.value.includes("?") ? "&" : "?"}_t=${Date.now()}`;
+  execute(url);
+}
+const { pause, resume, isActive } = useIntervalFn(
+  () => {
+    if (visibility.value === "visible") {
+      refreshScoreboard();
+    }
+  },
+  10000,
+  { immediate: false },
+);
+watch(
+  [getScoreboardUrl, visibility],
+  ([url, visible]) => {
+    if (url && visible === "visible") {
+      if (!isActive.value) resume();
+    } else if (isActive.value) {
+      pause();
     }
   },
   { immediate: true },
@@ -142,9 +168,10 @@ function exportCSV() {
         row.sum,
       ].join(","),
     )
-    .join("\n");
-  const csvData = new Blob([`${csvHeader}\n${csvBody}`], {
-    type: "text/csv;charset=utf-8",
+    .join("\r\n");
+  const bom = new Uint8Array([0xef, 0xbb, 0xbf]);
+  const csvData = new Blob([bom, `${csvHeader}\r\n${csvBody}`], {
+    type: "text/csv;charset=utf-8;",
   });
   const csvURL = URL.createObjectURL(csvData);
   const link = document.createElement("a");
@@ -205,10 +232,7 @@ function exportCSV() {
               @change="setScoreboardEnd"
             />
           </div>
-          <button
-            :class="['btn', isScoreboardFetching && 'loading']"
-            @click="() => execute(getScoreboardUrl)"
-          >
+          <button :class="['btn', isScoreboardFetching && 'loading']" @click="() => refreshScoreboard()">
             {{ t("course.hw.stats.fetch") }}
           </button>
           <button class="btn" @click="() => exportCSV()">{{ t("course.hw.stats.export") }}</button>

@@ -48,7 +48,7 @@ const state = computed(() => {
 <template>
   <div class="card bg-base-100 mx-auto w-full shadow-xl">
     <div class="card-body">
-      <div class="flex flex-col items-start justify-between sm:flex-row">
+      <div class="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
         <div class="lg:text-2x card-title md:mb-8 md:text-xl">
           <router-link
             v-if="homework.id && !preview"
@@ -60,7 +60,16 @@ const state = computed(() => {
           <span v-else>{{ homework.name }}</span>
           <div :class="['badge', STATUS_CLASS[state]]">{{ state }}</div>
         </div>
-        <due-countdown v-if="state === STATUS_LABEL.RUNNING" class="mt-2" :due="homework.end" />
+        <div class="flex items-center gap-3">
+          <router-link
+            v-if="homework.id && !preview"
+            class="btn px-4 text-base whitespace-nowrap"
+            :to="`/course/${$route.params.name}/homeworks/${homework.id}/stats`"
+          >
+            <i-uil-chart-line class="mr-1 lg:h-5 lg:w-5" /> {{ t("components.hw.card.description.stats") }}
+          </router-link>
+          <due-countdown v-if="state === STATUS_LABEL.RUNNING" class="mt-2" :due="homework.end" />
+        </div>
       </div>
 
       <div class="flex flex-wrap lg:flex-nowrap lg:gap-x-8">
@@ -120,9 +129,6 @@ const state = computed(() => {
       <div v-if="homework.id && !preview && session.isAdmin" class="card-actions justify-end">
         <router-link class="btn mr-3" :to="`/course/${$route.params.name}/homeworks/${homework.id}/edit`">
           <i-uil-edit class="mr-1 lg:h-5 lg:w-5" /> {{ t("components.hw.card.description.edit") }}
-        </router-link>
-        <router-link class="btn" :to="`/course/${$route.params.name}/homeworks/${homework.id}/stats`">
-          <i-uil-chart-line class="mr-1 lg:h-5 lg:w-5" /> {{ t("components.hw.card.description.stats") }}
         </router-link>
       </div>
     </div>

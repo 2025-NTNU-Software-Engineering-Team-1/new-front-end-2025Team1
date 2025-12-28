@@ -4,6 +4,7 @@ interface HomeworkForm {
   end: number;
   markdown: string;
   problemIds: number[];
+  penalty: string;
 }
 
 interface HomeworkCreationForm extends HomeworkForm {

@@ -27,7 +27,7 @@ const Auth = {
   logout: () => fetcher.get("/auth/session"),
   changePassword: (body: { oldPassword: string; newPassword: string }) =>
     fetcher.post("/auth/change-password", body),
-  batchSignup: (body: { newUsers: string; force: boolean; course: string }) =>
+  batchSignup: (body: { newUsers: string; force: boolean; course: string | null }) =>
     fetcher.post("/auth/batch-signup", body),
   checkEmail: (body: { email: string }) => fetcher.post<CheckEmail>("/auth/check/email", body),
   sendRecoveryEmail: (body: { email: string }) => fetcher.post("/auth/password-recovery", body),
@@ -86,6 +86,27 @@ const Problem = {
 
   // get a problem detail
   get: (id: string | number) => fetcher.get<Problem>(`/problem/view/${id}`),
+
+  // import/export
+  exportZip: (id: string | number, components?: string[]) =>
+    fetcher.get(`/problem/${id}/export`, {
+      params: components && components.length ? { components: components.join(",") } : undefined,
+      responseType: "blob",
+    }),
+  exportBatch: (problemIds: number[], components?: string[]) =>
+    fetcher.post(
+      "/problem/export-batch",
+      { problemIds, components: components && components.length ? components : undefined },
+      { responseType: "blob" },
+    ),
+  import: (formData: FormData) =>
+    fetcher.post("/problem/import", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }),
+  importBatch: (formData: FormData) =>
+    fetcher.post("/problem/import-batch", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }),
 };
 
 const Submission = {
@@ -360,6 +381,8 @@ const Course = {
   create: (body: CourseForm) => fetcher.post("/course", body),
   modify: (body: { course: string; new_course: string; teacher: string; color: string; emoji: string }) =>
     fetcher.put("/course", body),
+  list: () => fetcher.get("/course"),
+  get: (courseName: string) => fetcher.get(`/course/${courseName}`),
   join: (body: { course_code: string }) =>
     fetcher.post<{ message: string; data: { course: string } }>("/course/join", body),
   // Course code management (for teachers)
@@ -379,10 +402,39 @@ const Course = {
     fetcher.delete<{ message: string; data: { username: string } }>(
       `/course/${courseName}/member/${username}`,
     ),
+  // Add existing users to course as students (for teachers only)
+  addMembers: (courseName: string, usernames: string[]) =>
+    fetcher.post<{
+      message: string;
+      data: { added: string[]; already_in: string[]; not_found: string[] };
+    }>(`/course/${courseName}/members`, { usernames }),
+  // Search users for adding to course (course-specific endpoint)
+  searchUsers: (courseName: string, query: string) =>
+    fetcher.get<{ data: { username: string; displayedName: string; role: number }[] }>(
+      `/course/${courseName}/search-users`,
+      { params: { q: query } },
+    ),
 };
 
 const User = {
   modify: (username: string, body: UserEditionForm) => fetcher.patch(`/user/${username}`, body),
+  // Search users for adding to course
+  list: (params?: { offset?: number; count?: number; role?: number }) =>
+    fetcher.get<{ data: { username: string; displayedName: string; role: number }[] }>("/user", {
+      params,
+    }),
+};
+
+const Admin = {
+  // Get all banned IPs
+  getBannedIPs: () =>
+    fetcher.get<{
+      data: {
+        banned_ips: { ip: string; remaining_seconds: number; failure_count: number }[];
+      };
+    }>("/auth/banned-ips"),
+  // Unban a specific IP
+  unbanIP: (ip: string) => fetcher.delete<{ message: string }>(`/auth/banned-ips/${encodeURIComponent(ip)}`),
 };
 const Discussion = {
   // 1. 取得貼文列表 (New/Hot 切換)
@@ -625,6 +677,7 @@ export default {
   Homework,
   Course,
   User,
+  Admin,
   Discussion,
   APIToken: APITokenAPI,
   Chatbot,

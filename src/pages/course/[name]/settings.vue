@@ -12,6 +12,7 @@ import AppearanceSelector from "@/components/Course/AppearanceSelector.vue";
 
 const route = useRoute();
 const router = useRouter();
+defineProps(["name"]);
 const { t } = useI18n();
 const courseName = route.params.name as string;
 

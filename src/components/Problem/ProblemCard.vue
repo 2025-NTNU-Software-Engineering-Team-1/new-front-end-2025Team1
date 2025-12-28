@@ -24,6 +24,9 @@ interface NetworkRestriction {
     ip?: string[];
     url?: string[];
   };
+  custom_env?: {
+    env_list?: string[];
+  };
 }
 
 // 2. Define the Library/Static Analysis structure
@@ -306,6 +309,11 @@ const networkItemsCount = computed(() => {
   return count;
 });
 
+const customEnvList = computed(() => {
+  if (!isNetworkEnabled.value || !netRestriction.value?.custom_env?.env_list) return [];
+  return netRestriction.value.custom_env.env_list;
+});
+
 const isReminderDismissed = ref(false);
 const totalRestrictionsCount = computed(() => {
   const libCount = lib.value?.enabled ? libraryItemsCount.value : 0;
@@ -325,6 +333,32 @@ function dismissReminder(event?: Event) {
 watch(areRestrictionsVisible, (newVal) => {
   if (newVal) isReminderDismissed.value = true;
 });
+
+/* =========================================
+   [NEW] Interactive Mascot Animations
+   ========================================= */
+interface ReactionParticle {
+  id: number;
+  type: "angel" | "devil";
+  x: number;
+  y: number;
+}
+const mascotReactions = ref<ReactionParticle[]>([]);
+let particleCounter = 0;
+
+function triggerMascotReaction(type: "angel" | "devil") {
+  // Random position offset for organic feel
+  const x = Math.random() * 60 - 30; // -30 to 30
+  const y = Math.random() * 30 - 15; // -15 to 15
+
+  const id = particleCounter++;
+  mascotReactions.value.push({ id, type, x, y });
+
+  // cleanup
+  setTimeout(() => {
+    mascotReactions.value = mascotReactions.value.filter((p) => p.id !== id);
+  }, 1000);
+}
 </script>
 
 <template>
@@ -337,7 +371,12 @@ watch(areRestrictionsVisible, (newVal) => {
             {{ $route.params.id }} - {{ props.problem.problemName }}
           </div>
           <div class="flex">
-            <span class="badge badge-info mr-1" v-for="tag in props.problem.tags" :key="tag">{{ tag }}</span>
+            <span
+              class="badge badge-info mr-1 h-auto max-w-full text-left break-all whitespace-normal"
+              v-for="tag in props.problem.tags"
+              :key="tag"
+              >{{ tag }}</span
+            >
           </div>
         </div>
 
@@ -394,7 +433,7 @@ watch(areRestrictionsVisible, (newVal) => {
             <button
               v-if="session.isAdmin"
               class="btn btn-ghost btn-sm"
-              data-tip="Download test case"
+              :data-tip="$t('components.problem.card.downloadTestCase')"
               @click="downloadTestCase(Number($route.params.id))"
             >
               <i-uil-folder-download />
@@ -454,7 +493,9 @@ watch(areRestrictionsVisible, (newVal) => {
                 >
                   <span class="text-lg">{{ areRestrictionsVisible ? "×" : "⚙" }}</span>
                   <span>{{
-                    areRestrictionsVisible ? "Hide Constraints" : "View Environment Constraints"
+                    areRestrictionsVisible
+                      ? $t("components.problem.card.hideConstraints")
+                      : $t("components.problem.card.viewEnvironmentConstraints")
                   }}</span>
                 </button>
 
@@ -462,7 +503,7 @@ watch(areRestrictionsVisible, (newVal) => {
                   <div
                     v-if="showReminder"
                     class="group absolute -top-2 -right-2 z-10 flex animate-bounce cursor-pointer items-center justify-center hover:animate-none"
-                    title="Active restrictions found"
+                    :title="$t('components.problem.card.activeRestrictionsFound')"
                     @click="areRestrictionsVisible = true"
                   >
                     <div
@@ -473,7 +514,7 @@ watch(areRestrictionsVisible, (newVal) => {
                       <div
                         class="flex h-4 w-4 items-center justify-center rounded-full transition-colors hover:bg-white/20"
                         @click="dismissReminder"
-                        title="Dismiss reminder"
+                        :title="$t('components.problem.card.dismissReminder')"
                       >
                         ×
                       </div>
@@ -489,7 +530,30 @@ watch(areRestrictionsVisible, (newVal) => {
                 class="pointer-events-none absolute z-20 flex flex-col items-center"
                 :style="{ right: MASCOT_POSITION.right, top: MASCOT_POSITION.top }"
               >
-                <div class="transition-transform duration-500 ease-out">
+                <!-- Interactive Zone -->
+                <div
+                  class="pointer-events-auto relative cursor-pointer transition-transform duration-500 ease-out active:scale-95"
+                  @click="triggerMascotReaction(mascotState.type === 'angel' ? 'angel' : 'devil')"
+                >
+                  <!-- Particles Container -->
+                  <div
+                    class="pointer-events-none absolute inset-0 z-50 flex items-center justify-center overflow-visible"
+                  >
+                    <span
+                      v-for="p in mascotReactions"
+                      :key="p.id"
+                      class="absolute text-4xl select-none"
+                      :class="p.type === 'angel' ? 'animate-float-heart' : 'animate-shake-anger'"
+                      :style="{
+                        left: '50%',
+                        top: '50%',
+                        marginLeft: `${p.x}px`,
+                        marginTop: `${p.y}px`,
+                      }"
+                    >
+                      {{ p.type === "angel" ? "🤍" : "💥" }}
+                    </span>
+                  </div>
                   <div
                     v-if="mascotState.type === 'super-devil'"
                     class="flex items-center -space-x-6 md:-space-x-8"
@@ -534,9 +598,9 @@ watch(areRestrictionsVisible, (newVal) => {
                     @click="isLanguagesExpanded = !isLanguagesExpanded"
                   >
                     <div class="bg-primary h-6 w-1 rounded-full"></div>
-                    <span class="text-base-content/80 text-lg font-bold tracking-wide uppercase"
-                      >Allowed Languages</span
-                    >
+                    <span class="text-base-content/80 text-lg font-bold tracking-wide uppercase">{{
+                      $t("components.problem.card.allowedLanguages")
+                    }}</span>
                     <span class="bg-base-300 text-base-content/60 rounded px-2 py-1 font-mono text-xs">{{
                       allowedLangTexts.length
                     }}</span>
@@ -570,9 +634,9 @@ watch(areRestrictionsVisible, (newVal) => {
                       @click="isLibraryExpanded = !isLibraryExpanded"
                     >
                       <div class="bg-secondary h-6 w-1 rounded-full"></div>
-                      <span class="text-base-content/80 text-lg font-bold tracking-wide uppercase"
-                        >Static Analysis</span
-                      >
+                      <span class="text-base-content/80 text-lg font-bold tracking-wide uppercase">{{
+                        $t("course.problems.staticAnalysisGroup")
+                      }}</span>
                       <span
                         v-if="lib?.enabled"
                         class="bg-base-300 text-base-content/60 rounded px-2 py-1 font-mono text-xs"
@@ -600,17 +664,21 @@ watch(areRestrictionsVisible, (newVal) => {
                                 <span
                                   class="bg-success h-2 w-2 animate-pulse rounded-full shadow-[0_0_8px_rgba(var(--su),0.6)]"
                                 ></span>
-                                <span class="text-success">Allowed Only</span>
+                                <span class="text-success">{{
+                                  $t("components.problem.card.allowedOnly")
+                                }}</span>
                               </template>
                               <template v-else-if="s.mode === 'blacklist'">
                                 <span
                                   class="bg-error h-2 w-2 rounded-full shadow-[0_0_8px_rgba(var(--er),0.6)]"
                                 ></span>
-                                <span class="text-error">Blocked</span>
+                                <span class="text-error">{{ $t("components.problem.card.blocked") }}</span>
                               </template>
                               <template v-else>
                                 <span class="bg-base-300 h-2 w-2 rounded-full"></span>
-                                <span class="text-base-content/40">Unrestricted</span>
+                                <span class="text-base-content/40">{{
+                                  $t("components.problem.card.unrestricted")
+                                }}</span>
                               </template>
                             </div>
                           </div>
@@ -622,19 +690,23 @@ watch(areRestrictionsVisible, (newVal) => {
                             <span
                               v-for="sym in s.items"
                               :key="sym"
-                              class="bg-base-200/50 text-base-content/80 hover:text-primary hover:bg-base-200 inline-flex items-center rounded px-2 py-1 font-mono text-xs transition-colors select-none"
+                              class="bg-base-200/50 text-base-content/80 hover:text-primary hover:bg-base-200 inline-flex h-auto max-w-full items-center rounded px-2 py-1 text-left font-mono text-xs break-all whitespace-normal transition-colors select-none"
                             >
                               {{ sym }}
                             </span>
                           </div>
                           <div v-else class="text-base-content/30 pl-3 text-xs italic">
-                            {{ s.disabled ? "Not applicable" : "No rules defined" }}
+                            {{
+                              s.disabled
+                                ? $t("components.problem.card.notApplicable")
+                                : $t("components.problem.card.noRulesDefined")
+                            }}
                           </div>
                         </div>
                       </div>
                     </transition>
                     <div v-if="!lib?.enabled" class="text-base-content/40 pl-4 text-sm italic">
-                      No library restrictions active.
+                      {{ $t("components.problem.card.noLibraryRestrictionsActive") }}
                     </div>
                   </div>
 
@@ -644,9 +716,9 @@ watch(areRestrictionsVisible, (newVal) => {
                       @click="isNetworkExpanded = !isNetworkExpanded"
                     >
                       <div class="bg-warning h-6 w-1 rounded-full"></div>
-                      <span class="text-base-content/80 text-lg font-bold tracking-wide uppercase"
-                        >Network Access</span
-                      >
+                      <span class="text-base-content/80 text-lg font-bold tracking-wide uppercase">{{
+                        $t("course.problems.networkSidecars")
+                      }}</span>
                       <span
                         v-if="isNetworkEnabled"
                         class="bg-base-300 text-base-content/60 rounded px-2 py-1 font-mono text-xs"
@@ -664,7 +736,7 @@ watch(areRestrictionsVisible, (newVal) => {
                         >
                           <div class="flex items-center justify-between">
                             <span class="text-base-content/90 text-sm font-bold"
-                              >🔗 External Connections</span
+                              >🔗 {{ $t("components.problem.card.external") }}</span
                             >
 
                             <div
@@ -674,37 +746,41 @@ watch(areRestrictionsVisible, (newVal) => {
                                 <span
                                   class="bg-success h-2 w-2 animate-pulse rounded-full shadow-[0_0_8px_rgba(var(--su),0.6)]"
                                 ></span>
-                                <span class="text-success">Whitelist (Allowed Only)</span>
+                                <span class="text-success">{{
+                                  $t("components.problem.card.allowedOnly")
+                                }}</span>
                               </template>
                               <template v-else>
                                 <span
                                   class="bg-error h-2 w-2 rounded-full shadow-[0_0_8px_rgba(var(--er),0.6)]"
                                 ></span>
-                                <span class="text-error">Blacklist (Blocked)</span>
+                                <span class="text-error">{{ $t("components.problem.card.blocked") }}</span>
                               </template>
                             </div>
                           </div>
 
                           <div class="flex flex-col gap-1">
-                            <span class="text-base-content/50 text-xs font-bold uppercase">IP Addresses</span>
+                            <span class="text-base-content/50 text-xs font-bold uppercase">{{
+                              $t("components.problem.card.ip")
+                            }}</span>
                             <div v-if="externalConfig.ips.length" class="flex flex-wrap gap-2">
                               <span
                                 v-for="ip in externalConfig.ips"
                                 :key="ip"
-                                class="bg-base-200/50 text-base-content/80 hover:text-primary inline-flex items-center rounded px-2 py-1 font-mono text-xs transition-colors select-none"
+                                class="bg-base-200/50 text-base-content/80 hover:text-primary inline-flex h-auto max-w-full items-center rounded px-2 py-1 text-left font-mono text-xs break-all whitespace-normal transition-colors select-none"
                               >
                                 {{ ip }}
                               </span>
                             </div>
                             <div v-else class="text-base-content/30 text-xs italic">
-                              No specific IPs defined
+                              {{ $t("components.problem.card.noRulesDefined") }}
                             </div>
                           </div>
 
                           <div class="mt-2 flex flex-col gap-1">
-                            <span class="text-base-content/50 text-xs font-bold uppercase"
-                              >URLs / Domains</span
-                            >
+                            <span class="text-base-content/50 text-xs font-bold uppercase">{{
+                              $t("components.problem.card.url")
+                            }}</span>
                             <div v-if="externalConfig.urls.length" class="flex flex-wrap gap-2">
                               <span
                                 v-for="url in externalConfig.urls"
@@ -715,7 +791,7 @@ watch(areRestrictionsVisible, (newVal) => {
                               </span>
                             </div>
                             <div v-else class="text-base-content/30 text-xs italic">
-                              No specific URLs defined
+                              {{ $t("components.problem.card.noRulesDefined") }}
                             </div>
                           </div>
                         </div>
@@ -724,7 +800,7 @@ watch(areRestrictionsVisible, (newVal) => {
                           <div
                             class="text-base-content/40 mb-2 pl-1 text-xs font-bold tracking-widest uppercase"
                           >
-                            Sidecar Services
+                            {{ $t("components.problem.card.sidecarservices") }}
                           </div>
 
                           <div
@@ -758,7 +834,7 @@ watch(areRestrictionsVisible, (newVal) => {
                                     {{ car.name }}
                                   </div>
                                   <div class="text-base-content/50 font-mono text-xs break-all">
-                                    Image: {{ car.image }}
+                                    {{ $t("components.problem.card.image") }} {{ car.image }}
                                   </div>
                                 </div>
                               </div>
@@ -768,9 +844,9 @@ watch(areRestrictionsVisible, (newVal) => {
                                 class="border-base-content/5 relative z-10 mt-1 border-t pt-2"
                               >
                                 <div class="flex flex-wrap gap-1">
-                                  <span class="text-base-content/40 mr-1 self-center text-[10px] uppercase"
-                                    >Args:</span
-                                  >
+                                  <span class="text-base-content/40 mr-1 self-center text-[10px] uppercase">{{
+                                    $t("components.problem.card.arg")
+                                  }}</span>
                                   <span
                                     v-for="(arg, argIdx) in car.args"
                                     :key="argIdx"
@@ -784,17 +860,42 @@ watch(areRestrictionsVisible, (newVal) => {
                           </div>
                         </div>
 
+                        <div v-if="customEnvList.length > 0">
+                          <div
+                            class="text-base-content/40 mb-2 pl-1 text-xs font-bold tracking-widest uppercase"
+                          >
+                            {{ $t("components.problem.card.customimage") }}
+                          </div>
+
+                          <div class="border-base-content/5 bg-base-100/60 rounded-xl border p-4">
+                            <div class="flex flex-col gap-2">
+                              <span class="text-base-content/70 text-sm font-semibold">{{
+                                $t("components.problem.card.imagelist")
+                              }}</span>
+                              <div class="flex flex-col gap-1 pl-2">
+                                <div
+                                  v-for="env in customEnvList"
+                                  :key="env"
+                                  class="text-base-content/90 font-mono text-xs"
+                                >
+                                  - {{ env }}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
                         <div
                           v-if="!externalConfig && sidecarList.length === 0"
                           class="text-base-content/40 pl-4 text-sm italic"
                         >
-                          Network access is enabled, but no specific restrictions or sidecars are configured.
+                          {{ $t("components.problem.card.networkalert") }}
                         </div>
                       </div>
                     </transition>
 
                     <div v-if="!isNetworkEnabled" class="text-base-content/40 pl-4 text-sm italic">
-                      Network access is completely disabled.
+                      {{ $t("components.problem.card.networkdisable") }}
                     </div>
                   </div>
                 </div>
@@ -912,5 +1013,53 @@ watch(areRestrictionsVisible, (newVal) => {
     ease-in-out makes it smooth.
   */
   animation: signalMove 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Mascot Reaction Animations */
+.animate-float-heart {
+  animation: floatHeart 1s ease-out forwards;
+}
+
+.animate-shake-anger {
+  animation: shakeAnger 0.8s ease-in-out forwards;
+}
+
+@keyframes floatHeart {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -150%) scale(1);
+  }
+}
+
+@keyframes shakeAnger {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(-55%, -55%) scale(1.2);
+  }
+  30% {
+    transform: translate(-45%, -45%) scale(1.1);
+  }
+  45% {
+    transform: translate(-55%, -55%) scale(1.1);
+  }
+  60% {
+    transform: translate(-45%, -45%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
 }
 </style>

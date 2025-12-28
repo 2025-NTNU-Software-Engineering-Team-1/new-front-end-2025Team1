@@ -199,7 +199,7 @@
       "id": "題號",
       "name": "題名",
       "new": "新增",
-      "status": "隱藏",
+      "status": "狀態",
       "uploadDockerFilesZip": "上傳 dockerfiles.zip",
       "ArtifactCollection": "產物收集 (可選)",
       "CompiledBinary": "編譯後可執行檔 (BIN)",

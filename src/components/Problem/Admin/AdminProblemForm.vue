@@ -727,22 +727,35 @@ onMounted(async () => {
 
     <div class="form-control w-full md:max-w-xs">
       <label class="label">
-        <span class="label-text font-bold">{{ t("components.problem.forms.hiddenToggle") }}</span>
+        <span class="label-text font-bold">{{ t("course.problems.status") }}</span>
       </label>
-      <div class="bg-base-100 border-base-300 flex h-[3rem] items-center gap-3 rounded-lg border px-4">
+      <label
+        class="bg-base-200/50 hover:bg-base-200 flex cursor-pointer items-center justify-between rounded-xl px-4 py-2.5 transition-all"
+      >
+        <div class="flex items-center gap-3">
+          <div
+            class="flex h-8 w-8 items-center justify-center rounded-lg transition-colors duration-200"
+            :class="
+              problem.status === 1 ? 'bg-success/20 text-success' : 'bg-base-content/10 text-base-content/50'
+            "
+          >
+            <i-uil-eye v-if="problem.status === 1" class="h-5 w-5" />
+            <i-uil-ban v-else class="h-5 w-5" />
+          </div>
+          <span
+            class="text-sm font-bold transition-colors duration-200"
+            :class="problem.status === 1 ? 'text-success' : 'text-base-content/50'"
+          >
+            {{ problem.status === 1 ? t("course.problems.visible") : t("course.problems.hidden") }}
+          </span>
+        </div>
         <input
           type="checkbox"
-          class="toggle toggle-success"
+          class="toggle toggle-success toggle-sm"
           :checked="problem.status === 1"
           @change="update('status', (problem.status ^ 1) as 0 | 1)"
         />
-        <span
-          class="text-sm font-medium"
-          :class="problem.status === 1 ? 'text-success' : 'text-base-content/50'"
-        >
-          {{ problem.status === 1 ? t("course.problems.visible") : t("course.problems.hidden") }}
-        </span>
-      </div>
+      </label>
     </div>
   </div>
 

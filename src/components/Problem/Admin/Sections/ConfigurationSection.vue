@@ -1902,6 +1902,7 @@ onBeforeUnmount(() => {
                   <MultiStringInput
                     v-model="problem.config!.networkAccessRestriction!.external!.url"
                     placeholder="e.g. google.com"
+                    :is-link="true"
                     :badge-class="
                       problem.config!.networkAccessRestriction!.external!.model === 'White'
                         ? 'badge-info'

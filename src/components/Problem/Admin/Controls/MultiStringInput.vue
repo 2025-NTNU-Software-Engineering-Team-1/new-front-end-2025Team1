@@ -10,7 +10,8 @@ const props = defineProps<{
   placeholder?: string;
   badgeClass?: string;
   maxLength?: number;
-  collapseThreshold?: number; // 超过这个数量时显示收合功能
+  collapseThreshold?: number;
+  isLink?: boolean;
 }>();
 
 // Define emits
@@ -27,7 +28,7 @@ const isExpanded = ref(false);
 // - 'text-base': Normal text (16px)
 // Current setting: tight padding + extra small text
 const badgeStyle = "px-1.5 py-0.5 text-xs";
-// 默认收合阈值：超过10个时显示收合功能
+// MAX: 10
 const COLLAPSE_THRESHOLD = props.collapseThreshold ?? 10;
 // ---------------------
 
@@ -76,6 +77,13 @@ function remove(i: number) {
   next.splice(i, 1);
   emits("update:modelValue", next);
 }
+
+function getHref(value: string) {
+  if (value.startsWith("http://") || value.startsWith("https://")) {
+    return value;
+  }
+  return `https://${value}`;
+}
 </script>
 
 <template>
@@ -99,7 +107,16 @@ function remove(i: number) {
           class="badge h-auto min-h-0 gap-1 text-left break-all whitespace-normal"
           :class="[badgeClass || 'badge-info', badgeStyle]"
         >
-          <span>{{ item.value }}</span>
+          <a
+            v-if="isLink"
+            :href="getHref(item.value)"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="cursor-pointer hover:underline"
+          >
+            {{ item.value }}
+          </a>
+          <span v-else>{{ item.value }}</span>
           <button class="btn btn-ghost btn-xs h-auto min-h-0" @click="remove(item.originalIndex)">
             <i-uil-times />
           </button>

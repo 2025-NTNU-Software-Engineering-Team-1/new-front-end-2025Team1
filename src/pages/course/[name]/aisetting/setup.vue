@@ -84,11 +84,23 @@ interface ApiKey {
 const apiKeys = ref<ApiKey[]>([]);
 
 const searchQuery = ref("");
+const filterStatus = ref<"all" | "active" | "inactive">("all");
 
 const filteredApiKeys = computed(() => {
+  let keys = apiKeys.value;
+
+  // 1. Filter by Status
+  if (filterStatus.value === "active") {
+    keys = keys.filter((k) => k.is_active);
+  } else if (filterStatus.value === "inactive") {
+    keys = keys.filter((k) => !k.is_active);
+  }
+
+  // 2. Filter by Search
   const query = searchQuery.value.trim().toLowerCase();
-  if (!query) return apiKeys.value;
-  return apiKeys.value.filter(
+  if (!query) return keys;
+
+  return keys.filter(
     (k) => k.key_name.toLowerCase().includes(query) || (k.created_by || "").toLowerCase().includes(query),
   );
 });
@@ -326,182 +338,278 @@ onMounted(fetchKeys);
 </script>
 
 <template>
-  <div class="card-container pb-20">
-    <div class="card min-w-full">
-      <div class="card-body">
-        <div class="card-title mb-4">{{ t("course.aisetting.setup.title") }}</div>
+  <div class="px-6 py-8">
+    <div class="mx-auto max-w-7xl">
+      <!-- Page Header -->
+      <div class="border-base-content/10 mb-10 flex flex-col gap-2 border-b pb-6">
+        <h1 class="text-base-content text-3xl font-bold tracking-tight">
+          {{ t("course.aisetting.setup.title") }}
+        </h1>
+        <p class="text-base-content/60 text-base">Manage your AI integration keys securely.</p>
+      </div>
 
-        <div class="toast toast-end toast-bottom z-50">
-          <div v-if="errorMsg" class="alert alert-error px-4 py-2 text-sm">
-            <i-uil-times-circle class="h-4 w-4" />
-            <span>{{ errorMsg }}</span>
+      <!-- Toast Configuration -->
+      <div class="toast toast-end toast-bottom z-50">
+        <transition-group name="fade">
+          <div v-if="errorMsg" key="error" class="alert alert-error shadow-lg" role="alert">
+            <i-uil-times-circle class="h-5 w-5" />
+            <span class="font-medium">{{ errorMsg }}</span>
           </div>
-          <div v-if="successMsg" class="alert alert-success px-4 py-2 text-sm">
-            <i-uil-check-circle class="h-4 w-4" />
-            <span>{{ successMsg }}</span>
+          <div v-if="successMsg" key="success" class="alert alert-success shadow-lg" role="alert">
+            <i-uil-check-circle class="h-5 w-5" />
+            <span class="font-medium">{{ successMsg }}</span>
           </div>
+        </transition-group>
+      </div>
+
+      <!-- New Key Section -->
+      <div class="bg-base-100 border-base-200 mb-10 rounded-xl border p-6 shadow-sm">
+        <div class="mb-5 flex items-center justify-between">
+          <h2 class="text-base-content text-lg font-semibold">
+            {{ t("course.aisetting.setup.subtitleNewKey") }}
+          </h2>
         </div>
 
-        <div class="border-base-300 bg-base-200/30 dark:bg-base-200/10 mb-8 rounded-lg border p-5">
-          <h3 class="mb-4 text-lg font-semibold">{{ t("course.aisetting.setup.subtitleNewKey") }}</h3>
-
-          <div class="grid gap-4 md:grid-cols-3">
-            <div class="form-control">
-              <label class="label pb-1">
-                <span class="label-text text-sm font-medium">{{
-                  t("course.aisetting.setup.input.name")
-                }}</span>
-              </label>
-              <input
-                type="text"
-                v-model="newKey.name"
-                :placeholder="t('course.aisetting.setup.input.name')"
-                class="input input-bordered bg-base-100 w-full"
-                maxlength="50"
-              />
-            </div>
-
-            <div class="form-control">
-              <label class="label pb-1">
-                <span class="label-text text-sm font-medium">{{
-                  t("course.aisetting.setup.input.value")
-                }}</span>
-              </label>
-              <input
-                type="text"
-                v-model="newKey.value"
-                :placeholder="t('course.aisetting.setup.input.value')"
-                class="input input-bordered bg-base-100 w-full"
-                maxlength="50"
-              />
-            </div>
-
-            <div class="form-control">
-              <label class="label pb-1">
-                <span class="label-text text-sm font-medium">{{
-                  t("course.aisetting.setup.display.createdBy")
-                }}</span>
-              </label>
-              <input
-                type="text"
-                :value="session.displayedName || session.username"
-                class="input input-bordered bg-base-300 dark:bg-base-300/50 text-base-content/70 w-full cursor-not-allowed"
-                disabled
-              />
-            </div>
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-12 md:items-end">
+          <!-- Name Input -->
+          <div class="md:col-span-4">
+            <label class="text-base-content/50 mb-2 block text-xs font-semibold tracking-wider uppercase">
+              {{ t("course.aisetting.setup.input.name") }}
+            </label>
+            <input
+              type="text"
+              v-model="newKey.name"
+              :placeholder="t('course.aisetting.setup.input.name')"
+              class="input input-bordered focus:input-primary w-full transition-all"
+              maxlength="50"
+            />
           </div>
 
-          <div class="mt-5 flex justify-end">
+          <!-- Value Input -->
+          <div class="md:col-span-5">
+            <label class="text-base-content/50 mb-2 block text-xs font-semibold tracking-wider uppercase">
+              {{ t("course.aisetting.setup.input.value") }}
+            </label>
+            <input
+              type="text"
+              v-model="newKey.value"
+              :placeholder="t('course.aisetting.setup.input.value')"
+              class="input input-bordered focus:input-primary w-full font-mono text-sm transition-all"
+              maxlength="50"
+            />
+          </div>
+
+          <!-- Add Button -->
+          <div class="md:col-span-3">
             <button
-              class="btn btn-success gap-2"
+              class="btn btn-primary w-full gap-2 font-medium normal-case"
               :class="{ loading: isAddingKey }"
               :disabled="isAddingKey"
               @click="addKey"
             >
-              <i-uil-plus v-if="!isAddingKey" />
+              <i-uil-plus v-if="!isAddingKey" class="h-5 w-5" />
               {{ t("course.aisetting.setup.input.addKey") }}
             </button>
           </div>
+        </div>
 
-          <div v-if="newKey.maskedDisplay" class="text-success mt-3 font-mono text-sm">
-            Masked ID: {{ newKey.maskedDisplay }}
+        <!-- Masked ID Feedback -->
+        <div
+          v-if="newKey.maskedDisplay"
+          class="bg-success/10 text-success mt-4 flex items-center gap-2 rounded-lg p-3 text-sm"
+        >
+          <i-uil-shield-check class="h-5 w-5" />
+          <span
+            >Successfully added! Masked ID:
+            <span class="font-mono font-bold">{{ newKey.maskedDisplay }}</span></span
+          >
+        </div>
+      </div>
+
+      <!-- Existing Keys Table -->
+      <div class="border-base-200 bg-base-100 flex flex-col overflow-hidden rounded-xl border shadow-sm">
+        <!-- Toolbar: Tabs & Search -->
+        <div
+          class="border-base-200 bg-base-50/50 flex flex-col gap-4 border-b p-4 lg:flex-row lg:items-center lg:justify-between"
+        >
+          <!-- Filter Tabs -->
+          <div class="tabs tabs-boxed bg-base-200/50 rounded-lg p-1">
+            <a
+              class="tab tab-sm rounded-md transition-all duration-200"
+              :class="{ 'tab-active text-primary bg-white font-semibold shadow-sm': filterStatus === 'all' }"
+              @click="filterStatus = 'all'"
+            >
+              All
+            </a>
+            <a
+              class="tab tab-sm rounded-md transition-all duration-200"
+              :class="{
+                'tab-active text-success bg-white font-semibold shadow-sm': filterStatus === 'active',
+              }"
+              @click="filterStatus = 'active'"
+            >
+              Active
+            </a>
+            <a
+              class="tab tab-sm rounded-md transition-all duration-200"
+              :class="{
+                'tab-active text-base-content/50 bg-white font-semibold shadow-sm':
+                  filterStatus === 'inactive',
+              }"
+              @click="filterStatus = 'inactive'"
+            >
+              Inactive
+            </a>
+          </div>
+
+          <!-- Search & Count -->
+          <div class="flex w-full items-center gap-3 lg:w-auto">
+            <div class="text-base-content/40 hidden text-xs font-semibold tracking-wider uppercase md:block">
+              Total: {{ filteredApiKeys.length }}
+            </div>
+            <div class="relative w-full lg:w-64">
+              <div
+                class="text-base-content/40 pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"
+              >
+                <i-uil-search class="h-4 w-4" />
+              </div>
+              <input
+                v-model="searchQuery"
+                type="text"
+                class="input input-bordered input-sm focus:input-primary w-full pl-10"
+                :placeholder="t('course.aisetting.setup.input.searchPlaceholder')"
+              />
+            </div>
           </div>
         </div>
 
-        <div class="border-base-300 rounded-lg border p-5">
-          <div class="mb-4 flex items-center justify-between">
-            <h3 class="text-lg font-semibold">{{ t("course.aisetting.setup.subtitleExistingKey") }}</h3>
-            <input
-              v-model="searchQuery"
-              type="text"
-              class="input input-bordered input-sm w-64"
-              :placeholder="t('course.aisetting.setup.input.searchPlaceholder')"
-            />
-          </div>
-
-          <div v-if="isLoading && apiKeys.length === 0" class="py-4 text-center opacity-60">
-            <ui-spinner />
-          </div>
-
-          <div v-else-if="apiKeys.length === 0" class="py-4 text-center italic opacity-70">
-            {{ t("course.aisetting.setup.display.noKey") }}
-          </div>
-
-          <div v-else class="max-h-[600px] space-y-4 overflow-y-auto pr-2">
-            <div
-              v-for="k in filteredApiKeys"
-              :key="k.id"
-              class="border-base-300 bg-base-100 dark:bg-base-200/20 grid grid-cols-1 gap-4 rounded-lg border p-4 md:grid-cols-12 md:items-end"
+        <!-- Table Content -->
+        <div class="min-h-[300px] overflow-x-auto">
+          <table class="table w-full whitespace-nowrap">
+            <!-- Head -->
+            <thead
+              class="bg-base-100 border-base-200 text-base-content/50 border-b text-xs font-bold tracking-wider uppercase"
             >
-              <div class="md:col-span-3">
-                <label class="label pb-1">
-                  <span class="label-text text-xs opacity-70">{{
-                    t("course.aisetting.setup.display.keyName")
-                  }}</span>
-                </label>
-                <input
-                  type="text"
-                  v-model="k.key_name"
-                  class="input input-bordered input-sm bg-base-100 w-full"
-                  maxlength="50"
-                />
-              </div>
+              <tr>
+                <th class="pl-6">{{ t("course.aisetting.setup.display.keyName") }}</th>
+                <th>{{ t("course.aisetting.setup.display.masked") }}</th>
+                <th>{{ t("course.aisetting.setup.display.createdBy") }}</th>
+                <th class="w-24 text-center">Active</th>
+                <th class="w-24 pr-6 text-center">Actions</th>
+              </tr>
+            </thead>
 
-              <div class="md:col-span-3">
-                <label class="label pb-1">
-                  <span class="label-text text-xs opacity-70">{{
-                    t("course.aisetting.setup.display.masked")
-                  }}</span>
-                </label>
-                <div
-                  class="input input-bordered input-sm bg-base-300 dark:bg-base-300/50 text-base-content/70 flex w-full cursor-not-allowed items-center font-mono"
-                >
-                  {{ k.masked_value }}
-                </div>
-              </div>
+            <tbody>
+              <!-- Loading State -->
+              <tr v-if="isLoading && apiKeys.length === 0">
+                <td colspan="5" class="text-base-content/50 h-40 text-center">
+                  <div class="flex flex-col items-center justify-center gap-3">
+                    <ui-spinner class="text-primary h-6 w-6" />
+                    <span class="text-sm font-medium">Loading keys...</span>
+                  </div>
+                </td>
+              </tr>
 
-              <div class="md:col-span-2">
-                <label class="label pb-1">
-                  <span class="label-text text-xs opacity-70">{{
-                    t("course.aisetting.setup.display.createdBy")
-                  }}</span>
-                </label>
-                <input
-                  type="text"
-                  :value="k.created_by"
-                  class="input input-bordered input-sm bg-base-300 dark:bg-base-300/50 text-base-content/70 w-full cursor-not-allowed"
-                  disabled
-                />
-              </div>
+              <!-- Empty State -->
+              <tr v-else-if="apiKeys.length === 0">
+                <td colspan="5" class="text-base-content/40 h-64 text-center">
+                  <div class="flex flex-col items-center justify-center gap-3">
+                    <div class="bg-base-200/50 rounded-full p-4">
+                      <i-uil-key-skeleton class="h-8 w-8 opacity-40" />
+                    </div>
+                    <p class="text-sm font-medium">{{ t("course.aisetting.setup.display.noKey") }}</p>
+                  </div>
+                </td>
+              </tr>
 
-              <div class="md:col-span-2">
-                <label class="label pb-1">
-                  <span class="label-text text-xs opacity-70">{{
-                    t("course.aisetting.setup.display.active")
-                  }}</span>
-                </label>
-                <div class="flex h-8 items-center">
+              <!-- Items -->
+              <tr
+                v-for="(k, index) in filteredApiKeys"
+                :key="k.id"
+                class="group border-base-100 hover:bg-base-300/60 border-b transition-all duration-300 ease-in-out last:border-0 hover:scale-[1.002] hover:shadow-sm"
+                :class="{ 'bg-base-50/50 opacity-60 saturate-0': !k.is_active }"
+                :style="{ transitionDelay: '0ms' }"
+              >
+                <!-- Key Name (Editable) -->
+                <td class="pl-6">
+                  <input
+                    type="text"
+                    v-model="k.key_name"
+                    class="input input-ghost input-sm focus:input-bordered w-full text-sm font-semibold focus:bg-white focus:shadow-sm"
+                    maxlength="50"
+                  />
+                </td>
+
+                <!-- Masked Value -->
+                <td>
+                  <div
+                    class="bg-base-200/50 text-base-content/70 group-hover:bg-base-200 inline-flex items-center gap-2 rounded-md px-2.5 py-1 font-mono text-xs transition-colors"
+                  >
+                    <i-uil-padlock class="h-3 w-3 opacity-50" />
+                    {{ k.masked_value }}
+                  </div>
+                </td>
+
+                <!-- Created By -->
+                <td>
+                  <div class="text-base-content/70 flex items-center gap-2 text-sm">
+                    <i-uil-user class="h-4 w-4 opacity-50" />
+                    <span class="font-medium">{{ k.created_by }}</span>
+                  </div>
+                </td>
+
+                <!-- Active Toggle -->
+                <td class="text-center">
                   <input
                     type="checkbox"
                     class="toggle toggle-success toggle-sm"
                     v-model="k.is_active"
                     @change="updateKey(k)"
                   />
-                </div>
-              </div>
+                </td>
 
-              <div class="flex justify-end gap-2 md:col-span-2">
-                <button class="btn btn-success btn-sm" @click="updateKey(k)">
-                  {{ t("course.aisetting.setup.display.save") }}
-                </button>
-                <button class="btn btn-error btn-sm" @click="deleteKey(k.id)">
-                  {{ t("course.aisetting.setup.display.delete") }}
-                </button>
-              </div>
-            </div>
-          </div>
+                <!-- Actions -->
+                <td class="pr-6 text-center">
+                  <div
+                    class="flex justify-center gap-1 opacity-100 transition-opacity duration-200 lg:opacity-0 lg:group-hover:opacity-100"
+                  >
+                    <button
+                      class="btn btn-sm btn-ghost btn-square hover:bg-primary/10 hover:text-primary transition-colors"
+                      @click="updateKey(k)"
+                      :title="t('course.aisetting.setup.display.save')"
+                    >
+                      <i-uil-save class="h-4.5 w-4.5" />
+                    </button>
+                    <button
+                      class="btn btn-sm btn-ghost btn-square hover:bg-error/10 hover:text-error transition-colors"
+                      @click="deleteKey(k.id)"
+                      :title="t('course.aisetting.setup.display.delete')"
+                    >
+                      <i-uil-trash-alt class="h-4.5 w-4.5" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+/* Optional: specific transition for toast notifications */
+.fade-enter-active,
+.fade-leave-active {
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
+}
+</style>

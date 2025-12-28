@@ -325,6 +325,32 @@ function dismissReminder(event?: Event) {
 watch(areRestrictionsVisible, (newVal) => {
   if (newVal) isReminderDismissed.value = true;
 });
+
+/* =========================================
+   [NEW] Interactive Mascot Animations
+   ========================================= */
+interface ReactionParticle {
+  id: number;
+  type: "angel" | "devil";
+  x: number;
+  y: number;
+}
+const mascotReactions = ref<ReactionParticle[]>([]);
+let particleCounter = 0;
+
+function triggerMascotReaction(type: "angel" | "devil") {
+  // Random position offset for organic feel
+  const x = Math.random() * 60 - 30; // -30 to 30
+  const y = Math.random() * 30 - 15; // -15 to 15
+
+  const id = particleCounter++;
+  mascotReactions.value.push({ id, type, x, y });
+
+  // cleanup
+  setTimeout(() => {
+    mascotReactions.value = mascotReactions.value.filter((p) => p.id !== id);
+  }, 1000);
+}
 </script>
 
 <template>
@@ -489,7 +515,30 @@ watch(areRestrictionsVisible, (newVal) => {
                 class="pointer-events-none absolute z-20 flex flex-col items-center"
                 :style="{ right: MASCOT_POSITION.right, top: MASCOT_POSITION.top }"
               >
-                <div class="transition-transform duration-500 ease-out">
+                <!-- Interactive Zone -->
+                <div
+                  class="pointer-events-auto relative cursor-pointer transition-transform duration-500 ease-out active:scale-95"
+                  @click="triggerMascotReaction(mascotState.type === 'angel' ? 'angel' : 'devil')"
+                >
+                  <!-- Particles Container -->
+                  <div
+                    class="pointer-events-none absolute inset-0 z-50 flex items-center justify-center overflow-visible"
+                  >
+                    <span
+                      v-for="p in mascotReactions"
+                      :key="p.id"
+                      class="absolute select-none text-4xl"
+                      :class="p.type === 'angel' ? 'animate-float-heart' : 'animate-shake-anger'"
+                      :style="{
+                        left: '50%',
+                        top: '50%',
+                        marginLeft: `${p.x}px`,
+                        marginTop: `${p.y}px`,
+                      }"
+                    >
+                      {{ p.type === "angel" ? "🤍" : "💢" }}
+                    </span>
+                  </div>
                   <div
                     v-if="mascotState.type === 'super-devil'"
                     class="flex items-center -space-x-6 md:-space-x-8"
@@ -912,5 +961,53 @@ watch(areRestrictionsVisible, (newVal) => {
     ease-in-out makes it smooth.
   */
   animation: signalMove 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Mascot Reaction Animations */
+.animate-float-heart {
+  animation: floatHeart 1s ease-out forwards;
+}
+
+.animate-shake-anger {
+  animation: shakeAnger 0.8s ease-in-out forwards;
+}
+
+@keyframes floatHeart {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -150%) scale(1);
+  }
+}
+
+@keyframes shakeAnger {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  15% {
+    opacity: 1;
+    transform: translate(-55%, -55%) scale(1.2);
+  }
+  30% {
+    transform: translate(-45%, -45%) scale(1.1);
+  }
+  45% {
+    transform: translate(-55%, -55%) scale(1.1);
+  }
+  60% {
+    transform: translate(-45%, -45%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
 }
 </style>

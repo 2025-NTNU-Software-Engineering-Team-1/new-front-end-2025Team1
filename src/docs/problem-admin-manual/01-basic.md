@@ -40,9 +40,9 @@ The system automatically groups files into tasks based on the numerical prefix o
 
 | Task Index | Filename Pattern        | Description                                          |
 | :--------- | :---------------------- | :--------------------------------------------------- |
-| **Task 0** | `00_xx.in`, `00_xx.out` | Prefix `00` creates Task 0; supports multiple cases. |
-| **Task 1** | `01_xx.in`, `01_xx.out` | Prefix `01` creates Task 1.                          |
-| **Task 2** | `02_xx.in`, `02_xx.out` | Prefix `02` creates Task 2 (and so on).              |
+| **Task 0** | `00xx.in`, `00xx.out` | Prefix `00` creates Task 0; Start with `0000.in`, `0000.out` |
+| **Task 1** | `01xx.in`, `01xx.out` | Prefix `01` creates Task 1.|
+| **Task 2** | `02xx.in`, `02xx.out` | Prefix `02` creates Task 2 (and so on).|
 
 > **Note**: The total count of `.in` and `.out` files must be identical, and their indices must match perfectly.
 

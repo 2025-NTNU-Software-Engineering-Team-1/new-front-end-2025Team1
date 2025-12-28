@@ -499,15 +499,26 @@ async function submit() {
   }
 }
 
+const openDiscardDialog = ref(false);
+
 async function discard() {
-  if (confirm(t("course.problem.edit.confirmDiscard"))) router.push(`/course/${route.params.name}/problems`);
+  openDiscardDialog.value = true;
+}
+
+function confirmDiscard() {
+  openDiscardDialog.value = false;
+  router.push(`/course/${route.params.name}/problems`);
 }
 
 const isDeleting = ref(false);
+const openDeleteDialog = ref(false);
 
 async function delete_() {
-  if (!confirm(t("course.problem.edit.confirmDelete"))) return;
+  openDeleteDialog.value = true;
+}
 
+async function confirmDelete() {
+  openDeleteDialog.value = false;
   logger.warn("Deleting Problem...", route.params.id);
   isDeleting.value = true;
 
@@ -589,7 +600,7 @@ function cleanupForDisplay(data?: ProblemForm) {
                   <div
                     class="bg-info absolute top-1/2 -right-1 h-3 w-3 -translate-y-1/2 rotate-45 transform"
                   ></div>
-                  👋 Click here for Manual!
+                  {{ t("course.problem.edit.manualHint") }}
                 </div>
               </Transition>
 
@@ -652,6 +663,51 @@ function cleanupForDisplay(data?: ProblemForm) {
             </template>
           </template>
         </data-status-wrapper>
+
+        <!-- Discard Confirmation Dialog -->
+        <ui-dialog v-model="openDiscardDialog">
+          <template #title>
+            <div class="text-warning flex items-center gap-2">
+              <i-uil-exclamation-triangle />
+              {{ t("course.problem.edit.discardChanges") }}
+            </div>
+          </template>
+          <template #content>
+            <p class="py-4">{{ t("course.problem.edit.confirmDiscard") }}</p>
+            <div class="modal-action">
+              <button class="btn btn-ghost" @click="openDiscardDialog = false">
+                {{ t("general.cancel") }}
+              </button>
+              <button class="btn btn-warning" @click="confirmDiscard">
+                {{ t("general.confirm") }}
+              </button>
+            </div>
+          </template>
+        </ui-dialog>
+
+        <!-- Delete Confirmation Dialog -->
+        <ui-dialog v-model="openDeleteDialog">
+          <template #title>
+            <div class="text-error flex items-center gap-2">
+              <i-uil-trash-alt />
+              {{ t("general.deleteConfirmTitle") }}
+            </div>
+          </template>
+          <template #content>
+            <p class="py-2">{{ t("course.problem.edit.confirmDelete") }}</p>
+            <p class="text-error py-2 font-bold">
+              {{ t("general.deleteDetails") }}
+            </p>
+            <div class="modal-action">
+              <button class="btn btn-ghost" @click="openDeleteDialog = false">
+                {{ t("general.cancel") }}
+              </button>
+              <button class="btn btn-error" @click="confirmDelete">
+                {{ t("general.delete") }}
+              </button>
+            </div>
+          </template>
+        </ui-dialog>
       </div>
     </div>
   </div>

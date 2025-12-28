@@ -176,7 +176,8 @@
         "preview": "預覽",
         "json": "JSON（供開發人員檢查）",
         "confirmDelete": "確定欲刪除此題目無？",
-        "confirmDiscard": "確定欲取消更改無？"
+        "confirmDiscard": "確定欲取消更改無？",
+        "manualHint": "👋 點落遮看說明！"
       },
       "copycat": {
         "title": "題目 #{id} ê 抄襲檢測",

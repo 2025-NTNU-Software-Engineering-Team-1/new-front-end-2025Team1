@@ -409,7 +409,8 @@
         "preview": "Preview",
         "json": "JSON（for developer）",
         "confirmDelete": "Are you sure you want to delete this problem?",
-        "confirmDiscard": "Are you sure you want to discard changes?"
+        "confirmDiscard": "Are you sure you want to discard changes?",
+        "manualHint": "👋 Click here for Manual!"
       },
       "copycat": {
         "title": "Copycat of problem #{id}",

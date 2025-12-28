@@ -260,7 +260,7 @@ onUnmounted(() => {
     <div class="divider"></div>
     <div class="space-y-4">
       <h2 class="text-lg font-semibold">{{ $t("loginRecords.bannedIPs.title") }}</h2>
-      
+
       <div v-if="bannedIPsError" class="alert alert-error">
         <span>{{ bannedIPsError }}</span>
       </div>

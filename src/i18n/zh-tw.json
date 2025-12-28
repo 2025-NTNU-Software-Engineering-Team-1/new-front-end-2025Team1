@@ -408,7 +408,8 @@
         "preview": "預覽",
         "json": "JSON（供開發人員檢查）",
         "confirmDelete": "確定要刪除此題目嗎？",
-        "confirmDiscard": "確定要取消更改嗎？"
+        "confirmDiscard": "確定要取消更改嗎？",
+        "manualHint": "👋 點擊這裡查看說明！"
       },
       "copycat": {
         "title": "題目 #{id} 的抄襲檢測",

@@ -90,9 +90,7 @@ async function submit() {
     <div class="form-control w-full max-w-xs">
       <label class="label">
         <span class="label-text">{{ $t("components.hw.form.problems") }}</span>
-        <span class="label-text-alt text-base-content/60"
-          >{{ $t("components.hw.form.search") }}</span
-        >
+        <span class="label-text-alt text-base-content/60">{{ $t("components.hw.form.search") }}</span>
       </label>
       <problem-multi-select
         :model-value="form.problemIds"

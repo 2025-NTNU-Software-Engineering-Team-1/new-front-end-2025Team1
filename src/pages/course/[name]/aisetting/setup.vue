@@ -345,7 +345,7 @@ onMounted(fetchKeys);
         <h1 class="text-base-content text-3xl font-bold tracking-tight">
           {{ t("course.aisetting.setup.title") }}
         </h1>
-        <p class="text-base-content/60 text-base">Manage your AI integration keys securely.</p>
+        <p class="text-base-content/60 text-base">{{ t("course.aisetting.setup.subtitle") }}</p>
       </div>
 
       <!-- Toast Configuration -->
@@ -420,7 +420,7 @@ onMounted(fetchKeys);
         >
           <i-uil-shield-check class="h-5 w-5" />
           <span
-            >Successfully added! Masked ID:
+            >{{ t("course.aisetting.setup.successmsg") }}
             <span class="font-mono font-bold">{{ newKey.maskedDisplay }}</span></span
           >
         </div>
@@ -439,7 +439,7 @@ onMounted(fetchKeys);
               :class="{ 'tab-active text-primary bg-white font-semibold shadow-sm': filterStatus === 'all' }"
               @click="filterStatus = 'all'"
             >
-              All
+              {{ t("course.aisetting.setup.filter.all") }}
             </a>
             <a
               class="tab tab-sm rounded-md transition-all duration-200"
@@ -448,7 +448,7 @@ onMounted(fetchKeys);
               }"
               @click="filterStatus = 'active'"
             >
-              Active
+              {{ t("course.aisetting.setup.filter.active") }}
             </a>
             <a
               class="tab tab-sm rounded-md transition-all duration-200"
@@ -458,14 +458,14 @@ onMounted(fetchKeys);
               }"
               @click="filterStatus = 'inactive'"
             >
-              Inactive
+              {{ t("course.aisetting.setup.filter.inactive") }}
             </a>
           </div>
 
           <!-- Search & Count -->
           <div class="flex w-full items-center gap-3 lg:w-auto">
             <div class="text-base-content/40 hidden text-xs font-semibold tracking-wider uppercase md:block">
-              Total: {{ filteredApiKeys.length }}
+              {{ t("course.aisetting.setup.total") }}{{ filteredApiKeys.length }}
             </div>
             <div class="relative w-full lg:w-64">
               <div
@@ -494,8 +494,8 @@ onMounted(fetchKeys);
                 <th class="pl-6">{{ t("course.aisetting.setup.display.keyName") }}</th>
                 <th>{{ t("course.aisetting.setup.display.masked") }}</th>
                 <th>{{ t("course.aisetting.setup.display.createdBy") }}</th>
-                <th class="w-24 text-center">Active</th>
-                <th class="w-24 pr-6 text-center">Actions</th>
+                <th class="w-24 text-center">{{ t("course.aisetting.setup.display.active") }}</th>
+                <th class="w-24 pr-6 text-center">{{ t("course.aisetting.setup.display.action") }}</th>
               </tr>
             </thead>
 

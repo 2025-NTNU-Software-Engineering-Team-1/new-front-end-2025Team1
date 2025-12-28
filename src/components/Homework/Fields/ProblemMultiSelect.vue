@@ -38,7 +38,7 @@ function handleUpdate(value: number[]) {
       <div class="relative w-full max-w-xs">
         <ComboboxInput
           class="input-bordered input w-full pr-10 text-left"
-          :placeholder="modelValue.length ? modelValue.join(', ') : '可輸入 ID 或名稱搜尋'"
+          :placeholder="modelValue.length ? modelValue.join(', ') : $t('components.hw.form.search')"
           @change="query = $event.target.value"
           maxlength="50"
         />

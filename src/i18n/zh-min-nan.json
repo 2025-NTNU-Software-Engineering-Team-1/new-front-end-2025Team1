@@ -109,8 +109,11 @@
       "skinsPage": "皮膚管理",
       "setup": {
         "title": "AI 管理 - 設定",
+        "subtitle": "安全地管理您的AI整合金鑰",
         "subtitleNewKey": "新增金鑰資訊 (Gemini)",
         "subtitleExistingKey": "現有金鑰",
+        "successmsg": "添加成功！已屏蔽 ID：",
+        "total": "總和：",
         "input": {
           "name": "金鑰名稱 *",
           "value": "API 金鑰值",
@@ -124,7 +127,13 @@
           "createdBy": "建立者",
           "active": "啟用",
           "save": "儲存",
-          "delete": "刪除"
+          "delete": "刪除",
+          "action": "操作"
+        },
+        "filter": {
+          "all": "全部",
+          "active": "啟用",
+          "inactive": "未啟用"
         }
       },
       "usage": {
@@ -348,7 +357,7 @@
         "general": {
           "tried": "已嘗試使用者數量",
           "ac": "AC 使用者數量",
-          "acRatio": "AC Submission 比率",
+          "acRatio": "AC 繳交比率",
           "avg": "平均分數",
           "sd": "標準差"
         },
@@ -902,7 +911,9 @@
   "components": {
     "validation": {
       "not_blank": "袂使是空白或者只有空白字元",
-      "contains_invisible": "包含不可見或控制字元"
+      "contains_invisible": "包含不可見或控制字元",
+      "required": "這个欄位是必填項目",
+      "maxLength": "長度袂使超過 {max} 個字"
     },
     "ann": {
       "form": {
@@ -923,7 +934,8 @@
         "fromField": "開始時間",
         "dueField": "截止時間",
         "descField": "說明",
-        "submit": "送出"
+        "submit": "送出",
+        "search": "可輸入 ID 或名稱搜尋"
       },
       "validation": {
         "not_blank": "名稱袂使是空白或者只有空白字元",
@@ -1035,7 +1047,18 @@
         "disabled": "停用",
         "notApplicable": "無適用",
         "noRulesDefined": "猶未定規則",
-        "noLibraryRestrictionsActive": "猶未開函式庫限制。"
+        "noLibraryRestrictionsActive": "猶未開函式庫限制。",
+        "allowedLanguages": "准用 ê 程式語言",
+        "external": "外部網路存取限制",
+        "ip": "IP 位址",
+        "url": "連結 / 網域",
+        "sidecarservices": "Sidecar 服務",
+        "image": "映像檔：",
+        "arg": "參數: ",
+        "customimage": "自訂映像檔",
+        "imagelist": "映像檔列",
+        "networkalert": "網路存取已啟用，但未配置任何特定限制或sidecar。",
+        "networkdisable": "網路存取已完全停用。"
       },
       "infoCard": {
         "score": "得分",

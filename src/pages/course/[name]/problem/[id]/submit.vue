@@ -380,6 +380,22 @@ async function submit() {
             <div class="card-title md:text-lg lg:text-xl">
               {{ t("course.problem.submit.card.placeholder") }}
             </div>
+
+            <div class="form-control w-full md:max-w-xs">
+              <label class="label">
+                <span class="label-text">{{ t("course.problem.submit.lang.text") }}</span>
+              </label>
+              <select
+                v-model="(v$ as any).lang.$model"
+                :class="['select-bordered select', (v$ as any).lang.$error && 'input-error']"
+              >
+                <option disabled :value="-1">{{ t("course.problem.submit.lang.select") }}</option>
+                <option v-for="{ text, value } in langOptions" :key="value" :value="value">{{ text }}</option>
+              </select>
+              <label class="label" v-show="(v$ as any).lang.$error">
+                <span class="label-text-alt text-error" v-text="(v$ as any).lang.$errors[0]?.$message" />
+              </label>
+            </div>
           </div>
           <code-editor v-model="form.code" class="mt-4" />
           <span

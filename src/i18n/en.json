@@ -342,8 +342,11 @@
       "skinsPage": "Skin Management",
       "setup": {
         "title": "AI Management – Set Up",
+        "subtitle": "Manage your AI integration keys securely",
         "subtitleNewKey": "Add New API Key (Gemini)",
         "subtitleExistingKey": "Existing Key",
+        "successmsg": "Successfully added! Masked ID:",
+        "total": "Total:",
         "input": {
           "name": "Key Name *",
           "value": "API Key Value *",
@@ -357,7 +360,13 @@
           "createdBy": "Created By",
           "active": "Active",
           "save": "Save",
-          "delete": "Delete"
+          "delete": "Delete",
+          "action": "Action"
+        },
+        "filter": {
+          "all": "All",
+          "active": "Active",
+          "inactive": "Inactive"
         }
       },
       "usage": {
@@ -1005,7 +1014,9 @@
   "components": {
     "validation": {
       "not_blank": "Name Cannot be empty or whitespace",
-      "contains_invisible": "Contains invisible or control characters"
+      "contains_invisible": "Contains invisible or control characters",
+      "required": "This field is required",
+      "maxLength": "Length cannot exceed {max} characters"
     },
     "studentDashboard": {
       "welcome": "Here is what's happening in your courses.",
@@ -1036,7 +1047,8 @@
         "fromField": "From",
         "dueField": "Due",
         "descField": "Description",
-        "submit": "Submit"
+        "submit": "Submit",
+        "search": "You can search by ID or name"
       },
       "validation": {
         "not_blank": "Name cannot be empty or whitespace",
@@ -1149,7 +1161,18 @@
         "disabled": "Disabled",
         "notApplicable": "Not applicable",
         "noRulesDefined": "No rules defined",
-        "noLibraryRestrictionsActive": "No library restrictions active."
+        "noLibraryRestrictionsActive": "No library restrictions active.",
+        "allowedLanguages": "Allowed Languages",
+        "external": "Externel Connections",
+        "ip": "IP Address",
+        "url": "URLs / Domains",
+        "sidecarservices": "Sidecars Service",
+        "image": "Image: ",
+        "arg": "Args: ",
+        "customimage": "Custom Image",
+        "imagelist": "Image List",
+        "networkalert": "Network access is enabled, but no specific restrictions or sidecars are configured.",
+        "networkdisable": "Network access is completely disabled."
       },
       "infoCard": {
         "score": "Score",

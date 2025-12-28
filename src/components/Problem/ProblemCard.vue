@@ -736,7 +736,7 @@ function triggerMascotReaction(type: "angel" | "devil") {
                         >
                           <div class="flex items-center justify-between">
                             <span class="text-base-content/90 text-sm font-bold"
-                              >🔗 External Connections</span
+                              >🔗 {{ $t("components.problem.card.external") }}</span
                             >
 
                             <div
@@ -760,7 +760,9 @@ function triggerMascotReaction(type: "angel" | "devil") {
                           </div>
 
                           <div class="flex flex-col gap-1">
-                            <span class="text-base-content/50 text-xs font-bold uppercase">IP Addresses</span>
+                            <span class="text-base-content/50 text-xs font-bold uppercase">{{
+                              $t("components.problem.card.ip")
+                            }}</span>
                             <div v-if="externalConfig.ips.length" class="flex flex-wrap gap-2">
                               <span
                                 v-for="ip in externalConfig.ips"
@@ -776,9 +778,9 @@ function triggerMascotReaction(type: "angel" | "devil") {
                           </div>
 
                           <div class="mt-2 flex flex-col gap-1">
-                            <span class="text-base-content/50 text-xs font-bold uppercase"
-                              >URLs / Domains</span
-                            >
+                            <span class="text-base-content/50 text-xs font-bold uppercase">{{
+                              $t("components.problem.card.url")
+                            }}</span>
                             <div v-if="externalConfig.urls.length" class="flex flex-wrap gap-2">
                               <span
                                 v-for="url in externalConfig.urls"
@@ -798,7 +800,7 @@ function triggerMascotReaction(type: "angel" | "devil") {
                           <div
                             class="text-base-content/40 mb-2 pl-1 text-xs font-bold tracking-widest uppercase"
                           >
-                            Sidecar Services
+                            {{ $t("components.problem.card.sidecarservices") }}
                           </div>
 
                           <div
@@ -832,7 +834,7 @@ function triggerMascotReaction(type: "angel" | "devil") {
                                     {{ car.name }}
                                   </div>
                                   <div class="text-base-content/50 font-mono text-xs break-all">
-                                    Image: {{ car.image }}
+                                    {{ $t("components.problem.card.image") }} {{ car.image }}
                                   </div>
                                 </div>
                               </div>
@@ -842,9 +844,9 @@ function triggerMascotReaction(type: "angel" | "devil") {
                                 class="border-base-content/5 relative z-10 mt-1 border-t pt-2"
                               >
                                 <div class="flex flex-wrap gap-1">
-                                  <span class="text-base-content/40 mr-1 self-center text-[10px] uppercase"
-                                    >Args:</span
-                                  >
+                                  <span class="text-base-content/40 mr-1 self-center text-[10px] uppercase">{{
+                                    $t("components.problem.card.arg")
+                                  }}</span>
                                   <span
                                     v-for="(arg, argIdx) in car.args"
                                     :key="argIdx"
@@ -862,12 +864,14 @@ function triggerMascotReaction(type: "angel" | "devil") {
                           <div
                             class="text-base-content/40 mb-2 pl-1 text-xs font-bold tracking-widest uppercase"
                           >
-                            Custom Image
+                            {{ $t("components.problem.card.customimage") }}
                           </div>
 
                           <div class="border-base-content/5 bg-base-100/60 rounded-xl border p-4">
                             <div class="flex flex-col gap-2">
-                              <span class="text-base-content/70 text-sm font-semibold">Image Lists</span>
+                              <span class="text-base-content/70 text-sm font-semibold">{{
+                                $t("components.problem.card.imagelist")
+                              }}</span>
                               <div class="flex flex-col gap-1 pl-2">
                                 <div
                                   v-for="env in customEnvList"
@@ -885,13 +889,13 @@ function triggerMascotReaction(type: "angel" | "devil") {
                           v-if="!externalConfig && sidecarList.length === 0"
                           class="text-base-content/40 pl-4 text-sm italic"
                         >
-                          Network access is enabled, but no specific restrictions or sidecars are configured.
+                          {{ $t("components.problem.card.networkalert") }}
                         </div>
                       </div>
                     </transition>
 
                     <div v-if="!isNetworkEnabled" class="text-base-content/40 pl-4 text-sm italic">
-                      Network access is completely disabled.
+                      {{ $t("components.problem.card.networkdisable") }}
                     </div>
                   </div>
                 </div>

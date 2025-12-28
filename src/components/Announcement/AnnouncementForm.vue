@@ -25,9 +25,22 @@ const noInvisible = helpers.withMessage(
 );
 
 const rules = {
-  title: { required, notBlank, noInvisible, maxLength: maxLength(64) },
+  title: {
+    required: helpers.withMessage(() => t("components.validation.required"), required),
+    notBlank,
+    noInvisible,
+    maxLength: helpers.withMessage(
+      ({ $params }) => t("components.validation.maxLength", { max: $params.max }),
+      maxLength(64),
+    ),
+  },
   // Allow markdown to contain invisible characters (authors may paste content), only enforce length
-  markdown: { maxLength: maxLength(100000) },
+  markdown: {
+    maxLength: helpers.withMessage(
+      ({ $params }) => t("components.validation.maxLength", { max: $params.max }),
+      maxLength(100000),
+    ),
+  },
   // pinned is a boolean (true/false). Do NOT use `required` here because `required` treats `false` as invalid.
   pinned: {},
 };

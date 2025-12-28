@@ -693,8 +693,8 @@ onMounted(async () => {
   </div>
 
   <!-- Basic fields -->
-  <div class="mb-6 grid grid-cols-1 items-start gap-x-6 gap-y-4 md:grid-cols-2">
-    <div class="form-control w-full">
+  <div class="mb-6 flex flex-col items-start gap-y-4 md:flex-row md:items-center md:gap-x-6">
+    <div class="form-control w-full flex-1">
       <label class="label">
         <span class="label-text font-bold">
           {{ t("course.problems.problemName") }}
@@ -725,12 +725,9 @@ onMounted(async () => {
       </div>
     </div>
 
-    <div class="form-control w-full md:max-w-xs">
-      <label class="label">
-        <span class="label-text font-bold">{{ t("course.problems.status") }}</span>
-      </label>
+    <div class="form-control shrink-0">
       <label
-        class="bg-base-200/50 hover:bg-base-200 flex cursor-pointer items-center justify-between rounded-xl px-4 py-2.5 transition-all"
+        class="bg-base-200/50 hover:bg-base-200 flex cursor-pointer items-center gap-4 rounded-xl px-4 py-2.5 transition-all"
       >
         <div class="flex items-center gap-3">
           <div

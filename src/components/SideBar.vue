@@ -29,11 +29,29 @@ const flyMoon = ref(false);
 const showCoder = ref(false);
 const particles = ref<Array<{ id: number; x: number; y: number }>>([]);
 
+let timer1: ReturnType<typeof setTimeout> | undefined;
+let timer2: ReturnType<typeof setTimeout> | undefined;
+
+function clearTimers() {
+  clearTimeout(timer1);
+  clearTimeout(timer2);
+}
+
+function skipAnimation() {
+  clearTimers();
+  showCoder.value = false;
+  flySun.value = false;
+  flyMoon.value = false;
+  particles.value = [];
+}
+
 watch(
   () => isDark.value,
   (newVal, oldVal) => {
     // Only animate if value actually changed and it's not the initial load
     if (newVal === oldVal) return;
+
+    clearTimers();
 
     // Generate particles
     particles.value = Array.from({ length: 12 }, (_, i) => ({
@@ -47,21 +65,21 @@ watch(
     if (newVal === false) {
       showCoder.value = true;
       flySun.value = true;
-      setTimeout(() => {
+      timer1 = setTimeout(() => {
         flySun.value = false;
         particles.value = [];
       }, 2000);
-      setTimeout(() => {
+      timer2 = setTimeout(() => {
         showCoder.value = false;
       }, 2500);
     } else {
       showCoder.value = true;
       flyMoon.value = true;
-      setTimeout(() => {
+      timer1 = setTimeout(() => {
         flyMoon.value = false;
         particles.value = [];
       }, 2000);
-      setTimeout(() => {
+      timer2 = setTimeout(() => {
         showCoder.value = false;
       }, 2500);
     }
@@ -159,7 +177,7 @@ const session = useSession();
   </ul>
 
   <Teleport to="body">
-    <div v-if="showCoder" class="coder-container">
+    <div v-if="showCoder" class="coder-container" @dblclick="skipAnimation">
       <div class="coder-scene">
         <div class="lamp">
           <div class="lamp-base"></div>
@@ -390,7 +408,7 @@ const session = useSession();
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: none;
+  pointer-events: auto;
   animation: fade-in-out 2.5s ease-in-out forwards;
   backdrop-filter: blur(2px);
   background: rgba(0, 0, 0, 0.2);

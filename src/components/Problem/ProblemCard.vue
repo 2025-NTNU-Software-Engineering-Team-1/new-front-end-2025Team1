@@ -363,7 +363,12 @@ function triggerMascotReaction(type: "angel" | "devil") {
             {{ $route.params.id }} - {{ props.problem.problemName }}
           </div>
           <div class="flex">
-            <span class="badge badge-info mr-1" v-for="tag in props.problem.tags" :key="tag">{{ tag }}</span>
+            <span
+              class="badge badge-info mr-1 h-auto max-w-full text-left break-all whitespace-normal"
+              v-for="tag in props.problem.tags"
+              :key="tag"
+              >{{ tag }}</span
+            >
           </div>
         </div>
 
@@ -677,7 +682,7 @@ function triggerMascotReaction(type: "angel" | "devil") {
                             <span
                               v-for="sym in s.items"
                               :key="sym"
-                              class="bg-base-200/50 text-base-content/80 hover:text-primary hover:bg-base-200 inline-flex items-center rounded px-2 py-1 font-mono text-xs transition-colors select-none"
+                              class="bg-base-200/50 text-base-content/80 hover:text-primary hover:bg-base-200 inline-flex h-auto max-w-full items-center rounded px-2 py-1 text-left font-mono text-xs break-all whitespace-normal transition-colors select-none"
                             >
                               {{ sym }}
                             </span>
@@ -752,7 +757,7 @@ function triggerMascotReaction(type: "angel" | "devil") {
                               <span
                                 v-for="ip in externalConfig.ips"
                                 :key="ip"
-                                class="bg-base-200/50 text-base-content/80 hover:text-primary inline-flex items-center rounded px-2 py-1 font-mono text-xs transition-colors select-none"
+                                class="bg-base-200/50 text-base-content/80 hover:text-primary inline-flex h-auto max-w-full items-center rounded px-2 py-1 text-left font-mono text-xs break-all whitespace-normal transition-colors select-none"
                               >
                                 {{ ip }}
                               </span>

@@ -175,7 +175,7 @@
       "download": "下載",
       "notUploaded": "尚未上傳",
       "uploadACFiles": "上傳正確解法 (AC)",
-      "networkSidecars": "網路與 Sidecars",
+      "networkSidecars": "內外網服務",
       "networkAccessRestriction": "外部網路存取限制",
       "networkAccessModel": "存取模式",
       "networkAccessURLList": "URL 列表",

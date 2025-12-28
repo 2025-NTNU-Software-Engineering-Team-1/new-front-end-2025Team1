@@ -489,7 +489,9 @@ async function confirmDeleteAll() {
                       <div
                         v-if="isSupported"
                         class="tooltip tooltip-bottom"
-                        :data-tip="copied ? $t('course.submissions.copied') : $t('course.submissions.copyLink')"
+                        :data-tip="
+                          copied ? $t('course.submissions.copied') : $t('course.submissions.copyLink')
+                        "
                       >
                         <i-uil-link
                           class="ml-2 h-4 w-4 cursor-pointer"
@@ -505,7 +507,10 @@ async function confirmDeleteAll() {
                   <td>
                     <div
                       class="tooltip tooltip-bottom"
-                      :data-tip="problemId2Meta[submission.problemId.toString()]?.name || $t('course.submissions.loading')"
+                      :data-tip="
+                        problemId2Meta[submission.problemId.toString()]?.name ||
+                        $t('course.submissions.loading')
+                      "
                     >
                       <router-link
                         :to="`/course/${$route.params.name}/problem/${submission.problemId}`"

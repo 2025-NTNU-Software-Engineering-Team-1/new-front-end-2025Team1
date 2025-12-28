@@ -224,6 +224,8 @@
       "searchAddCustomImports": "Search / Add Custom Imports",
       "all": "Select all",
       "clear": "Clear selection",
+      "expandMore": "Expand",
+      "collapse": "Close",
       "executionMode": "Execution Mode",
       "executionModeGeneral": "General",
       "executionModeFuncitonOnly": "Function-Only",

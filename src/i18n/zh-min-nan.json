@@ -442,6 +442,8 @@
       "searchAddCustomHeaders": "搜尋 / 新增自訂標頭檔",
       "searchAddCustomFunctions": "搜尋 / 新增自訂函式",
       "searchAddCustomImports": "搜尋 / 新增自訂匯入",
+      "expandMore": "展開",
+      "collapse": "收合",
       "all": "全部選取",
       "clear": "清除選取",
       "executionMode": "執行模式",

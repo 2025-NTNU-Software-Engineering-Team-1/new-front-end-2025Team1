@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
-import { COMPONENT_OPTIONS, COMPONENT_SECTIONS, CORE_COMPONENTS, OPTIONAL_COMPONENTS } from "@/utils/problemImportExport";
+import {
+  COMPONENT_OPTIONS,
+  COMPONENT_SECTIONS,
+  CORE_COMPONENTS,
+  OPTIONAL_COMPONENTS,
+} from "@/utils/problemImportExport";
 
 const props = defineProps<{
   modelValue: boolean;
@@ -92,7 +97,7 @@ function confirm() {
             <div
               v-for="section in sectionOptions"
               :key="section.id"
-              class="rounded-lg border border-base-200 p-3"
+              class="border-base-200 rounded-lg border p-3"
             >
               <div class="mb-2 flex items-center justify-between">
                 <span class="font-medium">{{ t(section.labelKey) }}</span>

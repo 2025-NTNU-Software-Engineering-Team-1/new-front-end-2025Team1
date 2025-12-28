@@ -76,7 +76,10 @@ function handleUpdate(value: string[]) {
               <span :class="[selected ? 'font-medium' : 'font-normal', 'block truncate']">
                 {{ course.text }}
               </span>
-              <span v-if="selected" class="text-base-content absolute inset-y-0 left-0 flex items-center pl-3">
+              <span
+                v-if="selected"
+                class="text-base-content absolute inset-y-0 left-0 flex items-center pl-3"
+              >
                 <i-uil-check class="h-5 w-5" aria-hidden="true" />
               </span>
             </li>

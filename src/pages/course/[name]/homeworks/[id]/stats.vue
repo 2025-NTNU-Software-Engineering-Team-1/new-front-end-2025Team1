@@ -232,10 +232,7 @@ function exportCSV() {
               @change="setScoreboardEnd"
             />
           </div>
-          <button
-            :class="['btn', isScoreboardFetching && 'loading']"
-            @click="() => refreshScoreboard()"
-          >
+          <button :class="['btn', isScoreboardFetching && 'loading']" @click="() => refreshScoreboard()">
             {{ t("course.hw.stats.fetch") }}
           </button>
           <button class="btn" @click="() => exportCSV()">{{ t("course.hw.stats.export") }}</button>

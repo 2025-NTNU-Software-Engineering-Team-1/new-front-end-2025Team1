@@ -665,7 +665,11 @@ const maxPage = computed(() => {
                           <i-uil-chart-line class="lg:h-5 lg:w-5" />
                         </router-link>
                       </div>
-                      <div v-if="canExportProblem(problemId)" class="tooltip" :data-tip="$t('course.problems.export')">
+                      <div
+                        v-if="canExportProblem(problemId)"
+                        class="tooltip"
+                        :data-tip="$t('course.problems.export')"
+                      >
                         <button
                           class="btn btn-ghost btn-sm btn-circle mr-1"
                           :class="{ loading: isExporting }"
@@ -907,7 +911,11 @@ const maxPage = computed(() => {
                               <i-uil-chart-line class="lg:h-5 lg:w-5" />
                             </router-link>
                           </div>
-                          <div v-if="canExportProblem(problemId)" class="tooltip" :data-tip="$t('course.problems.export')">
+                          <div
+                            v-if="canExportProblem(problemId)"
+                            class="tooltip"
+                            :data-tip="$t('course.problems.export')"
+                          >
                             <button
                               class="btn btn-ghost btn-sm btn-circle mr-1"
                               :class="{ loading: isExporting }"
@@ -1037,7 +1045,11 @@ const maxPage = computed(() => {
     @confirm="handleExport"
   />
 
-  <import-problem-modal v-model="importModalOpen" :course-name="String(route.params.name)" @imported="execute()" />
+  <import-problem-modal
+    v-model="importModalOpen"
+    :course-name="String(route.params.name)"
+    @imported="execute()"
+  />
 </template>
 
 <style scoped>

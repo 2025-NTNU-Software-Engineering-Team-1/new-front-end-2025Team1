@@ -429,7 +429,13 @@ function resolveNetworkEnabled(config: any): boolean {
       typeof external === "object" &&
       ((Array.isArray(external.url) && external.url.length > 0) || !!external.url));
   const hasSidecars = Array.isArray(sidecars) && sidecars.length > 0;
-  return !!(hasExternal || hasSidecars || restriction.enabled || restriction.firewallExtranet || restriction.connectWithLocal);
+  return !!(
+    hasExternal ||
+    hasSidecars ||
+    restriction.enabled ||
+    restriction.firewallExtranet ||
+    restriction.connectWithLocal
+  );
 }
 
 function collectAssetMismatches(flags: ProblemFeatureFlags, included: Set<string>): string[] {
@@ -558,7 +564,8 @@ async function submitImport() {
   } catch (err: unknown) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const errorObj = err as any;
-    importError.value = errorObj?.response?.data?.message || errorObj?.message || t("course.problems.importFailed");
+    importError.value =
+      errorObj?.response?.data?.message || errorObj?.message || t("course.problems.importFailed");
   } finally {
     isImporting.value = false;
   }
@@ -619,8 +626,12 @@ onBeforeUnmount(() => {
             <span class="badge badge-outline">{{ preview.mode === "batch" ? "Batch" : "Single" }}</span>
           </div>
 
-          <div class="rounded-lg border border-base-200 p-3">
-            <div v-for="(item, idx) in preview.problems" :key="idx" class="border-base-200 border-b py-2 last:border-0">
+          <div class="border-base-200 rounded-lg border p-3">
+            <div
+              v-for="(item, idx) in preview.problems"
+              :key="idx"
+              class="border-base-200 border-b py-2 last:border-0"
+            >
               <div class="flex flex-wrap items-center gap-2">
                 <span class="font-medium">{{ item.name }}</span>
                 <span v-if="item.originalId" class="badge badge-ghost">#{{ item.originalId }}</span>
@@ -657,7 +668,7 @@ onBeforeUnmount(() => {
               <div
                 v-for="section in componentSections"
                 :key="section.id"
-                class="rounded-lg border border-base-200 p-3"
+                class="border-base-200 rounded-lg border p-3"
               >
                 <div class="mb-2 flex items-center justify-between">
                   <span class="font-medium">{{ t(section.labelKey) }}</span>
@@ -714,7 +725,9 @@ onBeforeUnmount(() => {
                 :placeholder="t('course.problems.importCoursePlaceholder')"
               />
               <label class="label">
-                <span v-if="isLoadingCourses" class="label-text-alt">{{ t("course.problems.importCourseLoading") }}</span>
+                <span v-if="isLoadingCourses" class="label-text-alt">{{
+                  t("course.problems.importCourseLoading")
+                }}</span>
                 <span v-else-if="courseError" class="label-text-alt text-error">{{ courseError }}</span>
                 <span v-else class="label-text-alt">{{ t("course.problems.importCourseHint") }}</span>
               </label>

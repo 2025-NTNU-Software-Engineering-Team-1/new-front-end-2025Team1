@@ -551,7 +551,8 @@ const mockProblemMeta = { owner: "", highScore: 0, submitCount: 0, ACUser: 0, su
 const exportModalOpen = ref(false);
 const isExporting = ref(false);
 const canExportProblem = computed(
-  () => session.isAdmin || (edittingProblem.value as Partial<Problem> | undefined)?.owner === session.username,
+  () =>
+    session.isAdmin || (edittingProblem.value as Partial<Problem> | undefined)?.owner === session.username,
 );
 // ==========================================
 // [HELPER] JSON Display Cleanup

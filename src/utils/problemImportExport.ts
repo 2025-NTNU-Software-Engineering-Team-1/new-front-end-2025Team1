@@ -31,7 +31,11 @@ export const COMPONENT_OPTIONS: ProblemComponentOption[] = [
     labelKey: "course.problems.componentResourceDataTeacher",
     group: "assets",
   },
-  { id: "assets.network_dockerfile", labelKey: "course.problems.componentNetworkDockerfile", group: "assets" },
+  {
+    id: "assets.network_dockerfile",
+    labelKey: "course.problems.componentNetworkDockerfile",
+    group: "assets",
+  },
   { id: "trial.public_testdata", labelKey: "course.problems.componentTrialPublicTestdata", group: "trial" },
   { id: "trial.ac_code", labelKey: "course.problems.componentTrialAcCode", group: "trial" },
   { id: "static_analysis", labelKey: "course.problems.componentStaticAnalysis", group: "analysis" },
@@ -47,7 +51,9 @@ export const OPTIONAL_COMPONENTS = COMPONENT_OPTIONS.filter((opt) => opt.group !
   (opt) => opt.id,
 );
 
-export const SETTINGS_COMPONENTS = COMPONENT_OPTIONS.filter((opt) => opt.group === "settings").map((opt) => opt.id);
+export const SETTINGS_COMPONENTS = COMPONENT_OPTIONS.filter((opt) => opt.group === "settings").map(
+  (opt) => opt.id,
+);
 
 export const ALWAYS_AVAILABLE_COMPONENTS = [...SETTINGS_COMPONENTS, "static_analysis"];
 

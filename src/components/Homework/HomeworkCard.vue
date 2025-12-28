@@ -63,7 +63,7 @@ const state = computed(() => {
         <div class="flex items-center gap-3">
           <router-link
             v-if="homework.id && !preview"
-            class="btn whitespace-nowrap px-4 text-base"
+            class="btn px-4 text-base whitespace-nowrap"
             :to="`/course/${$route.params.name}/homeworks/${homework.id}/stats`"
           >
             <i-uil-chart-line class="mr-1 lg:h-5 lg:w-5" /> {{ t("components.hw.card.description.stats") }}

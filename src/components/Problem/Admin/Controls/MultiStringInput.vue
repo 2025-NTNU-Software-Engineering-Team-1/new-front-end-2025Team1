@@ -106,10 +106,7 @@ function remove(i: number) {
         </div>
       </div>
       <div v-if="shouldShowCollapse" class="mt-2">
-        <button
-          class="btn btn-ghost btn-xs gap-1"
-          @click="toggleExpand"
-        >
+        <button class="btn btn-ghost btn-xs gap-1" @click="toggleExpand">
           <i-uil-angle-down v-if="!isExpanded" class="h-3 w-3" />
           <i-uil-angle-up v-else class="h-3 w-3" />
           <span v-if="!isExpanded">

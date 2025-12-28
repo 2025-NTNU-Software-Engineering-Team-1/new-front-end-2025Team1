@@ -100,6 +100,7 @@ declare module 'vue' {
     IUilTimes: typeof import('~icons/uil/times')['default']
     IUilTimesCircle: typeof import('~icons/uil/times-circle')['default']
     IUilTrashAlt: typeof import('~icons/uil/trash-alt')['default']
+    IUilUploadAlt: typeof import('~icons/uil/upload-alt')['default']
     IUilUser: typeof import('~icons/uil/user')['default']
     JudgeStatus: typeof import('./../components/JudgeStatus.vue')['default']
     LanguageMultiSelect: typeof import('./../components/Problem/Forms/LanguageMultiSelect.vue')['default']

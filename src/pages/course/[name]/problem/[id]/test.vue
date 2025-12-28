@@ -561,6 +561,23 @@ async function submitCode() {
               <div class="card-title md:text-2xl lg:text-3xl">
                 {{ t("course.problem.test.card.title") }}{{ route.params.id }}
               </div>
+              <!-- Top Right Quota Display -->
+              <div v-if="!loading" class="flex flex-col items-end">
+                <span class="text-base-content/60 text-xs font-medium">{{
+                  t("course.problem.test.trialQuota")
+                }}</span>
+                <div class="font-mono text-lg font-bold">
+                  <template v-if="trialQuotaUnlimited">
+                    <span class="text-success">{{ t("components.problem.card.unlimited") }}</span>
+                  </template>
+                  <template v-else>
+                    <span :class="{ 'text-error': (trialQuotaRemaining ?? 0) === 0 }">{{
+                      trialQuotaLoading ? "..." : (trialQuotaRemaining ?? "-")
+                    }}</span>
+                    <span class="text-base-content/40 text-sm">/{{ trialQuotaLimit ?? "-" }}</span>
+                  </template>
+                </div>
+              </div>
             </div>
 
             <div class="divider" />
@@ -690,20 +707,14 @@ async function submitCode() {
                           class="btn btn-sm gap-2"
                           :class="
                             useDefaultTestcases
-                              ? 'btn-neutral'
-                              : 'btn-ghost border-base-content/20 bg-base-100'
+                              ? 'btn-neutral ring-primary/20 ring-2'
+                              : 'btn-ghost border-base-content/20 bg-base-100 opacity-70'
                           "
                         >
                           <i-uil-globe class="h-4 w-4" />
                           <span class="hidden sm:inline">{{
                             t("course.problem.test.testcaseType.public")
                           }}</span>
-                          <div
-                            class="badge badge-sm"
-                            :class="useDefaultTestcases ? 'badge-primary' : 'badge-ghost'"
-                          >
-                            Active
-                          </div>
                         </button>
                       </div>
 
@@ -806,7 +817,7 @@ async function submitCode() {
                       :to="`/course/${route.params.name}/problem/${route.params.id}/test-cases`"
                       :title="t('course.problem.test.testcase')"
                     >
-                      <i-uil-setting class="h-4 w-4" />
+                      <i-uil-upload-alt class="h-4 w-4" />
                     </router-link>
                     <button
                       :class="['btn btn-primary btn-sm join-item gap-2', form.isLoading && 'loading']"

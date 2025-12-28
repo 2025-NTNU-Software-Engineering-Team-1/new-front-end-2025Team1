@@ -225,7 +225,7 @@ const enableZipArtifact = computed(() => {
   return !!(problem.value as any)?.config?.artifactCollection?.includes("zip");
 });
 const isPythonSubmission = computed(() => submission.value?.languageType === 2);
-const rejudgeEligibleStatuses = new Set([
+const rejudgeEligibleStatuses = new Set<SubmissionStatusCodes>([
   SUBMISSION_STATUS_CODE.ACCEPTED,
   SUBMISSION_STATUS_CODE.WRONG_ANSWER,
   SUBMISSION_STATUS_CODE.TIME_LIMIT_EXCEED,

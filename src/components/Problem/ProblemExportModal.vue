@@ -6,6 +6,7 @@ import {
   COMPONENT_SECTIONS,
   CORE_COMPONENTS,
   OPTIONAL_COMPONENTS,
+  type ProblemComponentOption,
 } from "@/utils/problemImportExport";
 
 const props = defineProps<{

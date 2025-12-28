@@ -173,7 +173,7 @@ async function loadCourseMemberships() {
         .sort((a, b) => a.course.localeCompare(b.course));
     }
     courseMemberships.value = normalized;
-  } catch (err) {
+  } catch {
     courseMembershipError.value = t("admin.user.course-load-error");
     courseMemberships.value = {};
   } finally {

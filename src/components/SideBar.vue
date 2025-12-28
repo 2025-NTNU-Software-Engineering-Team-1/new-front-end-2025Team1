@@ -2,7 +2,7 @@
 import { computed, ref, watch, watchEffect } from "vue";
 import { useRoute } from "vue-router";
 import { useTheme } from "@/stores/theme";
-import { useDark, useToggle, useStorage } from "@vueuse/core";
+import { useDark, useStorage } from "@vueuse/core";
 import { useSession } from "@/stores/session";
 import { LOCAL_STORAGE_KEY } from "@/constants";
 import useInteractions from "@/composables/useInteractions";

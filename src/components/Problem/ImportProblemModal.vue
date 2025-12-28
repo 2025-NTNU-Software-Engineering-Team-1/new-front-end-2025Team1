@@ -7,12 +7,57 @@ import {
   COMPONENT_OPTIONS,
   COMPONENT_SECTIONS,
   CORE_COMPONENTS,
-  SETTINGS_COMPONENTS,
   type ProblemComponentOption,
 } from "@/utils/problemImportExport";
 import { useI18n } from "vue-i18n";
 import { useSession } from "@/stores/session";
 import CourseMultiSelect from "@/components/Course/CourseMultiSelect.vue";
+
+interface NetworkAccessRestriction {
+  enabled?: boolean;
+  firewallExtranet?: boolean;
+  connectWithLocal?: boolean;
+  external?: { ip?: string[] | boolean; url?: string[] | boolean };
+  sidecars?: unknown[];
+}
+
+interface ExternalProblemConfig {
+  executionMode?: string;
+  scoringScript?: boolean | { custom: boolean };
+  customChecker?: boolean;
+  trialMode?: boolean;
+  testMode?: boolean;
+  resourceData?: boolean;
+  resourceDataTeacher?: boolean;
+  networkAccessEnabled?: boolean;
+  networkAccessRestriction?: NetworkAccessRestriction;
+}
+
+interface ExternalProblemMeta {
+  problemName?: string;
+  type?: number;
+  tags?: string[];
+  config?: ExternalProblemConfig;
+  pipeline?: {
+    executionMode?: string;
+    scoringScript?: boolean | { custom: boolean };
+    customChecker?: boolean;
+  };
+  testCase?: { tasks?: Array<{ caseCount?: number }> };
+  testCaseInfo?: { tasks?: Array<{ caseCount?: number }> };
+  [key: string]: unknown;
+}
+
+interface ExternalProblemManifest {
+  components?: Record<string, unknown>;
+  files?: Record<string, { role?: string }>;
+  problems?: Array<{
+    folder?: string;
+    originalId?: number;
+    name?: string;
+  }>;
+  [key: string]: unknown;
+}
 
 type ImportPreviewProblem = {
   originalId?: number;
@@ -276,11 +321,13 @@ async function parseZip(selected: File) {
       const entryMap = new Map(entries.map((entry) => [entry.filename, entry]));
 
       const rootManifestEntry = entryMap.get("manifest.json");
-      if (!rootManifestEntry || !rootManifestEntry.getData) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (!rootManifestEntry || !(rootManifestEntry as any).getData) {
         throw new Error(t("course.problems.importManifestMissing"));
       }
 
-      const rootManifestText = await rootManifestEntry.getData(new TextWriter());
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const rootManifestText = await (rootManifestEntry as any).getData(new TextWriter());
       const rootManifest = JSON.parse(rootManifestText);
 
       if (rootManifest?.problems && Array.isArray(rootManifest.problems)) {
@@ -292,17 +339,21 @@ async function parseZip(selected: File) {
           const folder = item?.folder;
           const manifestEntry = folder ? entryMap.get(`${folder}/manifest.json`) : null;
           const metaEntry = folder ? entryMap.get(`${folder}/meta.json`) : null;
-          let meta: any = null;
-          let manifest: any = null;
+          let meta: ExternalProblemMeta | null = null;
+          let manifest: ExternalProblemManifest | null = null;
 
-          if (manifestEntry?.getData) {
-            const manifestText = await manifestEntry.getData(new TextWriter());
-            manifest = JSON.parse(manifestText);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          if ((manifestEntry as any)?.getData) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const manifestText = await (manifestEntry as any).getData(new TextWriter());
+            manifest = JSON.parse(manifestText) as ExternalProblemManifest;
           }
 
-          if (metaEntry?.getData) {
-            const metaText = await metaEntry.getData(new TextWriter());
-            meta = JSON.parse(metaText);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          if ((metaEntry as any)?.getData) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const metaText = await (metaEntry as any).getData(new TextWriter());
+            meta = JSON.parse(metaText) as ExternalProblemMeta;
           }
 
           const components = extractComponents(manifest);
@@ -333,12 +384,14 @@ async function parseZip(selected: File) {
         };
       } else {
         const metaEntry = entryMap.get("meta.json");
-        if (!metaEntry?.getData) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (!(metaEntry as any)?.getData) {
           throw new Error(t("course.problems.importMetaMissing"));
         }
-        const manifest = rootManifest;
-        const metaText = await metaEntry.getData(new TextWriter());
-        const meta = JSON.parse(metaText);
+        const manifest = rootManifest as ExternalProblemManifest;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const metaText = await (metaEntry as any).getData(new TextWriter());
+        const meta = JSON.parse(metaText) as ExternalProblemMeta;
 
         const components = extractComponents(manifest);
         ALWAYS_AVAILABLE_COMPONENTS.forEach((id) => {
@@ -378,13 +431,13 @@ async function parseZip(selected: File) {
   }
 }
 
-function extractComponents(manifest: any): string[] {
+function extractComponents(manifest: ExternalProblemManifest | null): string[] {
   const components = new Set<string>();
   if (manifest?.components && typeof manifest.components === "object") {
     Object.keys(manifest.components).forEach((key) => components.add(key));
   }
   if (!components.size && manifest?.files) {
-    Object.values(manifest.files).forEach((info: any) => {
+    Object.values(manifest.files).forEach((info) => {
       if (info?.role) components.add(info.role);
     });
   }
@@ -392,7 +445,7 @@ function extractComponents(manifest: any): string[] {
   return Array.from(components);
 }
 
-function deriveFeatureFlags(meta: any): ProblemFeatureFlags {
+function deriveFeatureFlags(meta: ExternalProblemMeta | null): ProblemFeatureFlags {
   const config = meta?.config || {};
   const pipeline = meta?.pipeline || {};
   const executionMode = pipeline?.executionMode || config?.executionMode;
@@ -411,7 +464,7 @@ function deriveFeatureFlags(meta: any): ProblemFeatureFlags {
   };
 }
 
-function resolveNetworkEnabled(config: any): boolean {
+function resolveNetworkEnabled(config: ExternalProblemConfig | undefined): boolean {
   if (typeof config?.networkAccessEnabled === "boolean") {
     return config.networkAccessEnabled;
   }
@@ -459,7 +512,7 @@ function getComponentLabel(id: string): string {
   return labelKey ? t(labelKey) : id;
 }
 
-function computeRequiredComponents(meta: any): Set<string> {
+function computeRequiredComponents(meta: ExternalProblemMeta | null): Set<string> {
   const required = new Set<string>(CORE_COMPONENTS);
   const config = meta?.config || {};
   const pipeline = meta?.pipeline || {};
@@ -485,7 +538,7 @@ function computeRequiredComponents(meta: any): Set<string> {
   return required;
 }
 
-function normalizeTags(input: any): string[] {
+function normalizeTags(input: unknown): string[] {
   if (!Array.isArray(input)) return [];
   const seen = new Set<string>();
   const result: string[] = [];
@@ -498,10 +551,10 @@ function normalizeTags(input: any): string[] {
   return result;
 }
 
-function computeTestcaseCount(meta: any): number | undefined {
+function computeTestcaseCount(meta: ExternalProblemMeta | null): number | undefined {
   const tasks = meta?.testCase?.tasks || meta?.testCaseInfo?.tasks;
   if (!Array.isArray(tasks)) return undefined;
-  return tasks.reduce((sum: number, task: any) => sum + (task?.caseCount || 0), 0);
+  return tasks.reduce((sum: number, task: { caseCount?: number }) => sum + (task?.caseCount || 0), 0);
 }
 
 function formatProblemType(type?: number) {

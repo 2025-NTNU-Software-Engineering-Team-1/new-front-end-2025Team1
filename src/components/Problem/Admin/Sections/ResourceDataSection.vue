@@ -9,6 +9,7 @@ import { useI18n } from "vue-i18n";
 import { ZipReader, BlobReader } from "@zip.js/zip.js";
 import { assertFileSizeOK } from "@/utils/checkFileSize";
 import { getHoverTranslations } from "../../Hovers";
+import api from "@/models/api";
 
 // ==========================================
 // [CONFIG] Console Debug Mode
@@ -149,7 +150,7 @@ const downloadUrl = computed(() => {
   if (!pid || Array.isArray(pid)) return null;
   const assetPaths = (problem.value.config as any)?.assetPaths;
   if (assetPaths && !assetPaths[assetPathKey.value]) return null;
-  return `/api/problem/${pid}/asset/${assetPathKey.value}/download`;
+  return api.Problem.getAssetDownloadUrl(pid, assetPathKey.value);
 });
 
 // Reset count if feature is disabled

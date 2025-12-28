@@ -8,6 +8,7 @@ import { useRoute } from "vue-router";
 import { ZipReader, BlobReader, ZipWriter, BlobWriter, TextReader } from "@zip.js/zip.js";
 import { assertFileSizeOK } from "@/utils/checkFileSize";
 import { isMacOsZip } from "@/utils/zipValidator";
+import api from "@/models/api";
 import { useI18n } from "vue-i18n";
 import { getHoverTranslations } from "../../Hovers";
 import AITestcaseModal from "@/components/AITestcaseModal.vue";
@@ -144,7 +145,9 @@ const testdataError = ref<string | null>(null);
 const downloadUrl = computed(() => {
   const id = route.params.id;
   if (!id || Array.isArray(id)) return null;
-  return `/api/problem/${id}/testcase`;
+  const numericId = Number(id);
+  if (!Number.isFinite(numericId)) return null;
+  return api.Problem.getTestCaseUrl(numericId);
 });
 
 const hasRemoteTestcase = computed(() => Boolean((problem.value.config as any)?.assetPaths?.case));

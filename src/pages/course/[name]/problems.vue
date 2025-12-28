@@ -428,22 +428,33 @@ const maxPage = computed(() => {
                       sortedProblems || []
                     ).slice((page - 1) * 10, page * 10)"
                     :key="problemId"
-                    class="hover"
+                    class="hover hover-suction cursor-pointer transition-all duration-300"
                     :class="{
                       'bg-base-200':
                         searchQuery &&
                         (problemName.toLowerCase() === searchQuery.toLowerCase() ||
                           Number(searchQuery) === problemId),
                     }"
+                    @click="router.push(`/course/${$route.params.name}/problem/${problemId}`)"
                   >
                     <td>
-                      <router-link :to="`/course/${$route.params.name}/problem/${problemId}`" class="link">
+                      <router-link
+                        :to="`/course/${$route.params.name}/problem/${problemId}`"
+                        class="link"
+                        @click.stop
+                      >
                         {{ problemId }}
                       </router-link>
                     </td>
                     <td>
                       <div class="flex w-full items-center justify-between">
-                        <span class="mr-2">{{ problemName }}</span>
+                        <router-link
+                          :to="`/course/${$route.params.name}/problem/${problemId}`"
+                          class="mr-2 no-underline hover:no-underline"
+                          @click.stop
+                        >
+                          {{ problemName }}
+                        </router-link>
                         <span
                           v-if="aiVTuber || hasAiVtuber(problemId)"
                           class="inline-flex shrink-0 items-center rounded-full bg-gradient-to-r from-purple-400 to-indigo-400 px-2 py-0.5 text-xs font-medium text-white"
@@ -470,6 +481,7 @@ const maxPage = computed(() => {
                       <div
                         class="tooltip"
                         :data-tip="hasTrialHistory(problemId) ? 'Test History' : 'Trial Mode Disabled'"
+                        @click.stop
                       >
                         <router-link
                           :class="[
@@ -486,7 +498,7 @@ const maxPage = computed(() => {
                           <i-uil-history class="lg:h-5 lg:w-5" />
                         </router-link>
                       </div>
-                      <div class="tooltip" data-tip="Stats">
+                      <div class="tooltip" data-tip="Stats" @click.stop>
                         <router-link
                           class="btn btn-ghost btn-sm btn-circle mr-1"
                           :to="`/course/${$route.params.name}/problem/${problemId}/stats`"
@@ -499,6 +511,7 @@ const maxPage = computed(() => {
                           v-if="session.isAdmin"
                           class="btn btn-ghost btn-sm btn-circle mr-1"
                           :to="`/course/${$route.params.name}/problem/${problemId}/copycat`"
+                          @click.stop
                         >
                           <i-uil-file-exclamation-alt class="lg:h-5 lg:w-5" />
                         </router-link>
@@ -506,6 +519,7 @@ const maxPage = computed(() => {
                           v-if="session.isTeacher"
                           class="btn btn-ghost btn-sm btn-circle mr-1"
                           :to="`/course/${$route.params.name}/problem/${problemId}/copycat`"
+                          @click.stop
                         >
                           <i-uil-file-exclamation-alt class="lg:h-5 lg:w-5" />
                         </router-link>
@@ -513,6 +527,7 @@ const maxPage = computed(() => {
                           v-if="session.isTA"
                           class="btn btn-ghost btn-sm btn-circle mr-1"
                           :to="`/course/${$route.params.name}/problem/${problemId}/copycat`"
+                          @click.stop
                         >
                           <i-uil-file-exclamation-alt class="lg:h-5 lg:w-5" />
                         </router-link>
@@ -523,6 +538,7 @@ const maxPage = computed(() => {
                           v-if="session.isAdmin"
                           class="btn btn-ghost btn-sm btn-circle"
                           :to="`/course/${$route.params.name}/problem/${problemId}/edit`"
+                          @click.stop
                         >
                           <i-uil-edit class="lg:h-5 lg:w-5" />
                         </router-link>
@@ -530,6 +546,7 @@ const maxPage = computed(() => {
                           v-if="session.isTeacher"
                           class="btn btn-ghost btn-sm btn-circle"
                           :to="`/course/${$route.params.name}/problem/${problemId}/edit`"
+                          @click.stop
                         >
                           <i-uil-edit class="lg:h-5 lg:w-5" />
                         </router-link>
@@ -537,6 +554,7 @@ const maxPage = computed(() => {
                           v-if="session.isTA"
                           class="btn btn-ghost btn-sm btn-circle"
                           :to="`/course/${$route.params.name}/problem/${problemId}/edit`"
+                          @click.stop
                         >
                           <i-uil-edit class="lg:h-5 lg:w-5" />
                         </router-link>
@@ -545,7 +563,7 @@ const maxPage = computed(() => {
                       <div v-if="session.isAdmin || session.isTeacher" class="tooltip" data-tip="Delete">
                         <button
                           class="btn btn-ghost btn-sm btn-circle text-error"
-                          @click="deleteProblem($event, problemId, problemName)"
+                          @click.stop="deleteProblem($event, problemId, problemName)"
                         >
                           <i-uil-trash-alt class="lg:h-5 lg:w-5" />
                         </button>
@@ -616,25 +634,33 @@ const maxPage = computed(() => {
                           aiVTuber,
                         } in group.problems"
                         :key="problemId"
-                        class="hover"
+                        class="hover hover-suction cursor-pointer transition-all duration-300"
                         :class="{
                           'bg-base-200':
                             searchQuery &&
                             (problemName.toLowerCase() === searchQuery.toLowerCase() ||
                               Number(searchQuery) === problemId),
                         }"
+                        @click="router.push(`/course/${$route.params.name}/problem/${problemId}`)"
                       >
                         <td>
                           <router-link
                             :to="`/course/${$route.params.name}/problem/${problemId}`"
                             class="link"
+                            @click.stop
                           >
                             {{ problemId }}
                           </router-link>
                         </td>
                         <td>
                           <div class="flex w-full items-center justify-between">
-                            <span class="mr-2">{{ problemName }}</span>
+                            <router-link
+                              :to="`/course/${$route.params.name}/problem/${problemId}`"
+                              class="mr-2 no-underline hover:no-underline"
+                              @click.stop
+                            >
+                              {{ problemName }}
+                            </router-link>
                             <span
                               v-if="aiVTuber || hasAiVtuber(problemId)"
                               class="inline-flex shrink-0 items-center rounded-full bg-gradient-to-r from-purple-400 to-indigo-400 px-2 py-0.5 text-xs font-medium text-white"
@@ -659,6 +685,7 @@ const maxPage = computed(() => {
                           <div
                             class="tooltip"
                             :data-tip="hasTrialHistory(problemId) ? 'Test History' : 'Trial Mode Disabled'"
+                            @click.stop
                           >
                             <router-link
                               :class="[
@@ -688,6 +715,7 @@ const maxPage = computed(() => {
                               v-if="session.isAdmin"
                               class="btn btn-ghost btn-sm btn-circle mr-1"
                               :to="`/course/${$route.params.name}/problem/${problemId}/copycat`"
+                              @click.stop
                             >
                               <i-uil-file-exclamation-alt class="lg:h-5 lg:w-5" />
                             </router-link>
@@ -695,6 +723,7 @@ const maxPage = computed(() => {
                               v-if="session.isTeacher"
                               class="btn btn-ghost btn-sm btn-circle mr-1"
                               :to="`/course/${$route.params.name}/problem/${problemId}/copycat`"
+                              @click.stop
                             >
                               <i-uil-file-exclamation-alt class="lg:h-5 lg:w-5" />
                             </router-link>
@@ -702,6 +731,7 @@ const maxPage = computed(() => {
                               v-if="session.isTA"
                               class="btn btn-ghost btn-sm btn-circle mr-1"
                               :to="`/course/${$route.params.name}/problem/${problemId}/copycat`"
+                              @click.stop
                             >
                               <i-uil-file-exclamation-alt class="lg:h-5 lg:w-5" />
                             </router-link>
@@ -712,6 +742,7 @@ const maxPage = computed(() => {
                               v-if="session.isAdmin"
                               class="btn btn-ghost btn-sm btn-circle"
                               :to="`/course/${$route.params.name}/problem/${problemId}/edit`"
+                              @click.stop
                             >
                               <i-uil-edit class="lg:h-5 lg:w-5" />
                             </router-link>
@@ -719,6 +750,7 @@ const maxPage = computed(() => {
                               v-if="session.isTeacher"
                               class="btn btn-ghost btn-sm btn-circle"
                               :to="`/course/${$route.params.name}/problem/${problemId}/edit`"
+                              @click.stop
                             >
                               <i-uil-edit class="lg:h-5 lg:w-5" />
                             </router-link>
@@ -726,6 +758,7 @@ const maxPage = computed(() => {
                               v-if="session.isTA"
                               class="btn btn-ghost btn-sm btn-circle"
                               :to="`/course/${$route.params.name}/problem/${problemId}/edit`"
+                              @click.stop
                             >
                               <i-uil-edit class="lg:h-5 lg:w-5" />
                             </router-link>
@@ -734,7 +767,7 @@ const maxPage = computed(() => {
                           <div v-if="session.isAdmin || session.isTeacher" class="tooltip" data-tip="Delete">
                             <button
                               class="btn btn-ghost btn-sm btn-circle text-error"
-                              @click="deleteProblem($event, problemId, problemName)"
+                              @click.stop="deleteProblem($event, problemId, problemName)"
                             >
                               <i-uil-trash-alt class="lg:h-5 lg:w-5" />
                             </button>
@@ -788,3 +821,21 @@ const maxPage = computed(() => {
     </form>
   </dialog>
 </template>
+
+<style scoped>
+.hover-suction {
+  transform-origin: center;
+  transition:
+    transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.4s ease;
+  will-change: transform, box-shadow;
+}
+
+.hover-suction:hover {
+  /* Suction effect: Scale down slightly + Rotate X to look like it's tilting in + Translate Z for depth */
+  transform: scale(0.98) perspective(500px) rotateX(2deg) translateY(2px);
+  box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.05);
+  background-color: var(--base-200, #f2f2f2);
+  z-index: 10;
+}
+</style>

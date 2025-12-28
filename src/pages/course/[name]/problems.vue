@@ -333,7 +333,11 @@ const maxPage = computed(() => {
           <div class="relative flex flex-col">
             <div class="flex items-center gap-2">
               <!-- Group By Tag Toggle -->
+<<<<<<< Updated upstream
               <div class="tooltip mr-2" :data-tip="isGroupedView ? 'Back to Table' : 'Group By Tag'">
+=======
+              <div class="tooltip" :data-tip="isGroupedView ? 'Back to Table' : 'Group By Tag'">
+>>>>>>> Stashed changes
                 <button
                   class="btn btn-sm btn-circle"
                   :class="isGroupedView ? 'btn-primary' : 'btn-ghost'"
@@ -536,6 +540,7 @@ const maxPage = computed(() => {
                           <i-uil-edit class="lg:h-5 lg:w-5" />
                         </router-link>
                       </div>
+<<<<<<< Updated upstream
                       <!-- Delete Button -->
                       <div v-if="session.isAdmin || session.isTeacher" class="tooltip" data-tip="Delete">
                         <button
@@ -545,6 +550,8 @@ const maxPage = computed(() => {
                           <i-uil-trash-alt class="lg:h-5 lg:w-5" />
                         </button>
                       </div>
+=======
+>>>>>>> Stashed changes
                     </td>
                   </tr>
                 </tbody>

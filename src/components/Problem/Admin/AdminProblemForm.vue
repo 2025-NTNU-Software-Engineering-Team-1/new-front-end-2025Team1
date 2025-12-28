@@ -862,10 +862,16 @@ onMounted(async () => {
 
   <!-- Footer Action Bar -->
   <div
-    class="bg-base-100/90 border-base-300 fixed bottom-0 left-0 right-0 z-40 border-t p-4 shadow-[0_-8px_20px_rgba(0,0,0,0.1)] backdrop-blur-md"
+    class="bg-base-100/90 border-base-300 fixed bottom-0 left-0 right-0 z-40 border-t py-4 pr-6 shadow-[0_-8px_20px_rgba(0,0,0,0.1)] backdrop-blur-md"
+    :style="{ paddingLeft: 'max(1.5rem, calc((100vw - 80rem) / 2 + 1.5rem))' }"
   >
+<<<<<<< Updated upstream
     <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 md:flex-row">
       <div class="flex w-full items-center justify-center gap-3 md:flex-1 md:justify-center">
+=======
+    <div class="flex w-full flex-col items-center justify-between gap-4 md:flex-row">
+      <div class="flex w-full items-center justify-center gap-3 md:w-auto md:justify-start">
+>>>>>>> Stashed changes
         <!-- 🕒 Before first submit -->
         <template v-if="!hasSubmitted">
           <div class="bg-base-200 text-base-content/50 rounded-full p-2">

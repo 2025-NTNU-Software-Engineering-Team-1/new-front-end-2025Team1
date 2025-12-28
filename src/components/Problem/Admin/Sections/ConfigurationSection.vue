@@ -5,13 +5,14 @@
 // ==========================================
 import { inject, Ref, ref, reactive, watch, computed, onMounted, onBeforeUnmount } from "vue";
 import { useRoute } from "vue-router";
-import { ZipReader, BlobReader } from "@zip.js/zip.js";
+import { ZipReader, BlobReader, ZipWriter, BlobWriter, TextReader } from "@zip.js/zip.js";
 import { getHoverTranslations } from "../../Hovers";
 // Components
 import LanguageMultiSelect from "../../Forms/LanguageMultiSelect.vue";
 import MultiStringInput from "../Controls/MultiStringInput.vue";
 import SidecarInput from "../Controls/SidecarInput.vue";
 import RandomCoin from "../Controls/RandomCoin.vue";
+import AITestcaseModal from "@/components/AITestcaseModal.vue";
 
 // Utils & API
 import { assertFileSizeOK } from "@/utils/checkFileSize";
@@ -37,6 +38,70 @@ const IP_REGEX =
 
 // AC file
 const acFileError = ref("");
+
+// AI Testcase Modal for Public Testdata
+const showAIPublicTestcaseModal = ref(false);
+const isCreatingPublicZip = ref(false);
+
+// Type for advanced testcase assignment
+type TestcaseAssignment = {
+  task: number;
+  case: number;
+  input: string;
+  output: string;
+};
+
+async function handleAIPublicTestcases(inputs: string[], outputs?: string[]) {
+  if (!inputs.length) return;
+  isCreatingPublicZip.value = true;
+
+  try {
+    const zipWriter = new ZipWriter(new BlobWriter("application/zip"));
+
+    for (let i = 0; i < inputs.length; i++) {
+      const task = String(i).padStart(2, "0");
+      const caseNum = "00";
+      await zipWriter.add(`${task}${caseNum}.in`, new TextReader(inputs[i]));
+      if (outputs && outputs[i]) {
+        await zipWriter.add(`${task}${caseNum}.out`, new TextReader(outputs[i]));
+      }
+    }
+
+    const blob = await zipWriter.close();
+    const file = new File([blob], "ai_generated_public_testdata.zip", { type: "application/zip" });
+    problem.value.assets!.trialModePublicTestDataZip = file;
+  } catch (err) {
+    console.error("Failed to create public testdata zip from AI:", err);
+  } finally {
+    isCreatingPublicZip.value = false;
+  }
+}
+
+async function handleAIPublicTestcasesAdvanced(assignments: TestcaseAssignment[]) {
+  if (!assignments.length) return;
+  isCreatingPublicZip.value = true;
+
+  try {
+    const zipWriter = new ZipWriter(new BlobWriter("application/zip"));
+
+    for (const a of assignments) {
+      const task = String(a.task).padStart(2, "0");
+      const caseNum = String(a.case).padStart(2, "0");
+      await zipWriter.add(`${task}${caseNum}.in`, new TextReader(a.input));
+      if (a.output) {
+        await zipWriter.add(`${task}${caseNum}.out`, new TextReader(a.output));
+      }
+    }
+
+    const blob = await zipWriter.close();
+    const file = new File([blob], "ai_generated_public_testdata.zip", { type: "application/zip" });
+    problem.value.assets!.trialModePublicTestDataZip = file;
+  } catch (err) {
+    console.error("Failed to create public testdata zip from AI:", err);
+  } finally {
+    isCreatingPublicZip.value = false;
+  }
+}
 
 // ==========================================
 // Logger Utility
@@ -1631,6 +1696,16 @@ onBeforeUnmount(() => {
               <span v-else class="badge badge-outline text-xs opacity-70">{{
                 t("course.problems.notUploaded")
               }}</span>
+              <!-- AI Generate Button for Public Testdata -->
+              <button
+                type="button"
+                class="btn btn-xs btn-outline gap-1"
+                :disabled="isCreatingPublicZip"
+                @click="showAIPublicTestcaseModal = true"
+              >
+                <i-uil-robot class="h-4 w-4" />
+                {{ t("aiChatbot.testcaseGenerator.generateForPublic") }}
+              </button>
             </div>
           </div>
           <div class="mt-3 flex items-center gap-2">
@@ -2074,6 +2149,34 @@ onBeforeUnmount(() => {
       </div>
     </div>
   </div>
+
+  <!-- AI Testcase Generator Modal for Public Testdata -->
+  <AITestcaseModal
+    v-if="showAIPublicTestcaseModal"
+    :problem-id="route.params.id as string | undefined"
+    :course-name="(problem.courses?.[0] || route.params.name) as string"
+    mode="teacher"
+    :include-output="true"
+    :problem-context="{
+      title: problem.problemName || '',
+      description: problem.description?.description || '',
+      input_format: problem.description?.input || '',
+      output_format: problem.description?.output || '',
+    }"
+    @close="showAIPublicTestcaseModal = false"
+    @use-testcases="
+      (inputs: string[], outputs?: string[]) => {
+        handleAIPublicTestcases(inputs, outputs);
+        showAIPublicTestcaseModal = false;
+      }
+    "
+    @use-testcases-advanced="
+      (assignments: TestcaseAssignment[]) => {
+        handleAIPublicTestcasesAdvanced(assignments);
+        showAIPublicTestcaseModal = false;
+      }
+    "
+  />
 </template>
 
 <style scoped>

@@ -1516,7 +1516,18 @@
       "generated": "已生成 {count} 筆測資",
       "selectToUse": "勾選後加入自訂測資",
       "testcase": "測資",
-      "useSelected": "加入 {count} 筆已選取"
+      "useSelected": "加入 {count} 筆已選取",
+      "teacherMode": "老師模式",
+      "selectApiKey": "選擇 API 金鑰",
+      "generateForJudging": "生成測試測資",
+      "generateForPublic": "生成公開測資",
+      "assignInfo": "為每筆測資指定 Task 和 Case 編號，格式：TTCC.in/out",
+      "assign": "指定為",
+      "duplicateWarning": "偵測到重複的 Task/Case 組合，每組組合必須唯一。",
+      "duplicateAssignment": "無法使用：發現重複的 Task/Case 指定。",
+      "missingZeroZero": "至少需要一筆測資指定為 Task 00 Case 00 (0000.in)。",
+      "missingZeroZeroWarning": "必須包含 Task 00 Case 00 (0000.in) 作為起始點。",
+      "noResults": "未能生成測資，請重試。"
     }
   },
   "kokoro": {

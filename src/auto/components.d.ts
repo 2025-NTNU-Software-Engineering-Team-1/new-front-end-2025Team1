@@ -70,6 +70,7 @@ declare module 'vue' {
     IUilHome: typeof import('~icons/uil/home')['default']
     IUilHourglass: typeof import('~icons/uil/hourglass')['default']
     IUilImport: typeof import('~icons/uil/import')['default']
+    IUilInfoCircle: typeof import('~icons/uil/info-circle')['default']
     IUilKeySkeleton: typeof import('~icons/uil/key-skeleton')['default']
     IUilLanguage: typeof import('~icons/uil/language')['default']
     IUilLayerGroup: typeof import('~icons/uil/layer-group')['default']

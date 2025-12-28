@@ -5,11 +5,12 @@
 // ==========================================
 import { inject, Ref, ref, watch, computed } from "vue";
 import { useRoute } from "vue-router";
-import { ZipReader, BlobReader } from "@zip.js/zip.js";
+import { ZipReader, BlobReader, ZipWriter, BlobWriter, TextReader } from "@zip.js/zip.js";
 import { assertFileSizeOK } from "@/utils/checkFileSize";
 import { isMacOsZip } from "@/utils/zipValidator";
 import { useI18n } from "vue-i18n";
 import { getHoverTranslations } from "../../Hovers";
+import AITestcaseModal from "@/components/AITestcaseModal.vue";
 
 // ==========================================
 // Props & Injection
@@ -21,6 +22,75 @@ const route = useRoute();
 const isDrag = ref(false);
 const { t, locale } = useI18n();
 const hover = computed(() => getHoverTranslations(locale.value));
+
+// AI Testcase Modal State
+const showAITestcaseModal = ref(false);
+const isCreatingZip = ref(false);
+
+// Type for advanced testcase assignment
+type TestcaseAssignment = {
+  task: number;
+  case: number;
+  input: string;
+  output: string;
+};
+
+// Handle AI-generated testcases (simple mode - legacy, each as separate task)
+async function handleAITestcases(inputs: string[], outputs?: string[]) {
+  if (!inputs.length) return;
+  isCreatingZip.value = true;
+
+  try {
+    const zipWriter = new ZipWriter(new BlobWriter("application/zip"));
+
+    for (let i = 0; i < inputs.length; i++) {
+      const task = String(i).padStart(2, "0");
+      const caseNum = "00";
+      await zipWriter.add(`${task}${caseNum}.in`, new TextReader(inputs[i]));
+      if (outputs && outputs[i]) {
+        await zipWriter.add(`${task}${caseNum}.out`, new TextReader(outputs[i]));
+      }
+    }
+
+    const blob = await zipWriter.close();
+    const file = new File([blob], "ai_generated_testdata.zip", { type: "application/zip" });
+    problem.value.assets!.testdataZip = file;
+  } catch (err) {
+    console.error("Failed to create testdata zip from AI:", err);
+    testdataError.value = "Failed to create testdata from AI-generated test cases.";
+  } finally {
+    isCreatingZip.value = false;
+  }
+}
+
+// Handle AI-generated testcases (advanced mode - with custom task/case assignment)
+async function handleAITestcasesAdvanced(assignments: TestcaseAssignment[]) {
+  if (!assignments.length) return;
+  isCreatingZip.value = true;
+
+  try {
+    const zipWriter = new ZipWriter(new BlobWriter("application/zip"));
+
+    for (const a of assignments) {
+      const task = String(a.task).padStart(2, "0");
+      const caseNum = String(a.case).padStart(2, "0");
+      await zipWriter.add(`${task}${caseNum}.in`, new TextReader(a.input));
+      if (a.output) {
+        await zipWriter.add(`${task}${caseNum}.out`, new TextReader(a.output));
+      }
+    }
+
+    const blob = await zipWriter.close();
+    const file = new File([blob], "ai_generated_testdata.zip", { type: "application/zip" });
+    problem.value.assets!.testdataZip = file;
+  } catch (err) {
+    console.error("Failed to create testdata zip from AI:", err);
+    testdataError.value = "Failed to create testdata from AI-generated test cases.";
+  } finally {
+    isCreatingZip.value = false;
+  }
+}
+
 // ==========================================
 // [CONFIG] Console Debug Mode
 // ==========================================
@@ -260,6 +330,16 @@ watch(
         >
           {{ t("course.problems.downloadCurrent") }}
         </a>
+        <!-- AI Generate Button -->
+        <button
+          type="button"
+          class="btn btn-xs btn-outline gap-1"
+          :disabled="isCreatingZip"
+          @click="showAITestcaseModal = true"
+        >
+          <i-uil-robot class="h-4 w-4" />
+          {{ t("aiChatbot.testcaseGenerator.generateForJudging") }}
+        </button>
       </div>
     </label>
 
@@ -365,5 +445,32 @@ watch(
         </div>
       </div>
     </template>
+
+    <!-- AI Testcase Generator Modal -->
+    <AITestcaseModal
+      v-if="showAITestcaseModal"
+      :problem-id="route.params.id as string | undefined"
+      :course-name="(problem.courses?.[0] || route.params.name) as string"
+      mode="teacher"
+      :problem-context="{
+        title: problem.problemName || '',
+        description: problem.description?.description || '',
+        input_format: problem.description?.input || '',
+        output_format: problem.description?.output || '',
+      }"
+      @close="showAITestcaseModal = false"
+      @use-testcases="
+        (inputs: string[], outputs?: string[]) => {
+          handleAITestcases(inputs, outputs);
+          showAITestcaseModal = false;
+        }
+      "
+      @use-testcases-advanced="
+        (assignments: TestcaseAssignment[]) => {
+          handleAITestcasesAdvanced(assignments);
+          showAITestcaseModal = false;
+        }
+      "
+    />
   </div>
 </template>

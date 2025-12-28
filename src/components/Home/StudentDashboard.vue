@@ -211,7 +211,7 @@ onMounted(() => {
           v-else-if="courses.length > 0"
           class="scrollbar-thin flex max-h-[30rem] flex-col gap-3 overflow-y-auto p-1"
         >
-          <div class="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-1 2xl:grid-cols-2">
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-1">
             <router-link
               v-for="c in courses"
               :key="c.course"

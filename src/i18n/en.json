@@ -1520,7 +1520,18 @@
       "generated": "Generated {count} test cases",
       "selectToUse": "Select to add to custom testcases",
       "testcase": "Test Case",
-      "useSelected": "Add {count} selected"
+      "useSelected": "Add {count} selected",
+      "teacherMode": "Teacher Mode",
+      "selectApiKey": "Select API Key",
+      "generateForJudging": "Generate Test Data",
+      "generateForPublic": "Generate Public Test Data",
+      "assignInfo": "Assign each test case to a specific Task and Case number. Format: TTCC.in/out",
+      "assign": "Assign to",
+      "duplicateWarning": "Duplicate task/case assignment detected. Each combination must be unique.",
+      "duplicateAssignment": "Cannot use: duplicate task/case assignments found.",
+      "missingZeroZero": "At least one test case must be assigned to Task 00 Case 00 (0000.in).",
+      "missingZeroZeroWarning": "Must include Task 00 Case 00 (0000.in) as the starting point.",
+      "noResults": "No test cases were generated. Please try again."
     }
   },
   "kokoro": {

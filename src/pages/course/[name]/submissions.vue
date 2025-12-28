@@ -16,6 +16,7 @@ import { AxiosError } from "axios";
 const route = useRoute();
 const router = useRouter();
 const session = useSession();
+defineProps(["name"]);
 
 useTitle(`Submissions - ${route.params.name} | Normal OJ`);
 

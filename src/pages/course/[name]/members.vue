@@ -12,6 +12,7 @@ const route = useRoute();
 const router = useRouter();
 const session = useSession();
 const { t } = useI18n();
+defineProps(["name"]);
 
 useTitle(`Members - ${route.params.name} | Normal OJ`);
 
@@ -233,8 +234,8 @@ const errorMsg = ref("");
 const previewCSV = ref<{ headers?: string[]; body?: string[][] }>({});
 
 // Manual input mode
-type InputMode = "csv" | "manual";
-const inputMode = ref<InputMode>("csv");
+type InputMode = "csv" | "manual" | "existing";
+const inputMode = ref<InputMode>("existing"); // Default to existing users mode
 
 interface ManualUser {
   username: string;
@@ -297,8 +298,102 @@ watch(isOpen, (open) => {
     previewCSV.value = {};
     manualUsers.value = [createEmptyUser()];
     errorMsg.value = "";
+    // Reset existing users search
+    existingUserSearch.value = "";
+    selectedExistingUsers.value = [];
+    existingUserSearchResults.value = [];
   }
 });
+
+// =========== Add Existing Users Mode ===========
+interface ExistingUser {
+  username: string;
+  displayedName: string;
+  role: number;
+}
+
+const existingUserSearch = ref("");
+const selectedExistingUsers = ref<ExistingUser[]>([]);
+const existingUserSearchResults = ref<ExistingUser[]>([]);
+const existingUserSearchLoading = ref(false);
+const addExistingLoading = ref(false);
+
+// Debounced search for existing users
+let searchTimeout: ReturnType<typeof setTimeout> | null = null;
+watch(existingUserSearch, (query) => {
+  if (searchTimeout) clearTimeout(searchTimeout);
+  if (!query.trim()) {
+    existingUserSearchResults.value = [];
+    return;
+  }
+  searchTimeout = setTimeout(() => searchExistingUsers(query), 300);
+});
+
+async function searchExistingUsers(query: string) {
+  existingUserSearchLoading.value = true;
+  try {
+    const response = await api.Course.searchUsers(route.params.name as string, query);
+    // Response interceptor merges response.data, so actual data array is in response.data
+    const users = ((response as { data?: ExistingUser[] }).data || []) as ExistingUser[];
+    // Filter out already selected users (backend already filters course members)
+    existingUserSearchResults.value = users.filter(
+      (u) => !selectedExistingUsers.value.some((s) => s.username === u.username),
+    );
+  } catch {
+    existingUserSearchResults.value = [];
+  } finally {
+    existingUserSearchLoading.value = false;
+  }
+}
+
+function selectExistingUser(user: ExistingUser) {
+  if (!selectedExistingUsers.value.some((u) => u.username === user.username)) {
+    selectedExistingUsers.value.push(user);
+  }
+  // Remove from search results
+  existingUserSearchResults.value = existingUserSearchResults.value.filter(
+    (u) => u.username !== user.username,
+  );
+  existingUserSearch.value = "";
+}
+
+function removeSelectedUser(username: string) {
+  selectedExistingUsers.value = selectedExistingUsers.value.filter((u) => u.username !== username);
+}
+
+async function submitExistingUsers() {
+  if (selectedExistingUsers.value.length === 0) {
+    errorMsg.value = t("course.members.addExisting.noUsersSelected");
+    return;
+  }
+
+  addExistingLoading.value = true;
+  errorMsg.value = "";
+
+  try {
+    const usernames = selectedExistingUsers.value.map((u) => u.username);
+    const response = await api.Course.addMembers(route.params.name as string, usernames);
+    // Response interceptor merges response.data, so actual result is in response.data
+    const result = (response as { data?: { added: string[]; already_in: string[]; not_found: string[] } })
+      .data;
+
+    if (result?.added && result.added.length > 0) {
+      // Success - refresh the page
+      router.go(0);
+    } else if (result?.already_in && result.already_in.length > 0) {
+      errorMsg.value = t("course.members.addExisting.alreadyInCourse");
+    } else if (result?.not_found && result.not_found.length > 0) {
+      errorMsg.value = t("course.members.addExisting.userNotFound");
+    } else {
+      // Fallback: if no result but no error, refresh anyway
+      router.go(0);
+    }
+  } catch {
+    errorMsg.value = t("course.members.addExisting.addFailed");
+  } finally {
+    addExistingLoading.value = false;
+  }
+}
 
 // no csv validation was handled
 const standardizeUsername = (csv: string): string => {
@@ -657,179 +752,104 @@ async function submit() {
 
     <input v-model="isOpen" type="checkbox" id="my-modal" class="modal-toggle" />
     <div class="modal">
-      <div class="modal-box max-w-4xl">
-        <!-- Header Info -->
-        <div>
-          {{ $t("course.members.csvUploadHint.header") }}
-          <ul class="ml-4 list-disc">
-            <li v-for="h in ['username', 'email', 'password']">
-              <code>{{ h }}</code>
-            </li>
-            <li v-for="h in ['displayedName', 'role']">
-              <code>{{ h }}</code> (optional)
-            </li>
-          </ul>
-        </div>
-        <div>
-          {{ $t("course.members.csvUploadHint.content") }}
-        </div>
-
-        <div class="mt-2 font-bold">
-          {{ $t("course.members.csvUploadHint.caution") }}
-        </div>
-
-        <div class="my-4" />
-
-        <!-- Options -->
-        <div class="form-control">
-          <label class="label cursor-pointer">
-            <span class="label-text">{{ $t("course.members.standardizeUsername") }}</span>
-            <input v-model="shouldStandardizeUsername" type="checkbox" class="checkbox checkbox-primary" />
-          </label>
-        </div>
+      <div class="modal-box max-w-2xl">
+        <!-- Modal Title -->
+        <h3 class="mb-4 text-lg font-bold">{{ $t("course.members.addExisting.title") }}</h3>
 
         <!-- Error Message -->
-        <div class="alert alert-error shadow-lg" v-if="errorMsg">
+        <div class="alert alert-error mb-4 shadow-lg" v-if="errorMsg">
           <div>
             <i-uil-times-circle />
             <span>{{ errorMsg }}</span>
           </div>
         </div>
 
-        <div class="form-control my-4">
-          <label class="label cursor-pointer">
-            <span class="label-text">{{ $t("course.members.forceUpdate") }}</span>
-            <input type="checkbox" class="checkbox checkbox-primary" v-model="forceUpdate" />
-          </label>
-        </div>
-
-        <!-- Tab Switcher -->
-        <div class="tabs tabs-boxed mb-4">
-          <a class="tab" :class="{ 'tab-active': inputMode === 'csv' }" @click="inputMode = 'csv'">
-            {{ $t("course.members.csvUpload") }}
-          </a>
-          <a class="tab" :class="{ 'tab-active': inputMode === 'manual' }" @click="inputMode = 'manual'">
-            {{ $t("course.members.manualInput") }}
-          </a>
-        </div>
-
-        <!-- CSV Upload Mode -->
-        <template v-if="inputMode === 'csv'">
-          <div class="mt-2 overflow-hidden rounded-lg">
-            <div class="grid grid-cols-5">
-              <!-- Left Label -->
-              <div class="bg-base-300 col-span-1 flex items-center justify-center text-sm">
-                {{ $t("course.members.csvFiles") }}
-              </div>
-              <!-- Right Upload Area -->
-              <div class="textarea-bordered bg-base-100 col-span-4 p-4">
-                <template v-if="!newMembers">
-                  <div class="mb-2 text-sm opacity-70">{{ $t("course.members.csvUploadInfo") }}</div>
-                  <input
-                    type="file"
-                    accept=".csv"
-                    class="file-input-bordered file-input file-input-sm w-full"
-                    @change="newMembers = ($event.target as HTMLInputElement).files?.[0]"
-                  />
-                </template>
-                <template v-else>
-                  <div class="mb-2 flex items-center gap-2">
-                    <span class="font-medium">{{ newMembers.name }}</span>
-                    <button class="btn btn-sm btn-ghost" @click="newMembers = null">
-                      <i-uil-times />
-                    </button>
-                  </div>
-                  <div class="max-h-48 overflow-x-auto">
-                    <table class="table-compact table w-full">
-                      <thead>
-                        <tr v-if="previewCSV.headers">
-                          <th v-for="h in previewCSV.headers" :key="h">{{ h }}</th>
-                        </tr>
-                      </thead>
-                      <tbody v-if="previewCSV.body">
-                        <tr v-for="(r, idx) in previewCSV.body" :key="idx">
-                          <td v-for="(c, cidx) in r" :key="cidx">{{ c }}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </template>
-              </div>
-            </div>
-          </div>
-        </template>
-
-        <!-- Manual Input Mode -->
-        <template v-else>
-          <div class="space-y-3">
-            <!-- Header Row -->
-            <div class="grid grid-cols-12 gap-2 px-1 text-sm font-semibold opacity-70">
-              <div class="col-span-2">Username *</div>
-              <div class="col-span-3">Email *</div>
-              <div class="col-span-2">Password *</div>
-              <div class="col-span-2">Display Name</div>
-              <div class="col-span-2">Role</div>
-              <div class="col-span-1"></div>
-            </div>
-
-            <!-- User Rows -->
-            <div
-              v-for="(user, index) in manualUsers"
-              :key="index"
-              class="grid grid-cols-12 items-center gap-2"
-            >
+        <!-- Add Existing Users Mode -->
+        <div class="space-y-4">
+          <!-- Search Input with Dropdown -->
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">{{ $t("course.members.addExisting.searchHint") }}</span>
+            </label>
+            <div class="relative">
               <input
-                v-model="user.username"
+                v-model="existingUserSearch"
                 type="text"
-                placeholder="username"
-                class="input input-bordered input-sm col-span-2"
+                :placeholder="$t('course.members.addExisting.searchPlaceholder')"
+                class="input input-bordered w-full"
               />
-              <input
-                v-model="user.email"
-                type="email"
-                placeholder="email@example.com"
-                class="input input-bordered input-sm col-span-3"
-              />
-              <input
-                v-model="user.password"
-                type="text"
-                placeholder="password"
-                class="input input-bordered input-sm col-span-2"
-              />
-              <input
-                v-model="user.displayedName"
-                type="text"
-                placeholder="(optional)"
-                class="input input-bordered input-sm col-span-2"
-              />
-              <select v-model="user.role" class="select select-bordered select-sm col-span-2">
-                <option v-for="opt in roleOptions" :key="opt.value" :value="opt.value">
-                  {{ opt.text }}
-                </option>
-              </select>
-              <div class="col-span-1 flex gap-1">
-                <button class="btn btn-sm btn-ghost" @click="addManualUser" aria-label="Add user">
-                  <i-uil-plus />
-                </button>
-                <button
-                  class="btn btn-sm btn-ghost"
-                  @click="removeManualUser(index)"
-                  :disabled="manualUsers.length <= 1"
-                  aria-label="Remove user"
+              <span
+                v-if="existingUserSearchLoading"
+                class="loading loading-spinner loading-sm absolute top-3 right-3"
+              ></span>
+
+              <!-- Search Results Dropdown (absolute positioned) -->
+              <div
+                v-if="existingUserSearchResults.length > 0"
+                class="border-base-300 bg-base-100 absolute top-full right-0 left-0 z-50 mt-1 max-h-48 overflow-y-auto rounded-lg border shadow-lg"
+              >
+                <div
+                  v-for="user in existingUserSearchResults"
+                  :key="user.username"
+                  class="hover:bg-base-200 flex cursor-pointer items-center justify-between px-4 py-2 transition-colors"
+                  @click="selectExistingUser(user)"
                 >
-                  <i-uil-minus />
+                  <div>
+                    <span class="font-medium">{{ user.username }}</span>
+                    <span v-if="user.displayedName" class="ml-2 text-sm opacity-70"
+                      >({{ user.displayedName }})</span
+                    >
+                  </div>
+                  <i-uil-plus class="text-success" />
+                </div>
+              </div>
+
+              <!-- No results message (absolute positioned) -->
+              <div
+                v-else-if="existingUserSearch && !existingUserSearchLoading"
+                class="border-base-300 bg-base-100 absolute top-full right-0 left-0 z-50 mt-1 rounded-lg border p-3 text-sm opacity-70 shadow-lg"
+              >
+                {{ $t("course.members.addExisting.noResults") }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Selected Users -->
+          <div v-if="selectedExistingUsers.length > 0" class="space-y-2">
+            <label class="label">
+              <span class="label-text font-semibold">
+                {{ $t("course.members.addExisting.selectedUsers") }} ({{ selectedExistingUsers.length }})
+              </span>
+            </label>
+            <div class="flex flex-wrap gap-2">
+              <div
+                v-for="user in selectedExistingUsers"
+                :key="user.username"
+                class="badge badge-lg badge-primary gap-2"
+              >
+                {{ user.username }}
+                <button class="btn btn-ghost btn-xs" @click="removeSelectedUser(user.username)">
+                  <i-uil-times />
                 </button>
               </div>
             </div>
           </div>
-        </template>
+
+          <div v-else class="text-sm opacity-50">
+            {{ $t("course.members.addExisting.noUsersSelected") }}
+          </div>
+        </div>
 
         <!-- Modal Actions -->
         <div class="modal-action">
           <label for="my-modal" class="btn btn-ghost">{{ $t("course.members.cancel") }}</label>
-          <div :class="['btn btn-success ml-3', isProcessingSignup && 'loading']" @click="submit">
-            {{ $t("course.members.submit") }}
-          </div>
+          <button
+            :class="['btn btn-success ml-3', addExistingLoading && 'loading']"
+            :disabled="selectedExistingUsers.length === 0 || addExistingLoading"
+            @click="submitExistingUsers"
+          >
+            {{ $t("course.members.addExisting.addToCourse") }}
+          </button>
         </div>
       </div>
     </div>

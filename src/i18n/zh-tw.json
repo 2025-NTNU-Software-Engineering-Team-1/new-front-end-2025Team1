@@ -791,6 +791,19 @@
         "dupEmails": "重複 Email：",
         "skippedEntries": "以下使用者未建立，因為使用者名稱或 Email 已存在：{users}",
         "unknown-error-occurred": "發生未知錯誤 :("
+      },
+      "addExisting": {
+        "title": "新增現有使用者",
+        "searchPlaceholder": "搜尋使用者...",
+        "selectedUsers": "已選取的使用者",
+        "noUsersSelected": "尚未選取任何使用者",
+        "addToCourse": "加入課程",
+        "addSuccess": "成功新增 {count} 位使用者",
+        "addFailed": "新增使用者失敗",
+        "alreadyInCourse": "使用者已在課程中",
+        "userNotFound": "找不到使用者",
+        "searchHint": "輸入使用者名稱搜尋",
+        "noResults": "找不到符合的使用者"
       }
     }
   },
@@ -802,7 +815,7 @@
         "teacher": "教師"
       },
       "new": "新增",
-      "searchPlaceholder": "搜尋課程",
+      "searchPlaceholder": "搜尋課程...",
       "join": {
         "title": "透過課程代號加入",
         "placeholder": "輸入課程代號",
@@ -1395,7 +1408,18 @@
     "refresh": "刷新",
     "download": "下載 CSV",
     "noRecords": "尚無登入紀錄",
-    "rowCount": "共 {n} 筆紀錄"
+    "rowCount": "共 {n} 筆紀錄",
+    "bannedIPs": {
+      "title": "被封鎖的 IP",
+      "ip": "IP 位址",
+      "remainingTime": "剩餘時間",
+      "failureCount": "失敗次數",
+      "unban": "解除封鎖",
+      "unbanSuccess": "已成功解除 IP 封鎖",
+      "unbanFailed": "解除封鎖失敗",
+      "noBannedIPs": "目前沒有被封鎖的 IP",
+      "seconds": "秒"
+    }
   },
   "skinSelector": {
     "title": "選擇 AI 助教外觀",

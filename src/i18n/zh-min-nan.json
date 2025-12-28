@@ -708,6 +708,19 @@
         "dupEmails": "重複 Email：",
         "skippedEntries": "以下使用者未建立，因為使用者名稱或 Email 已存在：{users}",
         "unknown-error-occurred": "發生未知錯誤 :("
+      },
+      "addExisting": {
+        "title": "加入現有使用者",
+        "searchPlaceholder": "搜揣使用者...",
+        "selectedUsers": "揀好 ê 使用者",
+        "noUsersSelected": "猶未揀任何使用者",
+        "addToCourse": "加入課程",
+        "addSuccess": "成功加入 {count} 个使用者",
+        "addFailed": "加入使用者失敗",
+        "alreadyInCourse": "使用者已經佇課程內",
+        "userNotFound": "揣無使用者",
+        "searchHint": "輸入使用者名稱來搜揣",
+        "noResults": "揣無符合 ê 使用者"
       }
     }
   },
@@ -1286,7 +1299,18 @@
     "refresh": "重整理",
     "download": "下載 CSV",
     "noRecords": "無登入紀錄",
-    "rowCount": "攏總有 {n} 筆紀錄"
+    "rowCount": "攏總有 {n} 筆紀錄",
+    "bannedIPs": {
+      "title": "被封鎖 ê IP",
+      "ip": "IP 位址",
+      "remainingTime": "賰 ê 時間",
+      "failureCount": "失敗次數",
+      "unban": "解除封鎖",
+      "unbanSuccess": "已經解除 IP 封鎖矣",
+      "unbanFailed": "解除封鎖失敗",
+      "noBannedIPs": "目前無被封鎖 ê IP",
+      "seconds": "秒"
+    }
   },
   "skinSelector": {
     "title": "揀 AI 助教外觀",

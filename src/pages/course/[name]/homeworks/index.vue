@@ -10,6 +10,7 @@ import type { AxiosError } from "axios";
 
 const session = useSession();
 const route = useRoute();
+defineProps(["name"]);
 
 useTitle(`Homeworks - ${route.params.name} | Normal OJ`);
 const { data, error, isLoading } = useAxios<HomeworkList>(`/course/${route.params.name}/homework`, fetcher);

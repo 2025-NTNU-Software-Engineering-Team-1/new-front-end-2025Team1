@@ -11,6 +11,7 @@ import type { AxiosError } from "axios";
 
 const session = useSession();
 const route = useRoute();
+defineProps(["name"]);
 
 useTitle(`Announcements - ${route.params.name} | Normal OJ`);
 const {

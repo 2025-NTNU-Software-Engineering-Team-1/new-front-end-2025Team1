@@ -374,10 +374,39 @@ const Course = {
     fetcher.delete<{ message: string; data: { username: string } }>(
       `/course/${courseName}/member/${username}`,
     ),
+  // Add existing users to course as students (for teachers only)
+  addMembers: (courseName: string, usernames: string[]) =>
+    fetcher.post<{
+      message: string;
+      data: { added: string[]; already_in: string[]; not_found: string[] };
+    }>(`/course/${courseName}/members`, { usernames }),
+  // Search users for adding to course (course-specific endpoint)
+  searchUsers: (courseName: string, query: string) =>
+    fetcher.get<{ data: { username: string; displayedName: string; role: number }[] }>(
+      `/course/${courseName}/search-users`,
+      { params: { q: query } },
+    ),
 };
 
 const User = {
   modify: (username: string, body: UserEditionForm) => fetcher.patch(`/user/${username}`, body),
+  // Search users for adding to course
+  list: (params?: { offset?: number; count?: number; role?: number }) =>
+    fetcher.get<{ data: { username: string; displayedName: string; role: number }[] }>("/user", {
+      params,
+    }),
+};
+
+const Admin = {
+  // Get all banned IPs
+  getBannedIPs: () =>
+    fetcher.get<{
+      data: {
+        banned_ips: { ip: string; remaining_seconds: number; failure_count: number }[];
+      };
+    }>("/auth/banned-ips"),
+  // Unban a specific IP
+  unbanIP: (ip: string) => fetcher.delete<{ message: string }>(`/auth/banned-ips/${encodeURIComponent(ip)}`),
 };
 const Discussion = {
   // 1. 取得貼文列表 (New/Hot 切換)
@@ -620,6 +649,7 @@ export default {
   Homework,
   Course,
   User,
+  Admin,
   Discussion,
   APIToken: APITokenAPI,
   Chatbot,

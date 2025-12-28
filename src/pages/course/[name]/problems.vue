@@ -16,6 +16,7 @@ const session = useSession();
 const rolesCanReadProblemStatus = [UserRole.Admin, UserRole.Teacher, UserRole.TA];
 const route = useRoute();
 const router = useRouter();
+defineProps(["name"]);
 
 const { t: $t } = useI18n();
 

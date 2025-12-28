@@ -792,6 +792,19 @@
         "dupEmails": "Duplicate emails:",
         "skippedEntries": "The following users were not created because username or email already exists: {users}",
         "unknown-error-occurred": "Unknown error occurred :("
+      },
+      "addExisting": {
+        "title": "Add Existing Users",
+        "searchPlaceholder": "Search users...",
+        "selectedUsers": "Selected Users",
+        "noUsersSelected": "No users selected",
+        "addToCourse": "Add to Course",
+        "addSuccess": "Successfully added {count} user(s)",
+        "addFailed": "Failed to add users",
+        "alreadyInCourse": "User already in course",
+        "userNotFound": "User not found",
+        "searchHint": "Type username to search",
+        "noResults": "No matching users found"
       }
     }
   },
@@ -803,7 +816,7 @@
         "teacher": "Teacher"
       },
       "new": "New",
-      "searchPlaceholder": "Search Course",
+      "searchPlaceholder": "Search Course...",
       "join": {
         "title": "Join by Course Code",
         "placeholder": "Enter course code",
@@ -1399,7 +1412,18 @@
     "refresh": "Refresh",
     "download": "Download CSV",
     "noRecords": "No login records",
-    "rowCount": "{n} record(s)"
+    "rowCount": "{n} record(s)",
+    "bannedIPs": {
+      "title": "Banned IPs",
+      "ip": "IP Address",
+      "remainingTime": "Time Remaining",
+      "failureCount": "Failure Count",
+      "unban": "Unban",
+      "unbanSuccess": "IP unbanned successfully",
+      "unbanFailed": "Failed to unban IP",
+      "noBannedIPs": "No banned IPs",
+      "seconds": "seconds"
+    }
   },
   "skinSelector": {
     "title": "Choose AI Assistant Appearance",

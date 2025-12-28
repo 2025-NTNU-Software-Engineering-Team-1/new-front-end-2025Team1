@@ -22,8 +22,8 @@ const noInvisible = helpers.withMessage(
 );
 
 const rules = {
-  name: { required, maxLength: maxLength(64), noInvisible },
-  markdown: { maxLength: maxLength(10000) },
+  name: { required, maxLength: maxLength(50), noInvisible },
+  markdown: { maxLength: maxLength(350) },
   problemIds: { required },
   start: { required },
   end: {
@@ -90,6 +90,7 @@ async function submit() {
     <div class="form-control w-full max-w-xs">
       <label class="label">
         <span class="label-text">{{ $t("components.hw.form.problems") }}</span>
+        <span class="label-text-alt text-base-content/60">可輸入 ID 或名稱搜尋</span>
       </label>
       <problem-multi-select
         :model-value="form.problemIds"

@@ -244,10 +244,28 @@ const animState = ref({
     "--start-y": "0px",
     "--flight-time": `${ANIM_CONFIG.FLIGHT_DURATION}ms`,
   } as Record<string, string>,
+  skipped: false,
 });
 
 onMounted(async () => {
   await nextTick();
+
+  // LocalStorage Key
+  const COOKIE_KEY = "has_seen_manual_anim";
+
+  // Check if user has seen animation
+  if (route.query.reset_anim) {
+    localStorage.removeItem(COOKIE_KEY);
+  }
+
+  if (localStorage.getItem(COOKIE_KEY)) {
+    animState.value.spotlight = false;
+    animState.value.skipped = true;
+    return;
+  }
+
+  // Mark as seen
+  localStorage.setItem(COOKIE_KEY, "true");
 
   // 1. Calculate Dash Trajectory
   if (manualButtonWrapper.value) {
@@ -365,6 +383,7 @@ async function submit() {
 
   logger.group("Submit Edit Problem");
   formElement.value.isLoading = true;
+  const delayPromise = new Promise((resolve) => setTimeout(resolve, 4000));
 
   try {
     const pid = Number(route.params.id);
@@ -459,6 +478,8 @@ async function submit() {
       logger.log("Sending Assets Upload...");
       await api.Problem.uploadAssetsV2(pid, fd);
     }
+
+    await delayPromise;
 
     logger.success("Update Successful. Redirecting...");
     router.push(`/course/${route.params.name}/problem/${route.params.id}`);
@@ -568,8 +589,11 @@ function cleanupForDisplay(data?: ProblemForm) {
               </Transition>
 
               <div
-                class="opacity-0 transition-opacity duration-300"
-                :class="{ 'dash-fly-anim': animState.flying }"
+                class="transition-opacity duration-300"
+                :class="[
+                  animState.skipped ? 'opacity-100' : 'opacity-0',
+                  { 'dash-fly-anim': animState.flying },
+                ]"
               >
                 <AdminManualModal />
               </div>

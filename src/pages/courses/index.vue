@@ -137,7 +137,7 @@ async function handleJoinCourse() {
           <skeleton-table :col="2" :row="5" />
         </template>
         <template #data>
-          <div class="scrollbar-thin border-base-200 max-h-[60vh] overflow-y-auto rounded-lg border">
+          <div class="scrollbar-hide border-base-200 max-h-[60vh] overflow-y-auto rounded-lg border">
             <table class="table w-full">
               <thead class="bg-base-100 sticky top-0 z-10 shadow-sm">
                 <tr>

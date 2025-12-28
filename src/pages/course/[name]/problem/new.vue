@@ -9,6 +9,9 @@ import axios from "axios";
 import api from "@/models/api";
 import AdminProblemForm from "@/components/Problem/Admin/AdminProblemForm.vue";
 import AdminManualModal from "@/components/Problem/Admin/AdminManualModal.vue";
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
 
 // ==========================================
 // [CONFIG] Animation Settings (Ultra-Fast)
@@ -61,7 +64,7 @@ const logger = {
 // ==========================================
 const route = useRoute();
 const router = useRouter();
-useTitle(`New Problem - ${route.params.name} | Normal OJ`);
+useTitle(`${t("course.problem.new.title")} - ${route.params.name} | Normal OJ`);
 
 const formElement = ref<InstanceType<typeof AdminProblemForm>>();
 
@@ -346,7 +349,7 @@ const openJSON = ref(false);
     <div class="card min-w-full">
       <div class="card-body">
         <div class="card-title mb-3 justify-between">
-          New Problem
+          {{ t("course.problem.new.title") }}
 
           <div
             ref="manualButtonWrapper"
@@ -386,7 +389,7 @@ const openJSON = ref(false);
 
         <div class="divider" />
         <div class="card-title mb-3">
-          Preview
+          {{ t("course.problem.new.preview") }}
           <input v-model="openPreview" type="checkbox" class="toggle" />
         </div>
         <problem-card
@@ -398,7 +401,7 @@ const openJSON = ref(false);
         <div class="divider my-4" />
 
         <div class="card-title mb-3">
-          JSON
+          {{ t("course.problem.new.json") }}
           <input v-model="openJSON" type="checkbox" class="toggle" />
         </div>
         <pre v-if="openJSON" class="bg-base-200 rounded p-2">{{ JSON.stringify(newProblem, null, 2) }}</pre>

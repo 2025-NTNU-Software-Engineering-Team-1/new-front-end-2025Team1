@@ -1360,7 +1360,7 @@ onBeforeUnmount(() => {
                 v-model="searchQuery"
                 type="text"
                 class="input-bordered input input-sm flex-1"
-                placeholder="Search by Key Name or Creator"
+                :placeholder="t('course.problems.aiKeySearch')"
               />
             </div>
 
@@ -1564,11 +1564,11 @@ onBeforeUnmount(() => {
               :class="['input-bordered input w-full', trialQuotaError && 'input-error']"
               :value="localTrialLimit"
               @input="onTrialLimitInput"
-              placeholder="-1 (unlimited) or 1–500"
+              :placeholder="t('course.problems.trialMaxNumberPlaceholder')"
             />
             <label class="label">
               <span class="label-text-alt" :class="trialQuotaError ? 'text-error' : ''">
-                {{ trialQuotaError || "-1 means unlimited" }}
+                {{ trialQuotaError || t("course.problems.meansUnlimited") }}
               </span>
             </label>
           </div>
@@ -1677,8 +1677,7 @@ onBeforeUnmount(() => {
             />
           </div>
           <div class="mt-1 pl-1 text-xs opacity-70">
-            Only <code>.in</code> and <code>.out</code> files inside ZIP; each <code>.in</code> must have a
-            corresponding <code>.out</code> file; ≤ 1 GB
+            {{ t("course.problems.onlyInOutFiles") }}
           </div>
           <label v-if="v$?.assets?.trialModePublicTestDataZip?.$error" class="label">
             <span class="label-text-alt text-error">{{
@@ -1813,7 +1812,7 @@ onBeforeUnmount(() => {
                   d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                 ></path>
               </svg>
-              <span>{{ networkErrors.global[0] }}</span>
+              <span>{{ t("course.problems.networkErrors.global[0]") }} </span>
             </div>
           </div>
 

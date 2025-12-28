@@ -8,11 +8,14 @@ import { useTitle } from "@vueuse/core";
 import { isQuotaUnlimited } from "@/constants";
 import useInteractions from "@/composables/useInteractions";
 import type { AxiosError } from "axios";
+import { useI18n } from "vue-i18n";
 
 const session = useSession();
 const rolesCanReadProblemStatus = [UserRole.Admin, UserRole.Teacher, UserRole.TA];
 const route = useRoute();
 const router = useRouter();
+
+const { t: $t } = useI18n();
 
 const { isDesktop } = useInteractions();
 
@@ -95,7 +98,7 @@ const groupedProblems = computed(() => {
   for (const p of sortedProblems.value) {
     // Sort tags to ensure consistency (e.g. "A,B" is same as "B,A")
     const tags = p.tags ? [...p.tags].sort() : [];
-    const key = tags.length > 0 ? tags.join(", ") : "Uncategorized";
+    const key = tags.length > 0 ? tags.join(", ") : $t("course.problems.uncategorized");
 
     if (!groups[key]) {
       groups[key] = [];
@@ -347,7 +350,7 @@ const maxPage = computed(() => {
                 v-model="searchQuery"
                 type="text"
                 maxlength="50"
-                placeholder="Search Name or ID..."
+                :placeholder="$t('course.problems.searchPlaceholder')"
                 class="input input-bordered input-sm w-40 transition-colors lg:w-64"
                 :class="{ 'input-error': searchNotFound }"
                 @keyup.enter="performSearch"
@@ -450,7 +453,7 @@ const maxPage = computed(() => {
                       </div>
                     </td>
                     <td v-if="rolesCanReadProblemStatus.includes(session.role)">
-                      <span class="badge ml-1">{{ status === 0 ? "VISIBLE" : "HIDDEN" }}</span>
+                      <span class="badge ml-1">{{ status === 0 ? $t('course.problems.visible') : $t('course.problems.hidden') }}</span>
                     </td>
                     <td>
                       <span class="badge badge-info mr-1" v-for="tag in tags" :key="tag">{{ tag }}</span>

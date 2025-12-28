@@ -726,7 +726,7 @@ function closeDeleteErrorModal() {
               :disabled="isRejudgeLoading"
               @click="rejudge"
             >
-              <i-uil-repeat :class="['mr-1', isRejudgeLoading && 'animate-spin']" /> Rejudge
+              <i-uil-repeat :class="['mr-1', isRejudgeLoading && 'animate-spin']" /> {{ $t("course.problem.test.trialHistory.rejudge") }}
             </button>
             <!-- Delete Button (only shown if user has permission) -->
             <button

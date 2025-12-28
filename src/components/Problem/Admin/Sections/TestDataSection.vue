@@ -87,7 +87,7 @@ const hasBackendTestcase = computed(() => hasExistingTasks.value || hasRemoteTes
 const currentTaskLabel = computed(() => {
   if (!hasBackendTestcase.value) return "";
   const len = problem.value.testCaseInfo?.tasks?.length ?? 0;
-  return len > 0 ? `${len} task(s)` : "remote";
+  return len > 0 ? `${len} ${t("course.problems.task")}` : "remote";
 });
 
 // ==========================================
@@ -249,7 +249,7 @@ watch(
       >
       <div class="flex items-center gap-2">
         <span v-if="hasBackendTestcase" class="badge badge-outline badge-success text-xs">
-          Current: {{ currentTaskLabel }}
+          {{ t("course.problems.current") }} {{ currentTaskLabel }}
         </span>
         <span v-else class="badge badge-outline text-xs opacity-70">{{
           t("course.problems.notUploaded")

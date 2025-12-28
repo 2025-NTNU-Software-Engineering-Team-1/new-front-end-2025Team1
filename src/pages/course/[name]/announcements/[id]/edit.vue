@@ -7,10 +7,12 @@ import { useRoute, useRouter } from "vue-router";
 import api, { fetcher } from "@/models/api";
 import axios, { type AxiosError } from "axios";
 import AnnouncementForm from "@/components/Announcement/AnnouncementForm.vue";
+import { useI18n } from "vue-i18n";
 
 const route = useRoute();
 const router = useRouter();
-useTitle(`Edit Announcement - ${route.params.id} - ${route.params.name} | Normal OJ`);
+const { t } = useI18n();
+useTitle(`${t("course.ann.edit.title")} - ${route.params.id} - ${route.params.name} | Normal OJ`);
 
 const formElement = ref<InstanceType<typeof AnnouncementForm>>();
 
@@ -65,7 +67,7 @@ async function delete_() {
   if (!formElement.value) return;
 
   formElement.value.isLoading = true;
-  if (!confirm("Are u sure?")) return;
+  if (!confirm(t("course.ann.edit.confirmDelete"))) return;
   try {
     await api.Announcement.delete({ annId: route.params.id as string });
     router.push(`/course/${route.params.name}/announcements`);
@@ -81,7 +83,7 @@ async function delete_() {
   }
 }
 function discard() {
-  if (!confirm("Are u sure?")) return;
+  if (!confirm(t("course.ann.edit.confirmDiscard"))) return;
   router.push(`/course/${route.params.name}/announcements`);
 }
 </script>
@@ -91,19 +93,19 @@ function discard() {
     <div class="card min-w-full">
       <div class="card-body">
         <div class="card-title mb-3 flex-wrap justify-between lg:flex-nowrap">
-          Edit Announcement
+          {{ t("course.ann.edit.title") }}
           <div class="flex gap-x-3">
             <button
               :class="['btn btn-error btn-outline btn-sm lg:btn-md', formElement?.isLoading && 'loading']"
               @click="delete_"
             >
-              <i-uil-trash-alt class="mr-1 lg:h-5 lg:w-5" /> Delete
+              <i-uil-trash-alt class="mr-1 lg:h-5 lg:w-5" /> {{ t("course.ann.edit.delete") }}
             </button>
             <button
               :class="['btn btn-warning btn-sm lg:btn-md', formElement?.isLoading && 'loading']"
               @click="discard"
             >
-              <i-uil-times-circle class="mr-1 lg:h-5 lg:w-5" /> Discard Changes
+              <i-uil-times-circle class="mr-1 lg:h-5 lg:w-5" /> {{ t("course.ann.edit.discardChanges") }}
             </button>
           </div>
         </div>
@@ -124,7 +126,7 @@ function discard() {
               <div class="divider" />
 
               <div class="card-title mb-3">
-                Preview
+                {{ t("course.ann.edit.preview") }}
                 <input v-model="openPreview" type="checkbox" class="toggle" />
               </div>
 

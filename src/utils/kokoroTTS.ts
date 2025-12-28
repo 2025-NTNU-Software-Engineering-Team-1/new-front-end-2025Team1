@@ -4,6 +4,7 @@
  * 負責與 Web Worker 通訊，並在主執行緒處理 AudioContext 播放
  */
 import type { WorkerMessage, WorkerResponse } from "../workers/kokoro.worker";
+import i18n from "@/i18n";
 
 // RawAudio 介面 (與 Worker 共用概念)
 interface RawAudio {
@@ -36,17 +37,17 @@ let progressCallback: ProgressCallback | null = null;
  */
 export const AVAILABLE_VOICES = [
   // English
-  { id: "af_heart", name: "Heart (女聲)", gender: "female" },
-  { id: "af_bella", name: "Bella (女聲)", gender: "female" },
-  { id: "af_nicole", name: "Nicole (女聲)", gender: "female" },
-  { id: "af_sarah", name: "Sarah (女聲)", gender: "female" },
-  { id: "am_adam", name: "Adam (男聲)", gender: "male" },
-  { id: "am_michael", name: "Michael (男聲)", gender: "male" },
+  { id: "af_heart", name: "Heart", gender: "female" },
+  { id: "af_bella", name: "Bella", gender: "female" },
+  { id: "af_nicole", name: "Nicole", gender: "female" },
+  { id: "af_sarah", name: "Sarah", gender: "female" },
+  { id: "am_adam", name: "Adam", gender: "male" },
+  { id: "am_michael", name: "Michael", gender: "male" },
   // Chinese
-  { id: "zf_xiaobei", name: "小北 (女聲)", gender: "female" },
-  { id: "zf_xiaoni", name: "小妮 (女聲)", gender: "female" },
-  { id: "zm_yunjian", name: "雲健 (男聲)", gender: "male" },
-  { id: "zm_yunxi", name: "雲希 (男聲)", gender: "male" },
+  { id: "zf_xiaobei", name: "小北", gender: "female" },
+  { id: "zf_xiaoni", name: "小妮", gender: "female" },
+  { id: "zm_yunjian", name: "雲健", gender: "male" },
+  { id: "zm_yunxi", name: "雲希", gender: "male" },
 ];
 
 /**
@@ -72,7 +73,7 @@ export async function initKokoro(): Promise<void> {
   if (isInitializing && initPromise) return initPromise;
 
   isInitializing = true;
-  progressCallback?.(0, "正在啟動語音引擎...");
+  progressCallback?.(0, i18n.global.t("kokoro.engineStarting"));
 
   initPromise = new Promise<void>((resolve, reject) => {
     try {
@@ -85,7 +86,7 @@ export async function initKokoro(): Promise<void> {
         switch (msg.type) {
           case "init-success":
             console.log("[KokoroClient] Worker initialized successfully");
-            progressCallback?.(100, "語音引擎就緒");
+            progressCallback?.(100, i18n.global.t("kokoro.engineReady"));
             resolve();
             break;
 
@@ -98,7 +99,7 @@ export async function initKokoro(): Promise<void> {
             break;
 
           case "progress":
-            progressCallback?.(msg.percent, msg.text);
+            progressCallback?.(msg.percent, i18n.global.t(msg.text, msg.params ?? {}));
             break;
 
           case "audio":
@@ -166,7 +167,7 @@ export async function speak(text: string, emotion?: string): Promise<void> {
   // 中文支援目前 kokoro-js 缺少字典檔，會讀成 "Chinese letter"
   // 因此暫時強制使用瀏覽器 TTS 處理中文
   if (isChineseText(cleaned)) {
-    console.log("[KokoroClient] 檢測到中文，強制使用瀏覽器 TTS (kokoro-js 暫不支援中文)");
+    console.log(`[KokoroClient] ${i18n.global.t("kokoro.detectChinese")}`);
     // 嘗試尋找中文語音
     speakWithBrowserTTS(cleaned, emotion);
     return;

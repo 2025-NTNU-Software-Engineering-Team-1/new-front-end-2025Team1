@@ -499,11 +499,11 @@ async function submit() {
 }
 
 async function discard() {
-  if (confirm("Are u sure?")) router.push(`/course/${route.params.name}/problems`);
+  if (confirm(t("course.problem.edit.confirmDiscard"))) router.push(`/course/${route.params.name}/problems`);
 }
 
 async function delete_() {
-  if (!formElement.value || !confirm("Are u sure?")) return;
+  if (!formElement.value || !confirm(t("course.problem.edit.confirmDelete"))) return;
 
   logger.warn("Deleting Problem...", route.params.id);
   formElement.value.isLoading = true;
@@ -562,7 +562,7 @@ function cleanupForDisplay(data?: ProblemForm) {
     <div class="card min-w-full">
       <div class="card-body">
         <div class="card-title mb-3 justify-between">
-          {{ t("course.problems.editProblem") }}{{ $route.params.id }} - {{ edittingProblem?.problemName }}
+          {{ t("course.problem.edit.title") }} #{{ $route.params.id }} - {{ edittingProblem?.problemName }}
 
           <div class="flex items-center gap-x-3">
             <div
@@ -603,13 +603,13 @@ function cleanupForDisplay(data?: ProblemForm) {
               :class="['btn btn-error btn-outline btn-sm lg:btn-md', formElement?.isLoading && 'loading']"
               @click="delete_"
             >
-              <i-uil-trash-alt class="mr-1 lg:h-5 lg:w-5" /> {{ t("course.problems.delete") }}
+              <i-uil-trash-alt class="mr-1 lg:h-5 lg:w-5" /> {{ t("course.problem.edit.delete") }}
             </button>
             <button
               :class="['btn btn-warning btn-sm lg:btn-md', formElement?.isLoading && 'loading']"
               @click="discard"
             >
-              <i-uil-times-circle class="mr-1 lg:h-5 lg:w-5" /> {{ t("course.problems.discardChanges") }}
+              <i-uil-times-circle class="mr-1 lg:h-5 lg:w-5" /> {{ t("course.problem.edit.discardChanges") }}
             </button>
           </div>
         </div>
@@ -622,7 +622,7 @@ function cleanupForDisplay(data?: ProblemForm) {
 
               <div class="divider" />
               <div class="card-title mb-3">
-                {{ t("course.problems.Preview") }}
+                {{ t("course.problem.edit.preview") }}
                 <input v-model="openPreview" type="checkbox" class="toggle" />
               </div>
 
@@ -638,7 +638,7 @@ function cleanupForDisplay(data?: ProblemForm) {
 
               <div class="divider my-4" />
               <div class="card-title mb-3">
-                JSON
+                {{ t("course.problem.edit.json") }}
                 <input v-model="openJSON" type="checkbox" class="toggle" />
               </div>
 

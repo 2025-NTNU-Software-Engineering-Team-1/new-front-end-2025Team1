@@ -758,7 +758,7 @@ onBeforeUnmount(() => {
                   :title="$t('skinSelector.voice')"
                 >
                   <option v-for="v in voices" :key="v.id" :value="v.id" class="bg-white text-black">
-                    {{ v.name }}
+                    {{ v.name }} ({{ $t("general." + v.gender) }})
                   </option>
                 </select>
               </div>

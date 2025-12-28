@@ -280,7 +280,7 @@ async function confirmDeleteAllTrials() {
               :disabled="isRejudgeAllLoading || testHistory.length === 0"
               @click="rejudgeAll"
             >
-              <i-uil-repeat :class="['mr-1', isRejudgeAllLoading && 'animate-spin']" /> Rejudge All
+              <i-uil-repeat :class="['mr-1', isRejudgeAllLoading && 'animate-spin']" /> {{ $t("course.submissions.rejudgeAll") }}
             </button>
             <button
               v-if="canRejudge"
@@ -288,7 +288,7 @@ async function confirmDeleteAllTrials() {
               :disabled="isDeleteAllLoading || testHistory.length === 0"
               @click="prepareDeleteAllTrials"
             >
-              <i-uil-trash-alt :class="['mr-1', isDeleteAllLoading && 'animate-spin']" /> Delete All
+              <i-uil-trash-alt :class="['mr-1', isDeleteAllLoading && 'animate-spin']" /> {{ $t("course.submissions.deleteAll") }}
             </button>
             <router-link :to="getBackPath()" class="btn btn-sm">
               <i-uil-arrow-left class="mr-1" />

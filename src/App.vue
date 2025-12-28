@@ -56,7 +56,7 @@ watchEffect(() => {
         <div class="alert alert-error shadow-lg">
           <div>
             <i-uil-times-circle />
-            <span>Oops! Our server failed to respond.</span>
+            <span>{{ $t("app.serverError") }}</span>
           </div>
         </div>
       </div>

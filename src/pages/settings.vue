@@ -5,8 +5,8 @@ import { useI18n } from "vue-i18n";
 import { useTitle } from "@vueuse/core";
 import { LOCAL_STORAGE_KEY } from "@/constants";
 
-useTitle("Settings | Normal OJ");
 const { t, locale } = useI18n();
+useTitle(`${t("settings.title")} | ${t("general.title_tag")}`);
 
 const localeInStorate = useStorage(LOCAL_STORAGE_KEY.LOCALE, "english");
 
@@ -29,7 +29,7 @@ watchEffect(() => {
 
         <div class="form-control w-full max-w-xs">
           <label class="label">
-            <span class="label-text">Language:</span>
+            <span class="label-text">{{ t("settings.languageLabel") }}</span>
           </label>
           <select v-model="locale" class="select-bordered select">
             <option value="english">English</option>

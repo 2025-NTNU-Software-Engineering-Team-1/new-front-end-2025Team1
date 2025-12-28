@@ -415,7 +415,7 @@ onMounted(fetchKeys);
               v-model="searchQuery"
               type="text"
               class="input input-bordered input-sm w-64"
-              placeholder="Search by Key Name or Creator"
+              :placeholder="t('course.aisetting.setup.input.searchPlaceholder')"
             />
           </div>
 

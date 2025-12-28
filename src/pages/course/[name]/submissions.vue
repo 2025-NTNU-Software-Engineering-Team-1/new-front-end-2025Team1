@@ -379,7 +379,7 @@ async function confirmDeleteAll() {
             class="flex items-center justify-between gap-4"
           >
             <button class="btn btn-warning btn-sm" :disabled="isRejudgeAllLoading" @click="rejudgeAll">
-              <i-uil-repeat :class="['mr-1', isRejudgeAllLoading && 'animate-spin']" /> Rejudge All
+              <i-uil-repeat :class="['mr-1', isRejudgeAllLoading && 'animate-spin']" /> {{ $t("course.submissions.rejudgeAll") }}
             </button>
             <button
               v-if="session.isAdmin || session.isTeacher || session.isTA"
@@ -387,7 +387,7 @@ async function confirmDeleteAll() {
               :disabled="isDeleteAllLoading"
               @click="prepareDeleteAll"
             >
-              <i-uil-trash-alt :class="['mr-1', isDeleteAllLoading && 'animate-spin']" /> Delete All
+              <i-uil-trash-alt :class="['mr-1', isDeleteAllLoading && 'animate-spin']" /> {{ $t("course.submissions.deleteAll") }}
             </button>
             <div class="tooltip tooltip-bottom" data-tip="Download submissions json file">
               <button class="btn btn-sm" @click="downloadAllSubmissions">

@@ -37,6 +37,14 @@
       "new": {
         "title": "新增公告",
         "preview": "預覽"
+      },
+      "edit": {
+        "title": "編輯公告",
+        "delete": "刪除",
+        "discardChanges": "取消更改",
+        "preview": "預覽",
+        "confirmDelete": "確定欲刪除此公告無？",
+        "confirmDiscard": "確定欲取消更改無？"
       }
     },
     "hw": {
@@ -47,6 +55,14 @@
       "new": {
         "title": "加新功課",
         "preview": "預覽"
+      },
+      "edit": {
+        "title": "編輯功課",
+        "delete": "刪除",
+        "discardChanges": "取消更改",
+        "preview": "預覽",
+        "confirmDelete": "確定欲刪除此功課無？",
+        "confirmDiscard": "確定欲取消更改無？"
       },
       "stats": {
         "pageTitle": "功課統計",
@@ -98,7 +114,8 @@
         "input": {
           "name": "金鑰名稱 *",
           "value": "API 金鑰值",
-          "addKey": "新增金鑰"
+          "addKey": "新增金鑰",
+          "searchPlaceholder": "以金鑰名稱或建立者搜尋"
         },
         "display": {
           "noKey": "暫時無金鑰",
@@ -142,6 +159,21 @@
         "title": "新增題目",
         "preview": "預覽",
         "json": "JSON（供開發人員檢查）"
+      },
+      "edit": {
+        "title": "編輯題目",
+        "delete": "刪除",
+        "discardChanges": "取消更改",
+        "preview": "預覽",
+        "json": "JSON（供開發人員檢查）",
+        "confirmDelete": "確定欲刪除此題目無？",
+        "confirmDiscard": "確定欲取消更改無？"
+      },
+      "copycat": {
+        "title": "題目 #{id} ê 抄襲檢測",
+        "generating": "報告生成中...",
+        "generateReport": "點擊來生成報告",
+        "loadError": "載入課程成員失敗，請等咧再試看覓。"
       },
       "submit": {
         "err": {
@@ -199,6 +231,10 @@
         "testcase": "測資",
         "run": "執行",
         "trialQuota": "測試額度",
+        "back": "轉去",
+        "rejudgeAll": "全部重新評分",
+        "deleteAll": "刪除全部",
+        "rejudge":"重新評分",
         "submitModal": {
           "title": "提交確認",
           "message": "確定欲提交這个程式碼進行正式評分無？",
@@ -249,6 +285,7 @@
           "close": "關閉",
           "backToList": "轉去列表",
           "backToProblem": "轉去題目",
+          "rejudge": "重新評分",
           "type": "類型",
           "public": "公開",
           "custom": "自訂",
@@ -334,6 +371,7 @@
       }
     },
     "problems": {
+      "searchPlaceholder": "搜揣題目名稱抑是編號...",
       "text": "題目",
       "id": "題號",
       "name": "題名",
@@ -358,12 +396,14 @@
       "aiKeySuggestionStudentCount": "學生人數:",
       "aiKeySuggestionSuggestedKeys": "建議 ê Key 數量:",
       "aiKeySuggestionReason": "原因:",
-      "aiKeySearch": "搜揣",
+      "aiKeySearch": "搜揣金鑰名稱抑是建立者",
       "aiKeyLoadingKeys": "載入 Key...",
       "activeAiKeys": "啟用中 ê Key",
       "inactiveAiKeys": "停用中 ê Key",
       "trialMode": "測試模式",
       "trialMaxNumber": "測試次數上限",
+      "trialMaxNumberPlaceholder": "-1 (無限制) 或 1–500",
+      "meansUnlimited": "-1 代表無限制",
       "resultVisible": "開放看結果",
       "allowViewingExecutionOutput": "會當看執行 ê 輸出結果",
       "resultDownloadable": "開放下載結果",
@@ -399,6 +439,11 @@
       "headersRestrictionDisabled": "已停用標頭檔限制",
       "headersRestrictionInfo": "愛啟用 C/C++ 語言才會當用此功能",
       "functionsRestrictions": "函式限制",
+      "searchAddCustomHeaders": "搜尋 / 新增自訂標頭檔",
+      "searchAddCustomFunctions": "搜尋 / 新增自訂函式",
+      "searchAddCustomImports": "搜尋 / 新增自訂匯入",
+      "all": "全部選取",
+      "clear": "清除選取",
       "executionMode": "執行模式",
       "executionModeGeneral": "一般模式",
       "executionModeFuncitonOnly": "純函式模式",
@@ -426,11 +471,6 @@
       "descriptionProblem": "題目描述",
       "descriptionInput": "輸入說明",
       "descriptionOutput": "輸出說明",
-      "exampleInput": "範例輸入 {no}",
-      "exampleOutput": "範例輸出 {no}",
-      "AddSample": "新增範例",
-      "RemoveLast": "提掉最後一項",
-      "hint": "提示",
       "testDataZip": "測資壓縮檔",
       "zipFile": "ZIP 檔案",
       "downloadCurrent": "下載目前測資",
@@ -459,7 +499,6 @@
       "setResourceData": "設定資源資料",
       "submissionBlocked": "繳交被擋。請改下面幾項：",
       "commaSeparated": "用逗號分開",
-      "meansUnlimited": "-1 代表無限制",
       "allowedlan": "准用: .c, .cpp, .py",
       "networkSidecars": "內外網服務 (Network & Sidecars)",
       "onlyAllowSpecificInfo": "干焦准特定的 IP/URL。封鎖所有其他內容",
@@ -468,7 +507,40 @@
       "delete": "刪除",
       "discardChanges": "取消變更",
       "Preview": "預覽",
-      "editProblem": "編輯題目:"
+      "editProblem": "編輯題目:",
+      "problemSettings": "題目設定",
+      "configureProblemDetails": "設定題目詳細資訊、驗證和資源。",
+      "general": "一般",
+      "advanced": "進階",
+      "exampleInput": "範例輸入 #{no}",
+      "exampleOutput": "範例輸出 #{no}",
+      "hint": "提示",
+      "AddSample": "新增範例",
+      "RemoveLast": "移除最後一個範例",
+      "onlyInOutFiles": "僅 .in 和 .out 檔案 inside ZIP; 每個 .in 檔案必須有對應的 .out 檔案; ≤ 1 GB",
+      "ACFile": "AC 檔案",
+      "networkErrors": {
+        "global": {
+          "0": "※ 無設定封鎖選項；外部網路存取預設完全開放（黑名單模式）。"
+        }
+      },
+      "Docker": "Docker",
+      "DockerfileLocation": "Dockerfile 位置",
+      "DockerfileLocationPlaceholder": "環境資料夾/Dockerfile",
+      "DockerfileLocationError": "Dockerfile 位置錯誤，請確保結構為「環境資料夾/Dockerfile」。",
+      "DockerfileLocationErrorCount": "偵測到無效的資料夾數量：{count}。必須介於 1 到 5 之間。",
+      "sideCarName": "Sidecar 容器名稱",
+      "sideCarImage": "Docker 映像檔",
+      "sideCarArgs": "參數",
+      "sideCarEnv": "環境變數",
+      "sideCarAction": "操作",
+      "sideCarCommaSeparated": "用逗號分開",
+      "sideCarKEYVALUEPerLine": "每個單獨一行",
+      "addSidecar": "新增 Sidecar",
+      "noSidecarsConfigured": "無Sidecar",
+      "Advanced": "進階",
+      "systemLocked": "系統關閉",
+      "uncategorized": "未分類"
     },
     "submissions": {
       "text": "繳交狀態",
@@ -476,6 +548,8 @@
       "status": "狀態",
       "lang": "語言",
       "clear": "清除",
+      "rejudgeAll": "全部重新評分",
+      "deleteAll": "刪除全部",
       "table": {
         "id": "id",
         "pid": "題號",
@@ -630,6 +704,7 @@
         "semester": "學期"
       },
       "new": "加新",
+      "searchPlaceholder": "搜尋課程",
       "join": {
         "title": "用代號加課",
         "placeholder": "輸入代號",
@@ -1031,7 +1106,8 @@
         "user": "人數",
         "homework": "作業數量",
         "problem": "題目數量",
-        "submission": "提交數量"
+        "submission": "提交數量",
+        "total": "總數"
       }
     },
     "skins": {

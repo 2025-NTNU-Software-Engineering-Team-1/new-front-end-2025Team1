@@ -4,8 +4,8 @@ import { useI18n } from "vue-i18n";
 import { useTitle } from "@vueuse/core";
 import api, { type VtuberSkinInfo } from "@/models/api";
 
-useTitle("Admin - AI Skins | Normal OJ");
 const { t } = useI18n();
+useTitle(`${t("admin.skins.title")} | ${t("general.title_tag")}`);
 
 // State
 const skins = ref<VtuberSkinInfo[]>([]);
@@ -146,7 +146,7 @@ const loadSkins = async () => {
       // Ignore stats error
     }
   } catch (e) {
-    error.value = "載入失敗";
+    error.value = t("admin.skins.error.load");
     console.error("[Admin Skins] loadSkins error:", e);
   } finally {
     loading.value = false;
@@ -163,7 +163,7 @@ const toggleVisibility = async (skin: VtuberSkinInfo) => {
   } catch (e) {
     // Revert on error
     skin.is_public = originalState;
-    alert("更新失敗");
+    alert(t("admin.skins.error.update"));
     console.error("[Admin Skins] toggleVisibility error:", e);
   }
 };
@@ -175,7 +175,7 @@ const deleteSkin = async (skinId: string) => {
     await api.VtuberSkin.delete(skinId);
     await loadSkins();
   } catch (e) {
-    alert("刪除失敗");
+    alert(t("admin.skins.error.delete"));
     console.error("[Admin Skins] deleteSkin error:", e);
   }
 };
@@ -266,9 +266,7 @@ const saveEdit = async () => {
     await api.VtuberSkin.update(editingSkin.value.skin_id, formData);
     closeEdit();
     await loadSkins();
-  } catch (e) {
-    alert("儲存失敗");
-    console.error("[Admin Skins] saveEdit error:", e);
+    alert(t("admin.skins.error.save"));
   } finally {
     saving.value = false;
   }

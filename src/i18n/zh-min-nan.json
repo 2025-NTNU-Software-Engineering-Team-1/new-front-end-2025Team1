@@ -234,7 +234,7 @@
         "back": "轉去",
         "rejudgeAll": "全部重新評分",
         "deleteAll": "刪除全部",
-        "rejudge":"重新評分",
+        "rejudge": "重新評分",
         "submitModal": {
           "title": "提交確認",
           "message": "確定欲提交這个程式碼進行正式評分無？",

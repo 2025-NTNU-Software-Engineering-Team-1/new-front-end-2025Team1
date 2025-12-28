@@ -453,7 +453,9 @@ const maxPage = computed(() => {
                       </div>
                     </td>
                     <td v-if="rolesCanReadProblemStatus.includes(session.role)">
-                      <span class="badge ml-1">{{ status === 0 ? $t('course.problems.visible') : $t('course.problems.hidden') }}</span>
+                      <span class="badge ml-1">{{
+                        status === 0 ? $t("course.problems.visible") : $t("course.problems.hidden")
+                      }}</span>
                     </td>
                     <td>
                       <span class="badge badge-info mr-1" v-for="tag in tags" :key="tag">{{ tag }}</span>

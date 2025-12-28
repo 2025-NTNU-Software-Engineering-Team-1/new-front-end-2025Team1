@@ -49,7 +49,9 @@ async function generateReport() {
   <div class="card-container">
     <div class="card min-w-full">
       <div class="card-body">
-        <div class="card-title md:text-2xl lg:text-3xl">{{ t("course.problem.copycat.title", { id: $route.params.id }) }}</div>
+        <div class="card-title md:text-2xl lg:text-3xl">
+          {{ t("course.problem.copycat.title", { id: $route.params.id }) }}
+        </div>
 
         <div v-if="error" class="alert alert-error shadow-lg">
           <div>
@@ -64,7 +66,9 @@ async function generateReport() {
           </button>
         </div>
 
-        <div v-if="!data || (!data.cpp_report && !data.python_report)">{{ t("course.problem.copycat.generating") }}</div>
+        <div v-if="!data || (!data.cpp_report && !data.python_report)">
+          {{ t("course.problem.copycat.generating") }}
+        </div>
         <div v-else v-html="data.cpp_report" />
       </div>
     </div>

@@ -93,7 +93,9 @@ const courseSummaryTotal = computed(() => {
           </tbody>
           <tfoot>
             <tr>
-              <td><span class="font-bold">{{ t("admin.dashboard.coursecount.total") }}</span></td>
+              <td>
+                <span class="font-bold">{{ t("admin.dashboard.coursecount.total") }}</span>
+              </td>
               <td>{{ courseSummaryTotal!.userCount }}</td>
               <td>{{ courseSummaryTotal!.homeworkCount }}</td>
               <td>{{ courseSummaryTotal!.problemCount }}</td>

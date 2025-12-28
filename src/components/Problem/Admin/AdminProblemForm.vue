@@ -708,7 +708,7 @@ onMounted(async () => {
           class="text-sm font-medium"
           :class="problem.status === 1 ? 'text-success' : 'text-base-content/50'"
         >
-          {{ problem.status === 1 ? t('course.problems.visible') : t('course.problems.hidden') }}
+          {{ problem.status === 1 ? t("course.problems.visible") : t("course.problems.hidden") }}
         </span>
       </div>
     </div>
@@ -768,7 +768,7 @@ onMounted(async () => {
         >
           <i-uil-process class="text-base-content/70 h-5 w-5" />
           {{ t("course.problems.setPipelines") }}
-          <span class="badge badge-sm badge-ghost ml-2 font-normal">{{ t("course.problems.Advanced")}}</span>
+          <span class="badge badge-sm badge-ghost ml-2 font-normal">{{ t("course.problems.Advanced") }}</span>
         </div>
         <div
           class="collapse-content peer-checked:pt-2"
@@ -816,7 +816,7 @@ onMounted(async () => {
         >
           <i-uil-folder class="text-base-content/70 h-5 w-5" />
           {{ t("course.problems.setResourceData") }}
-          <span class="badge badge-sm badge-ghost ml-2 font-normal">{{ t("course.problems.Advanced")}}</span>
+          <span class="badge badge-sm badge-ghost ml-2 font-normal">{{ t("course.problems.Advanced") }}</span>
         </div>
         <div
           class="collapse-content peer-checked:pt-2"
@@ -837,7 +837,7 @@ onMounted(async () => {
         class="border-l-error border-y-base-300 border-r-base-300 bg-base-100 mt-4 rounded-xl border-y border-r border-l-4 p-5 shadow-sm"
       >
         <h3 class="text-error mb-2 flex items-center gap-2 font-bold">
-          <i-uil-exclamation-triangle /> {{ t('course.problems.detailedErrorLog') }}
+          <i-uil-exclamation-triangle /> {{ t("course.problems.detailedErrorLog") }}
         </h3>
         <div class="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
           <button
@@ -873,8 +873,10 @@ onMounted(async () => {
             <i-uil-hourglass class="h-6 w-6" />
           </div>
           <div class="flex flex-col">
-            <span class="text-base-content/80 text-sm font-bold">{{ t('course.problems.waitingForEdit') }}</span>
-            <span class="text-base-content/50 text-xs">{{ t('course.problems.completeBeforeSubmit') }}</span>
+            <span class="text-base-content/80 text-sm font-bold">{{
+              t("course.problems.waitingForEdit")
+            }}</span>
+            <span class="text-base-content/50 text-xs">{{ t("course.problems.completeBeforeSubmit") }}</span>
           </div>
         </template>
 
@@ -884,12 +886,12 @@ onMounted(async () => {
             <i-uil-exclamation-triangle class="h-6 w-6" />
           </div>
           <div class="flex flex-col">
-            <span class="text-error text-sm font-bold">{{ t('course.problems.submissionBlocked') }}</span>
+            <span class="text-error text-sm font-bold">{{ t("course.problems.submissionBlocked") }}</span>
             <button
               @click="errorSummary.length > 0 && openAndScroll(errorSummary[0].panel)"
               class="link link-hover text-base-content/70 hover:text-error text-left text-xs"
             >
-              {{ t('course.problems.fixIssues', { count: errorSummary.length }) }}
+              {{ t("course.problems.fixIssues", { count: errorSummary.length }) }}
             </button>
           </div>
         </template>
@@ -900,8 +902,8 @@ onMounted(async () => {
             <i-uil-check-circle class="h-6 w-6" />
           </div>
           <div class="flex flex-col">
-            <span class="text-success text-sm font-bold">{{ t('course.problems.readyToSubmit') }}</span>
-            <span class="text-base-content/60 text-xs">{{ t('course.problems.allValid') }}</span>
+            <span class="text-success text-sm font-bold">{{ t("course.problems.readyToSubmit") }}</span>
+            <span class="text-base-content/60 text-xs">{{ t("course.problems.allValid") }}</span>
           </div>
         </template>
       </div>

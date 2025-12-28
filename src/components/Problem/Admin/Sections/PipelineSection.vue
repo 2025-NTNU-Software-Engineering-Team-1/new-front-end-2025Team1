@@ -1245,7 +1245,7 @@ watch(
               class="text tooltip tooltip-right flex cursor-help items-center gap-1 font-medium"
               :data-tip="hover.libraryRestrictionsGroup2"
             >
-              {{ t("course.problems.staticAnalysisGroup") }} 
+              {{ t("course.problems.staticAnalysisGroup") }}
             </h4>
             <div class="mode-switcher">
               <div class="mode-switcher-container">
@@ -1312,13 +1312,13 @@ watch(
                     class="btn btn-xs btn-ghost h-5 min-h-0 px-1 text-[10px]"
                     @click="selectAllItems('imports', libraryMode)"
                   >
-                    {{ t('course.problems.selectAllGlobal') }}
+                    {{ t("course.problems.selectAllGlobal") }}
                   </button>
                   <button
                     class="btn btn-xs btn-ghost text-error h-5 min-h-0 px-1 text-[10px]"
                     @click="clearAllItems('imports', libraryMode)"
                   >
-                    {{ t('course.problems.clearAll') }}
+                    {{ t("course.problems.clearAll") }}
                   </button>
                 </div>
               </div>
@@ -1342,7 +1342,7 @@ watch(
                     </a>
 
                     <span v-if="importGroups.length === 0" class="py-2 text-xs opacity-50">
-                      {{ t('course.problems.noCategoriesAvailable') }}
+                      {{ t("course.problems.noCategoriesAvailable") }}
                     </span>
                   </div>
                 </div>
@@ -1360,13 +1360,13 @@ watch(
                         class="btn btn-xs btn-ghost hover:bg-base-300 h-5 min-h-0 px-2 text-[10px]"
                         @click="selectCategoryItems(activeImportGroupData.items, libraryMode, 'imports')"
                       >
-                        {{ t('course.problems.selectAll') }}
+                        {{ t("course.problems.selectAll") }}
                       </button>
                       <button
                         class="btn btn-xs btn-ghost text-error hover:bg-base-300 h-5 min-h-0 px-2 text-[10px]"
                         @click="clearCategoryItems(activeImportGroupData.items, libraryMode, 'imports')"
                       >
-                        {{ t('general.delete') }}
+                        {{ t("general.delete") }}
                       </button>
                     </div>
                   </div>
@@ -1406,7 +1406,9 @@ watch(
 
                 <div class="mt-auto border-t border-gray-600 pt-2">
                   <label class="label pt-0 pb-1">
-                    <span class="label-text-alt text-gray-400">{{ t('course.problems.searchAddCustomImports') }}</span>
+                    <span class="label-text-alt text-gray-400">{{
+                      t("course.problems.searchAddCustomImports")
+                    }}</span>
                   </label>
                   <MultiStringInput
                     :model-value="
@@ -1470,13 +1472,13 @@ watch(
                     class="btn btn-xs btn-ghost h-5 min-h-0 px-1 text-[10px]"
                     @click="selectAllItems('headers', libraryMode)"
                   >
-                    {{ t('course.problems.selectAllGlobal') }}
+                    {{ t("course.problems.selectAllGlobal") }}
                   </button>
                   <button
                     class="btn btn-xs btn-ghost text-error h-5 min-h-0 px-1 text-[10px]"
                     @click="clearAllItems('headers', libraryMode)"
                   >
-                    {{ t('course.problems.clearAll') }}
+                    {{ t("course.problems.clearAll") }}
                   </button>
                 </div>
               </div>
@@ -1500,7 +1502,7 @@ watch(
                     </a>
 
                     <span v-if="headerGroups.length === 0" class="py-2 text-xs opacity-50">
-                      {{ t('course.problems.noCategoriesAvailable') }}
+                      {{ t("course.problems.noCategoriesAvailable") }}
                     </span>
                   </div>
                 </div>
@@ -1518,13 +1520,13 @@ watch(
                         class="btn btn-xs btn-ghost hover:bg-base-300 h-5 min-h-0 px-2 text-[10px]"
                         @click="selectCategoryItems(activeHeaderGroupData.items, libraryMode, 'headers')"
                       >
-                        {{ t('course.problems.selectAll') }}
+                        {{ t("course.problems.selectAll") }}
                       </button>
                       <button
                         class="btn btn-xs btn-ghost text-error hover:bg-base-300 h-5 min-h-0 px-2 text-[10px]"
                         @click="clearCategoryItems(activeHeaderGroupData.items, libraryMode, 'headers')"
                       >
-                        {{ t('general.delete') }}
+                        {{ t("general.delete") }}
                       </button>
                     </div>
                   </div>
@@ -1564,7 +1566,9 @@ watch(
 
                 <div class="mt-auto border-t border-gray-600 pt-2">
                   <label class="label pt-0 pb-1">
-                    <span class="label-text-alt text-gray-400">{{ t('course.problems.searchAddCustomHeaders') }}</span>
+                    <span class="label-text-alt text-gray-400">{{
+                      t("course.problems.searchAddCustomHeaders")
+                    }}</span>
                   </label>
                   <MultiStringInput
                     :model-value="
@@ -1602,14 +1606,14 @@ watch(
                     class="btn btn-xs btn-ghost h-5 min-h-0 px-1 text-[10px]"
                     @click="selectAllItems('functions', libraryMode)"
                   >
-                    {{ t('course.problems.selectAllGlobal') }}
+                    {{ t("course.problems.selectAllGlobal") }}
                   </button>
                   <button
                     class="btn btn-xs btn-ghost text-error h-5 min-h-0 px-1 text-[10px]"
                     @click="clearAllItems('functions', libraryMode)"
                   >
-                    {{ t('course.problems.clearAll') }}
-                  />
+                    {{ t("course.problems.clearAll") }}
+                    />
                   </button>
                 </div>
               </div>
@@ -1669,7 +1673,7 @@ watch(
                   </a>
 
                   <span v-if="functionGroups.length === 0" class="py-2 text-xs opacity-50">
-                    {{ t('course.problems.noCategoriesForLanguage') }}
+                    {{ t("course.problems.noCategoriesForLanguage") }}
                   </span>
                 </div>
               </div>
@@ -1687,13 +1691,13 @@ watch(
                       class="btn btn-xs btn-ghost hover:bg-base-300 h-5 min-h-0 px-2 text-[10px]"
                       @click="selectCategoryItems(activeGroupData.items, libraryMode, 'functions')"
                     >
-                      {{ t('course.problems.selectAll') }}
+                      {{ t("course.problems.selectAll") }}
                     </button>
                     <button
                       class="btn btn-xs btn-ghost text-error hover:bg-base-300 h-5 min-h-0 px-2 text-[10px]"
                       @click="clearCategoryItems(activeGroupData.items, libraryMode, 'functions')"
                     >
-                      {{ t('general.delete') }}
+                      {{ t("general.delete") }}
                     </button>
                   </div>
                 </div>
@@ -1733,7 +1737,9 @@ watch(
 
               <div class="mt-auto border-t border-gray-600 pt-2">
                 <label class="label pt-0 pb-1">
-                  <span class="label-text-alt text-gray-400">{{ t('course.problems.searchAddCustomFunctions') }}</span>
+                  <span class="label-text-alt text-gray-400">{{
+                    t("course.problems.searchAddCustomFunctions")
+                  }}</span>
                 </label>
                 <MultiStringInput
                   :model-value="

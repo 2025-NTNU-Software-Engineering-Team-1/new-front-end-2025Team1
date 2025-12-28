@@ -7,6 +7,7 @@ import { inject, Ref, ref, watch, computed } from "vue";
 import { useRoute } from "vue-router";
 import { ZipReader, BlobReader } from "@zip.js/zip.js";
 import { assertFileSizeOK } from "@/utils/checkFileSize";
+import api from "@/models/api";
 import { useI18n } from "vue-i18n";
 import { hover_zh } from "../../Hovers/hover-zh-tw";
 import { hover_en } from "../../Hovers/hover-en";
@@ -98,7 +99,9 @@ function hasMacOSMetadataFiles(filenames: string[]): string[] {
 const downloadUrl = computed(() => {
   const id = route.params.id;
   if (!id || Array.isArray(id)) return null;
-  return `/api/problem/${id}/testcase`;
+  const numericId = Number(id);
+  if (!Number.isFinite(numericId)) return null;
+  return api.Problem.getTestCaseUrl(numericId);
 });
 
 const hasRemoteTestcase = computed(() => Boolean((problem.value.config as any)?.assetPaths?.case));

@@ -45,6 +45,10 @@ const Problem = {
       headers: { "Content-Type": "multipart/form-data" },
     }),
   getTestCaseUrl: (problemId: number) => `${fetcher.defaults.baseURL}/problem/${problemId}/testcase`,
+  getAssetDownloadUrl: (problemId: string | number, assetType: string) => {
+    const base = (fetcher.defaults.baseURL || "").toString().replace(/\/$/, "");
+    return `${base}/problem/${problemId}/asset/${assetType}/download`;
+  },
   initiateTestCaseUpload: (problemId: number, body: { length: number; partSize: number }) =>
     fetcher.post<{ upload_id: string; urls: string[] }>(
       `/problem/${problemId}/initiate-test-case-upload`,

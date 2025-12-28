@@ -908,7 +908,7 @@ const assetPaths = computed<Record<string, string>>(() => {
 
 const hasAsset = (key: string) => Boolean(assetPaths.value && assetPaths.value[key]);
 const assetDownloadUrl = (key: string) =>
-  assetPaths.value && assetPaths.value[key] ? `/api/problem/${route.params.id}/asset/${key}/download` : null;
+  assetPaths.value && assetPaths.value[key] ? api.Problem.getAssetDownloadUrl(route.params.id, key) : null;
 
 if (!problem.value.pipeline) {
   ensurePipeline();

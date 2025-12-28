@@ -37,7 +37,9 @@ export const ViewLogicalMaxTop = 2.0;
 
 // 相対パス - Dynamic skin support
 // Default built-in skin (loaded from MinIO via API)
-let _resourcesPath = "/api/ai/skins/builtin_hiyori/assets/runtime/";
+const apiBase = ((import.meta.env.VITE_APP_API_BASE_URL as string) || "/api").replace(/\/$/, "");
+const defaultSkinPath = `${apiBase}/ai/skins/builtin_hiyori/assets/runtime/`;
+let _resourcesPath = defaultSkinPath;
 let _modelJsonName = "hiyori_pro_t11.model3.json";
 
 // Getter functions for dynamic access
@@ -70,7 +72,7 @@ export const getSkinConfig = (): { resourcesPath: string; modelJsonName: string 
  * Reset to default built-in skin
  */
 export const resetToDefaultSkin = (): void => {
-  _resourcesPath = "/api/ai/skins/builtin_hiyori/assets/runtime/";
+  _resourcesPath = defaultSkinPath;
   _modelJsonName = "hiyori_pro_t11.model3.json";
 };
 

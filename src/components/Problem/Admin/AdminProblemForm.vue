@@ -12,6 +12,34 @@ import { hover_en } from "../Hovers/hover-en";
 const isAdvanced = ref(false);
 const hasSubmitted = ref(false);
 
+const STORAGE_KEY = "problem-form-mode";
+const EXPIRY_DAYS = 100;
+
+function loadPersistedMode() {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (!stored) return;
+
+  try {
+    const { mode, expiry } = JSON.parse(stored);
+    if (new Date().getTime() < expiry) {
+      isAdvanced.value = mode;
+    } else {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  } catch (e) {
+    localStorage.removeItem(STORAGE_KEY);
+  }
+}
+
+function persistMode(val: boolean) {
+  const expiry = new Date().getTime() + EXPIRY_DAYS * 24 * 60 * 60 * 1000;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ mode: val, expiry }));
+}
+
+watch(isAdvanced, (newVal) => {
+  persistMode(newVal);
+});
+
 // hello
 
 // [NOTE] Assuming icons are imported globally or via unplugin-icons.
@@ -290,6 +318,7 @@ function initFormStructure() {
 }
 
 onMounted(() => {
+  loadPersistedMode();
   initFormStructure();
 });
 
@@ -626,6 +655,7 @@ async function submit() {
 }
 
 onMounted(async () => {
+  loadPersistedMode();
   initFormStructure();
   await nextTick();
   // REMOVED: await v$.value.$validate(); to prevent RED error messages on initial load

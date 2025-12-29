@@ -1,74 +1,93 @@
-# Problem Management Manual
+# New Question Page Navigation
 
-This document provides guidance for the "Create Problem" and "Edit Problem" pages. It serves as a static reference for administrative operations.
-
----
-
-## 1. Recommended Workflow
-
-To ensure all settings are correctly linked, please follow this sequence:
-
-### Phase 1: Basic Information
-
-- **Problem Name & Visibility**: Define the title and toggle the hidden status.
-- **Problem Statement**: Fill in the description, input/output formats, and provide examples.
-
-### Phase 2: Configuration
-
-- **Submission Rules**: Select allowed languages, add tags, and set the submission quota.
-- **Accepted Format**: Choose between source code or zip archive submissions.
-- **Feature Toggles**: Enable Trial Mode, AI VTuber assistance, Network access, or Sidecar containers.
-- **Artifacts**: Configure collection rules for files generated during execution.
-
-### Phase 3: Pipeline Settings
-
-- **File Access**: Grant permissions for reading or writing files.
-- **Execution Mode**: Select General, Function Only, or Interactive mode.
-- **Advanced Logic**: Upload custom checkers, scoring scripts, or set library restrictions.
-
-### Phase 4: Data Management
-
-1.  **Test Data**: Upload the zip file first to establish the task structure.
-2.  **Task Refinement**: Adjust time limits, memory limits, and scores per task.
-3.  **Resource Data**: Upload supplemental files for students or teachers.
+This guide provides an overview of the new question page structure, helping you quickly understand the function of each section.
 
 ---
 
-## 2. Test Data Zip Specification
+## Homepage Introduction
 
-The system automatically groups files into tasks based on the numerical prefix of the filename.
+1. Question Name: Required field, used to identify the question.
 
-| Task Index | Filename Pattern      | Description                                                  |
-| :--------- | :-------------------- | :----------------------------------------------------------- |
-| **Task 0** | `00xx.in`, `00xx.out` | Prefix `00` creates Task 0; Start with `0000.in`, `0000.out` |
-| **Task 1** | `01xx.in`, `01xx.out` | Prefix `01` creates Task 1.                                  |
-| **Task 2** | `02xx.in`, `02xx.out` | Prefix `02` creates Task 2 (and so on).                      |
-
-> **Note**: The total count of `.in` and `.out` files must be identical, and their indices must match perfectly.
-
----
-
-## 3. Resource Data Prerequisites
-
-The management of resource files depends on the existing task structure and pipeline permissions:
-
-- **Upload Order**: You must upload the **Test Data Zip** before adding resource files.
-- **Student Resources**: These require the **Allow Read** permission in the Pipeline settings to be accessible.
-- **Teacher Resources**: These are internal and are not restricted by Pipeline access settings.
+2. Display Status:
+- **Shown**: Students can see this question in the course.
+- **Hidden**: The question is not visible to students.
+3. Mode Switching:
+- **Normal Mode**: Only the basic settings section is displayed.
+- **Advanced Mode**: The "Judging Process" and "Resource Files" sections are also displayed.
+    > The system will remember your preference settings and automatically apply them the next time you open the page.
 
 ---
 
-## 4. FAQ
+## Introduction to the Five Main Sections
 
-### Q1: Why is my submission blocked?
+### 1. Problem Description
 
-If the system detects missing fields or errors, a **Submission blocked** summary will appear at the bottom. Click this message to auto-scroll and expand the section containing the error.
+Edit the detailed description of the problem, including:
 
-### Q2: How do I configure the Quota?
+- Problem Description
+- Input and Output Formats
+- Problem Hints
+- Example Input/Output
 
-- Enter `-1` for unlimited submissions.
-- Enter an integer between `1` and `500` to set a specific limit.
+### 2. Configuration Settings
 
-### Q3: When should I choose "zip" as the Accepted Format?
+Set the submission specifications and function switches for the problems:
 
-Select this when the problem requires students to submit multiple files, such as custom headers or complex project structures. You can also specify a **Max Zip Size** to prevent oversized uploads.
+- Supported Languages ​​(C / C++ / Python)
+- Tag Management
+- Submission Quota Management
+- Submission Format
+- Test Mode
+- AI Teaching Assistant Function
+- Network and Environment Expansion
+- Product Collection
+
+### 3. Judging Process (Advanced)
+
+Set advanced options for the program execution environment:
+
+- File Access Permissions
+- Library Usage Restrictions
+- Execution Mode Selection
+- Custom Grading Scripts / Scoring Scripts
+
+### 4. Test Data
+
+Upload the compressed test data file and adjust the parameters of each task:
+
+- Time Limit
+- Memory Limit
+- Task Scores
+
+### 5. Resource Files (Advanced)
+
+Upload resource files (e.g., bmp, csv) for student or teacher use.
+
+---
+
+## Error Summary and Submission
+
+### Error Summary
+
+When form validation fails, a summary list of all errors will be displayed at the bottom of the page. Clicking on any error will automatically redirect to the corresponding section.
+
+### Submission Status
+
+Different messages will be displayed below the submit button depending on the form status:
+
+- **Waiting for Editing**: No submission attempt yet
+- **Submission Blocked**: Validation error exists and needs correction
+- **Ready**: All fields have passed validation
+
+---
+
+## Quick Operation Process
+
+1. Enter the question name
+2. Expand "Question Description" to write the question content
+3. Expand "Configuration Settings" to set the language and submission guidelines
+4. Expand "Test Data" to upload the test data compressed file
+5. Enable advanced mode as needed to set the judging process
+6. Click the submit button to complete the setup
+
+> **Tip**: It is recommended to upload the test data first. The system will automatically parse the task structure for subsequent settings.

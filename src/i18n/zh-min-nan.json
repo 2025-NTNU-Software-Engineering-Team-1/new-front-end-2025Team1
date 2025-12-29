@@ -658,7 +658,16 @@
         "lang": "語言",
         "time": "繳交時間",
         "ipAddr": "IP 位址"
-      }
+      },
+      "loading": "載入中...",
+      "copied": "複製好矣！",
+      "copyLink": "複製連結",
+      "confirmRejudge": "確認全部重新評分",
+      "rejudgeMsg": "確定欲重新評分 {n} 筆提交無？",
+      "rejudgeBtn": "重新評分 {n} 筆提交",
+      "confirmDelete": "確認全部刪除",
+      "deleteMsg": "確定欲刪除 {n} 筆提交無？",
+      "deleteBtn": "刪除 {n} 筆提交"
     },
     "submission": {
       "title": "Submission ID: ",

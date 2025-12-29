@@ -17,6 +17,7 @@ import "katex/dist/katex.min.css";
 import type { AxiosError } from "axios";
 import { useSession } from "@/stores/session";
 import AIChatbot from "@/components/AIChatbot.vue";
+import { isMacOsZip } from "@/utils/zipValidator";
 
 const md = new MarkdownIt({
   html: true,
@@ -456,6 +457,11 @@ async function test() {
         throw new Error("No zip file selected");
       }
       codeBlob = form.zip;
+      if (await isMacOsZip(form.zip)) {
+        form.errorMessage = t("course.problem.submit.err.macOsZip");
+        form.isLoading = false;
+        return;
+      }
     }
 
     // API 3: Upload code and optional custom testcases
@@ -524,6 +530,10 @@ async function submitCode() {
       // Zip mode: use the uploaded zip file directly
       if (!form.zip) {
         form.errorMessage = t("course.problem.test.err.zip");
+        return;
+      }
+      if (await isMacOsZip(form.zip)) {
+        form.errorMessage = t("course.problem.submit.err.macOsZip");
         return;
       }
       codeBlob = form.zip;

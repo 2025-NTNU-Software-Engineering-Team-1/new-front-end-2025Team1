@@ -355,15 +355,15 @@ async function confirmDeleteAll() {
           <!-- Admin/Teacher/TA actions: rejudge, download, search -->
           <dialog ref="rejudgeAllModal" class="modal">
             <div class="modal-box">
-              <h3 class="text-lg font-bold">Confirm Rejudge All</h3>
+              <h3 class="text-lg font-bold">{{ $t("course.submissions.confirmRejudge") }}</h3>
               <p class="py-4">
-                Are you sure you want to rejudge <strong>{{ rejudgeCount }}</strong> submission(s)?
+                {{ $t("course.submissions.rejudgeMsg", { n: rejudgeCount }) }}
               </p>
               <div class="modal-action">
-                <button class="btn" @click="rejudgeAllModal?.close()">Cancel</button>
+                <button class="btn" @click="rejudgeAllModal?.close()">{{ $t("general.cancel") }}</button>
                 <button class="btn btn-warning" :disabled="isRejudgeAllLoading" @click="confirmRejudgeAll">
                   <span v-if="isRejudgeAllLoading" class="loading loading-spinner"></span>
-                  Rejudge {{ rejudgeCount }} Submissions
+                  {{ $t("course.submissions.rejudgeBtn", { n: rejudgeCount }) }}
                 </button>
               </div>
             </div>
@@ -376,18 +376,18 @@ async function confirmDeleteAll() {
             <div class="modal-box">
               <h3 class="text-error text-lg font-bold">
                 <i-uil-exclamation-triangle class="mr-2 inline" />
-                Confirm Delete All
+                {{ $t("course.submissions.confirmDelete") }}
               </h3>
               <p class="py-4">
-                Are you sure you want to delete <strong>{{ deleteCount }}</strong> submission(s)?
+                {{ $t("course.submissions.deleteMsg", { n: deleteCount }) }}
                 <br />
-                <span class="text-warning">This action cannot be undone.</span>
+                <span class="text-warning">{{ $t("general.deleteDetails") }}</span>
               </p>
               <div class="modal-action">
-                <button class="btn" @click="deleteAllModal?.close()">Cancel</button>
+                <button class="btn" @click="deleteAllModal?.close()">{{ $t("general.cancel") }}</button>
                 <button class="btn btn-error" :disabled="isDeleteAllLoading" @click="confirmDeleteAll">
                   <span v-if="isDeleteAllLoading" class="loading loading-spinner"></span>
-                  Delete {{ deleteCount }} Submissions
+                  {{ $t("course.submissions.deleteBtn", { n: deleteCount }) }}
                 </button>
               </div>
             </div>

@@ -12,6 +12,7 @@ import { LANGUAGE_OPTIONS, LOCAL_STORAGE_KEY } from "@/constants";
 import { useI18n } from "vue-i18n";
 import { useSession } from "@/stores/session";
 import AIChatbot from "@/components/AIChatbot.vue";
+import { isMacOsZip } from "@/utils/zipValidator";
 
 // ==========================================
 // [CONFIG] Console Debug Mode
@@ -211,6 +212,16 @@ async function submit() {
       const zipReader = new ZipReader(new BlobReader(form.zip));
       const entries = await zipReader.getEntries();
       await zipReader.close();
+
+      // Check for macOS metadata files
+      if (await isMacOsZip(form.zip)) {
+        const msg = t("course.problem.submit.err.macOsZip");
+        logger.warn("macOS ZIP Detected", { filename: form.zip.name });
+        form.errorMessage = msg;
+        form.isLoading = false;
+        logger.groupEnd();
+        return;
+      }
 
       const fileNames = entries.map((entry) => entry.filename);
 

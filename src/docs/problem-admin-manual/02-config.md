@@ -1,85 +1,198 @@
-# Configuration Settings Manual
+# Detailed Explanation of Basic Functions
 
-This section explains the configuration settings for problems, including submission rules, Trial Mode, AI VTuber, Network settings, and Artifact Collection.
-
----
-
-## 1. General Submission Rules
-
-### Allowed Languages
-
-Specifies the programming languages (e.g., C, C++, Python) that students can use for submission. This setting determines the language options available to students and the accepted file extensions for AI VTuber and Trial Mode. Internally, these are stored using a bitmask.
-
-### Tags
-
-Used to categorize problems. Multiple tags should be separated by commas (e.g., `dp,math,greedy`). The system automatically trims whitespace and removes empty strings.
-
-### Quota
-
-Limits the number of times a student can submit a solution.
-
-- `-1`: Unlimited submissions.
-- `1 to 500`: Specific submission limit.
-
-### Accepted Format
-
-- **Code**: Students submit a single source file.
-- **Zip**: Students upload a zip archive. You can set a `Max Zip Size (MB)` between 1 and 1000 (default is 50).
+This manual details the functions of problem description, configuration settings, and data upload.
 
 ---
 
-## 2. Trial Mode
+## I. Problem Description
 
-Enabling Trial Mode provides a testing interface for students to verify their code before final submission.
+This section is used to edit the complete description of the problem.
 
-- **Trial Max Number**: Limits test attempts. Use `-1` for unlimited or `1 to 500` for a specific limit.
-- **Visibility & Downloads**: Configure whether students can view stdout/stderr or download output files.
-- **Public Test Data (.zip)**: Upload a zip containing only `.in` files for public testing. The file size limit is 1GB.
-- **AC Files (Trial)**: At least one correct reference file (AC file) must be uploaded if Trial Mode is enabled.
+### Problem Description
 
----
+Write the main content of the problem, explaining the background and requirements. Markdown format is supported.
 
-## 3. AI VTuber (AI Assistant)
+### Input Description
 
-### Frontend Verification
+Describe the input format that the program expects to receive, including data type and range limitations.
 
-When enabled, the system verifies that:
+### Output Description
 
-1. At least one API Key is selected.
-2. At least one AC file is uploaded as a reference for the AI.
+Describe the output format that the program should produce, including precision requirements and line break rules.
 
-### Model & API Keys
+### Hints
 
-- **AI Model**: Select available models (e.g., Gemini) from the UI.
-- **API Keys**: Provided by the Course. You can search by Key Name to auto-scroll to specific entries. Hover over the help icon to see the recommended number of keys.
+Provide additional problem-solving hints or notes (optional).
 
----
+### Example Input/Output
 
-## 4. Network & Sidecars
-
-### Network Access Model
-
-- **Whitelist**: Blocks all traffic except for the specified IPs/URLs.
-- **Blacklist**: Allows all traffic except for the specified IPs/URLs.
-- **IP / URL List**: Add entries using the multi-input component.
-
-### Sidecars (Sandbox Environment)
-
-Auxiliary containers (e.g., DB, Cache, or Local Judge Helpers) can be added by defining the image name, environment variables, and arguments.
-
-### Dockerfiles.zip (Custom Environments)
-
-When uploading custom environment configurations, the following structure is required:
-
-1. The zip must contain at least one `Dockerfile`.
-2. Each file must follow the path: `environment_folder/Dockerfile` (e.g., `python311/Dockerfile`).
-3. The system will parse and list the detected environments for user confirmation.
+Multiple examples can be added for students to refer to. Each example is limited to 1024 characters.
 
 ---
 
-## 5. Artifact Collection
+## II. Configuration Settings
 
-Select which files should be preserved or made available for download after execution:
+### 1. Supported Languages
 
-- **Compiled Binary**: The binary file generated after compilation.
-- **Student Artifact (zip)**: The original zip archive submitted by the student.
+Set the programming languages ​​allowed for students, including:
+
+- C
+- C++
+- Python
+
+Multiple languages ​​can be selected simultaneously. This setting will affect:
+
+- Language options in the front-end submission interface
+
+- File types accepted in trial mode
+
+- AI teaching assistant's decision logic
+
+### 2. Tag Management
+
+Used to label question types or knowledge points for easy categorization and searching. Separate multiple tags with commas when entering.
+
+**Limitation**: Each tag can contain a maximum of 16 characters.
+
+### 3. Submission Limit
+
+Limit the total number of submissions per student for this problem:
+
+- Enter `-1` for unlimited submissions
+
+- Enter an integer between `1` and `500` to represent the specific submission limit
+
+### 4. Submission Format
+
+Specify the format for student submissions:
+
+| Format              | Description                                          | Applicable Scenarios |
+| ------------------- | ---------------------------------------------------- | -------------------- |
+| **code**            | Students upload a single source code file directly   | General Problems     |
+| **Compressed File** | Students upload a ZIP file containing multiple files | Makefile Project     |
+
+When selecting a compressed file, you can set a maximum size limit (1 to 1000 MB, default 50 MB).
+
+---
+
+## III. Test Data
+
+### Data Compressed File Naming Conventions
+
+The system automatically groups tasks based on the file prefix number:
+
+| Task Number | File Naming Example   | Description |
+| ----------- | --------------------- | ----------- |
+| Task 0      | `0000.in`, `0000.out` | Prefix `00` |
+| Task 1      | `0100.in`, `0100.out` | Prefix `01` |
+| Task 2      | `0200.in`, `0200.out` | Prefix `02` |
+
+**Naming Rules**:
+
+```
+[Task Number (2 digits)][Data Survey Number (2 digits)].[in|out]
+```
+
+**Example**:
+
+```
+testdata.zip
+├── 0000.in
+├── 0000.out
+├── 0001.in
+├── 0001.out
+├── 0100.in
+├── 0100.out
+└── 0101.in
+└── 0101.out
+```
+
+The above structure represents:
+
+- Task 0: 2 data points (0000, 0001)
+
+- Task 1: 2 data points (0100, 0101)
+
+> **Note**: The number of input files (`.in`) and output files (`.out`) must be the same, and their numbers must correspond.
+
+### Task Parameter Settings
+
+After uploading the data points, the system will automatically parse and display each task. Adjustable for each task:
+
+| Parameters       | Description                           | Default Values                                |
+| ---------------- | ------------------------------------- | --------------------------------------------- |
+| **Time Limit**   | Maximum program execution time (ms)   | 1000 ms                                       |
+| **Memory Limit** | Maximum available program memory (MB) | 256 MB                                        |
+| **Task Score**   | Score allocation for this task        | Evenly distributed across the number of tasks |
+
+> **Verification Rule**: The total score of all tasks must equal 100 points.
+
+---
+
+## IV. Trial Run Mode
+
+Enabling this mode allows students to test their work before formal submission.
+
+### Basic Settings
+
+| Options                      | Description                                        |
+| ---------------------------- | -------------------------------------------------- |
+| **Maximum Number of Trials** | Enter `-1` for unlimited attempts, or `1` to `500` |
+| **Display Standard Output**  | Whether to display stdout content                  |
+| **Display Error Messages**   | Whether to display stderr content                  |
+| **Results Downloadable**     | Whether to allow downloading execution results     |
+
+### Upload Public Test Data
+
+Upload a compressed file containing only the input file (`.in`) as public test data.
+
+**Naming Rules**: Same prefix numbering rules as official test data.
+
+### Upload Correct Reference Program
+
+When enabling trial mode, at least one correct piece of code (`.c`, `.cpp`, or `.py`) must be uploaded for the system to generate the expected output.
+
+---
+
+## V. AI Teaching Assistant
+
+Assist students in understanding problems or debugging through generative AI models.
+
+### Setup Steps
+
+1. **Enable Feature**: Check "Enable AI Teaching Assistant"
+
+2. **Select Model**: Select a supported model from the drop-down menu.
+
+3. **Select Key**: Check the API key provided by the course.
+
+4. **Upload AC Program**: Provide the correct reference code.
+
+> **Note**: At least one API key must be selected; otherwise, it cannot be saved.
+
+---
+
+## VI. Product Collection
+
+Select the files the system should retain after evaluation:
+
+| Options                                | Description                                                |
+| -------------------------------------- | ---------------------------------------------------------- |
+| **Compiled Binary File**               | Retain the compiled executable file                        |
+| **Student Submission Compressed File** | Save the original compressed file submitted by the student |
+
+---
+
+## Frequently Asked Questions
+
+### Submission Quota Setting Rules?
+
+- Enter `-1` to represent unlimited submissions
+
+- Enter an integer between `1` and `500`
+
+### When should I select compressed file as the submission format? This is used when a task requires students to submit multiple source code or header files simultaneously (e.g., Makefile submission).
+
+### What if the total score for the assessment tasks is not 100?
+
+Adjust the score fields for each task to ensure the total score is 100 before submitting.

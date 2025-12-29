@@ -206,6 +206,7 @@
         "err": {
           "code": "Please paste your source code to submit.",
           "lang": "Please select the programming language.",
+          "macOsZip": "Detected macOS system files (e.g., __MACOSX or .DS_Store). Please compress your files in a Windows environment or remove these files before retrying.",
           "msg": "Oops! Something went wrong when submitting the code. Try again later."
         },
         "card": {
@@ -431,7 +432,17 @@
         "lang": "lang",
         "time": "time",
         "ipAddr": "IP Address"
-      }
+      },
+      "rowCount": "{n} submissions",
+      "loading": "Loading...",
+      "copied": "Copied",
+      "copyLink": "Copy Link",
+      "confirmRejudge": "Confirm Rejudge All",
+      "rejudgeMsg": "Are you sure you want to rejudge {n} submission(s)?",
+      "rejudgeBtn": "Rejudge {n} Submissions",
+      "confirmDelete": "Confirm Delete All",
+      "deleteMsg": "Are you sure you want to delete {n} submission(s)?",
+      "deleteBtn": "Delete {n} Submissions"
     },
     "submission": {
       "title": "Submission ID: ",
@@ -533,6 +544,7 @@
         "close": "Close"
       }
     },
+    "newUsers": "New Users",
     "members": {
       "title": "Members",
       "new": "New Members",

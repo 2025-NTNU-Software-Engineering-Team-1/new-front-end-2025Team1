@@ -9,12 +9,15 @@ This guide provides an overview of the new question page structure, helping you 
 1. Question Name: Required field, used to identify the question.
 
 2. Display Status:
+
 - **Shown**: Students can see this question in the course.
 - **Hidden**: The question is not visible to students.
+
 3. Mode Switching:
+
 - **Normal Mode**: Only the basic settings section is displayed.
 - **Advanced Mode**: The "Judging Process" and "Resource Files" sections are also displayed.
-    > The system will remember your preference settings and automatically apply them the next time you open the page.
+  > The system will remember your preference settings and automatically apply them the next time you open the page.
 
 ---
 

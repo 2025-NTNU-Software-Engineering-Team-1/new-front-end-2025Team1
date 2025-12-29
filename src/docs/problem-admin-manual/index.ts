@@ -28,8 +28,8 @@ export const PROBLEM_ADMIN_MANUAL_CATEGORIES: ManualCategory[] = [
     id: "advanced",
     title: "Advanced",
     pages: [
-      { id: "config", title: "Configuration", md: config },
-      { id: "pipeline", title: "Pipeline", md: pipeline },
+      { id: "config", title: "General", md: config },
+      { id: "pipeline", title: "Advanced", md: pipeline },
     ],
   },
 ];

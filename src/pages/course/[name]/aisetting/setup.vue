@@ -570,18 +570,16 @@ onMounted(fetchKeys);
 
                 <!-- Actions -->
                 <td class="pr-6 text-center">
-                  <div
-                    class="flex justify-center gap-1 opacity-100 transition-opacity duration-200 lg:opacity-0 lg:group-hover:opacity-100"
-                  >
+                  <div class="flex justify-center gap-1 opacity-100 transition-opacity duration-200">
                     <button
-                      class="btn btn-sm btn-ghost btn-square hover:bg-primary/10 hover:text-primary transition-colors"
+                      class="btn btn-sm btn-square text-primary bg-primary/10"
                       @click="updateKey(k)"
                       :title="t('course.aisetting.setup.display.save')"
                     >
                       <i-uil-save class="h-4.5 w-4.5" />
                     </button>
                     <button
-                      class="btn btn-sm btn-ghost btn-square hover:bg-error/10 hover:text-error transition-colors"
+                      class="btn btn-sm btn-square bg-error/10 text-error"
                       @click="deleteKey(k.id)"
                       :title="t('course.aisetting.setup.display.delete')"
                     >

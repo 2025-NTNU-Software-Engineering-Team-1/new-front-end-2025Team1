@@ -510,7 +510,7 @@ async function submitBatchUsers() {
 
     <div class="flex-1"></div>
     <label for="add-user-modal" class="btn btn-success">
-      <i-uil-plus-circle class="mr-1 lg:h-5 lg:w-5" /> {{ t("course.members.new") }}
+      <i-uil-plus-circle class="mr-1 lg:h-5 lg:w-5" /> {{ t("course.newUsers") }}
     </label>
   </div>
 

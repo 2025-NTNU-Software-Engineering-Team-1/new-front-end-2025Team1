@@ -206,6 +206,7 @@
         "err": {
           "code": "請在此貼上你的原始碼以利繳交。",
           "lang": "請選擇程式語言。",
+          "macOsZip": "偵測到 macOS 系統產生的垃圾檔案（如 __MACOSX 或 .DS_Store）。請在 Windows 環境壓縮，或先移除這些檔案再重試。",
           "msg": "Oops! Something went wrong when submitting the code. Try again later."
         },
         "card": {

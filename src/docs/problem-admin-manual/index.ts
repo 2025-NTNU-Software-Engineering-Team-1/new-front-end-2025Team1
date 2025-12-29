@@ -37,15 +37,15 @@ export const PROBLEM_ADMIN_MANUAL_CATEGORIES: ManualCategory[] = [
 export const PROBLEM_ADMIN_MANUAL_CATEGORIES_ZH: ManualCategory[] = [
   {
     id: "general",
-    title: "一般",
-    pages: [{ id: "basic", title: "基本", md: basicZh }],
+    title: "首頁",
+    pages: [{ id: "basic", title: "導覽", md: basicZh }],
   },
   {
     id: "advanced",
     title: "進階",
     pages: [
-      { id: "config", title: "設定", md: configZh },
-      { id: "pipeline", title: "流程", md: pipelineZh },
+      { id: "config", title: "基礎流程設定", md: configZh },
+      { id: "pipeline", title: "進階選項設定", md: pipelineZh },
     ],
   },
 ];

@@ -431,7 +431,17 @@
         "lang": "語言",
         "time": "繳交時間",
         "ipAddr": "IP 位址"
-      }
+      },
+      "rowCount": "{n} 筆紀錄",
+      "loading": "載入中...",
+      "copied": "已複製",
+      "copyLink": "複製連結",
+      "confirmRejudge": "確認全部重新評分",
+      "rejudgeMsg": "確定要重新評分 {n} 筆提交嗎？",
+      "rejudgeBtn": "重新評分 {n} 筆提交",
+      "confirmDelete": "確認全部刪除",
+      "deleteMsg": "確定要刪除 {n} 筆提交嗎？",
+      "deleteBtn": "刪除 {n} 筆提交"
     },
     "submission": {
       "title": "Submission ID: ",

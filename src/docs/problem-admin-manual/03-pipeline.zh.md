@@ -8,10 +8,10 @@
 
 設定學生程式的檔案操作權限：
 
-| 選項 | 說明 |
-|------|------|
+| 選項         | 說明                   |
+| ------------ | ---------------------- |
 | **允許讀取** | 程式可執行檔案讀取操作 |
-| **允許寫入** | 程式可建立或修改檔案 |
+| **允許寫入** | 程式可建立或修改檔案   |
 
 ### 連動規則
 
@@ -36,6 +36,7 @@
 **必要條件**：上傳 `makefile.zip` 壓縮檔
 
 **壓縮檔結構範例**：
+
 ```
 makefile.zip
 ├── Makefile
@@ -44,6 +45,7 @@ makefile.zip
 ```
 
 **Makefile 範例**：
+
 ```makefile
 CC = gcc
 CFLAGS = -Wall -O2
@@ -66,14 +68,17 @@ clean:
 **必要條件**：上傳教師端程式（`.c`、`.cpp` 或 `.py`）
 
 **設定選項**：
+
 - **教師端優先執行**：教師程式先啟動，學生程式後啟動
 
 **互動流程**：
+
 1. 教師程式讀取測資檔案
 2. 教師程式透過標準輸出/輸入與學生程式溝通
 3. 教師程式將判題結果寫入 `Check_Result` 檔案
 
 **教師程式範例（C 語言）**：
+
 ```c
 #include <stdio.h>
 
@@ -149,12 +154,12 @@ import sys
 def check(input_file, output_file, answer_file):
     """
     自訂檢查器主函式
-    
+
     Args:
         input_file: 輸入檔案路徑（測資 .in）
         output_file: 學生輸出檔案路徑
         answer_file: 預期答案檔案路徑（測資 .out）
-    
+
     Returns:
         tuple: (status, message) 其中 status 為 "AC" 或 "WA"
     """
@@ -233,6 +238,7 @@ if __name__ == "__main__":
 ### 輸出格式
 
 檢查器必須輸出以下格式：
+
 ```
 STATUS: AC
 MESSAGE: All numbers match within tolerance
@@ -275,10 +281,10 @@ import sys
 def calculate_score(scoring_input):
     """
     計算最終分數
-    
+
     Args:
         scoring_input: dict 包含 tasks, stats, lateSeconds 等資訊
-    
+
     Returns:
         dict: 包含 score, message, breakdown
     """
@@ -296,13 +302,13 @@ def calculate_score(scoring_input):
     for task_idx, task in enumerate(tasks):
         results = task.get("results", []) if isinstance(task, dict) else task
         task_weight = task_weights[task_idx] if task_idx < len(task_weights) else 0
-        
+
         correct_count = sum(
             1 for case in results
             if isinstance(case, dict) and case.get("status") == "AC"
         )
         total_count = len(results)
-        
+
         if total_count > 0:
             task_score = int(task_weight * (correct_count / total_count))
         else:
@@ -367,13 +373,14 @@ if __name__ == "__main__":
 ### 輸入格式
 
 系統傳入的 JSON 結構：
+
 ```json
 {
   "tasks": [
     {
       "results": [
-        {"status": "AC", "runTime": 120, "memory": 1024},
-        {"status": "WA", "runTime": 150, "memory": 1024}
+        { "status": "AC", "runTime": 120, "memory": 1024 },
+        { "status": "WA", "runTime": 150, "memory": 1024 }
       ]
     }
   ],
@@ -388,6 +395,7 @@ if __name__ == "__main__":
 ### 輸出格式
 
 腳本必須輸出：
+
 ```json
 {
   "score": 85,
@@ -409,16 +417,17 @@ if __name__ == "__main__":
 
 ### 限制類別
 
-| 類別 | Python | C/C++ |
-|------|--------|-------|
-| **語法限制** | ✓ | ✓ |
-| **匯入限制** | ✓ (import) | ✗ |
-| **標頭檔限制** | ✗ | ✓ (#include) |
-| **函式限制** | ✓ | ✓ |
+| 類別           | Python     | C/C++        |
+| -------------- | ---------- | ------------ |
+| **語法限制**   | ✓          | ✓            |
+| **匯入限制**   | ✓ (import) | ✗            |
+| **標頭檔限制** | ✗          | ✓ (#include) |
+| **函式限制**   | ✓          | ✓            |
 
 ### 過濾模式
 
 每種限制可切換為：
+
 - **白名單**：僅允許清單內的項目
 - **黑名單**：禁止使用清單內的項目
 
@@ -427,11 +436,13 @@ if __name__ == "__main__":
 ### 常見限制範例
 
 **禁止使用排序函式（黑名單）**：
+
 ```
 函式限制: sort, sorted, qsort
 ```
 
 **僅允許基礎標頭檔（白名單）**：
+
 ```
 標頭檔限制: stdio.h, stdlib.h, string.h
 ```
@@ -445,15 +456,18 @@ if __name__ == "__main__":
 供學生程式讀取的額外資料檔案（如 `.csv`、`.bmp`）。
 
 **前置條件**：
+
 1. 必須先上傳測資壓縮檔
 2. 必須開啟「允許讀取」權限
 
 **檔案命名規則**：
+
 ```
 [任務編號 2 位數][測資編號 2 位數].[副檔名]
 ```
 
 **範例**：
+
 ```
 student_resource.zip
 ├── 0000.csv    # 對應測資 0000
@@ -476,23 +490,26 @@ student_resource.zip
 
 控制學生程式的網路連線權限：
 
-| 模式 | 說明 |
-|------|------|
+| 模式       | 說明                   |
+| ---------- | ---------------------- |
 | **白名單** | 僅允許連線清單中的位址 |
-| **黑名單** | 僅封鎖清單中的位址 |
+| **黑名單** | 僅封鎖清單中的位址     |
 
 清單支援輸入：
+
 - IP 位址（如 `192.168.1.1`）
 - 網域名稱（如 `api.example.com`）
 
 ### 側掛容器 (Sidecars)
 
 在評測環境中新增輔助容器，用於提供：
+
 - 資料庫服務
 - API 模擬服務
 - 快取服務
 
 **設定欄位**：
+
 - 容器名稱
 - Docker 映像名稱
 - 環境變數
@@ -503,6 +520,7 @@ student_resource.zip
 上傳包含 Dockerfile 的壓縮檔以自訂執行環境：
 
 **壓縮檔結構**：
+
 ```
 dockerfiles.zip
 └── python311/

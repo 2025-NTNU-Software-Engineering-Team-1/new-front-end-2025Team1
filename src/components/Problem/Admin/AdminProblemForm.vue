@@ -733,23 +733,23 @@ onMounted(async () => {
           <div
             class="flex h-8 w-8 items-center justify-center rounded-lg transition-colors duration-200"
             :class="
-              problem.status === 1 ? 'bg-success/20 text-success' : 'bg-base-content/10 text-base-content/50'
+              problem.status === 0 ? 'bg-success/20 text-success' : 'bg-base-content/10 text-base-content/50'
             "
           >
-            <i-uil-eye v-if="problem.status === 1" class="h-5 w-5" />
+            <i-uil-eye v-if="problem.status === 0" class="h-5 w-5" />
             <i-uil-ban v-else class="h-5 w-5" />
           </div>
           <span
             class="text-sm font-bold transition-colors duration-200"
-            :class="problem.status === 1 ? 'text-success' : 'text-base-content/50'"
+            :class="problem.status === 0 ? 'text-success' : 'text-base-content/50'"
           >
-            {{ problem.status === 1 ? t("course.problems.visible") : t("course.problems.hidden") }}
+            {{ problem.status === 0 ? t("course.problems.visible") : t("course.problems.hidden") }}
           </span>
         </div>
         <input
           type="checkbox"
           class="toggle toggle-success toggle-sm"
-          :checked="problem.status === 1"
+          :checked="problem.status === 0"
           @change="update('status', (problem.status ^ 1) as 0 | 1)"
         />
       </label>
